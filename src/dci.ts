@@ -7,7 +7,7 @@ export function addDci(file: string, output: string) {
 
   const html = fs.readFileSync(file);
 
-  const idx = html.indexOf('<body');
+  const idx = html.indexOf('</head>');
 
   if (idx !== -1) {
     const dci_idx = html.indexOf(dci);
@@ -21,7 +21,7 @@ export function addDci(file: string, output: string) {
 
       const pos = idx;
 
-      const html_dci = html.slice(0, pos) + '\n' + dci + hex + '">\n' + html.slice(pos);
+      const html_dci = html.slice(0, pos) + '\n\n' + dci + hex + '">\n\n' + html.slice(pos);
 
       fs.writeFileSync(output, html_dci);
     } else {
