@@ -1,6 +1,7 @@
 import {fromIgnoreFile} from './ignorefile';
 
 const fs = require('fs');
+const path = require('path');
 var crypto = require('crypto')
 
 const dci = '<meta name="dc.identifier" content="res/';
@@ -27,6 +28,8 @@ export function checkDci(files: string[]) {
 }
 
 export function addDci(file: string, output: string) {
+    const filePath = path.parse(file);
+
     const html = fs.readFileSync(file);
     const idx = html.indexOf('</head>');
 
@@ -58,4 +61,16 @@ export function addDci(file: string, output: string) {
         console.log('cannot find body tag');
     }
 
+    // add file to .gitignore
+    const added = fromIgnoreFile();
+    const found = added.filter(path =>
+        filePath.dir === path.dir
+        && filePath.base === path.base
+    ).length > 0;
+
+    if (!found) {
+        const line = '\n!' + filePath.dir + '/' + filePath.base;
+        fs.appendFileSync('.gitignore', line);
+        console.log(`++ ${line}`);
+    }
 }

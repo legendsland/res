@@ -29,6 +29,7 @@ function createIndex() {
   return html;
 }
 
+//TODO: perform all kinds of checks
 export function gen() {
   const html = createIndex();
   console.log('index.html created');
