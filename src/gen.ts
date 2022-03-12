@@ -1,24 +1,9 @@
+import {fromIgnoreFile} from './ignorefile';
+
 const fs = require('fs');
-const path = require('path');
-const { exec } = require("child_process");
-var os = require('os');
 
-function processLineByLine(ignore: string) {
-  const list: any[] = [];
-
-  const check_str = '## files below will be committed';
-  let start = false;
-  ignore.split(os.EOL).forEach(line => {
-    if(!start && line === check_str ) {
-      start = true;
-      return;
-    }
-
-    if(start && line.trim() !== '') {
-      const p = path.parse(line.substring(1));
-      list.push(p);
-    }
-  })
+function createIndex() {
+  const list = fromIgnoreFile();
 
   const config = {
     containerId: 'container',
@@ -45,7 +30,7 @@ function processLineByLine(ignore: string) {
 }
 
 export function gen() {
-  const html = processLineByLine(fs.readFileSync('.gitignore').toString());
+  const html = createIndex();
   console.log('index.html created');
   fs.writeFileSync('index.html', html);
 }

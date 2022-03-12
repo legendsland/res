@@ -1,9 +1,10 @@
 import * as yargs from 'yargs';
-import { addDci } from "./dci";
+import {addDci, checkDci} from './dci';
 import { gen } from "./gen";
 import { merge } from './merge';
+import {Argv} from 'yargs';
 
-const args: any = yargs
+const args: Argv = yargs
 .usage('Usage: $0 [-d <filename>]')
 .option('dci', {
     alias: 'd',
@@ -15,6 +16,11 @@ const args: any = yargs
     describe: 'Merge two html files',
     type: 'array',
 })
+.option('test', {
+    alias: 't',
+    describe: 'Test html files having dc identifier',
+    type: 'array',
+})
 .option('output', {
     alias: 'o',
     describe: 'Output filename',
@@ -22,8 +28,13 @@ const args: any = yargs
 })
 ;
 
-const argv = args.argv;
-if (argv.d !== undefined) {
+const argv: any = args.argv;
+if (argv.t !== undefined) {
+    checkDci(argv.t);
+    process.exit(0);
+}
+
+else if (argv.d !== undefined) {
     addDci(argv.d, argv.o || argv.d);
 }
 
