@@ -33,6 +33,7 @@ export function delIgnore(filePath: ParsedPath) {
     const idx = ignoreFile.indexOf(line);
     if (idx !== -1) {
         const newContent = ignoreFile.slice(0, idx) + ignoreFile.slice(idx + line.length);
+        console.log(`${line} removed from ignore`);
         fs.writeFileSync('.gitignore', newContent);
     } else {
         console.log(`${line} not found`);

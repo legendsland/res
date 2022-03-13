@@ -138,6 +138,5 @@ export function del(file: string) {
 
         // remove from .gitignore
         delIgnore(path.parse(file));
-        console.log(`${file} removed from git`);
     });
 }
