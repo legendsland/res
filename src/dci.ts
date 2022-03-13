@@ -55,8 +55,8 @@ export async function checkFiles() {
 }
 
 const enum Ext {
-    html = 'html',
-    pdf = 'pdf',
+    html = '.html',
+    pdf = '.pdf',
 }
 
 export async function add(file: string, output: string) {
@@ -93,7 +93,7 @@ export async function add(file: string, output: string) {
             }
 
         } else {
-            console.log('cannot find body tag');
+            console.log('cannot find </head>');
         }
     } else if ( ext === Ext.pdf ) {
         // do nothing....
