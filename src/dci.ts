@@ -28,6 +28,32 @@ export function checkDci(files: string[]) {
     });
 }
 
+export async function checkFiles() {
+    const added = fromIgnoreFile().map(path => path.dir + '/' + path.base).sort();
+    const files = await gitListFiles({
+        fs: fs,
+        dir: '.',
+    });
+
+    const ignoreDirs = [
+        'res/images'
+    ];
+
+    const fromIgnore = JSON.stringify(added);
+    const fromGit = JSON.stringify(
+        files.filter((file) =>
+            file.startsWith('res/')
+            && ignoreDirs.filter((dir) => file.startsWith(dir)).length === 0
+        ).sort());
+    if (fromIgnore !== fromGit) {
+        console.log('!! not consistent');
+        console.log('ignore: ' + fromIgnore);
+        console.log('   git: ' + fromGit);
+    } else {
+        console.log('** consistent:\n' + added.join('\n'));
+    }
+}
+
 const enum Ext {
     html = 'html',
     pdf = 'pdf',
