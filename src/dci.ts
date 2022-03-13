@@ -27,38 +27,49 @@ export function checkDci(files: string[]) {
     });
 }
 
-export function addDci(file: string, output: string) {
+const enum Ext {
+    html = 'html',
+    pdf = 'pdf',
+}
+
+export function add(file: string, output: string) {
     const filePath = path.parse(file);
+    const ext = filePath.ext;
 
-    const html = fs.readFileSync(file);
-    const idx = html.indexOf('</head>');
+    // check file types
+    if ( ext === Ext.html ) {
+        const html = fs.readFileSync(file);
+        const idx = html.indexOf('</head>');
 
-    if (idx !== -1) {
-        const dci_idx = html.indexOf(dci);
-        // no dci
-        if (dci_idx === -1) {
+        if (idx !== -1) {
+            const dci_idx = html.indexOf(dci);
+            // no dci
+            if (dci_idx === -1) {
 
-            const sha1sum = crypto.createHash('sha1')
-            const hex = sha1sum.update(html).digest('hex');
+                const sha1sum = crypto.createHash('sha1')
+                const hex = sha1sum.update(html).digest('hex');
 
-            console.log('create dci: res/' + hex);
+                console.log('create dci: res/' + hex);
 
-            const pos = idx;
+                const pos = idx;
 
-            const html_dci = html.slice(0, pos) + '\n\n' + dci + hex + '">\n\n' + html.slice(pos);
+                const html_dci = html.slice(0, pos) + '\n\n' + dci + hex + '">\n\n' + html.slice(pos);
 
-            fs.writeFileSync(output, html_dci);
-        } else {
-            console.log('dci existed');
+                fs.writeFileSync(output, html_dci);
+            } else {
+                console.log('dci existed');
 
-            // copy if not the same file
-            if (file !== output) {
-                fs.writeFileSync(output, html);
+                // copy if not the same file
+                if (file !== output) {
+                    fs.writeFileSync(output, html);
+                }
             }
-        }
 
-    } else {
-        console.log('cannot find body tag');
+        } else {
+            console.log('cannot find body tag');
+        }
+    } else if ( ext === Ext.pdf ) {
+        // do nothing....
     }
 
     // add file to .gitignore

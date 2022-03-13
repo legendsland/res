@@ -1,14 +1,14 @@
 import * as yargs from 'yargs';
-import {addDci, checkDci} from './dci';
-import { gen } from "./gen";
+import {add, checkDci} from './dci';
+import {createIndex} from './gen';
 import { merge } from './merge';
 import {Argv} from 'yargs';
 
 const args: Argv = yargs
-.usage('Usage: $0 [-d <filename>]')
-.option('dci', {
-    alias: 'd',
-    describe: 'Add DCI to html',
+.usage('Usage: $0 [-a <filename>]')
+.option('add', {
+    alias: 'a',
+    describe: 'Add files to index',
     type: 'string',
 })
 .option('merge', {
@@ -34,8 +34,8 @@ if (argv.t !== undefined) {
     process.exit(0);
 }
 
-else if (argv.d !== undefined) {
-    addDci(argv.d, argv.o || argv.d);
+else if (argv.a !== undefined) {
+    add(argv.a, argv.o || argv.a);
 }
 
 else if (argv.m !== undefined) {
@@ -43,4 +43,4 @@ else if (argv.m !== undefined) {
     process.exit(0);
 }
 
-gen();
+createIndex();

@@ -2,7 +2,7 @@ import {fromIgnoreFile} from './ignorefile';
 
 const fs = require('fs');
 
-function createIndex() {
+export function createIndex() {
   const list = fromIgnoreFile();
 
   const config = {
@@ -26,12 +26,7 @@ function createIndex() {
 </html>
 `;
 
-  return html;
-}
-
-//TODO: perform all kinds of checks
-export function gen() {
-  const html = createIndex();
   console.log('index.html created');
   fs.writeFileSync('index.html', html);
 }
+
