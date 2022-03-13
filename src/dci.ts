@@ -1,8 +1,9 @@
-import {fromIgnoreFile} from './ignorefile';
+import {appendIgnore, delIgnore, fromIgnoreFile} from './ignorefile';
+import {listFiles as gitListFiles, remove as gitRemove, add as gitAdd} from 'isomorphic-git';
 
 const fs = require('fs');
 const path = require('path');
-var crypto = require('crypto')
+const crypto = require('crypto')
 
 const dci = '<meta name="dc.identifier" content="res/';
 
@@ -36,7 +37,7 @@ export function add(file: string, output: string) {
     const filePath = path.parse(file);
     const ext = filePath.ext;
 
-    // check file types
+    // add dci automatically if it is a html file and dci doesn't exist
     if ( ext === Ext.html ) {
         const html = fs.readFileSync(file);
         const idx = html.indexOf('</head>');
@@ -72,16 +73,45 @@ export function add(file: string, output: string) {
         // do nothing....
     }
 
-    // add file to .gitignore
-    const added = fromIgnoreFile();
-    const found = added.filter(path =>
-        filePath.dir === path.dir
-        && filePath.base === path.base
-    ).length > 0;
+    // add to .gitignore
+    appendIgnore(filePath);
 
-    if (!found) {
-        const line = '\n!' + filePath.dir + '/' + filePath.base;
-        fs.appendFileSync('.gitignore', line);
-        console.log(`++ ${line}`);
-    }
+    // add to git
+    gitAdd({
+        fs: fs,
+        dir: '.',
+        filepath: file
+    }).then(() => {
+        console.log(`${file} added to git`);
+    });
+}
+
+/**
+ * Remove a file from git and index, but don't delete the file from fs.
+ *
+ * @param file file to be removed.
+ */
+export function del(file: string) {
+    gitListFiles({
+        fs: fs,
+        dir: '.',
+    }).then(files => {
+        const list = files.filter(f => f === file);
+        if (list.length === 1) {
+            // remove from git
+            gitRemove({
+                fs: fs,
+                dir: '.',
+                filepath: list[0]
+            }).then(() => {
+                console.log(`${file} removed from git`);
+            });
+        } else {
+            console.log(`cannot find ${file}`);
+        }
+
+        // remove from .gitignore
+        delIgnore(path.parse(file));
+        console.log(`${file} removed from git`);
+    });
 }

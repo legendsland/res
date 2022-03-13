@@ -1,5 +1,5 @@
 import * as yargs from 'yargs';
-import {add, checkDci} from './dci';
+import {add, checkDci, del} from './dci';
 import {createIndex} from './gen';
 import { merge } from './merge';
 import {Argv} from 'yargs';
@@ -9,6 +9,11 @@ const args: Argv = yargs
 .option('add', {
     alias: 'a',
     describe: 'Add files to index',
+    type: 'string',
+})
+.option('delete', {
+    alias: 'd',
+    describe: 'Delete a file from index and git',
     type: 'string',
 })
 .option('merge', {
@@ -36,6 +41,10 @@ if (argv.t !== undefined) {
 
 else if (argv.a !== undefined) {
     add(argv.a, argv.o || argv.a);
+}
+
+else if (argv.d !== undefined) {
+    del(argv.d);
 }
 
 else if (argv.m !== undefined) {

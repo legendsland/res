@@ -24,3 +24,31 @@ export function fromIgnoreFile(): ParsedPath[] {
 
     return includedFiles;
 }
+
+export function delIgnore(filePath: ParsedPath) {
+    const line = '\n!' + filePath.dir + '/' + filePath.base;
+
+    const ignoreFile = fs.readFileSync('.gitignore').toString();
+
+    const idx = ignoreFile.indexOf(line);
+    if (idx !== -1) {
+        const newContent = ignoreFile.slice(0, idx) + ignoreFile.slice(idx + line.length);
+        fs.writeFileSync('.gitignore', newContent);
+    } else {
+        console.log(`${line} not found`);
+    }
+}
+
+export function appendIgnore(filePath: ParsedPath) {
+    const added = fromIgnoreFile();
+    const found = added.filter(path =>
+        filePath.dir === path.dir
+        && filePath.base === path.base
+    ).length > 0;
+
+    if (!found) {
+        const line = '\n!' + filePath.dir + '/' + filePath.base;
+        fs.appendFileSync('.gitignore', line);
+        console.log(`++ ${line}`);
+    }
+}
