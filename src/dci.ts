@@ -4,8 +4,11 @@ import {listFiles as gitListFiles, remove as gitRemove, add as gitAdd} from 'iso
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto')
+import * as cheerio from 'cheerio';
 
 const DCI = '<meta name="dc.identifier" content="res/';
+const SCRIPT_ELEM_ID = 'res-script';
+const STYLE_ELEM_ID = 'res-style';
 
 export function checkDci(files: string[]) {
     let htmlFiles = files;
@@ -66,14 +69,16 @@ export async function add(file: string, output: string) {
     // add dci automatically if it is a html file and dci doesn't exist
     if ( ext === Ext.html ) {
         const html = fs.readFileSync(file);
+        const $ = cheerio.load(html);
+
         const tagHeadCloseStart = html.indexOf('</head>');
         let updatedHtml = html;
         let newHtml = '';
 
         if (tagHeadCloseStart !== -1) {
-            const dci_idx = html.indexOf(DCI);
+            const dciIdx = html.indexOf(DCI);
             // no dci
-            if (dci_idx === -1) {
+            if (dciIdx === -1) {
 
                 const sha1sum = crypto.createHash('sha1')
                 const hex = sha1sum.update(html).digest('hex');
@@ -85,13 +90,20 @@ export async function add(file: string, output: string) {
                 console.log('dci existed');
             }
 
-            // add inlined css and javascript
-            const styleContent = fs.readFileSync('src/resources/book.css').toString();
+            // add inlined css and javascript if not exist
+            if ( $(`#${STYLE_ELEM_ID}`).length == 0 ) {
+                const styleContent = fs.readFileSync('src/resources/book.css').toString();
+                newHtml += `<style id="${STYLE_ELEM_ID}" type="text/css">${styleContent}</style>\n`;
+            } else {
+                console.log('style existed');
+            }
 
-            newHtml += `<style type="text/css">${styleContent}</style>\n`;
-
-            const scriptContent = fs.readFileSync('src/resources/book.js').toString();
-            newHtml += `<script  type="text/javascript">${scriptContent}</script>\n`;
+            if ( $(`#${SCRIPT_ELEM_ID}`).length == 0 ) {
+                const scriptContent = fs.readFileSync('src/resources/book.js').toString();
+                newHtml += `<script id="${SCRIPT_ELEM_ID}" type="text/javascript">${scriptContent}</script>\n`;
+            } else {
+                console.log('script existed');
+            }
 
             updatedHtml = html.slice(0, tagHeadCloseStart) + newHtml + html.slice(tagHeadCloseStart);
 
