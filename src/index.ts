@@ -43,11 +43,11 @@ import {Argv} from 'yargs';
     }
 
     else if (argv.a !== undefined) {
-        add(argv.a, argv.o || argv.a);
+        await add(argv.a, argv.o || argv.a);
     }
 
     else if (argv.d !== undefined) {
-        del(argv.d);
+        await del(argv.d);
     }
 
     else if (argv.m !== undefined) {

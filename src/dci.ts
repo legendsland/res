@@ -59,7 +59,7 @@ const enum Ext {
     pdf = 'pdf',
 }
 
-export function add(file: string, output: string) {
+export async function add(file: string, output: string) {
     const filePath = path.parse(file);
     const ext = filePath.ext;
 
@@ -117,26 +117,26 @@ export function add(file: string, output: string) {
  *
  * @param file file to be removed.
  */
-export function del(file: string) {
-    gitListFiles({
+export async function del(file: string) {
+    const files = await gitListFiles({
         fs: fs,
         dir: '.',
-    }).then(files => {
-        const list = files.filter(f => f === file);
-        if (list.length === 1) {
-            // remove from git
-            gitRemove({
-                fs: fs,
-                dir: '.',
-                filepath: list[0]
-            }).then(() => {
-                console.log(`${file} removed from git`);
-            });
-        } else {
-            console.log(`cannot find ${file}`);
-        }
-
-        // remove from .gitignore
-        delIgnore(path.parse(file));
     });
+
+    const list = files.filter(f => f === file);
+    if (list.length === 1) {
+        // remove from git
+        gitRemove({
+            fs: fs,
+            dir: '.',
+            filepath: list[0]
+        }).then(() => {
+            console.log(`${file} removed from git`);
+        });
+    } else {
+        console.log(`cannot find ${file}`);
+    }
+
+    // remove from .gitignore
+    delIgnore(path.parse(file));
 }
