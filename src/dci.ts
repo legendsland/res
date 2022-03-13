@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto')
 
-const dci = '<meta name="dc.identifier" content="res/';
+const DCI = '<meta name="dc.identifier" content="res/';
 
 export function checkDci(files: string[]) {
     let htmlFiles = files;
@@ -19,7 +19,7 @@ export function checkDci(files: string[]) {
 
     htmlFiles.forEach(filename => {
         const html = fs.readFileSync(filename);
-        const idx = html.indexOf(dci);
+        const idx = html.indexOf(DCI);
         if (idx === -1) {
             console.log(`!! ${filename}`);
         } else {
@@ -66,30 +66,38 @@ export async function add(file: string, output: string) {
     // add dci automatically if it is a html file and dci doesn't exist
     if ( ext === Ext.html ) {
         const html = fs.readFileSync(file);
-        const idx = html.indexOf('</head>');
+        const tagHeadCloseStart = html.indexOf('</head>');
+        let updatedHtml = html;
+        let newHtml = '';
 
-        if (idx !== -1) {
-            const dci_idx = html.indexOf(dci);
+        if (tagHeadCloseStart !== -1) {
+            const dci_idx = html.indexOf(DCI);
             // no dci
             if (dci_idx === -1) {
 
                 const sha1sum = crypto.createHash('sha1')
                 const hex = sha1sum.update(html).digest('hex');
-
                 console.log('create dci: res/' + hex);
+                newHtml = '\n\n' + DCI + hex + '">\n\n';
 
-                const pos = idx;
-
-                const html_dci = html.slice(0, pos) + '\n\n' + dci + hex + '">\n\n' + html.slice(pos);
-
-                fs.writeFileSync(output, html_dci);
+                updatedHtml = html.slice(0, tagHeadCloseStart) + '\n\n' + DCI + hex + '">\n\n' + html.slice(tagHeadCloseStart);
             } else {
                 console.log('dci existed');
+            }
 
-                // copy if not the same file
-                if (file !== output) {
-                    fs.writeFileSync(output, html);
-                }
+            // add inlined css and javascript
+            const styleContent = fs.readFileSync('src/resources/book.css').toString();
+
+            newHtml += `<style type="text/css">${styleContent}</style>\n`;
+
+            const scriptContent = fs.readFileSync('src/resources/book.js').toString();
+            newHtml += `<script  type="text/javascript">${scriptContent}</script>\n`;
+
+            updatedHtml = html.slice(0, tagHeadCloseStart) + newHtml + html.slice(tagHeadCloseStart);
+
+            // copy if not the same file
+            if (tagHeadCloseStart !== -1 || file !== output) {
+                fs.writeFileSync(output, updatedHtml);
             }
 
         } else {
