@@ -62,7 +62,8 @@ import { Epub } from './epub';
     }
 
     else if (argv.c !== undefined) {
-        const epub = new Epub(argv.c);
+        const epub = new Epub(argv.c, argv.o);
+        await epub.convert();
         process.exit(0);
     }
 

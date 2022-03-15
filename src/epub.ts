@@ -5,9 +5,9 @@
 
 import * as path from "path";
 import cheerio from "cheerio";
-import { readFileSync, writeFileSync } from "fs";
-import { number } from "yargs";
-import { encode } from "querystring";
+import * as fs from 'fs';
+import { readFileSync, writeFileSync, lstatSync } from "fs";
+import * as extract from "extract-zip";
 
 const PATH_CONTAINER = 'META-INF/container.xml';
 const TAG_ROOTFILE = 'rootfile';
@@ -20,11 +20,44 @@ const enum MediaType {
 
 export class Epub {
 
-
     private $container: cheerio.Root;
     private $rootfile: cheerio.Root;
+    private inputFile: string;
+    private output: string;
+    private outputFile: string;
+    private root: string;
+    private extractDir: string;
 
-    constructor(private path: string) {
+    constructor(input: string, output: string) {
+        this.inputFile = path.resolve(input);
+        this.output = output; 
+    }
+
+    async convert() {
+
+        const isDir = lstatSync(this.inputFile).isDirectory();
+        if (isDir) {
+            this.root = this.inputFile;
+            this.outputFile = this.output? this.output : './out.html';
+
+            if (!fs.existsSync(this.fullname(PATH_CONTAINER))) {
+                console.log('invalid epub directory');
+                process.exit(-1);
+            }
+
+        } else if (this.inputFile.endsWith('.epub')) {
+            //unzip to tmp
+            this.extractDir = '/tmp/res-epub';
+            await extract(this.inputFile, {dir: this.extractDir});
+            this.root = this.extractDir;
+
+            this.outputFile = this.output? this.output : this.inputFile.substring(0, this.inputFile.length-5) + '.html';
+
+        } else {
+            ////
+            console.log('unknow type');
+            process.exit(-1);
+        }
 
         this.$container = cheerio.load(
             readFileSync(this.fullname(PATH_CONTAINER)),
@@ -34,7 +67,6 @@ export class Epub {
         );
 
         const rootfilePath = this.$container(TAG_ROOTFILE).attr('full-path');
-
 
         this.$rootfile = cheerio.load(
             readFileSync(this.fullname(rootfilePath)),
@@ -49,18 +81,23 @@ export class Epub {
         const dci = $dci.text();
 
 
+        const rootfileDir = path.parse(rootfilePath).dir;
         const htmlFiles: string[] = [];
         const htmlItems = this.$rootfile(`manifest > item[media-type="${MediaType.xhtml_xml}"]`)
             .each((index: number, element: cheerio.TagElement) => 
-                htmlFiles.push(this.fullname(element.attribs['href']))
+                htmlFiles.push(path.join(this.root, rootfileDir, element.attribs['href']))
         );
-
 
         // merge these files
 
         const html = this.mergeAll(htmlFiles);
         
-        writeFileSync('./merged.html', html);
+        writeFileSync(this.outputFile, html);
+
+        // delete tmp
+        if (this.extractDir !== undefined) {
+            fs.rmSync(this.extractDir, { recursive: true, force: true });
+        }
     }
 
     private parse(filename: string) {
@@ -68,8 +105,8 @@ export class Epub {
         const $ = cheerio.load(readFileSync(filename));
 
         // this file's relative path to root
-        const rel = path.relative(this.path, filename);
-        console.log(rel);
+        const rel = path.relative(this.root, filename);
+        // console.log(rel);
 
         // update id in a single doc
         $('[id]').each((index: number, element: cheerio.TagElement) => {
@@ -89,7 +126,7 @@ export class Epub {
                     if (parts[0] === '') {
                         newHref = `#${rel}.${parts[1]}`;
                     } else {
-                        const fileRel = path.relative(this.path, path.join(dir, parts[0]));
+                        const fileRel = path.relative(this.root, path.join(dir, parts[0]));
                         newHref = `#${fileRel}.${parts[1]}`;
                     }
 
@@ -103,7 +140,7 @@ export class Epub {
         const styles = new Map<string, cheerio.TagElement>();
 
         $('link[type="text/css"]').each((index: number, element: cheerio.TagElement) => {
-            const url = path.relative(this.path, path.join(dir, element.attribs['href']));
+            const url = path.relative(this.root, path.join(dir, element.attribs['href']));
             styles.set(url, element);
         });
 
@@ -140,7 +177,7 @@ export class Epub {
         const f1 = this.parse(file1);
 
         f1.styles.forEach((elem: cheerio.TagElement, href: string) => {
-            html.styles.add(readFileSync(path.join(this.path, href)).toString());
+            html.styles.add(readFileSync(path.join(this.root, href)).toString());
         });
 
         html.body += f1.body;
@@ -175,7 +212,7 @@ ${html.body}
 
     // embeb svg, css, javascript, images
     private fullname(name: string) {
-        return this.path + '/' + name;
+        return path.join(this.root, name);
     }
 
 }
