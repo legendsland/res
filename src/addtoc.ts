@@ -43,7 +43,7 @@ if (!fs.existsSync(input)) {
 // ebook
 const fileContent = fs.readFileSync(input).toString();
 
-const $ = cheerio.load(fileContent);
+const $$ = cheerio.load(fileContent);
 
 
 //Search headers if elemIds is empty
@@ -52,9 +52,9 @@ if (elemIds === undefined) {
 
     let toc = `<div id="${id}"><ul style="list-style-type:none;padding:0;margin:0;">\n`;
 
-    $('h1,h2,h3,h4').each((idx: number, elem: Element) => {
-        const tag = $(elem).prop("tagName").toLowerCase();
-        const text = $(elem).text();
+    $$('h1,h2,h3,h4').each((idx: number, elem: Element) => {
+        const tag = $$(elem).prop("tagName").toLowerCase();
+        const text = $$(elem).text();
         const id = getId(elem);
 
         let sz = 7;
@@ -79,7 +79,7 @@ if (elemIds === undefined) {
     // console.log(toc);
 
     // insert to book
-    $('body').append(toc);
+    $$('body').append(toc);
     decorate(id, 0);
 
 } else {
@@ -94,8 +94,8 @@ genFile();
 function getId(elem: Element) {
     let id = undefined;
     while (elem !== undefined && id === undefined) {
-        id = $(elem).attr('id');
-        elem = $(elem).parent();
+        id = $$(elem).attr('id');
+        elem = $$(elem).parent();
     }
     return id;
 }
@@ -103,36 +103,36 @@ function getId(elem: Element) {
 function decorate(elemId: string, idx: number) {
 
     // toc id
-    if ($(`#${elemId}`).length === 0 ) {
+    if ($$(`#${elemId}`).length === 0 ) {
         console.log(`ID: '${elemId}' not exists`);
         return;
     }
 
-    const toc = $(`#${elemId}`);
+    const toc = $$(`#${elemId}`);
     toc.addClass('book-toc');
     const wrapClass = "book-toc-wrapper";
     const wrapId = `${wrapClass}-${elemId}`;
     toc.wrap(`<div class="${wrapClass}" id="${wrapId}" style="left: ${idx*100}px;"></div>`);
-    $(`#${wrapId}`).append('TOC');
+    $$(`#${wrapId}`).append('TOC');
 
 
-    if ($(`#${styleId}`).length === 0 ) {
+    if ($$(`#${styleId}`).length === 0 ) {
         // add common css
         const css = fs.readFileSync('./book.css').toString();
-        $('head').append(`<style id="${styleId}">${css}</style>`);
+        $$('head').append(`<style id="${styleId}">${css}</style>`);
     }
 
-    if ($(`#${scriptId}`).length === 0 ) {
+    if ($$(`#${scriptId}`).length === 0 ) {
         // add common script
         const scripts = fs.readFileSync('./book.html').toString();
-        $('html').append(scripts);
+        $$('html').append(scripts);
     }
 
-    if ($(`#${scriptData}`).length === 0 ) {
+    if ($$(`#${scriptData}`).length === 0 ) {
         const book_toc_data = JSON.stringify([{wrapid:wrapId, tocid:elemId}]);
-        $('html').append(`<script id="${scriptData}">var book_toc_data = '${book_toc_data}'</script>`);
+        $$('html').append(`<script id="${scriptData}">var book_toc_data = '${book_toc_data}'</script>`);
     } else {
-        const scriptElem = $(`#${scriptData}`);
+        const scriptElem = $$(`#${scriptData}`);
         const prevContent = scriptElem.html();
         const start = "var book_toc_data = '".length;
         const end = prevContent.length - 1;
@@ -150,6 +150,6 @@ function genFile() {
     }
     const filename = path.parse(input).name;
     const genfile = dir + '/' + filename + '.toc.html';
-    fs.writeFileSync(genfile, $.root().html());
+    fs.writeFileSync(genfile, $$.root().html());
     console.log(`${genfile} created`);
 }

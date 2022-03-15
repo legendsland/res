@@ -70,51 +70,43 @@ export async function add(file: string, output: string) {
     if ( ext === Ext.html ) {
         const html = fs.readFileSync(file);
         const $ = cheerio.load(html);
+        let updated = false;
 
-        const tagHeadCloseStart = html.indexOf('</head>');
-        let updatedHtml = html;
-        let newHtml = '';
-
-        if (tagHeadCloseStart !== -1) {
-            const dciIdx = html.indexOf(DCI);
-            // no dci
-            if (dciIdx === -1) {
-
-                const sha1sum = crypto.createHash('sha1')
-                const hex = sha1sum.update(html).digest('hex');
-                console.log('create dci: res/' + hex);
-                newHtml = '\n\n' + DCI + hex + '">\n\n';
-
-                updatedHtml = html.slice(0, tagHeadCloseStart) + '\n\n' + DCI + hex + '">\n\n' + html.slice(tagHeadCloseStart);
-            } else {
-                console.log('dci existed');
-            }
-
-            // add inlined css and javascript if not exist
-            if ( $(`#${STYLE_ELEM_ID}`).length == 0 ) {
-                const styleContent = fs.readFileSync('src/resources/book.css').toString();
-                newHtml += `<style id="${STYLE_ELEM_ID}" type="text/css">${styleContent}</style>\n`;
-            } else {
-                console.log('style existed');
-            }
-
-            if ( $(`#${SCRIPT_ELEM_ID}`).length == 0 ) {
-                const scriptContent = fs.readFileSync('out/src/resources/book.js').toString();
-                newHtml += `<script id="${SCRIPT_ELEM_ID}" type="text/javascript">${scriptContent}</script>\n`;
-            } else {
-                console.log('script existed');
-            }
-
-            updatedHtml = html.slice(0, tagHeadCloseStart) + newHtml + html.slice(tagHeadCloseStart);
-
-            // copy if not the same file
-            if (tagHeadCloseStart !== -1 || file !== output) {
-                fs.writeFileSync(output, updatedHtml);
-            }
-
+        const $dci = $('head[name="dc.identifier"]');
+        if ($dci.length === 0) {
+            const sha1sum = crypto.createHash('sha1')
+            const hex = sha1sum.update(html).digest('hex');
+            console.log('create dci: res/' + hex);
+            $('head').append(`<meta name="dc.identifier" content="res/${hex}"`);
+            updated = true;
         } else {
-            console.log('cannot find </head>');
+            console.log('dci existed');
         }
+
+        // add inlined css and javascript if not exist
+        const $style = $(`#${STYLE_ELEM_ID}`);
+        if ( $style.length == 0 ) {
+            const styleContent = fs.readFileSync('src/resources/book.css').toString();
+            $('head').append(`<style id="${STYLE_ELEM_ID}" type="text/css">${styleContent}</style>\n`);
+            updated = true;
+        } else {
+            console.log('style existed');
+        }
+
+        const $script = $(`#${SCRIPT_ELEM_ID}`);
+        if ( $script.length == 0 ) {
+            const scriptContent = fs.readFileSync('dist/main.js').toString();
+            $('html').append(`<script id="${SCRIPT_ELEM_ID}" type="text/javascript">${scriptContent}</script>\n`);
+            updated = true;
+        } else {
+            console.log('script existed');
+        }
+
+        // copy if not the same file
+        if (updated || file !== output) {
+            fs.writeFileSync(output, $.html());
+        }
+
     } else if ( ext === Ext.pdf ) {
         // do nothing....
     }

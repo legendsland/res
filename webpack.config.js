@@ -1,7 +1,6 @@
 // Generated using webpack-cli https://github.com/webpack/webpack-cli
 
 const path = require('path');
-const CopyPlugin = require("copy-webpack-plugin");
 
 const isProduction = process.env.NODE_ENV == 'production';
 
@@ -42,13 +41,6 @@ const config = {
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
     },
-    plugins: [
-        new CopyPlugin({
-            patterns: [
-                // { from: "./src/resources/", to: "." },
-            ],
-        }),
-    ],
 };
 
 module.exports = () => {
