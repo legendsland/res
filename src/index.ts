@@ -1,7 +1,6 @@
 import * as yargs from 'yargs';
 import {add, checkDci, checkFiles, del} from './dci';
 import {createIndex} from './gen';
-import { merge } from './merge';
 import {Argv} from 'yargs';
 import { Epub } from './epub';
 
@@ -45,29 +44,22 @@ import { Epub } from './epub';
     if (argv.t !== undefined) {
         checkDci(argv.t);
         await checkFiles();
-        process.exit(0);
     }
 
     else if (argv.a !== undefined) {
         await add(argv.a, argv.o || argv.a);
+        createIndex();
     }
 
     else if (argv.d !== undefined) {
         await del(argv.d);
-    }
-
-    else if (argv.m !== undefined) {
-        merge(argv.m, argv.o || argv.m[0]);
-        process.exit(0);
+        createIndex();
     }
 
     else if (argv.c !== undefined) {
         const epub = new Epub(argv.c, argv.o);
         await epub.convert();
-        process.exit(0);
     }
-
-    createIndex();
 
 })();
 

@@ -99,7 +99,7 @@ export async function add(file: string, output: string) {
             }
 
             if ( $(`#${SCRIPT_ELEM_ID}`).length == 0 ) {
-                const scriptContent = fs.readFileSync('src/resources/book.js').toString();
+                const scriptContent = fs.readFileSync('out/src/resources/book.js').toString();
                 newHtml += `<script id="${SCRIPT_ELEM_ID}" type="text/javascript">${scriptContent}</script>\n`;
             } else {
                 console.log('script existed');

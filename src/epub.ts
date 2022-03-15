@@ -11,12 +11,16 @@ import * as extract from "extract-zip";
 
 const PATH_CONTAINER = 'META-INF/container.xml';
 const TAG_ROOTFILE = 'rootfile';
-const TAG_DCI = 'dc:identifier';
-const TAG_DCI_ESC = 'dc\\:identifier';
+const TAG_DC_TITLE_ESC = 'dc\\:title';
+const TAG_DC_IDENTIFIER_ESC = 'dc\\:identifier';
 
 const enum MediaType {
     xhtml_xml = "application/xhtml+xml",
 };
+
+interface htmlHead {
+    title: string
+}
 
 export class Epub {
 
@@ -75,11 +79,9 @@ export class Epub {
             }
         );
 
-        const $dci = this.$rootfile(`${TAG_DCI_ESC}[id]`);
-
-        //TODO: if not exists
-        const dci = $dci.text();
-
+        const head: htmlHead = {
+            title: this.$rootfile(TAG_DC_TITLE_ESC).text()
+        };
 
         const rootfileDir = path.parse(rootfilePath).dir;
         const htmlFiles: string[] = [];
@@ -89,7 +91,7 @@ export class Epub {
         );
 
         // merge these files
-        const html = this.mergeAll(htmlFiles);
+        const html = this.mergeAll(head, htmlFiles);
 
         writeFileSync(this.outputFile, html);
 
@@ -184,7 +186,18 @@ export class Epub {
         return html;
     }
 
-    private mergeAll(files: string[]): string {
+    private mergeAll(head: htmlHead, files: string[]): string {
+        const $ = cheerio.load(`<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<head>
+</head>
+<body>
+</body>
+</html>`);
+
+        $('head').append(`<title>${head.title}</title>\n`);
+
         const html: any = {
             styles: new Set<string>(),
             body: ''
@@ -193,20 +206,14 @@ export class Epub {
         for(let i=0; i<files.length; ++i) {
             this.merge(files[i], html);
         }
-        
-        return `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<style>
+
+        $('head').append(`<style>
 ${Array.from(html.styles).join('</style>\n<style>\n')}
-</style>
-</head>
-<body>
-${html.body}
-</body>
-</html>`
-;
+</style>\n`);
+
+        $('body').append(`${html.body}`);
+
+        return $.html();
     }
 
     // embeb svg, css, javascript, images
