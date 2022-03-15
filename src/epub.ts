@@ -6,6 +6,8 @@
 import * as path from "path";
 import cheerio from "cheerio";
 import { readFileSync, writeFileSync } from "fs";
+import { number } from "yargs";
+import { encode } from "querystring";
 
 const PATH_CONTAINER = 'META-INF/container.xml';
 const TAG_ROOTFILE = 'rootfile';
@@ -97,6 +99,7 @@ export class Epub {
 
         });
 
+        // embed css
         const styles = new Map<string, cheerio.TagElement>();
 
         $('link[type="text/css"]').each((index: number, element: cheerio.TagElement) => {
@@ -109,10 +112,26 @@ export class Epub {
             attrs += `${key}="${value}" `;
         }
 
+        // embed images
+        $('img, image').each((index: number, element: cheerio.TagElement) => {
+            this.genBase64Image(dir, 'src', element);
+            this.genBase64Image(dir, 'href', element);
+            this.genBase64Image(dir, 'xlink:href', element);
+        });
 
         return {
             styles: styles,
             body: `<div ${attrs}>\n${$('body').html()}</div>\n`,
+        }
+    }
+
+    private genBase64Image(dir: string, attr: string, elem: cheerio.TagElement) {
+        const val = elem.attribs[attr];
+        // console.log(attr + ': ' + val);
+        if ( val !== undefined && !val.startsWith('data:image/')) {
+            const ext = path.parse(val).ext.substring(1);
+            const prefix = `data:image/${ext};base64,`;
+            elem.attribs[attr] = prefix + readFileSync(path.join(dir, val), {encoding: 'base64'});
         }
     }
 
@@ -139,7 +158,19 @@ export class Epub {
             this.merge(files[i], html);
         }
         
-        return '<html>\n<head>\n<style>\n' + Array.from(html.styles).join('</style>\n<style>\n') + '</style>\n</head>\n<body>\n' + html.body + '</body></html>';
+        return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+${Array.from(html.styles).join('</style>\n<style>\n')}
+</style>
+</head>
+<body>
+${html.body}
+</body>
+</html>`
+;
     }
 
     // embeb svg, css, javascript, images
