@@ -3,6 +3,7 @@ import {add, checkDci, checkFiles, del} from './dci';
 import {createIndex} from './gen';
 import { merge } from './merge';
 import {Argv} from 'yargs';
+import { Epub } from './epub';
 
 (async () =>{
 
@@ -33,6 +34,11 @@ import {Argv} from 'yargs';
             describe: 'Output filename',
             type: 'string',
         })
+        .option('convert', {
+            alias: 'c',
+            describe: 'Convert epub to a single html',
+            type: 'string',
+        })
     ;
 
     const argv: any = args.argv;
@@ -52,6 +58,11 @@ import {Argv} from 'yargs';
 
     else if (argv.m !== undefined) {
         merge(argv.m, argv.o || argv.m[0]);
+        process.exit(0);
+    }
+
+    else if (argv.c !== undefined) {
+        const epub = new Epub(argv.c);
         process.exit(0);
     }
 
