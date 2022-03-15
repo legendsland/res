@@ -89,9 +89,8 @@ export class Epub {
         );
 
         // merge these files
-
         const html = this.mergeAll(htmlFiles);
-        
+
         writeFileSync(this.outputFile, html);
 
         // delete tmp
