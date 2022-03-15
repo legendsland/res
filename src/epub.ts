@@ -120,9 +120,15 @@ export class Epub {
             
             // anchors
             if (!href.startsWith('http')) {
+                let newHref = '#';
+
                 const parts = href.split('#', 2);
-                if (parts.length>1) {
-                    let newHref = '';
+                if (parts.length === 1) {
+                    // link to other doc
+                    const fileRel = path.relative(this.root, path.join(dir, parts[0]));
+                    newHref = `#${fileRel}`;
+                }
+                else if (parts.length>1) {
                     // local link
                     if (parts[0] === '') {
                         newHref = `#${rel}.${parts[1]}`;
@@ -131,8 +137,9 @@ export class Epub {
                         newHref = `#${fileRel}.${parts[1]}`;
                     }
 
-                    element.attribs['href'] = newHref;
                 }
+
+                element.attribs['href'] = newHref;
             }
 
         });
@@ -159,7 +166,7 @@ export class Epub {
 
         return {
             styles: styles,
-            body: `<div ${attrs}>\n${$('body').html()}</div>\n`,
+            body: `<div id=${rel}><div ${attrs}>\n${$('body').html()}</div></div>\n`,
         }
     }
 
