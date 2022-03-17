@@ -72,15 +72,14 @@ export async function decorate(file: string, output: string) {
 
         const $ = cheerio.load(html);
 
-        const $dci = $('head[name="dc.identifier"]');
+        const $dci = $('meta[name="dc.identifier"]');
         if ($dci.length === 0) {
             const sha1sum = crypto.createHash('sha1')
             const hex = sha1sum.update(html).digest('hex');
             console.log('create dci: res/' + hex);
-            $('head').prepend(`<meta name="dc.identifier" content="res/${hex}">`);
-            console.log(`${$('head').html()}`);
+            $('head').prepend(`\n<meta name="dc.identifier" content="res/${hex}">\n`);
         } else {
-            console.log('dci existed, always keep this ID because hypothes.is may use it.');
+            console.log(`dci existed, always keep this ID: ${$dci.attr('content')} because hypothes.is may use it.`);
         }
 
         // add ore replace inlined css and javascript
