@@ -1,5 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import $ from 'jquery';
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -9,7 +10,19 @@ import ListItemText from '@mui/material/ListItemText';
 import Button from '@mui/material/Button';
 import Link from '@mui/material/Link';
 import {Toc} from './book';
+import { Nlp } from './nlp';
 
+// check running in http server or opened in browser as local file.
+function env(): string {
+    const href = document.location.href;
+    if (href.startsWith('file')) {
+        return 'file';
+    } else if (href.startsWith('http')) {
+        return 'http';
+    } else {
+        return 'unknown';
+    }
+}
 
 interface Config {
     containerId: string,
@@ -51,7 +64,12 @@ if (window.res_config !== undefined) {
 // other
 else {
 
+    // create cotainers
+    $('body').append('<div id="nlp-container"></div>');
+
     const toc = new Toc();
     toc.generate();
 
+    const nlp = new Nlp('nlp-container');
+    nlp.create();
 }
