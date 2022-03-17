@@ -1,7 +1,11 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import Button from '@mui/material/Button';
-// import DefaultDocument from 'compromise';
+import * as $ from 'jquery';
+
+import Verbs from 'compromise/types';
+import Document from 'compromise/types';
+import DefaultDocument from 'compromise';
 
 const nlp = require('compromise');
 /**
@@ -10,11 +14,10 @@ const nlp = require('compromise');
 nlp
 const App = () => {
 
-    let doc = nlp('she sells seashells by the seashore.');
+    let doc = nlp($('body').text());
 
     const onClick = () => {
-        doc.verbs().toPastTense();
-        let result = doc.text();
+        let result = doc.verbs().out('array');
 
         console.log(result);
     }
