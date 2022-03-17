@@ -49,9 +49,18 @@ import { startServer } from './server/server';
             describe: 'Start web server',
             type: 'string',
         })
+        .option('external', {
+            alias: 'e',
+            describe: 'Script as src link',
+            boolean: true,
+            default: false
+        })
     ;
 
     const argv: any = args.argv;
+    console.log(argv);
+
+
     if (argv.t !== undefined) {
         checkDci(argv.t);
         await checkFiles();
@@ -63,7 +72,7 @@ import { startServer } from './server/server';
     }
 
     else if (argv.u !== undefined) {
-        decorate(argv.u, argv.o || argv.u);
+        decorate(argv.u, argv.e, argv.o || argv.u);
     }
 
     else if (argv.d !== undefined) {

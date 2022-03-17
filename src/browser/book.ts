@@ -27,7 +27,7 @@ export class Toc {
             const id = $(element).prop('id');
 
             const tag = $(element).prop("tagName").toLowerCase();
-            console.log(id + ':' + tag);
+            // console.log(id + ':' + tag);
 
             if (tag === 'h1'
                 || tag === 'h2'

@@ -62,7 +62,7 @@ const enum Ext {
     pdf = '.pdf',
 }
 
-export async function decorate(file: string, output: string) {
+export async function decorate(file: string, external: boolean, output: string) {
     const filePath = path.parse(file);
     const ext = filePath.ext;
     
@@ -94,8 +94,15 @@ export async function decorate(file: string, output: string) {
         if ( $script.length !== 0 ) {
             $script.remove();
         }
-        const scriptContent = fs.readFileSync('dist/main.js').toString();
-        $('html').append(`<script id="${SCRIPT_ELEM_ID}" type="text/javascript">${scriptContent}</script>\n`);
+
+        if (external) {
+            // link, for debug
+            $('html').append(`<script id="${SCRIPT_ELEM_ID}" src="/res/dist/main.js" type="text/javascript"></script>\n`);
+        } else {
+            //embed
+            const scriptContent = fs.readFileSync('dist/main.js').toString();
+            $('html').append(`<script id="${SCRIPT_ELEM_ID}" type="text/javascript">${scriptContent}</script>\n`);
+        }
 
         // copy if not the same file
         fs.writeFileSync(output, $.html());

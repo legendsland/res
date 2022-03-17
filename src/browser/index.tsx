@@ -65,7 +65,7 @@ if (window.res_config !== undefined) {
 else {
 
     // create cotainers
-    $('body').append('<div id="nlp-container"></div>');
+    $('body').prepend('<div id="nlp-container"></div>');
 
     const toc = new Toc();
     toc.generate();
