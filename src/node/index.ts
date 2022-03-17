@@ -1,5 +1,5 @@
 import * as yargs from 'yargs';
-import {add, checkDci, checkFiles, del} from './dci';
+import {add, checkDci, checkFiles, del, decorate} from './dci';
 import {createIndex} from './gen';
 import {Argv} from 'yargs';
 import { Epub } from './epub';
@@ -12,6 +12,11 @@ import { startServer } from './server/server';
         .option('add', {
             alias: 'a',
             describe: 'Add files to index',
+            type: 'string',
+        })
+        .option('update', {
+            alias: 'u',
+            describe: 'Update file with css and js',
             type: 'string',
         })
         .option('delete', {
@@ -53,8 +58,12 @@ import { startServer } from './server/server';
     }
 
     else if (argv.a !== undefined) {
-        await add(argv.a, argv.o || argv.a);
+        await add(argv.a);
         createIndex();
+    }
+
+    else if (argv.u !== undefined) {
+        decorate(argv.u, argv.o || argv.u);
     }
 
     else if (argv.d !== undefined) {

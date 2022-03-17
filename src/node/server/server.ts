@@ -6,7 +6,7 @@ import * as path from 'path';
 export function startServer() {
 
     const app = express();
-    const root = path.join(__dirname, '../../../../');
+    const root = path.join(__dirname, '../../../../../');
 
     const port = 3000
     app.use(express.static(root));

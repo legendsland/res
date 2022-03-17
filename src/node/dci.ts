@@ -62,54 +62,52 @@ const enum Ext {
     pdf = '.pdf',
 }
 
-export async function add(file: string, output: string) {
+export async function decorate(file: string, output: string) {
     const filePath = path.parse(file);
     const ext = filePath.ext;
-
+    
     // add dci automatically if it is a html file and dci doesn't exist
     if ( ext === Ext.html ) {
         const html = fs.readFileSync(file);
+
         const $ = cheerio.load(html);
-        let updated = false;
 
         const $dci = $('head[name="dc.identifier"]');
         if ($dci.length === 0) {
             const sha1sum = crypto.createHash('sha1')
             const hex = sha1sum.update(html).digest('hex');
             console.log('create dci: res/' + hex);
-            $('head').append(`<meta name="dc.identifier" content="res/${hex}"`);
-            updated = true;
+            $('head').prepend(`<meta name="dc.identifier" content="res/${hex}">`);
+            console.log(`${$('head').html()}`);
         } else {
-            console.log('dci existed');
+            console.log('dci existed, always keep this ID because hypothes.is may use it.');
         }
 
-        // add inlined css and javascript if not exist
+        // add ore replace inlined css and javascript
         const $style = $(`#${STYLE_ELEM_ID}`);
-        if ( $style.length == 0 ) {
-            const styleContent = fs.readFileSync('src/resources/book.css').toString();
-            $('head').append(`<style id="${STYLE_ELEM_ID}" type="text/css">${styleContent}</style>\n`);
-            updated = true;
-        } else {
-            console.log('style existed');
+        if ( $style.length !== 0 ) {
+            $style.remove();
         }
+        const styleContent = fs.readFileSync('src/resources/book.css').toString();
+        $('head').append(`<style id="${STYLE_ELEM_ID}" type="text/css">${styleContent}</style>\n`);
 
         const $script = $(`#${SCRIPT_ELEM_ID}`);
-        if ( $script.length == 0 ) {
-            const scriptContent = fs.readFileSync('dist/main.js').toString();
-            $('html').append(`<script id="${SCRIPT_ELEM_ID}" type="text/javascript">${scriptContent}</script>\n`);
-            updated = true;
-        } else {
-            console.log('script existed');
+        if ( $script.length !== 0 ) {
+            $script.remove();
         }
+        const scriptContent = fs.readFileSync('dist/main.js').toString();
+        $('html').append(`<script id="${SCRIPT_ELEM_ID}" type="text/javascript">${scriptContent}</script>\n`);
 
         // copy if not the same file
-        if (updated || file !== output) {
-            fs.writeFileSync(output, $.html());
-        }
+        fs.writeFileSync(output, $.html());
 
     } else if ( ext === Ext.pdf ) {
         // do nothing....
     }
+}
+
+export async function add(file: string) {
+    const filePath = path.parse(file);
 
     // add to .gitignore
     appendIgnore(filePath);

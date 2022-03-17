@@ -55,7 +55,6 @@ export class Toc {
         `);
 
         $('#res-toc-control').on('click', (event) => {
-            console.log('control');
             this.toggle('res-toc-content');
             event.stopPropagation();
         });
@@ -73,7 +72,6 @@ export class Toc {
         });
 
         $(window).on('click', (event) => {
-            console.log('window');
             $('#res-toc-content').hide();
         });
 
