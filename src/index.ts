@@ -3,6 +3,7 @@ import {add, checkDci, checkFiles, del} from './dci';
 import {createIndex} from './gen';
 import {Argv} from 'yargs';
 import { Epub } from './epub';
+import { startServer } from './server/server';
 
 (async () =>{
 
@@ -38,6 +39,11 @@ import { Epub } from './epub';
             describe: 'Convert epub to a single html',
             type: 'string',
         })
+        .option('server', {
+            alias: 's',
+            describe: 'Start web server',
+            type: 'string',
+        })
     ;
 
     const argv: any = args.argv;
@@ -59,6 +65,10 @@ import { Epub } from './epub';
     else if (argv.c !== undefined) {
         const epub = new Epub(argv.c, argv.o);
         await epub.convert();
+    }
+
+    else if (argv.s !== undefined) {
+        startServer();
     }
 
 })();
