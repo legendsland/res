@@ -9,6 +9,8 @@ import * as $ from 'jquery';
 // import DefaultDocument from 'compromise';
 
 const nlp = require('compromise');
+// const nlp_ngrams = require('compromise-ngrams');
+// nlp.extend(nlp_ngrams) //done!
 
 /**
  * Text process
@@ -24,33 +26,54 @@ const App = () => {
 
     // do it in browser, or on the server
 
-    const onClickServer = () => {
+    const onClickServer = (request: string) => {
 
+        let url = '/res/nlp/' + request;
+     
         $.ajax({
-            url: '/res/nlp'
+            url: url,
+            type: 'POST',
+            data: JSON.stringify({size:1}),
+            contentType: 'application/json'
         }).done((data) => {
             console.log(data);
         });
-
     }
 
-    const onClickClient = () => {
+    const onClickClient = (request: string) => {
         let doc = nlp($('body').text());
-        let result = doc.verbs().out('array');
+
+        let result = '';
+        if (request === 'verbs') {
+            result = doc.verbs().out('array');
+        }
+
+        else if (request === 'ngrams') {
+            result = doc.ngrams({size:1});
+        }
+        
         console.log(result);
     }
 
     return (
         <Box>
             <Button
-                onClick={onClickServer}
+                onClick={() => {onClickServer('verbs');}}
             >
-                NLP-Server
+                S-verbs
             </Button>
+
             <Button
-                onClick={onClickClient}
+                onClick={() => {onClickServer('ngrams');}}
             >
-                NLP-Client
+                S-ngram
+            </Button>
+
+
+            <Button
+                onClick={() => {onClickClient('verbs');}}
+            >
+                C-verbs
             </Button>
         </Box>
     );
