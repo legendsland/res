@@ -13,3 +13,5 @@ NLP-enabled reading assistant.
 
 ### NLP
 1. words stat
+
+### Database

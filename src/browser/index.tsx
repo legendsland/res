@@ -10,7 +10,9 @@ import ListItemText from '@mui/material/ListItemText';
 import Button from '@mui/material/Button';
 import Link from '@mui/material/Link';
 import {Toc} from './book';
-import { Nlp } from './nlp';
+import {Nlp} from './nlp';
+import { Neo4j } from './neo4j';
+import { Request } from './request';
 
 // check running in http server or opened in browser as local file.
 function env(): string {
@@ -65,11 +67,21 @@ if (window.res_config !== undefined) {
 else {
 
     // create cotainers
+    $('body').prepend('<div id="req-container"></div>');
+
     $('body').prepend('<div id="nlp-container"></div>');
+
+    $('body').prepend('<div id="neo4j-container"></div>');
+
+    const request = new Request('req-container');
+    request.create();
 
     const toc = new Toc();
     toc.generate();
 
     const nlp = new Nlp('nlp-container');
     nlp.create();
+
+    const neo4j = new Neo4j('nlp-container');
+    neo4j.create();
 }

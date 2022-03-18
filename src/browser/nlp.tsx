@@ -3,6 +3,7 @@ import * as ReactDOM from 'react-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import * as $ from 'jquery';
+import { post } from './request';
 
 // import Verbs from 'compromise/types';
 // import Document from 'compromise/types';
@@ -28,14 +29,10 @@ const App = () => {
 
     const onClickServer = (request: string) => {
 
-        let url = '/res/nlp/' + request;
-     
-        $.ajax({
-            url: url,
-            type: 'POST',
-            data: JSON.stringify({size:1}),
-            contentType: 'application/json'
-        }).done((data) => {
+        post('/res', {
+            method: request,
+            params: []
+        }).then((data) => {
             console.log(data);
         });
     }
@@ -58,20 +55,20 @@ const App = () => {
     return (
         <Box>
             <Button
-                onClick={() => {onClickServer('verbs');}}
+                onClick={() => {onClickServer('nlpVerbs');}}
             >
                 S-verbs
             </Button>
 
             <Button
-                onClick={() => {onClickServer('ngrams');}}
+                onClick={() => {onClickServer('nlpNgrams');}}
             >
                 S-ngram
             </Button>
 
 
             <Button
-                onClick={() => {onClickClient('verbs');}}
+                onClick={() => {onClickClient('nlpVerbs');}}
             >
                 C-verbs
             </Button>

@@ -12,6 +12,7 @@ const { english } = require('stopwords');
 
 import { PorterStemmer } from 'natural';
 import {removeStopwords} from 'stopword';
+import { test } from "./neo4j/client";
 
 
 const bodyParser = require('body-parser');
@@ -24,8 +25,6 @@ interface NgramOption {
 }
 
 export function startServer() {
-
-
 
     const app = express();
     const root = path.join(__dirname, '../../../../../');
@@ -41,32 +40,55 @@ export function startServer() {
         res.sendFile('index.html', {root: root});
     });
 
-    /**
-     * nlp process
-     */
-    app.get('/res/nlp/verbs', async (req, res) => {
+    const routes = {
+        reqlist: {
+            fn: () => {
+                return Object.getOwnPropertyNames(routes)
+                    .filter(prop => prop !== 'reqlist')
+                    .map(prop => {
+                        return {name: prop};
+                    });
+            }
+        },
+
+        neo4jHello: {
+            fn: () => {
+                test();
+                return 'ok';
+            },
+        },
+
+        nlpVerbs: {
+            fn: async () => {
+                const text = await cleanText(path.join(root, '/res/res/thinking/A Rulebook for Arguments.18.html'));
+                return getVerbs(text);
+            }
+        },
+
+        nlpNgrams: {
+            fn: async () => {
+                const text = await cleanText(path.join(root, '/res/res/thinking/A Rulebook for Arguments.18.html'));
+                const ngrams = nlp(text).ngrams({
+                    size: 1
+                });
         
-        cleanText(path.join(root, '/res/res/thinking/A Rulebook for Arguments.18.html'))
-            .then((result) => {
-                
-                res.send(getVerbs(result));
-            
-            }).catch(() => res.send('error'));
+                return ngrams;
+            }
+        }
+    }
 
-    });
+    app.post('/res', async(req, res) => {
+        const params = req.body;
+        const method = params.method;
 
-    app.post('/res/nlp/ngrams', async (req, res) => {
-        
-        const text = await cleanText(path.join(root, '/res/res/thinking/A Rulebook for Arguments.18.html'))
-        const params: NgramOption = req.body as NgramOption;
-        
-        console.log(params);
-
-        const ngrams = nlp(text).ngrams({
-            size: params.size
-        });
-
-        res.send(ngrams);
+        //@ts-ignore
+        const target = routes[method];
+        if (target !== undefined) {
+            const result = await target.fn(...params.params);
+            res.send(result);
+        } else {
+            res.send('error');
+        }
     });
 
     app.listen(port, () => {
