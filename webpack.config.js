@@ -22,7 +22,12 @@ const config = {
         rules: [
             {
                 test: /\.(ts|tsx)$/i,
-                loader: 'ts-loader',
+                use: [{
+                    loader: 'ts-loader',
+                    options: {
+                        configFile: "tsconfig.webpack.json"
+                    }
+                }],
                 exclude: [
                     '/node_modules/',
                     '/src/node'

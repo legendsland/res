@@ -4,6 +4,7 @@ import {createIndex} from './gen';
 import {Argv} from 'yargs';
 import { Epub } from './epub';
 import { startServer } from './server/server';
+import { crawler } from './server/crawler';
 
 (async () =>{
 
@@ -55,6 +56,12 @@ import { startServer } from './server/server';
             boolean: true,
             default: false
         })
+        .option('crawler', {
+            alias: 'n',
+            describe: 'Script as src link',
+            boolean: true,
+            default: false
+        })
     ;
 
     const argv: any = args.argv;
@@ -87,6 +94,10 @@ import { startServer } from './server/server';
 
     else if (argv.s !== undefined) {
         startServer();
+    }
+
+    else if (argv.n) {
+        crawler();
     }
 
 })();

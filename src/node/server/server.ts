@@ -5,24 +5,13 @@ import * as fs from 'fs';
 import * as util from 'util';
 import * as cheerio from "cheerio";
 
-
-const { english } = require('stopwords');
-
-// console.log(sws.english);
-
-import { PorterStemmer } from 'natural';
 import {removeStopwords} from 'stopword';
-import { test } from "./neo4j/client";
-
+import { testConnection } from "./neo4j/client";
 
 const bodyParser = require('body-parser');
 
 const nlp = require('compromise');
 nlp.extend(require('compromise-ngrams')) //done!
-
-interface NgramOption {
-    size: number
-}
 
 export function startServer() {
 
@@ -35,6 +24,8 @@ export function startServer() {
     app.use(bodyParser.urlencoded({
         extended: false
     }));
+
+    let neo4jRnning = false;
 
     app.get('/res', (req, res) => {
         res.sendFile('index.html', {root: root});
@@ -52,9 +43,9 @@ export function startServer() {
         },
 
         neo4jHello: {
-            fn: () => {
-                test();
-                return 'ok';
+            fn: async () => {
+                const result =  await testConnection();
+                return result !== undefined? 'connected' : 'cannot connect';
             },
         },
 
@@ -84,12 +75,27 @@ export function startServer() {
         //@ts-ignore
         const target = routes[method];
         if (target !== undefined) {
+
+            if (!neo4jRnning && method.startsWith('neo4j')) {
+                res.send('neo4j is not running');
+                return;
+            }
+
             const result = await target.fn(...params.params);
             res.send(result);
         } else {
             res.send('error');
         }
     });
+
+    // connection neo4j
+    testConnection().then(() => {
+        neo4jRnning = true;
+        console.log('neo4j connected');
+    }).catch(() => {
+        neo4jRnning = false;
+        console.log('cannot connect neo4j');
+    })
 
     app.listen(port, () => {
         console.log(`Example app listening on port ${port}`)
