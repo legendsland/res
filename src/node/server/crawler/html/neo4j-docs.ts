@@ -4,9 +4,6 @@ import got from 'got';
 import * as url from 'url'
 import * as fs from 'fs'
 
-import {fromBuffer} from 'file-type';
-
-
 export async function crawler() {
     const context = await getToc();
     

@@ -4,7 +4,7 @@ import {createIndex} from './gen';
 import {Argv} from 'yargs';
 import { Epub } from './epub';
 import { startServer } from './server/server';
-import { crawler } from './server/crawler';
+import { crawler } from './server/crawler/html/neo4j-docs';
 
 (async () =>{
 
