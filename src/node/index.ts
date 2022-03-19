@@ -5,6 +5,7 @@ import {Argv} from 'yargs';
 import { Epub } from './epub';
 import { startServer } from './server/server';
 import { crawler } from './server/crawler/html/neo4j-docs';
+import { fetch } from './server/hypothes.is';
 
 (async () =>{
 
@@ -62,6 +63,12 @@ import { crawler } from './server/crawler/html/neo4j-docs';
             boolean: true,
             default: false
         })
+        .option('hypothes.is', {
+            alias: 'p',
+            describe: 'Script as src link',
+            boolean: true,
+            default: false
+        })
     ;
 
     const argv: any = args.argv;
@@ -100,5 +107,8 @@ import { crawler } from './server/crawler/html/neo4j-docs';
         crawler();
     }
 
+    else if (argv.p) {
+        await fetch();
+    }
 })();
 

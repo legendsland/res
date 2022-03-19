@@ -15,3 +15,4 @@ NLP-enabled reading assistant.
 1. words stat
 
 ### Database
+1. Design graph db
