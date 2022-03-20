@@ -3,11 +3,16 @@ import * as ReactDOM from 'react-dom';
 import * as $ from 'jquery';
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
+import ListSubheader from '@mui/material/ListSubheader';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Button from '@mui/material/Button';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import Collapse from '@mui/material/Collapse';
+
 import Link from '@mui/material/Link';
 import {Toc} from './book';
 import {Nlp} from './nlp';
@@ -26,9 +31,91 @@ function env(): string {
     }
 }
 
+type FilePath = { dir: string, base: string };
 interface Config {
     containerId: string,
-    data: [{ dir: string, base: string }]
+    data: FilePath[]
+}
+
+const Category = (props: any) => {
+
+    const category: {name: string, data: FilePath[]} = props.category;
+
+    const [open, setOpen] = React.useState(true);
+
+    const handleClick = () => {
+      setOpen(!open);
+    };
+
+    return (
+        <List
+
+        >
+            <ListItemButton onClick={handleClick}>
+                <ListItemText primary={category.name} />
+                {open ? <ExpandLess /> : <ExpandMore />}
+            </ListItemButton>
+            <Collapse in={open} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding>
+                {
+                    category.data
+                        .sort((a, b) => {
+                            return a.base.localeCompare(b.base);
+                        })
+                        .map(p => {
+                            const url = `${p.dir}/${p.base}`;
+                            return (
+                                    <ListItemButton key={url} sx={{ pl: 4 }}>
+                                        {/* <ListItemText primary={p.base} /> */}
+                                        <Link href={url} target="_blank" rel="noopener">{p.base}</Link>
+                                    </ListItemButton>
+                            )
+                        })
+                }
+                </List>
+            </Collapse>
+
+        </List>
+    );
+}
+
+const App = (props: any) => {
+
+    const config: FilePath[] = props.config;
+
+    const grouped: Map<string, FilePath[]> = new Map();
+
+    config.forEach(item => {
+        // item: res/aaa/bbb/....
+        const parts = item.dir.split('/');
+        const category = parts[1];
+
+        let files = grouped.get(category);
+        const file = [{dir: item.dir, base: item.base}];
+        if ( files === undefined) {
+            grouped.set(category, file);
+        } else {
+            files.push({dir: item.dir, base: item.base});
+        }
+    });
+
+    return (
+        <List>
+            {
+                Array.from(grouped)
+                    .sort(([name1, category1], [name2, category2]) => {
+                        return name1.localeCompare(name2);
+                    })
+                    .map(([name, category]) => (
+                        <Category
+                            category={{name: name, data: category}}
+                        >
+                        </Category>
+                ))
+            }
+        </List>
+    );
+
 }
 
 // index
@@ -37,30 +124,7 @@ if (window.res_config !== undefined) {
     //@ts-ignore
     const config: Config = window.res_config;
 
-    const App = () => {
-        return (
-            <List>
-                {
-                    config.data
-                        .sort((a, b) =>
-                            a.base.localeCompare(b.base))
-                        .map(p => {
-                            const url = `${p.dir}/${p.base}`;
-                            return (
-                                <ListItem key={url} disablePadding>
-                                    <ListItemButton>
-                                        {/* <ListItemText primary={p.base} /> */}
-                                        <Link href={url} target="_blank" rel="noopener">{p.base}</Link>
-                                    </ListItemButton>
-                                </ListItem>
-                            )
-                        })
-                }
-            </List>
-        );
-    }
-
-    ReactDOM.render(<App/>, document.querySelector(`#${config.containerId}`));
+    ReactDOM.render(<App config={config.data}></App>, document.querySelector(`#${config.containerId}`));
 }
 
 // other

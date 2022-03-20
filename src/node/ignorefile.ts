@@ -17,7 +17,9 @@ export function fromIgnoreFile(): ParsedPath[] {
         }
 
         if(start && line.trim() !== '') {
-            const p = path.parse(line.substring(1));
+            // remove the leading char '!'
+            const filename = line.substring(1);
+            const p = path.parse(filename);
             includedFiles.push(p);
         }
     })

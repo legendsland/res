@@ -11,6 +11,12 @@ import { fetch } from './server/hypothes.is';
 
     const args: Argv = yargs
         .usage('Usage: $0 [-a <filename>]')
+        .option('index', {
+            alias: 'i',
+            describe: 'Create index.html',
+            boolean: true,
+            default: false,
+        })
         .option('add', {
             alias: 'a',
             describe: 'Add files to index',
@@ -75,7 +81,11 @@ import { fetch } from './server/hypothes.is';
     console.log(argv);
 
 
-    if (argv.t !== undefined) {
+    if (argv.i) {
+        createIndex();
+    }
+
+    else if (argv.t !== undefined) {
         checkDci(argv.t);
         await checkFiles();
     }
