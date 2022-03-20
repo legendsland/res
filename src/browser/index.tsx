@@ -40,7 +40,7 @@ interface Config {
 const Category = (props: any) => {
 
     const category: {name: string, data: FilePath[]} = props.category;
-
+    const categoeyLabel = `${category.name} (${category.data.length})`;
     const [open, setOpen] = React.useState(true);
 
     const handleClick = () => {
@@ -48,11 +48,9 @@ const Category = (props: any) => {
     };
 
     return (
-        <List
-
-        >
+        <List>
             <ListItemButton onClick={handleClick}>
-                <ListItemText primary={category.name} />
+                <ListItemText primary={categoeyLabel} />
                 {open ? <ExpandLess /> : <ExpandMore />}
             </ListItemButton>
             <Collapse in={open} timeout="auto" unmountOnExit>
@@ -115,7 +113,6 @@ const App = (props: any) => {
             }
         </List>
     );
-
 }
 
 // index
