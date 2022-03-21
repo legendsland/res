@@ -7,6 +7,7 @@ import { startServer } from './server/server';
 import { crawler } from './server/crawler/html/neo4j-docs';
 import { fetch } from './server/hypothes.is';
 import { words } from './server/nlp';
+import {Neo4jClient} from './server/neo4j/client';
 
 (async () =>{
 
@@ -128,7 +129,14 @@ import { words } from './server/nlp';
     }
 
     else if (argv.l) {
-        words(argv.l);
+        const sent = words(argv.l);
+
+        const client = new Neo4jClient();
+        const result = await client.addSent(sent);
+
+        console.log(result);
+
+        await client.dispose();
     }
 })();
 
