@@ -7,10 +7,11 @@ import {keys} from '../../../../.keys';
 let driver: Driver = undefined;
 
 export async function testConnection(): Promise<Driver | undefined> {
+    const uri = keys.neo4j.uri;
+    const user = keys.neo4j.user;
     const pw = keys.neo4j.pw;
-    const uri = 'neo4j://localhost:7687';
 
-    return new Neo4jClient(uri, pw).connect();
+    return new Neo4jClient(uri, user, pw).connect();
 }
 
 export class Neo4jClient {
@@ -18,14 +19,16 @@ export class Neo4jClient {
 
     constructor(
         private uri: string,
+        private user: string,
         private pw: string
     ) {
 
     }
 
     async connect(): Promise<Driver | undefined> {
-        this.driver = neo4j.driver(this.uri, neo4j.auth.basic('neo4j', this.pw))
-        const session = driver.session()
+        console.log(`connect to: ${this.user}  ${this.uri}`);
+        this.driver = neo4j.driver(this.uri, neo4j.auth.basic(this.user, this.pw))
+        const session = this.driver.session()
 
         return new Promise((resolve, reject) => {
             session.run(
@@ -45,7 +48,7 @@ export class Neo4jClient {
             return false;
         }
 
-        
+
 
     }
 }
