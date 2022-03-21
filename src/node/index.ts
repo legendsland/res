@@ -6,6 +6,7 @@ import { Epub } from './epub';
 import { startServer } from './server/server';
 import { crawler } from './server/crawler/html/neo4j-docs';
 import { fetch } from './server/hypothes.is';
+import { words } from './server/nlp';
 
 (async () =>{
 
@@ -75,6 +76,11 @@ import { fetch } from './server/hypothes.is';
             boolean: true,
             default: false
         })
+        .option('nlp', {
+            alias: 'l',
+            describe: 'nlp',
+            type: 'string',
+        })
     ;
 
     const argv: any = args.argv;
@@ -119,6 +125,10 @@ import { fetch } from './server/hypothes.is';
 
     else if (argv.p) {
         await fetch();
+    }
+
+    else if (argv.l) {
+        words(argv.l);
     }
 })();
 
