@@ -13,7 +13,7 @@ const bodyParser = require('body-parser');
 const nlp = require('compromise');
 nlp.extend(require('compromise-ngrams')) //done!
 
-export function startServer() {
+export async function startServer() {
 
     const app = express();
     const root = path.join(__dirname, '../../../../../');
@@ -62,7 +62,7 @@ export function startServer() {
                 const ngrams = nlp(text).ngrams({
                     size: 1
                 });
-        
+
                 return ngrams;
             }
         }
@@ -89,19 +89,13 @@ export function startServer() {
     });
 
     // connection neo4j
-    testConnection().then(() => {
-        neo4jRnning = true;
-        console.log('neo4j connected');
-    }).catch(() => {
-        neo4jRnning = false;
-        console.log('cannot connect neo4j');
-    })
+    neo4jRnning = await testConnection();
 
     app.listen(port, () => {
         console.log(`Example app listening on port ${port}`)
     });
 
-} 
+}
 
 async function cleanText(path: string): Promise<string> {
 
@@ -110,7 +104,7 @@ async function cleanText(path: string): Promise<string> {
     return new Promise((resolve, reject) => {
         readFile(path).then((data) => {
             const $ = cheerio.load(data.toString());
-            
+
 
             const text: string = $('#OEBPS\\/prf\\.xhtml').text() as string;
 
@@ -125,7 +119,7 @@ async function cleanText(path: string): Promise<string> {
 
             console.log(result);
             resolve(result);
- 
+
         }).catch((error) => {
             reject();
         })
