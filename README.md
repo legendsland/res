@@ -10,10 +10,10 @@ NLP-enabled reading assistant.
 ## Interfaces
 select texts from web and send to npl, then stored in db
 
-
 ## TODO
 ### TOC
 1. change toc highlight when window scrolls
+2. embed fonts and css image url
 
 ### NLP
 1. words stat
