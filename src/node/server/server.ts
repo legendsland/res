@@ -6,7 +6,8 @@ import * as util from 'util';
 import * as cheerio from "cheerio";
 
 import {removeStopwords} from 'stopword';
-import { testConnection } from "./neo4j/client";
+import {Neo4jClient, testConnection} from './neo4j/client';
+import {words} from './nlp';
 
 const bodyParser = require('body-parser');
 
@@ -25,7 +26,11 @@ export async function startServer() {
         extended: false
     }));
 
-    let neo4jRnning = false;
+    let neo4jRunning = false;
+    const neo4jClient = new Neo4jClient();
+
+    // connection neo4j
+    await neo4jClient.check();
 
     app.get('/res', (req, res) => {
         res.sendFile('index.html', {root: root});
@@ -65,6 +70,12 @@ export async function startServer() {
 
                 return ngrams;
             }
+        },
+
+        nlpSentence: {
+            fn: async (sent: string) => {
+                neo4jClient.addSent(words(sent));
+            }
         }
     }
 
@@ -76,7 +87,7 @@ export async function startServer() {
         const target = routes[method];
         if (target !== undefined) {
 
-            if (!neo4jRnning && method.startsWith('neo4j')) {
+            if (!neo4jRunning && method.startsWith('neo4j')) {
                 res.send('neo4j is not running');
                 return;
             }
@@ -87,9 +98,6 @@ export async function startServer() {
             res.send('error');
         }
     });
-
-    // connection neo4j
-    neo4jRnning = await testConnection();
 
     app.listen(port, () => {
         console.log(`Example app listening on port ${port}`)

@@ -34,7 +34,7 @@ const App = () => {
 
     const [name, setName] = React.useState('');
     const [options, setOptions] = React.useState([]);
-    
+
     const onChange = (event:any, value: any) => {
         console.log(value);//s
         if (value !== undefined && value !== null) {
@@ -47,7 +47,7 @@ const App = () => {
             method: name,
             params: [],
         }).then(data => {
-            console.log(data);
+            // console.log(data);
         }).catch(error => {
             console.log(error);
         });
@@ -76,11 +76,11 @@ const App = () => {
                 onChange={onChange}
                 options={options as Req[]}
                 getOptionLabel={(option: Req) => option.name}
-                renderInput={(params) => 
+                renderInput={(params) =>
                     <TextField
                         {...params}
                         type='text'
-                        label="Requests" 
+                        label="Requests"
                     />
                 }
                 sx={{
@@ -92,7 +92,7 @@ const App = () => {
             <Button
                 onClick={submit}
             >
-                Submit                
+                Submit
             </Button>
 
         </FormControl>
