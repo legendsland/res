@@ -21,12 +21,12 @@ export function createIndex() {
     <body>
     <div id="${config.containerId}"></div>
     <script>var res_config = ${config_json};</script>
-    <script src="dist/main.js"></script>
+    <script src="./main.js"></script>
     </body>
 </html>
 `;
 
   console.log('index.html created');
-  fs.writeFileSync('index.html', html);
+  fs.writeFileSync('dist/res/index.html', html);
 }
 

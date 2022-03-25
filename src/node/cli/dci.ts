@@ -65,7 +65,7 @@ const enum Ext {
 export async function decorate(file: string, external: boolean, output: string) {
     const filePath = path.parse(file);
     const ext = filePath.ext;
-    
+
     // add dci automatically if it is a html file and dci doesn't exist
     if ( ext === Ext.html ) {
         const html = fs.readFileSync(file);
@@ -97,7 +97,7 @@ export async function decorate(file: string, external: boolean, output: string) 
 
         if (external) {
             // link, for debug
-            $('html').append(`<script id="${SCRIPT_ELEM_ID}" src="/res/dist/main.js" type="text/javascript"></script>\n`);
+            $('html').append(`<script id="${SCRIPT_ELEM_ID}" src="/res/main.js" type="text/javascript"></script>\n`);
         } else {
             //embed
             const scriptContent = fs.readFileSync('dist/main.js').toString();

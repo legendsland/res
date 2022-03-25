@@ -1,9 +1,9 @@
 import * as yargs from 'yargs';
-import {add, checkDci, checkFiles, del, decorate} from './dci';
-import {createIndex} from './gen';
+import {add, checkDci, checkFiles, del, decorate} from './cli/dci';
+import {createIndex} from './cli/gen';
 import {Argv} from 'yargs';
-import { Epub } from './epub';
-import { startServer } from './server/server';
+import { Epub } from './cli/epub';
+import { startServer } from './server/';
 import { crawler } from './server/crawler/html/neo4j-docs';
 import { fetch } from './server/hypothes.is';
 import { words } from './server/nlp';

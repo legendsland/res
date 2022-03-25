@@ -17,7 +17,7 @@ nlp.extend(require('compromise-ngrams')) //done!
 export async function startServer() {
 
     const app = express();
-    const root = path.join(__dirname, '../../../../../');
+    const root = path.join(__dirname, '../../../../dist/');
 
     const port = 3000
     app.use(express.static(root));
@@ -33,7 +33,11 @@ export async function startServer() {
     await neo4jClient.check();
 
     app.get('/res', (req, res) => {
-        res.sendFile('index.html', {root: root});
+        res.sendFile('index.html', {root: `${root}/res`});
+    });
+
+    app.get('/notebook', (req, res) => {
+        res.sendFile('index.html', {root: `${root}/notebook`});//
     });
 
     const routes = {
