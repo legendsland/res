@@ -17,7 +17,7 @@ nlp.extend(require('compromise-ngrams')) //done!
 export async function startServer() {
 
     const app = express();
-    const root = path.join(__dirname, '../../../../');
+    const root = path.join(__dirname, '../../../../../');
 
     const port = 3000
     app.use(express.static(root));
@@ -37,7 +37,7 @@ export async function startServer() {
     });
 
     app.get('/notebook', (req, res) => {
-        res.sendFile('dist/notebook/index.html', {root: `${root}`});//
+        res.sendFile('/res/dist/notebook/index.html', {root: `${root}`});//
     });
 
     const routes = {

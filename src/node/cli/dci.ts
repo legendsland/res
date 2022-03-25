@@ -97,7 +97,7 @@ export async function decorate(file: string, external: boolean, output: string) 
 
         if (external) {
             // link, for debug
-            $('html').append(`<script id="${SCRIPT_ELEM_ID}" src="/dist/res/main.js" type="text/javascript"></script>\n`);
+            $('html').append(`<script id="${SCRIPT_ELEM_ID}" src="/res/dist/res/main.js" type="text/javascript"></script>\n`);
         } else {
             //embed
             const scriptContent = fs.readFileSync('dist/res/main.js').toString();

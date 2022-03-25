@@ -62,7 +62,7 @@ const Category = (props: any) => {
                             return a.base.localeCompare(b.base);
                         })
                         .map(p => {
-                            const url = `/${p.dir}/${p.base}`;
+                            const url = `${p.dir}/${p.base}`;
                             return (
                                     <ListItemButton key={url} sx={{ pl: 4 }}>
                                         {/* <ListItemText primary={p.base} /> */}

@@ -21,7 +21,7 @@ export function createIndex() {
     <body>
     <div id="${config.containerId}"></div>
     <script>var res_config = ${config_json};</script>
-    <script src="/dist/res/main.js"></script>
+    <script src="/res/dist/res/main.js"></script>
     </body>
 </html>
 `;
