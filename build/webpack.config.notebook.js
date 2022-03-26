@@ -25,13 +25,16 @@ const config = {
                 use: [{
                     loader: 'ts-loader',
                     options: {
-                        configFile: "tsconfig.webpack.json"
+                        configFile: path.resolve(__dirname, "../tsconfig.webpack.json"),
                     }
                 }],
-                exclude: [
-                    '/node_modules/',
-                    '/src/node'
+                include: [
+                    path.resolve(__dirname, "../src/browser/notebook")
                 ],
+                // exclude: [
+                //     '/node_modules/',
+                //     '/src/node'
+                // ],
             },
             {
                 test: /\.css$/i,

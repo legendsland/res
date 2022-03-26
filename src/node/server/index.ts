@@ -40,6 +40,10 @@ export async function startServer() {
         res.sendFile('/res/dist/notebook/index.html', {root: `${root}`});//
     });
 
+    app.get('/notebook/editor', (req, res) => {
+        res.sendFile('/res/dist/notebook/editor.html', {root: `${root}`});//
+    });
+
     const routes = {
         reqlist: {
             fn: () => {

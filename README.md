@@ -15,7 +15,7 @@ select texts from web and send to npl, then stored in db
 1. main menu
 2. right-click menu
 
-### TOC
+### Reading Navigator
 1. change toc highlight when window scrolls
 2. embed fonts and css image url
 
@@ -23,9 +23,11 @@ select texts from web and send to npl, then stored in db
 1. words stat
 2. chinese tokenizer
 
-### Writing
+### Editor
 1. Take notes on web
 2. Save notes to DB.
+3. Writing as programming
+4. Rich format: text, image, formulas, audio, video
 
 vscode plugin or pure web?
 pure web first, then vscode extension.
