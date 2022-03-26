@@ -29,7 +29,8 @@ const config = {
                     }
                 }],
                 include: [
-                    path.resolve(__dirname, "../src/browser/notebook")
+                    path.resolve(__dirname, "../src/browser/notebook"),
+                    path.resolve(__dirname, "../src/browser/server")
                 ],
                 // exclude: [
                 //     '/node_modules/',
@@ -52,6 +53,7 @@ const config = {
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
     },
+    devtool: false,
     plugins: [
         new CopyPlugin({
             patterns: [

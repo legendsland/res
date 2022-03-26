@@ -3,7 +3,7 @@ import * as ReactDOM from 'react-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import * as $ from 'jquery';
-import { post } from './request';
+import { post } from '../server/request';
 
 // import Verbs from 'compromise/types';
 // import Document from 'compromise/types';
@@ -15,12 +15,12 @@ const nlp = require('compromise');
 
 /**
  * Text process
- * 
+ *
  * A simple version could be used in browser,
  * a advanced version should be in server.
- * 
+ *
  * let client script to check this.
- * 
+ *
  */
 
 const App = () => {
@@ -48,7 +48,7 @@ const App = () => {
         else if (request === 'ngrams') {
             result = doc.ngrams({size:1});
         }
-        
+
         console.log(result);
     }
 

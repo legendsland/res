@@ -40,10 +40,6 @@ export async function startServer() {
         res.sendFile('/res/dist/notebook/index.html', {root: `${root}`});//
     });
 
-    app.get('/notebook/editor', (req, res) => {
-        res.sendFile('/res/dist/notebook/editor.html', {root: `${root}`});//
-    });
-
     const routes = {
         reqlist: {
             fn: () => {
@@ -82,7 +78,13 @@ export async function startServer() {
 
         nlpSentence: {
             fn: async (sent: string) => {
-                neo4jClient.addSent(words(sent));
+                return neo4jClient.addSent(words(sent));
+            }
+        },
+
+        notes: {
+            fn: async () => {
+                return neo4jClient.getNodeByLabel('EditorJSNote');
             }
         }
     }
@@ -93,6 +95,8 @@ export async function startServer() {
 
         //@ts-ignore
         const target = routes[method];
+        console.log(`request: ${method}`);
+
         if (target !== undefined) {
 
             if (!neo4jRunning && method.startsWith('neo4j')) {

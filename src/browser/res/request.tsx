@@ -1,6 +1,5 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import * as $ from 'jquery';
 
 import {
     Autocomplete,
@@ -9,22 +8,7 @@ import {
     TextField,
     FormControl,
 } from '@mui/material';
-
-export async function post(url: string, data: any) {
-
-    return new Promise((reslove, reject) => {
-        $.ajax({
-            url: url,
-            type: 'POST',
-            data: JSON.stringify(data),
-            contentType: 'application/json'
-        }).then(data => {
-            reslove(data);
-        }).catch(error => {
-            reject(error);
-        });
-    })
-}
+import {post} from '../server/request';
 
 interface Req {
     name: string,

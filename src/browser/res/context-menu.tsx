@@ -8,7 +8,7 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import * as ReactDOM from 'react-dom';
 import {useEffect, useState} from 'react';
-import {post} from './request';
+import {post} from '../server/request';
 
 
 const ContextMenu = () => {

@@ -49,6 +49,24 @@ export class Neo4jClient {
         }
     }
 
+    async getNodeByLabel(label: string): Promise<any> {
+        let nodes: any[] = [];
+        try {
+            const result = await this.session.run(
+            `MATCH (n: ${label}) RETURN n`,
+            );
+
+            nodes = result.records.map((value) => {
+                return {...value.get(0).properties}
+            })
+
+        } catch (e) {
+
+        }
+
+        return Promise.resolve(nodes);
+    }
+
     async addSent(sent: Sentence): Promise<boolean> {
         let success = true;
         if (this.driver === undefined) {
