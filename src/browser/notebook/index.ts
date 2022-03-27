@@ -1,3 +1,3 @@
+import {NotebookView} from './list';
 
-
-console.log('note index');
+new NotebookView('notebook-container');

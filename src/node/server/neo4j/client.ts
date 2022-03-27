@@ -4,6 +4,7 @@ import { Driver } from 'neo4j-driver-core';
 import {keys} from '../../../../.keys';
 import {Sentence} from '../types';
 import {Session, Transaction} from 'neo4j-driver';
+const util = require('util');
 
 export async function testConnection(): Promise<boolean> {
     const uri = keys.neo4j.uri;
@@ -47,6 +48,51 @@ export class Neo4jClient {
             console.log(`connectivity verification failed. ${error}`)
             return false;
         }
+    }
+
+    async getNodeByLabel(label: string): Promise<any> {
+        let nodes: any[] = [];
+        try {
+            const result = await this.session.run(
+            `MATCH (n: ${label}) RETURN n`,
+            );
+
+            nodes = result.records.map((value) => {
+                return {...value.get(0).properties}
+            })
+
+        } catch (e) {
+
+        }
+
+        return Promise.resolve(nodes);
+    }
+
+    async saveNode(note: any): Promise<any> {
+        const id = note.id;
+        if (id !== undefined) {
+            const n = {
+                id: id,
+                title: note.title,
+                content: JSON.stringify(note.content)
+            }
+
+            console.log(util.inspect(n));
+
+            try {
+                await this.session.run(
+                    `MATCH (n {id: "${id}"})
+                    SET n += ${util.inspect(n)}
+                    RETURN n`,
+                );
+
+            } catch (e) {
+                console.log(e);
+                return Promise.resolve(e);
+            }
+        }
+
+        return Promise.resolve(id);
     }
 
     async addSent(sent: Sentence): Promise<boolean> {

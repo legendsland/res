@@ -25,12 +25,16 @@ const config = {
                 use: [{
                     loader: 'ts-loader',
                     options: {
-                        configFile: "tsconfig.webpack.json"
+                        configFile: path.resolve(__dirname, "../tsconfig.webpack.json"),
                     }
                 }],
+                include: [
+                    path.resolve(__dirname, "../src/browser/notebook"),
+                    path.resolve(__dirname, "../src/browser/server")
+                ],
                 exclude: [
-                    '/node_modules/',
-                    '/src/node'
+                    path.resolve(__dirname, '../node_modules/'),
+                    path.resolve(__dirname, '../src/node'),
                 ],
             },
             {
@@ -48,6 +52,10 @@ const config = {
     },
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
+    },
+    // devtool: 'inline-source-map',
+    optimization: {
+        minimize: false
     },
     plugins: [
         new CopyPlugin({
