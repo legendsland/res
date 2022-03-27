@@ -8,6 +8,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import CheckIcon from '@mui/icons-material/Check';
+import DeleteIcon from '@mui/icons-material/Delete';
 import {createContext, forwardRef, useContext, useEffect, useRef, useState} from 'react';
 import {post} from '../server/request';
 import {Button, IconButton, TextField} from '@mui/material';
@@ -82,7 +83,7 @@ const App = (props: any) => {
         setNotes(new Map(app.notebook.notes));
     };
 
-    app.onNoteSaved = (id: string) => {
+    app.onNoteUpdated = (id: string) => {
         setNotes(new Map(app.notebook.notes));
     }
 
@@ -97,8 +98,12 @@ const App = (props: any) => {
         app.saveNote(id);
     }
 
+    const handleDelete = async (id: string) => {
+        app.deleteNote(id);
+    }
+
     const handleChangedTitle = (newTitle: string) => {
-        console.log(`update title: ${setcurrentTitle} -> ${newTitle}`);
+        console.log(`update title: ${currentTitle} -> ${newTitle}`);
         app.updateTitle(currentId, newTitle);
         setcurrentTitle(newTitle);
         setNotes(new Map(app.notebook.notes));
@@ -113,6 +118,7 @@ const App = (props: any) => {
                     selected={currentId}
                     onSelectNote={onSelectNote}
                     onSaveNote={handleSaveNote}
+                    handleDelete={handleDelete}
                 />
             </Grid>
             <Grid item xs={8}>
@@ -127,6 +133,7 @@ const NoteListView = (props: any) => {
         selected,
         onSelectNote,
         onSaveNote,
+        handleDelete,
         notes
     } = props;
 
@@ -163,6 +170,11 @@ const NoteListView = (props: any) => {
                                 <ListItemButton>
                                     <ListItemText primary={note.title}/>
                                 </ListItemButton>
+                                <IconButton
+                                    onClick={() => handleDelete(note.id)}
+                                >
+                                    <DeleteIcon />
+                                </IconButton>
                                 {
                                     note.dirty?
                                         <IconButton
@@ -230,7 +242,7 @@ export class NotebookView {
 
     onGetNotes: (id: string) => any;
     onNoteContentChange: () => any;
-    onNoteSaved: (id: string) => any;
+    onNoteUpdated: (id: string) => any;
 
     constructor(private id: string) {
         this.nb = {
@@ -298,7 +310,25 @@ export class NotebookView {
                 // success
                 if (id_ === id) {
                     n.dirty = false;
-                    this?.onNoteSaved(id);
+                    this?.onNoteUpdated(id);
+                }
+            }).catch(err => {
+                console.log(err);
+            });
+        }
+    }
+
+    deleteNote(id: string) {
+        const n = this.nb.notes.get(id);
+        if (n!==undefined) {
+            post('/res', {
+                method: 'deleteNote',
+                params: [id]
+            }).then((id_: string) => {
+                // success
+                if (id_ === id) {
+                    this.nb.notes.delete(id);
+                    this?.onNoteUpdated(id);
                 }
             }).catch(err => {
                 console.log(err);

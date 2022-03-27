@@ -92,6 +92,12 @@ export async function startServer() {
             fn: async (note: any) => {
                 return neo4jClient.saveNode(note);
             }
+        },
+
+        deleteNote: {
+            fn: async (id: string) => {
+                return neo4jClient.deleteNode(id);
+            }
         }
     }
 
