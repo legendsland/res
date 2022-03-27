@@ -32,10 +32,10 @@ const config = {
                     path.resolve(__dirname, "../src/browser/notebook"),
                     path.resolve(__dirname, "../src/browser/server")
                 ],
-                // exclude: [
-                //     '/node_modules/',
-                //     '/src/node'
-                // ],
+                exclude: [
+                    path.resolve(__dirname, '../node_modules/'),
+                    path.resolve(__dirname, '../src/node'),
+                ],
             },
             {
                 test: /\.css$/i,
@@ -53,7 +53,10 @@ const config = {
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
     },
-    devtool: false,
+    devtool: 'inline-source-map',
+    optimization: {
+        minimize: false
+    },
     plugins: [
         new CopyPlugin({
             patterns: [
