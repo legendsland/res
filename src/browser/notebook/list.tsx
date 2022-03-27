@@ -11,6 +11,7 @@ import {createContext, forwardRef, useContext, useEffect, useRef, useState} from
 import {post} from '../server/request';
 import {Button, TextField} from '@mui/material';
 import {API} from '@editorjs/editorjs';
+const { v4: uuidv4 } = require('uuid');
 
 const EditorJS = require('@editorjs/editorjs');
 
@@ -20,78 +21,80 @@ const EditorJSList = require ('@editorjs/list');
 const EDITOR_ID = 'notebook-editor-container';
 
 interface Note {
+    id: string,
     title: string,
     content: any,
     draft?: boolean,
 }
 
 interface Notebook {
-    open: number,
-    notes: Note[],
+    opened: string | undefined,
+    notes: Map<string, Note>,
 }
-
-const defaultNotebook: Notebook = {
-    open: 0,
-    notes: [],
-}
-
-const NotebookContext = createContext(defaultNotebook);
 
 const App = (props: any) => {
 
     const app: NotebookView = props.app;
 
-    const [idx, setIdx] = useState(undefined);
+    const [currentId, setCurrentId] = useState(undefined);
 
     // get notelist from server
     useEffect(() => {
-        app.onGetNotes = (update: boolean) => {
-            if (update) {
-                setIdx(0);
-            }
+        app.onGetNotes = (id: string) => {
+            console.log(`setCurrentId ${id}`);
+            setCurrentId(id);
         }
     }, []);
 
-    let title = '';
-    const onSelectNote = async (index: number) => {
-        if (idx !== index) {
+    let title = 'xxxxx';
+    const onSelectNote = async (selectedId: string) => {
+        console.log(`${currentId} -> ${selectedId}`);
+
+        if (selectedId !== currentId) {
             // save new note
-            if (idx === -1) {
+            if (currentId === '') {
                 const content = await app.getContent();
                 // has content
                 if (content.blocks.length > 0) {
-                    app.addNote({title: title, content: content});
+                    app.addNote({
+                        id: uuidv4(),
+                        title: title,
+                        content: content});
                     console.log(content);
                 }
             }
 
             // update
             else {
-                const title = app.notebook.notes[idx].title;
+                const currentNode = app.getNote(currentId);
                 const content = await app.getContent();
                 // has content
                 if (content.blocks.length > 0) {
-                    app.updateNote(idx, {title: title, content: content});
+                    app.updateNote({
+                        id: currentNode.id,
+                        title: currentNode.title,
+                        content: content
+                    });
                 }
             }
 
-            setIdx(index);
+            setCurrentId(selectedId);
         }
     }
 
-    const handleTitleChange = (index: number, newTitle: string) => {
+    const handleTitleChange = (newTitle: string) => {
         console.log(`update title: ${title} -> ${newTitle}`);
         title = newTitle;
-        app.updateTitle(index, newTitle);
+        app.updateTitle(currentId, newTitle);
     }
 
     return (
         <Grid container spacing={2}>
             <Grid item xs={4}>
-                <NoteListView app={app} idx={idx} onSelectNote={onSelectNote}/>
+                <NoteListView app={app} selected={currentId} onSelectNote={onSelectNote}/>
             </Grid>
             <Grid item xs={8}>
-                <NoteView app={app} idx={idx} onTitleChanged={handleTitleChange}/>
+                <NoteView app={app} selected={currentId} onTitleChanged={handleTitleChange}/>
             </Grid>
         </Grid>
     );
@@ -100,12 +103,14 @@ const App = (props: any) => {
 const NoteListView = (props: any) => {
     const app: NotebookView = props.app;
 
+    console.log(`NoteListView`);
+
     const handleNewNote = () => {
-        props.onSelectNote(-1);
+        props.onSelectNote('');
     }
 
-    const handleSelectNote = (index: number) => {
-        props.onSelectNote(index);
+    const handleSelectNote = (id: string) => {
+        props.onSelectNote(id);
     }
 
     return (
@@ -118,12 +123,12 @@ const NoteListView = (props: any) => {
             </Button>
             <List>
                 {
-                    app.notebook.notes.map((note, index) => {
+                    Array.from(app.notebook.notes).map(([id, note]) => {
                         return (
                             <ListItem
-                                key={'note-' + index}
+                                key={'note-' + id}
                                 onClick={() => {
-                                    handleSelectNote(index);
+                                    handleSelectNote(id);
                                 }}
                             >
                                 <ListItemButton>
@@ -139,28 +144,33 @@ const NoteListView = (props: any) => {
 }
 
 const NoteView = (props: any) => {
-    const app: NotebookView = props.app;
-    const index = props.idx;
+    const app = props.app;
+    const selectedNote = app.getNote(props.selected);
 
-    console.log(`index -> ${index}`);
-    let title_ = (index !== undefined && index !== -1)?
-        app.notebook.notes[index].title : 'Untitled';
+    const [title, setTitle] = useState('Untitled');
 
-    console.log(title_);
 
-    const [title, setTitle] = useState(title_);
+    useEffect(() => {
+        const selectedNote = app.getNote(props.selected);
+        const title = selectedNote?.title;
+        setTitle(title || 'Untitled');
 
-    if (index === -1) {
+    }, [props.selected])
+
+    console.log(`show note ${props.selected}`)
+
+    if (props.selected === undefined) {
+
+    } else if (props.selected === '') {
         app.clearEditor();
-    } else if (index > -1) {
-        app.renderEditor(index);
+    } else {
+        app.renderNote(selectedNote);
     }
 
     const handleChange = (event: any) => {
         const newTitle = event.target.value;
         setTitle(newTitle);
-        title_ = newTitle;
-        props.onTitleChanged(index, newTitle);
+        app.updateTitle(selectedNote?.id, newTitle);
     }
 
     return (
@@ -170,7 +180,7 @@ const NoteView = (props: any) => {
                 variant="outlined"
                 label="Title"
                 placeholder="Untitled"
-                value={title_}
+                value={title}
                 onChange={handleChange}
             />
             <div id={EDITOR_ID}/>
@@ -183,12 +193,12 @@ export class NotebookView {
     private editor;
     private nb: Notebook;
 
-    onGetNotes: (update: boolean) => any;
+    onGetNotes: (id: string) => any;
 
     constructor(private id: string) {
         this.nb = {
-            open: 0,
-            notes: []
+            opened: undefined,
+            notes: new Map()
         };
 
         this.editor = new EditorJS({
@@ -201,28 +211,40 @@ export class NotebookView {
                 this.fetchNotes();
             },
             onChange: (api: API, event: CustomEvent) => {
-                console.log('Now I know that Editor\'s content changed!', event)
+                console.log('!! content changed!', event)
             }
         });
 
         ReactDOM.render(<App app={this}/>,
             document.getElementById(this.id));
     }
-
+//
     fetchNotes() {
         post('/res', {
             method: 'notes',
             params: []
         }).then((notes: Note[]) => {
-            this.notebook = {
-                open: 0,
-                notes: notes.map((note => {return {
+            let isFirst = true;
+            notes.forEach(note => {
+                if (isFirst) {
+                    this.nb.opened = note.id;
+                    isFirst = false;
+                }
+                this.nb.notes.set(note.id, {
+                    id: note.id,
                     title: note.title,
-                    content: JSON.parse(note.content)}})),
-            };
+                    content: JSON.parse(note.content)
+                });
+            });
 
-            this?.onGetNotes(this.notebook.notes.length>0);
+            if (this.nb.opened !== undefined) {
+                this?.onGetNotes(this.nb.opened);
+            }
         });
+    }
+
+    getNote(id: string) {
+        return this.nb.notes.get(id);
     }
 
     get notebook() {
@@ -233,24 +255,36 @@ export class NotebookView {
         this.nb = notebook;
     }
 
-    updateNote(index: number, note: Note) {
-        this.nb.notes[index] = note;
+    updateNote(note: Note) {
+        const n = this.nb.notes.get(note.id);
+        if (n!==undefined) {
+            this.nb.notes.set(n.id, note);
+        }
     }
 
-    updateTitle(index: number, title: string) {
-        this.nb.notes[index].title = title;
+    updateTitle(id: string, title: string) {
+        const n = this.nb.notes.get(id);
+        if (n!==undefined) {
+            n.title = title;
+        }
     }
 
     addNote(note: Note) {
-        this.nb.notes.push(note);
+        const n = this.nb.notes.get(note.id);
+        if (n === undefined && note.id !== undefined) {
+            this.nb.notes.set(note.id, note);
+        }
     }
 
-    renderEditor(index: number) {
-        this.editor.render(this.nb.notes[index].content);
+    renderEditor(id: string) {
+        const n = this.nb.notes.get(id);
+        if (n!==undefined) {
+            this.editor.render(n.content);
+        }
     }
 
-    renderEditorContent(content: any) {
-        this.editor.render(content);
+    renderNote(note: Note) {
+        this.editor.render(note.content);
     }
 
     clearEditor() {
