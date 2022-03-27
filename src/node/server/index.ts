@@ -86,16 +86,22 @@ export async function startServer() {
             fn: async () => {
                 return neo4jClient.getNodeByLabel('EditorJSNote');
             }
+        },
+
+        saveNote: {
+            fn: async (note: any) => {
+                return neo4jClient.saveNode(note);
+            }
         }
     }
 
-    app.post('/res', async(req, res) => {
-        const params = req.body;
-        const method = params.method;
+    app.post('/res', async(req, res, next) => {
+        const body = req.body;
+        const method = body.method;
 
         //@ts-ignore
         const target = routes[method];
-        console.log(`request: ${method}`);
+        console.log(`request: ${method}, params: ${JSON.stringify(body.params)}`);
 
         if (target !== undefined) {
 
@@ -104,10 +110,11 @@ export async function startServer() {
                 return;
             }
 
-            const result = await target.fn(...params.params);
+            const result = await target.fn(...body.params);
             res.send(result);
+
         } else {
-            res.send('error');
+            next('error');
         }
     });
 

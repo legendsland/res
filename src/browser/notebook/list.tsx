@@ -7,9 +7,10 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+import CheckIcon from '@mui/icons-material/Check';
 import {createContext, forwardRef, useContext, useEffect, useRef, useState} from 'react';
 import {post} from '../server/request';
-import {Button, TextField} from '@mui/material';
+import {Button, IconButton, TextField} from '@mui/material';
 import {API} from '@editorjs/editorjs';
 const { v4: uuidv4 } = require('uuid');
 
@@ -24,7 +25,7 @@ interface Note {
     id: string,
     title: string,
     content: any,
-    draft?: boolean,
+    dirty: boolean,
 }
 
 interface Notebook {
@@ -33,65 +34,86 @@ interface Notebook {
 }
 
 const App = (props: any) => {
-
     const app: NotebookView = props.app;
 
     const [currentId, setCurrentId] = useState(undefined);
+    const [currentTitle, setcurrentTitle] = useState('Untitled');
+    const [notes, setNotes] = useState(new Map());
 
-    // get notelist from server
-    useEffect(() => {
-        app.onGetNotes = (id: string) => {
-            console.log(`setCurrentId ${id}`);
-            setCurrentId(id);
+    app.onGetNotes = (id: string) => {
+        console.log(`setCurrentId ${id}`);
+        setNotes(new Map(app.notebook.notes));
+        setCurrentId(id);
+    };
+
+    app.onNoteContentChange = async () => {
+        // save new note
+        if (currentId === '') {
+            const content = await app.getContent();
+            // has content
+            if (content.blocks.length > 0) {
+                const newId = uuidv4();
+                app.addNote({
+                    id: newId,
+                    title: currentTitle,
+                    content: content,
+                    dirty: true
+                });
+                setCurrentId(newId);
+            }
         }
-    }, []);
 
-    let title = 'Untitled';
+        // update
+        else {
+            const currentNode = app.getNote(currentId);
+            //TODO: only get updated content
+            const content = await app.getContent();
+            // has content
+            if (content.blocks.length > 0) {
+                app.updateNote({
+                    id: currentNode.id,
+                    title: currentNode.title,
+                    content: content,
+                    dirty: true
+                });
+            }
+        }
+
+        setNotes(new Map(app.notebook.notes));
+    };
+
+    app.onNoteSaved = (id: string) => {
+        setNotes(new Map(app.notebook.notes));
+    }
+
     const onSelectNote = async (selectedId: string) => {
         console.log(`${currentId} -> ${selectedId}`);
-
         if (selectedId !== currentId) {
-            // save new note
-            if (currentId === '') {
-                const content = await app.getContent();
-                // has content
-                if (content.blocks.length > 0) {
-                    app.addNote({
-                        id: uuidv4(),
-                        title: title,
-                        content: content});
-                    console.log(content);
-                }
-            }
-
-            // update
-            else {
-                const currentNode = app.getNote(currentId);
-                const content = await app.getContent();
-                // has content
-                if (content.blocks.length > 0) {
-                    app.updateNote({
-                        id: currentNode.id,
-                        title: currentNode.title,
-                        content: content
-                    });
-                }
-            }
-
             setCurrentId(selectedId);
         }
     }
 
+    const handleSaveNote = async (id: string) => {
+        app.saveNote(id);
+    }
+
     const handleChangedTitle = (newTitle: string) => {
-        console.log(`update title: ${title} -> ${newTitle}`);
-        title = newTitle;
+        console.log(`update title: ${setcurrentTitle} -> ${newTitle}`);
         app.updateTitle(currentId, newTitle);
+        setcurrentTitle(newTitle);
+        setNotes(new Map(app.notebook.notes));
     }
 
     return (
         <Grid container spacing={2}>
             <Grid item xs={4}>
-                <NoteListView app={app} selected={currentId} onSelectNote={onSelectNote}/>
+                <NoteListView
+                    app={app}
+                    notes={notes}
+                    selected={currentId}
+                    onSelectNote={onSelectNote}
+                    onSaveNote={handleSaveNote}
+                />
             </Grid>
             <Grid item xs={8}>
                 <NoteView app={app} selected={currentId} onChangedTitle={handleChangedTitle}/>
@@ -101,16 +123,23 @@ const App = (props: any) => {
 }
 
 const NoteListView = (props: any) => {
-    const app: NotebookView = props.app;
-
-    console.log(`NoteListView`);
+    const {
+        selected,
+        onSelectNote,
+        onSaveNote,
+        notes
+    } = props;
 
     const handleNewNote = () => {
-        props.onSelectNote('');
+        onSelectNote('');
     }
 
     const handleSelectNote = (id: string) => {
-        props.onSelectNote(id);
+        onSelectNote(id);
+    }
+
+    const handleSave = (id: string) => {
+        onSaveNote(id);
     }
 
     return (
@@ -123,17 +152,26 @@ const NoteListView = (props: any) => {
             </Button>
             <List>
                 {
-                    Array.from(app.notebook.notes).map(([id, note]) => {
+                    Array.from(notes).map(([id, note]) => {
                         return (
                             <ListItem
-                                key={'note-' + id}
+                                key={'note-' + note.id}
                                 onClick={() => {
-                                    handleSelectNote(id);
+                                    handleSelectNote(note.id);
                                 }}
                             >
                                 <ListItemButton>
                                     <ListItemText primary={note.title}/>
                                 </ListItemButton>
+                                {
+                                    note.dirty?
+                                        <IconButton
+                                            onClick={() => handleSave(note.id)}
+                                        >
+                                            <CheckIcon />
+                                        </IconButton>
+                                        : <></>
+                                }
                             </ListItem>
                         )
                     })
@@ -191,6 +229,8 @@ export class NotebookView {
     private nb: Notebook;
 
     onGetNotes: (id: string) => any;
+    onNoteContentChange: () => any;
+    onNoteSaved: (id: string) => any;
 
     constructor(private id: string) {
         this.nb = {
@@ -209,6 +249,7 @@ export class NotebookView {
             },
             onChange: (api: API, event: CustomEvent) => {
                 console.log('!! content changed!', event)
+                this?.onNoteContentChange();
             }
         });
 
@@ -230,7 +271,8 @@ export class NotebookView {
                 this.nb.notes.set(note.id, {
                     id: note.id,
                     title: note.title,
-                    content: JSON.parse(note.content)
+                    content: JSON.parse(note.content),
+                    dirty: false
                 });
             });
 
@@ -240,16 +282,36 @@ export class NotebookView {
         });
     }
 
+    saveNotes() {
+        this.nb.notes.forEach((node: Note, id: string) => {
+            this.saveNote(id);
+        });
+    }
+
+    saveNote(id: string) {
+        const n = this.nb.notes.get(id);
+        if (n!==undefined && n.dirty) {
+            post('/res', {
+                method: 'saveNote',
+                params: [n]
+            }).then((id_: string) => {
+                // success
+                if (id_ === id) {
+                    n.dirty = false;
+                    this?.onNoteSaved(id);
+                }
+            }).catch(err => {
+                console.log(err);
+            });
+        }
+    }
+
     getNote(id: string) {
         return this.nb.notes.get(id);
     }
 
     get notebook() {
         return this.nb;
-    }
-
-    set notebook(notebook: Notebook) {
-        this.nb = notebook;
     }
 
     updateNote(note: Note) {
@@ -263,6 +325,7 @@ export class NotebookView {
         const n = this.nb.notes.get(id);
         if (n!==undefined) {
             n.title = title;
+            n.dirty = true;
         }
     }
 
