@@ -46,7 +46,7 @@ const App = (props: any) => {
         }
     }, []);
 
-    let title = 'xxxxx';
+    let title = 'Untitled';
     const onSelectNote = async (selectedId: string) => {
         console.log(`${currentId} -> ${selectedId}`);
 
@@ -82,7 +82,7 @@ const App = (props: any) => {
         }
     }
 
-    const handleTitleChange = (newTitle: string) => {
+    const handleChangedTitle = (newTitle: string) => {
         console.log(`update title: ${title} -> ${newTitle}`);
         title = newTitle;
         app.updateTitle(currentId, newTitle);
@@ -94,7 +94,7 @@ const App = (props: any) => {
                 <NoteListView app={app} selected={currentId} onSelectNote={onSelectNote}/>
             </Grid>
             <Grid item xs={8}>
-                <NoteView app={app} selected={currentId} onTitleChanged={handleTitleChange}/>
+                <NoteView app={app} selected={currentId} onChangedTitle={handleChangedTitle}/>
             </Grid>
         </Grid>
     );
@@ -145,32 +145,29 @@ const NoteListView = (props: any) => {
 
 const NoteView = (props: any) => {
     const app = props.app;
-    const selectedNote = app.getNote(props.selected);
-
     const [title, setTitle] = useState('Untitled');
 
+    console.log(`show note ${props.selected}`)
 
     useEffect(() => {
         const selectedNote = app.getNote(props.selected);
         const title = selectedNote?.title;
         setTitle(title || 'Untitled');
 
+        if (props.selected === undefined) {
+
+        } else if (props.selected === '') {
+            app.clearEditor();
+        } else {
+            app.renderNote(selectedNote);
+        }
+
     }, [props.selected])
-
-    console.log(`show note ${props.selected}`)
-
-    if (props.selected === undefined) {
-
-    } else if (props.selected === '') {
-        app.clearEditor();
-    } else {
-        app.renderNote(selectedNote);
-    }
 
     const handleChange = (event: any) => {
         const newTitle = event.target.value;
         setTitle(newTitle);
-        app.updateTitle(selectedNote?.id, newTitle);
+        props.onChangedTitle(newTitle);
     }
 
     return (
