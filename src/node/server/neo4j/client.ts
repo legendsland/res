@@ -81,8 +81,11 @@ export class Neo4jClient {
 
             try {
                 await this.session.run(
-                    `MATCH (n {id: "${id}"})
-                    SET n += ${util.inspect(n)}
+                    `MERGE (n:EditorJSNote {id: "${id}"})
+                    ON CREATE
+                        SET n += ${util.inspect(n)}
+                    ON MATCH
+                        SET n += ${util.inspect(n)}
                     RETURN n`,
                 );
 
@@ -90,6 +93,21 @@ export class Neo4jClient {
                 console.log(e);
                 return Promise.resolve(e);
             }
+        }
+
+        return Promise.resolve(id);
+    }
+
+    async deleteNode(id: string): Promise<any> {
+        try {
+            await this.session.run(
+                `MATCH (n:EditorJSNote {id: "${id}"})
+                    DELETE n`,
+            );
+
+        } catch (e) {
+            console.log(e);
+            return Promise.resolve(e);
         }
 
         return Promise.resolve(id);

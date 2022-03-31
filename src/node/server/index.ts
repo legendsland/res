@@ -8,6 +8,7 @@ import * as cheerio from "cheerio";
 import {removeStopwords} from 'stopword';
 import {Neo4jClient, testConnection} from './neo4j/client';
 import {words} from './nlp';
+import {ProgramRunner} from './program';
 
 const bodyParser = require('body-parser');
 
@@ -28,6 +29,7 @@ export async function startServer() {
 
     let neo4jRunning = false;
     const neo4jClient = new Neo4jClient();
+    const programRunner = new ProgramRunner();
 
     // connection neo4j
     await neo4jClient.check();
@@ -91,6 +93,18 @@ export async function startServer() {
         saveNote: {
             fn: async (note: any) => {
                 return neo4jClient.saveNode(note);
+            }
+        },
+
+        deleteNote: {
+            fn: async (id: string) => {
+                return neo4jClient.deleteNode(id);
+            }
+        },
+
+        runGraph: {
+            fn: async (program: string) => {
+                return programRunner.run(program);
             }
         }
     }
