@@ -26,11 +26,19 @@ select texts from web and send to npl, then stored in db
 ### Editor
 1. Take notes on web
 2. Save notes to DB.
-3. Writing as programming
-4. Rich format: text, image, formulas, audio, video
+**3. Writing as programming: runnable**
+nlp is runnable because natural language is a statement, question, or plan ... nlp
+understand this input and process it and response directly or in the background.
+It's the same idea as Wolfram Language.
+--> needs to create a new language ...
+lisp like programming language
 
 vscode plugin or pure web?
 pure web first, then vscode extension.
+
+### Graph Editor
+As EditorJS plugin
+Connect low-code programming with GraphDB
 
 ### Database
 1. Design graph db - !important

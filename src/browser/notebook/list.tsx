@@ -13,6 +13,8 @@ import {createContext, forwardRef, useContext, useEffect, useRef, useState} from
 import {post} from '../server/request';
 import {Button, IconButton, TextField} from '@mui/material';
 import {API} from '@editorjs/editorjs';
+import {RunTune} from './block-tunes/run';
+import {Graph} from './block/graph';
 const { v4: uuidv4 } = require('uuid');
 
 const EditorJS = require('@editorjs/editorjs');
@@ -21,7 +23,7 @@ const EditorJSHeader = require('@editorjs/header');
 const EditorJSList = require ('@editorjs/list');
 
 const EDITOR_ID = 'notebook-editor-container';
-
+//
 interface Note {
     id: string,
     title: string,
@@ -253,9 +255,14 @@ export class NotebookView {
         this.editor = new EditorJS({
             holder: EDITOR_ID,
             tools: {
+                paragraph: {
+                    tunes: ['rungraph'],
+                },
+                graph: Graph,
                 header: EditorJSHeader,
-                list: EditorJSList
-            },
+                list: EditorJSList,
+                rungraph: RunTune
+            },//
             onReady: () => {
                 this.fetchNotes();
             },
