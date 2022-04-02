@@ -59,9 +59,9 @@ import {Neo4jClient} from './server/neo4j/client';
             describe: 'Start web server',
             type: 'string',
         })
-        .option('external', {
+        .option('embedded', {
             alias: 'e',
-            describe: 'Script as src link',
+            describe: 'Embed script code into html',
             boolean: true,
             default: false
         })
