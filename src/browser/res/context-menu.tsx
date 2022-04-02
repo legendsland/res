@@ -20,7 +20,7 @@ const ContextMenu = () => {
     } | null>(null);
 
     const handleContextMenu = (event: MouseEvent) => {
-        event.preventDefault();
+        // event.preventDefault();
         const text = window.getSelection().toString();
 
         if (text !== '') {

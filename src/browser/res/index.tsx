@@ -15,9 +15,6 @@ import Collapse from '@mui/material/Collapse';
 
 import Link from '@mui/material/Link';
 import {Toc} from './book';
-import {Nlp} from './nlp';
-import { Neo4j } from './neo4j';
-import { Request } from './request';
 import {addTextSelectHandle} from './context-menu';
 
 // check running in http server or opened in browser as local file.
@@ -116,40 +113,26 @@ const App = (props: any) => {
     );
 }
 
-// index
+// table of content, res/ index page
 //@ts-ignore
 if (window.res_config !== undefined) {
     //@ts-ignore
     const config: Config = window.res_config;
 
-    ReactDOM.render(<App config={config.data}></App>, document.querySelector(`#${config.containerId}`));
+    ReactDOM.render(<App config={config.data}/>,
+        document.querySelector(`#${config.containerId}`));
 }
 
-// other
+// readings
+// all scripts should be creating on-the-fly
+// do not modify html file directly, the only exception is dc.identifier
 else {
 
-
-    // create cotainers
-    $('body').prepend('<div id="req-container"></div>');
-
-    $('body').prepend('<div id="nlp-container"></div>');
-
-    $('body').prepend('<div id="neo4j-container"></div>');
-
+    // add right-click menu options
     $('body').prepend('<div id="context-menu-container"></div>');
     addTextSelectHandle('context-menu-container');
 
-    const request = new Request('req-container');
-    request.create();
-
+    // add toc
     const toc = new Toc();
     toc.generate();
-
-    const nlp = new Nlp('nlp-container');
-    nlp.create();
-
-    const neo4j = new Neo4j('nlp-container');
-    neo4j.create();
-
-
 }
