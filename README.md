@@ -32,6 +32,9 @@ understand this input and process it and response directly or in the background.
 It's the same idea as Wolfram Language.
 --> needs to create a new language ...
 lisp like programming language
+Basic idea is each natural language sentence is a coded statement: it calculates something or makes
+a side-effect.
+
 
 vscode plugin or pure web?
 pure web first, then vscode extension.
