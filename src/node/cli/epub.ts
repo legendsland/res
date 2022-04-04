@@ -1,6 +1,6 @@
 /**
  * Load and parse epub.
- * 
+ *
  */
 
 import * as path from "path";
@@ -34,7 +34,7 @@ export class Epub {
 
     constructor(input: string, output: string) {
         this.inputFile = path.resolve(input);
-        this.output = output; 
+        this.output = output;
     }
 
     async convert() {
@@ -83,15 +83,37 @@ export class Epub {
             title: this.$rootfile(TAG_DC_TITLE_ESC).text()
         };
 
+        // process spine
+        const itemrefs: string[] = [];
+        this.$rootfile('spine itemref[idref]').each((index: number, element: cheerio.TagElement) => {
+            itemrefs.push(element.attribs['idref']);
+        });
+
         const rootfileDir = path.parse(rootfilePath).dir;
-        const htmlFiles: string[] = [];
-        const htmlItems = this.$rootfile(`manifest > item[media-type="${MediaType.xhtml_xml}"]`)
-            .each((index: number, element: cheerio.TagElement) => 
-                htmlFiles.push(path.join(this.root, rootfileDir, element.attribs['href']))
+        const htmlFiles: {id: string, href: string }[] = [];
+        this.$rootfile(`manifest > item[media-type="${MediaType.xhtml_xml}"]`)
+            .each((index: number, element: cheerio.TagElement) =>
+                htmlFiles.push({
+                    id: element.attribs['id'],
+                    href: path.join(this.root, rootfileDir, element.attribs['href']),
+                })
         );
 
+        const sortedHtmlFiles = htmlFiles.sort((a, b) => {
+            const ai = itemrefs.indexOf(a.id);
+            const bi = itemrefs.indexOf(b.id);
+            if (ai === -1)
+                return -1;
+            else if (bi === -1)
+                return 1;
+            else if (ai === bi)
+                return 0;
+            else
+                return  ai < bi? -1: 1;
+        }).map((a) => a.href);
+
         // merge these files
-        const html = this.mergeAll(head, htmlFiles);
+        const html = this.mergeAll(head, sortedHtmlFiles);
 
         writeFileSync(this.outputFile, html);
 
@@ -117,7 +139,7 @@ export class Epub {
 
         $('a[href]').each((index: number, element: cheerio.TagElement) => {
             const href = element.attribs['href'];
-            
+
             // anchors
             if (!href.startsWith('http')) {
                 let newHref = '#';
