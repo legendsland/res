@@ -195,10 +195,14 @@ export class Epub {
     private genBase64Image(dir: string, attr: string, elem: cheerio.TagElement) {
         const val = elem.attribs[attr];
         // console.log(attr + ': ' + val);
-        if ( val !== undefined && !val.startsWith('data:image/')) {
+        //TODO: fetch images from remote
+        if ( val !== undefined && !val.startsWith('data:image/') && !val.startsWith('http')) {
             const ext = path.parse(val).ext.substring(1);
             const prefix = `data:image/${ext};base64,`;
-            elem.attribs[attr] = prefix + readFileSync(path.join(dir, val), {encoding: 'base64'});
+            const file = path.join(dir, val);
+            if(fs.existsSync(file)) {
+                elem.attribs[attr] = prefix + readFileSync(file, {encoding: 'base64'});
+            }
         }
     }
 
