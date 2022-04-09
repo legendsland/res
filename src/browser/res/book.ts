@@ -42,10 +42,12 @@ export class Toc {
             }
         });
 
-        const tocHtml = toc.entries.map((entry) => 
-            `<li class="res-toc-${entry.tag}"><a href="#${entry.id}">${entry.text}</a></li>`
-        )
-        .reduce((prev, curr) => `${prev}\n${curr}`);
+        let tocHtml = '';
+        if (toc.entries.length > 0) {
+            tocHtml = toc.entries.map((entry) =>
+                `<li class="res-toc-${entry.tag}"><a href="#${entry.id}">${entry.text}</a></li>`
+            ).reduce((prev, curr) => `${prev}\n${curr}`);
+        }
 
         $('body').prepend(`
         <div id="res-toc-container">
@@ -66,7 +68,7 @@ export class Toc {
         $('#res-toc-content').on('mouseenter', function () {
             $(this).removeClass('transparent');
         });
-    
+
         $('#res-toc-content').on('mouseleave', function () {
             $(this).addClass('transparent');
         });
