@@ -3,11 +3,11 @@
  *
  */
 
-import * as path from "path";
-import cheerio from "cheerio";
+import * as path from 'path';
+import cheerio from 'cheerio';
 import * as fs from 'fs';
-import { readFileSync, writeFileSync, lstatSync } from "fs";
-import * as extract from "extract-zip";
+import {lstatSync, readFileSync, writeFileSync} from 'fs';
+import * as extract from 'extract-zip';
 
 const PATH_CONTAINER = 'META-INF/container.xml';
 const TAG_ROOTFILE = 'rootfile';
@@ -125,16 +125,36 @@ export class Epub {
 
     private parse(filename: string) {
         const dir = path.parse(filename).dir;
-        const $ = cheerio.load(readFileSync(filename));
+        const $ = cheerio.load(
+            readFileSync(filename),
+            {
+                xmlMode: true,
+        });
 
         // this file's relative path to root
         const rel = path.relative(this.root, filename);
         // console.log(rel);
 
+        // duplicate <a name='..'> to <a id='..'>
+        $('a[name]').each((index: number, element: cheerio.TagElement) => {
+            const id = element.attribs['id'];
+            if (id === undefined) {
+                element.attribs['id'] = element.attribs['name'];
+            }
+        });
+
         // update id in a single doc
         $('[id]').each((index: number, element: cheerio.TagElement) => {
             const newId = `${rel}.${element.attribs['id']}`;
             element.attribs['id'] = newId;
+            const children = $(element).children().length;
+
+            // workaround: <a id='xxx'/>contents
+            // is parsed incorrect to
+            // <a id='xxx'>contents</a>
+            if (children === 0) {
+                $(element).append('<div></div>');
+            }
         });
 
         $('a[href]').each((index: number, element: cheerio.TagElement) => {
