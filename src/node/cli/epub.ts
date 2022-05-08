@@ -131,6 +131,14 @@ export class Epub {
         const rel = path.relative(this.root, filename);
         // console.log(rel);
 
+        // duplicate <a name='..'> to <a id='..'>
+        $('a[name]').each((index: number, element: cheerio.TagElement) => {
+            const id = element.attribs['id'];
+            if (id === undefined) {
+                element.attribs['id'] = element.attribs['name'];
+            }
+        });
+
         // update id in a single doc
         $('[id]').each((index: number, element: cheerio.TagElement) => {
             const newId = `${rel}.${element.attribs['id']}`;
