@@ -59,7 +59,7 @@ export class Epub {
 
         } else {
             ////
-            console.log('unknow type');
+            console.log('unknown type');
             process.exit(-1);
         }
 
@@ -145,16 +145,15 @@ export class Epub {
 
         // update id in a single doc
         $('[id]').each((index: number, element: cheerio.TagElement) => {
-            const newId = `${rel}.${element.attribs['id']}`;
-            element.attribs['id'] = newId;
+            element.attribs['id'] = `${rel}.${element.attribs['id']}`;
             const children = $(element).children().length;
 
             // workaround: <a id='xxx'/>contents
             // is parsed incorrect to
             // <a id='xxx'>contents</a>
-            if (children === 0) {
-                $(element).append('<div></div>');
-            }
+            // if (children === 0) {
+            //     $(element).append('<div></div>');
+            // }
         });
 
         $('a[href]').each((index: number, element: cheerio.TagElement) => {
@@ -269,7 +268,7 @@ ${Array.from(html.styles).join('</style>\n<style>\n')}
         return $.html();
     }
 
-    // embeb svg, css, javascript, images
+    // embed svg, css, javascript, images
     private fullname(name: string) {
         return path.join(this.root, name);
     }

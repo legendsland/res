@@ -59,25 +59,18 @@ export class Toc {
         $('#res-toc-control').on('click', (event) => {
             this.toggle('res-toc-content');
             event.stopPropagation();
-        });
-
-        $('#res-toc-content').on('click', (event) => {
-            event.stopPropagation();
-        });
-
-        $('#res-toc-content').on('mouseenter', function () {
+        })
+        .on('mouseenter', function () {
             $(this).removeClass('transparent');
-        });
-
-        $('#res-toc-content').on('mouseleave', function () {
+        })
+        .on('mouseleave', function () {
             $(this).addClass('transparent');
-        });
+        })
+        .hide();
 
         $(window).on('click', (event) => {
             $('#res-toc-content').hide();
         });
-
-        $('#res-toc-content').hide();
     }
 
     private toggle(id: string) {
