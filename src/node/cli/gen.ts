@@ -17,6 +17,14 @@ export function createIndex() {
     <head>
         <meta charset="utf-8" />
         <title>Res</title>
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WP965D476X"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-WP965D476X');
+    </script>
     </head>
     <body>
     <div id="${config.containerId}"></div>
