@@ -9,20 +9,99 @@ const TOKEN = keys.h.token;
 
 export async function fetch() {
 
-    const {body, headers} = await got.get(`${api.links.search.url}?user=acct:zhy@hypothes.is`, {
-        
-        headers: {
-            Accept: 'application/vnd.hypothesis.v1+json',
-            Authorization: `Bearer ${TOKEN}`
-        }
+   // updateUri('lcqwfNxXEeydPwP03KX9Hw',
+   //     'A Note on a Standard Strategy for Developing Loop Invariants and Loops',
+   //     'http://localhost:3000/res/res/cs/paper/1982%20A%20Note%20on%20a%20Standard%20Strategy%20for%20Developing%20Loop%20Invariants%20and%20Loops.Gries.pdf');
 
-    });
-
-    console.log(headers);
-    console.log(body);
 }
 
-const api = 
+async function fetchAll() {
+
+   const {body, headers} = await got.get(`${api.links.search.url}?user=acct:zhy@hypothes.is`, {
+
+      headers: {
+         Accept: 'application/vnd.hypothesis.v1+json',
+         Authorization: `Bearer ${TOKEN}`
+      }
+
+   });
+
+   console.log(headers);
+   console.log(body);
+}
+
+export async function fetchOne(id: string) {
+
+   const url = api.links.annotation.read.url.replace(/:id/g, id);
+
+   console.log(url);
+   const {body, headers} = await got.get(`${url}?user=acct:zhy@hypothes.is`, {
+
+      headers: {
+         Accept: 'application/vnd.hypothesis.v1+json',
+         Authorization: `Bearer ${TOKEN}`
+      }
+
+   });
+
+   console.log(headers);
+   console.log(body);
+}
+
+// needs to fetch and modify
+export async function updateUri(id: string, title: string, uri: string) {
+
+   const ann = {
+      id: id,
+      uri: uri,
+      target: [
+          {
+             source: uri,
+             selector: [
+                {
+                   end: 406,
+                   type: "TextPositionSelector",
+                   start: 297
+                },
+                {
+                   type: "TextQuoteSelector",
+                   exact: "A by-now-standard strategy for developing a loop invariant and loop was developedin [l] and explained in [2].",
+                   prefix: "1982Revised March 1983Abstract. ",
+                   suffix: " Nevertheless, its use still pos"
+                }
+             ]
+          }
+      ],
+      document: {
+         title: [
+            title
+         ]
+      },
+      links: {
+         incontext: 'https://hyp.is/' + id + '/' + uri.substring('http://'.length)
+      }
+   }
+
+   const url = api.links.annotation.update.url.replace(/:id/g, ann.id);
+
+   console.log(url);
+   console.log(JSON.stringify(ann));
+   const {body, headers} = await got.patch(`${url}?user=acct:zhy@hypothes.is`, {
+
+      headers: {
+         Accept: 'application/vnd.hypothesis.v1+json',
+         Authorization: `Bearer ${TOKEN}`
+      },
+
+      json: ann
+
+   });
+
+   console.log(headers);
+   console.log(body);
+}
+
+const api =
 {
     "links":{
        "annotation":{
