@@ -6,7 +6,7 @@
 import * as path from 'path';
 import cheerio from 'cheerio';
 import * as fs from 'fs';
-import {lstatSync, readFileSync, writeFileSync} from 'fs';
+import {existsSync, lstatSync, readFileSync, writeFileSync} from 'fs';
 import * as extract from 'extract-zip';
 
 const PATH_CONTAINER = 'META-INF/container.xml';
@@ -230,7 +230,10 @@ export class Epub {
         const f1 = this.parse(file1);
 
         f1.styles.forEach((elem: cheerio.TagElement, href: string) => {
-            html.styles.add(readFileSync(path.join(this.root, href)).toString());
+            const file = path.join(this.root, href);
+            if (fs.existsSync(file)) {
+                html.styles.add(readFileSync(file).toString());
+            }
         });
 
         html.body += f1.body;
