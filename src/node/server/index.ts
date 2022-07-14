@@ -48,6 +48,23 @@ export async function startServer() {
         res.sendFile('/res/dist/notebook/index.html', {root: `${root}`});//
     });
 
+    // google programmablesearchengine
+    app.get('/search', (req, res) => {
+        res.sendFile('/res/dist/search/index.html', {root: `${root}`});//
+    });
+
+    app.get('/search/gcse-a47d2a20d46db4877.html', (req, res) => {
+        res.sendFile('/res/dist/search/gcse-a47d2a20d46db4877.html', {root: `${root}`});//
+    });
+
+    app.get('/search/gcse-97c555b677d12465f.html', (req, res) => {
+        res.sendFile('/res/dist/search/gcse-97c555b677d12465f.html', {root: `${root}`});//
+    });
+
+    app.get('/search/gcse-a4690bf98adbc4c10.html', (req, res) => {
+        res.sendFile('/res/dist/search/gcse-a4690bf98adbc4c10.html', {root: `${root}`});//
+    });
+
     const routes = {
         reqlist: {
             fn: () => {
