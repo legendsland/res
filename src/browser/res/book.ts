@@ -66,7 +66,8 @@ export class Toc {
         .on('mouseleave', function () {
             $(this).addClass('transparent');
         })
-        .hide();
+
+        $('#res-toc-content').hide();
 
         $(window).on('click', (event) => {
             $('#res-toc-content').hide();
