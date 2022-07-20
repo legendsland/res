@@ -87,20 +87,22 @@ export async function decorate(file: string, embedded: boolean, output: string) 
         if ( $style.length !== 0 ) {
             $style.remove();
         }
-        const styleContent = fs.readFileSync('src/resources/book.css').toString();
-        $('head').append(`<style id="${STYLE_ELEM_ID}" type="text/css">${styleContent}</style>\n`);
-
+//<meta name="dc.identifier" content="res/6287b00253a4b52566edbef59f7ba7c1050ed0a7">
         const $script = $(`#${SCRIPT_ELEM_ID}`);
         if ( $script.length !== 0 ) {
             $script.remove();
         }
 
         if (embedded) {
-            //embed
+            const styleContent = fs.readFileSync('dist/res/style.css').toString();
+            $('head').append(`<style id="${STYLE_ELEM_ID}">${styleContent}</style>\n`);
+
             const scriptContent = fs.readFileSync('dist/res/main.js').toString();
             $('html').append(`<script id="${SCRIPT_ELEM_ID}" type="text/javascript">${scriptContent}</script>\n`);
         } else {
-            // link, for debug
+            // link, easy for updating
+            $('head').append(`<link id="${STYLE_ELEM_ID}" rel="stylesheet" href="/res/dist/res/style.css" type="text/css"/>\n`);
+
             $('html').append(`<script id="${SCRIPT_ELEM_ID}" src="/res/dist/res/main.js" type="text/javascript"></script>\n`);
         }
 

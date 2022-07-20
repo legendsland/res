@@ -244,10 +244,11 @@ export class Epub {
     private mergeAll(head: htmlHead, files: string[]): string {
         const $ = cheerio.load(`<!DOCTYPE html>
 <html>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 </head>
 <body>
+<div id="book-container"></div>
 </body>
 </html>`);
 
@@ -266,7 +267,7 @@ export class Epub {
 ${Array.from(html.styles).join('</style>\n<style>\n')}
 </style>\n`);
 
-        $('body').append(`${html.body}`);
+        $('#book-container').append(`${html.body}`);
 
         return $.html();
     }
