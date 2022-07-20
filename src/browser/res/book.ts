@@ -15,6 +15,15 @@ interface TocContent {
     entries: TocEntry[];
 }
 
+class LinkTree {
+
+    add(id: string) {
+
+    }
+
+
+}
+
 export class Toc {
 
     generate() {
@@ -22,6 +31,19 @@ export class Toc {
         const toc: TocContent = {
             entries: []
         };
+
+        // get all internal links and organize them in a tree-like structure
+        // display at most five layers as a table of content.
+
+        // const links = new LinkTree();
+        //
+        // $('a[href]').each((index: number, elem: HTMLElement) => {
+        //     const href: string = $(elem).prop('href');
+        //     if (href.charAt(0) === '#') {
+        //         const id = href.substring(1);
+        //         links.add(id);
+        //     }
+        // });
 
         $('[id]').each((index: number, element: HTMLElement) => {
             const id = $(element).prop('id');

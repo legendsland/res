@@ -1,6 +1,5 @@
 /**
- * Load and parse epub.
- *
+ * Load, parse epub file and convert it to html.
  */
 
 import * as path from 'path';
@@ -64,7 +63,7 @@ export class Epub {
         }
 
         this.$container = cheerio.load(
-            readFileSync(this.fullname(PATH_CONTAINER)),
+            readFileSync(this.fullname(PATH_CONTAINER), {encoding: 'utf8'}),
             {
                 xmlMode: true
             }
@@ -73,14 +72,15 @@ export class Epub {
         const rootfilePath = this.$container(TAG_ROOTFILE).attr('full-path');
 
         this.$rootfile = cheerio.load(
-            readFileSync(this.fullname(rootfilePath)),
+            readFileSync(this.fullname(rootfilePath), {encoding: 'utf8'}),
             {
                 xmlMode: true
             }
         );
 
+        // use filename as title
         const head: htmlHead = {
-            title: this.$rootfile(TAG_DC_TITLE_ESC).text()
+            title: path.basename(this.outputFile, '.html')
         };
 
         // process spine
@@ -115,7 +115,7 @@ export class Epub {
         // merge these files
         const html = this.mergeAll(head, sortedHtmlFiles);
 
-        writeFileSync(this.outputFile, html);
+        writeFileSync(this.outputFile, html, {encoding: 'utf8'});
 
         // delete tmp
         if (this.extractDir !== undefined) {
@@ -126,7 +126,7 @@ export class Epub {
     private parse(filename: string) {
         const dir = path.parse(filename).dir;
         const $ = cheerio.load(
-            readFileSync(filename),
+            readFileSync(filename, {encoding: 'utf8'}),
             {
                 xmlMode: true,
         });
@@ -177,7 +177,6 @@ export class Epub {
                         const fileRel = path.relative(this.root, path.join(dir, parts[0]));
                         newHref = `#${fileRel}.${parts[1]}`;
                     }
-
                 }
 
                 element.attribs['href'] = newHref;
@@ -232,11 +231,11 @@ export class Epub {
         f1.styles.forEach((elem: cheerio.TagElement, href: string) => {
             const file = path.join(this.root, href);
             if (fs.existsSync(file)) {
-                html.styles.add(readFileSync(file).toString());
+                html.styles.add(readFileSync(file, {encoding: 'utf8'}).toString());
             }
         });
 
-        html.body += f1.body;
+        html.body.append(f1.body);
 
         return html;
     }
@@ -256,7 +255,7 @@ export class Epub {
 
         const html: any = {
             styles: new Set<string>(),
-            body: ''
+            body: $('#book-container')
         };
 
         for(let i=0; i<files.length; ++i) {
@@ -266,8 +265,6 @@ export class Epub {
         $('head').append(`<style>
 ${Array.from(html.styles).join('</style>\n<style>\n')}
 </style>\n`);
-
-        $('#book-container').append(`${html.body}`);
 
         return $.html();
     }
