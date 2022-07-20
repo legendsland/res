@@ -49,17 +49,17 @@ const config = {
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
     },
-    // plugins: [
-    //     new CopyPlugin({
-    //         patterns: [
-    //             {
-    //                 context: `${staticSrcPath}`,
-    //                 from: `**/*`,
-    //                 to: `${staticDestPath}`
-    //             },
-    //         ],
-    //     }),
-    // ],
+    plugins: [
+        new CopyPlugin({
+            patterns: [
+                {
+                    context: `${staticSrcPath}`,
+                    from: `**/*`,
+                    to: `${staticDestPath}`
+                },
+            ],
+        }),
+    ],
 };
 
 module.exports = () => {

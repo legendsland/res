@@ -17,6 +17,7 @@ export function createIndex() {
     <head>
         <meta charset="utf-8" />
         <title>Res</title>
+        <link rel="stylesheet" href="/res/dist/res/style.css" />
         <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-WP965D476X"></script>
     <script>
