@@ -7,6 +7,8 @@ import cheerio from 'cheerio';
 import * as fs from 'fs';
 import {existsSync, lstatSync, readFileSync, writeFileSync} from 'fs';
 import * as extract from 'extract-zip';
+import * as $ from 'jquery';
+import {Htmls} from './htmls';
 
 const PATH_CONTAINER = 'META-INF/container.xml';
 const TAG_ROOTFILE = 'rootfile';
@@ -15,7 +17,8 @@ const TAG_DC_IDENTIFIER_ESC = 'dc\\:identifier';
 
 const enum MediaType {
     xhtml_xml = "application/xhtml+xml",
-};
+    html = "text/html",
+}
 
 interface htmlHead {
     title: string
@@ -26,12 +29,14 @@ export class Epub {
     private $container: cheerio.Root;
     private $rootfile: cheerio.Root;
     private inputFile: string;
+    private outputFile: string
     private output: string;
-    private outputFile: string;
     private root: string;
     private extractDir: string;
+    private isEpub: boolean;
 
     constructor(input: string, output: string) {
+        this.isEpub = false;
         this.inputFile = path.resolve(input);
         this.output = output;
     }
@@ -40,22 +45,23 @@ export class Epub {
 
         const isDir = lstatSync(this.inputFile).isDirectory();
         if (isDir) {
-            this.root = this.inputFile;
-            this.outputFile = this.output? this.output : './out.html';
 
-            if (!fs.existsSync(this.fullname(PATH_CONTAINER))) {
-                console.log('invalid epub directory');
-                process.exit(-1);
-            }
+            // const outputFile = this.output?
+            //     this.output : this.inputFile + '.html';
+            //
+            // const htmls = new Htmls(this.inputFile, outputFile);
+            // return htmls.convert();
+
+            this.root = this.inputFile;
+            this.outputFile = this.output? this.output : this.inputFile + '.html';
 
         } else if (this.inputFile.endsWith('.epub')) {
             //unzip to tmp
             this.extractDir = '/tmp/res-epub';
             await extract(this.inputFile, {dir: this.extractDir});
             this.root = this.extractDir;
-
             this.outputFile = this.output? this.output : this.inputFile.substring(0, this.inputFile.length-5) + '.html';
-
+            this.isEpub = true;
         } else {
             ////
             console.log('unknown type');
@@ -91,7 +97,8 @@ export class Epub {
 
         const rootfileDir = path.parse(rootfilePath).dir;
         const htmlFiles: {id: string, href: string }[] = [];
-        this.$rootfile(`manifest > item[media-type="${MediaType.xhtml_xml}"]`)
+        this.$rootfile(`manifest > item[media-type="${MediaType.xhtml_xml}"]
+, manifest > item[media-type="${MediaType.html}"]`)
             .each((index: number, element: cheerio.TagElement) =>
                 htmlFiles.push({
                     id: element.attribs['id'],
@@ -129,6 +136,7 @@ export class Epub {
             readFileSync(filename, {encoding: 'utf8'}),
             {
                 xmlMode: true,
+                decodeEntities: false
         });
 
         // this file's relative path to root
@@ -186,10 +194,21 @@ export class Epub {
 
         // embed css
         const styles = new Map<string, cheerio.TagElement>();
+        let inlineStyles = '';
+        $('style, link[type="text/css"]').each((index: number, element: cheerio.TagElement) => {
+            const tag = $(element).prop("tagName").toLowerCase();
 
-        $('link[type="text/css"]').each((index: number, element: cheerio.TagElement) => {
-            const url = path.relative(this.root, path.join(dir, element.attribs['href']));
-            styles.set(url, element);
+            // external style file
+            if (tag === 'link') {
+                const url = path.relative(this.root, path.join(dir, element.attribs['href']));
+                styles.set(url, element);
+            }
+
+            // inlined styles
+            else {
+                inlineStyles += $(element).text();
+                inlineStyles += '\n';
+            }
         });
 
         let attrs = '';
@@ -206,7 +225,8 @@ export class Epub {
 
         return {
             styles: styles,
-            body: `<div id=${rel}><div ${attrs}>\n${$('body').html()}</div></div>\n`,
+            inlineStyles: inlineStyles,
+            body: `<div id="${rel}"><div ${attrs}>\n${$('body').html()}</div></div>\n`,
         }
     }
 
@@ -235,6 +255,7 @@ export class Epub {
             }
         });
 
+        html.styles.add(f1.inlineStyles);
         html.body.append(f1.body);
 
         return html;
@@ -248,6 +269,7 @@ export class Epub {
 </head>
 <body>
 <div id="book-container"></div>
+<div id="html-container"></div>
 </body>
 </html>`);
 
@@ -255,7 +277,7 @@ export class Epub {
 
         const html: any = {
             styles: new Set<string>(),
-            body: $('#book-container')
+            body: this.isEpub? $('#book-container') : $('#html-container')
         };
 
         for(let i=0; i<files.length; ++i) {
