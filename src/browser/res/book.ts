@@ -143,8 +143,9 @@ export class Toc {
                 .text()
             ;
 
+            // console.log(text);
             // too long, it may be text, not title
-            if (text.length < 32
+            if (text.length < 64
                 && text !== ''
                 && text !== preText) {
                 toc.entries.push({
@@ -161,7 +162,8 @@ export class Toc {
                 || tag === 'h4'
             ) {
                 const text2 = $(element).text().trim();
-                if (text2.length < 32
+                // console.log('---- ' + text2);
+                if (text2.length < 64
                     && text2 !== ''
                     && text2 !== text
                     && text2 !== preText) {
@@ -174,6 +176,8 @@ export class Toc {
                 }
             }
         });
+
+        // console.log(toc.entries);
 
         let tocHtml = '';
         if (toc.entries.length > 0) {
