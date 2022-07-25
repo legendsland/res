@@ -1,3 +1,5 @@
-import {Search} from './search';
+import {GcseSearch} from './gcse-search';
+import {QuerySearch} from './query';
 
-new Search('search-container');
+new GcseSearch('gcse-search-select');
+new QuerySearch('query-search-select');
