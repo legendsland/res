@@ -16,6 +16,7 @@ import Collapse from '@mui/material/Collapse';
 import Link from '@mui/material/Link';
 import {Toc} from './book';
 import {addTextSelectHandle} from './context-menu';
+import {Cli} from './cli';
 
 // check running in http server or opened in browser as local file.
 function env(): string {
@@ -136,3 +137,6 @@ else {
     const toc = new Toc();
     toc.generate();
 }
+
+//@ts-ignore
+global.cli = new Cli();
