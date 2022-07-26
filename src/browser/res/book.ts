@@ -187,36 +187,39 @@ export class Toc {
         }
 
         $('body').prepend(`
-        <div id="res-toc-container">
-            <button id="res-toc-control">TOC</button>
-            <div id="res-toc-content"><ul>\n${tocHtml}\n</ul></div>
-        </div>
-        `);
+<div id="res-toc-container">
+    <button id="res-toc-control">TOC</button>
+    <div id="res-toc-content"><ul>\n${tocHtml}\n</ul></div>
+</div>
+`);
 
         $('#res-toc-control').on('click', (event) => {
             this.toggle('res-toc-content');
             event.stopPropagation();
-        })
-        .on('mouseenter', function () {
+        });
+
+        $('#res-toc-content').on('mouseenter', function () {
             $(this).removeClass('transparent');
-        })
-        .on('mouseleave', function () {
+        }).on('mouseleave', function () {
             $(this).addClass('transparent');
-        })
+        }).on('click', function (event) {
+            event.stopPropagation();
+        }).hide();
 
-        $('#res-toc-content').hide();
-
-        $(window).on('click', (event) => {
+        $(window).on('click', function () {
             $('#res-toc-content').hide();
         });
     }
 
     private toggle(id: string) {
-        const hidden = $('#' + id).is(":hidden");
+        const $elem = $('#' + id);
+        const hidden = $elem.is(":hidden");
         if (hidden) {
-            $('#' + id).show();
+            $elem.removeClass('transparent');
+            $elem.show();
         } else {
-            $('#' + id).hide();
+            $elem.addClass('transparent');
+            $elem.hide();
         }
     }
 }

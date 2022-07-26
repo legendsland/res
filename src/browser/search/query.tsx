@@ -7,7 +7,9 @@ import {useState} from 'react';
 
 const queryUrls = new Map<string, string>([
     ['douban', 'https://www.douban.com/search?cat=1001'],
-    ['cnki', 'https://kns.cnki.net']
+    // ['cnki', 'https://kns.cnki.net']
+    ['libz', 'https://en.kr1lib.org/s/'],
+    ['libgen', 'https://libgen.is/search.php']
 ]);
 
 const query_engine_container_id = "query-search-container";
@@ -37,8 +39,11 @@ const App = (props: any) => {
                 label="Query Engine"
                 onChange={handleChange}
             >
-                <MenuItem value='douban'>Douban</MenuItem>
-                <MenuItem value='cnki'>CNKI</MenuItem>
+                {
+                    Array.from(queryUrls).map(([site, url]) => (
+                        <MenuItem value={site}>{site}</MenuItem>
+                    ))
+                }
             </Select>
         </FormControl>
     </div>
