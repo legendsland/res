@@ -126,6 +126,7 @@ export class Toc {
 
         // remove duplicated
         let preText = '';
+        const ignored = /\[(\d+|\*+)\]/g;  // notes, refs
         $('[id]').each((index: number, element: HTMLElement) => {
             const id = $(element).prop('id');
 
@@ -147,7 +148,8 @@ export class Toc {
             // too long, it may be text, not title
             if (text.length < 64
                 && text !== ''
-                && text !== preText) {
+                && text !== preText
+                && text.match(ignored) === null) {
                 toc.entries.push({
                     id: id,
                     tag: tag,
@@ -166,7 +168,8 @@ export class Toc {
                 if (text2.length < 64
                     && text2 !== ''
                     && text2 !== text
-                    && text2 !== preText) {
+                    && text2 !== preText
+                    && text.match(ignored) === null) {
                     toc.entries.push({
                         id: id,
                         tag: tag,
