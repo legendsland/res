@@ -7,7 +7,7 @@ import * as $ from 'jquery';
 
 interface TocEntry {
     id: string;
-    tag: string;
+    fs: number;
     text: string;
 }
 
@@ -129,20 +129,19 @@ export class Toc {
         const ignored = /\[(\d+|\*+)\]/g;  // notes, refs
         $('[id]').each((index: number, element: HTMLElement) => {
             const id = $(element).prop('id');
-
             const tag = $(element).prop("tagName").toLowerCase();
             // console.log(id + ':' + tag);
 
             // get first text node child of max font size
-            const text = $(element).find('*').contents()
+            const $text = $(element).find('*').contents()
                 .filter(function() {
                     return this.nodeType === 3
                         && $(this).text().trim() !== ''
-                    ;
+                        ;
                 })
-                .first()
-                .text()
-            ;
+                .first();
+
+            const text = $text.text();
 
             // console.log(text);
             // too long, it may be text, not title
@@ -150,9 +149,13 @@ export class Toc {
                 && text !== ''
                 && text !== preText
                 && text.match(ignored) === null) {
+
+                const fspx = $text.parent().css('font-size')
+                const fs = fspx.substring(0, fspx.length-'px'.length);
+
                 toc.entries.push({
                     id: id,
-                    tag: tag,
+                    fs: Number.parseInt(fs),
                     text: text,
                 });
                 preText = text;
@@ -169,10 +172,14 @@ export class Toc {
                     && text2 !== ''
                     && text2 !== text
                     && text2 !== preText
-                    && text.match(ignored) === null) {
+                    && text2.match(ignored) === null) {
+
+                    const fspx = $(element).css('font-size')
+                    const fs = fspx.substring(0, fspx.length-'px'.length);
+
                     toc.entries.push({
                         id: id,
-                        tag: tag,
+                        fs: Number.parseInt(fs),
                         text: text2,
                     });
                     preText = text2;
@@ -181,11 +188,20 @@ export class Toc {
         });
 
         // console.log(toc.entries);
+        const fonts = new Set<number>();
+        toc.entries.forEach(entry => {
+            fonts.add(entry.fs);
+        });
+
+        const fontsArray = Array.from(fonts);
+        toc.entries.forEach(entry => {
+            entry.fs = fontsArray.indexOf(entry.fs);
+        });
 
         let tocHtml = '';
         if (toc.entries.length > 0) {
             tocHtml = toc.entries.map((entry) =>
-                `<li class="res-toc-${entry.tag}"><a href="#${entry.id}">${entry.text}</a></li>`
+                `<li class="res-toc-fs-${entry.fs}"><a href="#${entry.id}">${entry.text}</a></li>`
             ).reduce((prev, curr) => `${prev}\n${curr}`);
         }
 

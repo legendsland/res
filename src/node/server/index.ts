@@ -10,6 +10,7 @@ import {Neo4jClient, testConnection} from './neo4j/client';
 import {words} from './nlp';
 import {ProgramRunner} from './program';
 
+const cors = require('cors');
 const bodyParser = require('body-parser');
 
 const nlp = require('compromise');
@@ -23,6 +24,7 @@ export async function startServer() {
     const babel = path.join('/home/zy/ws/src/prj/babel');
 
     const port = 3000
+    app.use(cors());
     app.use(express.static(root));
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({
