@@ -139,4 +139,4 @@ else {
 }
 
 //@ts-ignore
-global.cli = new Cli();
+global.x = new Cli();
