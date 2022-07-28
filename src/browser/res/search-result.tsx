@@ -57,7 +57,7 @@ const SearchResultView = (props: any) => {
                 onClick={handleClose}
             >
             </CloseIcon>
-            <div><span>{input}</span><span>&nbsp;</span>results: {results.length}</div>
+            <div><span>{input}</span><span>&nbsp;</span>Results: {results.length}, Spend: {props.spend}ms</div>
             <List
                 sx={{
                     textAlign: 'left',
@@ -108,7 +108,7 @@ export class SearchResultManager {
     ) {
     }
 
-    show(input: string, results: SearchResult[]) {
+    show(input: string, results: SearchResult[], spend: number) {
         const $container = $(`#${CONTAINER_ID}`);
         $container.remove(); // remove first
         $('body').append(`<div id="${CONTAINER_ID}"></div>`);
@@ -116,6 +116,7 @@ export class SearchResultManager {
             input={input}
             results={results}
             mgr={this}
+            spend={spend}
         />, $(`#${CONTAINER_ID}`)[0]);
     }
 

@@ -63,6 +63,7 @@ export class Cli {
         const re = new RegExp(str,"g");
         const searchResults: SearchResult[] = [];
 
+        const start = Date.now();
         this.texts.forEach((text, $elem) => {
             const original = text.original;
             const len = original.length;
@@ -72,7 +73,6 @@ export class Cli {
 
             let lastMatchedEnd = 0;
             let highlightText = '';
-
             Array.from(original.matchAll(re)).forEach(match => {
                 text.hasMatch = true;
                 const matchedLen = match[0].length;
@@ -93,15 +93,16 @@ export class Cli {
 
                 if (match.index !== 0) {
                     unmatched.push(original.substring(lastMatchedEnd, match.index));
+                } else {
+                    unmatched.push('');
                 }
+
                 lastMatchedEnd = matchedEnd;
 
                 spannedTexts.push(`<span class="book-search-matched">${match[0]}</span>`);
             });
 
-            if (lastMatchedEnd !== len) {
-                unmatched.push(original.substring(lastMatchedEnd));
-            }
+            unmatched.push(original.substring(lastMatchedEnd));
 
             spannedTexts.push(''); // last empty string
             unmatched.forEach((un, idx) => {
@@ -112,7 +113,7 @@ export class Cli {
             $elem.html(highlightText);
         });
 
-        this.searchResultMgr.show(str, searchResults);
+        this.searchResultMgr.show(str, searchResults, Date.now() - start);
     }
 
     c() {
