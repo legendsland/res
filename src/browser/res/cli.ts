@@ -6,6 +6,7 @@ import {SearchResult, SearchResultManager} from './search-result';
 
 interface MatchedText {
     original: string,
+    originalHtml: string;
     top: number,
     hasMatch: boolean
 }
@@ -23,7 +24,7 @@ export class Cli {
             // clean matched texts
             this.texts.forEach((matchedText, $elem) => {
                 if (matchedText.hasMatch) {
-                    $elem.html(matchedText.original);
+                    $elem.html(matchedText.originalHtml);
                     matchedText.hasMatch = false;
                 }
             });
@@ -51,6 +52,7 @@ export class Cli {
                 const top = elem.getBoundingClientRect().top + document.documentElement.scrollTop;
                 this.texts.set($elem, {
                     original: $elem.text(),
+                    originalHtml: $elem.html(),
                     top: top,
                     hasMatch: false
                 });
@@ -63,6 +65,7 @@ export class Cli {
         const re = new RegExp(str,"g");
         const searchResults: SearchResult[] = [];
 
+        const start = Date.now();
         this.texts.forEach((text, $elem) => {
             const original = text.original;
             const len = original.length;
@@ -72,7 +75,6 @@ export class Cli {
 
             let lastMatchedEnd = 0;
             let highlightText = '';
-
             Array.from(original.matchAll(re)).forEach(match => {
                 text.hasMatch = true;
                 const matchedLen = match[0].length;
@@ -91,28 +93,32 @@ export class Cli {
                     pos: text.top
                 });
 
+                // bug: other html are gone ...
                 if (match.index !== 0) {
                     unmatched.push(original.substring(lastMatchedEnd, match.index));
+                } else {
+                    unmatched.push('');
                 }
+
                 lastMatchedEnd = matchedEnd;
 
                 spannedTexts.push(`<span class="book-search-matched">${match[0]}</span>`);
             });
 
-            if (lastMatchedEnd !== len) {
+            if (text.hasMatch) {
                 unmatched.push(original.substring(lastMatchedEnd));
+
+                spannedTexts.push(''); // last empty string
+                unmatched.forEach((un, idx) => {
+                    highlightText += (un + spannedTexts[idx]);
+                });
+
+                // console.log(highlightText);
+                $elem.html(highlightText);
             }
-
-            spannedTexts.push(''); // last empty string
-            unmatched.forEach((un, idx) => {
-                highlightText += (un + spannedTexts[idx]);
-            });
-
-            // console.log(highlightText);
-            $elem.html(highlightText);
         });
 
-        this.searchResultMgr.show(str, searchResults);
+        this.searchResultMgr.show(str, searchResults, Date.now() - start);
     }
 
     c() {
