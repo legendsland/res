@@ -18,6 +18,8 @@ import {Toc} from './book';
 import {addTextSelectHandle} from './context-menu';
 import {Cli} from './cli';
 
+const pagemap = require('pagemap');
+
 // check running in http server or opened in browser as local file.
 function env(): string {
     const href = document.location.href;
@@ -130,8 +132,18 @@ if (window.res_config !== undefined) {
 else {
 
     // add right-click menu options
-    $('body').prepend('<div id="context-menu-container"></div>');
+    $('body')
+        .prepend('<div id="context-menu-container"></div>')
+        .prepend('<canvas id="res-pagemap"></canvas>')
+    ;
     addTextSelectHandle('context-menu-container');
+
+    // update minimap
+    pagemap($('#res-pagemap')[0], {
+        styles: {
+            '.book-search-matched': 'rgba(255,0,0,1)',
+        },
+    });
 
     // add toc
     const toc = new Toc();

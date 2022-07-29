@@ -12,6 +12,8 @@ import {Box, Collapse, Divider, ListItemText, Paper, Typography} from '@mui/mate
 import CloseIcon from '@mui/icons-material/Close';
 import {unmountComponentAtNode} from 'react-dom';
 
+const pagemap = require('pagemap');
+
 export interface SearchResult {
     title: string,
     text: string;
@@ -40,7 +42,6 @@ const SearchResultView = (props: any) => {
     };
 
     const handleClose = () => {
-        console.log('SearchResultView handleClose')
         const $elem = $(`#${CONTAINER_ID}`);
         unmountComponentAtNode($elem[0]);
         mgr.close();
@@ -57,11 +58,11 @@ const SearchResultView = (props: any) => {
                 onClick={handleClose}
             >
             </CloseIcon>
-            <div><span>{input}</span><span>&nbsp;</span>Results: {results.length}, Spend: {props.spend}ms</div>
+            <div><span>{input}</span><span>&nbsp;</span>Results: {results.length} in {props.spend}ms</div>
             <List
                 sx={{
                     textAlign: 'left',
-                    overflow: 'scroll',
+                    overflowY: 'scroll',
                     height: '80vh',
                 }}
             >
@@ -125,15 +126,3 @@ export class SearchResultManager {
         $(`#${CONTAINER_ID}`).remove();
     }
 }
-
-//
-// export function showSearchResults(input: string, results: SearchResult[]) {
-//     closeSearchResults(); // remove first
-//     $('body').append(`<div id="${CONTAINER_ID}"></div>`);
-//     ReactDOM.render(<SearchResultView input={input} results={results}/>, $(`#${CONTAINER_ID}`)[0]);
-// }
-//
-// export function closeSearchResults(dispose?: ()=>void) {
-//     // $(`#${CLOSE_ID}`).trigger('click');
-//     $(`#${CONTAINER_ID}`).remove();
-// }
