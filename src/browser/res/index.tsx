@@ -17,6 +17,8 @@ import Link from '@mui/material/Link';
 import {Toc} from './book';
 import {addTextSelectHandle} from './context-menu';
 import {Cli} from './cli';
+import {Shortcuts} from './shortcuts';
+import {CommandShortcut} from './command';
 
 const pagemap = require('pagemap');
 
@@ -116,6 +118,8 @@ const App = (props: any) => {
     );
 }
 
+const cli = new Cli();
+
 // table of content, res/ index page
 //@ts-ignore
 if (window.res_config !== undefined) {
@@ -130,9 +134,10 @@ if (window.res_config !== undefined) {
 // all scripts should be creating on-the-fly
 // do not modify html file directly, the only exception is dc.identifier
 else {
+    const $body = $('body');
 
     // add right-click menu options
-    $('body')
+    $body
         .prepend('<div id="context-menu-container"></div>')
         .prepend('<canvas id="res-pagemap"></canvas>')
     ;
@@ -148,7 +153,12 @@ else {
     // add toc
     const toc = new Toc();
     toc.generate();
+
+    //register keypress listener
+    const shortcuts = new Shortcuts();
+    shortcuts.add(new CommandShortcut(cli));
+    shortcuts.listen();
 }
 
 //@ts-ignore
-global.x = new Cli();
+global.x = cli;
