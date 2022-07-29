@@ -98,12 +98,12 @@ export async function decorate(file: string, embedded: boolean, output: string) 
             $('head').append(`<style id="${STYLE_ELEM_ID}">${styleContent}</style>\n`);
 
             const scriptContent = fs.readFileSync('dist/res/main.js').toString();
-            $('html').append(`<script id="${SCRIPT_ELEM_ID}" type="text/javascript">${scriptContent}</script>\n`);
+            $('body').append(`<script id="${SCRIPT_ELEM_ID}" type="text/javascript">${scriptContent}</script>\n`);
         } else {
             // link, easy for updating
             $('head').append(`<link id="${STYLE_ELEM_ID}" rel="stylesheet" href="/res/dist/res/style.css" type="text/css"/>\n`);
 
-            $('html').append(`<script id="${SCRIPT_ELEM_ID}" src="/res/dist/res/main.js" type="text/javascript"></script>\n`);
+            $('body').append(`<script id="${SCRIPT_ELEM_ID}" src="/res/dist/res/main.js" type="text/javascript"></script>\n`);
         }
 
         // copy if not the same file
