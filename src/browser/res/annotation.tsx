@@ -2,9 +2,14 @@ import * as $ from 'jquery';
 import * as _ from 'lodash';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import {useCallback, useEffect, useState} from 'react';
+import {Fragment, useCallback, useEffect, useState} from 'react';
 import {Db, Note} from '../../common/db';
 import {post} from '../server/request';
+
+type ViewEvent = {
+    name: string,
+    data: any
+}
 
 async function request(name: string, params: any[]) {
     return post('/res', {
@@ -134,18 +139,27 @@ export const AnnotationView  = (props: any) => {
     const islocal: boolean = props.islocal;
     const url = new URL(window.location.href);
 
-    const elem = $(note.selector.path)[0];
-    const top = elem.getBoundingClientRect().top + document.documentElement.scrollTop;
+    const annotatedElem = $(note.selector.path)[0];
+    const top = annotatedElem.getBoundingClientRect().top + document.documentElement.scrollTop;
     const zIndex = Math.floor(document.body.offsetHeight) - Math.floor(top);
 
     let originalText: string | undefined = undefined;
+
+    //@ts-ignore
+    window.handleClickMark = (target) => {
+        const prefix = 'res-ann-mark-';
+        const matched = $(target).attr('id')?.match(/res-ann-mark-[0-9]+/);
+        if (matched.length === 1) {
+            ann.show(parseInt(matched[0].substring(prefix.length)));
+        }
+    }
 
     const mark = () => {
         const $e = $(note.selector.path);
         originalText = $e.text();
         const selected = originalText.substring(note.selector.start, note.selector.end);
         const markedText = originalText.substring(0, note.selector.start)
-            + `<mark id="res-ann-mark-${idx}">${selected}</mark>`
+            + `<mark id="res-ann-mark-${idx}" onclick="handleClickMark(this)">${selected}</mark>`
             + originalText.substring(note.selector.end);
         $e.html(markedText);
     }
@@ -157,19 +171,26 @@ export const AnnotationView  = (props: any) => {
     }
 
     const [content, setContent] = useState(note.note);
-    const [del, setDel] = useState('none');
+    const [del, setDel] = useState('hidden');
 
     const handleChange = (e: any) => {
         debounceChange(url.pathname, note.id, e.target.value, (n: any) => note.note = n);
         setContent(e.target.value);
     }
 
-    const handleFocus = (e: any) => {
-        setDel('block');
+    const handleClick = (e: any) => {
+        // move to annotated text
+        annotatedElem.scrollIntoView({
+            block: 'center',
+        });
     }
 
-    const handleBlur = (e: any) => {
-        setDel('none');
+    const handleMouseEnter = (e: any) => {
+        setDel('visible');
+    }
+
+    const handleMouseLeave = (e: any) => {
+        setDel('hidden');
     }
 
     const handleDel = (e: any) => {
@@ -182,50 +203,95 @@ export const AnnotationView  = (props: any) => {
         })
     }
 
+    const blinkBorder = (index: number) => {
+        if (index === idx) {
+            const $elem = $(`#res-ann-${idx}`).parent();
+            $elem[0].scrollIntoView({
+                block: 'center',
+            });
+            $elem.css('outline', '1px red solid');
+            setTimeout(() => {
+                $elem.css('outline', 'none');
+            }, 300);
+        }
+    }
+
+    useEffect(() => {
+        ann.on((event: ViewEvent) => {
+            if (event.name === 'blink') {
+                blinkBorder(event.data.index);
+            }
+        });
+
+    }, [])
+
     return <div
         className='res-ann-a-container'
+        style={{
+            display: 'flex',
+            flexDirection: 'column',
+            backgroundColor: 'white',
+            margin: '10px',
+        }}
+        onClick={handleClick}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
     >
         <div
             id={`res-ann-${idx}`}
             className='res-ann'
             style={{
-                position: 'relative',
-                paddingTop: top,
-                zIndex: zIndex
+                width: '100%',
+                // marginRight: '5px',
+                border: 'hidden',
+                paddingLeft: '5px',
+                paddingRight: '5px',
             }}
         >
             {mark()}
-            <div
-                onFocus={handleFocus}
-                // onBlur={handleBlur}
-                >
-                <textarea
-                    className={`${note?.isnew? 'res-ann-new':''}`}
-                    style={{
-                        width: '100%',
-                        maxHeight: '200px',
-                        overflowY: 'scroll',
-                        resize: 'none',
-                        border: 0,
-                        backgroundColor: 'inherit',
-                        fontSize: 'x-small',
-                        textAlign: 'left',
-                    }}
-                    value={content}
-                    onChange={handleChange}
-                    readOnly={!islocal}
-                >
-                </textarea>
-                <div
-                    style={{
-                        display: del
-                    }}
-                >
-                    <i className="fa-solid fa-xmark"
-                       onClick={handleDel}
-                    ></i>
-                </div>
-            </div>
+            <p
+                style={{
+                    color: 'darkgray',
+                    fontSize: '12px',
+                    fontStyle: 'italic',
+                    paddingLeft: '2px',
+                    paddingRight: '10px',
+                    marginTop: 0,
+
+                    display: '-webkit-box',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    WebkitBoxOrient: 'vertical',
+                    WebkitLineClamp: 2,
+                }}
+            >
+                {note.selected}
+            </p>
+            <textarea
+                className={`${note?.isnew? 'res-ann-new':''}`}
+                style={{
+                    width: '97%',
+                    height: '100px',
+                    fontSize: '12px',
+                    resize: 'none',
+                    border: 0,
+                    textAlign: 'left',
+                }}
+                value={content}
+                onChange={handleChange}
+                readOnly={!islocal}
+            >
+            </textarea>
+        </div>
+        <div
+            style={{
+                //@ts-ignore
+                visibility: del
+            }}
+        >
+            <i className="fa-solid fa-xmark"
+               onClick={handleDel}
+            />
         </div>
     </div>
 }
@@ -236,33 +302,58 @@ export const AnnotationsView = (props: any) => {
     const [force, forceUpdate] = React.useReducer(x => x + 1, 0);
 
     useEffect(() => {
-        ann.on((event: any) => {
+        ann.on((event: ViewEvent) => {
             if (event.name === 'invalidation') {
                 forceUpdate();
+            } else if (event.name === 'show') {
+                toggle(true);
             }
         });
 
+        // hide
+        $('#res-ann-all').hide();
     }, [])
 
-    return <div
+    const handleClick = () => {
+        toggle();
+    }
+
+    const toggle = (show?: boolean) => {
+        if(show) {
+            $('#res-ann-all').show();
+        } else {
+            $('#res-ann-all').toggle();
+        }
+    }
+
+    return <Fragment
         key={force}
     >
-        {
-            ann?.notes.map((note, idx) => { return (
-                <AnnotationView
-                    ann={ann}
-                    note={note}
-                    idx={idx}
-                    islocal={ann.isLocal}
-                />
-            )})
-        }
-    </div>;
+        <button
+            onClick={handleClick}
+        >
+            Notes
+        </button>
+        <div
+            id={'res-ann-all'}
+        >
+            {
+                ann?.notes.map((note, idx) => { return (
+                    <AnnotationView
+                        ann={ann}
+                        note={note}
+                        idx={idx}
+                        islocal={ann.isLocal}
+                    />
+                )})
+            }
+        </div>
+    </Fragment>;
 }
 
 export class Ann {
     public notes: Note[];
-    private callback: (event: any) => void;
+    private callbacks: ((event: any) => void)[] = [];
     private path: string;
     private $container: JQuery;
     public isLocal: boolean;
@@ -295,7 +386,19 @@ export class Ann {
     }
 
     on(callback: any) {
-        this.callback = callback;
+        this.callbacks.push(callback);
+    }
+
+    show(index: number) {
+        this.callbacks.forEach((callback) => callback({
+            name: 'show'
+        }));
+        this.callbacks.forEach((callback) => callback({
+            name: 'blink',
+            data: {
+                index: index
+            }
+        }));
     }
 
     private textSelect() {
@@ -363,9 +466,9 @@ export class Ann {
         ]).then(() => {
             note.isnew = undefined;
             this.notes.push(note);
-            this.callback?.({
+            this.callbacks.forEach((callback) => callback({
                 name: 'invalidation'
-            });
+            }));
         });
     }
 
@@ -373,9 +476,9 @@ export class Ann {
         const idx = this.notes.findIndex(n => n.id === id);
         if (idx !== -1) {
             this.notes.splice(idx, 1);
-            this.callback?.({
+            this.callbacks.forEach((callback) => callback({
                 name: 'invalidation'
-            });
+            }));
         }
     }
 
