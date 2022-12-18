@@ -74,7 +74,7 @@ const TooltipView = (props: any) => {
                 <li
                     onClick={handleClick}
                 >
-                    <i className="fa-solid fa-plus"></i>
+                    <i className="fa-solid fa-plus"/>
                 </li>
             </ul>
         </div>
@@ -227,7 +227,6 @@ export const AnnotationView  = (props: any) => {
             backgroundColor: 'white',
             margin: '10px',
         }}
-        onClick={handleClick}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
     >
@@ -241,6 +240,7 @@ export const AnnotationView  = (props: any) => {
                 paddingLeft: '5px',
                 paddingRight: '5px',
             }}
+            onClick={handleClick}
         >
             {mark()}
             <p
