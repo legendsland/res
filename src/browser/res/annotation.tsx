@@ -5,6 +5,8 @@ import * as ReactDOM from 'react-dom';
 import {Fragment, useCallback, useEffect, useState} from 'react';
 import {Db, Note} from '../../common/db';
 import {post} from '../server/request';
+import Mark = require('mark.js');
+import {MarkOptions} from 'mark.js';
 
 type ViewEvent = {
     name: string,
@@ -143,31 +145,22 @@ export const AnnotationView  = (props: any) => {
     const top = annotatedElem.getBoundingClientRect().top + document.documentElement.scrollTop;
     const zIndex = Math.floor(document.body.offsetHeight) - Math.floor(top);
 
-    let originalText: string | undefined = undefined;
-
-    //@ts-ignore
-    window.handleClickMark = (target) => {
-        const prefix = 'res-ann-mark-';
-        const matched = $(target).attr('id')?.match(/res-ann-mark-[0-9]+/);
-        if (matched.length === 1) {
-            ann.show(parseInt(matched[0].substring(prefix.length)));
-        }
-    }
-
     const mark = () => {
-        const $e = $(note.selector.path);
-        originalText = $e.text();
-        const selected = originalText.substring(note.selector.start, note.selector.end);
-        const markedText = originalText.substring(0, note.selector.start)
-            + `<mark id="res-ann-mark-${idx}" onclick="handleClickMark(this)">${selected}</mark>`
-            + originalText.substring(note.selector.end);
-        $e.html(markedText);
+        // const mk = new Mark($(note.selector.path));
+
+        const mk = ann.mark(idx, note.selector.path);
+        mk.mark(note.selected, {
+            separateWordSearch: false,
+            // accuracy: 'exactly',
+            each: (elem) => {
+                $(elem).on('click', () => ann.show(idx))
+            }
+        });
     }
 
     const unmark = () => {
-        if (originalText !== undefined) {
-            $(note.selector.path).text(originalText);
-        }
+        ann.unmark(idx, {
+        });
     }
 
     const [content, setContent] = useState(note.note);
@@ -359,6 +352,7 @@ export class Ann {
     public isLocal: boolean;
     private tooltip: Tooltip;
 
+    marks: Map<number, Mark> = new Map<number, Mark>();
     constructor(
         private db_: Db
     ) {
@@ -399,6 +393,18 @@ export class Ann {
                 index: index
             }
         }));
+    }
+
+    mark(idx: number, selector: string): Mark {
+        const mk = new Mark($(selector)[0]);
+        this.marks.set(idx, mk);
+        return mk;
+    }
+
+    unmark(idx: number, options?: MarkOptions) {
+        const mk = this.marks.get(idx);
+        mk.unmark(options);
+        this.marks.delete(idx);
     }
 
     private textSelect() {
