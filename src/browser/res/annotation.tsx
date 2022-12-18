@@ -151,6 +151,7 @@ export const AnnotationView  = (props: any) => {
         const mk = ann.mark(idx, note.selector.path);
         mk.mark(note.selected, {
             separateWordSearch: false,
+            acrossElements: true,
             // accuracy: 'exactly',
             each: (elem) => {
                 $(elem).on('click', () => ann.show(idx))
