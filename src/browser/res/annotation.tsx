@@ -248,12 +248,14 @@ export const AnnotationView  = (props: any) => {
                     paddingLeft: '2px',
                     paddingRight: '10px',
                     marginTop: 0,
-
+                    marginBottom: 0,
                     display: '-webkit-box',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     WebkitBoxOrient: 'vertical',
                     WebkitLineClamp: 2,
+                    textIndent: 0,
+                    lineHeight: '13px',
                 }}
                 onClick={handleClick}
             >
@@ -264,11 +266,14 @@ export const AnnotationView  = (props: any) => {
             <textarea
                 style={{
                     width: '97%',
-                    height: '100px',
+                    // height: '100px',
+                    minHeight: '100px',
+                    maxHeight: '300px',
                     fontSize: '12px',
-                    resize: 'none',
+                    resize: 'vertical',
                     border: 0,
                     textAlign: 'left',
+                    marginBottom: '-10px'
                 }}
                 value={content}
                 onChange={handleChange}
@@ -278,6 +283,10 @@ export const AnnotationView  = (props: any) => {
 
             {/*tags*/}
             <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                }}
             >
                 <div
                     className={'res-ann-tags'}
@@ -307,33 +316,54 @@ export const AnnotationView  = (props: any) => {
                         )})
                     }
                 </div>
-                {islocal &&
-                    <textarea
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        marginTop: '-10px',
+                    }}
+                >
+                    {islocal &&
+                    <input
                         style={{
-                            width: '97%',
-                            height: '20px',
-                            resize: 'none',
+                            width: '50%',
+                            height: '18px',
+                            fontSize: '12px',
                             border: 0,
                             textAlign: 'left',
+                            paddingLeft: '5px',
                         }}
                         value={newTag}
                         onChange={handleChangeNewTag}
                         onBlur={handleNewTagBlur}
                         readOnly={!islocal}
+                        placeholder={'🏷'}
                     >
-                    </textarea>
-                }
+                    </input>
+                    }
+                    <div
+                        style={{
+                            width: '50%',
+                        }}
+                    >
+                        <div
+                            style={{
+                                //@ts-ignore
+                                visibility: del,
+                                height: '18px',
+                                fontSize: '14px',
+                                padding: 0,
+                                margin: 0,
+                                textAlign: 'right',
+                            }}
+                        >
+                            <i className="fa fa-solid fa-xmark"
+                               onClick={handleDel}
+                            />
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div
-            style={{
-                //@ts-ignore
-                visibility: del
-            }}
-        >
-            <i className="fa fa-solid fa-xmark"
-               onClick={handleDel}
-            />
         </div>
     </div>
 }
@@ -375,7 +405,7 @@ export const AnnotationsView = (props: any) => {
         <button
             onClick={handleClick}
         >
-            Notes
+            Notes ({ann.notes.length})
         </button>
         <div
             id={'res-ann-all'}
@@ -570,9 +600,9 @@ export class Ann {
         this.tooltip.hide();
     }
 
-    private showTooltip(ann: Note, x: number, y: number) {
+    private showTooltip(n: Note, x: number, y: number) {
         // get mouse position
-        this.tooltip.show(x, y, ann);
+        this.tooltip.show(x, y, n);
     }
 
     debouncedRequest = pDebounce(this.request, 2000).bind(this);
