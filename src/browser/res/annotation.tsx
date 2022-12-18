@@ -1,5 +1,6 @@
 import * as $ from 'jquery';
 import * as _ from 'lodash';
+import pDebounce from 'p-debounce';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {Fragment, useCallback, useEffect, useState} from 'react';
@@ -11,13 +12,6 @@ import {MarkOptions} from 'mark.js';
 type ViewEvent = {
     name: string,
     data: any
-}
-
-async function request(name: string, params: any[]) {
-    return post('/res', {
-        method: name,
-        params: params,
-    });
 }
 
 const TooltipView = (props: any) => {
@@ -74,7 +68,7 @@ const TooltipView = (props: any) => {
                 <li
                     onClick={handleClick}
                 >
-                    <i className="fa-solid fa-plus"/>
+                    <i className="fa fa-solid fa-plus"/>
                 </li>
             </ul>
         </div>
@@ -121,18 +115,6 @@ export class Tooltip {
     }
 }
 
-const debounceChange = _.debounce((url: string, id: string, ann: string, cb: any) => {
-    // send request to server
-    request('resAnnUpdate', [
-        url,
-        id,
-        ann
-    ]).then(() => {
-        cb(ann);
-    });
-
-}, 3000);
-
 export const AnnotationView  = (props: any) => {
 
     const ann: Ann = props.ann;
@@ -146,8 +128,6 @@ export const AnnotationView  = (props: any) => {
     const zIndex = Math.floor(document.body.offsetHeight) - Math.floor(top);
 
     const mark = () => {
-        // const mk = new Mark($(note.selector.path));
-
         const mk = ann.mark(idx, note.selector.path);
         mk.mark(note.selected, {
             separateWordSearch: false,
@@ -165,11 +145,25 @@ export const AnnotationView  = (props: any) => {
     }
 
     const [content, setContent] = useState(note.note);
+    const [newTag, setNewTag] = useState('');
     const [del, setDel] = useState('hidden');
 
     const handleChange = (e: any) => {
-        debounceChange(url.pathname, note.id, e.target.value, (n: any) => note.note = n);
+        ann.debouncedRequest('resAnnUpdate', url.pathname, note.id, e.target.value)
+            .then((n: any) => {
+               note.note = n;
+            });
         setContent(e.target.value);
+    }
+
+    const handleChangeNewTag = (e: any) => {
+        setNewTag(e.target.value.trim());
+    }
+
+    const handleNewTagBlur = (e: any) => {
+        if (newTag !== '') {
+            ann.addTag(url, note.id, newTag);
+        }
     }
 
     const handleClick = (e: any) => {
@@ -188,13 +182,8 @@ export const AnnotationView  = (props: any) => {
     }
 
     const handleDel = (e: any) => {
-        request('resAnnDel', [
-            url.pathname,
-            note.id,
-        ]).then(() => {
-            unmark();
-            ann.delAnnotation(note.id);
-        })
+        ann.delAnnotation(url, note.id)
+            .then(() => unmark());
     }
 
     const blinkBorder = (index: number) => {
@@ -208,6 +197,14 @@ export const AnnotationView  = (props: any) => {
                 $elem.css('outline', 'none');
             }, 300);
         }
+    }
+
+    const handleClickTag = () => {
+
+    }
+
+    const handleDelTag = (idx: number) => {
+        ann.delTag(url, note.id, idx)
     }
 
     useEffect(() => {
@@ -240,9 +237,9 @@ export const AnnotationView  = (props: any) => {
                 paddingLeft: '5px',
                 paddingRight: '5px',
             }}
-            onClick={handleClick}
         >
             {mark()}
+            {/*annotated text*/}
             <p
                 style={{
                     color: 'darkgray',
@@ -258,11 +255,13 @@ export const AnnotationView  = (props: any) => {
                     WebkitBoxOrient: 'vertical',
                     WebkitLineClamp: 2,
                 }}
+                onClick={handleClick}
             >
                 {note.selected}
             </p>
+
+            {/*editor*/}
             <textarea
-                className={`${note?.isnew? 'res-ann-new':''}`}
                 style={{
                     width: '97%',
                     height: '100px',
@@ -276,6 +275,55 @@ export const AnnotationView  = (props: any) => {
                 readOnly={!islocal}
             >
             </textarea>
+
+            {/*tags*/}
+            <div
+            >
+                <div
+                    className={'res-ann-tags'}
+                >
+                    {
+                        note.tags.map((tag, idx) => {return (
+                            <div
+                                style={{
+                                    display: 'inline-block'
+                                }}
+                            >
+                                <a
+                                    className={'res-ann-tag'}
+                                    onClick={handleClickTag}
+                                >
+                                    {tag}
+                                </a>
+                                {islocal &&
+                                    <i className="fa fa-solid fa-xmark"
+                                       style={{
+                                           fontSize: 'smaller',
+                                       }}
+                                       onClick={() => handleDelTag(idx)}
+                                    />
+                                }
+                            </div>
+                        )})
+                    }
+                </div>
+                {islocal &&
+                    <textarea
+                        style={{
+                            width: '97%',
+                            height: '20px',
+                            resize: 'none',
+                            border: 0,
+                            textAlign: 'left',
+                        }}
+                        value={newTag}
+                        onChange={handleChangeNewTag}
+                        onBlur={handleNewTagBlur}
+                        readOnly={!islocal}
+                    >
+                    </textarea>
+                }
+            </div>
         </div>
         <div
             style={{
@@ -283,7 +331,7 @@ export const AnnotationView  = (props: any) => {
                 visibility: del
             }}
         >
-            <i className="fa-solid fa-xmark"
+            <i className="fa fa-solid fa-xmark"
                onClick={handleDel}
             />
         </div>
@@ -298,6 +346,7 @@ export const AnnotationsView = (props: any) => {
     useEffect(() => {
         ann.on((event: ViewEvent) => {
             if (event.name === 'invalidation') {
+                console.log('invalidation');
                 forceUpdate();
             } else if (event.name === 'show') {
                 toggle(true);
@@ -374,6 +423,9 @@ export class Ann {
 
         // render annotations to page
         this.db_.annotation().get(this.path)?.forEach(n => {
+            if (n.tags === undefined) {
+                n.tags = [];
+            }
             this.notes.push(n);
         });
 
@@ -409,7 +461,6 @@ export class Ann {
     }
 
     private textSelect() {
-
         $('#book-container')
             .on('mouseup', (e) => {
                     const selection = document.getSelection();
@@ -433,7 +484,7 @@ export class Ann {
                                         end: end
                                     },
                                     note: '',
-                                    isnew: true,
+                                    tags: [],
                                 },
                                 e.clientX,
                                 e.clientY);
@@ -467,26 +518,52 @@ export class Ann {
     }
 
     newAnnotation(note: Note) {
-        request('resAnnAdd', [
-            this.path,
-            note
-        ]).then(() => {
-            note.isnew = undefined;
-            this.notes.push(note);
-            this.callbacks.forEach((callback) => callback({
-                name: 'invalidation'
-            }));
+        return this.request('resAnnAdd', this.path, note)
+            .then(() => {
+                this.notes.push(note);
+                this.callbacks.forEach((callback) => callback({
+                    name: 'invalidation'
+                }));
         });
     }
 
-    delAnnotation(id: string) {
-        const idx = this.notes.findIndex(n => n.id === id);
-        if (idx !== -1) {
-            this.notes.splice(idx, 1);
-            this.callbacks.forEach((callback) => callback({
-                name: 'invalidation'
-            }));
-        }
+    async delAnnotation(url: URL, id: string): Promise<any> {
+        return this.request('resAnnDel', url.pathname, id)
+            .then(() => {
+                const idx = this.notes.findIndex(n => n.id === id);
+                if (idx !== -1) {
+                    this.notes.splice(idx, 1);
+                    this.callbacks.forEach((callback) => callback({
+                        name: 'invalidation'
+                    }));
+                }
+            });
+    }
+
+    async delTag(url: URL, id: string, idx: number): Promise<any> {
+        return this.request('resAnnDelTag', url.pathname, id, idx)
+            .then(() => {
+                const nodeIdx = this.notes.findIndex(n => n.id === id);
+                if (nodeIdx !== -1) {
+                    this.notes[nodeIdx].tags.splice(idx, 1);
+                    this.callbacks.forEach((callback) => callback({
+                        name: 'invalidation'
+                    }));
+                }
+            });
+    }
+
+    async addTag(url: URL, id: string, tag: string): Promise<any> {
+        return this.request('resAnnAddTag', url.pathname, id, tag)
+            .then(() => {
+                const idx = this.notes.findIndex(n => n.id === id);
+                if (idx !== -1) {
+                    this.notes[idx].tags.push(tag);
+                    this.callbacks.forEach((callback) => callback({
+                        name: 'invalidation'
+                    }));
+                }
+            });
     }
 
     private hideTooltip() {
@@ -498,5 +575,31 @@ export class Ann {
         this.tooltip.show(x, y, ann);
     }
 
+    debouncedRequest = pDebounce(this.request, 2000).bind(this);
+
+    request(method: string, ...params: any[]): Promise<any> {
+        if (this.isLocal) {
+            // set timeout promise
+            const timeout = this.timeoutAfter(10);
+
+            // real request
+            const req = post('/res', {
+                    method: method,
+                    params: params
+            });
+            return Promise.race([timeout, req]);
+        } else {
+            return Promise.reject();
+        }
+    }
+
+    private timeoutAfter(seconds: number): Promise<any> {
+        //@ts-ignore
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                reject({status: -2, reason: 'request timeout'});
+            }, seconds * 1000);
+        });
+    }
 }
 

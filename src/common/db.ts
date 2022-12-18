@@ -12,7 +12,8 @@ export type Note = {
         start: number,
         end: number
     }
-    note: string
+    note: string,
+    tags?: string[]
     isnew?: boolean
 }
 
@@ -46,9 +47,29 @@ export abstract class Db {
         }
     }
 
+    updateAnnotationTag(url: string, id: string, tag: string) {
+        const notes = this.anns.get(url);
+        const n = notes?.find(n => n.id === id);
+        if (n!==undefined) {
+            if (n.tags === undefined) {
+                n.tags = [];
+            }
+            n.tags.push(tag);
+        }
+    }
+
+    delAnnotationTag(url: string, id: string, idx: number) {
+        const notes = this.anns.get(url);
+        const n = notes?.find(n => n.id === id);
+        if (n!==undefined) {
+            if (n.tags !== undefined) {
+                n.tags.splice(idx, 1);
+            }
+        }
+    }
+
     addAnnotation(url: string, note: Note) {
         const notes = this.anns.get(url);
-        note.isnew = undefined;
         if (notes === undefined) {
             this.anns.set(url, [note]);
         } else {

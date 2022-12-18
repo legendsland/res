@@ -153,6 +153,22 @@ export async function startServer() {
             }
         },
 
+        resAnnAddTag: {
+            fn: async (url: string, id: string, tag: string) => {
+                db.updateAnnotationTag(url, id, tag);
+                db.save();
+                return Promise.resolve();
+            }
+        },
+
+        resAnnDelTag: {
+            fn: async (url: string, id: string, idx: number) => {
+                db.delAnnotationTag(url, id, idx);
+                db.save();
+                return Promise.resolve();
+            }
+        },
+
         resAnnDel: {
             fn: async (url: string, id: string) => {
                 db.delAnnotation(url, id);
