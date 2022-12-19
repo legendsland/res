@@ -324,6 +324,7 @@ export const AnnotationView  = (props: any) => {
                     }}
                 >
                     {islocal &&
+                    <Fragment>
                     <input
                         style={{
                             width: '50%',
@@ -340,7 +341,6 @@ export const AnnotationView  = (props: any) => {
                         placeholder={'🏷'}
                     >
                     </input>
-                    }
                     <div
                         style={{
                             width: '50%',
@@ -362,6 +362,8 @@ export const AnnotationView  = (props: any) => {
                             />
                         </div>
                     </div>
+                    </Fragment>
+                    }
                 </div>
             </div>
         </div>
