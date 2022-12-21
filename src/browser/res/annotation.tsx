@@ -156,6 +156,16 @@ export const AnnotationView  = (props: any) => {
         setContent(e.target.value);
     }
 
+    const handleFinishEdit = () => {
+        $(`#res-ann-${idx} .res-ann-note-editor`).hide();
+        $(`#res-ann-${idx} .res-ann-note-container`).show();
+    }
+
+    const handleEdit = () => {
+        $(`#res-ann-${idx} .res-ann-note-container`).hide();
+        $(`#res-ann-${idx} .res-ann-note-editor`).show();
+    }
+
     const handleChangeNewTag = (e: any) => {
         setNewTag(e.target.value.trim());
     }
@@ -223,6 +233,7 @@ export const AnnotationView  = (props: any) => {
             flexDirection: 'column',
             backgroundColor: 'white',
             margin: '10px',
+            fontSize: '12px',
         }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -243,7 +254,6 @@ export const AnnotationView  = (props: any) => {
             <p
                 style={{
                     color: 'darkgray',
-                    fontSize: '12px',
                     fontStyle: 'italic',
                     paddingLeft: '2px',
                     paddingRight: '10px',
@@ -263,8 +273,29 @@ export const AnnotationView  = (props: any) => {
             </p>
 
             {/*editor*/}
+            <div
+                className={'res-ann-note-container'}
+            >
+                {/* rendering node */}
+                {
+                    content.split('\n').map(para => {return (
+                        <p>{para}</p>
+                    )})
+                }
+                {islocal &&
+                <span>
+                    <i
+                        className="fa fa-solid fa-edit"
+                        onClick={() => handleEdit()}
+                    />
+                </span>
+                }
+            </div>
+            {islocal &&
             <textarea
+                className={'res-ann-note-editor'}
                 style={{
+                    display: 'none',
                     width: '97%',
                     // height: '100px',
                     minHeight: '100px',
@@ -277,10 +308,10 @@ export const AnnotationView  = (props: any) => {
                 }}
                 value={content}
                 onChange={handleChange}
-                readOnly={!islocal}
+                onBlur={handleFinishEdit}
             >
             </textarea>
-
+            }
             {/*tags*/}
             <div
                 style={{
@@ -295,7 +326,8 @@ export const AnnotationView  = (props: any) => {
                         note.tags.map((tag, idx) => {return (
                             <div
                                 style={{
-                                    display: 'inline-block'
+                                    display: 'inline-block',
+                                    fontSize: 'smaller',
                                 }}
                             >
                                 <a
@@ -306,9 +338,6 @@ export const AnnotationView  = (props: any) => {
                                 </a>
                                 {islocal &&
                                     <i className="fa fa-solid fa-xmark"
-                                       style={{
-                                           fontSize: 'smaller',
-                                       }}
                                        onClick={() => handleDelTag(idx)}
                                     />
                                 }
@@ -337,8 +366,7 @@ export const AnnotationView  = (props: any) => {
                         value={newTag}
                         onChange={handleChangeNewTag}
                         onBlur={handleNewTagBlur}
-                        readOnly={!islocal}
-                        placeholder={'🏷'}
+                        placeholder={''}
                     >
                     </input>
                     <div
