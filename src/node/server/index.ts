@@ -23,9 +23,7 @@ export async function startServer() {
     const app = express();
     const root = path.join(__dirname, '../../../../../');
 
-    const babel = path.join('/home/zy/ws/src/prj/babel');
-
-    const port = 3000
+    const port = 34701;
     app.use(cors());
     app.use(express.static(root));
     app.use(bodyParser.json());
@@ -41,10 +39,6 @@ export async function startServer() {
 
     // connection neo4j
     await neo4jClient.check();
-
-    // app.get('/babel', (req, res) => {
-    //     res.sendFile('index.html', {root: `${babel}`});
-    // });
 
     app.get('/res', (req, res) => {
         res.sendFile('index.html', {root: `${root}`});

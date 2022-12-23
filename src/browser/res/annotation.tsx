@@ -1,5 +1,4 @@
 import * as $ from 'jquery';
-import * as _ from 'lodash';
 import pDebounce from 'p-debounce';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -202,10 +201,10 @@ export const AnnotationView  = (props: any) => {
             $elem[0].scrollIntoView({
                 block: 'center',
             });
-            $elem.css('outline', '1px red solid');
+            $elem.css('outline', '2px red solid');
             setTimeout(() => {
                 $elem.css('outline', 'none');
-            }, 300);
+            }, 500);
         }
     }
 
@@ -251,26 +250,28 @@ export const AnnotationView  = (props: any) => {
         >
             {mark()}
             {/*annotated text*/}
-            <p
+            <blockquote
                 style={{
                     color: 'darkgray',
-                    fontStyle: 'italic',
-                    paddingLeft: '2px',
-                    paddingRight: '10px',
+                    // fontStyle: 'italic',
+                    // paddingLeft: '2px',
+                    // paddingRight: '12px',
+                    paddingTop: '6px',
+                    paddingBottom: '2px',
                     marginTop: 0,
                     marginBottom: 0,
-                    display: '-webkit-box',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    WebkitBoxOrient: 'vertical',
-                    WebkitLineClamp: 2,
+                    // display: '-webkit-box',
+                    // overflow: 'hidden',
+                    // textOverflow: 'ellipsis',
+                    // WebkitBoxOrient: 'vertical',
+                    // WebkitLineClamp: 2,
                     textIndent: 0,
-                    lineHeight: '13px',
+                    lineHeight: '15px',
                 }}
                 onClick={handleClick}
             >
                 {note.selected}
-            </p>
+            </blockquote>
 
             {/*editor*/}
             <div
@@ -282,14 +283,6 @@ export const AnnotationView  = (props: any) => {
                         <p>{para}</p>
                     )})
                 }
-                {islocal &&
-                <span>
-                    <i
-                        className="fa fa-solid fa-edit"
-                        onClick={() => handleEdit()}
-                    />
-                </span>
-                }
             </div>
             {islocal &&
             <textarea
@@ -300,7 +293,6 @@ export const AnnotationView  = (props: any) => {
                     // height: '100px',
                     minHeight: '100px',
                     maxHeight: '300px',
-                    fontSize: '12px',
                     resize: 'vertical',
                     border: 0,
                     textAlign: 'left',
@@ -316,23 +308,35 @@ export const AnnotationView  = (props: any) => {
             <div
                 style={{
                     display: 'flex',
-                    flexDirection: 'column',
+                    flexDirection: 'row',
+                    alignItems: 'center',
                 }}
             >
+                {islocal &&
+                <span>
+                    <i
+                        className="fa fa-solid fa-edit"
+                        onClick={() => handleEdit()}
+                    />
+                </span>
+                }
                 <div
                     className={'res-ann-tags'}
                 >
                     {
                         note.tags.map((tag, idx) => {return (
                             <div
+                                className={'res-ann-a-tag'}
                                 style={{
-                                    display: 'inline-block',
                                     fontSize: 'smaller',
                                 }}
                             >
                                 <a
                                     className={'res-ann-tag'}
                                     onClick={handleClickTag}
+                                    style={{
+                                        color: 'darkgray',
+                                    }}
                                 >
                                     {tag}
                                 </a>
@@ -345,54 +349,34 @@ export const AnnotationView  = (props: any) => {
                         )})
                     }
                 </div>
+                {islocal &&
+                <Fragment>
+                <input
+                    style={{
+                        fontSize: '12px',
+                        border: 0,
+                        textAlign: 'left',
+                        paddingLeft: '10px',
+                    }}
+                    value={newTag}
+                    onChange={handleChangeNewTag}
+                    onBlur={handleNewTagBlur}
+                    placeholder={''}
+                >
+                </input>
                 <div
                     style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        marginTop: '-10px',
+                        //@ts-ignore
+                        visibility: del,
+                        fontSize: '14px',
                     }}
                 >
-                    {islocal &&
-                    <Fragment>
-                    <input
-                        style={{
-                            width: '50%',
-                            height: '18px',
-                            fontSize: '12px',
-                            border: 0,
-                            textAlign: 'left',
-                            paddingLeft: '5px',
-                        }}
-                        value={newTag}
-                        onChange={handleChangeNewTag}
-                        onBlur={handleNewTagBlur}
-                        placeholder={''}
-                    >
-                    </input>
-                    <div
-                        style={{
-                            width: '50%',
-                        }}
-                    >
-                        <div
-                            style={{
-                                //@ts-ignore
-                                visibility: del,
-                                height: '18px',
-                                fontSize: '14px',
-                                padding: 0,
-                                margin: 0,
-                                textAlign: 'right',
-                            }}
-                        >
-                            <i className="fa fa-solid fa-xmark"
-                               onClick={handleDel}
-                            />
-                        </div>
-                    </div>
-                    </Fragment>
-                    }
+                    <i className="fa fa-solid fa-xmark"
+                       onClick={handleDel}
+                    />
                 </div>
+                </Fragment>
+                }
             </div>
         </div>
     </div>
