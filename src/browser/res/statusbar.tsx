@@ -5,7 +5,7 @@
 import * as $ from 'jquery';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import {useEffect, useState} from 'react';
+import {Fragment, useEffect, useState} from 'react';
 import {color2Str, invertedColor2Str} from './types';
 
 export const StatusBarView = (props: any) => {
@@ -69,54 +69,56 @@ export const StatusBarView = (props: any) => {
     }, []);
 
     return <div id={sb.id}
-    >
-        <div
             key={force}
-        >
-            {
-                stat.palette.map((c, idx) => {
-                    return (
-                        <div
-                            key={`palette-${idx}`}
-                            style={{
-                                fontSize: '12px',
-                                width: '120px',
-                                textAlign: 'left',
-                                //@ts-ignore
-                                color: c.fg,
-                                //@ts-ignore
-                                backgroundColor: c.bg
-                            }}
-                        >
-                            {c.bg}
-                        </div>
-                    );
-                })
-            }
-        </div>
 
-        <div>
-            {
-                stat.colors.map((c, idx) => {
-                    return (
-                        <div
-                            key={`colors-${idx}`}
-                            style={{
-                                fontSize: '12px',
-                                width: '120px',
-                                textAlign: 'left',
-                                //@ts-ignore
-                                color: c.fg,
-                                //@ts-ignore
-                                backgroundColor: c.bg
-                            }}
-                        >
-                            {c.bg}
-                        </div>
-                    );
-                })
-            }
-        </div>
+    >
+        <Fragment
+        >
+        {
+            stat.palette.map((c, idx) => {
+                return (
+                    <div
+                        key={`palette-${idx}`}
+                        style={{
+                            fontSize: '12px',
+                            width: '120px',
+                            textAlign: 'left',
+                            //@ts-ignore
+                            color: c.fg,
+                            //@ts-ignore
+                            backgroundColor: c.bg,
+                            marginTop: 0,
+                            paddingTop: 0,
+                        }}
+                    >
+                        {c.bg}
+                    </div>
+                );
+            })
+        }
+        {
+            stat.colors.map((c, idx) => {
+                return (
+                    <div
+                        key={`colors-${idx}`}
+                        style={{
+                            fontSize: '12px',
+                            width: '120px',
+                            textAlign: 'left',
+                            //@ts-ignore
+                            color: c.fg,
+                            //@ts-ignore
+                            backgroundColor: c.bg,
+                            marginTop: 0,
+                            paddingTop: 0,
+                        }}
+                    >
+                        {c.bg}
+                    </div>
+                );
+            })
+        }
+        </Fragment>
     </div>
 }
 

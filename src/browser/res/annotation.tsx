@@ -52,16 +52,18 @@ const TooltipView = (props: any) => {
         style={{
             position: 'absolute',
             top: 0,
-            left: pos.x
+            left: pos.x,
         }}
     >
         <div
             style={{
-               position: 'relative',
-               display: display,
-               backgroundColor: 'white',
-               top: pos.y,
-               zIndex: 999
+                position: 'relative',
+                display: display,
+                backgroundColor: 'white',
+                top: pos.y,
+                zIndex: 999,
+                marginTop: 0,
+                paddingTop: 0,
             }}>
             <ul>
                 <li

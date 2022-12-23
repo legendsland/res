@@ -210,8 +210,11 @@ export class Epub {
 
             // external style file
             if (tag === 'link') {
-                const url = path.relative(this.root, path.join(dir, element.attribs['href']));
-                styles.set(url, element);
+                const type = $(element).attr('type');
+                if (type === 'text/css') {
+                    const url = path.relative(this.root, path.join(dir, element.attribs['href']));
+                    styles.set(url, element);
+                }
             }
 
             // inlined styles
