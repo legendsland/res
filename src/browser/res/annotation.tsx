@@ -168,14 +168,16 @@ export const AnnotationView  = (props: any) => {
             done: (nums) => {
                 // workaround: previous saved start, end is incorrect
                 // update pos
-                const newNote = Object.assign({}, note);
-                if (newNote?.pos?.top !== minTop
-                 || newNote?.pos?.left !== minLeft) {
-                    console.log('update ' + id + ': ' + newNote.pos.top + ' ' + newNote.pos.left + ' **');
-                    newNote.pos = {top: minTop, left: minLeft};
-                    ann.updateAnn(url, newNote).then(() => {
-                        Object.assign(note, newNote);
-                    })
+                if (islocal) {
+                    const newNote = Object.assign({}, note);
+                    if (newNote?.pos?.top !== minTop
+                        || newNote?.pos?.left !== minLeft) {
+                        console.log('update ' + id + ': ' + newNote.pos.top + ' ' + newNote.pos.left + ' **');
+                        newNote.pos = {top: minTop, left: minLeft};
+                        ann.updateAnn(url, newNote).then(() => {
+                            Object.assign(note, newNote);
+                        })
+                    }
                 }
             }
         });
