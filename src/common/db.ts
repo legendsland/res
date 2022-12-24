@@ -9,8 +9,10 @@ export type Note = {
     selected: string,
     selector: {
         path: string,
-        start: number,
-        end: number
+    }
+    pos?: {
+       top: number,
+       left: number,
     }
     note: string,
     tags?: string[]
@@ -28,6 +30,11 @@ export type Annotation = {
 
 export type IndexedAnnotation = Map<string, Note[]>;
 
+/**
+ * this is just hand-made nonsql db. maybe it's better to use
+ * some popular browser db, IndexedDB?
+ */
+
 export abstract class Db {
     protected db_: Database;
     protected anns: IndexedAnnotation = new Map<string, Note[]>();
@@ -39,11 +46,11 @@ export abstract class Db {
 
     abstract load(): void;
 
-    updateAnnotation(url: string, id: string, note: string) {
+    updateAnn(url: string, note: Note) {
         const notes = this.anns.get(url);
-        const n = notes?.find(n => n.id === id);
-        if (n!==undefined) {
-            n.note = note;
+        const idx = notes?.findIndex(n => n.id === note.id);
+        if (idx!==-1) {
+            notes[idx] = note;
         }
     }
 

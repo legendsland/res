@@ -132,8 +132,8 @@ export async function startServer() {
         },
 
         resAnnUpdate: {
-            fn: async (url: string, id: string, note: string) => {
-                db.updateAnnotation(url, id, note);
+            fn: async (url: string, note: string) => {
+                db.updateAnn(url, JSON.parse(note));
                 db.save();
                 return Promise.resolve();
             }
