@@ -10,13 +10,12 @@ export type Note = {
     selector: {
         path: string,
     }
-    pos?: {
+    pos: {
        top: number,
        left: number,
     }
     note: string,
-    tags?: string[]
-    isnew?: boolean
+    tags: string[]
 }
 
 export type Record = {
