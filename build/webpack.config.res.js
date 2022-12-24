@@ -11,13 +11,10 @@ const staticDestPath = path.resolve(__dirname, '../dist/res');
 
 const config = {
     entry: './src/browser/res/index.tsx',
+    devtool: "source-map",
     output: {
         path: path.resolve(__dirname, '../dist/res'),
     },
-    plugins: [
-        // Add your plugins here
-        // Learn more about plugins from https://webpack.js.org/configuration/plugins/
-    ],
     module: {
         rules: [
             {
@@ -25,9 +22,13 @@ const config = {
                 use: [{
                     loader: 'ts-loader',
                     options: {
-                        configFile: "tsconfig.webpack.json"
-                    }
-                }],
+                        configFile: "tsconfig.webpack.json",
+                        compilerOptions: {
+                            'sourceMap': true,
+                        },
+                    }},
+                    "source-map-loader"
+                ],
                 exclude: [
                     '/node_modules/',
                     '/src/node'

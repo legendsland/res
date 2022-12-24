@@ -120,7 +120,7 @@ export const AnnotationView  = (props: any) => {
 
     const ann: Ann = props.ann;
     const note: Note = props.note;
-    const idx: number = props.idx;
+    const id: string = note.id;
     const islocal: boolean = props.islocal;
     const url = new URL(window.location.href);
 
@@ -129,19 +129,19 @@ export const AnnotationView  = (props: any) => {
     const zIndex = Math.floor(document.body.offsetHeight) - Math.floor(top);
 
     const mark = () => {
-        const mk = ann.mark(idx, note.selector.path);
+        const mk = ann.mark(id, note.selector.path);
         mk.mark(note.selected, {
             separateWordSearch: false,
             acrossElements: true,
             // accuracy: 'exactly',
             each: (elem) => {
-                $(elem).on('click', () => ann.show(idx))
+                $(elem).on('click', () => ann.show(id))
             }
         });
     }
 
     const unmark = () => {
-        ann.unmark(idx, {
+        ann.unmark(id, {
         });
     }
 
@@ -158,13 +158,13 @@ export const AnnotationView  = (props: any) => {
     }
 
     const handleFinishEdit = () => {
-        $(`#res-ann-${idx} .res-ann-note-editor`).hide();
-        $(`#res-ann-${idx} .res-ann-note-container`).show();
+        $(`#res-ann-${id} .res-ann-note-editor`).hide();
+        $(`#res-ann-${id} .res-ann-note-container`).show();
     }
 
     const handleEdit = () => {
-        $(`#res-ann-${idx} .res-ann-note-container`).hide();
-        $(`#res-ann-${idx} .res-ann-note-editor`).show();
+        $(`#res-ann-${id} .res-ann-note-container`).hide();
+        $(`#res-ann-${id} .res-ann-note-editor`).show();
     }
 
     const handleChangeNewTag = (e: any) => {
@@ -197,9 +197,9 @@ export const AnnotationView  = (props: any) => {
             .then(() => unmark());
     }
 
-    const blinkBorder = (index: number) => {
-        if (index === idx) {
-            const $elem = $(`#res-ann-${idx}`).parent();
+    const blinkBorder = (index: string) => {
+        if (index === id) {
+            const $elem = $(`#res-ann-${id}`).parent();
             $elem[0].scrollIntoView({
                 block: 'center',
             });
@@ -240,7 +240,7 @@ export const AnnotationView  = (props: any) => {
         onMouseLeave={handleMouseLeave}
     >
         <div
-            id={`res-ann-${idx}`}
+            id={`res-ann-${id}`}
             className='res-ann'
             style={{
                 width: '100%',
@@ -298,7 +298,8 @@ export const AnnotationView  = (props: any) => {
                     resize: 'vertical',
                     border: 0,
                     textAlign: 'left',
-                    marginBottom: '-10px'
+                    marginBottom: '-10px',
+                    margin: 0
                 }}
                 value={content}
                 onChange={handleChange}
@@ -312,6 +313,7 @@ export const AnnotationView  = (props: any) => {
                     display: 'flex',
                     flexDirection: 'row',
                     alignItems: 'center',
+                    margin: 0,
                 }}
             >
                 {islocal &&
@@ -324,6 +326,9 @@ export const AnnotationView  = (props: any) => {
                 }
                 <div
                     className={'res-ann-tags'}
+                    style={{
+                        margin: 0,
+                    }}
                 >
                     {
                         note.tags.map((tag, idx) => {return (
@@ -359,6 +364,7 @@ export const AnnotationView  = (props: any) => {
                         border: 0,
                         textAlign: 'left',
                         paddingLeft: '10px',
+                        margin: 0,
                     }}
                     value={newTag}
                     onChange={handleChangeNewTag}
@@ -427,11 +433,14 @@ export const AnnotationsView = (props: any) => {
             id={'res-ann-all'}
         >
             {
-                ann?.notes.map((note, idx) => { return (
+                ann?.notes.sort((a, b) => {
+                    const offseta = $(a.selector.path).last().offset().top;
+                    const offsetb = $(b.selector.path).last().offset().top;
+                    return offseta>offsetb? 1:-1;
+                }).map((note) => { return (
                     <AnnotationView
                         ann={ann}
                         note={note}
-                        idx={idx}
                         islocal={ann.isLocal}
                     />
                 )})
@@ -448,7 +457,7 @@ export class Ann {
     public isLocal: boolean;
     private tooltip: Tooltip;
 
-    marks: Map<number, Mark> = new Map<number, Mark>();
+    marks: Map<string, Mark> = new Map<string, Mark>();
     constructor(
         private db_: Db
     ) {
@@ -482,7 +491,7 @@ export class Ann {
         this.callbacks.push(callback);
     }
 
-    show(index: number) {
+    show(index: string) {
         this.callbacks.forEach((callback) => callback({
             name: 'show'
         }));
@@ -494,13 +503,13 @@ export class Ann {
         }));
     }
 
-    mark(idx: number, selector: string): Mark {
+    mark(idx: string, selector: string): Mark {
         const mk = new Mark($(selector)[0]);
         this.marks.set(idx, mk);
         return mk;
     }
 
-    unmark(idx: number, options?: MarkOptions) {
+    unmark(idx: string, options?: MarkOptions) {
         const mk = this.marks.get(idx);
         mk.unmark(options);
         this.marks.delete(idx);

@@ -30,14 +30,20 @@ export function merge(from: string, to: string) {
 
     for(let i=0; i<fromElems.length; ++i) {
         const $f = $from(fromElems[i]);
+
         // remove id
         $f.removeAttr('id');
         $f.find('[id]').removeAttr('id');
 
-        // get children html
-        const newHtml = $f.html();
-        const tag = $f.prop("tagName").toLowerCase();
-        $to(toElems[i]).after(`<${tag}>${newHtml}</${tag}>`);
+        // remove images
+        $f.find('img').remove();
+
+        if (! $f.is(':empty')) {
+            // get children html
+            const newHtml = $f.html();
+            const tag = $f.prop('tagName').toLowerCase();
+            $to(toElems[i]).after(`<${tag}>${newHtml}</${tag}>`);
+        }
     }
 
     fs.writeFileSync(path.join(dir, outName), $to('html').prop('outerHTML').toString());
