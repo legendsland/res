@@ -90,7 +90,7 @@ import {merge} from './cli/merge';
 
 
     if (argv.i) {
-        createIndex();
+        await createIndex();
     }
 
     else if (argv.t !== undefined) {
@@ -100,7 +100,7 @@ import {merge} from './cli/merge';
 
     else if (argv.a !== undefined) {
         await add(argv.a);
-        createIndex();
+        await createIndex();
     }
 
     else if (argv.u !== undefined) {
@@ -109,7 +109,7 @@ import {merge} from './cli/merge';
 
     else if (argv.d !== undefined) {
         await del(argv.d);
-        createIndex();
+        await createIndex();
     }
 
     else if (argv.c !== undefined) {

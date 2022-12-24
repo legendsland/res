@@ -1,6 +1,6 @@
 
 // assert {type: 'json'};
-type Database = {
+export type Database = {
     annotation: Annotation
 }
 
@@ -44,6 +44,11 @@ export abstract class Db {
     }
 
     abstract load(): void;
+
+    getAnn(url: string): Note[] {
+        const notes = this.anns.get(url);
+        return notes===undefined? [] : notes;
+    }
 
     updateAnn(url: string, note: Note) {
         const notes = this.anns.get(url);
@@ -103,6 +108,10 @@ export abstract class Db {
 
     annotation(): IndexedAnnotation {
         return this.anns;
+    }
+
+    get db() {
+        return this.db_;
     }
 }
 

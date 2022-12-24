@@ -38,7 +38,7 @@ function env(): string {
     }
 }
 
-type FilePath = { dir: string, base: string };
+type FilePath = { dir: string, base: string, stars: number, note: boolean };
 interface Config {
     containerId: string,
     data: FilePath[]
@@ -72,7 +72,7 @@ const Category = (props: any) => {
                             return (
                                     <ListItemButton key={url} sx={{ pl: 4 }}>
                                         {/* <ListItemText primary={p.base} /> */}
-                                        <Link href={url} target="_blank" rel="noopener">{p.base}</Link>
+                                        <Link href={url} target="_blank" rel="noopener">{p.base} {p.stars>=5?'⭐':p.note?'📝':''}</Link>
                                     </ListItemButton>
                             )
                         })
@@ -96,11 +96,11 @@ const App = (props: any) => {
         const category = parts[1];
 
         let files = grouped.get(category);
-        const file = [{dir: item.dir, base: item.base}];
+        const file = [{dir: item.dir, base: item.base, stars: item.stars, note: item.note}];
         if ( files === undefined) {
             grouped.set(category, file);
         } else {
-            files.push({dir: item.dir, base: item.base});
+            files.push({dir: item.dir, base: item.base, stars: item.stars, note: item.note});
         }
     });
 
