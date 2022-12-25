@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto')
 import * as cheerio from 'cheerio';
+import {addGoogScript} from './google-analytics';
 
 const DCI = '<meta name="dc.identifier" content="res/';
 const SCRIPT_ELEM_ID = 'res-script';
@@ -104,6 +105,10 @@ export async function decorate(file: string, embedded: boolean, output: string) 
             $('head').append(`<link id="${STYLE_ELEM_ID}" rel="stylesheet" href="/res/dist/res/style.css" type="text/css"/>\n`);
 
             $('body').append(`<script id="${SCRIPT_ELEM_ID}" src="/res/dist/res/main.js" type="text/javascript"></script>\n`);
+
+            // google track
+            addGoogScript($('body'));
+
         }
 
         // copy if not the same file

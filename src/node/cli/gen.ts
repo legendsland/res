@@ -2,6 +2,7 @@ import {fromIgnoreFile} from './ignorefile';
 import {Db} from '../../common/db';
 import {ParsedPath} from 'path';
 import * as path from 'path';
+import {googScript} from './google-analytics';
 
 const fs = require('fs');
 
@@ -42,15 +43,8 @@ export async function createIndex() {
         <meta charset="utf-8" />
         <title>Res</title>
         <link rel="stylesheet" href="/res/dist/res/style.css" />
-        <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WP965D476X"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-WP965D476X');
-    </script>
     </head>
+    ${googScript}
     <body>
     <div id="${config.containerId}"></div>
     <script>var res_config = ${config_json};</script>
