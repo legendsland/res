@@ -16,7 +16,7 @@ export async function createIndex() {
   const db_ = await require('./db');
   const db: Db = db_.db;
 
-  list.forEach((l: ParsedPath & {stars: number, note: boolean}) => {
+  list.forEach((l: ParsedPath & {stars: number, note: number}) => {
     const url = encodeURI(path.join('/res/', l.dir, l.base));
     const notes = db.getAnn(url);
     let maxStars = 0;
@@ -28,8 +28,8 @@ export async function createIndex() {
         }
       }
       maxStars = Math.max(maxStars, stars);
-      l.note = true;
     });
+    l.note = notes.length;
     l.stars = maxStars;
   })
 

@@ -38,7 +38,7 @@ function env(): string {
     }
 }
 
-type FilePath = { dir: string, base: string, stars: number, note: boolean };
+type FilePath = { dir: string, base: string, stars: number, note: number };
 interface Config {
     containerId: string,
     data: FilePath[]
@@ -72,7 +72,7 @@ const Category = (props: any) => {
                             return (
                                     <ListItemButton key={url} sx={{ pl: 4 }}>
                                         {/* <ListItemText primary={p.base} /> */}
-                                        <Link href={url} target="_blank" rel="noopener">{p.base} {p.stars>=5?'⭐':p.note?'📝':''}</Link>
+                                        <Link href={url} target="_blank" rel="noopener">{p.base} {p.stars>=5?`⭐(${p.note})`:p.note?`📝(${p.note})`:''}</Link>
                                     </ListItemButton>
                             )
                         })

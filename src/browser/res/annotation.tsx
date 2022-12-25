@@ -129,6 +129,7 @@ export const AnnotationView  = (props: any) => {
     const zIndex = Math.floor(document.body.offsetHeight) - Math.floor(top);
 
     const mark = () => {
+        console.log(`mark: {${id}: ${note?.pos.top}, ${note?.pos.left}}`);
 
         // already marked
         if ($(`mark.${id}`).length !== 0) {
@@ -137,7 +138,7 @@ export const AnnotationView  = (props: any) => {
 
         // console.log(`mark ${id}`);
         const mk = ann.mark(id, note.selector.path);
-        console.log(`mark: {${id}: ${note?.pos.top}, ${note?.pos.left}}`);
+
 
         let minTop = Number.MAX_SAFE_INTEGER;
         let minLeft = Number.MAX_SAFE_INTEGER;
@@ -145,10 +146,13 @@ export const AnnotationView  = (props: any) => {
         mk.mark(note.selected, {
             separateWordSearch: false,
             acrossElements: true,
+            // debug: true,
             // exclude: [
             //   'mark'
             // ],
             // accuracy: 'exactly',
+
+            // it has bugs, may not be called
             each: (elem) => {
 
                 let {top, left} = $(elem).offset();
@@ -166,6 +170,7 @@ export const AnnotationView  = (props: any) => {
             },
 
             done: (nums) => {
+                console.log(`total marked: ${nums}`);
                 // workaround: previous saved start, end is incorrect
                 // update pos
                 if (islocal) {
@@ -179,6 +184,10 @@ export const AnnotationView  = (props: any) => {
                         })
                     }
                 }
+            },
+
+            noMatch(term: string) {
+                console.log(`noMatch: ${term}`);
             }
         });
     }
@@ -188,16 +197,12 @@ export const AnnotationView  = (props: any) => {
     const [del, setDel] = useState('hidden');
 
     const handleChange = (e: any) => {
-        const newNote = Object.assign({}, note);
-        newNote.note = e.target.value;
-        ann.debounced(ann.updateAnn, url, newNote)
-            .then((n: any) => {
-               note.note = n;
-            });
         setContent(e.target.value);
     }
 
     const handleFinishEdit = () => {
+        note.note = content;
+        ann.updateAnn(url, note);
         $(`#res-ann-${id} .res-ann-note-editor`).hide();
         $(`#res-ann-${id} .res-ann-note-container`).show();
     }
@@ -321,7 +326,7 @@ export const AnnotationView  = (props: any) => {
             >
                 {/* rendering node */}
                 {
-                    content.split('\n').map(para => {return (
+                    content?.split('\n').map(para => {return (
                         <p>{para}</p>
                     )})
                 }
@@ -582,6 +587,18 @@ export class Ann {
                     if (text === '') {
                         this.hideTooltip();
                     } else {
+                        // console.log(`selected: ${text}`);
+
+                        // let ranges = [];
+                        // for(let i = 0; i < selection.rangeCount; i++) {
+                        //     ranges[i] = selection.getRangeAt(i);
+                        //     console.log(ranges[i])
+                        //     const rect1 = ranges[i].getBoundingClientRect();
+                        //     console.log(rect1)
+                        //     const rect2 = ranges[i].getClientRects();
+                        //     console.log(rect2)
+                        // }
+
                         const range = selection.getRangeAt(0);
                         // const rect = range.getBoundingClientRect();
                         // const start = range.startOffset;  // offset of text node
