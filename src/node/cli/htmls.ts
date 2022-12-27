@@ -14,7 +14,7 @@ import * as $ from 'jquery';
 
 export class Htmls {
 
-    readonly html_start = `<!doctype html>
+    readonly html_start = `<!DOCTYPE html>
 <html><head><meta charset=utf-8></head><body><div id="book-container" style="max-width: 100% !important;">
 `;
 

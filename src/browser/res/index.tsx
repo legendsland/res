@@ -23,6 +23,7 @@ import {StatusBar} from './statusbar';
 import {ColorPicker} from './color-picker';
 import {BrowserDb} from './db';
 import {Ann, Tooltip} from './annotation';
+import {addGoogScript} from '../google-analytics';
 
 const pagemap = require('pagemap');
 
@@ -132,8 +133,10 @@ const App = (props: any) => {
 
     const cli = new Cli();
 
-// table of content, res/ index page
-//@ts-ignore
+    const $body = $('body');
+
+    // table of content, res/ index page
+    //@ts-ignore
     if (window.res_config !== undefined) {
         //@ts-ignore
         const config: Config = window.res_config;
@@ -142,12 +145,10 @@ const App = (props: any) => {
             document.querySelector(`#${config.containerId}`));
     }
 
-// readings
-// all scripts should be creating on-the-fly
-// do not modify html file directly, the only exception is dc.identifier
+    // readings
+    // all scripts should be creating on-the-fly
+    // do not modify html file directly, the only exception is dc.identifier
     else {
-        const $body = $('body');
-
         // add right-click menu options
         $body
             .prepend('<div id="context-menu-container"></div>')
@@ -176,9 +177,12 @@ const App = (props: any) => {
         const shortcuts = new Shortcuts();
         shortcuts.add(new CommandShortcut(cli));
         shortcuts.listen();
+
+        // load google script
     }
 
-//@ts-ignore
-    global.x = cli;
+    addGoogScript($body);
 
+    //@ts-ignore
+    global.x = cli;
 })();

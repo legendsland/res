@@ -2,7 +2,6 @@ import {fromIgnoreFile} from './ignorefile';
 import {Db} from '../../common/db';
 import {ParsedPath} from 'path';
 import * as path from 'path';
-import {googScript} from './google-analytics';
 
 const fs = require('fs');
 
@@ -44,7 +43,6 @@ export async function createIndex() {
         <title>Res</title>
         <link rel="stylesheet" href="/res/dist/res/style.css" />
     </head>
-    ${googScript}
     <body>
     <div id="${config.containerId}"></div>
     <script>var res_config = ${config_json};</script>
