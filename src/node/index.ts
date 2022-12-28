@@ -9,6 +9,7 @@ import { fetch } from './server/hypothes.is';
 import { words } from './server/nlp';
 import {Neo4jClient} from './server/neo4j/client';
 import {merge} from './cli/merge';
+import {rm} from './cli/pre-code';
 
 (async () =>{
 
@@ -83,6 +84,10 @@ import {merge} from './cli/merge';
             describe: 'nlp',
             type: 'string',
         })
+        .option('pre', {
+            describe: 'delete ch pre',
+            type: 'string',
+        })
     ;
 
     const argv: any = args.argv;
@@ -142,6 +147,10 @@ import {merge} from './cli/merge';
 
     else if (argv.m) {
         await merge(argv.m[0], argv.m[1]);
+    }
+
+    else if (argv.pre) {
+        rm(argv.pre);
     }
 })();
 
