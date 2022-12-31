@@ -80,95 +80,114 @@ export class Toc {
 
     generate() {
 
-        const toc: TocContent = {
-            entries: []
-        };
+        let tocHtml = '';
+        const $prebuilt = $('#res-toc-prebuilt');
 
-        // remove duplicated
-        let preText = '';
-        const ignored = this.ignore();  // notes, refs
-        $('[id]').each((index: number, element: HTMLElement) => {
-            const id = $(element).prop('id');
-            const tag = $(element).prop("tagName").toLowerCase();
-            // console.log(id + ':' + tag);
+        if ($prebuilt.length === 0) {
 
-            // get first text node child of max font size
-            const $text = $(element).find('*').contents()
-                .filter(function() {
-                    return this.nodeType === 3
-                        && $(this).text().trim() !== ''
-                        ;
-                })
-                .first();
+            const toc: TocContent = {
+                entries: []
+            };
 
-            const text = $text.text();
+            // remove duplicated
+            let preText = '';
+            const ignored = this.ignore();  // notes, refs
+            $('[id]').each((index: number, element: HTMLElement) => {
+                const id = $(element).prop('id');
+                const tag = $(element).prop("tagName").toLowerCase();
+                // console.log(id + ':' + tag);
 
-            // console.log(text);
-            // too long, it may be text, not title
-            if (text.length < 64
-                && text !== ''
-                && text !== preText
-                && text.match(ignored) === null) {
+                // get first text node child of max font size
+                const $text = $(element).find('*').contents()
+                    .filter(function () {
+                        return this.nodeType === 3
+                            && $(this).text().trim() !== ''
+                            ;
+                    })
+                    .first();
 
-                const fspx = $text.parent().css('font-size')
-                const fs = fspx.substring(0, fspx.length-'px'.length);
+                const text = $text.text();
 
-                toc.entries.push({
-                    id: id,
-                    fs: Number.parseInt(fs),
-                    text: text,
-                });
-                preText = text;
-            }
+                // console.log(text);
+                // too long, it may be text, not title
+                if (text.length < 64
+                    && text !== ''
+                    && text !== preText
+                    && text.match(ignored) === null) {
 
-            if (tag === 'h1'
-                || tag === 'h2'
-                || tag === 'h3'
-                || tag === 'h4'
-            ) {
-                const text2 = $(element).text().trim();
-                // console.log('---- ' + text2);
-                if (text2.length < 64
-                    && text2 !== ''
-                    && text2 !== text
-                    && text2 !== preText
-                    && text2.match(ignored) === null) {
-
-                    const fspx = $(element).css('font-size')
-                    const fs = fspx.substring(0, fspx.length-'px'.length);
+                    const fspx = $text.parent().css('font-size')
+                    const fs = fspx.substring(0, fspx.length - 'px'.length);
 
                     toc.entries.push({
                         id: id,
                         fs: Number.parseInt(fs),
-                        text: text2,
+                        text: text,
                     });
-                    preText = text2;
+                    preText = text;
+                }
+
+                if (tag === 'h1'
+                    || tag === 'h2'
+                    || tag === 'h3'
+                    || tag === 'h4'
+                ) {
+                    const text2 = $(element).text().trim();
+                    // console.log('---- ' + text2);
+                    if (text2.length < 64
+                        && text2 !== ''
+                        && text2 !== text
+                        && text2 !== preText
+                        && text2.match(ignored) === null) {
+
+                        const fspx = $(element).css('font-size')
+                        const fs = fspx.substring(0, fspx.length - 'px'.length);
+
+                        toc.entries.push({
+                            id: id,
+                            fs: Number.parseInt(fs),
+                            text: text2,
+                        });
+                        preText = text2;
+                    }
+                }
+            });
+
+            // console.log(toc.entries);
+            const fonts = new Set<number>();
+            toc.entries.forEach(entry => {
+                fonts.add(entry.fs);
+            });
+
+            const fontsArray = Array.from(fonts);
+            toc.entries.forEach(entry => {
+                entry.fs = fontsArray.indexOf(entry.fs);
+            });
+
+            if (toc.entries.length > 0) {
+                tocHtml = toc.entries.map((entry) =>
+                    `<li class="res-toc-fs-${entry.fs}"><a href="#${entry.id}">${entry.text}</a></li>`
+                ).reduce((prev, curr) => `${prev}\n${curr}`);
+
+                tocHtml = `<ul>\n${tocHtml}\n</ul>`;
+            }
+        }
+
+        else {
+            const sel = $prebuilt.attr('sel');
+            if (sel !== undefined && sel !== '') {
+                const wrap = $prebuilt.attr('wrap');
+                if (wrap !== undefined) {
+                    tocHtml = `<${wrap}>${$(sel).html()}</${wrap}>`;
+                } else {
+                    tocHtml = $(sel).html();
                 }
             }
-        });
-
-        // console.log(toc.entries);
-        const fonts = new Set<number>();
-        toc.entries.forEach(entry => {
-            fonts.add(entry.fs);
-        });
-
-        const fontsArray = Array.from(fonts);
-        toc.entries.forEach(entry => {
-            entry.fs = fontsArray.indexOf(entry.fs);
-        });
-
-        let tocHtml = '';
-        if (toc.entries.length > 0) {
-            tocHtml = toc.entries.map((entry) =>
-                `<li class="res-toc-fs-${entry.fs}"><a href="#${entry.id}">${entry.text}</a></li>`
-            ).reduce((prev, curr) => `${prev}\n${curr}`);
         }
 
         $('body').prepend(`
 <div id="res-toc-container">
     <button id="res-toc-control">TOC</button>
-    <div id="res-toc-content"><ul>\n${tocHtml}\n</ul></div>
+    <div id="res-toc-content">${tocHtml}</div>
 </div>
 `);
 

@@ -37,26 +37,30 @@ export class Cli {
         this.$container = $('#book-container');
         this.fullText = this.$container.text();
 
-        // needs to calculate the heights of each text nodes
-        this.$container
-            .find('*')
-            .contents()
-            .filter(function() {
-                return this.nodeType === 3
-                    && $(this).text().trim() !== ''
-                    ;
-            })
-            .parent()
-            .each((idx, elem: HTMLElement) => {
-                const $elem = $(elem);
-                const top = elem.getBoundingClientRect().top + document.documentElement.scrollTop;
-                this.texts.set($elem, {
-                    original: $elem.text(),
-                    originalHtml: $elem.html(),
-                    top: top,
-                    hasMatch: false
-                });
-            })
+        try {
+            // needs to calculate the heights of each text nodes
+            this.$container
+                .find('*')
+                .contents()
+                .filter(function () {
+                    return this.nodeType === 3
+                        && $(this).text().trim() !== ''
+                        ;
+                })
+                .parent()
+                .each((idx, elem: HTMLElement) => {
+                    const $elem = $(elem);
+                    const top = elem.getBoundingClientRect().top + document.documentElement.scrollTop;
+                    this.texts.set($elem, {
+                        original: $elem.text(),
+                        originalHtml: $elem.html(),
+                        top: top,
+                        hasMatch: false
+                    });
+                })
+        } catch (e) {
+            // stack overflow
+        }
     }
 
     f(str: string) {

@@ -165,7 +165,11 @@ const App = (props: any) => {
 
         // add toc
         const toc = new Toc();
-        toc.generate();
+        try {
+            toc.generate();
+        } catch (e) {
+            // stack overflow
+        }
 
         // add status bar
         const sb = new StatusBar('res-statusbar');
