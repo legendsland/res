@@ -372,6 +372,7 @@ export const AnnotationView  = (props: any) => {
                 <div
                     className={'res-ann-tags'}
                     style={{
+                        display: 'flex',
                         margin: 0,
                     }}
                 >
@@ -409,6 +410,7 @@ export const AnnotationView  = (props: any) => {
                         border: 0,
                         textAlign: 'left',
                         paddingLeft: '10px',
+                        width: '100%',
                         margin: 0,
                     }}
                     value={newTag}
