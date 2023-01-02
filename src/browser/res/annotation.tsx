@@ -125,6 +125,11 @@ export const AnnotationView  = (props: any) => {
     const url = new URL(window.location.href);
 
     const annotatedElem = $(note.selector.path)[0];
+    if (annotatedElem === undefined) {
+        console.log(`invalid selector ${note.selector.path}`);
+        return <></>
+    }
+
     const top = annotatedElem.getBoundingClientRect().top + document.documentElement.scrollTop;
     const zIndex = Math.floor(document.body.offsetHeight) - Math.floor(top);
 
