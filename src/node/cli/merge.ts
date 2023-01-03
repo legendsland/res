@@ -33,7 +33,7 @@ function getPath($: any, elem: HTMLElement) {
 export function merge(from: string, to: string) {
 
     // shoe not be nested
-    const selector = 'h1,h2,h3,h4,p,li,dt,dd,pre';  //pre
+    const selector = 'h1,h2,h3,h4,p,li,dt,dd,pre,blockquote';  //pre blockquote
 
     const fromFile = path.resolve(from);
     const toFile = path.resolve(to);
