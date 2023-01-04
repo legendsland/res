@@ -101,7 +101,7 @@ export class Archive {
 
         Array.from(urls).map(([url, name]) => {
             this.$index('#res-wa-index ul').append(`
-<li><a href="${url}">${name}</a></li>
+<li><a href="${url}" target="_blank">${name}</a></li>
 `)
         })
 
