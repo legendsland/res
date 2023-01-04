@@ -1,7 +1,7 @@
 import * as yargs from 'yargs';
 import {add, checkDci, checkFiles, del, decorate} from './cli/dci';
 import {createIndex} from './cli/gen';
-import {Argv} from 'yargs';
+import {Arguments, Argv} from 'yargs';
 import { Epub } from './cli/epub';
 import { startServer } from './server/';
 import { crawler } from './server/crawler/html/neo4j-docs';
@@ -10,6 +10,10 @@ import { words } from './server/nlp';
 import {Neo4jClient} from './server/neo4j/client';
 import {merge} from './cli/merge';
 import {rm} from './cli/pre-code';
+import * as path from 'path';
+import {Archive} from './cli/archive'
+
+const ROOT = '/home/zy/ws/res/';
 
 (async () =>{
 
@@ -88,6 +92,18 @@ import {rm} from './cli/pre-code';
             describe: 'delete ch pre',
             type: 'string',
         })
+        .command('frame [dir]', 'merge multiple html files into single one as iframes',
+        (yargs: any) => {
+            yargs.positional('dir', {
+                type: 'string'
+            })
+        }, (({dir}) => {
+                let p = undefined;
+                if (typeof dir === 'string') {
+                    p = path.join(ROOT, dir);
+                }
+                new Archive(p);
+            }))
     ;
 
     const argv: any = args.argv;

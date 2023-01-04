@@ -6,10 +6,8 @@ import * as path from 'path';
 import cheerio from 'cheerio';
 import * as css from 'css';
 import * as fs from 'fs';
-import {existsSync, lstatSync, readFileSync, writeFileSync} from 'fs';
+import {lstatSync, readFileSync, writeFileSync} from 'fs';
 import * as extract from 'extract-zip';
-import * as $ from 'jquery';
-import {Htmls} from './htmls';
 
 const PATH_CONTAINER = 'META-INF/container.xml';
 const TAG_ROOTFILE = 'rootfile';

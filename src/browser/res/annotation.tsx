@@ -588,6 +588,7 @@ export class Ann {
     private textSelect() {
         $('#book-container')
             .on('mouseup', (e) => {
+                    // console.log('mouseup');
                     const selection = document.getSelection();
                     const text = selection.toString();
                     // console.log(text);
@@ -674,6 +675,8 @@ export class Ann {
 
             elem = elem.parentElement;
         }
+        console.log(`get path: ${path}`);
+
         if (path.startsWith('#book-container')) {
             return path;
         } else {
