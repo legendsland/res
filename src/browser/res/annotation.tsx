@@ -396,7 +396,9 @@ export const AnnotationView  = (props: any) => {
                                         color: 'darkgray',
                                     }}
                                 >
+                                    <span>
                                     {tag}
+                                    </span>
                                 </a>
                                 {islocal &&
                                     <i className="fa fa-solid fa-xmark"

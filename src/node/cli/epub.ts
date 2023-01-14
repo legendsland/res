@@ -406,7 +406,6 @@ export class Epub {
 </head>
 <body>
 <div id="book-container"></div>
-<div id="html-container"></div>
 </body>
 </html>`);
 
@@ -414,7 +413,7 @@ export class Epub {
         const html: any = {
             styles: new Set<string>(),
             head: undefined,
-            body: this.isEpub? $('#book-container') : $('#html-container')
+            body: $('#book-container')
         };
 
         let headStr = `

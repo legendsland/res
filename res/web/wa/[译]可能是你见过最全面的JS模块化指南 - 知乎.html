@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>[译]可能是你见过最全面的JS模块化指南 - 知乎</title><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><meta name="renderer" content="webkit"><meta name="force-rendering" content="webkit"><meta http-equiv="X-UA-Compatible" content="IE=10,chrome=1"><meta name="google-site-verification" content="FTeR0c8arOPKh8c5DYh_9uu98_zJbaWw53J-Sch9MTg"><meta data-rh="true" name="keywords" content="JavaScript,前端开发"><meta data-rh="true" name="description" content="原文链接https://weblogs.asp.net/dixin/understanding-all-javascript-module-formats-and-tools 在使用JS开发现代大型项目时，模块化代码已经是一个必选项，然而，JS语言设计之初仅仅是为了做一些简单的表单提交…"><meta data-rh="true" property="og:title" content="[译]可能是你见过最全面的JS模块化指南"><meta data-rh="true" property="og:url" content="https://zhuanlan.zhihu.com/p/134350363"><meta data-rh="true" property="og:description" content="原文链接https://weblogs.asp.net/dixin/understanding-all-javascript-module-formats-and-tools 在使用JS开发现代大型项目时，模块化代码已经是一个必选项，然而，JS语言设计之初仅仅是为了做一些简单的表单提交…"><meta data-rh="true" property="og:image" content="https://pic1.zhimg.com/v2-19a4d55dc492117d6e48be4617c92cf9_720w.jpg?source=172ae18b"><meta data-rh="true" property="og:type" content="article"><meta data-rh="true" property="og:site_name" content="知乎专栏"><style data-emotion-css="1ujtx97"></style><style data-emotion-css="uodor8"></style><style data-emotion-css="1y9jkzv">.css-1y9jkzv{box-sizing:border-box;margin:0;min-width:0;max-width:100%;background-color:#FFFFFF;width:38px;height:38px;border-radius:50%}</style><style data-emotion-css="1cd9gw4"></style><style data-emotion-css="1yuhvjn">.css-1yuhvjn{margin-top:16px}</style><style data-emotion-css="376mun">.css-376mun{position:relative;display:inline}</style><style data-emotion-css="3jt6os"></style><style data-emotion-css="1wr1m8"></style><style data-emotion-css="hypxot"></style><style data-emotion-css="4em6pe animation-1yvu044">.css-4em6pe{word-break:break-word;line-height:1.6}.css-4em6pe>[data-first-child]{margin-top:0}.css-4em6pe>:last-child{margin-bottom:0}.css-4em6pe h2{clear:left;margin-top:calc((1.4em*2)/1.2);margin-bottom:calc(1.4em/1.2);font-size:1.2em;line-height:1.5;font-weight:600}.css-4em6pe h3{clear:left;margin-top:calc((1.4em*1.5)/1.1);margin-bottom:calc(1.4em/1.1);font-size:1.1em;line-height:1.5;font-weight:600}.css-4em6pe a:focus{outline:none;-webkit-transition:box-shadow 0.3s;transition:box-shadow 0.3s}.css-4em6pe a.external{-webkit-text-decoration:none;text-decoration:none;cursor:pointer;border-bottom:1px solid #808080}.css-4em6pe a.ztext-link:hover,.css-4em6pe a.internal:hover,.css-4em6pe a.external:hover{color:#175199;border-bottom:1px solid #175199}.css-4em6pe a.ztext-link>.ellipsis::after,.css-4em6pe a.internal>.ellipsis::after,.css-4em6pe a.external>.ellipsis::after{content:"..."}.css-4em6pe a.external>.invisible{font:0/0 a;color:transparent;text-shadow:none;background-color:transparent}.css-4em6pe p{margin:1.4em 0}.css-4em6pe blockquote{margin:1.4em 0;padding-left:1em;color:#646464;border-left:3px solid #D3D3D3}.css-4em6pe ol,.css-4em6pe ul{margin:1.4em 0;padding:0;width:100%}.css-4em6pe ol li::before,.css-4em6pe ul li::before{width:1em}.css-4em6pe ul{display:table}.css-4em6pe ul>li{display:table-row;list-style:none}.css-4em6pe ul>li::before{display:table-cell;content:"•  ";white-space:pre}.css-4em6pe ol{display:table;counter-reset:ol}.css-4em6pe ol>li{display:table-row;list-style:none}.css-4em6pe ol>li::before{display:table-cell;text-align:right;counter-increment:ol;content:counter(ol)". ";white-space:pre}.css-4em6pe code{margin:0 2px;padding:3px 4px;border-radius:3px;font-family:Menlo,Monaco,Consolas,"Andale Mono","lucida console","Courier New",monospace;font-size:0.5em;background-color:#F6F6F6}.css-4em6pe pre{padding:calc(0.8em/0.9);font-size:0.5em;word-break:initial;word-wrap:initial;white-space:pre;overflow:auto;-webkit-overflow-scrolling:touch;background:#F6F6F6;border-radius:4px}.css-4em6pe pre code{margin:0;padding:0;font-size:inherit;border-radius:0;background-color:inherit}.css-4em6pe .highlight{margin:1em 0}.css-4em6pe .highlight pre{margin:0}.css-4em6pe .highlight .err{color:#F1403C}.css-4em6pe .highlight .k{font-weight:600}.css-4em6pe .highlight .o{font-weight:600}.css-4em6pe .highlight .c1{font-style:italic;color:#999999}.css-4em6pe .highlight .kc{font-weight:600}.css-4em6pe .highlight .kd{font-weight:600}.css-4em6pe .highlight .kr{font-weight:600}.css-4em6pe .highlight .na{color:#056DE8}.css-4em6pe .highlight .nb{color:#056DE8}.css-4em6pe .highlight .nt{color:#175199}.css-4em6pe .highlight .mi{color:#056DE8}.css-4em6pe .highlight .s2{color:#F1403C}.css-4em6pe .highlight .s1{color:#F1403C}.css-4em6pe .highlight::-webkit-scrollbar{width:6px;height:6px}.css-4em6pe .highlight::-webkit-scrollbar-thumb:horizontal{background-color:rgba(18,18,18,0.5);border-radius:6px}.css-4em6pe .highlight::-webkit-scrollbar-thumb:horizontal:hover{background-color:rgba(18,18,18,0.6)}@-webkit-keyframes animation-1yvu044{from{opacity:0}to{opacity:1}}@keyframes animation-1yvu044{from{opacity:0}to{opacity:1}}</style><style data-emotion-css="1s3a4zw"></style><style data-emotion-css="1xlfegr"></style><style data-emotion-css="1gomreu">.css-1gomreu{position:relative;display:inline-block}</style><style>@-webkit-keyframes spinnerBladeFade{0%{opacity:.85}50%{opacity:.25}to{opacity:.25}}@keyframes spinnerBladeFade{0%{opacity:.85}50%{opacity:.25}to{opacity:.25}}</style><style></style><style>img:not([src]),img[src=""]{opacity:0}@-webkit-keyframes skeleton-wave{0%{-webkit-transform:translateX(-8000%);transform:translateX(-8000%)}to{-webkit-transform:translateX(10000%);transform:translateX(10000%)}}@keyframes skeleton-wave{0%{-webkit-transform:translateX(-8000%);transform:translateX(-8000%)}to{-webkit-transform:translateX(10000%);transform:translateX(10000%)}}@-webkit-keyframes linear-double{0%{-webkit-transform:translateX(-56%);transform:translateX(-56%)}to{-webkit-transform:translateX(56%);transform:translateX(56%)}}@keyframes linear-double{0%{-webkit-transform:translateX(-56%);transform:translateX(-56%)}to{-webkit-transform:translateX(56%);transform:translateX(56%)}}</style><style></style><style data-emotion="css">@-webkit-keyframes animation-p6x5s9{0%{transform:translateX(-100%)}40%{transform:translateX(0px)}60%{transform:translateX(0px)}100%{transform:translateX(100%)}}@keyframes animation-p6x5s9{0%{transform:translateX(-100%)}40%{transform:translateX(0px)}60%{transform:translateX(0px)}100%{transform:translateX(100%)}}@-webkit-keyframes animation-1alkx44{0%,100%{transform:translateY(-100%)}50%{transform:translateY(100%)}}@keyframes animation-1alkx44{0%,100%{transform:translateY(-100%)}50%{transform:translateY(100%)}}</style><style></style><style></style><style>.LoadingBar{background:#056de8;display:none;height:2px;left:0;pointer-events:none;position:fixed;right:0;top:0;-webkit-transform:translateX(-100%);transform:translateX(-100%);z-index:101}@-webkit-keyframes LoadingBarForward{0%{-webkit-transform:translateX(-100%);transform:translateX(-100%)}40%{-webkit-transform:translateX(0);transform:translateX(0)}60%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(100%);transform:translateX(100%)}}@keyframes LoadingBarForward{0%{-webkit-transform:translateX(-100%);transform:translateX(-100%)}40%{-webkit-transform:translateX(0);transform:translateX(0)}60%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(100%);transform:translateX(100%)}}@-webkit-keyframes fxRichTextFadeIn{0%{opacity:0}to{opacity:1}}@keyframes fxRichTextFadeIn{0%{opacity:0}to{opacity:1}}</style><style></style><style type="text/css">@keyframes loading{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes ball-scale-multiple{0%{transform:scale(.22);opacity:0}5%{opacity:1}to{transform:scale(1);opacity:0}}@keyframes bright{0%{opacity:.5}to{opacity:1}}@supports (display:flex){.yidun_popup.yidun_popup--auto .yidun_modal{top:auto;margin:auto}.yidun_popup.yidun_popup--auto .yidun_modal__wrap{display:block}.yidun_popup.yidun_popup--auto .yidun_modal__subwrap{display:-ms-flexbox;display:flex;-ms-flex-direction:column;flex-direction:column;-ms-flex-align:center;align-items:center;-ms-flex-line-pack:center;align-content:center}}</style><meta itemprop="name" content="绛红"><meta itemprop="image" content="https://picx.zhimg.com/v2-8d84124283b78d11babbc0389550ae94_l.jpg?source=32738c0c"><meta itemprop="url" content="https://www.zhihu.com/people/jiang-hong-25-13"><meta itemprop="zhihu:followerCount" content="151"><link type="image/x-icon" rel="shortcut icon" href="data:image/vnd.microsoft.icon;base64,AAABAAEAICAAAAEAIACoEAAAFgAAACgAAAAgAAAAQAAAAAEAIAAAAAAAABAAABMLAAATCwAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/ZQBg/2cAv/9lAP7/ZgD//2YA//9mAf//ZgD//2YA//9mAP//ZgD//2YA//9mAP//ZgD//2YA//9mAf7/ZgH//2YB//9lAP//ZgD//2YB/v9nAP7/agH//2sA//9sAe7/bwC//3EAXwAAAAAAAAAAAAAAAAAAAAD/YAAQ/2YAz/9lAP7/ZgD//2YA//9lAP7/ZgD//2YA//9mAP//ZgD//2YB/v9lAf7/ZgH//2UA//9mAf7/ZgH//2YA//9mAP//ZgH//2YA//9nAf//aAD//2kA//9rAP//bAD//24A//9wAP//cQD+/3QAv/9wABAAAAAAAAAAAP9lAb//ZQH+/2YA//9mAP//ZgH//2YA//9mAP//ZgD//2YA//9mAP//ZgD//2YA//9mAP//ZwH//2YA//9mAf7/ZgD//2YA//9mAP//ZwD//2gA/v9qAP//bAD//2wB/v9uAP//cAD//3IA//9zAP//dQD//3cAzwAAAAD/ZgBf/2YA//9mAP//ZgH+/2YA//9mAP//ZgH//2YA//9lAP7/ZgH//2YB/v9lAP7/ZgD//2UB/v9lAP7/ZgH+/2UB/v9mAP//ZgH//2cA//9pAP//agD//2wA//9uAP//bwD//3AA//9xAf7/dAD//3UA//92AP//eAH//3kAX/9nAL//ZQD//2YB//9mAP//ZgD//2YA//9mAP//ZgD//2UA/v9lAP7/ZgD//2YA//9mAf//ZgD//2YA//9mAP//ZgH//2cB//9nAP//aQD//2sA//9sAP//bgH//28B/v9wAP7/cgH//3MA//91AP7/dgD//3gA//95AP7/ewC//2YB7v9mAf//ZgD//2UA/v9mAf//jUD//59g//+MQP//ZgD//2UA/v9lAf7/ZgH//2YA//9lAP7/ZgD//2UA/v9mAf7/aAD//2kA//9rAP//bAH+/20A/v9vAP//cQH+/3MA//9zAf7/dQD+/3YA//95AP//egD//3sB/v99Af//ZgD//2YB/v9lAP//ZgD//2UA/v+gYP//9e/////////Yv///eSD+/2YA//9mAP//ZgH//2UA/v9mAf//xaD//2gA//9qAf//awD//2wB/v/JoP//lED//3EA//9zAP//dAD//3YB//93AP//eAD+/3oA//97AP//fQH+/38A//9lAP7/ZgH//2YA//9mAP//ZgD//2YA//+CMP//9e/////////s3///ZgD//2YB/v9lAP7/ZgD//6lw////////cxD//2wA//9tAP//bgD///bv////////wpD//30R//91Af7/eAD//3kA//96AP7/fAH//30B/v+AAf//gAD//2YA//9mAP7/ZgD//2YA//9mAP//ZgD//2YA//+fYP////////////+zgP7/ZQH+/2YA//96If//9e////////9+IP//pGD//////////////////////////////////////////////////3wA/v9+Af//gAD//4AA/v+CAP7/ZQD+/2YA//9mAf//ZgH//2UA//9mAf//ZgH+/2YA///FoP///////+zf//95IP//ZwD//9m/////////2r///20B//+lYP//////////////////l0D//9Wv////////////////////////fgD//4AB//+AAf7/ggD+/4QB//9mAP//ZgD//2YA//9mAP//ZgD//2YA//9mAf//ZgH+/3gh/v///////////6Fg//+scP7///////bv//+AIP7/bwD+/6Zg////////3L///3UA//92Af7/eAD//3oA//+LIP////////////+AAP//gQH+/4IB/v+EAP//hQD//2YA//9mAP//ZQD+/2YB//9nAf//ZgD//2UB/v9mAP//ZgD//8ag////////2r///+zf////////rnD//3AA//9xAP//p2D////////dv///dwD+/3kA//95Af7/fAD//40h/v///////////4IA//+DAP//hQD//4YA//+IAP//ZgH+/2YA//9mAP//ZgD//2YA//9mAf//ZQD+/2YA//9nAP//jkD+///////27///fyD//8CQ//9wAP//cQH+/3MA//+oYP///////96///95AP//egD+/3wB//9+Af//jyD/////////////gwD//4UA//+HAf//iAH//4kA//9mAf7/ZgD//2YA//9mAP//ZgH//2YA//9mAP//ZgD+/2gB/v9qAP//9u////////+JMf7/cAH//3EA//9zAP//dAH+/6lg////////3r///3sB//99Af//fQD+/38A//+RIf7///////////+FAf//hwH//4gB/v+KAP//igH+/2YB//9mAf7/ZgH+/2YA//9mAf//cBD//3oh/v97IP7/fSD//34g///kz////////51Q//9xAf7/cwD//3UA//92AP//q2H+///////ev///fQD//34A//9/AP//gAH+/5Ig/////////////4cA//+JAf//iQD+/4sA/v+NAf7/ZgD//2YB//9mAf7/ZgD//2YB/v+9kP///////////////////////////////////////////////////////+7f//+tYP7//////9+///9+Af//gAH+/4EA//+DAP//lCD/////////////iQH//4oB//+MAf//jgH//48A//9mAP//ZgH//2YB/v9mAP//aAD//3wg///av///7N///+3f///t3///9u/////////37///7t///+7f///v3///zp///61g////////37///4AB//+BAP//gwD//4QA/v+VIP////////////+LAf//jAD//44B//+PAP//kQD+/2YB//9mAP//ZwD//2kA//9pAP//awD//20B//9uAP7/cAD//3EA//+5gP///////8uf//93AP//eQH//3oA/v97AP//rmD////////gv///ggD//4MB/v+FAP//hgH+/5ch/v///////////4wA/v+OAP//jwD//5EA//+TAf7/ZgD//2cA//9pAf//agD//2wA//9tAP//bwD//3AA//9yAP//cwD//7mA////////zJ///3kA//97Af//fAD//34A//+vYP///////+C///+EAP//hQD//4cA//+HAf7/mCD/////////////jwD//5AA/v+RAf//kwH+/5QA//9nAP//aQH//2oB/v9sAf7/bQD//5tQ//+vcP7/ehH+/3QB//91AP//uoD////////Nn///ewD//3wB/v9+AP//gAD//7Bh////////4L///4UA//+HAP7/iAD//4oB/v+aIP////////////+QAP//kgD//5MA//+UAP//lwD+/2kA//9qAP//bAD//20A//9vAP//lED////////u3///hyD//3cB//+8gP///////86f//98AP//fgD//4AA//+BAP//sWD////////gv///iAH//4kA//+KAP//jAH//5sg/////////////5IB//+TAf//lQD//5cB/v+YAP//agD+/20B//9uAf//cAH//3EA//9yAP//3L/////////DkP//eAH+/7yA////////z5///34A//+AAf//gQD//4MB/v+yYP///////+G///+JAf//igD//4wA//+OAP//nSD/////////////lAH//5UA//+XAf7/mAD//5oA//9sAf7/bgH+/3AA//9xAP//cwD//3QA/v+pYP////////fv///ev///79/////////37///37///9+////fv///s2D//7Nh////////9+///+G////jv///47///+O////jv/////////////+VAP//lwD+/5gA//+aAP//mwD//24A//9wAP//cQD//3MA/v91AP//dgD//4gg//////////////////////////////////////////////////+0YP//tGD//////////////////////////////////////////////////5gA/v+ZAf//mgD//5wA//+eAf//cQD//3EB/v9zAP//dQD//3YA//94AP//eQH+/9av////////x5D//6BA/v+hQP//oUD//6NA/v+kQP//pUD//4kB//+REf//qUD//6pA//+rQP//rED//61A//+uQP//r0D//7BA//+yQP//mQD//5sA/v+cAf//ngD+/58A//9yAP//dAH//3UA//92AP//eAH+/3kA/v97Af//rWD////////nz///gQD//4IA//+FAf//hgH//4cA/v+JAP//igD+/4wA//+NAP//jwD//5AA//+SAf7/kwD//5YB/v+WAP//mAD//5oA/v+bAP//nQH//54A/v+fAP//oQD//3QA//91Af//dwD//3gA//96Af//ewD//30A//9/AP//t3D///fv//+TIP7/hAD//4UA//+HAP//iAD+/4sA//+MAf//jQD//48A//+RAf//kgH//5QA//+VAP//lwH+/5gB/v+aAP//mwH//50B//+eAP//oAD+/6EA//+jAO//dwG//3cA//95AP//egH+/3sA//99AP//fwD//4AA//+CAf//hAD//4UA//+GAP7/hwH+/4kA//+LAf7/jAD//44B/v+PAP//kQH+/5MA//+VAf7/lQD//5cA//+YAP//mgD//5wB//+dAP//nwH//6AA//+iAf//owH//6QAv/94AGD/eQH//3oA//98Af//fgH//4AA//+AAP//ggH//4MA//+FAP7/hgH//4gA//+KAP//iwH//40A//+OAP//kAD//5EA//+TAP//lQD//5YB/v+XAP//mQD//5sA/v+cAf7/nQH//58A//+gAP//ogH//6MA//+lAP//pgBfAAAAAP96Ac//fAD//34B/v+AAf//gQD//4IB//+DAf7/hgH//4YA/v+IAf7/igH+/4sB/v+NAP//jgD+/5AA/v+RAP//kwD+/5UA//+XAP7/lwD//5kA//+aAP//nAD//54B/v+fAP//oQD//6IB//+kAf7/pQD//6cAvwAAAAAAAAAA/4AAEP99AL//gAH+/4EA//+DAP//hAH+/4UA//+HAf//iQH//4oA//+LAP//jQH+/44A//+QAP//kgH+/5QA/v+UAP//lgD//5gA//+ZAP//mwD//5wA//+dAP//nwH//6EB//+iAf//owD//6UA//+nAM//nwAQAAAAAAAAAAAAAAAAAAAAAP+BAF//gwC//4QA7/+FAP7/hwD//4kB/v+KAP//jAD//40A//+QAf7/kAD//5IB//+UAf//lQD//5cA//+YAP//mgH+/5sA//+dAf7/ngD//58A//+hAP//owH//6QA//+lAL//pgBfAAAAAAAAAAAAAAAA4AAAB4AAAAGAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAABgAAAAeAAAAc="><link rel="canonical" href="https://zhuanlan.zhihu.com/p/134350363"><style>img[src="data:,"],source[src="data:,"]{display:none!important}</style></head><head>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container"><a id="ariaTipText" role="pagedescription" aria-label="欢迎进入 [译]可能是你见过最全面的JS模块化指南 - 知乎,盲人用户使用操作智能引导，请按快捷键Ctrl+Alt+R；阅读详细操作说明请按快捷键Ctrl+Alt+问号键。" aria-atomic="true" class="skipAutoFix" style="width:1px;height:1px"><img src="data:," style="position:absolute;top:0px;width:1px!important;height:1px!important"></a><div id="root"><div class="App"><div class="LoadingBar  css-uzm3ri"></div><main role="main" class="App-main"><div class="Post-content" data-zop-usertoken="{&quot;userToken&quot;:&quot;&quot;}" data-zop="{&quot;authorName&quot;:&quot;绛红&quot;,&quot;itemId&quot;:134350363,&quot;title&quot;:&quot;[译]可能是你见过最全面的JS模块化指南&quot;,&quot;type&quot;:&quot;article&quot;}" data-za-detail-view-path-module="PostItem" data-za-extra-module="{&quot;card&quot;:{&quot;content&quot;:{&quot;type&quot;:&quot;Post&quot;,&quot;token&quot;:&quot;134350363&quot;}}}"><article class="Post-Main Post-NormalMain" tabindex="-1"><header class="Post-Header"><h1 class="Post-Title">[译]可能是你见过最全面的JS模块化指南</h1><div class="Post-Author"><div class="AuthorInfo" itemprop="author" itemscope="" itemtype="http://schema.org/Person"><div class="AuthorInfo"><span class="UserLink AuthorInfo-avatarWrapper"><div class="css-1gomreu"><a href="https://www.zhihu.com/people/jiang-hong-25-13" target="_blank" class="UserLink-link" data-za-detail-view-element_name="User"><img class="Avatar AuthorInfo-avatar css-1y9jkzv" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCAK8ArwDASIAAhEBAxEB/8QAHQABAAEFAQEBAAAAAAAAAAAAAAkCBQYHCAQDAf/EAFoQAQABAgQBBgcLCAYGBQ0AAAADBAUCBgcTCAEUIzNDUwkSFWNzg5MRFiIkJTI0QqOzwxdEVFVkdNPjIUFFUmLwMTVyhKTzYZSywuQYJidRcYGCkZK0wdTh/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAL/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCTsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABTufDa8171itGhem1fnu6Rc7njkjpqCh3NvndbJ1cbRPBbxN6o6/5jzZb88Ulo5ja6Smq6SSig8Tlgkkk6vzkYOuxTt7fVqgAAAAAAAAAAAAAAAAFMfm1Snb+GCoR/U3HjqFlfiQuuXM9RW+LJNPeqi0yU+CDbkoI+STb5xuO/8Ac+Bux/M7yMFQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACrrFKnrARz+E31CkumestaYUc/JJTWOg8q1mD9oqOjj+zj+0bD8F7l/menucs27X+tL1TUUf+7x/wDiHHXFDnD3+cQOecyRybmCS7yUVPj83T9HH92kU4BLBDY+GHLtTLy9JeKituOP/rG3+HGDogAAAAAAAAAAAAAAAAABV9RSAiP47sp+9PiZzRLHFt0t8jpr1H6yPbk+0jkSC8HWoWLUbh7ypdK6TeuFvg8j1+PH8Ppafo/u9v2jlTwoWX+Z6hZKzJH/AGpZamikx/u8n/iGZeC9zJJUZYzxk+ok+h19NcY8HpI+kFu5ABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAtOarx728sXfMEm34lroKmt+H5uNdmreKW4Y7Nw5ajXLB1kGXan/P2gIaausluFTVXKo/PJOcyJoOGi2eQ+HzTy2SfPjy7RSY/SSR7iFiePbhx/wByNOZpzS8y09yxRfUgstFH9mDIwABT1bQPELxmab6D45Mvx7mYc0bfR2ekqNvY/eJOzB0AOKeGXi51+141WwWioyfl+PJtPHJJcpoKSfcpe75Ocbneebdqbm5gBUAAAAAAAAMV1YuGdLRpzfrlpvaI7nmSjoNy2UknaVPZuBcj+Ec1eyve8do1cytR3aCnk2quOlp+YXCk9WCSQYVpdq1kTWLK8GaNPr3HcqXq5MG3tyUkndyR9mzUAAHD3hRbfHJlLId3+vHdqmi/4fc/Dar8GfmDyfrTfsv7vwL5YZPgecp5P5jevhNKfc0Zy9U/o+Yo/tKeRyfwK3jyVxP5Nj/WHPaL2lPJ/DFpcBV9RSIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGneMDc/8AJj1G2/1LJ943E1vxIWfy5oDqHaPr1GXa34HqwQsVXUz+s6NOtkvpMmWHb7S2U33aCn6RgxyyfMkTcaH3j3waLZDvf6Zl23SeP/u4M3Vbfd/PUtS8S+ttr0E0rrc4yRRz3So+JWmkx9pW9n7MGpuM/i2k0gosenWQamPlzlcI9yon5f7JppOrk9J3bkThh4Ys08SOZJ8w32tq6XLNHP8AKt3k5ZMdRWS93H5zpGA6eZLzlxEau0uW+eyVd7zJX84uddP0m3H+cVCYrT7ImW9M8p2/JeVaLmlss8G3Hg/vf45POAqyPkfKWneW6XKWS7BT2m10fVwQR/56RkAAAAAAAAAAObOKvhDy7rlbJcyZapaO3Z6pY/i9Vjj6O4/s9R/EdJqvqAhS081E1J4c9Ssdws+Ge3Xa1yclHdrTV9XPHycvu46eoS26J6yZT11yNTZ2ypL4uCToq+hx9ZSVPaU8jmnwg3DXFmjL2PXDKdt+W7HH8tRxx/TKLvNvvI3JHC3r3cdAdSIL3LJJjy9c9ujvVL1m5T956SMExY89trKG6UEFyt9THUUtZHuU88faRvQDkPwmkm3onl6PvMzR/dyOI+FCs5vxG6eVMf66jj+zkjdh+FCr+Sm02ydb/wCupvsmP/h//wCuP+FCn55xIaeU8fz/AC1HJ9nILTLqVSkQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPBmC1+XLDdLLJ/aFHU03tI9t71XS9n8/swQK11vltdfVW2T59HJJT/D82l14H79yZk4Zclcvj9JQR1Fukwf3Nuok/D20bXFZk/3j8Q+ecvxxbcElz57BHg6uOOo6SP7x2L4MTOnPNOs15JqJOns9357HH5uoj/lg7VRScfGr8mo+tlVlajrfHsmS/kqCPvKn84k/D9Wkx1KzhFp9p/mTO1Vij+Q7bUVviYu82+jQf11wqbpU1VyuFTJUVVRJzmok7yQEhXgzNL4qDLGYdXqyD41dKjyNQSY/0aPrPtPu3cH1P8feNScKeV/efw65DtO3t45LLHWyekqOkbZAAAAAAAAAAAAB8aqnpqyjmpq6GOSmnj28eCT68fnEMXEbpT+RnWHMORo+T3LdHJz22/46KTq00vo3AnhQckxYMWStRqeP4UnOLFUYuzx9pH+ILbG8HPq5U500orcgXio3Ljkuo24P3KTq/wAR1mil8H3neXKnEVbrRUS/Fc2UFRapMGPvOsj+0jSsbn/0d4IR9+FGvny9kDK8f5vSVtxkwesjjj/Eav8AB5ZPkzLxG0V7ki6DK9BU3GT0n0eP7x4uPfOkeb+JC900Eu5Dlukp7N6yPpJPtJJHRngxMiclvyHmjUOoj6S8XPydT4/N0/8AMkFu1wBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACrrMfpAUqnI2jXGNmDUzifveks1tt+DLW5cae0+Jh+OblH2knpNuR1zyfPxgjg8JvkfyfqFlfUSni6C+WyW3VHpKf+XJ9m15wD6kR5E4gbdbbhUxx27NkElmn3O86yn+0dn8fmQ/fpw8XG5U9NuVuV6uO8wej6uT7ORFRS1lTR1MFdb6nbqqOSOojnj7OQErXH/mSTL/DNfqaP+3KuitXtJNz8NFLBT84mgpo+0k23b/E1rPS678GWV8100kflCPMVNTX6COT6PWxxybn8Rx9plb/LGpeULR+sL1bqbb/3iME3eXLPFl/L1uskfzLfSU1F7OPbe9Vjk+Hj/wC2pAAAAAAAAAAAAAcz+EQsXJd+Gm6VvJ8+x3e3VseP1mx+I6YaP41qfnHDBnnc7OkppP8AiIwRV6X5gqcp6l5UzTRy7eO33qiqdz1iZvUzP9m00yBe9Q7vLHzGx0klZ/T8Dck7OP2iDyPdj8eWn6+Pq3X3HPxFcmcOW16MZYrty32OCmqL9Jgk3I563b6v1YOT7/fLlmS93TNN4l3K66VclbPJJ3knSJjuGnIv5NdCsl5TqIuSOtp7bHUVeDk5fmVNR0kn3iJ/QXIf5TNZsm5N2tyC4XaPnHafFo+kk+zjTXfUwdngjFqh8q6sprfQVVyrOop4JKiRy5wdcWGY+IbMmcMv5rtdDQY6DljuVpwUuHlwfEtzb25Pd6zs+k84IdUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKdvc8SOTtOjVKfqgiD0dzBJpnxgWutvHxfBR5xrbdV7ndyVElP+Il86v/b7tEjxwZDrtP8AiQzDU0+5BS5gkjv1BPH5zrPtI0knDlqxT60aQZeztHLHz3Y5nc8EfZ1sfWf584DPb/Y6HMlhuOW7pF49LdKSSiqPRyR7aDbN2W67J+Z7vlK6R7dVY6+pt0kfo5E631/++i48IbpnLkvW/wB+NPTbduzpSc9+B2dbH0dR+H7QHMGCsqo6aehjqZI6Wo25JINzo5Ntmugkf/p1053PmSZttP8A95GwRlWlF08h6qZNu8n9n363VO5/vEYJwtz4apVt/D7zApAea4XS22mkkrrpcIKKlj7eeTbjelj+eMj5X1IyrcMnZwtMdytF0j26iDqwXuCopqiGOpo5Y54ZOrkj+H9o+riTMfBxrFonvZt4V9W75Hzf4zjy5XVHWe06OT1kajSHwh/M7x7yeIvLEmXbpRyc2qLlSU8kcccn7RT9ZGDt4eOzXm0ZktdNebHcoLlb6uPcgq6XHHjjkewAVfXa81i10030PsPlvPl728dRHJzShg6SsrPRxg2H9fB2n+BhmY9ZNKcn3iHLmZNQ8t2241GPbjpJ6+OOTpEdeoHGBxFcReZPeVpRRXSy0Nf1Frsfw6yeLzlR/wAttPRbwcG3XUuZ9dL7y1dV4/OZLLQybm5+8VHaerB3p9RS/I4/gYO77N+gNH8bMm3wwZ56XrIKaP8A4iNvBzV4Q288lp4ZrpRYvcwY7xd7dRR+03/wwRS+jV9Zjx7nSY5O0UdX/sH98HZfgy9P+W8al5h1DrIuhy/bOZQY/wBpqP5caSZzlwFadcuQ+Hq0XOtpuSO4ZsnkvM/j/wCnbk+j/Z+57R0WDT3FvnWLIHD1nS8csnJgqq6g5bXRx8vJ/olqOj93/wCXu4//AIHIfgvbZJPqXnG7fUpLDHFyY/SVH8tevCaaoc4r8taQUFV8Cnj8vXPB5zq6f8SRsfwauQ5Mv6P3TO1RHtz5sufQfuVP0cf4gOvAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFXWYFIDlbwg+icupGlGDPdnot+9ZL3K2SP9It35xH6vrPVuX+AfiAj0r1HkyBmO5eJl7Nkkcfjyfmlb2cnrOr9mlHkp+cQ7cke5gk+pJ0iJPjK4c5dDNRcdyslL/wCaOZJJai048H5pJ2lGCWz6ndufOOTSXHqvofccdvpty8ZU5fLVB3kkcf0iP2eNhnA7xUxam2SDSvPlz9zN1nj26Seb+jyvRx/18v8A65I+0/5jrbHHFUYMcXWYJI9sECXWYP4auOSWnkwVMfz4+kbh4r9G5dE9ab3luji27JcPlWy4/wBmk7P1ckbT4JyNOs2Uufch5ezjBJuR3i001b8DzkfSMjcjeDh1M99GkVbp3cKncuGT6vo8En6FUdX+I65AAAc/8T3CdlLX21Y7xTckFlzlRRe7Q3Hkj5cO/wC51cdR/Xyx/dugAER2juuGrXCHqFW5NzBTVnLbqOr271YJ5Nz1lP5zb9olPyDnjLOpGV7fnHKVyir7ZdMHLUR44+k/o7SP2jQHG7wwxaxZVx51yhb4/frYY/6I8H9p036P6Tu3DfD5xTahcO1ZW0tkpoLlZK/l92ezVvLy8kcdT3kfudWCQXim4q8tcPuX8Ntoo4btnG4x8vMLXgl5fEp4/wBIqPN/eI+sg5A1e4x9V6qpuN3qKufrLteKrpKe2R+b/DjYVyY8+6/apR8mOTHecz5rr9vx/SfhxpetDNG8t6F6d2/JOX/ckxx/GK+t8TpKup7SQW+Oi2gunmg+XfIOR7XHvVH0+5z/AEyrk85J+G2MqUiAAFXVuD/ChZwijs+RsgRy/DqJ6m9Tx7nd7ccf3kju3pPH6NEZxwaiRagcQ9+5nU79FlvbsNJ2nV9Z9puC2hWT6ZZDrtUNQrDkC37nj3yvjopMeDs4+0k9nuMYd1+DR0g5au5XrW28UXR08fkay+PyeJ0kn0iT8MHfVqtdDZ7VS2m3xbFFRwR08EfzOjjWPUTPlg0yybd895orNm32mDnEnL/f5O7j85J/+WQVdZTW+jx1tZUxwQU8e5Jjk6OONFdxo8VH5cMz+83KFd4mSrHUfF9v+06j9I9H3Yhqy41GduJzW/HJtSY79nS7dHHg/N4/4ccf3aYzI+T7Tp/k+0ZJy/g8S3Wekjoo/wDHtuTfB9cOcuS7Hh1szhbtu9XyDbssE8fSUlu7z0kn3bs8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABhWrel+V9ZMh3TIObo9yir4+v5OspJOzqI2agIUtRcg594fdS57Bc6uott6sdRHWUFyp+07usjSA8KPGxYdWKalyTqRPSWfO0ce3HjxybdPc/R93J5ttDiF4c8ncQmVuS03vDyUF6t/L8k3XBg8eSjk/hoodV9J8/wCjGZ8eUs8WnmlV1lJPH9Hr4+8p5ASP8eOjfJqnpHPmS1U3j5iyZuXGDB3lP+cR/ierRV+kdE6V8dGtmm9HBZLhW0ecLRTx7ccF43JKjb/eGis1XS23zMl0vdnsEdloqyrkqILdgk3OZ+b3BbcPBbqx+SfXiyVNwqdi0Xz5Bufj9X0nVye0S8fU6T56BL6+Dpdv/YTGcJ+rkesmiNizJUy7l2t8fkq7R9Z8ZjENxgAAAp3PgdH0aMnwgfD5Fp3nbBqjleikwWHNE/xvBHH9EuP8z+IkBwavZIk1dk0TjreSTMOC0+WuWOP6ke51fpO0V6xaZ2nWDTS/aeXzlw7F0pNuDH3FT2cntARweDyvmTbPxCYI8ybeCuulslorLPj6uOpk25Nv1ke4lR+qgprqfMmn+bZ6ao3Lbfsv1+348fWU9THImI4cdX6HW7Si0Z2j2uS4+JzK7QdxWx9Z/E9YLbQH7/R3r8EAAMA111NpNHNJsxZ/qscfJJb6Tl5p48nWVsnRxx+0kQrVVZU3CpnrrhU789RJJJJjx9pI7U8JTrHiumaLToxZ6n4rY/lW9bf6bJ9Hj9n944lBkGQck3/UrONoyNlin8e4Xefm+Dlk7PziZfKOXskaE6YW6w4rlTW/L+VaHlwT1dVjjwe59eSST/pkx9Iiq4d9f6Hh8rL1mijyDBfcw1kEdPbK6qr9uOgj7To9tZ9ZOIrVTXKrjkz1f/kunk3ILVSx7FHB6v8AiC25eLjjPuWr3LVaf6by1Ftyb+dz/MqLv/Dp304K+Eyp1Uu9LqbqBbdvJtvk3KSkk6PyvU//AK708KHBBd9RJqXP+r9DWW3KkfSQW7Huc4u38On+8STW610NroILba6KnpKKjj26eCCPbjjj9GIeqOPb6uPq/VqgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYrqNpdknVzLc2Us+WCnutuk6XB4/WQSd5HJ2cjKgEX+vPADqJkHHPf9NcNRnOwxdJJB/alJ6vtPVuU56eWnmx01RFJHJH0cm/92nt/Dan1Y4aNHNZaeaozxlCHFcZI9vludH8UrMHrO09ZuAhq6vrOzdVeDy1g5ch6rz6d3et8S0Z0wbce5Jt7dxj6v2nVtd8VPD1U8POf4bRb6msrrFc4ecWmtnweJJ5yOTvNtp2hrKm31lLcrfU7FVRyc5gkj7OSP8A5YtPQNYcOOstr1y0ltedoMXJyXGP4ldoMHYVsfWfxGzxAxfUnPlp0zyRf893yTBzWx0clRJg3Os7uP7v2jKHDvhMtUeYZYy9pNb5Onuknlm5+J+jR9X9p92DjvLGumcbPrrS683Cp37v5a8o1+32kcnRyU/o9tM7Q1kVwoILlTySeJUR7ke50fWIfeEnSv8AK5rxl7L9ZTblot8nlW593zan7P2m2mLBGd4R/Sf3p6nUWplrptu3Zwj26vb/AFjT/wASPb9msnAFrXNpxqr7xLlV7dkzp8W6TH1Fx/N5Pw3cnF7pf+VbQTMuX6Sl5JLla8HlW07f6TT/AMvcjQ90tZLTzYKmjqdjHH0kc8fR7YJ7usx4/wARSwHQjUaLVjSTKmfo+vulB8b83Ux9HJ9oz4BjGpWerFpfka9Z7zBJyR0VjpOc48HufP7uP2jJ0e3hJdcPKF1t+h2X63x4Lf8AKN+/efzeP8T1gONM45su2fM1XjON8l3K28VclbUY/Sf521o+p0b8+u7k4OuC/JeeMmUOqmrNFUXHBdJOSW02qTFsR82/rqJO83Pu/SC3JWmekGo+sd68i6eZXrLlNydZJ1dPT+kkSEcPPAPkzTCalzbqNLT5mzLT9JHDt/J9BJ7n9UfaOosv5asmUrPBZMt2WjtVup+rpaGn2I41zBT6NUAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABpbiy0Pi1w0iuOX7fHH5btfyjZZP2mPs/WR9Gh8xxyU+PHHURSR4+0jx9ZGnsRV8e+iv5NdWuXOVnpOWOw50weUY/E6unrfziP8QHm4GtdOXSPVaHLd7rfEy3nDHHRVePH1cFT+b1H+e8St/1Y/SfXQJfWS08FWuv5Z9J6ahvlbyyZoyxyx227+P1k/d1HrPw5AdEejQ8cZWe/wAoHETmu5R1Pj0VrqPI1Jt9J0dP0f3m4lpzxmiLJmTL3m2XpI7PbKm4/P7uPcQZ1dwkuFTPcqySSSask5zJJj84CQrwY2QIqLKWa9Taqn9ya6Vnkmkk5f0an6x281Bwk5P94fDtke07e3VVFs8oz8nnKjpG3wUyR7nWR7mD2iFjiJ07/JfrZm/JP5rR3PnFJ+7VHSRpq0c3hOcgYbZnXKOodLB7kd4oZbXV4/O0/wAz7OT7MGceDI1Ew3DJ+aNNK6XpLXVx3WjwdZ0dR0cn2n3jt3cRPcBWdPefxIWG2yS/FcyU9TZZPw/tI0sPnQYZrBqdZdH9Ob3qFfeXcwWuDl2IP0io7OP1kiFnM+YLtnDMlxzRmCt37pdKuStq55O0kkdW+ER109+GfIdIMv13yRlOTcue32lx/luQfr93/jBn+gOk9drZqpZcgUe5gpayTnNzn7iij6yT8NNJabbQ2a201ptdNHSUVBBHTwQYMHVxx9W5V8Hrofi0/wBNsepF8odu+Z06SDx+wt3Z+06x1mAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA0vxc6Nya0aJ3exWyl5JL3bPlSzcv7RF2frI26FP1QQK445PHx7ns8ba/DDrRU6F6r27NskknkSs+Tr1Bg7Si7z1fWNocfGgH5L9RfyiZfotvL2cJ5JJMEfV0lx7SP1nWe0csi0s/G5nSnsfC9mGut9THJgzBHRW6knwdpHUSfw0VGWbHJmjM9oy3R9fdK+mt0fadZJtr5ftXNRcz5Fsem17zDPVWDLuPkkt1Hjij93B7n+j3ZGYcIdkiv/Ejp7bqiPx44r1zn2cckn4YJh6G301ro4LbTx7cNHHHTR4MHdxvQp3NxUIHM/hDcp++Thyrbvt7k2W7nTXH1fVyfeOmGu+IjL/vo0Hz/AGTb3OcZdrfger3AQ/6T5glyvqdlTMkku35LvVFJues6RLHxQ6723QnTCuzJhkp5L3dPi1hpuXH19T3no4+sQ49Zg3e8/uMnz7qVnjU2uorjnnMU91mt9JHR0nj9hHGLY/XVlTcK+e5XCpknqqySSSeSSTrJJOskbT4W9F5ddNYLRlKoik8kUfyjescfZ0UfZ+s6tqX/AKPs0svBHof+RvSSlud6oeTDmTNfLFcLngx4Okp49voKf/3fiCHQtLTxUdNBTUccccEce3Hgj6PbfUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYTrDppl/V/T275AzJF8SuFP0ePb6iTs6j1aGrULIl+01zndMi5np9i4Wefbx93JH3ic3c/9jkvjs4bMOqmUfyj5Vtu5mjLlPJuRx8nSV9u7SP0kYtGG6o8HDlOW+a/T5lxxe7Bluy1FR8PvJOjj/EcrfWSbeDd03myvpHcc/wBwptuqzhX9B2fxKn6P7zcEOuVX135/npGHSVlyqKnHmmn3OZU8nN44+8pu8BmDx3W1xXu1VVpk6usp5KeT1ke2+8FRHWQ4Kmn6TBI+3L/owAgcvFrksd1rrRURbeO3zyU236OTbeNvrjg03qdO+IfMPxaSO3Zok8vUknebnWezk3GmMs5Yv+b8wW/K+WLbJXXS7z83pKXB2kgN9cDOgf5YNV4b/e6LfyxlCSOtrtyPo6ip/N6f/PdpY/rtZ8Pmjdo0L0ytuRqDlinqY+XnFxro/wA7rJOsk5fN/MbKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU/ZqgHNme+AbQTPmbp841Nvu9pnuNRzmqpbVV7FPPJ2nR7fRug7JZ7bluyUOX7HRU9DbrfBFT0kEHwI44o+z9muCmeoip4cclR0cEf1wWjMdRLJggsFH9KuH2cfaLDVXTm9ZuWv/V1n+L7Hfx9o+8lRW+JPcuruN8k5tSebjXChjjtdHgtsd7o49v6m2CiwVEVvrPJO7uUVZ8Ytk+P7tkP/AGGFczkj+RI6mPpJOc2yrj7OTu2UWq4eVKPnPVzx9HJH3cgME1t0C0618s9Lac/W+f5Px8slDWUsmxU0/LJ7nj/9x4NGOGPSTQiOSpyRZJOW6VEe1JdblPv1no9zs22QFXWY/wCIpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABY75UeUKyCwR/M+kV+Pza6V1ZFb6aeuqOop2Jzx3LkoObQR+Pd750kmDu4wfeh+WK+e7cy3IY+jpI5Ojp44+8e3yxTUePb8r2eD/AALXjj3PEoZPlOenj+iQdHR0/pHlt14vdZR1VTb6a1wQUfZ7ALxcaPypR7lHTUc+OPpI56Hs3lobpzeowXvk6OCsk5tc4+7qe8eWhqPKlNjuVZYI+jk25J6HoJI1clPzfx7tJcuf2i4fF6iTtI/OAzcWbL9ZL4mOyXCX41R/X7yNeQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAeO83DyPbcdTH1/Zx+cBaLrUR3S5c2x/6vtfxmr/AIa11V0io6Ka7XPnHPb59HjwfA243lzBUeS7bBaNz41USc9r8aihzBcswVOC0Vltp6uCSTtI+rBfsv3S0SWrBbejpMEke35tYYMv+T8eOK4W26Vf7r1ci3ZgjprXdZ6az7keCPo5PH6R8MF4qfE2+j8TzfRgzmkukVlwVVZdNvntZJubGDb6NaKTMltkuVVHUUPwLh0cmwxee4VNR0cknwP7kfRsknkitdngveW7bHHgk6ySfpJIwerbrrfj2usrbP1f7RRMvpKyKspsFdTy7mCTq5Gr580XeorILlUSxyY6fq+jj6Rl+X6yKjqcEdPJ8nXTpKTzcnaRgyYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFTFK64RVlynuUnSUVn6vz9Su+Y7pJb6D4v8ASqjo4FhutruUdNRW2zxxyQU/SSdJ1kgPLPY7Ts4Lvmi7yQVVZ0m29tmzBlu11OC22e21Hj1Em3vyMenyvmSsmx1NRJHJjk6Tx5J32tuW73b6yCu5tT4+bybm3JOD1Zjs9gs9fPU3StqJ56iTcjgg6NaLxY6m144Ob9PS1n0eTA9txy3mS6VM9dURU/xjs+cR9GyGirMwUlDS0sllo5+b/wB+rBaKuny3vQ5fukVRBVU8cfxqBe/k3Jdkxx1m5V0tRULDfMv3u8XLHcubU8e5+0PVPb8yVlkwWSopqOTb6ufnYPLHHkS4TdJLWUGOTs3qqrPHa8fk2nqfiVw+iTySbnN6laPeXe/H6un/AOsPbS2PMkdHPbZOb46WTsJKjqwZfY7h5UoPjHR1UfR1GDH3i5MPwSVtnx0t7uG348nxevjwSbno5GZR9Jg/wApAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU9YqAeCus9tumPBLcKGOfb7x8Peflv9URrsAtXvTy1+qY/tD3p5a/VMf2i6gLV708tfqmP7Q96eWv1TH9ouoC0+8/LfaWmN++9PLX6pj9pIuoC1e9PLX6pj9pIe9PLX6pj9pIuoC1e9PLX6pj9pIuEFPHRw4KaOLbwR9Xt9I+oAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//2Q==" srcset="" alt="绛红" sizes=""></a></div></span><div class="AuthorInfo-content"><div class="AuthorInfo-head"><span class="UserLink AuthorInfo-name"><div class="css-1gomreu"><a href="https://www.zhihu.com/people/jiang-hong-25-13" target="_blank" class="UserLink-link" data-za-detail-view-element_name="User">绛红</a></div></span></div><div class="AuthorInfo-detail"><div class="AuthorInfo-badge"></div></div></div></div></div></div><div class="LabelContainer-wrapper"></div><div role="button" tabindex="0"><span class="Voters"><button type="button" class="Button Button--plain">15 人<!-- -->赞同了该文章</button></span></div></header><div class="Post-RichTextContainer"><div class="css-1yuhvjn"><div class="css-376mun"><div class="RichText ztext Post-RichText css-4em6pe" options="[object Object]"><blockquote data-first-child="" data-pid="TRdskrgq"> 原文链接<a href="https://link.zhihu.com/?target=https%3A//weblogs.asp.net/dixin/understanding-all-javascript-module-formats-and-tools" class=" external" target="_blank" rel="nofollow noreferrer" data-za-detail-view-id="1043"><span class="invisible">https://</span><span class="visible">weblogs.asp.net/dixin/u</span><span class="invisible">nderstanding-all-javascript-module-formats-and-tools</span><span class="ellipsis"></span></a><br> </blockquote><p data-pid="u9bT8iVB">在使用JS开发现代大型项目时，模块化代码已经是一个必选项，然而，JS语言设计之初仅仅是为了做一些简单的表单提交，并没有内置模块或者命名空间的概念。经过长时间的发展，针对JS的模块化已经涌现了大量的解决方案。本文将详细讨论下目前市面上主流的JS模块化所使用到的技术。</p><h2>IIFE module: JS模块化模式</h2><p data-pid="Oyjf9Cab">在浏览器中，在全局环境定义变量将导致当前网页中所有JS文件的作用域被污染：</p><div class="highlight"><pre><code class="language-js"><span class="c1">// Define global variables.
+</span><span class="c1"></span><span class="kd">let</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="kr">const</span> <span class="nx">increase</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span>
+<span class="kr">const</span> <span class="nx">reset</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Count is reset."</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="c1">// Use global variables.
+</span><span class="c1"></span><span class="nx">increase</span><span class="p">();</span>
+<span class="nx">reset</span><span class="p">();</span>
+</code></pre></div><p data-pid="48Gemjxb">为了避免全局污染，我们经常使用一个匿名函数来包裹代码：</p><div class="highlight"><pre><code class="language-js"><span class="p">(()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="kd">let</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="c1">// ...
+</span><span class="c1"></span><span class="p">});</span>
+</code></pre></div><p data-pid="Vm9aZ8yR">显然，这样做就不会产生全局变量，但这里仅仅定义了一个函数，里面的代码并未执行。</p><h3>IIFE：立即调用函数表达式</h3><p data-pid="_d5rAYkH">执行一个函数<code>f</code>的表达式为<code>f()</code>，同样的，执行一个匿名函数<code>(() =&gt; {})</code>的方法为<code>(() =&gt; {})()</code>：</p><div class="highlight"><pre><code class="language-js"><span class="p">(()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="kd">let</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="c1">// ...
+</span><span class="c1"></span><span class="p">})();</span>
+</code></pre></div><p data-pid="3VfaVqmk">这就是IIFE(立即函数调用表达式)，利用它，我们可以定义一个简单的模块：</p><div class="highlight"><pre><code class="language-js"><span class="c1">// Define IIFE module.
+</span><span class="c1"></span><span class="kr">const</span> <span class="nx">iifeCounterModule</span> <span class="o">=</span> <span class="p">(()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="kd">let</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="nx">increase</span><span class="o">:</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="o">++</span><span class="nx">count</span><span class="p">,</span>
+        <span class="nx">reset</span><span class="o">:</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+            <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Count is reset."</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+<span class="p">})();</span>
+
+<span class="c1">// Use IIFE module.
+</span><span class="c1"></span><span class="nx">iifeCounterModule</span><span class="p">.</span><span class="nx">increase</span><span class="p">();</span>
+<span class="nx">iifeCounterModule</span><span class="p">.</span><span class="nx">reset</span><span class="p">();</span>
+</code></pre></div><p data-pid="2ko9w6gF">上面这段代码将模块代码包裹在了一个IIFE中。模块内逻辑通过匿名函数返回的对象对外暴露出来，而在这个过程中仅有一个模块名作为全局变量被引入。任何时候，我们仅需要调用这个模块名，就可以使用其内部的所有api。这就是JS模块化模式。</p><h3>混合导入(Import mixins)</h3><p data-pid="cZL6F2h3">有时我们的模块需要依赖于其他的模块。而在JS模块化模式中，每个依赖模块都是一个全局变量。我们可以直接在匿名函数中使用它们，或者将依赖作为参数传入匿名中：</p><div class="highlight"><pre><code class="language-js"><span class="c1">// Define IIFE module with dependencies.
+</span><span class="c1"></span><span class="kr">const</span> <span class="nx">iifeCounterModule</span> <span class="o">=</span> <span class="p">((</span><span class="nx">dependencyModule1</span><span class="p">,</span> <span class="nx">dependencyModule2</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="kd">let</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="nx">increase</span><span class="o">:</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="o">++</span><span class="nx">count</span><span class="p">,</span>
+        <span class="nx">reset</span><span class="o">:</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+            <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Count is reset."</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+<span class="p">})(</span><span class="nx">dependencyModule1</span><span class="p">,</span> <span class="nx">dependencyModule2</span><span class="p">);</span>
+</code></pre></div><p data-pid="uMQuos4H">上面这种做法在早期的流行框架中很常见，比如jQuery。（新版的jQuery遵循的UMD规范，我们会在后面的部分提到）。</p><h2>Revealing module（揭示模式）</h2><p data-pid="a1BgS8W2">揭示模式是由Christian Heilmann命名的。它也是一种立即函数调用表达式，但它更加强调将所有的API以局部变量的形式定义在匿名函数中：</p><div class="highlight"><pre><code class="language-js"><span class="c1">// Define revealing module.
+</span><span class="c1"></span><span class="kr">const</span> <span class="nx">revealingCounterModule</span> <span class="o">=</span> <span class="p">(()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="kd">let</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kr">const</span> <span class="nx">increase</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span>
+    <span class="kr">const</span> <span class="nx">reset</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+        <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Count is reset."</span><span class="p">);</span>
+    <span class="p">};</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="nx">increase</span><span class="p">,</span>
+        <span class="nx">reset</span>
+    <span class="p">};</span>
+<span class="p">})();</span>
+
+<span class="c1">// Use revealing module.
+</span><span class="c1"></span><span class="nx">revealingCounterModule</span><span class="p">.</span><span class="nx">increase</span><span class="p">();</span>
+<span class="nx">revealingCounterModule</span><span class="p">.</span><span class="nx">reset</span><span class="p">();</span>
+</code></pre></div><h2>CJS module: CommonJS / Node.js module</h2><p data-pid="QBu7Od7P">CommonJS最初被叫做ServerJS，由Node.js制定并实施。默认情况下，每一个js文件都是一个CommonJS模块。每个模块通过<code>module</code>和<code>exports</code>变量来对外暴露接口，通过<code>require</code>函数来调用其他模块。下面的代码遵照CommonJS规范定义了一个Counter模块：</p><div class="highlight"><pre><code class="language-js"><span class="c1">// Define CommonJS module: commonJSCounterModule.js.
+</span><span class="c1"></span><span class="kr">const</span> <span class="nx">dependencyModule1</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"./dependencyModule1"</span><span class="p">);</span>
+<span class="kr">const</span> <span class="nx">dependencyModule2</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"./dependencyModule2"</span><span class="p">);</span>
+
+<span class="kd">let</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="kr">const</span> <span class="nx">increase</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span>
+<span class="kr">const</span> <span class="nx">reset</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Count is reset."</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="nx">exports</span><span class="p">.</span><span class="nx">increase</span> <span class="o">=</span> <span class="nx">increase</span><span class="p">;</span>
+<span class="nx">exports</span><span class="p">.</span><span class="nx">reset</span> <span class="o">=</span> <span class="nx">reset</span><span class="p">;</span>
+<span class="c1">// Or equivalently:
+</span><span class="c1"></span><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">increase</span><span class="p">,</span>
+    <span class="nx">reset</span>
+<span class="p">};</span>
+</code></pre></div><p data-pid="h_CNHpHp">下面的代码使用了刚才定义的counter模块：</p><div class="highlight"><pre><code class="language-js"><span class="c1">// Use CommonJS module.
+</span><span class="c1"></span><span class="kr">const</span> <span class="p">{</span> <span class="nx">increase</span><span class="p">,</span> <span class="nx">reset</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"./commonJSCounterModule"</span><span class="p">);</span>
+<span class="nx">increase</span><span class="p">();</span>
+<span class="nx">reset</span><span class="p">();</span>
+<span class="c1">// Or equivelently:
+</span><span class="c1"></span><span class="kr">const</span> <span class="nx">commonJSCounterModule</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"./commonJSCounterModule"</span><span class="p">);</span>
+<span class="nx">commonJSCounterModule</span><span class="p">.</span><span class="nx">increase</span><span class="p">();</span>
+<span class="nx">commonJSCounterModule</span><span class="p">.</span><span class="nx">reset</span><span class="p">();</span>
+</code></pre></div><p data-pid="So8p0ew3">运行时，Node.js将文件中的代码包裹进一个函数中，并将<code>exports</code>,<code>module</code>和<code>require</code>通过参数形式传入：</p><div class="highlight"><pre><code class="language-js"><span class="c1">// Define CommonJS module: wrapped commonJSCounterModule.js.
+</span><span class="c1"></span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">exports</span><span class="p">,</span> <span class="nx">require</span><span class="p">,</span> <span class="nx">module</span><span class="p">,</span> <span class="nx">__filename</span><span class="p">,</span> <span class="nx">__dirname</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kr">const</span> <span class="nx">dependencyModule1</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"./dependencyModule1"</span><span class="p">);</span>
+    <span class="kr">const</span> <span class="nx">dependencyModule2</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"./dependencyModule2"</span><span class="p">);</span>
+
+    <span class="kd">let</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kr">const</span> <span class="nx">increase</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span>
+    <span class="kr">const</span> <span class="nx">reset</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+        <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Count is reset."</span><span class="p">);</span>
+    <span class="p">};</span>
+
+    <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="nx">increase</span><span class="p">,</span>
+        <span class="nx">reset</span>
+    <span class="p">};</span>
+
+    <span class="k">return</span> <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span><span class="p">;</span>
+<span class="p">}).</span><span class="nx">call</span><span class="p">(</span><span class="nx">thisValue</span><span class="p">,</span> <span class="nx">exports</span><span class="p">,</span> <span class="nx">require</span><span class="p">,</span> <span class="nx">module</span><span class="p">,</span> <span class="nx">filename</span><span class="p">,</span> <span class="nx">dirname</span><span class="p">);</span>
+
+<span class="c1">// Use CommonJS module.
+</span><span class="c1"></span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">exports</span><span class="p">,</span> <span class="nx">require</span><span class="p">,</span> <span class="nx">module</span><span class="p">,</span> <span class="nx">__filename</span><span class="p">,</span> <span class="nx">__dirname</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kr">const</span> <span class="nx">commonJSCounterModule</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"./commonJSCounterModule"</span><span class="p">);</span>
+    <span class="nx">commonJSCounterModule</span><span class="p">.</span><span class="nx">increase</span><span class="p">();</span>
+    <span class="nx">commonJSCounterModule</span><span class="p">.</span><span class="nx">reset</span><span class="p">();</span>
+<span class="p">}).</span><span class="nx">call</span><span class="p">(</span><span class="nx">thisValue</span><span class="p">,</span> <span class="nx">exports</span><span class="p">,</span> <span class="nx">require</span><span class="p">,</span> <span class="nx">module</span><span class="p">,</span> <span class="nx">filename</span><span class="p">,</span> <span class="nx">dirname</span><span class="p">);</span>
+</code></pre></div><h2>AMD module / RequireJS module</h2><p data-pid="t8YKVOzr"><a href="https://link.zhihu.com/?target=https%3A//github.com/amdjs/amdjs-api" class=" wrap external" target="_blank" rel="nofollow noreferrer" data-za-detail-view-id="1043">AMD</a>由<a href="https://link.zhihu.com/?target=https%3A//requirejs.org/" class=" wrap external" target="_blank" rel="nofollow noreferrer" data-za-detail-view-id="1043">RequireJS</a>库制定并实施。AMD使用<code>define</code>函数来定义一个模块，该函数接受模块名，依赖模块名，工厂方法这三个参数：</p><div class="highlight"><pre><code class="language-js"><span class="c1">// Define AMD module.
+</span><span class="c1"></span><span class="nx">define</span><span class="p">(</span><span class="s2">"amdCounterModule"</span><span class="p">,</span> <span class="p">[</span><span class="s2">"dependencyModule1"</span><span class="p">,</span> <span class="s2">"dependencyModule2"</span><span class="p">],</span> <span class="p">(</span><span class="nx">dependencyModule1</span><span class="p">,</span> <span class="nx">dependencyModule2</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="kd">let</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kr">const</span> <span class="nx">increase</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span>
+    <span class="kr">const</span> <span class="nx">reset</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+        <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Count is reset."</span><span class="p">);</span>
+    <span class="p">};</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="nx">increase</span><span class="p">,</span>
+        <span class="nx">reset</span>
+    <span class="p">};</span>
+<span class="p">});</span>
+</code></pre></div><p data-pid="F01WIwAk">AMD使用<code>require</code>函数调用模块：</p><div class="highlight"><pre><code class="language-js"><span class="c1">// Use AMD module.
+</span><span class="c1"></span><span class="nx">require</span><span class="p">([</span><span class="s2">"amdCounterModule"</span><span class="p">],</span> <span class="nx">amdCounterModule</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="nx">amdCounterModule</span><span class="p">.</span><span class="nx">increase</span><span class="p">();</span>
+    <span class="nx">amdCounterModule</span><span class="p">.</span><span class="nx">reset</span><span class="p">();</span>
+<span class="p">});</span>
+</code></pre></div><p data-pid="JxAsIlDF">需要注意的是，AMD的<code>require</code>函数与CommonJS的<code>require</code>方法不同。AMD的<code>require</code>除了接受要使用的模块名外，还要将该模块作为参数传递给使用它的函数。</p><h3>动态加载</h3><p data-pid="6Uc6cQ90">AMD中的<code>define</code>方法还可以接受一个回调函数作为参数。该函数可以使用传入的<code>require</code>方法来动态加载模块：</p><div class="highlight"><pre><code class="language-js"><span class="c1">// Use dynamic AMD module.
+</span><span class="c1"></span><span class="nx">define</span><span class="p">(</span><span class="nx">require</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="kr">const</span> <span class="nx">dynamicDependencyModule1</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"dependencyModule1"</span><span class="p">);</span>
+    <span class="kr">const</span> <span class="nx">dynamicDependencyModule2</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"dependencyModule2"</span><span class="p">);</span>
+
+    <span class="kd">let</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kr">const</span> <span class="nx">increase</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span>
+    <span class="kr">const</span> <span class="nx">reset</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+        <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Count is reset."</span><span class="p">);</span>
+    <span class="p">};</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="nx">increase</span><span class="p">,</span>
+        <span class="nx">reset</span>
+    <span class="p">};</span>
+<span class="p">});</span>
+</code></pre></div><h3>使用CommonJS语法定义AMD模块</h3><p data-pid="Nnk5VOJP">上述的回调函数除了接受<code>require</code>参数外，还可以接受<code>exports</code>和<code>module</code>两个参数。因此，我们可以在这个回调里使用CommonJS语法：</p><div class="highlight"><pre><code class="language-js"><span class="c1">// Define AMD module with CommonJS code.
+</span><span class="c1"></span><span class="nx">define</span><span class="p">((</span><span class="nx">require</span><span class="p">,</span> <span class="nx">exports</span><span class="p">,</span> <span class="nx">module</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="c1">// CommonJS code.
+</span><span class="c1"></span>    <span class="kr">const</span> <span class="nx">dependencyModule1</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"dependencyModule1"</span><span class="p">);</span>
+    <span class="kr">const</span> <span class="nx">dependencyModule2</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"dependencyModule2"</span><span class="p">);</span>
+
+    <span class="kd">let</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kr">const</span> <span class="nx">increase</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span>
+    <span class="kr">const</span> <span class="nx">reset</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+        <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Count is reset."</span><span class="p">);</span>
+    <span class="p">};</span>
+
+    <span class="nx">exports</span><span class="p">.</span><span class="nx">increase</span> <span class="o">=</span> <span class="nx">increase</span><span class="p">;</span>
+    <span class="nx">exports</span><span class="p">.</span><span class="nx">reset</span> <span class="o">=</span> <span class="nx">reset</span><span class="p">;</span>
+<span class="p">});</span>
+
+<span class="c1">// Use AMD module with CommonJS code.
+</span><span class="c1"></span><span class="nx">define</span><span class="p">(</span><span class="nx">require</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="c1">// CommonJS code.
+</span><span class="c1"></span>    <span class="kr">const</span> <span class="nx">counterModule</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"amdCounterModule"</span><span class="p">);</span>
+    <span class="nx">counterModule</span><span class="p">.</span><span class="nx">increase</span><span class="p">();</span>
+    <span class="nx">counterModule</span><span class="p">.</span><span class="nx">reset</span><span class="p">();</span>
+<span class="p">});</span>
+</code></pre></div><h2>UMD module / UmdJS module</h2><p data-pid="btV4SMGB"><a href="https://link.zhihu.com/?target=https%3A//github.com/umdjs/umd" class=" wrap external" target="_blank" rel="nofollow noreferrer" data-za-detail-view-id="1043">UMD</a>是为了兼容不同代码运行环境而产生的规范，大多数情况下，它使用AMD规范为基础，并通过一些特殊的语法设定使其与CommonJS规范相兼容。</p><h3>兼容AMD（RequireJS）和浏览器的UMD规范</h3><div class="highlight"><pre><code class="language-js"><span class="c1">// Define UMD module for both AMD and browser.
+</span><span class="c1"></span><span class="p">((</span><span class="nx">root</span><span class="p">,</span> <span class="nx">factory</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="c1">// Detects AMD/RequireJS"s define function.
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">define</span> <span class="o">===</span> <span class="s2">"function"</span> <span class="o">&amp;&amp;</span> <span class="nx">define</span><span class="p">.</span><span class="nx">amd</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// Is AMD/RequireJS. Call factory with AMD/RequireJS"s define function.
+</span><span class="c1"></span>        <span class="nx">define</span><span class="p">(</span><span class="s2">"umdCounterModule"</span><span class="p">,</span> <span class="p">[</span><span class="s2">"deependencyModule1"</span><span class="p">,</span> <span class="s2">"dependencyModule2"</span><span class="p">],</span> <span class="nx">factory</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="c1">// Is Browser. Directly call factory.
+</span><span class="c1"></span>        <span class="c1">// Imported dependencies are global variables(properties of window object).
+</span><span class="c1"></span>        <span class="c1">// Exported module is also a global variable(property of window object)
+</span><span class="c1"></span>        <span class="nx">root</span><span class="p">.</span><span class="nx">umdCounterModule</span> <span class="o">=</span> <span class="nx">factory</span><span class="p">(</span><span class="nx">root</span><span class="p">.</span><span class="nx">deependencyModule1</span><span class="p">,</span> <span class="nx">root</span><span class="p">.</span><span class="nx">dependencyModule2</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">})(</span><span class="k">typeof</span> <span class="nx">self</span> <span class="o">!==</span> <span class="s2">"undefined"</span> <span class="o">?</span> <span class="nx">self</span> <span class="o">:</span> <span class="k">this</span><span class="p">,</span> <span class="p">(</span><span class="nx">deependencyModule1</span><span class="p">,</span> <span class="nx">dependencyModule2</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="c1">// Module code goes here.
+</span><span class="c1"></span>    <span class="kd">let</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kr">const</span> <span class="nx">increase</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span>
+    <span class="kr">const</span> <span class="nx">reset</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+        <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Count is reset."</span><span class="p">);</span>
+    <span class="p">};</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="nx">increase</span><span class="p">,</span>
+        <span class="nx">reset</span>
+    <span class="p">};</span>
+<span class="p">});</span>
+</code></pre></div><p data-pid="vFGPJg1S">这段代码看起来很复杂，但它实质上只是一个立即执行函数。这个函数首先检查了AMD中的<code>define</code>函数是否存在：</p><ul><li data-pid="xNHKZS8A">如果存在，则使用<code>define</code>函数调用模块的工厂方法</li><li data-pid="0Txl2L-u">如果不存在，则直接调用工厂方法。此时，<code>root</code>实际指向是浏览器的<code>window</code>对象，所有的变量都挂载到全局变量（即<code>window</code>对象）下，包括<code>factory</code>返回的模块。</li></ul><h3>兼容AMD（RequireJS）和CommonJS（Node.js）的UMD规范</h3><p data-pid="aklKSsFh">下面的代码是UMD的另一个种实现，它可以兼容AMD（RequireJS）和CommonJS（Node.js）：</p><div class="highlight"><pre><code class="language-js"><span class="p">(</span><span class="nx">define</span> <span class="p">=&gt;</span> <span class="nx">define</span><span class="p">((</span><span class="nx">require</span><span class="p">,</span> <span class="nx">exports</span><span class="p">,</span> <span class="nx">module</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="c1">// Module code goes here.
+</span><span class="c1"></span>    <span class="kr">const</span> <span class="nx">dependencyModule1</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"dependencyModule1"</span><span class="p">);</span>
+    <span class="kr">const</span> <span class="nx">dependencyModule2</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"dependencyModule2"</span><span class="p">);</span>
+
+    <span class="kd">let</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kr">const</span> <span class="nx">increase</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span>
+    <span class="kr">const</span> <span class="nx">reset</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+        <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Count is reset."</span><span class="p">);</span>
+    <span class="p">};</span>
+
+    <span class="nx">module</span><span class="p">.</span><span class="kr">export</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="nx">increase</span><span class="p">,</span>
+        <span class="nx">reset</span>
+    <span class="p">};</span>
+<span class="p">}))(</span><span class="c1">// Detects module variable and exports variable of CommonJS/Node.js.
+</span><span class="c1"></span>    <span class="c1">// Also detect the define function of AMD/RequireJS.
+</span><span class="c1"></span>    <span class="k">typeof</span> <span class="nx">module</span> <span class="o">===</span> <span class="s2">"object"</span> <span class="o">&amp;&amp;</span> <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">&amp;&amp;</span> <span class="k">typeof</span> <span class="nx">define</span> <span class="o">!==</span> <span class="s2">"function"</span>
+        <span class="o">?</span> <span class="c1">// Is CommonJS/Node.js. Manually create a define function.
+</span><span class="c1"></span>            <span class="nx">factory</span> <span class="p">=&gt;</span> <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">factory</span><span class="p">(</span><span class="nx">require</span><span class="p">,</span> <span class="nx">exports</span><span class="p">,</span> <span class="nx">module</span><span class="p">)</span>
+        <span class="o">:</span> <span class="c1">// Is AMD/RequireJS. Directly use its define function.
+</span><span class="c1"></span>            <span class="nx">define</span><span class="p">);</span>
+</code></pre></div><p data-pid="e2TLnocU">不要害怕，这也是一个立即执行函数。这个匿名函数的参数在执行时会通过判断<code>exports</code>和<code>define</code>是否存在，来确定当前执行环境： <i> 当前环境为CommonJS/Node.js时，匿名函数的参数就是一个手动定义的<code>define</code>函数 </i> 当前环境为AMD/RequireJS时，匿名函数的参数就直接是AMD中的<code>define</code>函数。 如此，在保证了<code>define</code>方法的存在后，匿名函数内部就可以直接使用<code>define</code>函数来创建模块。</p><h2>ES module: ECMAScript 2015, or ES6 module</h2><p data-pid="W2qFLcLR">2015年，JavaScript规范第6版（ES5 / ES6）引入了一种新的模块定义方式。规范中主要定义了<code>import</code>和<code>export</code>关键字。下面是一个使用示例：</p><div class="highlight"><pre><code class="language-js"><span class="c1">// Define ES module: esCounterModule.js or esCounterModule.mjs.
+</span><span class="c1"></span><span class="kr">import</span> <span class="nx">dependencyModule1</span> <span class="nx">from</span> <span class="s2">"./dependencyModule1.mjs"</span><span class="p">;</span>
+<span class="kr">import</span> <span class="nx">dependencyModule2</span> <span class="nx">from</span> <span class="s2">"./dependencyModule2.mjs"</span><span class="p">;</span>
+
+<span class="kd">let</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="c1">// Named export:
+</span><span class="c1"></span><span class="kr">export</span> <span class="kr">const</span> <span class="nx">increase</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span>
+<span class="kr">export</span> <span class="kr">const</span> <span class="nx">reset</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Count is reset."</span><span class="p">);</span>
+<span class="p">};</span>
+<span class="c1">// Or default export:
+</span><span class="c1"></span><span class="kr">export</span> <span class="k">default</span> <span class="p">{</span>
+    <span class="nx">increase</span><span class="p">,</span>
+    <span class="nx">reset</span>
+<span class="p">};</span>
+</code></pre></div><p data-pid="KenhKwN5">浏览器中需要通过<code>&lt;script&gt;</code>标签来定义一个模块：<code>&lt;script type="module" src="esCounterModule.js"&gt;&lt;/script&gt;</code>。而Node环境下需要将<code>.js</code>后缀重命名为<code>.mjs</code>。</p><div class="highlight"><pre><code class="language-js"><span class="c1">// Use ES module.
+</span><span class="c1">// Browser: &lt;script type="module" src="esCounterModule.js"&gt;&lt;/script&gt; or inline.
+</span><span class="c1">// Server: esCounterModule.mjs
+</span><span class="c1">// Import from named export.
+</span><span class="c1"></span><span class="kr">import</span> <span class="p">{</span> <span class="nx">increase</span><span class="p">,</span> <span class="nx">reset</span> <span class="p">}</span> <span class="nx">from</span> <span class="s2">"./esCounterModule.mjs"</span><span class="p">;</span>
+<span class="nx">increase</span><span class="p">();</span>
+<span class="nx">reset</span><span class="p">();</span>
+<span class="c1">// Or import from default export:
+</span><span class="c1"></span><span class="kr">import</span> <span class="nx">esCounterModule</span> <span class="nx">from</span> <span class="s2">"./esCounterModule.mjs"</span><span class="p">;</span>
+<span class="nx">esCounterModule</span><span class="p">.</span><span class="nx">increase</span><span class="p">();</span>
+<span class="nx">esCounterModule</span><span class="p">.</span><span class="nx">reset</span><span class="p">();</span>
+</code></pre></div><p data-pid="9NP0aZet">对于不支持该属性的浏览器，<code>&lt;script&gt;</code>标签的<code>nomodule</code>属性可以用作向下兼容：</p><div class="highlight"><pre><code class="language-html"><span class="p">&lt;</span><span class="nt">script</span> <span class="na">nomodule</span><span class="p">&gt;</span>
+    <span class="nx">alert</span><span class="p">(</span><span class="s2">"Not supported."</span><span class="p">);</span>
+<span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span></code></pre></div><h3>ES动态模块：ESMAScript 2020, or ES11 dynamic module</h3><p data-pid="_8Ihaq-2">2020年，新的Javascript规范第11版新增可以动态引入ES模块<code>import</code>函数。<code>import</code>函数会返回一个<code>promise</code>，它引入的模块内容就可以通过<code>then</code>方法的参数被获取到：</p><div class="highlight"><pre><code class="language-js"><span class="c1">// Use dynamic ES module with promise APIs, import from named export:
+</span><span class="c1"></span><span class="kr">import</span><span class="p">(</span><span class="s2">"./esCounterModule.js"</span><span class="p">).</span><span class="nx">then</span><span class="p">(({</span> <span class="nx">increase</span><span class="p">,</span> <span class="nx">reset</span> <span class="p">})</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="nx">increase</span><span class="p">();</span>
+    <span class="nx">reset</span><span class="p">();</span>
+<span class="p">});</span>
+<span class="c1">// Or import from default export:
+</span><span class="c1"></span><span class="kr">import</span><span class="p">(</span><span class="s2">"./esCounterModule.js"</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span><span class="nx">dynamicESCounterModule</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="nx">dynamicESCounterModule</span><span class="p">.</span><span class="nx">increase</span><span class="p">();</span>
+    <span class="nx">dynamicESCounterModule</span><span class="p">.</span><span class="nx">reset</span><span class="p">();</span>
+<span class="p">});</span>
+</code></pre></div><p data-pid="KARxdMX0">由于是使用的<code>promise</code>，显然我们也可以使用<code>await</code>关键字来实现：</p><div class="highlight"><pre><code class="language-js"><span class="c1">// Use dynamic ES module with async/await.
+</span><span class="c1"></span><span class="p">(</span><span class="nx">async</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+
+    <span class="c1">// Import from named export:
+</span><span class="c1"></span>    <span class="kr">const</span> <span class="p">{</span> <span class="nx">increase</span><span class="p">,</span> <span class="nx">reset</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">await</span> <span class="kr">import</span><span class="p">(</span><span class="s2">"./esCounterModule.js"</span><span class="p">);</span>
+    <span class="nx">increase</span><span class="p">();</span>
+    <span class="nx">reset</span><span class="p">();</span>
+
+    <span class="c1">// Or import from default export:
+</span><span class="c1"></span>    <span class="kr">const</span> <span class="nx">dynamicESCounterModule</span> <span class="o">=</span> <span class="nx">await</span> <span class="kr">import</span><span class="p">(</span><span class="s2">"./esCounterModule.js"</span><span class="p">);</span>
+    <span class="nx">dynamicESCounterModule</span><span class="p">.</span><span class="nx">increase</span><span class="p">();</span>
+    <span class="nx">dynamicESCounterModule</span><span class="p">.</span><span class="nx">reset</span><span class="p">();</span>
+
+<span class="p">})();</span>
+</code></pre></div><p data-pid="xbwNukQj">这个新规范的浏览器兼容性可以参见(<a href="https://link.zhihu.com/?target=https%3A//developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules" class=" external" target="_blank" rel="nofollow noreferrer" data-za-detail-view-id="1043"><span class="invisible">https://</span><span class="visible">developer.mozilla.org/e</span><span class="invisible">n-US/docs/Web/JavaScript/Guide/Modules</span><span class="ellipsis"></span></a>)[<a href="https://link.zhihu.com/?target=https%3A//developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules%3A" class=" external" target="_blank" rel="nofollow noreferrer" data-za-detail-view-id="1043"><span class="invisible">https://</span><span class="visible">developer.mozilla.org/e</span><span class="invisible">n-US/docs/Web/JavaScript/Guide/Modules:</span><span class="ellipsis"></span></a>]</p><h2>System module / SystemJS module</h2><p data-pid="A613vbm4">SystemJS是一个允许ES module模块运行在旧版本ES环境的库。例如，下面的模块是使用ES6语法定义的：</p><div class="highlight"><pre><code class="language-js"><span class="c1">// Define ES module.
+</span><span class="c1"></span><span class="kr">import</span> <span class="nx">dependencyModule1</span> <span class="nx">from</span> <span class="s2">"./dependencyModule1.js"</span><span class="p">;</span>
+<span class="kr">import</span> <span class="nx">dependencyModule2</span> <span class="nx">from</span> <span class="s2">"./dependencyModule2.js"</span><span class="p">;</span>
+<span class="nx">dependencyModule1</span><span class="p">.</span><span class="nx">api1</span><span class="p">();</span>
+<span class="nx">dependencyModule2</span><span class="p">.</span><span class="nx">api2</span><span class="p">();</span>
+
+<span class="kd">let</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="c1">// Named export:
+</span><span class="c1"></span><span class="kr">export</span> <span class="kr">const</span> <span class="nx">increase</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="o">++</span><span class="nx">count</span> <span class="p">};</span>
+<span class="kr">export</span> <span class="kr">const</span> <span class="nx">reset</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Count is reset."</span><span class="p">);</span>
+<span class="p">};</span>
+<span class="c1">// Or default export:
+</span><span class="c1"></span><span class="kr">export</span> <span class="k">default</span> <span class="p">{</span>
+    <span class="nx">increase</span><span class="p">,</span>
+    <span class="nx">reset</span>
+<span class="p">}</span>
+</code></pre></div><p data-pid="UMUrvRHm">显然，在一些不支持ES6语法的旧浏览器中，这段代码是无法运行的。一个解决方法就是使用SystemJS的<code>register</code>API来定义模块：</p><div class="highlight"><pre><code class="language-js"><span class="c1">// Define SystemJS module.
+</span><span class="c1"></span><span class="nx">System</span><span class="p">.</span><span class="nx">register</span><span class="p">([</span><span class="s2">"./dependencyModule1.js"</span><span class="p">,</span> <span class="s2">"./dependencyModule2.js"</span><span class="p">],</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">exports_1</span><span class="p">,</span> <span class="nx">context_1</span><span class="p">)</span> <span class="p">{</span>
+    <span class="s2">"use strict"</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">dependencyModule1_js_1</span><span class="p">,</span> <span class="nx">dependencyModule2_js_1</span><span class="p">,</span> <span class="nx">count</span><span class="p">,</span> <span class="nx">increase</span><span class="p">,</span> <span class="nx">reset</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">__moduleName</span> <span class="o">=</span> <span class="nx">context_1</span> <span class="o">&amp;&amp;</span> <span class="nx">context_1</span><span class="p">.</span><span class="nx">id</span><span class="p">;</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="nx">setters</span><span class="o">:</span> <span class="p">[</span>
+            <span class="kd">function</span> <span class="p">(</span><span class="nx">dependencyModule1_js_1_1</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">dependencyModule1_js_1</span> <span class="o">=</span> <span class="nx">dependencyModule1_js_1_1</span><span class="p">;</span>
+            <span class="p">},</span>
+            <span class="kd">function</span> <span class="p">(</span><span class="nx">dependencyModule2_js_1_1</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">dependencyModule2_js_1</span> <span class="o">=</span> <span class="nx">dependencyModule2_js_1_1</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">],</span>
+        <span class="nx">execute</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+            <span class="nx">dependencyModule1_js_1</span><span class="p">.</span><span class="k">default</span><span class="p">.</span><span class="nx">api1</span><span class="p">();</span>
+            <span class="nx">dependencyModule2_js_1</span><span class="p">.</span><span class="k">default</span><span class="p">.</span><span class="nx">api2</span><span class="p">();</span>
+            <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="c1">// Named export:
+</span><span class="c1"></span>            <span class="nx">exports_1</span><span class="p">(</span><span class="s2">"increase"</span><span class="p">,</span> <span class="nx">increase</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="o">++</span><span class="nx">count</span> <span class="p">};</span>
+            <span class="nx">exports_1</span><span class="p">(</span><span class="s2">"reset"</span><span class="p">,</span> <span class="nx">reset</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+                <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Count is reset."</span><span class="p">);</span>
+            <span class="p">};);</span>
+            <span class="c1">// Or default export:
+</span><span class="c1"></span>            <span class="nx">exports_1</span><span class="p">(</span><span class="s2">"default"</span><span class="p">,</span> <span class="p">{</span>
+                <span class="nx">increase</span><span class="p">,</span>
+                <span class="nx">reset</span>
+            <span class="p">});</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+<span class="p">});</span>
+</code></pre></div><p data-pid="amjxs1of">上面的代码排除了没有使用ES6的新语法，因此可以正常在旧环境中被引用。这个转义过程可以使用Webpack，TypeScript等自动完成。</p><h3>动态引入</h3><p data-pid="UN85w2ar">SystemJS也支持<code>import</code>函数的动态引入：</p><div class="highlight"><pre><code class="language-js"><span class="c1">// Use SystemJS module with promise APIs.
+</span><span class="c1"></span><span class="nx">System</span><span class="p">.</span><span class="kr">import</span><span class="p">(</span><span class="s2">"./esCounterModule.js"</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span><span class="nx">dynamicESCounterModule</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="nx">dynamicESCounterModule</span><span class="p">.</span><span class="nx">increase</span><span class="p">();</span>
+    <span class="nx">dynamicESCounterModule</span><span class="p">.</span><span class="nx">reset</span><span class="p">();</span>
+<span class="p">});</span>
+</code></pre></div><h2>Webpack module</h2><p data-pid="stf9RMP1">Webpack简单来说是一个模块打包器。它可以将CommonJS模块，AMD模块，ES模块转义到一个通用的模块标准内，并将所有的代码打包进一个文件中。例如，我们在3个文件中分别使用不同的规范来定义模块：</p><div class="highlight"><pre><code class="language-js"><span class="c1">// Define AMD module: amdDependencyModule1.js
+</span><span class="c1"></span><span class="nx">define</span><span class="p">(</span><span class="s2">"amdDependencyModule1"</span><span class="p">,</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="kr">const</span> <span class="nx">api1</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span> <span class="p">};</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="nx">api1</span>
+    <span class="p">};</span>
+<span class="p">});</span>
+
+<span class="c1">// Define CommonJS module: commonJSDependencyModule2.js
+</span><span class="c1"></span><span class="kr">const</span> <span class="nx">dependencyModule1</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"./amdDependencyModule1"</span><span class="p">);</span>
+<span class="kr">const</span> <span class="nx">api2</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="nx">dependencyModule1</span><span class="p">.</span><span class="nx">api1</span><span class="p">();</span>
+<span class="nx">exports</span><span class="p">.</span><span class="nx">api2</span> <span class="o">=</span> <span class="nx">api2</span><span class="p">;</span>
+
+<span class="c1">// Define ES module: esCounterModule.js.
+</span><span class="c1"></span><span class="kr">import</span> <span class="nx">dependencyModule1</span> <span class="nx">from</span> <span class="s2">"./amdDependencyModule1"</span><span class="p">;</span>
+<span class="kr">import</span> <span class="nx">dependencyModule2</span> <span class="nx">from</span> <span class="s2">"./commonJSDependencyModule2"</span><span class="p">;</span>
+<span class="nx">dependencyModule1</span><span class="p">.</span><span class="nx">api1</span><span class="p">();</span>
+<span class="nx">dependencyModule2</span><span class="p">.</span><span class="nx">api2</span><span class="p">();</span>
+
+<span class="kd">let</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="kr">const</span> <span class="nx">increase</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span>
+<span class="kr">const</span> <span class="nx">reset</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Count is reset."</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="kr">export</span> <span class="k">default</span> <span class="p">{</span>
+    <span class="nx">increase</span><span class="p">,</span>
+    <span class="nx">reset</span>
+<span class="p">}</span>
+</code></pre></div><p data-pid="hPGog1w6">然后我们导入并使用该模块：</p><div class="highlight"><pre><code class="language-js"><span class="c1">// Use ES module: index.js
+</span><span class="c1"></span><span class="kr">import</span> <span class="nx">counterModule</span> <span class="nx">from</span> <span class="s2">"./esCounterModule"</span><span class="p">;</span>
+<span class="nx">counterModule</span><span class="p">.</span><span class="nx">increase</span><span class="p">();</span>
+<span class="nx">counterModule</span><span class="p">.</span><span class="nx">reset</span><span class="p">();</span>
+</code></pre></div><p data-pid="H858-wU1">Webpack可以将上面所有文件的代码打包进一个<code>main.js</code>中，加入我们的目录如下： * root     * dist         * main.js (Bundle of all files under src)     * src         * amdDependencyModule1.js         * commonJSDependencyModule2.js         * esCounterModule.js         * index.js     * webpack.config.js</p><p data-pid="r3ax6bBo">Webpack本身运行在Node.js环境，因此使用CommonJS语法。<code>webpack.config.js</code>中代码如下：</p><div class="highlight"><pre><code class="language-js"><span class="kr">const</span> <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'path'</span><span class="p">);</span>
+
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">entry</span><span class="o">:</span> <span class="s1">'./src/index.js'</span><span class="p">,</span>
+    <span class="nx">mode</span><span class="o">:</span> <span class="s2">"none"</span><span class="p">,</span> <span class="c1">// Do not optimize or minimize the code for readability.
+</span><span class="c1"></span>    <span class="nx">output</span><span class="o">:</span> <span class="p">{</span>
+        <span class="nx">filename</span><span class="o">:</span> <span class="s1">'main.js'</span><span class="p">,</span>
+        <span class="nx">path</span><span class="o">:</span> <span class="nx">path</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">'dist'</span><span class="p">),</span>
+    <span class="p">},</span>
+<span class="p">};</span>
+</code></pre></div><p data-pid="zsfPb-QI">接着运行命令打包上述文件：</p><div class="highlight"><pre><code class="language-bash">npm install webpack webpack-cli --save-dev
+npx webpack --config webpack.config.js</code></pre></div><p data-pid="L8Fcw1oS">打包出的<code>main.js</code>代码如下（为了提高可读性，我们对其中代码进行了格式化，并对部分变量进行了重命名）：</p><div class="highlight"><pre><code class="language-js"><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">modules</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// webpackBootstrap
+</span><span class="c1"></span>    <span class="c1">// The module cache
+</span><span class="c1"></span>    <span class="kd">var</span> <span class="nx">installedModules</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="c1">// The require function
+</span><span class="c1"></span>    <span class="kd">function</span> <span class="nx">require</span><span class="p">(</span><span class="nx">moduleId</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// Check if module is in cache
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="nx">installedModules</span><span class="p">[</span><span class="nx">moduleId</span><span class="p">])</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">installedModules</span><span class="p">[</span><span class="nx">moduleId</span><span class="p">].</span><span class="nx">exports</span><span class="p">;</span>
+
+        <span class="p">}</span>
+        <span class="c1">// Create a new module (and put it into the cache)
+</span><span class="c1"></span>        <span class="kd">var</span> <span class="nx">module</span> <span class="o">=</span> <span class="nx">installedModules</span><span class="p">[</span><span class="nx">moduleId</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="nx">i</span><span class="o">:</span> <span class="nx">moduleId</span><span class="p">,</span>
+            <span class="nx">l</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span>
+            <span class="nx">exports</span><span class="o">:</span> <span class="p">{}</span>
+
+        <span class="p">};</span>
+        <span class="c1">// Execute the module function
+</span><span class="c1"></span>        <span class="nx">modules</span><span class="p">[</span><span class="nx">moduleId</span><span class="p">].</span><span class="nx">call</span><span class="p">(</span><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span><span class="p">,</span> <span class="nx">module</span><span class="p">,</span> <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span><span class="p">,</span> <span class="nx">require</span><span class="p">);</span>
+        <span class="c1">// Flag the module as loaded
+</span><span class="c1"></span>        <span class="nx">module</span><span class="p">.</span><span class="nx">l</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+        <span class="c1">// Return the exports of the module
+</span><span class="c1"></span>        <span class="k">return</span> <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// expose the modules object (__webpack_modules__)
+</span><span class="c1"></span>    <span class="nx">require</span><span class="p">.</span><span class="nx">m</span> <span class="o">=</span> <span class="nx">modules</span><span class="p">;</span>
+    <span class="c1">// expose the module cache
+</span><span class="c1"></span>    <span class="nx">require</span><span class="p">.</span><span class="nx">c</span> <span class="o">=</span> <span class="nx">installedModules</span><span class="p">;</span>
+    <span class="c1">// define getter function for harmony exports
+</span><span class="c1"></span>    <span class="nx">require</span><span class="p">.</span><span class="nx">d</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">exports</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">getter</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">require</span><span class="p">.</span><span class="nx">o</span><span class="p">(</span><span class="nx">exports</span><span class="p">,</span> <span class="nx">name</span><span class="p">))</span> <span class="p">{</span>
+            <span class="nb">Object</span><span class="p">.</span><span class="nx">defineProperty</span><span class="p">(</span><span class="nx">exports</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="p">{</span> <span class="nx">enumerable</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">get</span><span class="o">:</span> <span class="nx">getter</span> <span class="p">});</span>
+
+        <span class="p">}</span>
+
+    <span class="p">};</span>
+    <span class="c1">// define __esModule on exports
+</span><span class="c1"></span>    <span class="nx">require</span><span class="p">.</span><span class="nx">r</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">exports</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">Symbol</span> <span class="o">!==</span> <span class="s1">'undefined'</span> <span class="o">&amp;&amp;</span> <span class="nx">Symbol</span><span class="p">.</span><span class="nx">toStringTag</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nb">Object</span><span class="p">.</span><span class="nx">defineProperty</span><span class="p">(</span><span class="nx">exports</span><span class="p">,</span> <span class="nx">Symbol</span><span class="p">.</span><span class="nx">toStringTag</span><span class="p">,</span> <span class="p">{</span> <span class="nx">value</span><span class="o">:</span> <span class="s1">'Module'</span> <span class="p">});</span>
+
+        <span class="p">}</span>
+        <span class="nb">Object</span><span class="p">.</span><span class="nx">defineProperty</span><span class="p">(</span><span class="nx">exports</span><span class="p">,</span> <span class="s1">'__esModule'</span><span class="p">,</span> <span class="p">{</span> <span class="nx">value</span><span class="o">:</span> <span class="kc">true</span> <span class="p">});</span>
+
+    <span class="p">};</span>
+    <span class="c1">// create a fake namespace object
+</span><span class="c1"></span>    <span class="c1">// mode &amp; 1: value is a module id, require it
+</span><span class="c1"></span>    <span class="c1">// mode &amp; 2: merge all properties of value into the ns
+</span><span class="c1"></span>    <span class="c1">// mode &amp; 4: return value when already ns object
+</span><span class="c1"></span>    <span class="c1">// mode &amp; 8|1: behave like require
+</span><span class="c1"></span>    <span class="nx">require</span><span class="p">.</span><span class="nx">t</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">value</span><span class="p">,</span> <span class="nx">mode</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">mode</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">)</span> <span class="nx">value</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="nx">value</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">mode</span> <span class="o">&amp;</span> <span class="mi">8</span><span class="p">)</span> <span class="k">return</span> <span class="nx">value</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">((</span><span class="nx">mode</span> <span class="o">&amp;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="k">typeof</span> <span class="nx">value</span> <span class="o">===</span> <span class="s1">'object'</span> <span class="o">&amp;&amp;</span> <span class="nx">value</span> <span class="o">&amp;&amp;</span> <span class="nx">value</span><span class="p">.</span><span class="nx">__esModule</span><span class="p">)</span> <span class="k">return</span> <span class="nx">value</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">ns</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+        <span class="nx">require</span><span class="p">.</span><span class="nx">r</span><span class="p">(</span><span class="nx">ns</span><span class="p">);</span>
+        <span class="nb">Object</span><span class="p">.</span><span class="nx">defineProperty</span><span class="p">(</span><span class="nx">ns</span><span class="p">,</span> <span class="s1">'default'</span><span class="p">,</span> <span class="p">{</span> <span class="nx">enumerable</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">value</span><span class="o">:</span> <span class="nx">value</span> <span class="p">});</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">mode</span> <span class="o">&amp;</span> <span class="mi">2</span> <span class="o">&amp;&amp;</span> <span class="k">typeof</span> <span class="nx">value</span> <span class="o">!=</span> <span class="s1">'string'</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">key</span> <span class="k">in</span> <span class="nx">value</span><span class="p">)</span> <span class="nx">require</span><span class="p">.</span><span class="nx">d</span><span class="p">(</span><span class="nx">ns</span><span class="p">,</span> <span class="nx">key</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">key</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">value</span><span class="p">[</span><span class="nx">key</span><span class="p">];</span> <span class="p">}.</span><span class="nx">bind</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">key</span><span class="p">));</span>
+        <span class="k">return</span> <span class="nx">ns</span><span class="p">;</span>
+    <span class="p">};</span>
+    <span class="c1">// getDefaultExport function for compatibility with non-harmony modules
+</span><span class="c1"></span>    <span class="nx">require</span><span class="p">.</span><span class="nx">n</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">module</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">getter</span> <span class="o">=</span> <span class="nx">module</span> <span class="o">&amp;&amp;</span> <span class="nx">module</span><span class="p">.</span><span class="nx">__esModule</span> <span class="o">?</span>
+            <span class="kd">function</span> <span class="nx">getDefault</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">module</span><span class="p">[</span><span class="s1">'default'</span><span class="p">];</span> <span class="p">}</span> <span class="o">:</span>
+            <span class="kd">function</span> <span class="nx">getModuleExports</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">module</span><span class="p">;</span> <span class="p">};</span>
+        <span class="nx">require</span><span class="p">.</span><span class="nx">d</span><span class="p">(</span><span class="nx">getter</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">,</span> <span class="nx">getter</span><span class="p">);</span>
+        <span class="k">return</span> <span class="nx">getter</span><span class="p">;</span>
+    <span class="p">};</span>
+    <span class="c1">// Object.prototype.hasOwnProperty.call
+</span><span class="c1"></span>    <span class="nx">require</span><span class="p">.</span><span class="nx">o</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">object</span><span class="p">,</span> <span class="nx">property</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">object</span><span class="p">,</span> <span class="nx">property</span><span class="p">);</span> <span class="p">};</span>
+    <span class="c1">// __webpack_public_path__
+</span><span class="c1"></span>    <span class="nx">require</span><span class="p">.</span><span class="nx">p</span> <span class="o">=</span> <span class="s2">""</span><span class="p">;</span>
+    <span class="c1">// Load entry module and return exports
+</span><span class="c1"></span>    <span class="k">return</span> <span class="nx">require</span><span class="p">(</span><span class="nx">require</span><span class="p">.</span><span class="nx">s</span> <span class="o">=</span> <span class="mi">0</span><span class="p">);</span>
+<span class="p">})([</span>
+    <span class="kd">function</span> <span class="p">(</span><span class="nx">module</span><span class="p">,</span> <span class="nx">exports</span><span class="p">,</span> <span class="nx">require</span><span class="p">)</span> <span class="p">{</span>
+        <span class="s2">"use strict"</span><span class="p">;</span>
+        <span class="nx">require</span><span class="p">.</span><span class="nx">r</span><span class="p">(</span><span class="nx">exports</span><span class="p">);</span>
+        <span class="c1">// Use ES module: index.js.
+</span><span class="c1"></span>        <span class="kd">var</span> <span class="nx">esCounterModule</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+        <span class="nx">esCounterModule</span><span class="p">[</span><span class="s2">"default"</span><span class="p">].</span><span class="nx">increase</span><span class="p">();</span>
+        <span class="nx">esCounterModule</span><span class="p">[</span><span class="s2">"default"</span><span class="p">].</span><span class="nx">reset</span><span class="p">();</span>
+    <span class="p">},</span>
+    <span class="kd">function</span> <span class="p">(</span><span class="nx">module</span><span class="p">,</span> <span class="nx">exports</span><span class="p">,</span> <span class="nx">require</span><span class="p">)</span> <span class="p">{</span>
+        <span class="s2">"use strict"</span><span class="p">;</span>
+        <span class="nx">require</span><span class="p">.</span><span class="nx">r</span><span class="p">(</span><span class="nx">exports</span><span class="p">);</span>
+        <span class="c1">// Define ES module: esCounterModule.js.
+</span><span class="c1"></span>        <span class="kd">var</span> <span class="nx">amdDependencyModule1</span> <span class="o">=</span> <span class="nx">require</span><span class="p">.</span><span class="nx">n</span><span class="p">(</span><span class="nx">require</span><span class="p">(</span><span class="mi">2</span><span class="p">));</span>
+        <span class="kd">var</span> <span class="nx">commonJSDependencyModule2</span> <span class="o">=</span> <span class="nx">require</span><span class="p">.</span><span class="nx">n</span><span class="p">(</span><span class="nx">require</span><span class="p">(</span><span class="mi">3</span><span class="p">));</span>
+        <span class="nx">amdDependencyModule1</span><span class="p">.</span><span class="nx">a</span><span class="p">.</span><span class="nx">api1</span><span class="p">();</span>
+        <span class="nx">commonJSDependencyModule2</span><span class="p">.</span><span class="nx">a</span><span class="p">.</span><span class="nx">api2</span><span class="p">();</span>
+
+        <span class="kd">let</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="kr">const</span> <span class="nx">increase</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span>
+        <span class="kr">const</span> <span class="nx">reset</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+            <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Count is reset."</span><span class="p">);</span>
+        <span class="p">};</span>
+
+        <span class="nx">exports</span><span class="p">[</span><span class="s2">"default"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="nx">increase</span><span class="p">,</span>
+            <span class="nx">reset</span>
+        <span class="p">};</span>
+    <span class="p">},</span>
+    <span class="kd">function</span> <span class="p">(</span><span class="nx">module</span><span class="p">,</span> <span class="nx">exports</span><span class="p">,</span> <span class="nx">require</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">result</span><span class="p">;</span>
+        <span class="o">!</span><span class="p">(</span><span class="nx">result</span> <span class="o">=</span> <span class="p">(()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+            <span class="c1">// Define AMD module: amdDependencyModule1.js
+</span><span class="c1"></span>            <span class="kr">const</span> <span class="nx">api1</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span> <span class="p">};</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="nx">api1</span>
+            <span class="p">};</span>
+        <span class="p">}).</span><span class="nx">call</span><span class="p">(</span><span class="nx">exports</span><span class="p">,</span> <span class="nx">require</span><span class="p">,</span> <span class="nx">exports</span><span class="p">,</span> <span class="nx">module</span><span class="p">),</span>
+            <span class="nx">result</span> <span class="o">!==</span> <span class="kc">undefined</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">result</span><span class="p">));</span>
+    <span class="p">},</span>
+    <span class="kd">function</span> <span class="p">(</span><span class="nx">module</span><span class="p">,</span> <span class="nx">exports</span><span class="p">,</span> <span class="nx">require</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// Define CommonJS module: commonJSDependencyModule2.js
+</span><span class="c1"></span>        <span class="kr">const</span> <span class="nx">dependencyModule1</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+        <span class="kr">const</span> <span class="nx">api2</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="nx">dependencyModule1</span><span class="p">.</span><span class="nx">api1</span><span class="p">();</span>
+        <span class="nx">exports</span><span class="p">.</span><span class="nx">api2</span> <span class="o">=</span> <span class="nx">api2</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">]);</span>
+</code></pre></div><p data-pid="Kl4mjqXQ">显然，这还是一个立即执行函数。之前4个文件中的代码被转义进了一个包含4个元素的函数数组，然后这个数组作为参数被传入了匿名函数中。</p><h2>Babel module</h2><p data-pid="Soi1E8oJ">Babel是另一个可以将ES6及之后的JS代码转义为旧标准代码的工具。上面使用ES6书写的代码逻辑可以被转义为下面的Babel module：</p><div class="highlight"><pre><code class="language-js"><span class="c1">// Babel.
+</span><span class="c1"></span><span class="nb">Object</span><span class="p">.</span><span class="nx">defineProperty</span><span class="p">(</span><span class="nx">exports</span><span class="p">,</span> <span class="s2">"__esModule"</span><span class="p">,</span> <span class="p">{</span>
+    <span class="nx">value</span><span class="o">:</span> <span class="kc">true</span>
+<span class="p">});</span>
+<span class="nx">exports</span><span class="p">[</span><span class="s2">"default"</span><span class="p">]</span> <span class="o">=</span> <span class="k">void</span> <span class="mi">0</span><span class="p">;</span>
+<span class="kd">function</span> <span class="nx">_interopRequireDefault</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">obj</span> <span class="o">&amp;&amp;</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">__esModule</span> <span class="o">?</span> <span class="nx">obj</span> <span class="o">:</span> <span class="p">{</span> <span class="s2">"default"</span><span class="o">:</span> <span class="nx">obj</span> <span class="p">};</span> <span class="p">}</span>
+
+<span class="c1">// Define ES module: esCounterModule.js.
+</span><span class="c1"></span><span class="kd">var</span> <span class="nx">dependencyModule1</span> <span class="o">=</span> <span class="nx">_interopRequireDefault</span><span class="p">(</span><span class="nx">require</span><span class="p">(</span><span class="s2">"./amdDependencyModule1"</span><span class="p">));</span>
+<span class="kd">var</span> <span class="nx">dependencyModule2</span> <span class="o">=</span> <span class="nx">_interopRequireDefault</span><span class="p">(</span><span class="nx">require</span><span class="p">(</span><span class="s2">"./commonJSDependencyModule2"</span><span class="p">));</span>
+<span class="nx">dependencyModule1</span><span class="p">[</span><span class="s2">"default"</span><span class="p">].</span><span class="nx">api1</span><span class="p">();</span>
+<span class="nx">dependencyModule2</span><span class="p">[</span><span class="s2">"default"</span><span class="p">].</span><span class="nx">api2</span><span class="p">();</span>
+
+<span class="kd">var</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">increase</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span> <span class="p">};</span>
+<span class="kd">var</span> <span class="nx">reset</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Count is reset."</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="nx">exports</span><span class="p">[</span><span class="s2">"default"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">increase</span><span class="o">:</span> <span class="nx">increase</span><span class="p">,</span>
+    <span class="nx">reset</span><span class="o">:</span> <span class="nx">reset</span>
+<span class="p">};</span>
+</code></pre></div><p data-pid="CUTAocPb">而<code>index.js</code>中使用这个模块的代码会被转义成为：</p><div class="highlight"><pre><code class="language-js"><span class="c1">// Babel.
+</span><span class="c1"></span><span class="kd">function</span> <span class="nx">_interopRequireDefault</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">obj</span> <span class="o">&amp;&amp;</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">__esModule</span> <span class="o">?</span> <span class="nx">obj</span> <span class="o">:</span> <span class="p">{</span> <span class="s2">"default"</span><span class="o">:</span> <span class="nx">obj</span> <span class="p">};</span> <span class="p">}</span>
+
+<span class="c1">// Use ES module: index.js
+</span><span class="c1"></span><span class="kd">var</span> <span class="nx">esCounterModule</span> <span class="o">=</span> <span class="nx">_interopRequireDefault</span><span class="p">(</span><span class="nx">require</span><span class="p">(</span><span class="s2">"./esCounterModule.js"</span><span class="p">));</span>
+<span class="nx">esCounterModule</span><span class="p">[</span><span class="s2">"default"</span><span class="p">].</span><span class="nx">increase</span><span class="p">();</span>
+<span class="nx">esCounterModule</span><span class="p">[</span><span class="s2">"default"</span><span class="p">].</span><span class="nx">reset</span><span class="p">();</span>
+</code></pre></div><p data-pid="xjQSnZzS">这是默认的转义结果，Babel也可以与其他工具协同工作。</p><h3>Babel + SystemJS</h3><p data-pid="TIBU6Mdl">Babel可以使用SystemJS的插件，运行下面的命令：</p><div class="highlight"><pre><code class="language-bash">npm install --save-dev @babel/plugin-transform-modules-systemjs</code></pre></div><p data-pid="6VAEa1J3">然后在Babel配置文件，例如<code>babel.config.json</code>中增加配置项：</p><div class="highlight"><pre><code class="language-json"><span class="p">{</span>
+    <span class="nt">"plugins"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"@babel/plugin-transform-modules-systemjs"</span><span class="p">],</span>
+    <span class="nt">"presets"</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">[</span>
+            <span class="s2">"@babel/env"</span><span class="p">,</span>
+            <span class="p">{</span>
+                <span class="nt">"targets"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">"ie"</span><span class="p">:</span> <span class="s2">"11"</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+    <span class="p">]</span>
+<span class="p">}</span></code></pre></div><p data-pid="jXa3SJVy">执行命令：</p><div class="highlight"><pre><code class="language-bash">npx babel src --out-dir lib</code></pre></div><p data-pid="sazcQuF2">结果如下： * root     * lib         * amdDependencyModule1.js (SystemJS转义结果)         * commonJSDependencyModule2.js (SystemJS转义结果)         * esCounterModule.js (SystemJS转义结果)         * index.js (SystemJS转义结果)     * src         * amdDependencyModule1.js         * commonJSDependencyModule2.js         * esCounterModule.js         * index.js     * babel.config.json</p><p data-pid="uhwXbnWw">所有的AMD，CommonJS，ES模块都被转义成了SystemJS语法：</p><div class="highlight"><pre><code class="language-js"><span class="c1">// Transpile AMD/RequireJS module definition to SystemJS syntax: lib/amdDependencyModule1.js.
+</span><span class="c1"></span><span class="nx">System</span><span class="p">.</span><span class="nx">register</span><span class="p">([],</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">_export</span><span class="p">,</span> <span class="nx">_context</span><span class="p">)</span> <span class="p">{</span>
+    <span class="s2">"use strict"</span><span class="p">;</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="nx">setters</span><span class="o">:</span> <span class="p">[],</span>
+        <span class="nx">execute</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+            <span class="c1">// Define AMD module: src/amdDependencyModule1.js
+</span><span class="c1"></span>            <span class="nx">define</span><span class="p">(</span><span class="s2">"amdDependencyModule1"</span><span class="p">,</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+                <span class="kr">const</span> <span class="nx">api1</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span> <span class="p">};</span>
+
+                <span class="k">return</span> <span class="p">{</span>
+                    <span class="nx">api1</span>
+                <span class="p">};</span>
+            <span class="p">});</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+<span class="p">});</span>
+
+<span class="c1">// Transpile CommonJS/Node.js module definition to SystemJS syntax: lib/commonJSDependencyModule2.js.
+</span><span class="c1"></span><span class="nx">System</span><span class="p">.</span><span class="nx">register</span><span class="p">([],</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">_export</span><span class="p">,</span> <span class="nx">_context</span><span class="p">)</span> <span class="p">{</span>
+    <span class="s2">"use strict"</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">dependencyModule1</span><span class="p">,</span> <span class="nx">api2</span><span class="p">;</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="nx">setters</span><span class="o">:</span> <span class="p">[],</span>
+        <span class="nx">execute</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+            <span class="c1">// Define CommonJS module: src/commonJSDependencyModule2.js
+</span><span class="c1"></span>            <span class="nx">dependencyModule1</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"./amdDependencyModule1"</span><span class="p">);</span>
+
+            <span class="nx">api2</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="nx">dependencyModule1</span><span class="p">.</span><span class="nx">api1</span><span class="p">();</span>
+
+            <span class="nx">exports</span><span class="p">.</span><span class="nx">api2</span> <span class="o">=</span> <span class="nx">api2</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+<span class="p">});</span>
+
+<span class="c1">// Transpile ES module definition to SystemJS syntax: lib/esCounterModule.js.
+</span><span class="c1"></span><span class="nx">System</span><span class="p">.</span><span class="nx">register</span><span class="p">([</span><span class="s2">"./amdDependencyModule1"</span><span class="p">,</span> <span class="s2">"./commonJSDependencyModule2"</span><span class="p">],</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">_export</span><span class="p">,</span> <span class="nx">_context</span><span class="p">)</span> <span class="p">{</span>
+    <span class="s2">"use strict"</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">dependencyModule1</span><span class="p">,</span> <span class="nx">dependencyModule2</span><span class="p">,</span> <span class="nx">count</span><span class="p">,</span> <span class="nx">increase</span><span class="p">,</span> <span class="nx">reset</span><span class="p">;</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="nx">setters</span><span class="o">:</span> <span class="p">[</span><span class="kd">function</span> <span class="p">(</span><span class="nx">_amdDependencyModule</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">dependencyModule1</span> <span class="o">=</span> <span class="nx">_amdDependencyModule</span><span class="p">.</span><span class="k">default</span><span class="p">;</span>
+        <span class="p">},</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">_commonJSDependencyModule</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">dependencyModule2</span> <span class="o">=</span> <span class="nx">_commonJSDependencyModule</span><span class="p">.</span><span class="k">default</span><span class="p">;</span>
+        <span class="p">}],</span>
+        <span class="nx">execute</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+            <span class="c1">// Define ES module: src/esCounterModule.js.
+</span><span class="c1"></span>            <span class="nx">dependencyModule1</span><span class="p">.</span><span class="nx">api1</span><span class="p">();</span>
+            <span class="nx">dependencyModule2</span><span class="p">.</span><span class="nx">api2</span><span class="p">();</span>
+            <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+            <span class="nx">increase</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span>
+
+            <span class="nx">reset</span> <span class="o">=</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+                <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Count is reset."</span><span class="p">);</span>
+            <span class="p">};</span>
+
+            <span class="nx">_export</span><span class="p">(</span><span class="s2">"default"</span><span class="p">,</span> <span class="p">{</span>
+                <span class="nx">increase</span><span class="p">,</span>
+                <span class="nx">reset</span>
+            <span class="p">});</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+<span class="p">});</span>
+
+<span class="c1">// Transpile ES module usage to SystemJS syntax: lib/index.js.
+</span><span class="c1"></span><span class="nx">System</span><span class="p">.</span><span class="nx">register</span><span class="p">([</span><span class="s2">"./esCounterModule"</span><span class="p">],</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">_export</span><span class="p">,</span> <span class="nx">_context</span><span class="p">)</span> <span class="p">{</span>
+    <span class="s2">"use strict"</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">esCounterModule</span><span class="p">;</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="nx">setters</span><span class="o">:</span> <span class="p">[</span><span class="kd">function</span> <span class="p">(</span><span class="nx">_esCounterModuleJs</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">esCounterModule</span> <span class="o">=</span> <span class="nx">_esCounterModuleJs</span><span class="p">.</span><span class="k">default</span><span class="p">;</span>
+        <span class="p">}],</span>
+        <span class="nx">execute</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+            <span class="c1">// Use ES module: src/index.js
+</span><span class="c1"></span>            <span class="nx">esCounterModule</span><span class="p">.</span><span class="nx">increase</span><span class="p">();</span>
+            <span class="nx">esCounterModule</span><span class="p">.</span><span class="nx">reset</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+<span class="p">});</span>
+</code></pre></div><h2>TypeScript module</h2><p data-pid="7RAqwT8h">TypeScript支持所有的JS语法，包括ES6中的模块(<a href="https://link.zhihu.com/?target=https%3A//www.typescriptlang.org/docs/handbook/modules.html" class=" external" target="_blank" rel="nofollow noreferrer" data-za-detail-view-id="1043"><span class="invisible">https://www.</span><span class="visible">typescriptlang.org/docs</span><span class="invisible">/handbook/modules.html</span><span class="ellipsis"></span></a>)[<a href="https://link.zhihu.com/?target=https%3A//www.typescriptlang.org/docs/handbook/modules.html" class=" external" target="_blank" rel="nofollow noreferrer" data-za-detail-view-id="1043"><span class="invisible">https://www.</span><span class="visible">typescriptlang.org/docs</span><span class="invisible">/handbook/modules.html</span><span class="ellipsis"></span></a>]。在TypeScript编译过程中，这些ES模块可以被转义为ES6语法，也可以根据<code>tsconfig.json</code>中的配置转义为其他模块标准：</p><div class="highlight"><pre><code class="language-json"><span class="p">{</span>
+    <span class="nt">"compilerOptions"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">"module"</span><span class="p">:</span> <span class="s2">"ES2020"</span><span class="p">,</span> <span class="err">//</span> <span class="err">None,</span> <span class="err">CommonJS,</span> <span class="err">AMD,</span> <span class="err">System,</span> <span class="err">UMD,</span> <span class="err">ES6,</span> <span class="err">ES2015,</span> <span class="err">ES2020,</span> <span class="err">ESNext.</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></div><p data-pid="9sHm97Zz">举例来说：</p><div class="highlight"><pre><code class="language-js"><span class="c1">// TypeScript and ES module.
+</span><span class="c1">// With compilerOptions: { module: "ES6" }. Transpile to ES module with the same import/export syntax.
+</span><span class="c1"></span><span class="kr">import</span> <span class="nx">dependencyModule</span> <span class="nx">from</span> <span class="s2">"./dependencyModule"</span><span class="p">;</span>
+<span class="nx">dependencyModule</span><span class="p">.</span><span class="nx">api</span><span class="p">();</span>
+<span class="kd">let</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="kr">export</span> <span class="kr">const</span> <span class="nx">increase</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="o">++</span><span class="nx">count</span> <span class="p">};</span>
+
+
+<span class="c1">// With compilerOptions: { module: "CommonJS" }. Transpile to CommonJS/Node.js module:
+</span><span class="c1"></span><span class="kd">var</span> <span class="nx">__importDefault</span> <span class="o">=</span> <span class="p">(</span><span class="k">this</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">__importDefault</span><span class="p">)</span> <span class="o">||</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">mod</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nx">mod</span> <span class="o">&amp;&amp;</span> <span class="nx">mod</span><span class="p">.</span><span class="nx">__esModule</span><span class="p">)</span> <span class="o">?</span> <span class="nx">mod</span> <span class="o">:</span> <span class="p">{</span> <span class="s2">"default"</span><span class="o">:</span> <span class="nx">mod</span> <span class="p">};</span>
+<span class="p">};</span>
+<span class="nx">exports</span><span class="p">.</span><span class="nx">__esModule</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+
+<span class="kd">var</span> <span class="nx">dependencyModule_1</span> <span class="o">=</span> <span class="nx">__importDefault</span><span class="p">(</span><span class="nx">require</span><span class="p">(</span><span class="s2">"./dependencyModule"</span><span class="p">));</span>
+<span class="nx">dependencyModule_1</span><span class="p">[</span><span class="s2">"default"</span><span class="p">].</span><span class="nx">api</span><span class="p">();</span>
+<span class="kd">var</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="nx">exports</span><span class="p">.</span><span class="nx">increase</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span> <span class="p">};</span>
+
+<span class="c1">// With compilerOptions: { module: "AMD" }. Transpile to AMD/RequireJS module:
+</span><span class="c1"></span><span class="kd">var</span> <span class="nx">__importDefault</span> <span class="o">=</span> <span class="p">(</span><span class="k">this</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">__importDefault</span><span class="p">)</span> <span class="o">||</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">mod</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nx">mod</span> <span class="o">&amp;&amp;</span> <span class="nx">mod</span><span class="p">.</span><span class="nx">__esModule</span><span class="p">)</span> <span class="o">?</span> <span class="nx">mod</span> <span class="o">:</span> <span class="p">{</span> <span class="s2">"default"</span><span class="o">:</span> <span class="nx">mod</span> <span class="p">};</span>
+<span class="p">};</span>
+<span class="nx">define</span><span class="p">([</span><span class="s2">"require"</span><span class="p">,</span> <span class="s2">"exports"</span><span class="p">,</span> <span class="s2">"./dependencyModule"</span><span class="p">],</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">require</span><span class="p">,</span> <span class="nx">exports</span><span class="p">,</span> <span class="nx">dependencyModule_1</span><span class="p">)</span> <span class="p">{</span>
+    <span class="s2">"use strict"</span><span class="p">;</span>
+    <span class="nx">exports</span><span class="p">.</span><span class="nx">__esModule</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+
+    <span class="nx">dependencyModule_1</span> <span class="o">=</span> <span class="nx">__importDefault</span><span class="p">(</span><span class="nx">dependencyModule_1</span><span class="p">);</span>
+    <span class="nx">dependencyModule_1</span><span class="p">[</span><span class="s2">"default"</span><span class="p">].</span><span class="nx">api</span><span class="p">();</span>
+    <span class="kd">var</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nx">exports</span><span class="p">.</span><span class="nx">increase</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span> <span class="p">};</span>
+<span class="p">});</span>
+
+<span class="c1">// With compilerOptions: { module: "UMD" }. Transpile to UMD/UmdJS module:
+</span><span class="c1"></span><span class="kd">var</span> <span class="nx">__importDefault</span> <span class="o">=</span> <span class="p">(</span><span class="k">this</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">__importDefault</span><span class="p">)</span> <span class="o">||</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">mod</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nx">mod</span> <span class="o">&amp;&amp;</span> <span class="nx">mod</span><span class="p">.</span><span class="nx">__esModule</span><span class="p">)</span> <span class="o">?</span> <span class="nx">mod</span> <span class="o">:</span> <span class="p">{</span> <span class="s2">"default"</span><span class="o">:</span> <span class="nx">mod</span> <span class="p">};</span>
+<span class="p">};</span>
+<span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">factory</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">module</span> <span class="o">===</span> <span class="s2">"object"</span> <span class="o">&amp;&amp;</span> <span class="k">typeof</span> <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">===</span> <span class="s2">"object"</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">v</span> <span class="o">=</span> <span class="nx">factory</span><span class="p">(</span><span class="nx">require</span><span class="p">,</span> <span class="nx">exports</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">v</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">v</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">define</span> <span class="o">===</span> <span class="s2">"function"</span> <span class="o">&amp;&amp;</span> <span class="nx">define</span><span class="p">.</span><span class="nx">amd</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">define</span><span class="p">([</span><span class="s2">"require"</span><span class="p">,</span> <span class="s2">"exports"</span><span class="p">,</span> <span class="s2">"./dependencyModule"</span><span class="p">],</span> <span class="nx">factory</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">})(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">require</span><span class="p">,</span> <span class="nx">exports</span><span class="p">)</span> <span class="p">{</span>
+    <span class="s2">"use strict"</span><span class="p">;</span>
+    <span class="nx">exports</span><span class="p">.</span><span class="nx">__esModule</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+
+    <span class="kd">var</span> <span class="nx">dependencyModule_1</span> <span class="o">=</span> <span class="nx">__importDefault</span><span class="p">(</span><span class="nx">require</span><span class="p">(</span><span class="s2">"./dependencyModule"</span><span class="p">));</span>
+    <span class="nx">dependencyModule_1</span><span class="p">[</span><span class="s2">"default"</span><span class="p">].</span><span class="nx">api</span><span class="p">();</span>
+    <span class="kd">var</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nx">exports</span><span class="p">.</span><span class="nx">increase</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span> <span class="p">};</span>
+<span class="p">});</span>
+
+<span class="c1">// With compilerOptions: { module: "System" }. Transpile to System/SystemJS module:
+</span><span class="c1"></span><span class="nx">System</span><span class="p">.</span><span class="nx">register</span><span class="p">([</span><span class="s2">"./dependencyModule"</span><span class="p">],</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">exports_1</span><span class="p">,</span> <span class="nx">context_1</span><span class="p">)</span> <span class="p">{</span>
+    <span class="s2">"use strict"</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">dependencyModule_1</span><span class="p">,</span> <span class="nx">count</span><span class="p">,</span> <span class="nx">increase</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">__moduleName</span> <span class="o">=</span> <span class="nx">context_1</span> <span class="o">&amp;&amp;</span> <span class="nx">context_1</span><span class="p">.</span><span class="nx">id</span><span class="p">;</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="nx">setters</span><span class="o">:</span> <span class="p">[</span>
+            <span class="kd">function</span> <span class="p">(</span><span class="nx">dependencyModule_1_1</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">dependencyModule_1</span> <span class="o">=</span> <span class="nx">dependencyModule_1_1</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">],</span>
+        <span class="nx">execute</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+            <span class="nx">dependencyModule_1</span><span class="p">[</span><span class="s2">"default"</span><span class="p">].</span><span class="nx">api</span><span class="p">();</span>
+            <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="nx">exports_1</span><span class="p">(</span><span class="s2">"increase"</span><span class="p">,</span> <span class="nx">increase</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span> <span class="p">});</span>
+        <span class="p">}</span>
+    <span class="p">};</span>
+<span class="p">});</span>
+</code></pre></div><p data-pid="CGr8BUs7">TypeScript中支持的ES module语法被叫做外部模块。</p><h3>内部模块和命名空间</h3><p data-pid="t6FFwdGG">TypeScript还有一个<code>module</code>关键字和一个<code>namespace</code>关键字(<a href="https://link.zhihu.com/?target=https%3A//www.typescriptlang.org/docs/handbook/namespaces-and-modules.html%23pitfalls-of-namespaces-and-modules" class=" external" target="_blank" rel="nofollow noreferrer" data-za-detail-view-id="1043"><span class="invisible">https://www.</span><span class="visible">typescriptlang.org/docs</span><span class="invisible">/handbook/namespaces-and-modules.html#pitfalls-of-namespaces-and-modules</span><span class="ellipsis"></span></a>)[<a href="https://link.zhihu.com/?target=https%3A//www.typescriptlang.org/docs/handbook/namespaces-and-modules.html%23pitfalls-of-namespaces-and-modules" class=" external" target="_blank" rel="nofollow noreferrer" data-za-detail-view-id="1043"><span class="invisible">https://www.</span><span class="visible">typescriptlang.org/docs</span><span class="invisible">/handbook/namespaces-and-modules.html#pitfalls-of-namespaces-and-modules</span><span class="ellipsis"></span></a>]。它们被叫做内部模块：</p><div class="highlight"><pre><code class="language-ts"><span class="kr">module</span> <span class="nx">Counter</span> <span class="p">{</span>
+    <span class="kd">let</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kr">export</span> <span class="kr">const</span> <span class="nx">increase</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span>
+    <span class="kr">export</span> <span class="kr">const</span> <span class="nx">reset</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Count is reset."</span><span class="p">);</span>
+    <span class="p">};</span>
+<span class="p">}</span>
+
+<span class="kr">namespace</span> <span class="nx">Counter</span> <span class="p">{</span>
+    <span class="kd">let</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kr">export</span> <span class="kr">const</span> <span class="nx">increase</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span>
+    <span class="kr">export</span> <span class="kr">const</span> <span class="nx">reset</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Count is reset."</span><span class="p">);</span>
+    <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div><p data-pid="0U0qej0N">这两种都可以被转义成JS对象：</p><div class="highlight"><pre><code class="language-js"><span class="kd">var</span> <span class="nx">Counter</span><span class="p">;</span>
+<span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">Counter</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nx">Counter</span><span class="p">.</span><span class="nx">increase</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span> <span class="p">};</span>
+    <span class="nx">Counter</span><span class="p">.</span><span class="nx">reset</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+        <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Count is reset."</span><span class="p">);</span>
+    <span class="p">};</span>
+<span class="p">})(</span><span class="nx">Counter</span> <span class="o">||</span> <span class="p">(</span><span class="nx">Counter</span> <span class="o">=</span> <span class="p">{}));</span>
+</code></pre></div><p data-pid="D6Pgse5v">TypeScript内部模块可以通过<code>.</code>分隔符来区分层级：</p><div class="highlight"><pre><code class="language-ts"><span class="kr">module</span> <span class="nx">Counter.Sub</span> <span class="p">{</span>
+    <span class="kd">let</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kr">export</span> <span class="kr">const</span> <span class="nx">increase</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kr">namespace</span> <span class="nx">Counter</span><span class="p">.</span><span class="nx">Sub</span> <span class="p">{</span>
+    <span class="kd">let</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kr">export</span> <span class="kr">const</span> <span class="nx">increase</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div><p data-pid="B1mxM3ux">上面的代码转义结果如下：</p><div class="highlight"><pre><code class="language-js"><span class="kd">var</span> <span class="nx">Counter</span><span class="p">;</span>
+<span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">Counter</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">Sub</span><span class="p">;</span>
+    <span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">Sub</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="nx">Sub</span><span class="p">.</span><span class="nx">increase</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span> <span class="p">};</span>
+    <span class="p">})(</span><span class="nx">Sub</span> <span class="o">=</span> <span class="nx">Counter</span><span class="p">.</span><span class="nx">Sub</span> <span class="o">||</span> <span class="p">(</span><span class="nx">Counter</span><span class="p">.</span><span class="nx">Sub</span> <span class="o">=</span> <span class="p">{}));</span>
+<span class="p">})(</span><span class="nx">Counter</span><span class="o">||</span> <span class="p">(</span><span class="nx">Counter</span> <span class="o">=</span> <span class="p">{}));</span>
+</code></pre></div><p data-pid="JhrF-0Mn">TypeScript内部模块还可以与<code>export</code>一起使用：</p><div class="highlight"><pre><code class="language-ts"><span class="kr">module</span> <span class="nx">Counter</span> <span class="p">{</span>
+    <span class="kd">let</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kr">export</span> <span class="kr">module</span> <span class="nx">Sub</span> <span class="p">{</span>
+        <span class="kr">export</span> <span class="kr">const</span> <span class="nx">increase</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kr">module</span> <span class="nx">Counter</span> <span class="p">{</span>
+    <span class="kd">let</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kr">export</span> <span class="kr">namespace</span> <span class="nx">Sub</span> <span class="p">{</span>
+        <span class="kr">export</span> <span class="kr">const</span> <span class="nx">increase</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div><p data-pid="26AxrsJ0">转义结果类似于刚刚的分层模块：</p><div class="highlight"><pre><code class="language-js"><span class="kd">var</span> <span class="nx">Counter</span><span class="p">;</span>
+<span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">Counter</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">Sub</span><span class="p">;</span>
+    <span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">Sub</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">Sub</span><span class="p">.</span><span class="nx">increase</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="o">++</span><span class="nx">count</span><span class="p">;</span> <span class="p">};</span>
+    <span class="p">})(</span><span class="nx">Sub</span> <span class="o">=</span> <span class="nx">Counter</span><span class="p">.</span><span class="nx">Sub</span> <span class="o">||</span> <span class="p">(</span><span class="nx">Counter</span><span class="p">.</span><span class="nx">Sub</span> <span class="o">=</span> <span class="p">{}));</span>
+<span class="p">})(</span><span class="nx">Counter</span> <span class="o">||</span> <span class="p">(</span><span class="nx">Counter</span> <span class="o">=</span> <span class="p">{}));</span>
+</code></pre></div><h2>结论</h2><p data-pid="l0momAeB">JavaScript的模块化路程充满了戏剧性，截止到目前，我们供讨论了十多个不同的规范/工具：</p><ol><li data-pid="4rfif15G">IIFE module</li><li data-pid="Z5GfepvT">揭示模块</li><li data-pid="ObxIJNaf">CJS module：CommonJS module / Node.js module</li><li data-pid="J69pkc0D">AMD module: Asynchronous Module Definition / RequireJS module</li><li data-pid="k6QYj-y6">UMD module: Universal Module Definition / UmdJS module</li><li data-pid="pBDG-SA5">ES module: ECMAScript 2015 / ES6 module</li><li data-pid="19-kgh8M">ES dynamic module: ECMAScript 2020 / ES11 dynamic module</li><li data-pid="I3XEWl0D">System module: SystemJS module</li><li data-pid="z-NL6hYx">Webpack module</li><li data-pid="LlhTuEFk">Babel module</li><li data-pid="xLIo-Z5x">TypeScript module and namespace</li></ol><p data-pid="Lf-MCRZ5">幸运的是，如今JavaScript已经建立的语言内置模块标准，且几乎所有的现代浏览器都已经支持。对于旧的浏览器，我们也可以使用这些新标准，并通过Webpack/Babel/SystemJS/TypeScript来转义。</p></div></div></div></div><div role="button" tabindex="0" class="ContentItem-time">发布于 2020-04-22 13:53</div></article></div></main></div></div></div>
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+
+
+</body></html>
