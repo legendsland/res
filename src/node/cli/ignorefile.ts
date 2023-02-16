@@ -50,8 +50,20 @@ export function appendIgnore(filePath: ParsedPath) {
     ).length > 0;
 
     if (!found) {
-        const line = '\n!' + filePath.dir + '/' + filePath.base;
-        fs.appendFileSync('.gitignore', line);
-        console.log(`++ ${line}`);
+        let lines = '';
+
+        // check if is a symbolic link
+        const file = filePath.dir + '/' + filePath.base;
+        const stat = fs.lstatSync(file);
+        if (stat.isSymbolicLink()) {
+            console.log(`symbol link: ${file}`);
+            const real = fs.readlinkSync(file);
+            const realFile = path.relative('.', path.resolve(filePath.dir, real));
+            lines += '\n!' + realFile;
+        }
+
+        lines += '\n!' + file;
+        fs.appendFileSync('.gitignore', lines);
+        console.log(`++ ${lines}`);
     }
 }
