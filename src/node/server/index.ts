@@ -4,13 +4,15 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as util from 'util';
 import * as cheerio from "cheerio";
-
+export const RED = require("node-red");
+import * as http from 'http';
 import {removeStopwords} from 'stopword';
 import {Neo4jClient, testConnection} from './neo4j/client';
 import {words} from './nlp';
 import {ProgramRunner} from './program';
 import {NodeDb} from './res';
 import {Note} from '../../common/db';
+import {keys} from '../../../.keys';
 
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -21,9 +23,21 @@ nlp.extend(require('compromise-ngrams')) //done!
 export async function startServer() {
 
     const app = express();
-    const root = path.join(__dirname, '../../../../../');
+    const server = http.createServer(app);
 
+    const root = path.join(__dirname, '../../../../../');
     const port = 34701;
+
+    const settings = {
+        httpAdminRoot:"/red",
+        httpNodeRoot: "/red/api",
+        userDir: keys.redDirs.base,
+    };
+
+    RED.init(server, settings);
+    app.use(settings.httpAdminRoot,RED.httpAdmin);
+    app.use(settings.httpNodeRoot,RED.httpNode);
+
     app.use(cors());
     app.use(express.static(root));
     app.use(bodyParser.json());
@@ -202,10 +216,11 @@ export async function startServer() {
         }
     });
 
-    app.listen(port, () => {
-        console.log(`Example app listening on port ${port}`)
+    RED.start().then(() => {
+        server.listen(port, () => {
+            console.log(`Example app listening on port ${port}`)
+        });
     });
-
 }
 
 async function cleanText(path: string): Promise<string> {
