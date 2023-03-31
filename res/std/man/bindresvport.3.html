@@ -1,0 +1,140 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (C) 2007, Michael Kerrisk <mtk.manpages@gmail.com>
+   and Copyright (C) 2008, Linux Foundation, written by Michael Kerrisk
+       <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   2007-05-31, mtk: Rewrite and substantial additional text.
+   2008-12-03, mtk: Rewrote some pieces and fixed some errors
+   --><head>
+<meta name="dc.identifier" content="res/ffd645a558a9497cb6b9ab5691d3be84ef86ef95">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>bindresvport(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">bindresvport(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">bindresvport(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">bindresvport - bind a socket to a privileged IP port</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/types.h&gt;</b>
+<b>#include &lt;netinet/in.h&gt;</b></pre>
+<pre><b>int bindresvport(int </b><i>sockfd</i><b>, struct sockaddr_in *</b><i>sin</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>bindresvport</b>() is used to bind the socket referred to by
+    the file descriptor <i>sockfd</i> to a privileged anonymous IP port, that
+    is, a port number arbitrarily selected from the range 512 to 1023.</p>
+<p class="Pp">If the <b>bind</b>(2) performed by <b>bindresvport</b>() is
+    successful, and <i>sin</i> is not NULL, then <i>sin-&gt;sin_port</i> returns
+    the port number actually allocated.</p>
+<p class="Pp"><i>sin</i> can be NULL, in which case <i>sin-&gt;sin_family</i> is
+    implicitly taken to be <b>AF_INET</b>. However, in this case,
+    <b>bindresvport</b>() has no way to return the port number actually
+    allocated. (This information can later be obtained using
+    <b>getsockname</b>(2).)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp"><b>bindresvport</b>() returns 0 on success; otherwise -1 is
+    returned and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp"><b>bindresvport</b>() can fail for any of the same reasons as
+    <b>bind</b>(2). In addition, the following errors may occur:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>The calling process was not privileged (on Linux: the calling process did
+      not have the <b>CAP_NET_BIND_SERVICE</b> capability in the user namespace
+      governing its network namespace).</dd>
+  <dt id="EADDRINUSE"><a class="permalink" href="#EADDRINUSE"><b>EADDRINUSE</b></a></dt>
+  <dd>All privileged ports are in use.</dd>
+  <dt id="EAFNOSUPPORT"><a class="permalink" href="#EAFNOSUPPORT"><b>EAFNOSUPPORT</b>
+    (<b>EPFNOSUPPORT</b> in glibc 2.7 and earlier)</a></dt>
+  <dd><i>sin</i> is not NULL and <i>sin-&gt;sin_family</i> is not
+      <b>AF_INET</b>.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>bindresvport ()</td>
+    <td>Thread safety</td>
+    <td>glibc&nbsp;&gt;=&nbsp;2.17: MT-Safe; .
+      glibc&nbsp;&lt;&nbsp;2.17: MT-Unsafe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+<p class="Pp">The <b>bindresvport</b>() function uses a static variable that was
+    not protected by a lock before glibc 2.17, rendering the function
+  MT-Unsafe.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">Not in POSIX.1. Present on the BSDs, Solaris, and many other
+    systems.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Unlike some <b>bindresvport</b>() implementations, the glibc
+    implementation ignores any value that the caller supplies in
+    <i>sin-&gt;sin_port</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>bind</b>(2), <b>getsockname</b>(2)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

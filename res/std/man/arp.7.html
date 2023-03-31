@@ -1,0 +1,288 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   This man page is Copyright (C) 1999 Matthew Wilcox <willy@bofh.ai>.
+   %%%LICENSE_START(VERBATIM_ONE_PARA)
+   Permission is granted to distribute possibly modified copies
+   of this page provided the header is included verbatim,
+   and in case of nontrivial modification author and date
+   of the modification is added to the header.
+   %%%LICENSE_END
+  
+   Modified June 1999 Andi Kleen
+   $Id: arp.7,v 1.10 2000/04/27 19:31:38 ak Exp $
+   --><head>
+<meta name="dc.identifier" content="res/f8a314759f2ba51a3bec77baaef4e184f8f76ccf">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>arp(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">arp(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">arp(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">arp - Linux ARP kernel module.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">This kernel protocol module implements the Address Resolution
+    Protocol defined in RFC&nbsp;826. It is used to convert between Layer2
+    hardware addresses and IPv4 protocol addresses on directly connected
+    networks. The user normally doesn't interact directly with this module
+    except to configure it; instead it provides a service for other protocols in
+    the kernel.</p>
+<p class="Pp">A user process can receive ARP packets by using <b>packet</b>(7)
+    sockets. There is also a mechanism for managing the ARP cache in user-space
+    by using <b>netlink</b>(7) sockets. The ARP table can also be controlled via
+    <b>ioctl</b>(2) on any <b>AF_INET</b> socket.</p>
+<p class="Pp">The ARP module maintains a cache of mappings between hardware
+    addresses and protocol addresses. The cache has a limited size so old and
+    less frequently used entries are garbage-collected. Entries which are marked
+    as permanent are never deleted by the garbage-collector. The cache can be
+    directly manipulated by the use of ioctls and its behavior can be tuned by
+    the <i>/proc</i> interfaces described below.</p>
+<p class="Pp">When there is no positive feedback for an existing mapping after
+    some time (see the <i>/proc</i> interfaces below), a neighbor cache entry is
+    considered stale. Positive feedback can be gotten from a higher layer; for
+    example from a successful TCP ACK. Other protocols can signal forward
+    progress using the <b>MSG_CONFIRM</b> flag to <b>sendmsg</b>(2). When there
+    is no forward progress, ARP tries to reprobe. It first tries to ask a local
+    arp daemon <b>app_solicit</b> times for an updated MAC address. If that
+    fails and an old MAC address is known, a unicast probe is sent
+    <b>ucast_solicit</b> times. If that fails too, it will broadcast a new ARP
+    request to the network. Requests are sent only when there is data queued for
+    sending.</p>
+<p class="Pp">Linux will automatically add a nonpermanent proxy arp entry when
+    it receives a request for an address it forwards to and proxy arp is enabled
+    on the receiving interface. When there is a reject route for the target, no
+    proxy arp entry is added.</p>
+<section class="Ss">
+<h2 class="Ss" id="Ioctls"><a class="permalink" href="#Ioctls">Ioctls</a></h2>
+<p class="Pp">Three ioctls are available on all <b>AF_INET</b> sockets. They
+    take a pointer to a <i>struct arpreq</i> as their argument.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct arpreq {
+<br>
+    struct sockaddr arp_pa;      /* protocol address */
+<br>
+    struct sockaddr arp_ha;      /* hardware address */
+<br>
+    int             arp_flags;   /* flags */
+<br>
+    struct sockaddr arp_netmask; /* netmask of protocol address */
+<br>
+    char            arp_dev[16];
+};
+</pre>
+<br>
+<p class="Pp"><b>SIOCSARP</b>, <b>SIOCDARP</b> and <b>SIOCGARP</b> respectively
+    set, delete, and get an ARP mapping. Setting and deleting ARP maps are
+    privileged operations and may be performed only by a process with the
+    <b>CAP_NET_ADMIN</b> capability or an effective UID of 0.</p>
+<p class="Pp"><i>arp_pa</i> must be an <b>AF_INET</b> address and <i>arp_ha</i>
+    must have the same type as the device which is specified in <i>arp_dev</i>.
+    <i>arp_dev</i> is a zero-terminated string which names a device.</p>
+<div class="Bd-indent">
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td colspan="2" style="text-align: center;"><i>arp_flags</i></td>
+  </tr>
+  <tr>
+    <td>flag</td>
+    <td>meaning</td>
+  </tr>
+  <tr>
+    <td>ATF_COM</td>
+    <td>Lookup complete</td>
+  </tr>
+  <tr>
+    <td>ATF_PERM</td>
+    <td>Permanent entry</td>
+  </tr>
+  <tr>
+    <td>ATF_PUBL</td>
+    <td>Publish entry</td>
+  </tr>
+  <tr>
+    <td>ATF_USETRAILERS</td>
+    <td>Trailers requested</td>
+  </tr>
+  <tr>
+    <td>ATF_NETMASK</td>
+    <td>Use a netmask</td>
+  </tr>
+  <tr>
+    <td>ATF_DONTPUB</td>
+    <td>Don't answer</td>
+  </tr>
+</tbody></table>
+</div>
+<p class="Pp">If the <b>ATF_NETMASK</b> flag is set, then <i>arp_netmask</i>
+    should be valid. Linux 2.2 does not support proxy network ARP entries, so
+    this should be set to 0xffffffff, or 0 to remove an existing proxy arp
+    entry. <b>ATF_USETRAILERS</b> is obsolete and should not be used.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="/proc_interfaces"><a class="permalink" href="#/proc_interfaces">/proc
+  interfaces</a></h2>
+<p class="Pp">ARP supports a range of <i>/proc</i> interfaces to configure
+    parameters on a global or per-interface basis. The interfaces can be
+    accessed by reading or writing the <i>/proc/sys/net/ipv4/neigh/*/*</i>
+    files. Each interface in the system has its own directory in
+    <i>/proc/sys/net/ipv4/neigh/</i>. The setting in the "default"
+    directory is used for all newly created devices. Unless otherwise specified,
+    time-related interfaces are specified in seconds.</p>
+<dl class="Bl-tag">
+  <dt id="anycast_delay"><a class="permalink" href="#anycast_delay"><i>anycast_delay</i>
+    (since Linux 2.2)</a></dt>
+  <dd>The maximum number of jiffies to delay before replying to a IPv6 neighbor
+      solicitation message. Anycast support is not yet implemented. Defaults to
+      1 second.</dd>
+  <dt id="app_solicit"><a class="permalink" href="#app_solicit"><i>app_solicit</i>
+    (since Linux 2.2)</a></dt>
+  <dd>The maximum number of probes to send to the user space ARP daemon via
+      netlink before dropping back to multicast probes (see
+      <i>mcast_solicit</i>). Defaults to 0.</dd>
+  <dt id="base_reachable_time"><a class="permalink" href="#base_reachable_time"><i>base_reachable_time</i>
+    (since Linux 2.2)</a></dt>
+  <dd>Once a neighbor has been found, the entry is considered to be valid for at
+      least a random value between <i>base_reachable_time</i>/2 and
+      3*<i>base_reachable_time</i>/2. An entry's validity will be extended if it
+      receives positive feedback from higher level protocols. Defaults to 30
+      seconds. This file is now obsolete in favor of
+      <i>base_reachable_time_ms</i>.</dd>
+  <dt id="base_reachable_time_ms"><a class="permalink" href="#base_reachable_time_ms"><i>base_reachable_time_ms</i>
+    (since Linux 2.6.12)</a></dt>
+  <dd>As for <i>base_reachable_time</i>, but measures time in milliseconds.
+      Defaults to 30000 milliseconds.</dd>
+  <dt id="delay_first_probe_time"><a class="permalink" href="#delay_first_probe_time"><i>delay_first_probe_time</i>
+    (since Linux 2.2)</a></dt>
+  <dd>Delay before first probe after it has been decided that a neighbor is
+      stale. Defaults to 5 seconds.</dd>
+  <dt id="gc_interval"><a class="permalink" href="#gc_interval"><i>gc_interval</i>
+    (since Linux 2.2)</a></dt>
+  <dd>How frequently the garbage collector for neighbor entries should attempt
+      to run. Defaults to 30 seconds.</dd>
+  <dt id="gc_stale_time"><a class="permalink" href="#gc_stale_time"><i>gc_stale_time</i>
+    (since Linux 2.2)</a></dt>
+  <dd>Determines how often to check for stale neighbor entries. When a neighbor
+      entry is considered stale, it is resolved again before sending data to it.
+      Defaults to 60 seconds.</dd>
+  <dt id="gc_thresh1"><a class="permalink" href="#gc_thresh1"><i>gc_thresh1</i>
+    (since Linux 2.2)</a></dt>
+  <dd>The minimum number of entries to keep in the ARP cache. The garbage
+      collector will not run if there are fewer than this number of entries in
+      the cache. Defaults to 128.</dd>
+  <dt id="gc_thresh2"><a class="permalink" href="#gc_thresh2"><i>gc_thresh2</i>
+    (since Linux 2.2)</a></dt>
+  <dd>The soft maximum number of entries to keep in the ARP cache. The garbage
+      collector will allow the number of entries to exceed this for 5 seconds
+      before collection will be performed. Defaults to 512.</dd>
+  <dt id="gc_thresh3"><a class="permalink" href="#gc_thresh3"><i>gc_thresh3</i>
+    (since Linux 2.2)</a></dt>
+  <dd>The hard maximum number of entries to keep in the ARP cache. The garbage
+      collector will always run if there are more than this number of entries in
+      the cache. Defaults to 1024.</dd>
+  <dt id="locktime"><a class="permalink" href="#locktime"><i>locktime</i> (since
+    Linux 2.2)</a></dt>
+  <dd>The minimum number of jiffies to keep an ARP entry in the cache. This
+      prevents ARP cache thrashing if there is more than one potential mapping
+      (generally due to network misconfiguration). Defaults to 1 second.</dd>
+  <dt id="mcast_solicit"><a class="permalink" href="#mcast_solicit"><i>mcast_solicit</i>
+    (since Linux 2.2)</a></dt>
+  <dd>The maximum number of attempts to resolve an address by
+      multicast/broadcast before marking the entry as unreachable. Defaults to
+      3.</dd>
+  <dt id="proxy_delay"><a class="permalink" href="#proxy_delay"><i>proxy_delay</i>
+    (since Linux 2.2)</a></dt>
+  <dd>When an ARP request for a known proxy-ARP address is received, delay up to
+      <i>proxy_delay</i> jiffies before replying. This is used to prevent
+      network flooding in some cases. Defaults to 0.8 seconds.</dd>
+  <dt id="proxy_qlen"><a class="permalink" href="#proxy_qlen"><i>proxy_qlen</i>
+    (since Linux 2.2)</a></dt>
+  <dd>The maximum number of packets which may be queued to proxy-ARP addresses.
+      Defaults to 64.</dd>
+  <dt id="retrans_time"><a class="permalink" href="#retrans_time"><i>retrans_time</i>
+    (since Linux 2.2)</a></dt>
+  <dd>The number of jiffies to delay before retransmitting a request. Defaults
+      to 1 second. This file is now obsolete in favor of
+    <i>retrans_time_ms</i>.</dd>
+  <dt id="retrans_time_ms"><a class="permalink" href="#retrans_time_ms"><i>retrans_time_ms</i>
+    (since Linux 2.6.12)</a></dt>
+  <dd>The number of milliseconds to delay before retransmitting a request.
+      Defaults to 1000 milliseconds.</dd>
+  <dt id="ucast_solicit"><a class="permalink" href="#ucast_solicit"><i>ucast_solicit</i>
+    (since Linux 2.2)</a></dt>
+  <dd>The maximum number of attempts to send unicast probes before asking the
+      ARP daemon (see <i>app_solicit</i>). Defaults to 3.</dd>
+  <dt id="unres_qlen"><a class="permalink" href="#unres_qlen"><i>unres_qlen</i>
+    (since Linux 2.2)</a></dt>
+  <dd>The maximum number of packets which may be queued for each unresolved
+      address by other network layers. Defaults to 3.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <i>struct arpreq</i> changed in Linux 2.0 to include the
+    <i>arp_dev</i> member and the ioctl numbers changed at the same time.
+    Support for the old ioctls was dropped in Linux 2.2.</p>
+<p class="Pp">Support for proxy arp entries for networks (netmask not equal
+    0xffffffff) was dropped in Linux 2.2. It is replaced by automatic proxy arp
+    setup by the kernel for all reachable hosts on other interfaces (when
+    forwarding and proxy arp is enabled for the interface).</p>
+<p class="Pp">The <i>neigh/*</i> interfaces did not exist before Linux 2.2.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">Some timer settings are specified in jiffies, which is
+    architecture- and kernel version-dependent; see <b>time</b>(7).</p>
+<p class="Pp">There is no way to signal positive feedback from user space. This
+    means connection-oriented protocols implemented in user space will generate
+    excessive ARP traffic, because ndisc will regularly reprobe the MAC address.
+    The same problem applies for some kernel protocols (e.g., NFS over UDP).</p>
+<p class="Pp">This man page mashes together functionality that is IPv4-specific
+    with functionality that is shared between IPv4 and IPv6.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>capabilities</b>(7), <b>ip</b>(7), <b>arpd</b>(8)</p>
+<p class="Pp">RFC&nbsp;826 for a description of ARP. RFC&nbsp;2461 for a
+    description of IPv6 neighbor discovery and the base algorithms used. Linux
+    2.2+ IPv4 ARP uses the IPv6 algorithms when applicable.</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 1995 Michael Chastain (mec@duracef.shout.net), 22 July 1995.
+   Copyright (c) 2015 Andrew Lutomirski
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+   --><head>
+<meta name="dc.identifier" content="res/bc5308c0140e4e30665157e3c7a25383dfa9a7f5">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>modify_ldt(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">modify_ldt(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">modify_ldt(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">modify_ldt - get or set a per-process LDT entry</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;asm/ldt.h&gt;</b>         /* Definition of <b>struct user_desc</b> */
+<b>#include &lt;sys/syscall.h&gt;</b>     /* Definition of <b>SYS_*</b> constants */
+<b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int syscall(SYS_modify_ldt, int </b><i>func</i><b>, void </b><i>ptr</i><b>[.</b><i>bytecount</i><b>],</b>
+<b>            unsigned long </b><i>bytecount</i><b>);</b></pre>
+<p class="Pp"><i>Note</i>: glibc provides no wrapper for <b>modify_ldt</b>(),
+    necessitating the use of <b>syscall</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>modify_ldt</b>() reads or writes the local descriptor table
+    (LDT) for a process. The LDT is an array of segment descriptors that can be
+    referenced by user code. Linux allows processes to configure a per-process
+    (actually per-mm) LDT. For more information about the LDT, see the Intel
+    Software Developer's Manual or the AMD Architecture Programming Manual.</p>
+<p class="Pp">When <i>func</i> is 0, <b>modify_ldt</b>() reads the LDT into the
+    memory pointed to by <i>ptr</i>. The number of bytes read is the smaller of
+    <i>bytecount</i> and the actual size of the LDT, although the kernel may act
+    as though the LDT is padded with additional trailing zero bytes. On success,
+    <b>modify_ldt</b>() will return the number of bytes read.</p>
+<p class="Pp">When <i>func</i> is 1 or 0x11, <b>modify_ldt</b>() modifies the
+    LDT entry indicated by <i>ptr-&gt;entry_number</i>. <i>ptr</i> points to a
+    <i>user_desc</i> structure and <i>bytecount</i> must equal the size of this
+    structure.</p>
+<p class="Pp">The <i>user_desc</i> structure is defined in
+    <i>&lt;asm/ldt.h&gt;</i> as:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct user_desc {
+<br>
+    unsigned int  entry_number;
+<br>
+    unsigned int  base_addr;
+<br>
+    unsigned int  limit;
+<br>
+    unsigned int  seg_32bit:1;
+<br>
+    unsigned int  contents:2;
+<br>
+    unsigned int  read_exec_only:1;
+<br>
+    unsigned int  limit_in_pages:1;
+<br>
+    unsigned int  seg_not_present:1;
+<br>
+    unsigned int  useable:1;
+};
+</pre>
+<br>
+<p class="Pp">In Linux 2.4 and earlier, this structure was named
+    <i>modify_ldt_ldt_s</i>.</p>
+<p class="Pp">The <i>contents</i> field is the segment type (data, expand-down
+    data, non-conforming code, or conforming code). The other fields match their
+    descriptions in the CPU manual, although <b>modify_ldt</b>() cannot set the
+    hardware-defined "accessed" bit described in the CPU manual.</p>
+<p class="Pp">A <i>user_desc</i> is considered "empty" if
+    <i>read_exec_only</i> and <i>seg_not_present</i> are set to 1 and all of the
+    other fields are 0. An LDT entry can be cleared by setting it to an
+    "empty" <i>user_desc</i> or, if <i>func</i> is 1, by setting both
+    <i>base</i> and <i>limit</i> to 0.</p>
+<p class="Pp">A conforming code segment (i.e., one with <i>contents==3</i>) will
+    be rejected if <i>func</i> is 1 or if <i>seg_not_present</i> is 0.</p>
+<p class="Pp">When <i>func</i> is 2, <b>modify_ldt</b>() will read zeros. This
+    appears to be a leftover from Linux 2.4.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>modify_ldt</b>() returns either the actual number
+    of bytes read (for reading) or 0 (for writing). On failure,
+    <b>modify_ldt</b>() returns -1 and sets <i>errno</i> to indicate the
+  error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>ptr</i> points outside the address space.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>ptr</i> is 0, or <i>func</i> is 1 and <i>bytecount</i> is not equal to
+      the size of the structure <i>user_desc</i>, or <i>func</i> is 1 or 0x11
+      and the new LDT entry has invalid values.</dd>
+  <dt id="ENOSYS"><a class="permalink" href="#ENOSYS"><b>ENOSYS</b></a></dt>
+  <dd><i>func</i> is neither 0, 1, 2, nor 0x11.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This call is Linux-specific and should not be used in programs
+    intended to be portable.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp"><b>modify_ldt</b>() should not be used for thread-local storage,
+    as it slows down context switches and only supports a limited number of
+    threads. Threading libraries should use <b>set_thread_area</b>(2) or
+    <b>arch_prctl</b>(2) instead, except on extremely old kernels that do not
+    support those system calls.</p>
+<p class="Pp">The normal use for <b>modify_ldt</b>() is to run legacy 16-bit or
+    segmented 32-bit code. Not all kernels allow 16-bit segments to be
+    installed, however.</p>
+<p class="Pp">Even on 64-bit kernels, <b>modify_ldt</b>() cannot be used to
+    create a long mode (i.e., 64-bit) code segment. The undocumented field
+    "lm" in <i>user_desc</i> is not useful, and, despite its name,
+    does not result in a long mode segment.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">On 64-bit kernels before Linux 3.19, setting the "lm"
+    bit in <i>user_desc</i> prevents the descriptor from being considered empty.
+    Keep in mind that the "lm" bit does not exist in the 32-bit
+    headers, but these buggy kernels will still notice the bit even when set in
+    a 32-bit process.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>arch_prctl</b>(2), <b>set_thread_area</b>(2),
+  <b>vm86</b>(2)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

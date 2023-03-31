@@ -1,0 +1,323 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) Michael Kerrisk, 2004
+  	using some material drawn from earlier man pages
+  	written by Thomas Kuhn, Copyright 1996
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+   --><head>
+<meta name="dc.identifier" content="res/bd090e59d4728410dac63ba97a785768c3a69739">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>mlock(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">mlock(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">mlock(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">mlock, mlock2, munlock, mlockall, munlockall - lock and unlock
+    memory</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/mman.h&gt;</b></pre>
+<pre><b>int mlock(const void </b><i>addr</i><b>[.</b><i>len</i><b>], size_t </b><i>len</i><b>);</b>
+<b>int mlock2(const void </b><i>addr</i><b>[.</b><i>len</i><b>], size_t </b><i>len</i><b>, unsigned int </b><i>flags</i><b>);</b>
+<b>int munlock(const void </b><i>addr</i><b>[.</b><i>len</i><b>], size_t </b><i>len</i><b>);</b></pre>
+<pre><b>int mlockall(int </b><i>flags</i><b>);</b>
+<b>int munlockall(void);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>mlock</b>(), <b>mlock2</b>(), and <b>mlockall</b>() lock part
+    or all of the calling process's virtual address space into RAM, preventing
+    that memory from being paged to the swap area.</p>
+<p class="Pp"><b>munlock</b>() and <b>munlockall</b>() perform the converse
+    operation, unlocking part or all of the calling process's virtual address
+    space, so that pages in the specified virtual address range may once more be
+    swapped out if required by the kernel memory manager.</p>
+<p class="Pp">Memory locking and unlocking are performed in units of whole
+    pages.</p>
+<section class="Ss">
+<h2 class="Ss" id="mlock(),_mlock2(),_and_munlock()"><a class="permalink" href="#mlock(),_mlock2(),_and_munlock()">mlock(),
+  mlock2(), and munlock()</a></h2>
+<p class="Pp"><b>mlock</b>() locks pages in the address range starting at
+    <i>addr</i> and continuing for <i>len</i> bytes. All pages that contain a
+    part of the specified address range are guaranteed to be resident in RAM
+    when the call returns successfully; the pages are guaranteed to stay in RAM
+    until later unlocked.</p>
+<p class="Pp"><b>mlock2</b>() also locks pages in the specified range starting
+    at <i>addr</i> and continuing for <i>len</i> bytes. However, the state of
+    the pages contained in that range after the call returns successfully will
+    depend on the value in the <i>flags</i> argument.</p>
+<p class="Pp">The <i>flags</i> argument can be either 0 or the following
+    constant:</p>
+<dl class="Bl-tag">
+  <dt id="MLOCK_ONFAULT"><a class="permalink" href="#MLOCK_ONFAULT"><b>MLOCK_ONFAULT</b></a></dt>
+  <dd>Lock pages that are currently resident and mark the entire range so that
+      the remaining nonresident pages are locked when they are populated by a
+      page fault.</dd>
+</dl>
+<p class="Pp">If <i>flags</i> is 0, <b>mlock2</b>() behaves exactly the same as
+    <b>mlock</b>().</p>
+<p class="Pp"><b>munlock</b>() unlocks pages in the address range starting at
+    <i>addr</i> and continuing for <i>len</i> bytes. After this call, all pages
+    that contain a part of the specified memory range can be moved to external
+    swap space again by the kernel.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="mlockall()_and_munlockall()"><a class="permalink" href="#mlockall()_and_munlockall()">mlockall()
+  and munlockall()</a></h2>
+<p class="Pp"><b>mlockall</b>() locks all pages mapped into the address space of
+    the calling process. This includes the pages of the code, data, and stack
+    segment, as well as shared libraries, user space kernel data, shared memory,
+    and memory-mapped files. All mapped pages are guaranteed to be resident in
+    RAM when the call returns successfully; the pages are guaranteed to stay in
+    RAM until later unlocked.</p>
+<p class="Pp">The <i>flags</i> argument is constructed as the bitwise OR of one
+    or more of the following constants:</p>
+<dl class="Bl-tag">
+  <dt id="MCL_CURRENT"><a class="permalink" href="#MCL_CURRENT"><b>MCL_CURRENT</b></a></dt>
+  <dd>Lock all pages which are currently mapped into the address space of the
+      process.</dd>
+  <dt id="MCL_FUTURE"><a class="permalink" href="#MCL_FUTURE"><b>MCL_FUTURE</b></a></dt>
+  <dd>Lock all pages which will become mapped into the address space of the
+      process in the future. These could be, for instance, new pages required by
+      a growing heap and stack as well as new memory-mapped files or shared
+      memory regions.</dd>
+  <dt id="MCL_ONFAULT"><a class="permalink" href="#MCL_ONFAULT"><b>MCL_ONFAULT</b>
+    (since Linux 4.4)</a></dt>
+  <dd>Used together with <b>MCL_CURRENT</b>, <b>MCL_FUTURE</b>, or both. Mark
+      all current (with <b>MCL_CURRENT</b>) or future (with <b>MCL_FUTURE</b>)
+      mappings to lock pages when they are faulted in. When used with
+      <b>MCL_CURRENT</b>, all present pages are locked, but <b>mlockall</b>()
+      will not fault in non-present pages. When used with <b>MCL_FUTURE</b>, all
+      future mappings will be marked to lock pages when they are faulted in, but
+      they will not be populated by the lock when the mapping is created.
+      <b>MCL_ONFAULT</b> must be used with either <b>MCL_CURRENT</b> or
+      <b>MCL_FUTURE</b> or both.</dd>
+</dl>
+<p class="Pp">If <b>MCL_FUTURE</b> has been specified, then a later system call
+    (e.g., <b>mmap</b>(2), <b>sbrk</b>(2), <b>malloc</b>(3)), may fail if it
+    would cause the number of locked bytes to exceed the permitted maximum (see
+    below). In the same circumstances, stack growth may likewise fail: the
+    kernel will deny stack expansion and deliver a <b>SIGSEGV</b> signal to the
+    process.</p>
+<p class="Pp"><b>munlockall</b>() unlocks all pages mapped into the address
+    space of the calling process.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, these system calls return 0. On error, -1 is returned,
+    <i>errno</i> is set to indicate the error, and no changes are made to any
+    locks in the address space of the process.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>(<b>mlock</b>(), <b>mlock2</b>(), and <b>munlock</b>()) Some or all of the
+      specified address range could not be locked.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>(<b>mlock</b>(), <b>mlock2</b>(), and <b>munlock</b>()) The result of the
+      addition <i>addr</i>+<i>len</i> was less than <i>addr</i> (e.g., the
+      addition may have resulted in an overflow).</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>(<b>mlock2</b>()) Unknown <i>flags</i> were specified.</dd>
+  <dt id="EINVAL~3"><a class="permalink" href="#EINVAL~3"><b>EINVAL</b></a></dt>
+  <dd>(<b>mlockall</b>()) Unknown <i>flags</i> were specified or
+      <b>MCL_ONFAULT</b> was specified without either <b>MCL_FUTURE</b> or
+      <b>MCL_CURRENT</b>.</dd>
+  <dt id="EINVAL~4"><a class="permalink" href="#EINVAL~4"><b>EINVAL</b></a></dt>
+  <dd>(Not on Linux) <i>addr</i> was not a multiple of the page size.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>(<b>mlock</b>(), <b>mlock2</b>(), and <b>munlock</b>()) Some of the
+      specified address range does not correspond to mapped pages in the address
+      space of the process.</dd>
+  <dt id="ENOMEM~2"><a class="permalink" href="#ENOMEM~2"><b>ENOMEM</b></a></dt>
+  <dd>(<b>mlock</b>(), <b>mlock2</b>(), and <b>munlock</b>()) Locking or
+      unlocking a region would result in the total number of mappings with
+      distinct attributes (e.g., locked versus unlocked) exceeding the allowed
+      maximum. (For example, unlocking a range in the middle of a currently
+      locked mapping would result in three mappings: two locked mappings at each
+      end and an unlocked mapping in the middle.)</dd>
+  <dt id="ENOMEM~3"><a class="permalink" href="#ENOMEM~3"><b>ENOMEM</b></a></dt>
+  <dd>(Linux 2.6.9 and later) the caller had a nonzero <b>RLIMIT_MEMLOCK</b>
+      soft resource limit, but tried to lock more memory than the limit
+      permitted. This limit is not enforced if the process is privileged
+      (<b>CAP_IPC_LOCK</b>).</dd>
+  <dt id="ENOMEM~4"><a class="permalink" href="#ENOMEM~4"><b>ENOMEM</b></a></dt>
+  <dd>(Linux 2.4 and earlier) the calling process tried to lock more than half
+      of RAM.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The caller is not privileged, but needs privilege (<b>CAP_IPC_LOCK</b>) to
+      perform the requested operation.</dd>
+  <dt id="EPERM~2"><a class="permalink" href="#EPERM~2"><b>EPERM</b></a></dt>
+  <dd>(<b>munlockall</b>()) (Linux 2.6.8 and earlier) The caller was not
+      privileged (<b>CAP_IPC_LOCK</b>).</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>mlock2</b>() is available since Linux 4.4; glibc support was
+    added in glibc 2.27.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>mlock</b>(), <b>munlock</b>(), <b>mlockall</b>(), and
+    <b>munlockall</b>(): POSIX.1-2001, POSIX.1-2008, SVr4.</p>
+<p class="Pp"><b>mlock2</b>() is Linux specific.</p>
+<p class="Pp">On POSIX systems on which <b>mlock</b>() and <b>munlock</b>() are
+    available, <b>_POSIX_MEMLOCK_RANGE</b> is defined in <i>&lt;unistd.h&gt;</i>
+    and the number of bytes in a page can be determined from the constant
+    <b>PAGESIZE</b> (if defined) in <i>&lt;limits.h&gt;</i> or by calling
+    <i>sysconf(_SC_PAGESIZE)</i>.</p>
+<p class="Pp">On POSIX systems on which <b>mlockall</b>() and
+    <b>munlockall</b>() are available, <b>_POSIX_MEMLOCK</b> is defined in
+    <i>&lt;unistd.h&gt;</i> to a value greater than 0. (See also
+    <b>sysconf</b>(3).)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Memory locking has two main applications: real-time algorithms and
+    high-security data processing. Real-time applications require deterministic
+    timing, and, like scheduling, paging is one major cause of unexpected
+    program execution delays. Real-time applications will usually also switch to
+    a real-time scheduler with <b>sched_setscheduler</b>(2). Cryptographic
+    security software often handles critical bytes like passwords or secret keys
+    as data structures. As a result of paging, these secrets could be
+    transferred onto a persistent swap store medium, where they might be
+    accessible to the enemy long after the security software has erased the
+    secrets in RAM and terminated. (But be aware that the suspend mode on
+    laptops and some desktop computers will save a copy of the system's RAM to
+    disk, regardless of memory locks.)</p>
+<p class="Pp">Real-time processes that are using <b>mlockall</b>() to prevent
+    delays on page faults should reserve enough locked stack pages before
+    entering the time-critical section, so that no page fault can be caused by
+    function calls. This can be achieved by calling a function that allocates a
+    sufficiently large automatic variable (an array) and writes to the memory
+    occupied by this array in order to touch these stack pages. This way, enough
+    pages will be mapped for the stack and can be locked into RAM. The dummy
+    writes ensure that not even copy-on-write page faults can occur in the
+    critical section.</p>
+<p class="Pp">Memory locks are not inherited by a child created via
+    <b>fork</b>(2) and are automatically removed (unlocked) during an
+    <b>execve</b>(2) or when the process terminates. The <b>mlockall</b>()
+    <b>MCL_FUTURE</b> and <b>MCL_FUTURE | MCL_ONFAULT</b> settings are not
+    inherited by a child created via <b>fork</b>(2) and are cleared during an
+    <b>execve</b>(2).</p>
+<p class="Pp">Note that <b>fork</b>(2) will prepare the address space for a
+    copy-on-write operation. The consequence is that any write access that
+    follows will cause a page fault that in turn may cause high latencies for a
+    real-time process. Therefore, it is crucial not to invoke <b>fork</b>(2)
+    after an <b>mlockall</b>() or <b>mlock</b>() operation—not even from
+    a thread which runs at a low priority within a process which also has a
+    thread running at elevated priority.</p>
+<p class="Pp">The memory lock on an address range is automatically removed if
+    the address range is unmapped via <b>munmap</b>(2).</p>
+<p class="Pp">Memory locks do not stack, that is, pages which have been locked
+    several times by calls to <b>mlock</b>(), <b>mlock2</b>(), or
+    <b>mlockall</b>() will be unlocked by a single call to <b>munlock</b>() for
+    the corresponding range or by <b>munlockall</b>(). Pages which are mapped to
+    several locations or by several processes stay locked into RAM as long as
+    they are locked at least at one location or by at least one process.</p>
+<p class="Pp">If a call to <b>mlockall</b>() which uses the <b>MCL_FUTURE</b>
+    flag is followed by another call that does not specify this flag, the
+    changes made by the <b>MCL_FUTURE</b> call will be lost.</p>
+<p class="Pp">The <b>mlock2</b>() <b>MLOCK_ONFAULT</b> flag and the
+    <b>mlockall</b>() <b>MCL_ONFAULT</b> flag allow efficient memory locking for
+    applications that deal with large mappings where only a (small) portion of
+    pages in the mapping are touched. In such cases, locking all of the pages in
+    a mapping would incur a significant penalty for memory locking.</p>
+<section class="Ss">
+<h2 class="Ss" id="Linux_notes"><a class="permalink" href="#Linux_notes">Linux
+  notes</a></h2>
+<p class="Pp">Under Linux, <b>mlock</b>(), <b>mlock2</b>(), and <b>munlock</b>()
+    automatically round <i>addr</i> down to the nearest page boundary. However,
+    the POSIX.1 specification of <b>mlock</b>() and <b>munlock</b>() allows an
+    implementation to require that <i>addr</i> is page aligned, so portable
+    applications should ensure this.</p>
+<p class="Pp">The <i>VmLck</i> field of the Linux-specific
+    <i>/proc/[pid]/status</i> file shows how many kilobytes of memory the
+    process with ID <i>PID</i> has locked using <b>mlock</b>(), <b>mlock2</b>(),
+    <b>mlockall</b>(), and <b>mmap</b>(2) <b>MAP_LOCKED</b>.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Limits_and_permissions"><a class="permalink" href="#Limits_and_permissions">Limits
+  and permissions</a></h2>
+<p class="Pp">In Linux 2.6.8 and earlier, a process must be privileged
+    (<b>CAP_IPC_LOCK</b>) in order to lock memory and the <b>RLIMIT_MEMLOCK</b>
+    soft resource limit defines a limit on how much memory the process may
+  lock.</p>
+<p class="Pp">Since Linux 2.6.9, no limits are placed on the amount of memory
+    that a privileged process can lock and the <b>RLIMIT_MEMLOCK</b> soft
+    resource limit instead defines a limit on how much memory an unprivileged
+    process may lock.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">In Linux 4.8 and earlier, a bug in the kernel's accounting of
+    locked memory for unprivileged processes (i.e., without <b>CAP_IPC_LOCK</b>)
+    meant that if the region specified by <i>addr</i> and <i>len</i> overlapped
+    an existing lock, then the already locked bytes in the overlapping region
+    were counted twice when checking against the limit. Such double accounting
+    could incorrectly calculate a "total locked memory" value for the
+    process that exceeded the <b>RLIMIT_MEMLOCK</b> limit, with the result that
+    <b>mlock</b>() and <b>mlock2</b>() would fail on requests that should have
+    succeeded. This bug was fixed in Linux 4.9.</p>
+<p class="Pp">In Linux 2.4 series of kernels up to and including Linux 2.4.17, a
+    bug caused the <b>mlockall</b>() <b>MCL_FUTURE</b> flag to be inherited
+    across a <b>fork</b>(2). This was rectified in Linux 2.4.18.</p>
+<p class="Pp">Since Linux 2.6.9, if a privileged process calls
+    <i>mlockall(MCL_FUTURE)</i> and later drops privileges (loses the
+    <b>CAP_IPC_LOCK</b> capability by, for example, setting its effective UID to
+    a nonzero value), then subsequent memory allocations (e.g., <b>mmap</b>(2),
+    <b>brk</b>(2)) will fail if the <b>RLIMIT_MEMLOCK</b> resource limit is
+    encountered.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>mincore</b>(2), <b>mmap</b>(2), <b>setrlimit</b>(2),
+    <b>shmctl</b>(2), <b>sysconf</b>(3), <b>proc</b>(5),
+  <b>capabilities</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,288 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/5c64981abdaa5a6203747fdad8933e10026625b3">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>SENDMSG(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">SENDMSG(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">SENDMSG(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">sendmsg — send a message on a socket using a message
+    structure</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;sys/socket.h&gt;</pre>
+<pre>ssize_t sendmsg(int <i>socket</i>, const struct msghdr *<i>message</i>, int <i>flags</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>sendmsg</i>() function shall send a message through a
+    connection-mode or connectionless-mode socket. If the socket is a
+    connectionless-mode socket, the message shall be sent to the address
+    specified by <b>msghdr</b> if no pre-specified peer address has been set. If
+    a peer address has been pre-specified, either the message shall be sent to
+    the address specified in <b>msghdr</b> (overriding the pre-specified peer
+    address), or the function shall return -1 and set <i>errno</i> to
+    <b>[EISCONN]</b>. If the socket is connection-mode, the destination address
+    in <b>msghdr</b> shall be ignored.</p>
+<p class="Pp">The <i>sendmsg</i>() function takes the following arguments:</p>
+<dl class="Bl-tag">
+  <dt id="socket"><a class="permalink" href="#socket"><i>socket</i></a></dt>
+  <dd>Specifies the socket file descriptor.</dd>
+  <dt id="message"><a class="permalink" href="#message"><i>message</i></a></dt>
+  <dd>Points to a <b>msghdr</b> structure, containing both the destination
+      address and the buffers for the outgoing message. The length and format of
+      the address depend on the address family of the socket. The
+      <i>msg_flags</i> member is ignored.</dd>
+  <dt id="flags"><a class="permalink" href="#flags"><i>flags</i></a></dt>
+  <dd>Specifies the type of message transmission. The application may specify 0
+      or the following flag:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="MSG_EOR"><a class="permalink" href="#MSG_EOR">MSG_EOR</a></dt>
+  <dd>Terminates a record (if supported by the protocol).</dd>
+  <dt id="MSG_OOB"><a class="permalink" href="#MSG_OOB">MSG_OOB</a></dt>
+  <dd>Sends out-of-band data on sockets that support out-of-bound data. The
+      significance and semantics of out-of-band data are protocol-specific.</dd>
+  <dt id="MSG_NOSIGNAL"><a class="permalink" href="#MSG_NOSIGNAL">MSG_NOSIGNAL</a></dt>
+  <dd>Requests not to send the SIGPIPE signal if an attempt to send is made on a
+      stream-oriented socket that is no longer connected. The <b>[EPIPE]</b>
+      error shall still be returned.</dd>
+</dl>
+</div>
+<p class="Pp">The <i>msg_iov</i> and <i>msg_iovlen</i> fields of <i>message</i>
+    specify zero or more buffers containing the data to be sent. <i>msg_iov</i>
+    points to an array of <b>iovec</b> structures; <i>msg_iovlen</i> shall be
+    set to the dimension of this array. In each <b>iovec</b> structure, the
+    <i>iov_base</i> field specifies a storage area and the <i>iov_len</i> field
+    gives its size in bytes. Some of these sizes can be zero. The data from each
+    storage area indicated by <i>msg_iov</i> is sent in turn.</p>
+<p class="Pp">Successful completion of a call to <i>sendmsg</i>() does not
+    guarantee delivery of the message. A return value of -1 indicates only
+    locally-detected errors.</p>
+<p class="Pp">If space is not available at the sending socket to hold the
+    message to be transmitted and the socket file descriptor does not have
+    O_NONBLOCK set, the <i>sendmsg</i>() function shall block until space is
+    available. If space is not available at the sending socket to hold the
+    message to be transmitted and the socket file descriptor does have
+    O_NONBLOCK set, the <i>sendmsg</i>() function shall fail.</p>
+<p class="Pp">If the socket protocol supports broadcast and the specified
+    address is a broadcast address for the socket protocol, <i>sendmsg</i>()
+    shall fail if the SO_BROADCAST option is not set for the socket.</p>
+<p class="Pp">The socket in use may require the process to have appropriate
+    privileges to use the <i>sendmsg</i>() function.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>sendmsg</i>() shall return the
+    number of bytes sent. Otherwise, -1 shall be returned and <i>errno</i> set
+    to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>sendmsg</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b> or
+    <b>EWOULDBLOCK</b></a></dt>
+  <dd>
+    <br>
+    The socket's file descriptor is marked O_NONBLOCK and the requested
+      operation would block.</dd>
+  <dt id="EAFNOSUPPORT"><a class="permalink" href="#EAFNOSUPPORT"><b>EAFNOSUPPORT</b></a></dt>
+  <dd>
+    <br>
+    Addresses in the specified address family cannot be used with this
+    socket.</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The <i>socket</i> argument is not a valid file descriptor.</dd>
+  <dt id="ECONNRESET"><a class="permalink" href="#ECONNRESET"><b>ECONNRESET</b></a></dt>
+  <dd>A connection was forcibly closed by a peer.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>A signal interrupted <i>sendmsg</i>() before any data was
+    transmitted.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The sum of the <i>iov_len</i> values overflows an <b>ssize_t</b>.</dd>
+  <dt id="EMSGSIZE"><a class="permalink" href="#EMSGSIZE"><b>EMSGSIZE</b></a></dt>
+  <dd>The message is too large to be sent all at once (as the socket requires),
+      or the <i>msg_iovlen</i> member of the <b>msghdr</b> structure pointed to
+      by <i>message</i> is less than or equal to 0 or is greater than
+    {IOV_MAX}.</dd>
+  <dt id="ENOTCONN"><a class="permalink" href="#ENOTCONN"><b>ENOTCONN</b></a></dt>
+  <dd>The socket is connection-mode but is not connected.</dd>
+  <dt id="ENOTSOCK"><a class="permalink" href="#ENOTSOCK"><b>ENOTSOCK</b></a></dt>
+  <dd>The <i>socket</i> argument does not refer to a socket.</dd>
+  <dt id="EOPNOTSUPP"><a class="permalink" href="#EOPNOTSUPP"><b>EOPNOTSUPP</b></a></dt>
+  <dd>The <i>socket</i> argument is associated with a socket that does not
+      support one or more of the values set in <i>flags</i>.</dd>
+  <dt id="EPIPE"><a class="permalink" href="#EPIPE"><b>EPIPE</b></a></dt>
+  <dd>The socket is shut down for writing, or the socket is connection-mode and
+      is no longer connected. In the latter case, and if the socket is of type
+      SOCK_STREAM or SOCK_SEQPACKET and the MSG_NOSIGNAL flag is not set, the
+      SIGPIPE signal is generated to the calling thread.</dd>
+</dl>
+<p class="Pp">If the address family of the socket is AF_UNIX, then
+    <i>sendmsg</i>() shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>An I/O error occurred while reading from or writing to the file
+    system.</dd>
+  <dt id="ELOOP"><a class="permalink" href="#ELOOP"><b>ELOOP</b></a></dt>
+  <dd>A loop exists in symbolic links encountered during resolution of the
+      pathname in the socket address.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of a component of a pathname is longer than {NAME_MAX}.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>A component of the pathname does not name an existing file or the path
+      name is an empty string.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>A component of the path prefix of the pathname in the socket address names
+      an existing file that is neither a directory nor a symbolic link to a
+      directory, or the pathname in the socket address contains at least one
+      non-&lt;slash&gt; character and ends with one or more trailing
+      &lt;slash&gt; characters and the last pathname component names an existing
+      file that is neither a directory nor a symbolic link to a directory.
+    <br>
+  </dd>
+</dl>
+<p class="Pp">The <i>sendmsg</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>Search permission is denied for a component of the path prefix; or write
+      access to the named socket is denied.</dd>
+  <dt id="EDESTADDRREQ"><a class="permalink" href="#EDESTADDRREQ"><b>EDESTADDRREQ</b></a></dt>
+  <dd>
+    <br>
+    The socket is not connection-mode and does not have its peer address set,
+      and no destination address was specified.</dd>
+  <dt id="EHOSTUNREACH"><a class="permalink" href="#EHOSTUNREACH"><b>EHOSTUNREACH</b></a></dt>
+  <dd>
+    <br>
+    The destination host cannot be reached (probably because the host is down or
+      a remote router cannot reach it).</dd>
+  <dt id="EIO~2"><a class="permalink" href="#EIO~2"><b>EIO</b></a></dt>
+  <dd>An I/O error occurred while reading from or writing to the file
+    system.</dd>
+  <dt id="EISCONN"><a class="permalink" href="#EISCONN"><b>EISCONN</b></a></dt>
+  <dd>A destination address was specified and the socket is already
+    connected.</dd>
+  <dt id="ENETDOWN"><a class="permalink" href="#ENETDOWN"><b>ENETDOWN</b></a></dt>
+  <dd>The local network interface used to reach the destination is down.</dd>
+  <dt id="ENETUNREACH"><a class="permalink" href="#ENETUNREACH"><b>ENETUNREACH</b></a></dt>
+  <dd>
+    <br>
+    No route to the network is present.</dd>
+  <dt id="ENOBUFS"><a class="permalink" href="#ENOBUFS"><b>ENOBUFS</b></a></dt>
+  <dd>Insufficient resources were available in the system to perform the
+      operation.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient memory was available to fulfill the request.</dd>
+</dl>
+<p class="Pp">If the address family of the socket is AF_UNIX, then
+    <i>sendmsg</i>() may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="ELOOP~2"><a class="permalink" href="#ELOOP~2"><b>ELOOP</b></a></dt>
+  <dd>More than {SYMLOOP_MAX} symbolic links were encountered during resolution
+      of the pathname in the socket address.</dd>
+  <dt id="ENAMETOOLONG~2"><a class="permalink" href="#ENAMETOOLONG~2"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of a pathname exceeds {PATH_MAX}, or pathname resolution of a
+      symbolic link produced an intermediate result with a length that exceeds
+      {PATH_MAX}.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">Done.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The <i>select</i>() and <i>poll</i>() functions can be used to
+    determine when it is possible to send more data.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>getsockopt</i>()</i>, <i><i>poll</i>()</i>,
+    <i><i>pselect</i>()</i>, <i><i>recv</i>()</i>, <i><i>recvfrom</i>()</i>,
+    <i><i>recvmsg</i>()</i>, <i><i>send</i>()</i>, <i><i>sendto</i>()</i>,
+    <i><i>setsockopt</i>()</i>, <i><i>shutdown</i>()</i>,
+  <i><i>socket</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;sys_socket.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

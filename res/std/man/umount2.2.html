@@ -1,0 +1,187 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/420e88843ab92962601a1464bd942e21c890daea">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>umount(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">umount(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">umount(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">umount, umount2 - unmount filesystem</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/mount.h&gt;</b></pre>
+<pre><b>int umount(const char *</b><i>target</i><b>);</b>
+<b>int umount2(const char *</b><i>target</i><b>, int </b><i>flags</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>umount</b>() and <b>umount2</b>() remove the attachment of the
+    (topmost) filesystem mounted on <i>target</i>.</p>
+<p class="Pp">Appropriate privilege (Linux: the <b>CAP_SYS_ADMIN</b> capability)
+    is required to unmount filesystems.</p>
+<p class="Pp">Linux 2.1.116 added the <b>umount2</b>() system call, which, like
+    <b>umount</b>(), unmounts a target, but allows additional <i>flags</i>
+    controlling the behavior of the operation:</p>
+<dl class="Bl-tag">
+  <dt id="MNT_FORCE"><a class="permalink" href="#MNT_FORCE"><b>MNT_FORCE</b>
+    (since Linux 2.1.116)</a></dt>
+  <dd>Ask the filesystem to abort pending requests before attempting the
+      unmount. This may allow the unmount to complete without waiting for an
+      inaccessible server, but could cause data loss. If, after aborting
+      requests, some processes still have active references to the filesystem,
+      the unmount will still fail. As at Linux 4.12, <b>MNT_FORCE</b> is
+      supported only on the following filesystems: 9p (since Linux 2.6.16), ceph
+      (since Linux 2.6.34), cifs (since Linux 2.6.12), fuse (since Linux
+      2.6.16), lustre (since Linux 3.11), and NFS (since Linux 2.1.116).</dd>
+  <dt id="MNT_DETACH"><a class="permalink" href="#MNT_DETACH"><b>MNT_DETACH</b>
+    (since Linux 2.4.11)</a></dt>
+  <dd>Perform a lazy unmount: make the mount unavailable for new accesses,
+      immediately disconnect the filesystem and all filesystems mounted below it
+      from each other and from the mount table, and actually perform the unmount
+      when the mount ceases to be busy.</dd>
+  <dt id="MNT_EXPIRE"><a class="permalink" href="#MNT_EXPIRE"><b>MNT_EXPIRE</b>
+    (since Linux 2.6.8)</a></dt>
+  <dd>Mark the mount as expired. If a mount is not currently in use, then an
+      initial call to <b>umount2</b>() with this flag fails with the error
+      <b>EAGAIN</b>, but marks the mount as expired. The mount remains expired
+      as long as it isn't accessed by any process. A second <b>umount2</b>()
+      call specifying <b>MNT_EXPIRE</b> unmounts an expired mount. This flag
+      cannot be specified with either <b>MNT_FORCE</b> or
+    <b>MNT_DETACH</b>.</dd>
+  <dt id="UMOUNT_NOFOLLOW"><a class="permalink" href="#UMOUNT_NOFOLLOW"><b>UMOUNT_NOFOLLOW</b>
+    (since Linux 2.6.34)</a></dt>
+  <dd>Don't dereference <i>target</i> if it is a symbolic link. This flag allows
+      security problems to be avoided in set-user-ID-<i>root</i> programs that
+      allow unprivileged users to unmount filesystems.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, zero is returned. On error, -1 is returned, and
+    <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The error values given below result from filesystem type
+    independent errors. Each filesystem type may have its own special errors and
+    its own special behavior. See the Linux kernel source code for details.</p>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>A call to <b>umount2</b>() specifying <b>MNT_EXPIRE</b> successfully
+      marked an unbusy filesystem as expired.</dd>
+  <dt id="EBUSY"><a class="permalink" href="#EBUSY"><b>EBUSY</b></a></dt>
+  <dd><i>target</i> could not be unmounted because it is busy.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>target</i> points outside the user address space.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>target</i> is not a mount point.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd><i>target</i> is locked; see <b>mount_namespaces</b>(7).</dd>
+  <dt id="EINVAL~3"><a class="permalink" href="#EINVAL~3"><b>EINVAL</b></a></dt>
+  <dd><b>umount2</b>() was called with <b>MNT_EXPIRE</b> and either
+      <b>MNT_DETACH</b> or <b>MNT_FORCE</b>.</dd>
+  <dt id="EINVAL~4"><a class="permalink" href="#EINVAL~4"><b>EINVAL</b> (since
+    Linux 2.6.34)</a></dt>
+  <dd><b>umount2</b>() was called with an invalid flag value in
+    <i>flags</i>.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd>A pathname was longer than <b>MAXPATHLEN</b>.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>A pathname was empty or had a nonexistent component.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>The kernel could not allocate a free page to copy filenames or data
+    into.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The caller does not have the required privileges.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>MNT_DETACH</b> and <b>MNT_EXPIRE</b> are available since glibc
+    2.11.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These functions are Linux-specific and should not be used in
+    programs intended to be portable.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="umount()_and_shared_mounts"><a class="permalink" href="#umount()_and_shared_mounts">umount()
+  and shared mounts</a></h2>
+<p class="Pp">Shared mounts cause any mount activity on a mount, including
+    <b>umount</b>() operations, to be forwarded to every shared mount in the
+    peer group and every slave mount of that peer group. This means that
+    <b>umount</b>() of any peer in a set of shared mounts will cause all of its
+    peers to be unmounted and all of their slaves to be unmounted as well.</p>
+<p class="Pp">This propagation of unmount activity can be particularly
+    surprising on systems where every mount is shared by default. On such
+    systems, recursively bind mounting the root directory of the filesystem onto
+    a subdirectory and then later unmounting that subdirectory with
+    <b>MNT_DETACH</b> will cause every mount in the mount namespace to be lazily
+    unmounted.</p>
+<p class="Pp">To ensure <b>umount</b>() does not propagate in this fashion, the
+    mount may be remounted using a <b>mount</b>(2) call with a
+    <i>mount_flags</i> argument that includes both <b>MS_REC</b> and
+    <b>MS_PRIVATE</b> prior to <b>umount</b>() being called.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Historical_details"><a class="permalink" href="#Historical_details">Historical
+  details</a></h2>
+<p class="Pp">The original <b>umount</b>() function was called as
+    <i>umount(device)</i> and would return <b>ENOTBLK</b> when called with
+    something other than a block device. In Linux 0.98p4, a call
+    <i>umount(dir)</i> was added, in order to support anonymous devices. In
+    Linux 2.3.99-pre7, the call <i>umount(device)</i> was removed, leaving only
+    <i>umount(dir)</i> (since now devices can be mounted in more than one place,
+    so specifying the device does not suffice).</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>mount</b>(2), <b>mount_namespaces</b>(7),
+    <b>path_resolution</b>(7), <b>mount</b>(8), <b>umount</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

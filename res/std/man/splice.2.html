@@ -1,0 +1,194 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   This manpage is Copyright (C) 2006 Jens Axboe
+   and Copyright (C) 2006 Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/d1a4c2d3998560c27bc96b6d0a0fe6357562053e">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>splice(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">splice(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">splice(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">splice - splice data to/from a pipe</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#define _GNU_SOURCE</b>         /* See feature_test_macros(7) */
+<b>#include &lt;fcntl.h&gt;</b></pre>
+<pre><b>ssize_t splice(int </b><i>fd_in</i><b>, off64_t *_Nullable </b><i>off_in</i><b>,</b>
+<b>               int </b><i>fd_out</i><b>, off64_t *_Nullable </b><i>off_out</i><b>,</b>
+<b>               size_t </b><i>len</i><b>, unsigned int </b><i>flags</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>splice</b>() moves data between two file descriptors without
+    copying between kernel address space and user address space. It transfers up
+    to <i>len</i> bytes of data from the file descriptor <i>fd_in</i> to the
+    file descriptor <i>fd_out</i>, where one of the file descriptors must refer
+    to a pipe.</p>
+<p class="Pp">The following semantics apply for <i>fd_in</i> and
+  <i>off_in</i>:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>If <i>fd_in</i> refers to a pipe, then <i>off_in</i> must be NULL.</dd>
+  <dt>•</dt>
+  <dd>If <i>fd_in</i> does not refer to a pipe and <i>off_in</i> is NULL, then
+      bytes are read from <i>fd_in</i> starting from the file offset, and the
+      file offset is adjusted appropriately.</dd>
+  <dt>•</dt>
+  <dd>If <i>fd_in</i> does not refer to a pipe and <i>off_in</i> is not NULL,
+      then <i>off_in</i> must point to a buffer which specifies the starting
+      offset from which bytes will be read from <i>fd_in</i>; in this case, the
+      file offset of <i>fd_in</i> is not changed.</dd>
+</dl>
+<p class="Pp">Analogous statements apply for <i>fd_out</i> and
+  <i>off_out</i>.</p>
+<p class="Pp">The <i>flags</i> argument is a bit mask that is composed by ORing
+    together zero or more of the following values:</p>
+<dl class="Bl-tag">
+  <dt id="SPLICE_F_MOVE"><a class="permalink" href="#SPLICE_F_MOVE"><b>SPLICE_F_MOVE</b></a></dt>
+  <dd>Attempt to move pages instead of copying. This is only a hint to the
+      kernel: pages may still be copied if the kernel cannot move the pages from
+      the pipe, or if the pipe buffers don't refer to full pages. The initial
+      implementation of this flag was buggy: therefore starting in Linux 2.6.21
+      it is a no-op (but is still permitted in a <b>splice</b>() call); in the
+      future, a correct implementation may be restored.</dd>
+  <dt id="SPLICE_F_NONBLOCK"><a class="permalink" href="#SPLICE_F_NONBLOCK"><b>SPLICE_F_NONBLOCK</b></a></dt>
+  <dd>Do not block on I/O. This makes the splice pipe operations nonblocking,
+      but <b>splice</b>() may nevertheless block because the file descriptors
+      that are spliced to/from may block (unless they have the <b>O_NONBLOCK</b>
+      flag set).</dd>
+  <dt id="SPLICE_F_MORE"><a class="permalink" href="#SPLICE_F_MORE"><b>SPLICE_F_MORE</b></a></dt>
+  <dd>More data will be coming in a subsequent splice. This is a helpful hint
+      when the <i>fd_out</i> refers to a socket (see also the description of
+      <b>MSG_MORE</b> in <b>send</b>(2), and the description of <b>TCP_CORK</b>
+      in <b>tcp</b>(7)).</dd>
+  <dt id="SPLICE_F_GIFT"><a class="permalink" href="#SPLICE_F_GIFT"><b>SPLICE_F_GIFT</b></a></dt>
+  <dd>Unused for <b>splice</b>(); see <b>vmsplice</b>(2).</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <b>splice</b>() returns the number of
+    bytes spliced to or from the pipe.</p>
+<p class="Pp">A return value of 0 means end of input. If <i>fd_in</i> refers to
+    a pipe, then this means that there was no data to transfer, and it would not
+    make sense to block because there are no writers connected to the write end
+    of the pipe.</p>
+<p class="Pp">On error, <b>splice</b>() returns -1 and <i>errno</i> is set to
+    indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd><b>SPLICE_F_NONBLOCK</b> was specified in <i>flags</i> or one of the file
+      descriptors had been marked as nonblocking (<b>O_NONBLOCK</b>)<b>,</b> and
+      the operation would block.</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>One or both file descriptors are not valid, or do not have proper
+      read-write mode.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The target filesystem doesn't support splicing.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>The target file is opened in append mode.</dd>
+  <dt id="EINVAL~3"><a class="permalink" href="#EINVAL~3"><b>EINVAL</b></a></dt>
+  <dd>Neither of the file descriptors refers to a pipe.</dd>
+  <dt id="EINVAL~4"><a class="permalink" href="#EINVAL~4"><b>EINVAL</b></a></dt>
+  <dd>An offset was given for nonseekable device (e.g., a pipe).</dd>
+  <dt id="EINVAL~5"><a class="permalink" href="#EINVAL~5"><b>EINVAL</b></a></dt>
+  <dd><i>fd_in</i> and <i>fd_out</i> refer to the same pipe.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Out of memory.</dd>
+  <dt id="ESPIPE"><a class="permalink" href="#ESPIPE"><b>ESPIPE</b></a></dt>
+  <dd>Either <i>off_in</i> or <i>off_out</i> was not NULL, but the corresponding
+      file descriptor refers to a pipe.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>splice</b>() system call first appeared in Linux 2.6.17;
+    library support was added in glibc 2.5.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This system call is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The three system calls <b>splice</b>(), <b>vmsplice</b>(2), and
+    <b>tee</b>(2), provide user-space programs with full control over an
+    arbitrary kernel buffer, implemented within the kernel using the same type
+    of buffer that is used for a pipe. In overview, these system calls perform
+    the following tasks:</p>
+<dl class="Bl-tag">
+  <dt id="splice"><a class="permalink" href="#splice"><b>splice</b>()</a></dt>
+  <dd>moves data from the buffer to an arbitrary file descriptor, or vice versa,
+      or from one buffer to another.</dd>
+  <dt id="tee"><a class="permalink" href="#tee"><b>tee</b>(2)</a></dt>
+  <dd>"copies" the data from one buffer to another.</dd>
+  <dt id="vmsplice"><a class="permalink" href="#vmsplice"><b>vmsplice</b>(2)</a></dt>
+  <dd>"copies" data from user space into the buffer.</dd>
+</dl>
+<p class="Pp">Though we talk of copying, actual copies are generally avoided.
+    The kernel does this by implementing a pipe buffer as a set of
+    reference-counted pointers to pages of kernel memory. The kernel creates
+    "copies" of pages in a buffer by creating new pointers (for the
+    output buffer) referring to the pages, and increasing the reference counts
+    for the pages: only pointers are copied, not the pages of the buffer.</p>
+<p class="Pp">In Linux 2.6.30 and earlier, exactly one of <i>fd_in</i> and
+    <i>fd_out</i> was required to be a pipe. Since Linux 2.6.31, both arguments
+    may refer to pipes.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">See <b>tee</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>copy_file_range</b>(2), <b>sendfile</b>(2), <b>tee</b>(2),
+    <b>vmsplice</b>(2), <b>pipe</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

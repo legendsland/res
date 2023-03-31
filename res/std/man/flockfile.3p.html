@@ -1,0 +1,177 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/410e17a1a6714bc8ae84a67d0a178dcfeca4bdb7">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>FLOCKFILE(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">FLOCKFILE(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">FLOCKFILE(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">flockfile, ftrylockfile, funlockfile — stdio locking
+    functions</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;stdio.h&gt;</pre>
+<pre>void flockfile(FILE *<i>file</i>);
+int ftrylockfile(FILE *<i>file</i>);
+void funlockfile(FILE *<i>file</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">These functions shall provide for explicit application-level
+    locking of stdio (<b>FILE *</b>) objects. These functions can be used by a
+    thread to delineate a sequence of I/O statements that are executed as a
+    unit.</p>
+<p class="Pp">The <i>flockfile</i>() function shall acquire for a thread
+    ownership of a (<b>FILE *</b>) object.</p>
+<p class="Pp">The <i>ftrylockfile</i>() function shall acquire for a thread
+    ownership of a (<b>FILE *</b>) object if the object is available;
+    <i>ftrylockfile</i>() is a non-blocking version of <i>flockfile</i>().</p>
+<p class="Pp">The <i>funlockfile</i>() function shall relinquish the ownership
+    granted to the thread. The behavior is undefined if a thread other than the
+    current owner calls the <i>funlockfile</i>() function.</p>
+<p class="Pp">The functions shall behave as if there is a lock count associated
+    with each (<b>FILE *</b>) object. This count is implicitly initialized to
+    zero when the (<b>FILE *</b>) object is created. The (<b>FILE *</b>) object
+    is unlocked when the count is zero. When the count is positive, a single
+    thread owns the (<b>FILE *</b>) object. When the <i>flockfile</i>() function
+    is called, if the count is zero or if the count is positive and the caller
+    owns the (<b>FILE *</b>) object, the count shall be incremented. Otherwise,
+    the calling thread shall be suspended, waiting for the count to return to
+    zero. Each call to <i>funlockfile</i>() shall decrement the count. This
+    allows matching calls to <i>flockfile</i>() (or successful calls to
+    <i>ftrylockfile</i>()) and <i>funlockfile</i>() to be nested.</p>
+<p class="Pp">All functions that reference (<b>FILE *</b>) objects, except those
+    with names ending in <i>_unlocked</i>, shall behave as if they use
+    <i>flockfile</i>() and <i>funlockfile</i>() internally to obtain ownership
+    of these (<b>FILE *</b>) objects.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">None for <i>flockfile</i>() and <i>funlockfile</i>().</p>
+<p class="Pp">The <i>ftrylockfile</i>() function shall return zero for success
+    and non-zero to indicate that the lock cannot be acquired.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">No errors are defined.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">Applications using these functions may be subject to priority
+    inversion, as discussed in the Base Definitions volume of
+    POSIX.1‐2017, <i>Section 3.291</i>, <i>Priority Inversion</i>.</p>
+<p class="Pp">A call to <i>exit</i>() can block until locked streams are
+    unlocked because a thread having ownership of a (<b>FILE</b>*) object blocks
+    all function calls that reference that (<b>FILE</b>*) object (except those
+    with names ending in _unlocked) from other threads, including calls to
+    <i>exit</i>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The <i>flockfile</i>() and <i>funlockfile</i>() functions provide
+    an orthogonal mutual-exclusion lock for each <b>FILE</b>. The
+    <i>ftrylockfile</i>() function provides a non-blocking attempt to acquire a
+    file lock, analogous to <i>pthread_mutex_trylock</i>().</p>
+<p class="Pp">These locks behave as if they are the same as those used
+    internally by <i>stdio</i> for thread-safety. This both provides
+    thread-safety of these functions without requiring a second level of
+    internal locking and allows functions in <i>stdio</i> to be implemented in
+    terms of other <i>stdio</i> functions.</p>
+<p class="Pp">Application developers and implementors should be aware that there
+    are potential deadlock problems on <b>FILE</b> objects. For example, the
+    line-buffered flushing semantics of <i>stdio</i> (requested via {_IOLBF})
+    require that certain input operations sometimes cause the buffered contents
+    of implementation-defined line-buffered output streams to be flushed. If two
+    threads each hold the lock on the other's <b>FILE</b>, deadlock ensues. This
+    type of deadlock can be avoided by acquiring <b>FILE</b> locks in a
+    consistent order. In particular, the line-buffered output stream deadlock
+    can typically be avoided by acquiring locks on input streams before locks on
+    output streams if a thread would be acquiring both.</p>
+<p class="Pp">In summary, threads sharing <i>stdio</i> streams with other
+    threads can use <i>flockfile</i>() and <i>funlockfile</i>() to cause
+    sequences of I/O performed by a single thread to be kept bundled. The only
+    case where the use of <i>flockfile</i>() and <i>funlockfile</i>() is
+    required is to provide a scope protecting uses of the <i>*_unlocked</i>
+    functions/macros. This moves the cost/performance tradeoff to the optimal
+    point.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>exit</i>()</i>, <i><i>getc_unlocked</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Section
+    3.291</i>, <i>Priority Inversion</i>, <i><b>&lt;stdio.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

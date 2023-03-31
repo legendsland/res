@@ -1,0 +1,151 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2020 by Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/d60263744d161c78c6a0041b4265a0f5da6da354">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>pidfd_getfd(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">pidfd_getfd(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">pidfd_getfd(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pidfd_getfd - obtain a duplicate of another process's file
+    descriptor</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/syscall.h&gt;</b>      /* Definition of <b>SYS_*</b> constants */
+<b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int syscall(SYS_pidfd_getfd, int </b><i>pidfd</i><b>, int </b><i>targetfd</i><b>,</b>
+<b>            unsigned int </b><i>flags</i><b>);</b></pre>
+<p class="Pp"><i>Note</i>: glibc provides no wrapper for <b>pidfd_getfd</b>(),
+    necessitating the use of <b>syscall</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>pidfd_getfd</b>() system call allocates a new file
+    descriptor in the calling process. This new file descriptor is a duplicate
+    of an existing file descriptor, <i>targetfd</i>, in the process referred to
+    by the PID file descriptor <i>pidfd</i>.</p>
+<p class="Pp">The duplicate file descriptor refers to the same open file
+    description (see <b>open</b>(2)) as the original file descriptor in the
+    process referred to by <i>pidfd</i>. The two file descriptors thus share
+    file status flags and file offset. Furthermore, operations on the underlying
+    file object (for example, assigning an address to a socket object using
+    <b>bind</b>(2)) can equally be performed via the duplicate file
+  descriptor.</p>
+<p class="Pp">The close-on-exec flag (<b>FD_CLOEXEC</b>; see <b>fcntl</b>(2)) is
+    set on the file descriptor returned by <b>pidfd_getfd</b>().</p>
+<p class="Pp">The <i>flags</i> argument is reserved for future use. Currently,
+    it must be specified as 0.</p>
+<p class="Pp">Permission to duplicate another process's file descriptor is
+    governed by a ptrace access mode <b>PTRACE_MODE_ATTACH_REALCREDS</b> check
+    (see <b>ptrace</b>(2)).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>pidfd_getfd</b>() returns a file descriptor (a
+    nonnegative integer). On error, -1 is returned and <i>errno</i> is set to
+    indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd><i>pidfd</i> is not a valid PID file descriptor.</dd>
+  <dt id="EBADF~2"><a class="permalink" href="#EBADF~2"><b>EBADF</b></a></dt>
+  <dd><i>targetfd</i> is not an open file descriptor in the process referred to
+      by <i>pidfd</i>.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>flags</i> is not 0.</dd>
+  <dt id="EMFILE"><a class="permalink" href="#EMFILE"><b>EMFILE</b></a></dt>
+  <dd>The per-process limit on the number of open file descriptors has been
+      reached (see the description of <b>RLIMIT_NOFILE</b> in
+      <b>getrlimit</b>(2)).</dd>
+  <dt id="ENFILE"><a class="permalink" href="#ENFILE"><b>ENFILE</b></a></dt>
+  <dd>The system-wide limit on the total number of open files has been
+    reached.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The calling process did not have <b>PTRACE_MODE_ATTACH_REALCREDS</b>
+      permissions (see <b>ptrace</b>(2)) over the process referred to by
+      <i>pidfd</i>.</dd>
+  <dt id="ESRCH"><a class="permalink" href="#ESRCH"><b>ESRCH</b></a></dt>
+  <dd>The process referred to by <i>pidfd</i> does not exist (i.e., it has
+      terminated and been waited on).</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>pidfd_getfd</b>() first appeared in Linux 5.6.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>pidfd_getfd</b>() is Linux specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">For a description of PID file descriptors, see
+    <b>pidfd_open</b>(2).</p>
+<p class="Pp">The effect of <b>pidfd_getfd</b>() is similar to the use of
+    <b>SCM_RIGHTS</b> messages described in <b>unix</b>(7), but differs in the
+    following respects:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>In order to pass a file descriptor using an <b>SCM_RIGHTS</b> message, the
+      two processes must first establish a UNIX domain socket connection.</dd>
+  <dt>•</dt>
+  <dd>The use of <b>SCM_RIGHTS</b> requires cooperation on the part of the
+      process whose file descriptor is being copied. By contrast, no such
+      cooperation is necessary when using <b>pidfd_getfd</b>().</dd>
+  <dt>•</dt>
+  <dd>The ability to use <b>pidfd_getfd</b>() is restricted by a
+      <b>PTRACE_MODE_ATTACH_REALCREDS</b> ptrace access mode check.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>clone3</b>(2), <b>dup</b>(2), <b>kcmp</b>(2),
+    <b>pidfd_open</b>(2)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

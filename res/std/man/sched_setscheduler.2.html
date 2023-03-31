@@ -1,0 +1,195 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2014 Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/fea647dd66d997301ebbc07982d9696585f960bc">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>sched_setscheduler(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">sched_setscheduler(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">sched_setscheduler(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">sched_setscheduler, sched_getscheduler - set and get scheduling
+    policy/parameters</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sched.h&gt;</b></pre>
+<pre><b>int sched_setscheduler(pid_t </b><i>pid</i><b>, int </b><i>policy</i><b>,</b>
+<b>                       const struct sched_param *</b><i>param</i><b>);</b>
+<b>int sched_getscheduler(pid_t </b><i>pid</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>sched_setscheduler</b>() system call sets both the
+    scheduling policy and parameters for the thread whose ID is specified in
+    <i>pid</i>. If <i>pid</i> equals zero, the scheduling policy and parameters
+    of the calling thread will be set.</p>
+<p class="Pp">The scheduling parameters are specified in the <i>param</i>
+    argument, which is a pointer to a structure of the following form:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct sched_param {
+<br>
+    ...
+<br>
+    int sched_priority;
+<br>
+    ...
+};
+</pre>
+<br>
+<p class="Pp">In the current implementation, the structure contains only one
+    field, <i>sched_priority</i>. The interpretation of <i>param</i> depends on
+    the selected policy.</p>
+<p class="Pp">Currently, Linux supports the following "normal" (i.e.,
+    non-real-time) scheduling policies as values that may be specified in
+    <i>policy</i>:</p>
+<dl class="Bl-tag">
+  <dt id="SCHED_OTHER"><a class="permalink" href="#SCHED_OTHER"><b>SCHED_OTHER</b></a></dt>
+  <dd>the standard round-robin time-sharing policy;</dd>
+  <dt id="SCHED_BATCH"><a class="permalink" href="#SCHED_BATCH"><b>SCHED_BATCH</b></a></dt>
+  <dd>for "batch" style execution of processes; and</dd>
+  <dt id="SCHED_IDLE"><a class="permalink" href="#SCHED_IDLE"><b>SCHED_IDLE</b></a></dt>
+  <dd>for running <i>very</i> low priority background jobs.</dd>
+</dl>
+<p class="Pp">For each of the above policies, <i>param-&gt;sched_priority</i>
+    must be 0.</p>
+<p class="Pp">Various "real-time" policies are also supported, for
+    special time-critical applications that need precise control over the way in
+    which runnable threads are selected for execution. For the rules governing
+    when a process may use these policies, see <b>sched</b>(7). The real-time
+    policies that may be specified in <i>policy</i> are:</p>
+<dl class="Bl-tag">
+  <dt id="SCHED_FIFO"><a class="permalink" href="#SCHED_FIFO"><b>SCHED_FIFO</b></a></dt>
+  <dd>a first-in, first-out policy; and</dd>
+  <dt id="SCHED_RR"><a class="permalink" href="#SCHED_RR"><b>SCHED_RR</b></a></dt>
+  <dd>a round-robin policy.</dd>
+</dl>
+<p class="Pp">For each of the above policies, <i>param-&gt;sched_priority</i>
+    specifies a scheduling priority for the thread. This is a number in the
+    range returned by calling <b>sched_get_priority_min</b>(2) and
+    <b>sched_get_priority_max</b>(2) with the specified <i>policy</i>. On Linux,
+    these system calls return, respectively, 1 and 99.</p>
+<p class="Pp">Since Linux 2.6.32, the <b>SCHED_RESET_ON_FORK</b> flag can be
+    ORed in <i>policy</i> when calling <b>sched_setscheduler</b>(). As a result
+    of including this flag, children created by <b>fork</b>(2) do not inherit
+    privileged scheduling policies. See <b>sched</b>(7) for details.</p>
+<p class="Pp"><b>sched_getscheduler</b>() returns the current scheduling policy
+    of the thread identified by <i>pid</i>. If <i>pid</i> equals zero, the
+    policy of the calling thread will be retrieved.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>sched_setscheduler</b>() returns zero. On success,
+    <b>sched_getscheduler</b>() returns the policy for the thread (a nonnegative
+    integer). On error, both calls return -1, and <i>errno</i> is set to
+    indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>Invalid arguments: <i>pid</i> is negative or <i>param</i> is NULL.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>(<b>sched_setscheduler</b>()) <i>policy</i> is not one of the recognized
+      policies.</dd>
+  <dt id="EINVAL~3"><a class="permalink" href="#EINVAL~3"><b>EINVAL</b></a></dt>
+  <dd>(<b>sched_setscheduler</b>()) <i>param</i> does not make sense for the
+      specified <i>policy</i>.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The calling thread does not have appropriate privileges.</dd>
+  <dt id="ESRCH"><a class="permalink" href="#ESRCH"><b>ESRCH</b></a></dt>
+  <dd>The thread whose ID is <i>pid</i> could not be found.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008 (but see BUGS below). The
+    <b>SCHED_BATCH</b> and <b>SCHED_IDLE</b> policies are Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Further details of the semantics of all of the above
+    "normal" and "real-time" scheduling policies can be
+    found in the <b>sched</b>(7) manual page. That page also describes an
+    additional policy, <b>SCHED_DEADLINE</b>, which is settable only via
+    <b>sched_setattr</b>(2).</p>
+<p class="Pp">POSIX systems on which <b>sched_setscheduler</b>() and
+    <b>sched_getscheduler</b>() are available define
+    <b>_POSIX_PRIORITY_SCHEDULING</b> in <i>&lt;unistd.h&gt;</i>.</p>
+<p class="Pp">POSIX.1 does not detail the permissions that an unprivileged
+    thread requires in order to call <b>sched_setscheduler</b>(), and details
+    vary across systems. For example, the Solaris 7 manual page says that the
+    real or effective user ID of the caller must match the real user ID or the
+    save set-user-ID of the target.</p>
+<p class="Pp">The scheduling policy and parameters are in fact per-thread
+    attributes on Linux. The value returned from a call to <b>gettid</b>(2) can
+    be passed in the argument <i>pid</i>. Specifying <i>pid</i> as 0 will
+    operate on the attributes of the calling thread, and passing the value
+    returned from a call to <b>getpid</b>(2) will operate on the attributes of
+    the main thread of the thread group. (If you are using the POSIX threads
+    API, then use <b>pthread_setschedparam</b>(3),
+    <b>pthread_getschedparam</b>(3), and <b>pthread_setschedprio</b>(3), instead
+    of the <b>sched_*</b>(2) system calls.)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">POSIX.1 says that on success, <b>sched_setscheduler</b>() should
+    return the previous scheduling policy. Linux <b>sched_setscheduler</b>()
+    does not conform to this requirement, since it always returns 0 on
+  success.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>chrt</b>(1), <b>nice</b>(2), <b>sched_get_priority_max</b>(2),
+    <b>sched_get_priority_min</b>(2), <b>sched_getaffinity</b>(2),
+    <b>sched_getattr</b>(2), <b>sched_getparam</b>(2),
+    <b>sched_rr_get_interval</b>(2), <b>sched_setaffinity</b>(2),
+    <b>sched_setattr</b>(2), <b>sched_setparam</b>(2), <b>sched_yield</b>(2),
+    <b>setpriority</b>(2), <b>capabilities</b>(7), <b>cpuset</b>(7),
+    <b>sched</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

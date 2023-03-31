@@ -1,0 +1,152 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/e2508fc5f183ccb7de00e4a84f48212a38060d42">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>open_memstream(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">open_memstream(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">open_memstream(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">open_memstream, open_wmemstream - open a dynamic memory buffer
+    stream</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;stdio.h&gt;</b></pre>
+<pre><b>FILE *open_memstream(char **</b><i>ptr</i><b>, size_t *</b><i>sizeloc</i><b>);</b></pre>
+<pre><b>#include &lt;wchar.h&gt;</b></pre>
+<pre><b>FILE *open_wmemstream(wchar_t **</b><i>ptr</i><b>, size_t *</b><i>sizeloc</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>open_memstream</b>(), <b>open_wmemstream</b>():</p>
+<pre><br>
+    Since glibc 2.10:
+<br>
+        _POSIX_C_SOURCE &gt;= 200809L
+<br>
+    Before glibc 2.10:
+<br>
+        _GNU_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>open_memstream</b>() function opens a stream for writing to
+    a memory buffer. The function dynamically allocates the buffer, and the
+    buffer automatically grows as needed. Initially, the buffer has a size of
+    zero. After closing the stream, the caller should <b>free</b>(3) this
+    buffer.</p>
+<p class="Pp">The locations pointed to by <i>ptr</i> and <i>sizeloc</i> are used
+    to report, respectively, the current location and the size of the buffer.
+    The locations referred to by these pointers are updated each time the stream
+    is flushed (<b>fflush</b>(3)) and when the stream is closed
+    (<b>fclose</b>(3)). These values remain valid only as long as the caller
+    performs no further output on the stream. If further output is performed,
+    then the stream must again be flushed before trying to access these
+  values.</p>
+<p class="Pp">A null byte is maintained at the end of the buffer. This byte is
+    <i>not</i> included in the size value stored at <i>sizeloc</i>.</p>
+<p class="Pp">The stream maintains the notion of a current position, which is
+    initially zero (the start of the buffer). Each write operation implicitly
+    adjusts the buffer position. The stream's buffer position can be explicitly
+    changed with <b>fseek</b>(3) or <b>fseeko</b>(3). Moving the buffer position
+    past the end of the data already written fills the intervening space with
+    null characters.</p>
+<p class="Pp">The <b>open_wmemstream</b>() is similar to
+    <b>open_memstream</b>(), but operates on wide characters instead of
+  bytes.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <b>open_memstream</b>() and
+    <b>open_wmemstream</b>() return a <i>FILE</i> pointer. Otherwise, NULL is
+    returned and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>open_memstream (), open_wmemstream ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>open_memstream</b>() was already available in glibc 1.0.x.
+    <b>open_wmemstream</b>() is available since glibc 2.4.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2008. These functions are not specified in POSIX.1-2001,
+    and are not widely available on other systems.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">There is no file descriptor associated with the file stream
+    returned by these functions (i.e., <b>fileno</b>(3) will return an error if
+    called on the returned stream).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">Before glibc 2.7, seeking past the end of a stream created by
+    <b>open_memstream</b>() does not enlarge the buffer; instead the
+    <b>fseek</b>(3) call fails, returning -1.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">See <b>fmemopen</b>(3).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>fmemopen</b>(3), <b>fopen</b>(3), <b>setbuf</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

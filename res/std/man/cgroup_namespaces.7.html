@@ -1,0 +1,226 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2016 by Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/848e927901b56e0c957748bdca4a61fa6866951e">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>cgroup_namespaces(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">cgroup_namespaces(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">cgroup_namespaces(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">cgroup_namespaces - overview of Linux cgroup namespaces</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">For an overview of namespaces, see <b>namespaces</b>(7).</p>
+<p class="Pp">Cgroup namespaces virtualize the view of a process's cgroups (see
+    <b>cgroups</b>(7)) as seen via <i>/proc/</i>pid<i>/cgroup</i> and
+    <i>/proc/</i>pid<i>/mountinfo</i>.</p>
+<p class="Pp">Each cgroup namespace has its own set of cgroup root directories.
+    These root directories are the base points for the relative locations
+    displayed in the corresponding records in the <i>/proc/</i>pid<i>/cgroup</i>
+    file. When a process creates a new cgroup namespace using <b>clone</b>(2) or
+    <b>unshare</b>(2) with the <b>CLONE_NEWCGROUP</b> flag, its current cgroups
+    directories become the cgroup root directories of the new namespace. (This
+    applies both for the cgroups version 1 hierarchies and the cgroups version 2
+    unified hierarchy.)</p>
+<p class="Pp">When reading the cgroup memberships of a "target"
+    process from <i>/proc/</i>pid<i>/cgroup</i>, the pathname shown in the third
+    field of each record will be relative to the reading process's root
+    directory for the corresponding cgroup hierarchy. If the cgroup directory of
+    the target process lies outside the root directory of the reading process's
+    cgroup namespace, then the pathname will show <i>../</i> entries for each
+    ancestor level in the cgroup hierarchy.</p>
+<p class="Pp">The following shell session demonstrates the effect of creating a
+    new cgroup namespace.</p>
+<p class="Pp">First, (as superuser) in a shell in the initial cgroup namespace,
+    we create a child cgroup in the <i>freezer</i> hierarchy, and place a
+    process in that cgroup that we will use as part of the demonstration
+  below:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre># <b>mkdir -p /sys/fs/cgroup/freezer/sub2</b>
+# <b>sleep 10000 &amp;</b>     # Create a process that lives for a while
+[1] 20124
+# <b>echo 20124 &gt; /sys/fs/cgroup/freezer/sub2/cgroup.procs</b>
+</pre>
+<br>
+<p class="Pp">We then create another child cgroup in the <i>freezer</i>
+    hierarchy and put the shell into that cgroup:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre># <b>mkdir -p /sys/fs/cgroup/freezer/sub</b>
+# <b>echo $$</b>                      # Show PID of this shell
+30655
+# <b>echo 30655 &gt; /sys/fs/cgroup/freezer/sub/cgroup.procs</b>
+# <b>cat /proc/self/cgroup | grep freezer</b>
+7:freezer:/sub
+</pre>
+<br>
+<p class="Pp">Next, we use <b>unshare</b>(1) to create a process running a new
+    shell in new cgroup and mount namespaces:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre># <b>PS1="sh2# " unshare -Cm bash</b>
+</pre>
+<br>
+<p class="Pp">From the new shell started by <b>unshare</b>(1), we then inspect
+    the <i>/proc/</i>pid<i>/cgroup</i> files of, respectively, the new shell, a
+    process that is in the initial cgroup namespace (<i>init</i>, with PID 1),
+    and the process in the sibling cgroup (<i>sub2</i>):</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>sh2# <b>cat /proc/self/cgroup | grep freezer</b>
+7:freezer:/
+sh2# <b>cat /proc/1/cgroup | grep freezer</b>
+7:freezer:/..
+sh2# <b>cat /proc/20124/cgroup | grep freezer</b>
+7:freezer:/../sub2
+</pre>
+<br>
+<p class="Pp">From the output of the first command, we see that the freezer
+    cgroup membership of the new shell (which is in the same cgroup as the
+    initial shell) is shown defined relative to the freezer cgroup root
+    directory that was established when the new cgroup namespace was created.
+    (In absolute terms, the new shell is in the <i>/sub</i> freezer cgroup, and
+    the root directory of the freezer cgroup hierarchy in the new cgroup
+    namespace is also <i>/sub</i>. Thus, the new shell's cgroup membership is
+    displayed as '/'.)</p>
+<p class="Pp">However, when we look in <i>/proc/self/mountinfo</i> we see the
+    following anomaly:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>sh2# <b>cat /proc/self/mountinfo | grep freezer</b>
+155 145 0:32 /.. /sys/fs/cgroup/freezer ...
+</pre>
+<br>
+<p class="Pp">The fourth field of this line (<i>/..</i>) should show the
+    directory in the cgroup filesystem which forms the root of this mount. Since
+    by the definition of cgroup namespaces, the process's current freezer cgroup
+    directory became its root freezer cgroup directory, we should see '/' in
+    this field. The problem here is that we are seeing a mount entry for the
+    cgroup filesystem corresponding to the initial cgroup namespace (whose
+    cgroup filesystem is indeed rooted at the parent directory of <i>sub</i>).
+    To fix this problem, we must remount the freezer cgroup filesystem from the
+    new shell (i.e., perform the mount from a process that is in the new cgroup
+    namespace), after which we see the expected results:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>sh2# <b>mount --make-rslave /</b>     # Don't propagate mount events
+<br>
+                               # to other namespaces
+sh2# <b>umount /sys/fs/cgroup/freezer</b>
+sh2# <b>mount -t cgroup -o freezer freezer /sys/fs/cgroup/freezer</b>
+sh2# <b>cat /proc/self/mountinfo | grep freezer</b>
+155 145 0:32 / /sys/fs/cgroup/freezer rw,relatime ...
+</pre>
+<br>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">Namespaces are a Linux-specific feature.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Use of cgroup namespaces requires a kernel that is configured with
+    the <b>CONFIG_CGROUPS</b> option.</p>
+<p class="Pp">The virtualization provided by cgroup namespaces serves a number
+    of purposes:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>It prevents information leaks whereby cgroup directory paths outside of a
+      container would otherwise be visible to processes in the container. Such
+      leakages could, for example, reveal information about the container
+      framework to containerized applications.</dd>
+  <dt>•</dt>
+  <dd>It eases tasks such as container migration. The virtualization provided by
+      cgroup namespaces allows containers to be isolated from knowledge of the
+      pathnames of ancestor cgroups. Without such isolation, the full cgroup
+      pathnames (displayed in <i>/proc/self/cgroups</i>) would need to be
+      replicated on the target system when migrating a container; those
+      pathnames would also need to be unique, so that they don't conflict with
+      other pathnames on the target system.</dd>
+  <dt>•</dt>
+  <dd>It allows better confinement of containerized processes, because it is
+      possible to mount the container's cgroup filesystems such that the
+      container processes can't gain access to ancestor cgroup directories.
+      Consider, for example, the following scenario:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>We have a cgroup directory, <i>/cg/1</i>, that is owned by user ID
+    9000.</dd>
+  <dt>•</dt>
+  <dd>We have a process, <i>X</i>, also owned by user ID 9000, that is
+      namespaced under the cgroup <i>/cg/1/2</i> (i.e., <i>X</i> was placed in a
+      new cgroup namespace via <b>clone</b>(2) or <b>unshare</b>(2) with the
+      <b>CLONE_NEWCGROUP</b> flag).</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>In the absence of cgroup namespacing, because the cgroup directory
+      <i>/cg/1</i> is owned (and writable) by UID 9000 and process <i>X</i> is
+      also owned by user ID 9000, process <i>X</i> would be able to modify the
+      contents of cgroups files (i.e., change cgroup settings) not only in
+      <i>/cg/1/2</i> but also in the ancestor cgroup directory <i>/cg/1</i>.
+      Namespacing process <i>X</i> under the cgroup directory <i>/cg/1/2</i>, in
+      combination with suitable mount operations for the cgroup filesystem (as
+      shown above), prevents it modifying files in <i>/cg/1</i>, since it cannot
+      even see the contents of that directory (or of further removed cgroup
+      ancestor directories). Combined with correct enforcement of hierarchical
+      limits, this prevents process <i>X</i> from escaping the limits imposed by
+      ancestor cgroups.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>unshare</b>(1), <b>clone</b>(2), <b>setns</b>(2),
+    <b>unshare</b>(2), <b>proc</b>(5), <b>cgroups</b>(7), <b>credentials</b>(7),
+    <b>namespaces</b>(7), <b>user_namespaces</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

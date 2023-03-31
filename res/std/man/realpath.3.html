@@ -1,0 +1,201 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (C) 1999 Andries Brouwer (aeb@cwi.nl)
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Rewritten old page, 990824, aeb@cwi.nl
+   2004-12-14, mtk, added discussion of resolved_path == NULL
+   --><head>
+<meta name="dc.identifier" content="res/660e49cff5dd70a2afdd35463180329c68055f3f">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>realpath(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">realpath(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">realpath(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">realpath - return the canonicalized absolute pathname</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;limits.h&gt;</b>
+<b>#include &lt;stdlib.h&gt;</b></pre>
+<pre><b>char *realpath(const char *restrict </b><i>path</i><b>,</b>
+<b>               char *restrict </b><i>resolved_path</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>realpath</b>():</p>
+<pre><br>
+    _XOPEN_SOURCE &gt;= 500
+<br>
+        || /* glibc &gt;= 2.19: */ _DEFAULT_SOURCE
+<br>
+        || /* glibc &lt;= 2.19: */ _BSD_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>realpath</b>() expands all symbolic links and resolves
+    references to <i>/./</i>, <i>/../</i> and extra '/' characters in the
+    null-terminated string named by <i>path</i> to produce a canonicalized
+    absolute pathname. The resulting pathname is stored as a null-terminated
+    string, up to a maximum of <b>PATH_MAX</b> bytes, in the buffer pointed to
+    by <i>resolved_path</i>. The resulting path will have no symbolic link,
+    <i>/./</i> or <i>/../</i> components.</p>
+<p class="Pp">If <i>resolved_path</i> is specified as NULL, then
+    <b>realpath</b>() uses <b>malloc</b>(3) to allocate a buffer of up to
+    <b>PATH_MAX</b> bytes to hold the resolved pathname, and returns a pointer
+    to this buffer. The caller should deallocate this buffer using
+    <b>free</b>(3).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">If there is no error, <b>realpath</b>() returns a pointer to the
+    <i>resolved_path</i>.</p>
+<p class="Pp">Otherwise, it returns NULL, the contents of the array
+    <i>resolved_path</i> are undefined, and <i>errno</i> is set to indicate the
+    error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>Read or search permission was denied for a component of the path
+    prefix.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>path</i> is NULL. (Before glibc 2.3, this error is also returned if
+      <i>resolved_path</i> is NULL.)</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>An I/O error occurred while reading from the filesystem.</dd>
+  <dt id="ELOOP"><a class="permalink" href="#ELOOP"><b>ELOOP</b></a></dt>
+  <dd>Too many symbolic links were encountered in translating the pathname.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd>A component of a pathname exceeded <b>NAME_MAX</b> characters, or an
+      entire pathname exceeded <b>PATH_MAX</b> characters.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>The named file does not exist.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Out of memory.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>A component of the path prefix is not a directory.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>realpath ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">4.4BSD, POSIX.1-2001.</p>
+<p class="Pp">POSIX.1-2001 says that the behavior if <i>resolved_path</i> is
+    NULL is implementation-defined. POSIX.1-2008 specifies the behavior
+    described in this page.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">In 4.4BSD and Solaris, the limit on the pathname length is
+    <b>MAXPATHLEN</b> (found in <i>&lt;sys/param.h&gt;</i>). SUSv2 prescribes
+    <b>PATH_MAX</b> and <b>NAME_MAX</b>, as found in <i>&lt;limits.h&gt;</i> or
+    provided by the <b>pathconf</b>(3) function. A typical source fragment would
+    be</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>#ifdef PATH_MAX
+<br>
+  path_max = PATH_MAX;
+#else
+<br>
+  path_max = pathconf(path, _PC_PATH_MAX);
+<br>
+  if (path_max &lt;= 0)
+<br>
+    path_max = 4096;
+#endif
+</pre>
+<br>
+<p class="Pp">(But see the BUGS section.)</p>
+<section class="Ss">
+<h2 class="Ss" id="GNU_extensions"><a class="permalink" href="#GNU_extensions">GNU
+  extensions</a></h2>
+<p class="Pp">If the call fails with either <b>EACCES</b> or <b>ENOENT</b> and
+    <i>resolved_path</i> is not NULL, then the prefix of <i>path</i> that is not
+    readable or does not exist is returned in <i>resolved_path</i>.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">The POSIX.1-2001 standard version of this function is broken by
+    design, since it is impossible to determine a suitable size for the output
+    buffer, <i>resolved_path</i>. According to POSIX.1-2001 a buffer of size
+    <b>PATH_MAX</b> suffices, but <b>PATH_MAX</b> need not be a defined
+    constant, and may have to be obtained using <b>pathconf</b>(3). And asking
+    <b>pathconf</b>(3) does not really help, since, on the one hand POSIX warns
+    that the result of <b>pathconf</b>(3) may be huge and unsuitable for
+    mallocing memory, and on the other hand <b>pathconf</b>(3) may return -1 to
+    signify that <b>PATH_MAX</b> is not bounded. The
+    <i>resolved_path&nbsp;==&nbsp;NULL</i> feature, not standardized in
+    POSIX.1-2001, but standardized in POSIX.1-2008, allows this design problem
+    to be avoided.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>realpath</b>(1), <b>readlink</b>(2),
+    <b>canonicalize_file_name</b>(3), <b>getcwd</b>(3), <b>pathconf</b>(3),
+    <b>sysconf</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

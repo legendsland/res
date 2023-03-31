@@ -1,0 +1,175 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2014 Google, Inc., written by David Drysdale
+   and Copyright (c) 2015, Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/96529ada866725f2b87ebc3a555815188245e86f">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>execveat(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">execveat(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">execveat(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">execveat - execute program relative to a directory file
+  descriptor</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;linux/fcntl.h&gt;</b>      /* Definition of <b>AT_*</b> constants */
+<b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int execveat(int </b><i>dirfd</i><b>, const char *</b><i>pathname</i><b>,</b>
+<b>             char *const _Nullable </b><i>argv</i><b>[],</b>
+<b>             char *const _Nullable </b><i>envp</i><b>[],</b>
+<b>             int </b><i>flags</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>execveat</b>() system call executes the program referred to
+    by the combination of <i>dirfd</i> and <i>pathname</i>. It operates in
+    exactly the same way as <b>execve</b>(2), except for the differences
+    described in this manual page.</p>
+<p class="Pp">If the pathname given in <i>pathname</i> is relative, then it is
+    interpreted relative to the directory referred to by the file descriptor
+    <i>dirfd</i> (rather than relative to the current working directory of the
+    calling process, as is done by <b>execve</b>(2) for a relative
+  pathname).</p>
+<p class="Pp">If <i>pathname</i> is relative and <i>dirfd</i> is the special
+    value <b>AT_FDCWD</b>, then <i>pathname</i> is interpreted relative to the
+    current working directory of the calling process (like
+  <b>execve</b>(2)).</p>
+<p class="Pp">If <i>pathname</i> is absolute, then <i>dirfd</i> is ignored.</p>
+<p class="Pp">If <i>pathname</i> is an empty string and the <b>AT_EMPTY_PATH</b>
+    flag is specified, then the file descriptor <i>dirfd</i> specifies the file
+    to be executed (i.e., <i>dirfd</i> refers to an executable file, rather than
+    a directory).</p>
+<p class="Pp">The <i>flags</i> argument is a bit mask that can include zero or
+    more of the following flags:</p>
+<dl class="Bl-tag">
+  <dt id="AT_EMPTY_PATH"><a class="permalink" href="#AT_EMPTY_PATH"><b>AT_EMPTY_PATH</b></a></dt>
+  <dd>If <i>pathname</i> is an empty string, operate on the file referred to by
+      <i>dirfd</i> (which may have been obtained using the <b>open</b>(2)
+      <b>O_PATH</b> flag).</dd>
+  <dt id="AT_SYMLINK_NOFOLLOW"><a class="permalink" href="#AT_SYMLINK_NOFOLLOW"><b>AT_SYMLINK_NOFOLLOW</b></a></dt>
+  <dd>If the file identified by <i>dirfd</i> and a non-NULL <i>pathname</i> is a
+      symbolic link, then the call fails with the error <b>ELOOP</b>.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>execveat</b>() does not return. On error, -1 is
+    returned, and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The same errors that occur for <b>execve</b>(2) can also occur for
+    <b>execveat</b>(). The following additional errors can occur for
+    <b>execveat</b>():</p>
+<dl class="Bl-tag">
+  <dt id="pathname"><a class="permalink" href="#pathname"><i>pathname</i></a></dt>
+  <dd>is relative but <i>dirfd</i> is neither <b>AT_FDCWD</b> nor a valid file
+      descriptor.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>Invalid flag specified in <i>flags</i>.</dd>
+  <dt id="ELOOP"><a class="permalink" href="#ELOOP"><b>ELOOP</b></a></dt>
+  <dd><i>flags</i> includes <b>AT_SYMLINK_NOFOLLOW</b> and the file identified
+      by <i>dirfd</i> and a non-NULL <i>pathname</i> is a symbolic link.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>The program identified by <i>dirfd</i> and <i>pathname</i> requires the
+      use of an interpreter program (such as a script starting with
+      "#!"), but the file descriptor <i>dirfd</i> was opened with the
+      <b>O_CLOEXEC</b> flag, with the result that the program file is
+      inaccessible to the launched interpreter. See BUGS.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd><i>pathname</i> is relative and <i>dirfd</i> is a file descriptor
+      referring to a file other than a directory.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>execveat</b>() was added in Linux 3.19. Library support was
+    added in glibc 2.34.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">The <b>execveat</b>() system call is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">In addition to the reasons explained in <b>openat</b>(2), the
+    <b>execveat</b>() system call is also needed to allow <b>fexecve</b>(3) to
+    be implemented on systems that do not have the <i>/proc</i> filesystem
+    mounted.</p>
+<p class="Pp">When asked to execute a script file, the <i>argv[0]</i> that is
+    passed to the script interpreter is a string of the form <i>/dev/fd/N</i> or
+    <i>/dev/fd/N/P</i>, where <i>N</i> is the number of the file descriptor
+    passed via the <i>dirfd</i> argument. A string of the first form occurs when
+    <b>AT_EMPTY_PATH</b> is employed. A string of the second form occurs when
+    the script is specified via both <i>dirfd</i> and <i>pathname</i>; in this
+    case, <i>P</i> is the value given in <i>pathname</i>.</p>
+<p class="Pp">For the same reasons described in <b>fexecve</b>(3), the natural
+    idiom when using <b>execveat</b>() is to set the close-on-exec flag on
+    <i>dirfd</i>. (But see BUGS.)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">The <b>ENOENT</b> error described above means that it is not
+    possible to set the close-on-exec flag on the file descriptor given to a
+    call of the form:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>execveat(fd, "", argv, envp, AT_EMPTY_PATH);
+</pre>
+<br>
+<p class="Pp">However, the inability to set the close-on-exec flag means that a
+    file descriptor referring to the script leaks through to the script itself.
+    As well as wasting a file descriptor, this leakage can lead to
+    file-descriptor exhaustion in scenarios where scripts recursively employ
+    <b>execveat</b>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>execve</b>(2), <b>openat</b>(2), <b>fexecve</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

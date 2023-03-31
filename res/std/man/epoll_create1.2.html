@@ -1,0 +1,141 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/af6856e2c230e3ca487ce3150156b12c9b50d02f">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>epoll_create(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">epoll_create(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">epoll_create(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">epoll_create, epoll_create1 - open an epoll file descriptor</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/epoll.h&gt;</b></pre>
+<pre><b>int epoll_create(int </b><i>size</i><b>);</b>
+<b>int epoll_create1(int </b><i>flags</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>epoll_create</b>() creates a new <b>epoll</b>(7) instance.
+    Since Linux 2.6.8, the <i>size</i> argument is ignored, but must be greater
+    than zero; see NOTES.</p>
+<p class="Pp"><b>epoll_create</b>() returns a file descriptor referring to the
+    new epoll instance. This file descriptor is used for all the subsequent
+    calls to the <b>epoll</b> interface. When no longer required, the file
+    descriptor returned by <b>epoll_create</b>() should be closed by using
+    <b>close</b>(2). When all file descriptors referring to an epoll instance
+    have been closed, the kernel destroys the instance and releases the
+    associated resources for reuse.</p>
+<section class="Ss">
+<h2 class="Ss" id="epoll_create1()"><a class="permalink" href="#epoll_create1()">epoll_create1()</a></h2>
+<p class="Pp">If <i>flags</i> is 0, then, other than the fact that the obsolete
+    <i>size</i> argument is dropped, <b>epoll_create1</b>() is the same as
+    <b>epoll_create</b>(). The following value can be included in <i>flags</i>
+    to obtain different behavior:</p>
+<dl class="Bl-tag">
+  <dt id="EPOLL_CLOEXEC"><a class="permalink" href="#EPOLL_CLOEXEC"><b>EPOLL_CLOEXEC</b></a></dt>
+  <dd>Set the close-on-exec (<b>FD_CLOEXEC</b>) flag on the new file descriptor.
+      See the description of the <b>O_CLOEXEC</b> flag in <b>open</b>(2) for
+      reasons why this may be useful.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, these system calls return a file descriptor (a
+    nonnegative integer). On error, -1 is returned, and <i>errno</i> is set to
+    indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>size</i> is not positive.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>(<b>epoll_create1</b>()) Invalid value specified in <i>flags</i>.</dd>
+  <dt id="EMFILE"><a class="permalink" href="#EMFILE"><b>EMFILE</b></a></dt>
+  <dd>The per-user limit on the number of epoll instances imposed by
+      <i>/proc/sys/fs/epoll/max_user_instances</i> was encountered. See
+      <b>epoll</b>(7) for further details.</dd>
+  <dt id="EMFILE~2"><a class="permalink" href="#EMFILE~2"><b>EMFILE</b></a></dt>
+  <dd>The per-process limit on the number of open file descriptors has been
+      reached.</dd>
+  <dt id="ENFILE"><a class="permalink" href="#ENFILE"><b>ENFILE</b></a></dt>
+  <dd>The system-wide limit on the total number of open files has been
+    reached.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>There was insufficient memory to create the kernel object.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>epoll_create</b>() was added in Linux 2.6. Library support is
+    provided in glibc 2.3.2.</p>
+<p class="Pp"><b>epoll_create1</b>() was added in Linux 2.6.27. Library support
+    is provided in glibc 2.9.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>epoll_create</b>() and <b>epoll_create1</b>() are
+    Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">In the initial <b>epoll_create</b>() implementation, the
+    <i>size</i> argument informed the kernel of the number of file descriptors
+    that the caller expected to add to the <b>epoll</b> instance. The kernel
+    used this information as a hint for the amount of space to initially
+    allocate in internal data structures describing events. (If necessary, the
+    kernel would allocate more space if the caller's usage exceeded the hint
+    given in <i>size</i>.) Nowadays, this hint is no longer required (the kernel
+    dynamically sizes the required data structures without needing the hint),
+    but <i>size</i> must still be greater than zero, in order to ensure backward
+    compatibility when new <b>epoll</b> applications are run on older
+  kernels.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>close</b>(2), <b>epoll_ctl</b>(2), <b>epoll_wait</b>(2),
+    <b>epoll</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,377 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/8d8335c1b95b5406498e59a47338ea0f9681d1cc">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>gethostbyname(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">gethostbyname(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">gethostbyname(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">gethostbyname, gethostbyaddr, sethostent, gethostent, endhostent,
+    h_errno, herror, hstrerror, gethostbyaddr_r, gethostbyname2,
+    gethostbyname2_r, gethostbyname_r, gethostent_r - get network host entry</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;netdb.h&gt;</b></pre>
+<pre><b>void sethostent(int </b><i>stayopen</i><b>);</b>
+<b>void endhostent(void);</b></pre>
+<pre><b>[[deprecated]] extern int h_errno;</b></pre>
+<pre><b>[[deprecated]] struct hostent *gethostbyname(const char *</b><i>name</i><b>);</b>
+<b>[[deprecated]] struct hostent *gethostbyaddr(const void </b><i>addr</i><b>[.</b><i>len</i><b>],</b>
+<b>                                             socklen_t </b><i>len</i><b>, int </b><i>type</i><b>);</b></pre>
+<pre><b>[[deprecated]] void herror(const char *</b><i>s</i><b>);</b>
+<b>[[deprecated]] const char *hstrerror(int </b><i>err</i><b>);</b></pre>
+<pre>/* System V/POSIX extension */
+<b>struct hostent *gethostent(void);</b></pre>
+<pre>/* GNU extensions */
+<b>[[deprecated]]</b>
+<b>struct hostent *gethostbyname2(const char *</b><i>name</i><b>, int </b><i>af</i><b>);</b></pre>
+<pre><b>int gethostent_r(struct hostent *restrict </b><i>ret</i><b>,</b>
+<b>                 char </b><i>buf</i><b>[restrict .</b><i>buflen</i><b>], size_t </b><i>buflen</i><b>,</b>
+<b>                 struct hostent **restrict </b><i>result</i><b>,</b>
+<b>                 int *restrict </b><i>h_errnop</i><b>);</b></pre>
+<pre><b>[[deprecated]]</b>
+<b>int gethostbyaddr_r(const void </b><i>addr</i><b>[restrict .</b><i>len</i><b>], socklen_t </b><i>len</i><b>,</b>
+<b>                 int </b><i>type</i><b>,</b>
+<b>                 struct hostent *restrict </b><i>ret</i><b>,</b>
+<b>                 char </b><i>buf</i><b>[restrict .</b><i>buflen</i><b>], size_t </b><i>buflen</i><b>,</b>
+<b>                 struct hostent **restrict </b><i>result</i><b>,</b>
+<b>                 int *restrict </b><i>h_errnop</i><b>);</b>
+<b>[[deprecated]]</b>
+<b>int gethostbyname_r(const char *restrict </b><i>name</i><b>,</b>
+<b>                 struct hostent *restrict </b><i>ret</i><b>,</b>
+<b>                 char </b><i>buf</i><b>[restrict .</b><i>buflen</i><b>], size_t </b><i>buflen</i><b>,</b>
+<b>                 struct hostent **restrict </b><i>result</i><b>,</b>
+<b>                 int *restrict </b><i>h_errnop</i><b>);</b>
+<b>[[deprecated]]</b>
+<b>int gethostbyname2_r(const char *restrict </b><i>name</i><b>, int </b><i>af,</i>
+<b>                 struct hostent *restrict </b><i>ret</i><b>,</b>
+<b>                 char </b><i>buf</i><b>[restrict .</b><i>buflen</i><b>], size_t </b><i>buflen</i><b>,</b>
+<b>                 struct hostent **restrict </b><i>result</i><b>,</b>
+<b>                 int *restrict </b><i>h_errnop</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>gethostbyname2</b>(), <b>gethostent_r</b>(),
+    <b>gethostbyaddr_r</b>(), <b>gethostbyname_r</b>(),
+    <b>gethostbyname2_r</b>():</p>
+<pre><br>
+    Since glibc 2.19:
+<br>
+        _DEFAULT_SOURCE
+<br>
+    glibc up to and including 2.19:
+<br>
+        _BSD_SOURCE || _SVID_SOURCE</pre>
+<p class="Pp"><b>herror</b>(), <b>hstrerror</b>():</p>
+<pre><br>
+    Since glibc 2.19:
+<br>
+        _DEFAULT_SOURCE
+<br>
+    glibc 2.8 to glibc 2.19:
+<br>
+        _BSD_SOURCE || _SVID_SOURCE
+<br>
+    Before glibc 2.8:
+<br>
+        none</pre>
+<p class="Pp"><b>h_errno</b>:</p>
+<pre><br>
+    Since glibc 2.19
+<br>
+        _DEFAULT_SOURCE || _POSIX_C_SOURCE &lt; 200809L
+<br>
+    glibc 2.12 to glibc 2.19:
+<br>
+        _BSD_SOURCE || _SVID_SOURCE || _POSIX_C_SOURCE &lt; 200809L
+<br>
+    Before glibc 2.12:
+<br>
+        none</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>gethostbyname*</b>(), <b>gethostbyaddr*</b>(),
+    <b>herror</b>(), and <b>hstrerror</b>() functions are obsolete. Applications
+    should use <b>getaddrinfo</b>(3), <b>getnameinfo</b>(3), and
+    <b>gai_strerror</b>(3) instead.</p>
+<p class="Pp">The <b>sethostent</b>() function specifies, if <i>stayopen</i> is
+    true (1), that a connected TCP socket should be used for the name server
+    queries and that the connection should remain open during successive
+    queries. Otherwise, name server queries will use UDP datagrams.</p>
+<p class="Pp">The <b>endhostent</b>() function ends the use of a TCP connection
+    for name server queries.</p>
+<p class="Pp">The <b>gethostbyname</b>() function returns a structure of type
+    <i>hostent</i> for the given host <i>name</i>. Here <i>name</i> is either a
+    hostname or an IPv4 address in standard dot notation (as for
+    <b>inet_addr</b>(3)). If <i>name</i> is an IPv4 address, no lookup is
+    performed and <b>gethostbyname</b>() simply copies <i>name</i> into the
+    <i>h_name</i> field and its <i>struct in_addr</i> equivalent into the
+    <i>h_addr_list[0]</i> field of the returned <i>hostent</i> structure. If
+    <i>name</i> doesn't end in a dot and the environment variable
+    <b>HOSTALIASES</b> is set, the alias file pointed to by <b>HOSTALIASES</b>
+    will first be searched for <i>name</i> (see <b>hostname</b>(7) for the file
+    format). The current domain and its parents are searched unless <i>name</i>
+    ends in a dot.</p>
+<p class="Pp">The <b>gethostbyaddr</b>() function returns a structure of type
+    <i>hostent</i> for the given host address <i>addr</i> of length <i>len</i>
+    and address type <i>type</i>. Valid address types are <b>AF_INET</b> and
+    <b>AF_INET6</b> (defined in <i>&lt;sys/socket.h&gt;</i>). The host address
+    argument is a pointer to a struct of a type depending on the address type,
+    for example a <i>struct in_addr *</i> (probably obtained via a call to
+    <b>inet_addr</b>(3)) for address type <b>AF_INET</b>.</p>
+<p class="Pp">The (obsolete) <b>herror</b>() function prints the error message
+    associated with the current value of <i>h_errno</i> on <i>stderr</i>.</p>
+<p class="Pp">The (obsolete) <b>hstrerror</b>() function takes an error number
+    (typically <i>h_errno</i>) and returns the corresponding message string.</p>
+<p class="Pp">The domain name queries carried out by <b>gethostbyname</b>() and
+    <b>gethostbyaddr</b>() rely on the Name Service Switch
+    (<b>nsswitch.conf</b>(5)) configured sources or a local name server
+    (<b>named</b>(8)). The default action is to query the Name Service Switch
+    (<b>nsswitch.conf</b>(5)) configured sources, failing that, a local name
+    server (<b>named</b>(8)).</p>
+<section class="Ss">
+<h2 class="Ss" id="Historical"><a class="permalink" href="#Historical">Historical</a></h2>
+<p class="Pp">The <b>nsswitch.conf</b>(5) file is the modern way of controlling
+    the order of host lookups.</p>
+<p class="Pp">In glibc 2.4 and earlier, the <i>order</i> keyword was used to
+    control the order of host lookups as defined in <i>/etc/host.conf</i>
+    (<b>host.conf</b>(5)).</p>
+<p class="Pp">The <i>hostent</i> structure is defined in <i>&lt;netdb.h&gt;</i>
+    as follows:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct hostent {
+<br>
+    char  *h_name;            /* official name of host */
+<br>
+    char **h_aliases;         /* alias list */
+<br>
+    int    h_addrtype;        /* host address type */
+<br>
+    int    h_length;          /* length of address */
+<br>
+    char **h_addr_list;       /* list of addresses */
+}
+#define h_addr h_addr_list[0] /* for backward compatibility */
+</pre>
+<br>
+<p class="Pp">The members of the <i>hostent</i> structure are:</p>
+<dl class="Bl-tag">
+  <dt id="h_name"><a class="permalink" href="#h_name"><i>h_name</i></a></dt>
+  <dd>The official name of the host.</dd>
+  <dt id="h_aliases"><a class="permalink" href="#h_aliases"><i>h_aliases</i></a></dt>
+  <dd>An array of alternative names for the host, terminated by a null
+    pointer.</dd>
+  <dt id="h_addrtype"><a class="permalink" href="#h_addrtype"><i>h_addrtype</i></a></dt>
+  <dd>The type of address; always <b>AF_INET</b> or <b>AF_INET6</b> at
+    present.</dd>
+  <dt id="h_length"><a class="permalink" href="#h_length"><i>h_length</i></a></dt>
+  <dd>The length of the address in bytes.</dd>
+  <dt id="h_addr_list"><a class="permalink" href="#h_addr_list"><i>h_addr_list</i></a></dt>
+  <dd>An array of pointers to network addresses for the host (in network byte
+      order), terminated by a null pointer.</dd>
+  <dt id="h_addr"><a class="permalink" href="#h_addr"><i>h_addr</i></a></dt>
+  <dd>The first address in <i>h_addr_list</i> for backward compatibility.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <b>gethostbyname</b>() and <b>gethostbyaddr</b>() functions
+    return the <i>hostent</i> structure or a null pointer if an error occurs. On
+    error, the <i>h_errno</i> variable holds an error number. When non-NULL, the
+    return value may point at static data, see the notes below.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The variable <i>h_errno</i> can have the following values:</p>
+<dl class="Bl-tag">
+  <dt id="HOST_NOT_FOUND"><a class="permalink" href="#HOST_NOT_FOUND"><b>HOST_NOT_FOUND</b></a></dt>
+  <dd>The specified host is unknown.</dd>
+  <dt id="NO_DATA"><a class="permalink" href="#NO_DATA"><b>NO_DATA</b></a></dt>
+  <dd>The requested name is valid but does not have an IP address. Another type
+      of request to the name server for this domain may return an answer. The
+      constant <b>NO_ADDRESS</b> is a synonym for <b>NO_DATA</b>.</dd>
+  <dt id="NO_RECOVERY"><a class="permalink" href="#NO_RECOVERY"><b>NO_RECOVERY</b></a></dt>
+  <dd>A nonrecoverable name server error occurred.</dd>
+  <dt id="TRY_AGAIN"><a class="permalink" href="#TRY_AGAIN"><b>TRY_AGAIN</b></a></dt>
+  <dd>A temporary error occurred on an authoritative name server. Try again
+      later.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FILES"><a class="permalink" href="#FILES">FILES</a></h1>
+<dl class="Bl-tag">
+  <dt><i>/etc/host.conf</i></dt>
+  <dd>resolver configuration file</dd>
+  <dt><i>/etc/hosts</i></dt>
+  <dd>host database file</dd>
+  <dt><i>/etc/nsswitch.conf</i></dt>
+  <dd>name service switch configuration</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>gethostbyname ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race:hostbyname env locale</td>
+  </tr>
+  <tr>
+    <td>gethostbyaddr ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race:hostbyaddr env locale</td>
+  </tr>
+  <tr>
+    <td>sethostent (), endhostent (), gethostent_r ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race:hostent env locale</td>
+  </tr>
+  <tr>
+    <td>herror (), hstrerror ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+  <tr>
+    <td>gethostent ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race:hostent race:hostentbuf env locale</td>
+  </tr>
+  <tr>
+    <td>gethostbyname2 ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race:hostbyname2 env locale</td>
+  </tr>
+  <tr>
+    <td>gethostbyaddr_r (), gethostbyname_r (), gethostbyname2_r ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe env locale</td>
+  </tr>
+</tbody></table>
+<p class="Pp">In the above table, <i>hostent</i> in <i>race:hostent</i>
+    signifies that if any of the functions <b>sethostent</b>(),
+    <b>gethostent</b>(), <b>gethostent_r</b>(), or <b>endhostent</b>() are used
+    in parallel in different threads of a program, then data races could
+  occur.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001 specifies <b>gethostbyname</b>(),
+    <b>gethostbyaddr</b>(), <b>sethostent</b>(), <b>endhostent</b>(),
+    <b>gethostent</b>(), and <i>h_errno</i>; <b>gethostbyname</b>(),
+    <b>gethostbyaddr</b>(), and <i>h_errno</i> are marked obsolescent in that
+    standard. POSIX.1-2008 removes the specifications of <b>gethostbyname</b>(),
+    <b>gethostbyaddr</b>(), and <i>h_errno</i>, recommending the use of
+    <b>getaddrinfo</b>(3) and <b>getnameinfo</b>(3) instead.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The functions <b>gethostbyname</b>() and <b>gethostbyaddr</b>()
+    may return pointers to static data, which may be overwritten by later calls.
+    Copying the <i>struct hostent</i> does not suffice, since it contains
+    pointers; a deep copy is required.</p>
+<p class="Pp">In the original BSD implementation the <i>len</i> argument of
+    <b>gethostbyname</b>() was an <i>int</i>. The SUSv2 standard is buggy and
+    declares the <i>len</i> argument of <b>gethostbyaddr</b>() to be of type
+    <i>size_t</i>. (That is wrong, because it has to be <i>int</i>, and
+    <i>size_t</i> is not. POSIX.1-2001 makes it <i>socklen_t</i>, which is OK.)
+    See also <b>accept</b>(2).</p>
+<p class="Pp">The BSD prototype for <b>gethostbyaddr</b>() uses <i>const
+    char&nbsp;*</i> for the first argument.</p>
+<section class="Ss">
+<h2 class="Ss" id="System_V/POSIX_extension"><a class="permalink" href="#System_V/POSIX_extension">System
+  V/POSIX extension</a></h2>
+<p class="Pp">POSIX requires the <b>gethostent</b>() call, which should return
+    the next entry in the host data base. When using DNS/BIND this does not make
+    much sense, but it may be reasonable if the host data base is a file that
+    can be read line by line. On many systems, a routine of this name reads from
+    the file <i>/etc/hosts</i>. It may be available only when the library was
+    built without DNS support. The glibc version will ignore ipv6 entries. This
+    function is not reentrant, and glibc adds a reentrant version
+    <b>gethostent_r</b>().</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="GNU_extensions"><a class="permalink" href="#GNU_extensions">GNU
+  extensions</a></h2>
+<p class="Pp">glibc2 also has a <b>gethostbyname2</b>() that works like
+    <b>gethostbyname</b>(), but permits to specify the address family to which
+    the address must belong.</p>
+<p class="Pp">glibc2 also has reentrant versions <b>gethostent_r</b>(),
+    <b>gethostbyaddr_r</b>(), <b>gethostbyname_r</b>(), and
+    <b>gethostbyname2_r</b>(). The caller supplies a <i>hostent</i> structure
+    <i>ret</i> which will be filled in on success, and a temporary work buffer
+    <i>buf</i> of size <i>buflen</i>. After the call, <i>result</i> will point
+    to the result on success. In case of an error or if no entry is found
+    <i>result</i> will be NULL. The functions return 0 on success and a nonzero
+    error number on failure. In addition to the errors returned by the
+    nonreentrant versions of these functions, if <i>buf</i> is too small, the
+    functions will return <b>ERANGE</b>, and the call should be retried with a
+    larger buffer. The global variable <i>h_errno</i> is not modified, but the
+    address of a variable in which to store error numbers is passed in
+    <i>h_errnop</i>.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp"><b>gethostbyname</b>() does not recognize components of a dotted
+    IPv4 address string that are expressed in hexadecimal.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>getaddrinfo</b>(3), <b>getnameinfo</b>(3), <b>inet</b>(3),
+    <b>inet_ntop</b>(3), <b>inet_pton</b>(3), <b>resolver</b>(3),
+    <b>hosts</b>(5), <b>nsswitch.conf</b>(5), <b>hostname</b>(7),
+    <b>named</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

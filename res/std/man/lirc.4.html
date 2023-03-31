@@ -1,0 +1,350 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2015-2016, Alec Leamas
+   Copyright (c) 2018, Sean Young <sean@mess.org>
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+ --><head>
+<meta name="dc.identifier" content="res/62e7c5a61484b500572f3ea8c14a6d9f50ccd3e3">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>lirc(4)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">lirc(4)</td>
+    <td class="head-vol">Device Drivers Manual</td>
+    <td class="head-rtitle">lirc(4)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">lirc - lirc devices</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>/dev/lirc*</i> character devices provide a low-level
+    bidirectional interface to infra-red (IR) remotes. Most of these devices can
+    receive, and some can send. When receiving or sending data, the driver works
+    in two different modes depending on the underlying hardware.</p>
+<p class="Pp">Some hardware (typically TV-cards) decodes the IR signal
+    internally and provides decoded button presses as scancode values. Drivers
+    for this kind of hardware work in <b>LIRC_MODE_SCANCODE</b> mode. Such
+    hardware usually does not support sending IR signals. Furthermore, such
+    hardware can only decode a limited set of IR protocols, usually only the
+    protocol of the specific remote which is bundled with, for example, a
+    TV-card.</p>
+<p class="Pp">Other hardware provides a stream of pulse/space durations. Such
+    drivers work in <b>LIRC_MODE_MODE2</b> mode. Such hardware can be used with
+    (almost) any kind of remote. This type of hardware can also be used in
+    <b>LIRC_MODE_SCANCODE</b> mode, in which case the kernel IR decoders will
+    decode the IR. These decoders can be written in extended BPF (see
+    <b>bpf</b>(2)) and attached to the <b>lirc</b> device. Sometimes, this kind
+    of hardware also supports sending IR data.</p>
+<p class="Pp">The <b>LIRC_GET_FEATURES</b> ioctl (see below) allows probing for
+    whether receiving and sending is supported, and in which modes, amongst
+    other features.</p>
+<section class="Ss">
+<h2 class="Ss" id="Reading_input_with_the_LIRC_MODE_MODE2_mode"><a class="permalink" href="#Reading_input_with_the_LIRC_MODE_MODE2_mode">Reading
+  input with the LIRC_MODE_MODE2 mode</a></h2>
+<p class="Pp">In the <b>LIRC_MODE_MODE2 mode</b>, the data returned by
+    <b>read</b>(2) provides 32-bit values representing a space or a pulse
+    duration. The time of the duration (microseconds) is encoded in the lower 24
+    bits. Pulse (also known as flash) indicates a duration of infrared light
+    being detected, and space (also known as gap) indicates a duration with no
+    infrared. If the duration of space exceeds the inactivity timeout, a special
+    timeout package is delivered, which marks the end of a message. The upper 8
+    bits indicate the type of package:</p>
+<dl class="Bl-tag">
+  <dt id="LIRC_MODE2_SPACE"><a class="permalink" href="#LIRC_MODE2_SPACE"><b>LIRC_MODE2_SPACE</b></a></dt>
+  <dd>Value reflects a space duration (microseconds).</dd>
+  <dt id="LIRC_MODE2_PULSE"><a class="permalink" href="#LIRC_MODE2_PULSE"><b>LIRC_MODE2_PULSE</b></a></dt>
+  <dd>Value reflects a pulse duration (microseconds).</dd>
+  <dt id="LIRC_MODE2_FREQUENCY"><a class="permalink" href="#LIRC_MODE2_FREQUENCY"><b>LIRC_MODE2_FREQUENCY</b></a></dt>
+  <dd>Value reflects a frequency (Hz); see the
+      <b>LIRC_SET_MEASURE_CARRIER_MODE</b> ioctl.</dd>
+  <dt id="LIRC_MODE2_TIMEOUT"><a class="permalink" href="#LIRC_MODE2_TIMEOUT"><b>LIRC_MODE2_TIMEOUT</b></a></dt>
+  <dd>Value reflects a space duration (microseconds). The package reflects a
+      timeout; see the <b>LIRC_SET_REC_TIMEOUT_REPORTS</b> ioctl.</dd>
+  <dt id="LIRC_MODE2_OVERFLOW"><a class="permalink" href="#LIRC_MODE2_OVERFLOW"><b>LIRC_MODE2_OVERFLOW</b></a></dt>
+  <dd>The IR receiver encountered an overflow, and as a result data is missing
+      (since Linux 5.18).</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Reading_input_with_the_LIRC_MODE_SCANCODE_mode"><a class="permalink" href="#Reading_input_with_the_LIRC_MODE_SCANCODE_mode">Reading
+  input with the LIRC_MODE_SCANCODE mode</a></h2>
+<p class="Pp">In the <b>LIRC_MODE_SCANCODE</b> mode, the data returned by
+    <b>read</b>(2) reflects decoded button presses, in the struct
+    <i>lirc_scancode</i>. The scancode is stored in the <i>scancode</i> field,
+    and the IR protocol is stored in <i>rc_proto</i>. This field has one the
+    values of the <i>enum rc_proto</i>.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Writing_output_with_the_LIRC_MODE_PULSE_mode"><a class="permalink" href="#Writing_output_with_the_LIRC_MODE_PULSE_mode">Writing
+  output with the LIRC_MODE_PULSE mode</a></h2>
+<p class="Pp">The data written to the character device using <b>write</b>(2) is
+    a pulse/space sequence of integer values. Pulses and spaces are only marked
+    implicitly by their position. The data must start and end with a pulse, thus
+    it must always include an odd number of samples. The <b>write</b>(2)
+    function blocks until the data has been transmitted by the hardware. If more
+    data is provided than the hardware can send, the <b>write</b>(2) call fails
+    with the error <b>EINVAL</b>.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Writing_output_with_the_LIRC_MODE_SCANCODE_mode"><a class="permalink" href="#Writing_output_with_the_LIRC_MODE_SCANCODE_mode">Writing
+  output with the LIRC_MODE_SCANCODE mode</a></h2>
+<p class="Pp">The data written to the character devices must be a single struct
+    <i>lirc_scancode</i>. The <i>scancode</i> and <i>rc_proto</i> fields must
+    filled in, all other fields must be 0. The kernel IR encoders will convert
+    the scancode to pulses and spaces. The protocol or scancode is invalid, or
+    the <b>lirc</b> device cannot transmit.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="IOCTL_COMMANDS"><a class="permalink" href="#IOCTL_COMMANDS">IOCTL
+  COMMANDS</a></h1>
+<pre>#include &lt;linux/lirc.h&gt;    /* But see BUGS */
+int ioctl(int fd, int cmd, int *val);</pre>
+<p class="Pp">The following <b>ioctl</b>(2) operations are provided by the
+    <b>lirc</b> character device to probe or change specific <b>lirc</b>
+    hardware settings.</p>
+<section class="Ss">
+<h2 class="Ss" id="Always_Supported_Commands"><a class="permalink" href="#Always_Supported_Commands">Always
+  Supported Commands</a></h2>
+<p class="Pp"><i>/dev/lirc*</i> devices always support the following
+  commands:</p>
+<dl class="Bl-tag">
+  <dt id="LIRC_GET_FEATURES"><a class="permalink" href="#LIRC_GET_FEATURES"><b>LIRC_GET_FEATURES</b>
+    (<i>void</i>)</a></dt>
+  <dd>Returns a bit mask of combined features bits; see FEATURES.</dd>
+</dl>
+<p class="Pp">If a device returns an error code for <b>LIRC_GET_FEATURES</b>, it
+    is safe to assume it is not a <b>lirc</b> device.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Optional_Commands"><a class="permalink" href="#Optional_Commands">Optional
+  Commands</a></h2>
+<p class="Pp">Some <b>lirc</b> devices support the commands listed below. Unless
+    otherwise stated, these fail with the error <b>ENOTTY</b> if the operation
+    isn't supported, or with the error <b>EINVAL</b> if the operation failed, or
+    invalid arguments were provided. If a driver does not announce support of
+    certain features, invoking the corresponding ioctls will fail with the error
+    <b>ENOTTY</b>.</p>
+<dl class="Bl-tag">
+  <dt id="LIRC_GET_REC_MODE"><a class="permalink" href="#LIRC_GET_REC_MODE"><b>LIRC_GET_REC_MODE</b>
+    (<i>void</i>)</a></dt>
+  <dd>If the <b>lirc</b> device has no receiver, this operation fails with the
+      error <b>ENOTTY</b>. Otherwise, it returns the receive mode, which will be
+      one of:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="LIRC_MODE_MODE2"><a class="permalink" href="#LIRC_MODE_MODE2"><b>LIRC_MODE_MODE2</b></a></dt>
+  <dd>The driver returns a sequence of pulse/space durations.</dd>
+  <dt id="LIRC_MODE_SCANCODE"><a class="permalink" href="#LIRC_MODE_SCANCODE"><b>LIRC_MODE_SCANCODE</b></a></dt>
+  <dd>The driver returns struct <i>lirc_scancode</i> values, each of which
+      represents a decoded button press.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="LIRC_SET_REC_MODE"><a class="permalink" href="#LIRC_SET_REC_MODE"><b>LIRC_SET_REC_MODE</b>
+    (<i>int</i>)</a></dt>
+  <dd>Set the receive mode. <i>val</i> is either <b>LIRC_MODE_SCANCODE</b> or
+      <b>LIRC_MODE_MODE2</b>. If the <b>lirc</b> device has no receiver, this
+      operation fails with the error <b>ENOTTY.</b></dd>
+  <dt id="LIRC_GET_SEND_MODE"><a class="permalink" href="#LIRC_GET_SEND_MODE"><b>LIRC_GET_SEND_MODE</b>
+    (<i>void</i>)</a></dt>
+  <dd>Return the send mode. <b>LIRC_MODE_PULSE</b> or <b>LIRC_MODE_SCANCODE</b>
+      is supported. If the <b>lirc</b> device cannot send, this operation fails
+      with the error <b>ENOTTY.</b></dd>
+  <dt id="LIRC_SET_SEND_MODE"><a class="permalink" href="#LIRC_SET_SEND_MODE"><b>LIRC_SET_SEND_MODE</b>
+    (<i>int</i>)</a></dt>
+  <dd>Set the send mode. <i>val</i> is either <b>LIRC_MODE_SCANCODE</b> or
+      <b>LIRC_MODE_PULSE</b>. If the <b>lirc</b> device cannot send, this
+      operation fails with the error <b>ENOTTY</b>.</dd>
+  <dt id="LIRC_SET_SEND_CARRIER"><a class="permalink" href="#LIRC_SET_SEND_CARRIER"><b>LIRC_SET_SEND_CARRIER</b>
+    (<i>int</i>)</a></dt>
+  <dd>Set the modulation frequency. The argument is the frequency (Hz).</dd>
+  <dt id="LIRC_SET_SEND_DUTY_CYCLE"><a class="permalink" href="#LIRC_SET_SEND_DUTY_CYCLE"><b>LIRC_SET_SEND_DUTY_CYCLE</b>
+    (<i>int</i>)</a></dt>
+  <dd>Set the carrier duty cycle. <i>val</i> is a number in the range [0,100]
+      which describes the pulse width as a percentage of the total cycle.
+      Currently, no special meaning is defined for 0 or 100, but the values are
+      reserved for future use.</dd>
+  <dt id="LIRC_GET_MIN_TIMEOUT"><a class="permalink" href="#LIRC_GET_MIN_TIMEOUT"><b>LIRC_GET_MIN_TIMEOUT</b>
+    (<i>void</i>)<b>,</b> <b>LIRC_GET_MAX_TIMEOUT</b> (<i>void</i>)</a></dt>
+  <dd>Some devices have internal timers that can be used to detect when there
+      has been no IR activity for a long time. This can help <b>lircd</b>(8) in
+      detecting that an IR signal is finished and can speed up the decoding
+      process. These operations return integer values with the minimum/maximum
+      timeout that can be set (microseconds). Some devices have a fixed timeout.
+      For such drivers, <b>LIRC_GET_MIN_TIMEOUT</b> and
+      <b>LIRC_GET_MAX_TIMEOUT</b> will fail with the error <b>ENOTTY</b>.</dd>
+  <dt id="LIRC_SET_REC_TIMEOUT"><a class="permalink" href="#LIRC_SET_REC_TIMEOUT"><b>LIRC_SET_REC_TIMEOUT</b>
+    (<i>int</i>)</a></dt>
+  <dd>Set the integer value for IR inactivity timeout (microseconds). To be
+      accepted, the value must be within the limits defined by
+      <b>LIRC_GET_MIN_TIMEOUT</b> and <b>LIRC_GET_MAX_TIMEOUT</b>. A value of 0
+      (if supported by the hardware) disables all hardware timeouts and data
+      should be reported as soon as possible. If the exact value cannot be set,
+      then the next possible value <i>greater</i> than the given value should be
+      set.</dd>
+  <dt id="LIRC_GET_REC_TIMEOUT"><a class="permalink" href="#LIRC_GET_REC_TIMEOUT"><b>LIRC_GET_REC_TIMEOUT</b>
+    (<i>void</i>)</a></dt>
+  <dd>Return the current inactivity timeout (microseconds). Available since
+      Linux 4.18.</dd>
+  <dt id="LIRC_SET_REC_TIMEOUT_REPORTS"><a class="permalink" href="#LIRC_SET_REC_TIMEOUT_REPORTS"><b>LIRC_SET_REC_TIMEOUT_REPORTS</b>
+    (<i>int</i>)</a></dt>
+  <dd>Enable (<i>val</i> is 1) or disable (<i>val</i> is 0) timeout packages in
+      <b>LIRC_MODE_MODE2</b>. The behavior of this operation has varied across
+      kernel versions:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Since Linux 5.17: timeout packages are always enabled and this ioctl is a
+      no-op.</dd>
+  <dt>•</dt>
+  <dd>Since Linux 4.16: timeout packages are enabled by default. Each time the
+      <b>lirc</b> device is opened, the <b>LIRC_SET_REC_TIMEOUT</b> operation
+      can be used to disable (and, if desired, to later re-enable) the timeout
+      on the file descriptor.</dd>
+  <dt>•</dt>
+  <dd>In Linux 4.15 and earlier: timeout packages are disabled by default, and
+      enabling them (via <b>LIRC_SET_REC_TIMEOUT</b>) on any file descriptor
+      associated with the <b>lirc</b> device has the effect of enabling timeouts
+      for all file descriptors referring to that device (until timeouts are
+      disabled again).</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="LIRC_SET_REC_CARRIER"><a class="permalink" href="#LIRC_SET_REC_CARRIER"><b>LIRC_SET_REC_CARRIER</b>
+    (<i>int</i>)</a></dt>
+  <dd>Set the upper bound of the receive carrier frequency (Hz). See
+      <b>LIRC_SET_REC_CARRIER_RANGE</b>.</dd>
+  <dt id="LIRC_SET_REC_CARRIER_RANGE"><a class="permalink" href="#LIRC_SET_REC_CARRIER_RANGE"><b>LIRC_SET_REC_CARRIER_RANGE</b>
+    (<i>int</i>)</a></dt>
+  <dd>Sets the lower bound of the receive carrier frequency (Hz). For this to
+      take affect, first set the lower bound using the
+      <b>LIRC_SET_REC_CARRIER_RANGE</b> ioctl, and then the upper bound using
+      the <b>LIRC_SET_REC_CARRIER</b> ioctl.</dd>
+  <dt id="LIRC_SET_MEASURE_CARRIER_MODE"><a class="permalink" href="#LIRC_SET_MEASURE_CARRIER_MODE"><b>LIRC_SET_MEASURE_CARRIER_MODE</b>
+    (<i>int</i>)</a></dt>
+  <dd>Enable (<i>val</i> is 1) or disable (<i>val</i> is 0) the measure mode. If
+      enabled, from the next key press on, the driver will send
+      <b>LIRC_MODE2_FREQUENCY</b> packets. By default, this should be turned
+      off.</dd>
+  <dt id="LIRC_GET_REC_RESOLUTION"><a class="permalink" href="#LIRC_GET_REC_RESOLUTION"><b>LIRC_GET_REC_RESOLUTION</b>
+    (<i>void</i>)</a></dt>
+  <dd>Return the driver resolution (microseconds).</dd>
+  <dt id="LIRC_SET_TRANSMITTER_MASK"><a class="permalink" href="#LIRC_SET_TRANSMITTER_MASK"><b>LIRC_SET_TRANSMITTER_MASK</b>
+    (<i>int</i>)</a></dt>
+  <dd>Enable the set of transmitters specified in <i>val</i>, which contains a
+      bit mask where each enabled transmitter is a 1. The first transmitter is
+      encoded by the least significant bit, and so on. When an invalid bit mask
+      is given, for example a bit is set even though the device does not have so
+      many transmitters, this operation returns the number of available
+      transmitters and does nothing otherwise.</dd>
+  <dt id="LIRC_SET_WIDEBAND_RECEIVER"><a class="permalink" href="#LIRC_SET_WIDEBAND_RECEIVER"><b>LIRC_SET_WIDEBAND_RECEIVER</b>
+    (<i>int</i>)</a></dt>
+  <dd>Some devices are equipped with a special wide band receiver which is
+      intended to be used to learn the output of an existing remote. This ioctl
+      can be used to enable (<i>val</i> equals 1) or disable (<i>val</i> equals
+      0) this functionality. This might be useful for devices that otherwise
+      have narrow band receivers that prevent them to be used with certain
+      remotes. Wide band receivers may also be more precise. On the other hand,
+      their disadvantage usually is reduced range of reception.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Note: wide band receiver may be implicitly enabled if you enable carrier
+      reports. In that case, it will be disabled as soon as you disable carrier
+      reports. Trying to disable a wide band receiver while carrier reports are
+      active will do nothing.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FEATURES"><a class="permalink" href="#FEATURES">FEATURES</a></h1>
+<p class="Pp">the <b>LIRC_GET_FEATURES</b> ioctl returns a bit mask describing
+    features of the driver. The following bits may be returned in the mask:</p>
+<dl class="Bl-tag">
+  <dt id="LIRC_CAN_REC_MODE2"><a class="permalink" href="#LIRC_CAN_REC_MODE2"><b>LIRC_CAN_REC_MODE2</b></a></dt>
+  <dd>The driver is capable of receiving using <b>LIRC_MODE_MODE2</b>.</dd>
+  <dt id="LIRC_CAN_REC_SCANCODE"><a class="permalink" href="#LIRC_CAN_REC_SCANCODE"><b>LIRC_CAN_REC_SCANCODE</b></a></dt>
+  <dd>The driver is capable of receiving using <b>LIRC_MODE_SCANCODE</b>.</dd>
+  <dt id="LIRC_CAN_SET_SEND_CARRIER"><a class="permalink" href="#LIRC_CAN_SET_SEND_CARRIER"><b>LIRC_CAN_SET_SEND_CARRIER</b></a></dt>
+  <dd>The driver supports changing the modulation frequency using
+      <b>LIRC_SET_SEND_CARRIER</b>.</dd>
+  <dt id="LIRC_CAN_SET_SEND_DUTY_CYCLE"><a class="permalink" href="#LIRC_CAN_SET_SEND_DUTY_CYCLE"><b>LIRC_CAN_SET_SEND_DUTY_CYCLE</b></a></dt>
+  <dd>The driver supports changing the duty cycle using
+      <b>LIRC_SET_SEND_DUTY_CYCLE</b>.</dd>
+  <dt id="LIRC_CAN_SET_TRANSMITTER_MASK"><a class="permalink" href="#LIRC_CAN_SET_TRANSMITTER_MASK"><b>LIRC_CAN_SET_TRANSMITTER_MASK</b></a></dt>
+  <dd>The driver supports changing the active transmitter(s) using
+      <b>LIRC_SET_TRANSMITTER_MASK</b>.</dd>
+  <dt id="LIRC_CAN_SET_REC_CARRIER"><a class="permalink" href="#LIRC_CAN_SET_REC_CARRIER"><b>LIRC_CAN_SET_REC_CARRIER</b></a></dt>
+  <dd>The driver supports setting the receive carrier frequency using
+      <b>LIRC_SET_REC_CARRIER</b>. Any <b>lirc</b> device since the drivers were
+      merged in Linux 2.6.36 must have <b>LIRC_CAN_SET_REC_CARRIER_RANGE</b> set
+      if <b>LIRC_CAN_SET_REC_CARRIER</b> feature is set.</dd>
+  <dt id="LIRC_CAN_SET_REC_CARRIER_RANGE"><a class="permalink" href="#LIRC_CAN_SET_REC_CARRIER_RANGE"><b>LIRC_CAN_SET_REC_CARRIER_RANGE</b></a></dt>
+  <dd>The driver supports <b>LIRC_SET_REC_CARRIER_RANGE</b>. The lower bound of
+      the carrier must first be set using the <b>LIRC_SET_REC_CARRIER_RANGE</b>
+      ioctl, before using the <b>LIRC_SET_REC_CARRIER</b> ioctl to set the upper
+      bound.</dd>
+  <dt id="LIRC_CAN_GET_REC_RESOLUTION"><a class="permalink" href="#LIRC_CAN_GET_REC_RESOLUTION"><b>LIRC_CAN_GET_REC_RESOLUTION</b></a></dt>
+  <dd>The driver supports <b>LIRC_GET_REC_RESOLUTION</b>.</dd>
+  <dt id="LIRC_CAN_SET_REC_TIMEOUT"><a class="permalink" href="#LIRC_CAN_SET_REC_TIMEOUT"><b>LIRC_CAN_SET_REC_TIMEOUT</b></a></dt>
+  <dd>The driver supports <b>LIRC_SET_REC_TIMEOUT</b>.</dd>
+  <dt id="LIRC_CAN_MEASURE_CARRIER"><a class="permalink" href="#LIRC_CAN_MEASURE_CARRIER"><b>LIRC_CAN_MEASURE_CARRIER</b></a></dt>
+  <dd>The driver supports measuring of the modulation frequency using
+      <b>LIRC_SET_MEASURE_CARRIER_MODE</b>.</dd>
+  <dt id="LIRC_CAN_USE_WIDEBAND_RECEIVER"><a class="permalink" href="#LIRC_CAN_USE_WIDEBAND_RECEIVER"><b>LIRC_CAN_USE_WIDEBAND_RECEIVER</b></a></dt>
+  <dd>The driver supports learning mode using
+    <b>LIRC_SET_WIDEBAND_RECEIVER</b>.</dd>
+  <dt id="LIRC_CAN_SEND_PULSE"><a class="permalink" href="#LIRC_CAN_SEND_PULSE"><b>LIRC_CAN_SEND_PULSE</b></a></dt>
+  <dd>The driver supports sending using <b>LIRC_MODE_PULSE</b> or
+      <b>LIRC_MODE_SCANCODE</b></dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">Using these devices requires the kernel source header file
+    <i>lirc.h</i>. This file is not available before Linux 4.6. Users of older
+    kernels could use the file bundled in
+    <a class="Lk" href="http://www.lirc.org">http://www.lirc.org</a>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>ir-ctl</b>(1), <b>lircd</b>(8),&nbsp;<b>bpf</b>(2)</p>
+<p class="Pp"><a class="Lk" href="https://www.kernel.org/doc/html/latest/userspace-api/media/rc/lirc-dev.html">https://www.kernel.org/doc/html/latest/userspace-api/media/rc/lirc-dev.html</a></p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

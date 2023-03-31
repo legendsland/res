@@ -1,0 +1,179 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/ec97983a142b4d77b5f1c4a1380c3d9fc1acfecf">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>if_nameindex(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">if_nameindex(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">if_nameindex(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">if_nameindex, if_freenameindex - get network interface names and
+    indexes</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;net/if.h&gt;</b></pre>
+<pre><b>struct if_nameindex *if_nameindex(</b><i>void</i><b>);</b>
+<b>void if_freenameindex(struct if_nameindex *</b><i>ptr</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>if_nameindex</b>() function returns an array of
+    <i>if_nameindex</i> structures, each containing information about one of the
+    network interfaces on the local system. The <i>if_nameindex</i> structure
+    contains at least the following entries:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>unsigned int if_index; /* Index of interface (1, 2, ...) */
+char        *if_name;  /* Null-terminated name ("eth0", etc.) */
+</pre>
+<br>
+<p class="Pp">The <i>if_index</i> field contains the interface index. The
+    <i>if_name</i> field points to the null-terminated interface name. The end
+    of the array is indicated by entry with <i>if_index</i> set to zero and
+    <i>if_name</i> set to NULL.</p>
+<p class="Pp">The data structure returned by <b>if_nameindex</b>() is
+    dynamically allocated and should be freed using <b>if_freenameindex</b>()
+    when no longer needed.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>if_nameindex</b>() returns pointer to the array; on
+    error, NULL is returned, and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp"><b>if_nameindex</b>() may fail and set <i>errno</i> if:</p>
+<dl class="Bl-tag">
+  <dt id="ENOBUFS"><a class="permalink" href="#ENOBUFS"><b>ENOBUFS</b></a></dt>
+  <dd>Insufficient resources available.</dd>
+</dl>
+<p class="Pp"><b>if_nameindex</b>() may also fail for any of the errors
+    specified for <b>socket</b>(2), <b>bind</b>(2), <b>ioctl</b>(2),
+    <b>getsockname</b>(2), <b>recvmsg</b>(2), <b>sendto</b>(2), or
+    <b>malloc</b>(3).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>if_nameindex (), if_freenameindex ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>if_nameindex</b>() function first appeared in glibc 2.1,
+    but before glibc 2.3.4, the implementation supported only interfaces with
+    IPv4 addresses. Support of interfaces that don't have IPv4 addresses is
+    available only on kernels that support netlink.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, RFC&nbsp;3493.</p>
+<p class="Pp">This function first appeared in BSDi.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below demonstrates the use of the functions described
+    on this page. An example of the output this program might produce is the
+    following:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>./a.out</b><i></i>
+<i>1: lo</i>
+<i>2: wlan0</i>
+<i>3: em1</i>
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<pre>#include &lt;net/if.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+int
+main(void)
+{
+<br>
+    struct if_nameindex *if_ni, *i;
+<br>
+    if_ni = if_nameindex();
+<br>
+    if (if_ni == NULL) {
+<br>
+        perror("if_nameindex");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    for (i = if_ni; !(i-&gt;if_index == 0 &amp;&amp; i-&gt;if_name == NULL); i++)
+<br>
+        printf("%u: %s\n", i-&gt;if_index, i-&gt;if_name);
+<br>
+    if_freenameindex(if_ni);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>getsockopt</b>(2), <b>setsockopt</b>(2), <b>getifaddrs</b>(3),
+    <b>if_indextoname</b>(3), <b>if_nametoindex</b>(3), <b>ifconfig</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

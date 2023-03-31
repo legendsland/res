@@ -1,0 +1,160 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (C) 2002 Andries Brouwer (aeb@cwi.nl)
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Inspired by a page written by Walter Harms.
+   --><head>
+<meta name="dc.identifier" content="res/77f38252572cea005b6e668902daadf0a6147873">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>getfsent(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">getfsent(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">getfsent(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getfsent, getfsspec, getfsfile, setfsent, endfsent - handle fstab
+    entries</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;fstab.h&gt;</b></pre>
+<pre><b>int setfsent(void);</b>
+<b>struct fstab *getfsent(void);</b>
+<b>void endfsent(void);</b></pre>
+<pre><b>struct fstab *getfsfile(const char *</b><i>mount_point</i><b>);</b>
+<b>struct fstab *getfsspec(const char *</b><i>special_file</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">These functions read from the file <i>/etc/fstab</i>. The
+    <i>struct fstab</i> is defined by:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct fstab {
+<br>
+    char       *fs_spec;       /* block device name */
+<br>
+    char       *fs_file;       /* mount point */
+<br>
+    char       *fs_vfstype;    /* filesystem type */
+<br>
+    char       *fs_mntops;     /* mount options */
+<br>
+    const char *fs_type;       /* rw/rq/ro/sw/xx option */
+<br>
+    int         fs_freq;       /* dump frequency, in days */
+<br>
+    int         fs_passno;     /* pass number on parallel dump */
+};
+</pre>
+<br>
+<p class="Pp">Here the field <i>fs_type</i> contains (on a *BSD system) one of
+    the five strings "rw", "rq", "ro",
+    "sw", "xx" (read-write, read-write with quota,
+    read-only, swap, ignore).</p>
+<p class="Pp">The function <b>setfsent</b>() opens the file when required and
+    positions it at the first line.</p>
+<p class="Pp">The function <b>getfsent</b>() parses the next line from the file.
+    (After opening it when required.)</p>
+<p class="Pp">The function <b>endfsent</b>() closes the file when required.</p>
+<p class="Pp">The function <b>getfsspec</b>() searches the file from the start
+    and returns the first entry found for which the <i>fs_spec</i> field matches
+    the <i>special_file</i> argument.</p>
+<p class="Pp">The function <b>getfsfile</b>() searches the file from the start
+    and returns the first entry found for which the <i>fs_file</i> field matches
+    the <i>mount_point</i> argument.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon success, the functions <b>getfsent</b>(), <b>getfsfile</b>(),
+    and <b>getfsspec</b>() return a pointer to a <i>struct fstab</i>, while
+    <b>setfsent</b>() returns 1. Upon failure or end-of-file, these functions
+    return NULL and 0, respectively.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>endfsent (), setfsent ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race:fsent</td>
+  </tr>
+  <tr>
+    <td>getfsent (), getfsspec (), getfsfile ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race:fsent locale</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These functions are not in POSIX.1. Several operating systems have
+    them, for example, *BSD, SunOS, Digital UNIX, AIX (which also has a
+    <b>getfstype</b>()). HP-UX has functions of the same names, that however use
+    a <i>struct checklist</i> instead of a <i>struct fstab</i>, and calls these
+    functions obsolete, superseded by <b>getmntent</b>(3).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">These functions are not thread-safe.</p>
+<p class="Pp">Since Linux allows mounting a block special device in several
+    places, and since several devices can have the same mount point, where the
+    last device with a given mount point is the interesting one, while
+    <b>getfsfile</b>() and <b>getfsspec</b>() only return the first occurrence,
+    these two functions are not suitable for use under Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>getmntent</b>(3), <b>fstab</b>(5)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

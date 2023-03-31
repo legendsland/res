@@ -1,0 +1,305 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 1983, 1991 The Regents of the University of California.
+   And Copyright (C) 2011 Guillem Jover <guillem@hadrons.org>
+   And Copyright (C) 2006, 2014 Michael Kerrisk
+   All rights reserved.
+  
+   SPDX-License-Identifier: BSD-4-Clause-UC
+  
+       @(#)readlink.2	6.8 (Berkeley) 3/10/91
+  
+   Modified Sat Jul 24 00:10:21 1993 by Rik Faith (faith@cs.unc.edu)
+   Modified Tue Jul  9 23:55:17 1996 by aeb
+   Modified Fri Jan 24 00:26:00 1997 by aeb
+   2011-09-20, Guillem Jover <guillem@hadrons.org>:
+       Added text on dynamically allocating buffer + example program
+   --><head>
+<meta name="dc.identifier" content="res/04c90128fd93fb4d8164c597002bfd9e803912a3">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>readlink(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">readlink(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">readlink(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">readlink, readlinkat - read value of a symbolic link</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>ssize_t readlink(const char *restrict </b><i>pathname</i><b>, char *restrict </b><i>buf</i><b>,</b>
+<b>                 size_t </b><i>bufsiz</i><b>);</b></pre>
+<pre><b>#include &lt;fcntl.h&gt;            </b>/* Definition of <b>AT_*</b> constants */
+<b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>ssize_t readlinkat(int </b><i>dirfd</i><b>, const char *restrict </b><i>pathname</i><b>,</b>
+<b>                 char *restrict </b><i>buf</i><b>, size_t </b><i>bufsiz</i><b>);</b></pre>
+<pre></pre>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>readlink</b>():</p>
+<pre><br>
+    _XOPEN_SOURCE &gt;= 500 || _POSIX_C_SOURCE &gt;= 200112L
+<br>
+        || /* glibc &lt;= 2.19: */ _BSD_SOURCE</pre>
+<p class="Pp"><b>readlinkat</b>():</p>
+<pre><br>
+    Since glibc 2.10:
+<br>
+        _POSIX_C_SOURCE &gt;= 200809L
+<br>
+    Before glibc 2.10:
+<br>
+        _ATFILE_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>readlink</b>() places the contents of the symbolic link
+    <i>pathname</i> in the buffer <i>buf</i>, which has size <i>bufsiz</i>.
+    <b>readlink</b>() does not append a terminating null byte to <i>buf</i>. It
+    will (silently) truncate the contents (to a length of <i>bufsiz</i>
+    characters), in case the buffer is too small to hold all of the
+  contents.</p>
+<section class="Ss">
+<h2 class="Ss" id="readlinkat()"><a class="permalink" href="#readlinkat()">readlinkat()</a></h2>
+<p class="Pp">The <b>readlinkat</b>() system call operates in exactly the same
+    way as <b>readlink</b>(), except for the differences described here.</p>
+<p class="Pp">If the pathname given in <i>pathname</i> is relative, then it is
+    interpreted relative to the directory referred to by the file descriptor
+    <i>dirfd</i> (rather than relative to the current working directory of the
+    calling process, as is done by <b>readlink</b>() for a relative
+  pathname).</p>
+<p class="Pp">If <i>pathname</i> is relative and <i>dirfd</i> is the special
+    value <b>AT_FDCWD</b>, then <i>pathname</i> is interpreted relative to the
+    current working directory of the calling process (like
+  <b>readlink</b>()).</p>
+<p class="Pp">If <i>pathname</i> is absolute, then <i>dirfd</i> is ignored.</p>
+<p class="Pp">Since Linux 2.6.39, <i>pathname</i> can be an empty string, in
+    which case the call operates on the symbolic link referred to by
+    <i>dirfd</i> (which should have been obtained using <b>open</b>(2) with the
+    <b>O_PATH</b> and <b>O_NOFOLLOW</b> flags).</p>
+<p class="Pp">See <b>openat</b>(2) for an explanation of the need for
+    <b>readlinkat</b>().</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, these calls return the number of bytes placed in
+    <i>buf</i>. (If the returned value equals <i>bufsiz</i>, then truncation may
+    have occurred.) On error, -1 is returned and <i>errno</i> is set to indicate
+    the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>Search permission is denied for a component of the path prefix. (See also
+      <b>path_resolution</b>(7).)</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>(<b>readlinkat</b>()) <i>pathname</i> is relative but <i>dirfd</i> is
+      neither <b>AT_FDCWD</b> nor a valid file descriptor.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>buf</i> extends outside the process's allocated address space.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>bufsiz</i> is not positive.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>The named file (i.e., the final filename component of <i>pathname</i>) is
+      not a symbolic link.</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>An I/O error occurred while reading from the filesystem.</dd>
+  <dt id="ELOOP"><a class="permalink" href="#ELOOP"><b>ELOOP</b></a></dt>
+  <dd>Too many symbolic links were encountered in translating the pathname.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd>A pathname, or a component of a pathname, was too long.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>The named file does not exist.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient kernel memory was available.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>A component of the path prefix is not a directory.</dd>
+  <dt id="ENOTDIR~2"><a class="permalink" href="#ENOTDIR~2"><b>ENOTDIR</b></a></dt>
+  <dd>(<b>readlinkat</b>()) <i>pathname</i> is relative and <i>dirfd</i> is a
+      file descriptor referring to a file other than a directory.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>readlinkat</b>() was added in Linux 2.6.16; library support was
+    added in glibc 2.4.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>readlink</b>(): 4.4BSD (<b>readlink</b>() first appeared in
+    4.2BSD), POSIX.1-2001, POSIX.1-2008.</p>
+<p class="Pp"><b>readlinkat</b>(): POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Up to and including glibc 2.4, the return type of
+    <b>readlink</b>() was declared as <i>int</i>. Nowadays, the return type is
+    declared as <i>ssize_t</i>, as (newly) required in POSIX.1-2001.</p>
+<p class="Pp">Using a statically sized buffer might not provide enough room for
+    the symbolic link contents. The required size for the buffer can be obtained
+    from the <i>stat.st_size</i> value returned by a call to <b>lstat</b>(2) on
+    the link. However, the number of bytes written by <b>readlink</b>() and
+    <b>readlinkat</b>() should be checked to make sure that the size of the
+    symbolic link did not increase between the calls. Dynamically allocating the
+    buffer for <b>readlink</b>() and <b>readlinkat</b>() also addresses a common
+    portability problem when using <b>PATH_MAX</b> for the buffer size, as this
+    constant is not guaranteed to be defined per POSIX if the system does not
+    have such limit.</p>
+<section class="Ss">
+<h2 class="Ss" id="glibc_notes"><a class="permalink" href="#glibc_notes">glibc
+  notes</a></h2>
+<p class="Pp">On older kernels where <b>readlinkat</b>() is unavailable, the
+    glibc wrapper function falls back to the use of <b>readlink</b>(). When
+    <i>pathname</i> is a relative pathname, glibc constructs a pathname based on
+    the symbolic link in <i>/proc/self/fd</i> that corresponds to the
+    <i>dirfd</i> argument.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The following program allocates the buffer needed by
+    <b>readlink</b>() dynamically from the information provided by
+    <b>lstat</b>(2), falling back to a buffer of size <b>PATH_MAX</b> in cases
+    where <b>lstat</b>(2) reports a size of zero.</p>
+<p class="Pp"></p>
+<pre>#include &lt;limits.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;sys/stat.h&gt;
+#include &lt;unistd.h&gt;
+int
+main(int argc, char *argv[])
+{
+<br>
+    char         *buf;
+<br>
+    ssize_t      nbytes, bufsiz;
+<br>
+    struct stat  sb;
+<br>
+    if (argc != 2) {
+<br>
+        fprintf(stderr, "Usage: %s &lt;pathname&gt;\n", argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    if (lstat(argv[1], &amp;sb) == -1) {
+<br>
+        perror("lstat");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    /* Add one to the link size, so that we can determine whether
+<br>
+       the buffer returned by readlink() was truncated. */
+<br>
+    bufsiz = sb.st_size + 1;
+<br>
+    /* Some magic symlinks under (for example) /proc and /sys
+<br>
+       report 'st_size' as zero. In that case, take PATH_MAX as
+<br>
+       a "good enough" estimate. */
+<br>
+    if (sb.st_size == 0)
+<br>
+        bufsiz = PATH_MAX;
+<br>
+    buf = malloc(bufsiz);
+<br>
+    if (buf == NULL) {
+<br>
+        perror("malloc");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    nbytes = readlink(argv[1], buf, bufsiz);
+<br>
+    if (nbytes == -1) {
+<br>
+        perror("readlink");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    /* Print only 'nbytes' of 'buf', as it doesn't contain a terminating
+<br>
+       null byte ('\0'). */
+<br>
+    printf("'%s' points to '%.*s'\n", argv[1], (int) nbytes, buf);
+<br>
+    /* If the return value was equal to the buffer size, then the
+<br>
+       the link target was larger than expected (perhaps because the
+<br>
+       target was changed between the call to lstat() and the call to
+<br>
+       readlink()). Warn the user that the returned target may have
+<br>
+       been truncated. */
+<br>
+    if (nbytes == bufsiz)
+<br>
+        printf("(Returned buffer may have been truncated)\n");
+<br>
+    free(buf);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>readlink</b>(1), <b>lstat</b>(2), <b>stat</b>(2),
+    <b>symlink</b>(2), <b>realpath</b>(3), <b>path_resolution</b>(7),
+    <b>symlink</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

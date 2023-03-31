@@ -1,0 +1,171 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/b5e07220de10ac82f9dd1be9b40b00ae73ff30ca">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>dirent.h(0P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">dirent.h(0P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">dirent.h(0P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">dirent.h — format of directory entries</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;dirent.h&gt;</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The internal format of directories is unspecified.</p>
+<p class="Pp">The <i>&lt;dirent.h&gt;</i> header shall define the following
+    type:</p>
+<dl class="Bl-tag">
+  <dt id="DIR"><a class="permalink" href="#DIR"><b>DIR</b></a></dt>
+  <dd>A type representing a directory stream. The <b>DIR</b> type may be an
+      incomplete type.</dd>
+</dl>
+<p class="Pp">It shall also define the structure <b>dirent</b> which shall
+    include the following members:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>ino_t  d_ino       File serial number.
+char   d_name[]    Filename string of entry.</pre>
+</div>
+<p class="Pp">The <i>&lt;dirent.h&gt;</i> header shall define the <b>ino_t</b>
+    type as described in <i>&lt;sys/types.h&gt;</i>.</p>
+<p class="Pp">The array <i>d_name</i> is of unspecified size, but shall contain
+    a filename of at most {NAME_MAX} bytes followed by a terminating null
+  byte.</p>
+<p class="Pp">The following shall be declared as functions and may also be
+    defined as macros. Function prototypes shall be provided.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>int            alphasort(const struct dirent **, const struct dirent **);
+int            closedir(DIR *);
+int            dirfd(DIR *);
+DIR           *fdopendir(int);
+DIR           *opendir(const char *);
+struct dirent *readdir(DIR *);
+int            readdir_r(DIR *restrict, struct dirent *restrict,
+<br>
+                   struct dirent **restrict);
+void           rewinddir(DIR *);
+int            scandir(const char *, struct dirent ***,
+<br>
+                   int (*)(const struct dirent *),
+<br>
+                   int (*)(const struct dirent **,
+<br>
+                   const struct dirent **));
+void           seekdir(DIR *, long);
+long           telldir(DIR *);</pre>
+</div>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">Information similar to that in the <i>&lt;dirent.h&gt;</i> header
+    is contained in a file <i>&lt;sys/dir.h&gt;</i> in 4.2 BSD and 4.3 BSD. The
+    equivalent in these implementations of <b>struct dirent</b> from this volume
+    of POSIX.1‐2017 is <b>struct direct</b>. The filename was changed
+    because the name <i>&lt;sys/dir.h&gt;</i> was also used in earlier
+    implementations to refer to definitions related to the older access method;
+    this produced name conflicts. The name of the structure was changed because
+    this volume of POSIX.1‐2017 does not completely define what is in the
+    structure, so it could be different on some implementations from <b>struct
+    direct</b>.</p>
+<p class="Pp">The name of an array of <b>char</b> of an unspecified size should
+    not be used as an lvalue. Use of:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>sizeof(d_name)</pre>
+</div>
+<p class="Pp">is incorrect; use:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>strlen(d_name)</pre>
+</div>
+<p class="Pp">instead.</p>
+<p class="Pp">The array of <b>char</b> <i>d_name</i> is not a fixed size.
+    Implementations may need to declare <b>struct dirent</b> with an array size
+    for <i>d_name</i> of 1, but the actual number of bytes provided matches (or
+    only slightly exceeds) the length of the filename string.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><b>&lt;sys_types.h&gt;</b></i></p>
+<p class="Pp">The System Interfaces volume of POSIX.1‐2017,
+    <i><i>alphasort</i>()</i>, <i><i>closedir</i>()</i>, <i><i>dirfd</i>()</i>,
+    <i><i>fdopendir</i>()</i>, <i><i>readdir</i>()</i>,
+    <i><i>rewinddir</i>()</i>, <i><i>seekdir</i>()</i>,
+  <i><i>telldir</i>()</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

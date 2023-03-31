@@ -1,0 +1,224 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2016 by Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/88757b45708d939c3e1a5f308b46bb0939a22b1f">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>tmpfs(5)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">tmpfs(5)</td>
+    <td class="head-vol">File Formats Manual</td>
+    <td class="head-rtitle">tmpfs(5)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">tmpfs - a virtual memory filesystem</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>tmpfs</b> facility allows the creation of filesystems whose
+    contents reside in virtual memory. Since the files on such filesystems
+    typically reside in RAM, file access is extremely fast.</p>
+<p class="Pp">The filesystem is automatically created when mounting a filesystem
+    with the type <b>tmpfs</b> via a command such as the following:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ sudo mount -t tmpfs -o size=10M tmpfs /mnt/mytmpfs
+</pre>
+<br>
+<p class="Pp">A <b>tmpfs</b> filesystem has the following properties:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>The filesystem can employ swap space when physical memory pressure demands
+      it.</dd>
+  <dt>•</dt>
+  <dd>The filesystem consumes only as much physical memory and swap space as is
+      required to store the current contents of the filesystem.</dd>
+  <dt>•</dt>
+  <dd>During a remount operation (<i>mount&nbsp;-o&nbsp;remount</i>), the
+      filesystem size can be changed (without losing the existing contents of
+      the filesystem).</dd>
+</dl>
+<p class="Pp">If a <b>tmpfs</b> filesystem is unmounted, its contents are
+    discarded (lost).</p>
+<section class="Ss">
+<h2 class="Ss" id="Mount_options"><a class="permalink" href="#Mount_options">Mount
+  options</a></h2>
+<p class="Pp">The <b>tmpfs</b> filesystem supports the following mount
+  options:</p>
+<dl class="Bl-tag">
+  <dt id="size"><a class="permalink" href="#size"><b>size</b>=<i>bytes</i></a></dt>
+  <dd>Specify an upper limit on the size of the filesystem. The size is given in
+      bytes, and rounded up to entire pages.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The size may have a <b>k</b>, <b>m</b>, or <b>g</b> suffix for Ki, Mi, Gi
+      (binary kilo (kibi), binary mega (mebi), and binary giga (gibi)).</dd>
+  <dt></dt>
+  <dd>The size may also have a % suffix to limit this instance to a percentage
+      of physical RAM.</dd>
+  <dt></dt>
+  <dd>The default, when neither <b>size</b> nor <b>nr_blocks</b> is specified,
+      is <i>size=50%</i>.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="nr_blocks"><a class="permalink" href="#nr_blocks"><b>nr_blocks</b>=<i>blocks</i></a></dt>
+  <dd>The same as <b>size</b>, but in blocks of <b>PAGE_CACHE_SIZE</b>.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Blocks may be specified with <b>k</b>, <b>m</b>, or <b>g</b> suffixes like
+      <b>size</b>, but not a % suffix.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="nr_inodes"><a class="permalink" href="#nr_inodes"><b>nr_inodes</b>=<i>inodes</i></a></dt>
+  <dd>The maximum number of inodes for this instance. The default is half of the
+      number of your physical RAM pages, or (on a machine with highmem) the
+      number of lowmem RAM pages, whichever is smaller.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Inodes may be specified with <b>k</b>, <b>m</b>, or <b>g</b> suffixes like
+      <b>size</b>, but not a % suffix.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="mode"><a class="permalink" href="#mode"><b>mode</b>=<i>mode</i></a></dt>
+  <dd>Set initial permissions of the root directory.</dd>
+  <dt id="gid"><a class="permalink" href="#gid"><b>gid</b>=<i>gid</i> (since
+    Linux 2.5.7)</a></dt>
+  <dd>Set the initial group ID of the root directory.</dd>
+  <dt id="uid"><a class="permalink" href="#uid"><b>uid</b>=<i>uid</i> (since
+    Linux 2.5.7)</a></dt>
+  <dd>Set the initial user ID of the root directory.</dd>
+  <dt id="huge"><a class="permalink" href="#huge"><b>huge</b>=<i>huge_option</i>
+    (since Linux 4.7.0)</a></dt>
+  <dd>Set the huge table memory allocation policy for all files in this instance
+      (if <b>CONFIG_TRANSPARENT_HUGE_PAGECACHE</b> is enabled).</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The <i>huge_option</i> value is one of the following:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="never"><a class="permalink" href="#never"><b>never</b></a></dt>
+  <dd>Do not allocate huge pages. This is the default.</dd>
+  <dt id="always"><a class="permalink" href="#always"><b>always</b></a></dt>
+  <dd>Attempt to allocate huge pages every time a new page is needed.</dd>
+  <dt id="within_size"><a class="permalink" href="#within_size"><b>within_size</b></a></dt>
+  <dd>Only allocate huge page if it will be fully within <i>i_size</i>. Also
+      respect <b>fadvise</b>(2) and <b>madvise</b>(2) hints</dd>
+  <dt id="advise"><a class="permalink" href="#advise"><b>advise</b></a></dt>
+  <dd>Only allocate huge pages if requested with <b>fadvise</b>(2) or
+      <b>madvise</b>(2).</dd>
+  <dt id="deny"><a class="permalink" href="#deny"><b>deny</b></a></dt>
+  <dd>For use in emergencies, to force the huge option off from all mounts.</dd>
+  <dt id="force"><a class="permalink" href="#force"><b>force</b></a></dt>
+  <dd>Force the huge option on for all mounts; useful for testing.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="mpol"><a class="permalink" href="#mpol"><b>mpol</b>=<i>mpol_option</i>
+    (since Linux 2.6.15)</a></dt>
+  <dd>Set the NUMA memory allocation policy for all files in this instance (if
+      <b>CONFIG_NUMA</b> is enabled).</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The <i>mpol_option</i> value is one of the following:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="default"><a class="permalink" href="#default"><b>default</b></a></dt>
+  <dd>Use the process allocation policy (see <b>set_mempolicy</b>(2)).</dd>
+  <dt id="prefer"><a class="permalink" href="#prefer"><b>prefer</b>:<i>node</i></a></dt>
+  <dd>Preferably allocate memory from the given <i>node</i>.</dd>
+  <dt id="bind"><a class="permalink" href="#bind"><b>bind</b>:<i>nodelist</i></a></dt>
+  <dd>Allocate memory only from nodes in <i>nodelist</i>.</dd>
+  <dt id="interleave"><a class="permalink" href="#interleave"><b>interleave</b></a></dt>
+  <dd>Allocate from each node in turn.</dd>
+  <dt id="interleave~2"><a class="permalink" href="#interleave~2"><b>interleave</b>:<i>nodelist</i></a></dt>
+  <dd>Allocate from each node of <i>in</i> turn.</dd>
+  <dt id="local"><a class="permalink" href="#local"><b>local</b></a></dt>
+  <dd>Preferably allocate memory from the local node.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>In the above, <i>nodelist</i> is a comma-separated list of decimal numbers
+      and ranges that specify NUMA nodes. A range is a pair of hyphen-separated
+      decimal numbers, the smallest and largest node numbers in the range. For
+      example, <i>mpol=bind:0-3,5,7,9-15</i>.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>tmpfs</b> facility was added in Linux 2.4, as a successor
+    to the older <b>ramfs</b> facility, which did not provide limit checking or
+    allow for the use of swap space.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">In order for user-space tools and applications to create
+    <b>tmpfs</b> filesystems, the kernel must be configured with the
+    <b>CONFIG_TMPFS</b> option.</p>
+<p class="Pp">The <b>tmpfs</b> filesystem supports extended attributes (see
+    <b>xattr</b>(7)), but <i>user</i> extended attributes are not permitted.</p>
+<p class="Pp">An internal shared memory filesystem is used for System V shared
+    memory (<b>shmget</b>(2)) and shared anonymous mappings (<b>mmap</b>(2) with
+    the <b>MAP_SHARED</b> and <b>MAP_ANONYMOUS</b> flags). This filesystem is
+    available regardless of whether the kernel was configured with the
+    <b>CONFIG_TMPFS</b> option.</p>
+<p class="Pp">A <b>tmpfs</b> filesystem mounted at <i>/dev/shm</i> is used for
+    the implementation of POSIX shared memory (<b>shm_overview</b>(7)) and POSIX
+    semaphores (<b>sem_overview</b>(7)).</p>
+<p class="Pp">The amount of memory consumed by all <b>tmpfs</b> filesystems is
+    shown in the <i>Shmem</i> field of <i>/proc/meminfo</i> and in the
+    <i>shared</i> field displayed by <b>free</b>(1).</p>
+<p class="Pp">The <b>tmpfs</b> facility was formerly called <b>shmfs</b>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>df</b>(1), <b>du</b>(1), <b>memfd_create</b>(2),
+    <b>mmap</b>(2), <b>set_mempolicy</b>(2), <b>shm_open</b>(3),
+  <b>mount</b>(8)</p>
+<p class="Pp">The kernel source files <i>Documentation/filesystems/tmpfs.txt</i>
+    and <i>Documentation/admin-guide/mm/transhuge.rst</i>.</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

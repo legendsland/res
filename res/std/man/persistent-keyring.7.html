@@ -1,0 +1,126 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2014 Red Hat, Inc. All Rights Reserved.
+   Written by David Howells (dhowells@redhat.com)
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+   --><head>
+<meta name="dc.identifier" content="res/4cf0593995cb7ed8165fe1fa0159751afbbd8367">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>persistent-keyring(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">persistent-keyring(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">persistent-keyring(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">persistent-keyring - per-user persistent keyring</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The persistent keyring is a keyring used to anchor keys on behalf
+    of a user. Each UID the kernel deals with has its own persistent keyring
+    that is shared between all threads owned by that UID. The persistent keyring
+    has a name (description) of the form <i>_persistent.&lt;UID&gt;</i> where
+    <i>&lt;UID&gt;</i> is the user ID of the corresponding user.</p>
+<p class="Pp">The persistent keyring may not be accessed directly, even by
+    processes with the appropriate UID. Instead, it must first be linked to one
+    of a process's keyrings, before that keyring can access the persistent
+    keyring by virtue of its possessor permits. This linking is done with the
+    <b>keyctl_get_persistent</b>(3) function.</p>
+<p class="Pp">If a persistent keyring does not exist when it is accessed by the
+    <b>keyctl_get_persistent</b>(3) operation, it will be automatically
+  created.</p>
+<p class="Pp">Each time the <b>keyctl_get_persistent</b>(3) operation is
+    performed, the persistent keyring's expiration timer is reset to the value
+    in:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>/proc/sys/kernel/keys/persistent_keyring_expiry
+</pre>
+<br>
+<p class="Pp">Should the timeout be reached, the persistent keyring will be
+    removed and everything it pins can then be garbage collected. The keyring
+    will then be re-created on a subsequent call to
+    <b>keyctl_get_persistent</b>(3).</p>
+<p class="Pp">The persistent keyring is not directly searched by
+    <b>request_key</b>(2); it is searched only if it is linked into one of the
+    keyrings that is searched by <b>request_key</b>(2).</p>
+<p class="Pp">The persistent keyring is independent of <b>clone</b>(2),
+    <b>fork</b>(2), <b>vfork</b>(2), <b>execve</b>(2), and <b>_exit</b>(2). It
+    persists until its expiration timer triggers, at which point it is garbage
+    collected. This allows the persistent keyring to carry keys beyond the life
+    of the kernel's record of the corresponding UID (the destruction of which
+    results in the destruction of the <b>user-keyring</b>(7) and the
+    <b>user-session-keyring</b>(7)). The persistent keyring can thus be used to
+    hold authentication tokens for processes that run without user interaction,
+    such as programs started by <b>cron</b>(8).</p>
+<p class="Pp">The persistent keyring is used to store UID-specific objects that
+    themselves have limited lifetimes (e.g., kerberos tokens). If those tokens
+    cease to be used (i.e., the persistent keyring is not accessed), then the
+    timeout of the persistent keyring ensures that the corresponding objects are
+    automatically discarded.</p>
+<section class="Ss">
+<h2 class="Ss" id="Special_operations"><a class="permalink" href="#Special_operations">Special
+  operations</a></h2>
+<p class="Pp">The <i>keyutils</i> library provides the
+    <b>keyctl_get_persistent</b>(3) function for manipulating persistent
+    keyrings. (This function is an interface to the <b>keyctl</b>(2)
+    <b>KEYCTL_GET_PERSISTENT</b> operation.) This operation allows the calling
+    thread to get the persistent keyring corresponding to its own UID or, if the
+    thread has the <b>CAP_SETUID</b> capability, the persistent keyring
+    corresponding to some other UID in the same user namespace.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Each user namespace owns a keyring called
+    <i>.persistent_register</i> that contains links to all of the persistent
+    keys in that namespace. (The <i>.persistent_register</i> keyring can be seen
+    when reading the contents of the <i>/proc/keys</i> file for the UID 0 in the
+    namespace.) The <b>keyctl_get_persistent</b>(3) operation looks for a key
+    with a name of the form <i>_persistent.</i>UID in that keyring, creates the
+    key if it does not exist, and links it into the keyring.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>keyctl</b>(1), <b>keyctl</b>(3),
+    <b>keyctl_get_persistent</b>(3), <b>keyrings</b>(7),
+    <b>process-keyring</b>(7), <b>session-keyring</b>(7),
+    <b>thread-keyring</b>(7), <b>user-keyring</b>(7),
+    <b>user-session-keyring</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

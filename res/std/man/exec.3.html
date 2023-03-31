@@ -1,0 +1,245 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 1991 The Regents of the University of California.
+   All rights reserved.
+  
+   SPDX-License-Identifier: BSD-4-Clause-UC
+  
+       @(#)exec.3	6.4 (Berkeley) 4/19/91
+  
+   Converted for Linux, Mon Nov 29 11:12:48 1993, faith@cs.unc.edu
+   Updated more for Linux, Tue Jul 15 11:54:18 1997, pacman@cqc.com
+   Modified, 24 Jun 2004, Michael Kerrisk <mtk.manpages@gmail.com>
+       Added note on casting NULL
+   --><head>
+<meta name="dc.identifier" content="res/37fa6214837125c2779b5ad7594f4b936434d5ea">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>exec(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">exec(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">exec(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">execl, execlp, execle, execv, execvp, execvpe - execute a file</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>extern char **environ;</b></pre>
+<pre><b>int execl(const char *</b><i>pathname</i><b>, const char *</b><i>arg</i><b>, ...</b>
+<b>                /*, (char *) NULL */);</b>
+<b>int execlp(const char *</b><i>file</i><b>, const char *</b><i>arg</i><b>, ...</b>
+<b>                /*, (char *) NULL */);</b>
+<b>int execle(const char *</b><i>pathname</i><b>, const char *</b><i>arg</i><b>, ...</b>
+<b>                /*, (char *) NULL, char *const </b><i>envp</i><b>[] */);</b>
+<b>int execv(const char *</b><i>pathname</i><b>, char *const </b><i>argv</i><b>[]);</b>
+<b>int execvp(const char *</b><i>file</i><b>, char *const </b><i>argv</i><b>[]);</b>
+<b>int execvpe(const char *</b><i>file</i><b>, char *const </b><i>argv</i><b>[], char *const </b><i>envp</i><b>[]);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>execvpe</b>():</p>
+<pre><br>
+    _GNU_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>exec</b>() family of functions replaces the current process
+    image with a new process image. The functions described in this manual page
+    are layered on top of <b>execve</b>(2). (See the manual page for
+    <b>execve</b>(2) for further details about the replacement of the current
+    process image.)</p>
+<p class="Pp">The initial argument for these functions is the name of a file
+    that is to be executed.</p>
+<p class="Pp">The functions can be grouped based on the letters following the
+    "exec" prefix.</p>
+<section class="Ss">
+<h2 class="Ss" id="l_-_execl(),_execlp(),_execle()"><a class="permalink" href="#l_-_execl(),_execlp(),_execle()">l
+  - execl(), execlp(), execle()</a></h2>
+<p class="Pp">The <i>const char&nbsp;*arg</i> and subsequent ellipses can be
+    thought of as <i>arg0</i>, <i>arg1</i>, ..., <i>argn</i>. Together they
+    describe a list of one or more pointers to null-terminated strings that
+    represent the argument list available to the executed program. The first
+    argument, by convention, should point to the filename associated with the
+    file being executed. The list of arguments <i>must</i> be terminated by a
+    null pointer, and, since these are variadic functions, this pointer must be
+    cast <i>(char&nbsp;*) NULL</i>.</p>
+<p class="Pp">By contrast with the 'l' functions, the 'v' functions (below)
+    specify the command-line arguments of the executed program as a vector.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="v_-_execv(),_execvp(),_execvpe()"><a class="permalink" href="#v_-_execv(),_execvp(),_execvpe()">v
+  - execv(), execvp(), execvpe()</a></h2>
+<p class="Pp">The <i>char&nbsp;*const argv[]</i> argument is an array of
+    pointers to null-terminated strings that represent the argument list
+    available to the new program. The first argument, by convention, should
+    point to the filename associated with the file being executed. The array of
+    pointers <i>must</i> be terminated by a null pointer.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="e_-_execle(),_execvpe()"><a class="permalink" href="#e_-_execle(),_execvpe()">e
+  - execle(), execvpe()</a></h2>
+<p class="Pp">The environment of the new process image is specified via the
+    argument <i>envp</i>. The <i>envp</i> argument is an array of pointers to
+    null-terminated strings and <i>must</i> be terminated by a null pointer.</p>
+<p class="Pp">All other <b>exec</b>() functions (which do not include 'e' in the
+    suffix) take the environment for the new process image from the external
+    variable <i>environ</i> in the calling process.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="p_-_execlp(),_execvp(),_execvpe()"><a class="permalink" href="#p_-_execlp(),_execvp(),_execvpe()">p
+  - execlp(), execvp(), execvpe()</a></h2>
+<p class="Pp">These functions duplicate the actions of the shell in searching
+    for an executable file if the specified filename does not contain a slash
+    (/) character. The file is sought in the colon-separated list of directory
+    pathnames specified in the <b>PATH</b> environment variable. If this
+    variable isn't defined, the path list defaults to a list that includes the
+    directories returned by <i>confstr(_CS_PATH)</i> (which typically returns
+    the value "/bin:/usr/bin") and possibly also the current working
+    directory; see NOTES for further details.</p>
+<p class="Pp"><b>execvpe</b>() searches for the program using the value of
+    <b>PATH</b> from the caller's environment, not from the <i>envp</i>
+    argument.</p>
+<p class="Pp">If the specified filename includes a slash character, then
+    <b>PATH</b> is ignored, and the file at the specified pathname is
+  executed.</p>
+<p class="Pp">In addition, certain errors are treated specially.</p>
+<p class="Pp">If permission is denied for a file (the attempted <b>execve</b>(2)
+    failed with the error <b>EACCES</b>), these functions will continue
+    searching the rest of the search path. If no other file is found, however,
+    they will return with <i>errno</i> set to <b>EACCES</b>.</p>
+<p class="Pp">If the header of a file isn't recognized (the attempted
+    <b>execve</b>(2) failed with the error <b>ENOEXEC</b>), these functions will
+    execute the shell (<i>/bin/sh</i>) with the path of the file as its first
+    argument. (If this attempt fails, no further searching is done.)</p>
+<p class="Pp">All other <b>exec</b>() functions (which do not include 'p' in the
+    suffix) take as their first argument a (relative or absolute) pathname that
+    identifies the program to be executed.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <b>exec</b>() functions return only if an error has occurred.
+    The return value is -1, and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">All of these functions may fail and set <i>errno</i> for any of
+    the errors specified for <b>execve</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>execl (), execle (), execv ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+  <tr>
+    <td>execlp (), execvp (), execvpe ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe env</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>execvpe</b>() function first appeared in glibc 2.11.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+<p class="Pp">The <b>execvpe</b>() function is a GNU extension.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The default search path (used when the environment does not
+    contain the variable <b>PATH</b>) shows some variation across systems. It
+    generally includes <i>/bin</i> and <i>/usr/bin</i> (in that order) and may
+    also include the current working directory. On some other systems, the
+    current working is included after <i>/bin</i> and <i>/usr/bin</i>, as an
+    anti-Trojan-horse measure. The glibc implementation long followed the
+    traditional default where the current working directory is included at the
+    start of the search path. However, some code refactoring during the
+    development of glibc 2.24 caused the current working directory to be dropped
+    altogether from the default search path. This accidental behavior change is
+    considered mildly beneficial, and won't be reverted.</p>
+<p class="Pp">The behavior of <b>execlp</b>() and <b>execvp</b>() when errors
+    occur while attempting to execute the file is historic practice, but has not
+    traditionally been documented and is not specified by the POSIX standard.
+    BSD (and possibly other systems) do an automatic sleep and retry if
+    <b>ETXTBSY</b> is encountered. Linux treats it as a hard error and returns
+    immediately.</p>
+<p class="Pp">Traditionally, the functions <b>execlp</b>() and <b>execvp</b>()
+    ignored all errors except for the ones described above and <b>ENOMEM</b> and
+    <b>E2BIG</b>, upon which they returned. They now return if any error other
+    than the ones described above occurs.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">Before glibc 2.24, <b>execl</b>() and <b>execle</b>() employed
+    <b>realloc</b>(3) internally and were consequently not async-signal-safe, in
+    violation of the requirements of POSIX.1. This was fixed in glibc 2.24.</p>
+<section class="Ss">
+<h2 class="Ss" id="Architecture-specific_details"><a class="permalink" href="#Architecture-specific_details">Architecture-specific
+  details</a></h2>
+<p class="Pp">On sparc and sparc64, <b>execv</b>() is provided as a system call
+    by the kernel (with the prototype shown above) for compatibility with SunOS.
+    This function is <i>not</i> employed by the <b>execv</b>() wrapper function
+    on those architectures.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>sh</b>(1), <b>execve</b>(2), <b>execveat</b>(2),
+    <b>fork</b>(2), <b>ptrace</b>(2), <b>fexecve</b>(3), <b>system</b>(3),
+    <b>environ</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

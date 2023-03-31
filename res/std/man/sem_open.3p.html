@@ -1,0 +1,237 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/f510904b4637f84d403af392ac8cbf4b97489ab4">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>SEM_OPEN(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">SEM_OPEN(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">SEM_OPEN(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">sem_open — initialize and open a named semaphore</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;semaphore.h&gt;</pre>
+<pre>sem_t *sem_open(const char *<i>name</i>, int <i>oflag</i>, ...);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>sem_open</i>() function shall establish a connection
+    between a named semaphore and a process. Following a call to
+    <i>sem_open</i>() with semaphore name <i>name</i>, the process may reference
+    the semaphore associated with <i>name</i> using the address returned from
+    the call. This semaphore may be used in subsequent calls to
+    <i>sem_wait</i>(), <i>sem_timedwait</i>(), <i>sem_trywait</i>(),
+    <i>sem_post</i>(), and <i>sem_close</i>(). The semaphore remains usable by
+    this process until the semaphore is closed by a successful call to
+    <i>sem_close</i>(), <i>_exit</i>(), or one of the <i>exec</i> functions.</p>
+<p class="Pp">The <i>oflag</i> argument controls whether the semaphore is
+    created or merely accessed by the call to <i>sem_open</i>(). The following
+    flag bits may be set in <i>oflag</i>:</p>
+<dl class="Bl-tag">
+  <dt id="O_CREAT"><a class="permalink" href="#O_CREAT">O_CREAT</a></dt>
+  <dd>This flag is used to create a semaphore if it does not already exist. If
+      O_CREAT is set and the semaphore already exists, then O_CREAT has no
+      effect, except as noted under O_EXCL. Otherwise, <i>sem_open</i>() creates
+      a named semaphore. The O_CREAT flag requires a third and a fourth
+      argument: <i>mode</i>, which is of type <b>mode_t</b>, and <i>value</i>,
+      which is of type <b>unsigned</b>. The semaphore is created with an initial
+      value of <i>value</i>. Valid initial values for semaphores are less than
+      or equal to {SEM_VALUE_MAX}.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">The user ID of the semaphore shall be set to the effective user ID
+    of the process. The group ID of the semaphore shall be set to the effective
+    group ID of the process; however, if the <i>name</i> argument is visible in
+    the file system, the group ID may be set to the group ID of the containing
+    directory. The permission bits of the semaphore are set to the value of the
+    <i>mode</i> argument except those set in the file mode creation mask of the
+    process. When bits in <i>mode</i> other than the file permission bits are
+    specified, the effect is unspecified.</p>
+<p class="Pp">After the semaphore named <i>name</i> has been created by
+    <i>sem_open</i>() with the O_CREAT flag, other processes can connect to the
+    semaphore by calling <i>sem_open</i>() with the same value of
+  <i>name</i>.</p>
+</div>
+<dl class="Bl-tag">
+  <dt id="O_EXCL"><a class="permalink" href="#O_EXCL">O_EXCL</a></dt>
+  <dd>If O_EXCL and O_CREAT are set, <i>sem_open</i>() fails if the semaphore
+      <i>name</i> exists. The check for the existence of the semaphore and the
+      creation of the semaphore if it does not exist are atomic with respect to
+      other processes executing <i>sem_open</i>() with O_EXCL and O_CREAT set.
+      If O_EXCL is set and O_CREAT is not set, the effect is undefined.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">If flags other than O_CREAT and O_EXCL are specified in the
+    <i>oflag</i> parameter, the effect is unspecified.</p>
+</div>
+<p class="Pp">The <i>name</i> argument points to a string naming a semaphore
+    object. It is unspecified whether the name appears in the file system and is
+    visible to functions that take pathnames as arguments. The <i>name</i>
+    argument conforms to the construction rules for a pathname, except that the
+    interpretation of &lt;slash&gt; characters other than the leading
+    &lt;slash&gt; character in <i>name</i> is implementation-defined, and that
+    the length limits for the <i>name</i> argument are implementation-defined
+    and need not be the same as the pathname limits {PATH_MAX} and {NAME_MAX}.
+    If <i>name</i> begins with the &lt;slash&gt; character, then processes
+    calling <i>sem_open</i>() with the same value of <i>name</i> shall refer to
+    the same semaphore object, as long as that name has not been removed. If
+    <i>name</i> does not begin with the &lt;slash&gt; character, the effect is
+    implementation-defined.</p>
+<p class="Pp">If a process makes multiple successful calls to <i>sem_open</i>()
+    with the same value for <i>name</i>, the same semaphore address shall be
+    returned for each such successful call, provided that there have been no
+    calls to <i>sem_unlink</i>() for this semaphore, and at least one previous
+    successful <i>sem_open</i>() call for this semaphore has not been matched
+    with a <i>sem_close</i>() call.</p>
+<p class="Pp">References to copies of the semaphore produce undefined
+  results.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, the <i>sem_open</i>() function shall
+    return the address of the semaphore. Otherwise, it shall return a value of
+    SEM_FAILED and set <i>errno</i> to indicate the error. The symbol SEM_FAILED
+    is defined in the <i>&lt;semaphore.h&gt;</i> header. No successful return
+    from <i>sem_open</i>() shall return the value SEM_FAILED.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">If any of the following conditions occur, the <i>sem_open</i>()
+    function shall return SEM_FAILED and set <i>errno</i> to the corresponding
+    value:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>The named semaphore exists and the permissions specified by <i>oflag</i>
+      are denied, or the named semaphore does not exist and permission to create
+      the named semaphore is denied.</dd>
+  <dt id="EEXIST"><a class="permalink" href="#EEXIST"><b>EEXIST</b></a></dt>
+  <dd>O_CREAT and O_EXCL are set and the named semaphore already exists.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The <i>sem_open</i>() operation was interrupted by a signal.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The <i>sem_open</i>() operation is not supported for the given name, or
+      O_CREAT was specified in <i>oflag</i> and <i>value</i> was greater than
+      {SEM_VALUE_MAX}.</dd>
+  <dt id="EMFILE"><a class="permalink" href="#EMFILE"><b>EMFILE</b></a></dt>
+  <dd>Too many semaphore descriptors or file descriptors are currently in use by
+      this process.</dd>
+  <dt id="ENFILE"><a class="permalink" href="#ENFILE"><b>ENFILE</b></a></dt>
+  <dd>Too many semaphores are currently open in the system.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>O_CREAT is not set and the named semaphore does not exist.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>There is insufficient memory for the creation of the new named
+    semaphore.</dd>
+  <dt id="ENOSPC"><a class="permalink" href="#ENOSPC"><b>ENOSPC</b></a></dt>
+  <dd>There is insufficient space on a storage device for the creation of the
+      new named semaphore.</dd>
+</dl>
+<p class="Pp">If any of the following conditions occur, the <i>sem_open</i>()
+    function may return SEM_FAILED and set <i>errno</i> to the corresponding
+    value:</p>
+<dl class="Bl-tag">
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of the <i>name</i> argument exceeds {_POSIX_PATH_MAX} on systems
+      that do not support the XSI option or exceeds {_XOPEN_PATH_MAX} on XSI
+      systems, or has a pathname component that is longer than {_POSIX_NAME_MAX}
+      on systems that do not support the XSI option or longer than
+      {_XOPEN_NAME_MAX} on XSI systems.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">Early drafts required an error return value of -1 with the type
+    <b>sem_t *</b> for the <i>sem_open</i>() function, which is not guaranteed
+    to be portable across implementations. The revised text provides the
+    symbolic error code SEM_FAILED to eliminate the type conflict.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">A future version might require the <i>sem_open</i>() and
+    <i>sem_unlink</i>() functions to have semantics similar to normal file
+    system operations.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>semctl</i>()</i>, <i><i>semget</i>()</i>,
+    <i><i>semop</i>()</i>, <i><i>sem_close</i>()</i>, <i><i>sem_post</i>()</i>,
+    <i><i>sem_timedwait</i>()</i>, <i><i>sem_trywait</i>()</i>,
+    <i><i>sem_unlink</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;semaphore.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

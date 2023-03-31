@@ -1,0 +1,319 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright 2005, 2012, 2016 Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: GPL-1.0-or-later
+   --><head>
+<meta name="dc.identifier" content="res/567e382ad36dabf7f4bf26822a6fbd5e3b06391d">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>fmemopen(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">fmemopen(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">fmemopen(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">fmemopen - open memory as stream</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;stdio.h&gt;</b></pre>
+<pre><b>FILE *fmemopen(void </b><i>buf</i><b>[.</b><i>size</i><b>], size_t </b><i>size</i><b>, const char *</b><i>mode</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>fmemopen</b>():</p>
+<pre><br>
+    Since glibc 2.10:
+<br>
+        _POSIX_C_SOURCE &gt;= 200809L
+<br>
+    Before glibc 2.10:
+<br>
+        _GNU_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>fmemopen</b>() function opens a stream that permits the
+    access specified by <i>mode</i>. The stream allows I/O to be performed on
+    the string or memory buffer pointed to by <i>buf</i>.</p>
+<p class="Pp">The <i>mode</i> argument specifies the semantics of I/O on the
+    stream, and is one of the following:</p>
+<dl class="Bl-tag">
+  <dt id="r"><a class="permalink" href="#r"><i>r</i></a></dt>
+  <dd>The stream is opened for reading.</dd>
+  <dt id="w"><a class="permalink" href="#w"><i>w</i></a></dt>
+  <dd>The stream is opened for writing.</dd>
+  <dt id="a"><a class="permalink" href="#a"><i>a</i></a></dt>
+  <dd>Append; open the stream for writing, with the initial buffer position set
+      to the first null byte.</dd>
+  <dt id="r+"><a class="permalink" href="#r+"><i>r+</i></a></dt>
+  <dd>Open the stream for reading and writing.</dd>
+  <dt id="w+"><a class="permalink" href="#w+"><i>w+</i></a></dt>
+  <dd>Open the stream for reading and writing. The buffer contents are truncated
+      (i.e., '\0' is placed in the first byte of the buffer).</dd>
+  <dt id="a+"><a class="permalink" href="#a+"><i>a+</i></a></dt>
+  <dd>Append; open the stream for reading and writing, with the initial buffer
+      position set to the first null byte.</dd>
+</dl>
+<p class="Pp">The stream maintains the notion of a current position, the
+    location where the next I/O operation will be performed. The current
+    position is implicitly updated by I/O operations. It can be explicitly
+    updated using <b>fseek</b>(3), and determined using <b>ftell</b>(3). In all
+    modes other than append, the initial position is set to the start of the
+    buffer. In append mode, if no null byte is found within the buffer, then the
+    initial position is <i>size+1</i>.</p>
+<p class="Pp">If <i>buf</i> is specified as NULL, then <b>fmemopen</b>()
+    allocates a buffer of <i>size</i> bytes. This is useful for an application
+    that wants to write data to a temporary buffer and then read it back again.
+    The initial position is set to the start of the buffer. The buffer is
+    automatically freed when the stream is closed. Note that the caller has no
+    way to obtain a pointer to the temporary buffer allocated by this call (but
+    see <b>open_memstream</b>(3)).</p>
+<p class="Pp">If <i>buf</i> is not NULL, then it should point to a buffer of at
+    least <i>size</i> bytes allocated by the caller.</p>
+<p class="Pp">When a stream that has been opened for writing is flushed
+    (<b>fflush</b>(3)) or closed (<b>fclose</b>(3)), a null byte is written at
+    the end of the buffer if there is space. The caller should ensure that an
+    extra byte is available in the buffer (and that <i>size</i> counts that
+    byte) to allow for this.</p>
+<p class="Pp">In a stream opened for reading, null bytes ('\0') in the buffer do
+    not cause read operations to return an end-of-file indication. A read from
+    the buffer will indicate end-of-file only when the current buffer position
+    advances <i>size</i> bytes past the start of the buffer.</p>
+<p class="Pp">Write operations take place either at the current position (for
+    modes other than append), or at the current size of the stream (for append
+    modes).</p>
+<p class="Pp">Attempts to write more than <i>size</i> bytes to the buffer result
+    in an error. By default, such errors will be visible (by the absence of
+    data) only when the <i>stdio</i> buffer is flushed. Disabling buffering with
+    the following call may be useful to detect errors at the time of an output
+    operation:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>setbuf(stream, NULL);
+</pre>
+<br>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <b>fmemopen</b>() returns a
+    <i>FILE</i> pointer. Otherwise, NULL is returned and <i>errno</i> is set to
+    indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>fmemopen (),</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>fmemopen</b>() was already available in glibc 1.0.x.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2008. This function is not specified in POSIX.1-2001, and
+    is not widely available on other systems.</p>
+<p class="Pp">POSIX.1-2008 specifies that 'b' in <i>mode</i> shall be ignored.
+    However, Technical Corrigendum 1 adjusts the standard to allow
+    implementation-specific treatment for this case, thus permitting the glibc
+    treatment of 'b'.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">There is no file descriptor associated with the file stream
+    returned by this function (i.e., <b>fileno</b>(3) will return an error if
+    called on the returned stream).</p>
+<p class="Pp">With glibc 2.22, binary mode (see below) was removed, many
+    longstanding bugs in the implementation of <b>fmemopen</b>() were fixed, and
+    a new versioned symbol was created for this interface.</p>
+<section class="Ss">
+<h2 class="Ss" id="Binary_mode"><a class="permalink" href="#Binary_mode">Binary
+  mode</a></h2>
+<p class="Pp">From glibc 2.9 to glibc 2.21, the glibc implementation of
+    <b>fmemopen</b>() supported a "binary" mode, enabled by specifying
+    the letter 'b' as the second character in <i>mode</i>. In this mode, writes
+    don't implicitly add a terminating null byte, and <b>fseek</b>(3)
+    <b>SEEK_END</b> is relative to the end of the buffer (i.e., the value
+    specified by the <i>size</i> argument), rather than the current string
+    length.</p>
+<p class="Pp">An API bug afflicted the implementation of binary mode: to specify
+    binary mode, the 'b' must be the <i>second</i> character in <i>mode</i>.
+    Thus, for example, "wb+" has the desired effect, but
+    "w+b" does not. This is inconsistent with the treatment of
+    <i>mode</i> by <b>fopen</b>(3).</p>
+<p class="Pp">Binary mode was removed in glibc 2.22; a 'b' specified in
+    <i>mode</i> has no effect.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">Before glibc 2.22, if <i>size</i> is specified as zero,
+    <b>fmemopen</b>() fails with the error <b>EINVAL</b>. It would be more
+    consistent if this case successfully created a stream that then returned
+    end-of-file on the first attempt at reading; since glibc 2.22, the glibc
+    implementation provides that behavior.</p>
+<p class="Pp">Before glibc 2.22, specifying append mode ("a" or
+    "a+") for <b>fmemopen</b>() sets the initial buffer position to
+    the first null byte, but (if the current position is reset to a location
+    other than the end of the stream) does not force subsequent writes to append
+    at the end of the stream. This bug is fixed in glibc 2.22.</p>
+<p class="Pp">Before glibc 2.22, if the <i>mode</i> argument to
+    <b>fmemopen</b>() specifies append ("a" or "a+"), and
+    the <i>size</i> argument does not cover a null byte in <i>buf</i>, then,
+    according to POSIX.1-2008, the initial buffer position should be set to the
+    next byte after the end of the buffer. However, in this case the glibc
+    <b>fmemopen</b>() sets the buffer position to -1. This bug is fixed in glibc
+    2.22.</p>
+<p class="Pp">Before glibc 2.22, when a call to <b>fseek</b>(3) with a
+    <i>whence</i> value of <b>SEEK_END</b> was performed on a stream created by
+    <b>fmemopen</b>(), the <i>offset</i> was <i>subtracted</i> from the
+    end-of-stream position, instead of being added. This bug is fixed in glibc
+    2.22.</p>
+<p class="Pp">The glibc 2.9 addition of "binary" mode for
+    <b>fmemopen</b>() silently changed the ABI: previously, <b>fmemopen</b>()
+    ignored 'b' in <i>mode</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below uses <b>fmemopen</b>() to open an input buffer,
+    and <b>open_memstream</b>(3) to open a dynamically sized output buffer. The
+    program scans its input string (taken from the program's first command-line
+    argument) reading integers, and writes the squares of these integers to the
+    output buffer. An example of the output produced by this program is the
+    following:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$<b> ./a.out '1 23 43'</b>
+size=11; ptr=1 529 1849
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#define _GNU_SOURCE
+#include &lt;err.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+int
+main(int argc, char *argv[])
+{
+<br>
+    FILE *out, *in;
+<br>
+    int v, s;
+<br>
+    size_t size;
+<br>
+    char *ptr;
+<br>
+    if (argc != 2) {
+<br>
+        fprintf(stderr, "Usage: %s '&lt;num&gt;...'\n", argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    in = fmemopen(argv[1], strlen(argv[1]), "r");
+<br>
+    if (in == NULL)
+<br>
+        err(EXIT_FAILURE, "fmemopen");
+<br>
+    out = open_memstream(&amp;ptr, &amp;size);
+<br>
+    if (out == NULL)
+<br>
+        err(EXIT_FAILURE, "open_memstream");
+<br>
+    for (;;) {
+<br>
+        s = fscanf(in, "%d", &amp;v);
+<br>
+        if (s &lt;= 0)
+<br>
+            break;
+<br>
+        s = fprintf(out, "%d ", v * v);
+<br>
+        if (s == -1)
+<br>
+            err(EXIT_FAILURE, "fprintf");
+<br>
+    }
+<br>
+    fclose(in);
+<br>
+    fclose(out);
+<br>
+    printf("size=%zu; ptr=%s\n", size, ptr);
+<br>
+    free(ptr);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>fopen</b>(3), <b>fopencookie</b>(3),
+  <b>open_memstream</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

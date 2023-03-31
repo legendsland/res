@@ -1,0 +1,454 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/4a598642f15f8b0d439f735400aea947839a2379">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>READ(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">READ(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">READ(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pread, read — read from a file</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;unistd.h&gt;</pre>
+<pre>ssize_t pread(int <i>fildes</i>, void *<i>buf</i>, size_t <i>nbyte</i>, off_t <i>offset</i>);
+ssize_t read(int <i>fildes</i>, void *<i>buf</i>, size_t <i>nbyte</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>read</i>() function shall attempt to read <i>nbyte</i>
+    bytes from the file associated with the open file descriptor, <i>fildes</i>,
+    into the buffer pointed to by <i>buf</i>. The behavior of multiple
+    concurrent reads on the same pipe, FIFO, or terminal device is
+  unspecified.</p>
+<p class="Pp">Before any action described below is taken, and if <i>nbyte</i> is
+    zero, the <i>read</i>() function may detect and return errors as described
+    below. In the absence of errors, or if error detection is not performed, the
+    <i>read</i>() function shall return zero and have no other results.</p>
+<p class="Pp">On files that support seeking (for example, a regular file), the
+    <i>read</i>() shall start at a position in the file given by the file offset
+    associated with <i>fildes</i>. The file offset shall be incremented by the
+    number of bytes actually read.</p>
+<p class="Pp">Files that do not support seeking—for example,
+    terminals—always read from the current position. The value of a file
+    offset associated with such a file is undefined.</p>
+<p class="Pp">No data transfer shall occur past the current end-of-file. If the
+    starting position is at or after the end-of-file, 0 shall be returned. If
+    the file refers to a device special file, the result of subsequent
+    <i>read</i>() requests is implementation-defined.</p>
+<p class="Pp">If the value of <i>nbyte</i> is greater than {SSIZE_MAX}, the
+    result is implementation-defined.</p>
+<p class="Pp">When attempting to read from an empty pipe or FIFO:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>If no process has the pipe open for writing, <i>read</i>() shall return 0
+      to indicate end-of-file.</dd>
+  <dt> *</dt>
+  <dd>If some process has the pipe open for writing and O_NONBLOCK is set,
+      <i>read</i>() shall return -1 and set <i>errno</i> to
+    <b>[EAGAIN]</b>.</dd>
+  <dt> *</dt>
+  <dd>If some process has the pipe open for writing and O_NONBLOCK is clear,
+      <i>read</i>() shall block the calling thread until some data is written or
+      the pipe is closed by all processes that had the pipe open for
+    writing.</dd>
+</dl>
+<p class="Pp">When attempting to read a file (other than a pipe or FIFO) that
+    supports non-blocking reads and has no data currently available:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>If O_NONBLOCK is set, <i>read</i>() shall return -1 and set <i>errno</i>
+      to <b>[EAGAIN]</b>.</dd>
+  <dt> *</dt>
+  <dd>If O_NONBLOCK is clear, <i>read</i>() shall block the calling thread until
+      some data becomes available.</dd>
+  <dt> *</dt>
+  <dd>The use of the O_NONBLOCK flag has no effect if there is some data
+      available.</dd>
+</dl>
+<p class="Pp">The <i>read</i>() function reads data previously written to a
+    file. If any portion of a regular file prior to the end-of-file has not been
+    written, <i>read</i>() shall return bytes with value 0. For example,
+    <i>lseek</i>() allows the file offset to be set beyond the end of existing
+    data in the file. If data is later written at this point, subsequent reads
+    in the gap between the previous end of data and the newly written data shall
+    return bytes with value 0 until data is written into the gap.</p>
+<p class="Pp">Upon successful completion, where <i>nbyte</i> is greater than 0,
+    <i>read</i>() shall mark for update the last data access timestamp of the
+    file, and shall return the number of bytes read. This number shall never be
+    greater than <i>nbyte</i>. The value returned may be less than <i>nbyte</i>
+    if the number of bytes left in the file is less than <i>nbyte</i>, if the
+    <i>read</i>() request was interrupted by a signal, or if the file is a pipe
+    or FIFO or special file and has fewer than <i>nbyte</i> bytes immediately
+    available for reading. For example, a <i>read</i>() from a file associated
+    with a terminal may return one typed line of data.</p>
+<p class="Pp">If a <i>read</i>() is interrupted by a signal before it reads any
+    data, it shall return -1 with <i>errno</i> set to <b>[EINTR]</b>.</p>
+<p class="Pp">If a <i>read</i>() is interrupted by a signal after it has
+    successfully read some data, it shall return the number of bytes read.</p>
+<p class="Pp">For regular files, no data transfer shall occur past the offset
+    maximum established in the open file description associated with
+    <i>fildes</i>.</p>
+<p class="Pp">If <i>fildes</i> refers to a socket, <i>read</i>() shall be
+    equivalent to <i>recv</i>() with no flags set.</p>
+<p class="Pp">If the O_DSYNC and O_RSYNC bits have been set, read I/O operations
+    on the file descriptor shall complete as defined by synchronized I/O data
+    integrity completion. If the O_SYNC and O_RSYNC bits have been set, read I/O
+    operations on the file descriptor shall complete as defined by synchronized
+    I/O file integrity completion.</p>
+<p class="Pp">If <i>fildes</i> refers to a shared memory object, the result of
+    the <i>read</i>() function is unspecified.</p>
+<p class="Pp">If <i>fildes</i> refers to a typed memory object, the result of
+    the <i>read</i>() function is unspecified.</p>
+<p class="Pp">A <i>read</i>() from a STREAMS file can read data in three
+    different modes: <i>byte-stream</i> mode, <i>message-nondiscard</i> mode,
+    and <i>message-discard</i> mode. The default shall be byte-stream mode. This
+    can be changed using the I_SRDOPT <i>ioctl</i>() request, and can be tested
+    with I_GRDOPT <i>ioctl</i>(). In byte-stream mode, <i>read</i>() shall
+    retrieve data from the STREAM until as many bytes as were requested are
+    transferred, or until there is no more data to be retrieved. Byte-stream
+    mode ignores message boundaries.</p>
+<p class="Pp">In STREAMS message-nondiscard mode, <i>read</i>() shall retrieve
+    data until as many bytes as were requested are transferred, or until a
+    message boundary is reached. If <i>read</i>() does not retrieve all the data
+    in a message, the remaining data shall be left on the STREAM, and can be
+    retrieved by the next <i>read</i>() call. Message-discard mode also
+    retrieves data until as many bytes as were requested are transferred, or a
+    message boundary is reached. However, unread data remaining in a message
+    after the <i>read</i>() returns shall be discarded, and shall not be
+    available for a subsequent <i>read</i>(), <i>getmsg</i>(), or
+    <i>getpmsg</i>() call.</p>
+<p class="Pp">How <i>read</i>() handles zero-byte STREAMS messages is determined
+    by the current read mode setting. In byte-stream mode, <i>read</i>() shall
+    accept data until it has read <i>nbyte</i> bytes, or until there is no more
+    data to read, or until a zero-byte message block is encountered. The
+    <i>read</i>() function shall then return the number of bytes read, and place
+    the zero-byte message back on the STREAM to be retrieved by the next
+    <i>read</i>(), <i>getmsg</i>(), or <i>getpmsg</i>(). In message-nondiscard
+    mode or message-discard mode, a zero-byte message shall return 0 and the
+    message shall be removed from the STREAM. When a zero-byte message is read
+    as the first message on a STREAM, the message shall be removed from the
+    STREAM and 0 shall be returned, regardless of the read mode.</p>
+<p class="Pp">A <i>read</i>() from a STREAMS file shall return the data in the
+    message at the front of the STREAM head read queue, regardless of the
+    priority band of the message.</p>
+<p class="Pp">By default, STREAMs are in control-normal mode, in which a
+    <i>read</i>() from a STREAMS file can only process messages that contain a
+    data part but do not contain a control part. The <i>read</i>() shall fail if
+    a message containing a control part is encountered at the STREAM head. This
+    default action can be changed by placing the STREAM in either control-data
+    mode or control-discard mode with the I_SRDOPT <i>ioctl</i>() command. In
+    control-data mode, <i>read</i>() shall convert any control part to data and
+    pass it to the application before passing any data part originally present
+    in the same message. In control-discard mode, <i>read</i>() shall discard
+    message control parts but return to the process any data part in the
+    message.</p>
+<p class="Pp">In addition, <i>read</i>() shall fail if the STREAM head had
+    processed an asynchronous error before the call. In this case, the value of
+    <i>errno</i> shall not reflect the result of <i>read</i>(), but reflect the
+    prior error. If a hangup occurs on the STREAM being read, <i>read</i>()
+    shall continue to operate normally until the STREAM head read queue is
+    empty. Thereafter, it shall return 0.</p>
+<p class="Pp">The <i>pread</i>() function shall be equivalent to <i>read</i>(),
+    except that it shall read from a given position in the file without changing
+    the file offset. The first three arguments to <i>pread</i>() are the same as
+    <i>read</i>() with the addition of a fourth argument <i>offset</i> for the
+    desired position inside the file. An attempt to perform a <i>pread</i>() on
+    a file that is incapable of seeking shall result in an error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, these functions shall return a
+    non-negative integer indicating the number of bytes actually read.
+    Otherwise, the functions shall return -1 and set <i>errno</i> to indicate
+    the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">These functions shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>The file is neither a pipe, nor a FIFO, nor a socket, the O_NONBLOCK flag
+      is set for the file descriptor, and the thread would be delayed in the
+      read operation.</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The <i>fildes</i> argument is not a valid file descriptor open for
+      reading.</dd>
+  <dt id="EBADMSG"><a class="permalink" href="#EBADMSG"><b>EBADMSG</b></a></dt>
+  <dd>The file is a STREAM file that is set to control-normal mode and the
+      message waiting to be read includes a control part.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The read operation was terminated due to the receipt of a signal, and no
+      data was transferred.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The STREAM or multiplexer referenced by <i>fildes</i> is linked (directly
+      or indirectly) downstream from a multiplexer.</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>The process is a member of a background process group attempting to read
+      from its controlling terminal, and either the calling thread is blocking
+      SIGTTIN or the process is ignoring SIGTTIN or the process group of the
+      process is orphaned. This error may also be generated for
+      implementation-defined reasons.</dd>
+  <dt id="EISDIR"><a class="permalink" href="#EISDIR"><b>EISDIR</b></a></dt>
+  <dd>The <i>fildes</i> argument refers to a directory and the implementation
+      does not allow the directory to be read using <i>read</i>() or
+      <i>pread</i>(). The <i>readdir</i>() function should be used instead.</dd>
+  <dt id="EOVERFLOW"><a class="permalink" href="#EOVERFLOW"><b>EOVERFLOW</b></a></dt>
+  <dd>The file is a regular file, <i>nbyte</i> is greater than 0, the starting
+      position is before the end-of-file, and the starting position is greater
+      than or equal to the offset maximum established in the open file
+      description associated with <i>fildes</i>.</dd>
+</dl>
+<p class="Pp">The <i>pread</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>The file is a regular file or block special file, and the <i>offset</i>
+      argument is negative. The file offset shall remain unchanged.</dd>
+  <dt id="ESPIPE"><a class="permalink" href="#ESPIPE"><b>ESPIPE</b></a></dt>
+  <dd>The file is incapable of seeking.
+    <br>
+  </dd>
+</dl>
+<p class="Pp">The <i>read</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EAGAIN~2"><a class="permalink" href="#EAGAIN~2"><b>EAGAIN</b></a></dt>
+  <dd>The file is a pipe or FIFO, the O_NONBLOCK flag is set for the file
+      descriptor, and the thread would be delayed in the read operation.</dd>
+  <dt id="EAGAIN~3"><a class="permalink" href="#EAGAIN~3"><b>EAGAIN</b> or
+    <b>EWOULDBLOCK</b></a></dt>
+  <dd>
+    <br>
+    The file is a socket, the O_NONBLOCK flag is set for the file descriptor,
+      and the thread would be delayed in the read operation.</dd>
+  <dt id="ECONNRESET"><a class="permalink" href="#ECONNRESET"><b>ECONNRESET</b></a></dt>
+  <dd>A read was attempted on a socket and the connection was forcibly closed by
+      its peer.</dd>
+  <dt id="ENOTCONN"><a class="permalink" href="#ENOTCONN"><b>ENOTCONN</b></a></dt>
+  <dd>A read was attempted on a socket that is not connected.</dd>
+  <dt id="ETIMEDOUT"><a class="permalink" href="#ETIMEDOUT"><b>ETIMEDOUT</b></a></dt>
+  <dd>A read was attempted on a socket and a transmission timeout occurred.</dd>
+</dl>
+<p class="Pp">These functions may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EIO~2"><a class="permalink" href="#EIO~2"><b>EIO</b></a></dt>
+  <dd>A physical I/O error has occurred.</dd>
+  <dt id="ENOBUFS"><a class="permalink" href="#ENOBUFS"><b>ENOBUFS</b></a></dt>
+  <dd>Insufficient resources were available in the system to perform the
+      operation.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient memory was available to fulfill the request.</dd>
+  <dt id="ENXIO"><a class="permalink" href="#ENXIO"><b>ENXIO</b></a></dt>
+  <dd>A request was made of a nonexistent device, or the request was outside the
+      capabilities of the device.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Reading_Data_into_a_Buffer"><a class="permalink" href="#Reading_Data_into_a_Buffer">Reading
+  Data into a Buffer</a></h2>
+<p class="Pp">The following example reads data from the file associated with the
+    file descriptor <i>fd</i> into the buffer pointed to by <i>buf</i>.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;sys/types.h&gt;
+#include &lt;unistd.h&gt;
+...
+char buf[20];
+size_t nbytes;
+ssize_t bytes_read;
+int fd;
+...
+nbytes = sizeof(buf);
+bytes_read = read(fd, buf, nbytes);
+...</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">This volume of POSIX.1‐2017 does not specify the value of
+    the file offset after an error is returned; there are too many cases. For
+    programming errors, such as <b>[EBADF]</b>, the concept is meaningless since
+    no file is involved. For errors that are detected immediately, such as
+    <b>[EAGAIN]</b>, clearly the offset should not change. After an interrupt or
+    hardware error, however, an updated value would be very useful and is the
+    behavior of many implementations.</p>
+<p class="Pp">Note that a <i>read</i>() of zero bytes does not modify the last
+    data access timestamp. A <i>read</i>() that requests more than zero bytes,
+    but returns zero, is required to modify the last data access timestamp.</p>
+<p class="Pp">Implementations are allowed, but not required, to perform error
+    checking for <i>read</i>() requests of zero bytes.</p>
+<section class="Ss">
+<h2 class="Ss" id="Input_and_Output"><a class="permalink" href="#Input_and_Output">Input
+  and Output</a></h2>
+<p class="Pp">The use of I/O with large byte counts has always presented
+    problems. Ideas such as <i>lread</i>() and <i>lwrite</i>() (using and
+    returning <b>long</b>s) were considered at one time. The current solution is
+    to use abstract types on the ISO&nbsp;C standard function to <i>read</i>()
+    and <i>write</i>(). The abstract types can be declared so that existing
+    functions work, but can also be declared so that larger types can be
+    represented in future implementations. It is presumed that whatever
+    constraints limit the maximum range of <b>size_t</b> also limit portable I/O
+    requests to the same range. This volume of POSIX.1‐2017 also limits
+    the range further by requiring that the byte count be limited so that a
+    signed return value remains meaningful. Since the return type is also a
+    (signed) abstract type, the byte count can be defined by the implementation
+    to be larger than an <b>int</b> can hold.</p>
+<p class="Pp">The standard developers considered adding atomicity requirements
+    to a pipe or FIFO, but recognized that due to the nature of pipes and FIFOs
+    there could be no guarantee of atomicity of reads of {PIPE_BUF} or any other
+    size that would be an aid to applications portability.</p>
+<p class="Pp">This volume of POSIX.1‐2017 requires that no action be
+    taken for <i>read</i>() or <i>write</i>() when <i>nbyte</i> is zero. This is
+    not intended to take precedence over detection of errors (such as invalid
+    buffer pointers or file descriptors). This is consistent with the rest of
+    this volume of POSIX.1‐2017, but the phrasing here could be misread
+    to require detection of the zero case before any other errors. A value of
+    zero is to be considered a correct value, for which the semantics are a
+    no-op.</p>
+<p class="Pp">I/O is intended to be atomic to ordinary files and pipes and
+    FIFOs. Atomic means that all the bytes from a single operation that started
+    out together end up together, without interleaving from other I/O
+    operations. It is a known attribute of terminals that this is not honored,
+    and terminals are explicitly (and implicitly permanently) excepted, making
+    the behavior unspecified. The behavior for other device types is also left
+    unspecified, but the wording is intended to imply that future standards
+    might choose to specify atomicity (or not).</p>
+<p class="Pp">There were recommendations to add format parameters to
+    <i>read</i>() and <i>write</i>() in order to handle networked transfers
+    among heterogeneous file system and base hardware types. Such a facility may
+    be required for support by the OSI presentation of layer services. However,
+    it was determined that this should correspond with similar C-language
+    facilities, and that is beyond the scope of this volume of
+    POSIX.1‐2017. The concept was suggested to the developers of the
+    ISO&nbsp;C standard for their consideration as a possible area for future
+    work.</p>
+<p class="Pp">In 4.3 BSD, a <i>read</i>() or <i>write</i>() that is interrupted
+    by a signal before transferring any data does not by default return an
+    <b>[EINTR]</b> error, but is restarted. In 4.2 BSD, 4.3 BSD, and the Eighth
+    Edition, there is an additional function, <i>select</i>(), whose purpose is
+    to pause until specified activity (data to read, space to write, and so on)
+    is detected on specified file descriptors. It is common in applications
+    written for those systems for <i>select</i>() to be used before
+    <i>read</i>() in situations (such as keyboard input) where interruption of
+    I/O due to a signal is desired.</p>
+<p class="Pp">The issue of which files or file types are interruptible is
+    considered an implementation design issue. This is often affected primarily
+    by hardware and reliability issues.</p>
+<p class="Pp">There are no references to actions taken following an
+    ``unrecoverable error''. It is considered beyond the scope of this volume of
+    POSIX.1‐2017 to describe what happens in the case of hardware
+  errors.</p>
+<p class="Pp">Earlier versions of this standard allowed two very different
+    behaviors with regard to the handling of interrupts. In order to minimize
+    the resulting confusion, it was decided that POSIX.1‐2008 should
+    support only one of these behaviors. Historical practice on AT&amp;T-derived
+    systems was to have <i>read</i>() and <i>write</i>() return -1 and set
+    <i>errno</i> to <b>[EINTR]</b> when interrupted after some, but not all, of
+    the data requested had been transferred. However, the US Department of
+    Commerce FIPS 151‐1 and FIPS 151‐2 require the historical BSD
+    behavior, in which <i>read</i>() and <i>write</i>() return the number of
+    bytes actually transferred before the interrupt. If -1 is returned when any
+    data is transferred, it is difficult to recover from the error on a seekable
+    device and impossible on a non-seekable device. Most new implementations
+    support this behavior. The behavior required by POSIX.1‐2008 is to
+    return the number of bytes transferred.</p>
+<p class="Pp">POSIX.1‐2008 does not specify when an implementation that
+    buffers <i>read</i>()s actually moves the data into the user-supplied
+    buffer, so an implementation may choose to do this at the latest possible
+    moment. Therefore, an interrupt arriving earlier may not cause <i>read</i>()
+    to return a partial byte count, but rather to return -1 and set <i>errno</i>
+    to <b>[EINTR]</b>.</p>
+<p class="Pp">Consideration was also given to combining the two previous
+    options, and setting <i>errno</i> to <b>[EINTR]</b> while returning a short
+    count. However, not only is there no existing practice that implements this,
+    it is also contradictory to the idea that when <i>errno</i> is set, the
+    function responsible shall return -1.</p>
+<p class="Pp">This volume of POSIX.1‐2017 intentionally does not specify
+    any <i>pread</i>() errors related to pipes, FIFOs, and sockets other than
+    <b>[ESPIPE]</b>.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>fcntl</i>()</i>, <i><i>ioctl</i>()</i>,
+    <i><i>lseek</i>()</i>, <i><i>open</i>()</i>, <i><i>pipe</i>()</i>,
+    <i><i>readv</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Chapter
+    11</i>, <i>General Terminal Interface</i>, <i><b>&lt;stropts.h&gt;</b></i>,
+    <i><b>&lt;sys_uio.h&gt;</b></i>, <i><b>&lt;unistd.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

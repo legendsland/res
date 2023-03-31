@@ -1,0 +1,185 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright 2003,2004 Andi Kleen, SuSE Labs.
+   and Copyright 2007 Lee Schermerhorn, Hewlett Packard
+  
+   %%%LICENSE_START(VERBATIM_PROF)
+   Permission is granted to make and distribute verbatim copies of this
+   manual provided the copyright notice and this permission notice are
+   preserved on all copies.
+  
+   Permission is granted to copy and distribute modified versions of this
+   manual under the conditions for verbatim copying, provided that the
+   entire resulting derived work is distributed under the terms of a
+   permission notice identical to this one.
+  
+   Since the Linux kernel and libraries are constantly changing, this
+   manual page may be incorrect or out-of-date.  The author(s) assume no
+   responsibility for errors or omissions, or for damages resulting from
+   the use of the information contained herein.
+  
+   Formatted or processed versions of this manual, if unaccompanied by
+   the source, must acknowledge the copyright and authors of this work.
+   %%%LICENSE_END
+  
+   2006-02-03, mtk, substantial wording changes and other improvements
+   2007-08-27, Lee Schermerhorn <Lee.Schermerhorn@hp.com>
+       more precise specification of behavior.
+   --><head>
+<meta name="dc.identifier" content="res/f6c8536c6faeb4e0dd9eaa4b8ce7a27c66e65b7c">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>get_mempolicy(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">get_mempolicy(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">get_mempolicy(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">get_mempolicy - retrieve NUMA memory policy for a thread</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">NUMA (Non-Uniform Memory Access) policy library (<i>libnuma</i>,
+    <i>-lnuma</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<p class="Pp"><b>#include &lt;numaif.h&gt;</b></p>
+<pre><b>long get_mempolicy(int *</b><i>mode</i><b>,</b>
+<b>                   unsigned long </b><i>nodemask</i><b>[(.</b><i>maxnode</i><b> + ULONG_WIDTH - 1)</b>
+<b>                                          / ULONG_WIDTH],</b>
+<b>                   unsigned long </b><i>maxnode</i><b>, void *</b><i>addr</i><b>,</b>
+<b>                   unsigned long </b><i>flags</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>get_mempolicy</b>() retrieves the NUMA policy of the calling
+    thread or of a memory address, depending on the setting of <i>flags</i>.</p>
+<p class="Pp">A NUMA machine has different memory controllers with different
+    distances to specific CPUs. The memory policy defines from which node memory
+    is allocated for the thread.</p>
+<p class="Pp">If <i>flags</i> is specified as 0, then information about the
+    calling thread's default policy (as set by <b>set_mempolicy</b>(2)) is
+    returned, in the buffers pointed to by <i>mode</i> and <i>nodemask</i>. The
+    value returned in these arguments may be used to restore the thread's policy
+    to its state at the time of the call to <b>get_mempolicy</b>() using
+    <b>set_mempolicy</b>(2). When <i>flags</i> is 0, <i>addr</i> must be
+    specified as NULL.</p>
+<p class="Pp">If <i>flags</i> specifies <b>MPOL_F_MEMS_ALLOWED</b> (available
+    since Linux 2.6.24), the <i>mode</i> argument is ignored and the set of
+    nodes (memories) that the thread is allowed to specify in subsequent calls
+    to <b>mbind</b>(2) or <b>set_mempolicy</b>(2) (in the absence of any <i>mode
+    flags</i>) is returned in <i>nodemask</i>. It is not permitted to combine
+    <b>MPOL_F_MEMS_ALLOWED</b> with either <b>MPOL_F_ADDR</b> or
+    <b>MPOL_F_NODE</b>.</p>
+<p class="Pp">If <i>flags</i> specifies <b>MPOL_F_ADDR</b>, then information is
+    returned about the policy governing the memory address given in <i>addr</i>.
+    This policy may be different from the thread's default policy if
+    <b>mbind</b>(2) or one of the helper functions described in <b>numa</b>(3)
+    has been used to establish a policy for the memory range containing
+    <i>addr</i>.</p>
+<p class="Pp">If the <i>mode</i> argument is not NULL, then
+    <b>get_mempolicy</b>() will store the policy mode and any optional <i>mode
+    flags</i> of the requested NUMA policy in the location pointed to by this
+    argument. If <i>nodemask</i> is not NULL, then the nodemask associated with
+    the policy will be stored in the location pointed to by this argument.
+    <i>maxnode</i> specifies the number of node IDs that can be stored into
+    <i>nodemask</i>—that is, the maximum node ID plus one. The value
+    specified by <i>maxnode</i> is always rounded to a multiple of
+    <i>sizeof(unsigned&nbsp;long)*8</i>.</p>
+<p class="Pp">If <i>flags</i> specifies both <b>MPOL_F_NODE</b> and
+    <b>MPOL_F_ADDR</b>, <b>get_mempolicy</b>() will return the node ID of the
+    node on which the address <i>addr</i> is allocated into the location pointed
+    to by <i>mode</i>. If no page has yet been allocated for the specified
+    address, <b>get_mempolicy</b>() will allocate a page as if the thread had
+    performed a read (load) access to that address, and return the ID of the
+    node where that page was allocated.</p>
+<p class="Pp">If <i>flags</i> specifies <b>MPOL_F_NODE</b>, but not
+    <b>MPOL_F_ADDR</b>, and the thread's current policy is
+    <b>MPOL_INTERLEAVE</b>, then <b>get_mempolicy</b>() will return in the
+    location pointed to by a non-NULL <i>mode</i> argument, the node ID of the
+    next node that will be used for interleaving of internal kernel pages
+    allocated on behalf of the thread. These allocations include pages for
+    memory-mapped files in process memory ranges mapped using the <b>mmap</b>(2)
+    call with the <b>MAP_PRIVATE</b> flag for read accesses, and in memory
+    ranges mapped with the <b>MAP_SHARED</b> flag for all accesses.</p>
+<p class="Pp">Other flag values are reserved.</p>
+<p class="Pp">For an overview of the possible policies see
+    <b>set_mempolicy</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>get_mempolicy</b>() returns 0; on error, -1 is
+    returned and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>Part of all of the memory range specified by <i>nodemask</i> and
+      <i>maxnode</i> points outside your accessible address space.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The value specified by <i>maxnode</i> is less than the number of node IDs
+      supported by the system. Or <i>flags</i> specified values other than
+      <b>MPOL_F_NODE</b> or <b>MPOL_F_ADDR</b>; or <i>flags</i> specified
+      <b>MPOL_F_ADDR</b> and <i>addr</i> is NULL, or <i>flags</i> did not
+      specify <b>MPOL_F_ADDR</b> and <i>addr</i> is not NULL. Or, <i>flags</i>
+      specified <b>MPOL_F_NODE</b> but not <b>MPOL_F_ADDR</b> and the current
+      thread policy is not <b>MPOL_INTERLEAVE</b>. Or, <i>flags</i> specified
+      <b>MPOL_F_MEMS_ALLOWED</b> with either <b>MPOL_F_ADDR</b> or
+      <b>MPOL_F_NODE</b>. (And there are other <b>EINVAL</b> cases.)</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>get_mempolicy</b>() system call was added in Linux
+  2.6.7.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This system call is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">For information on library support, see <b>numa</b>(7).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>getcpu</b>(2), <b>mbind</b>(2), <b>mmap</b>(2),
+    <b>set_mempolicy</b>(2), <b>numa</b>(3), <b>numa</b>(7),
+  <b>numactl</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,369 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/25f52f4b9c921831af84f5f42b10eb1706b0fc0f">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>TDELETE(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">TDELETE(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">TDELETE(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">tdelete, tfind, tsearch, twalk — manage a binary search
+    tree</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;search.h&gt;</pre>
+<pre>void *tdelete(const void *restrict <i>key</i>, void **restrict <i>rootp</i>,
+<br>
+    int(*<i>compar</i>)(const void *, const void *));
+void *tfind(const void *<i>key</i>, void *const *<i>rootp</i>,
+<br>
+    int(*<i>compar</i>)(const void *, const void *));
+void *tsearch(const void *<i>key</i>, void **<i>rootp</i>,
+<br>
+    int (*<i>compar</i>)(const void *, const void *));
+void twalk(const void *<i>root</i>,
+<br>
+    void (*<i>action</i>)(const void *, VISIT, int));</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>tdelete</i>(), <i>tfind</i>(), <i>tsearch</i>(), and
+    <i>twalk</i>() functions manipulate binary search trees. Comparisons are
+    made with a user-supplied routine, the address of which is passed as the
+    <i>compar</i> argument. This routine is called with two arguments, which are
+    the pointers to the elements being compared. The application shall ensure
+    that the user-supplied routine returns an integer less than, equal to, or
+    greater than 0, according to whether the first argument is to be considered
+    less than, equal to, or greater than the second argument. The comparison
+    function need not compare every byte, so arbitrary data may be contained in
+    the elements in addition to the values being compared.</p>
+<p class="Pp">The <i>tsearch</i>() function shall build and access the tree. The
+    <i>key</i> argument is a pointer to an element to be accessed or stored. If
+    there is a node in the tree whose element is equal to the value pointed to
+    by <i>key</i>, a pointer to this found node shall be returned. Otherwise,
+    the value pointed to by <i>key</i> shall be inserted (that is, a new node is
+    created and the value of <i>key</i> is copied to this node), and a pointer
+    to this node returned. Only pointers are copied, so the application shall
+    ensure that the calling routine stores the data. The <i>rootp</i> argument
+    points to a variable that points to the root node of the tree. A null
+    pointer value for the variable pointed to by <i>rootp</i> denotes an empty
+    tree; in this case, the variable shall be set to point to the node which
+    shall be at the root of the new tree.</p>
+<p class="Pp">Like <i>tsearch</i>(), <i>tfind</i>() shall search for a node in
+    the tree, returning a pointer to it if found. However, if it is not found,
+    <i>tfind</i>() shall return a null pointer. The arguments for <i>tfind</i>()
+    are the same as for <i>tsearch</i>().</p>
+<p class="Pp">The <i>tdelete</i>() function shall delete a node from a binary
+    search tree. The arguments are the same as for <i>tsearch</i>(). The
+    variable pointed to by <i>rootp</i> shall be changed if the deleted node was
+    the root of the tree. If the deleted node was the root of the tree and had
+    no children, the variable pointed to by <i>rootp</i> shall be set to a null
+    pointer. The <i>tdelete</i>() function shall return a pointer to the parent
+    of the deleted node, or an unspecified non-null pointer if the deleted node
+    was the root node, or a null pointer if the node is not found.</p>
+<p class="Pp">If <i>tsearch</i>() adds an element to a tree, or <i>tdelete</i>()
+    successfully deletes an element from a tree, the concurrent use of that tree
+    in another thread, or use of pointers produced by a previous call to
+    <i>tfind</i>() or <i>tsearch</i>(), produces undefined results.</p>
+<p class="Pp">The <i>twalk</i>() function shall traverse a binary search tree.
+    The <i>root</i> argument is a pointer to the root node of the tree to be
+    traversed. (Any node in a tree may be used as the root for a walk below that
+    node.) The argument <i>action</i> is the name of a routine to be invoked at
+    each node. This routine is, in turn, called with three arguments. The first
+    argument shall be the address of the node being visited. The structure
+    pointed to by this argument is unspecified and shall not be modified by the
+    application, but it shall be possible to cast a pointer-to-node into a
+    pointer-to-pointer-to-element to access the element stored in the node. The
+    second argument shall be a value from an enumeration data type:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>typedef enum { preorder, postorder, endorder, leaf } VISIT;</pre>
+</div>
+<p class="Pp">(defined in <i>&lt;search.h&gt;</i>), depending on whether this is
+    the first, second, or third time that the node is visited (during a
+    depth-first, left-to-right traversal of the tree), or whether the node is a
+    leaf. The third argument shall be the level of the node in the tree, with
+    the root being level 0.</p>
+<p class="Pp">If the calling function alters the pointer to the root, the result
+    is undefined.</p>
+<p class="Pp">If the functions pointed to by <i>action</i> or <i>compar</i> (for
+    any of these binary search functions) change the tree, the results are
+    undefined.</p>
+<p class="Pp">These functions are thread-safe only as long as multiple threads
+    do not access the same tree.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">If the node is found, both <i>tsearch</i>() and <i>tfind</i>()
+    shall return a pointer to it. If not, <i>tfind</i>() shall return a null
+    pointer, and <i>tsearch</i>() shall return a pointer to the inserted
+  item.</p>
+<p class="Pp">A null pointer shall be returned by <i>tsearch</i>() if there is
+    not enough space available to create a new node.</p>
+<p class="Pp">A null pointer shall be returned by <i>tdelete</i>(),
+    <i>tfind</i>(), and <i>tsearch</i>() if <i>rootp</i> is a null pointer on
+    entry.</p>
+<p class="Pp">The <i>tdelete</i>() function shall return a pointer to the parent
+    of the deleted node, or an unspecified non-null pointer if the deleted node
+    was the root node, or a null pointer if the node is not found.</p>
+<p class="Pp">The <i>twalk</i>() function shall not return a value.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">No errors are defined.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The following code reads in strings and stores structures
+    containing a pointer to each string and a count of its length. It then walks
+    the tree, printing out the stored strings and their lengths in alphabetical
+    order.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;limits.h&gt;
+#include &lt;search.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdio.h&gt;</pre>
+<pre>struct element {      /* Pointers to these are stored in the tree. */
+<br>
+    int     count;
+<br>
+    char    string[];
+};</pre>
+<pre>void  *root = NULL;          /* This points to the root. */</pre>
+<pre>int main(void)
+{
+<br>
+    char   str[_POSIX2_LINE_MAX+1];
+<br>
+    int    length = 0;
+<br>
+    struct element *elementptr;
+<br>
+    void   *node;
+<br>
+    void   print_node(const void *, VISIT, int);
+<br>
+    int    node_compare(const void *, const void *),
+<br>
+           delete_root(const void *, const void *);</pre>
+<pre><br>
+    while (fgets(str, sizeof(str), stdin))  {
+<br>
+        /* Set element. */
+<br>
+        length = strlen(str);
+<br>
+        if (str[length-1] == '\n')
+<br>
+            str[--length] = '\0';
+<br>
+        elementptr = malloc(sizeof(struct element) + length + 1);
+<br>
+        strcpy(elementptr-&gt;string, str);
+<br>
+        elementptr-&gt;count = 1;
+<br>
+        /* Put element into the tree. */
+<br>
+        node = tsearch((void *)elementptr, &amp;root, node_compare);
+<br>
+        if (node == NULL) {
+<br>
+            fprintf(stderr,
+<br>
+                    "tsearch: Not enough space available\n");
+<br>
+            exit(EXIT_FAILURE);
+<br>
+        }
+<br>
+        else if (*(struct element **)node != elementptr) {
+<br>
+            /* A node containing the element already exists */
+<br>
+            (*(struct element **)node)-&gt;count++;
+<br>
+            free(elementptr);
+<br>
+        }
+<br>
+    }
+<br>
+    twalk(root, print_node);</pre>
+<pre><br>
+    /* Delete all nodes in the tree */
+<br>
+    while (root != NULL) {
+<br>
+        elementptr = *(struct element **)root;
+<br>
+        printf("deleting node: string = %s,  count = %d\n",
+<br>
+               elementptr-&gt;string,
+<br>
+               elementptr-&gt;count);
+<br>
+        tdelete((void *)elementptr, &amp;root, delete_root);
+<br>
+        free(elementptr);
+<br>
+    }</pre>
+<pre><br>
+    return 0;
+}</pre>
+<pre>/*
+<br>
+ *  This routine compares two nodes, based on an
+<br>
+ *  alphabetical ordering of the string field.
+<br>
+ */
+int
+node_compare(const void *node1, const void *node2)
+{
+<br>
+    return strcmp(((const struct element *) node1)-&gt;string,
+<br>
+        ((const struct element *) node2)-&gt;string);
+}</pre>
+<pre>/*
+<br>
+ *  This comparison routine can be used with tdelete()
+<br>
+ *  when explicitly deleting a root node, as no comparison
+<br>
+ *  is necessary.
+<br>
+ */
+int
+delete_root(const void *node1, const void *node2)
+{
+<br>
+    return 0;
+}</pre>
+<pre>/*
+<br>
+ *  This routine prints out a node, the second time
+<br>
+ *  twalk encounters it or if it is a leaf.
+<br>
+ */
+void
+print_node(const void *ptr, VISIT order, int level)
+{
+<br>
+    const struct element *p = *(const struct element **) ptr;</pre>
+<pre><br>
+    if (order == postorder || order == leaf)  {
+<br>
+        (void) printf("string = %s,  count = %d\n",
+<br>
+            p-&gt;string, p-&gt;count);
+<br>
+    }
+}</pre>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The <i>root</i> argument to <i>twalk</i>() is one level of
+    indirection less than the <i>rootp</i> arguments to <i>tdelete</i>() and
+    <i>tsearch</i>().</p>
+<p class="Pp">There are two nomenclatures used to refer to the order in which
+    tree nodes are visited. The <i>twalk</i>() function uses <b>preorder</b>,
+    <b>postorder</b>, and <b>endorder</b> to refer respectively to visiting a
+    node before any of its children, after its left child and before its right,
+    and after both its children. The alternative nomenclature uses
+    <b>preorder</b>, <b>inorder</b>, and <b>postorder</b> to refer to the same
+    visits, which could result in some confusion over the meaning of
+    <b>postorder</b>.</p>
+<p class="Pp">Since the return value of <i>tdelete</i>() is an unspecified
+    non-null pointer in the case that the root of the tree has been deleted,
+    applications should only use the return value of <i>tdelete</i>() as
+    indication of success or failure and should not assume it can be
+    dereferenced. Some implementations in this case will return a pointer to the
+    new root of the tree (or to an empty tree if the deleted root node was the
+    only node in the tree); other implementations return arbitrary non-null
+    pointers.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>hcreate</i>()</i>, <i><i>lsearch</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;search.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

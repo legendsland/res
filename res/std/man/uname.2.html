@@ -1,0 +1,149 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2001 Andries Brouwer <aeb@cwi.nl>.
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   2007-07-05 mtk: Added details on underlying system call interfaces
+   --><head>
+<meta name="dc.identifier" content="res/3362e8d8214703825330e8b559a28978c3e40600">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>uname(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">uname(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">uname(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">uname - get name and information about current kernel</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/utsname.h&gt;</b></pre>
+<pre><b>int uname(struct utsname *</b><i>buf</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>uname</b>() returns system information in the structure pointed
+    to by <i>buf</i>. The <i>utsname</i> struct is defined in
+    <i>&lt;sys/utsname.h&gt;</i>:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct utsname {
+<br>
+    char sysname[];    /* Operating system name (e.g., "Linux") */
+<br>
+    char nodename[];   /* Name within communications network
+<br>
+                          to which the node is attached, if any */
+<br>
+    char release[];    /* Operating system release
+<br>
+                          (e.g., "2.6.28") */
+<br>
+    char version[];    /* Operating system version */
+<br>
+    char machine[];    /* Hardware type identifier */
+#ifdef _GNU_SOURCE
+<br>
+    char domainname[]; /* NIS or YP domain name */
+#endif
+};
+</pre>
+<br>
+<p class="Pp">The length of the arrays in a <i>struct utsname</i> is unspecified
+    (see NOTES); the fields are terminated by a null byte ('\0').</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, zero is returned. On error, -1 is returned, and
+    <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>buf</i> is not valid.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, SVr4, 4.4BSD.</p>
+<p class="Pp">The <i>domainname</i> member (the NIS or YP domain name) is a GNU
+    extension.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The kernel has the name, release, version, and supported machine
+    type built in. Conversely, the <i>nodename</i> field is configured by the
+    administrator to match the network (this is what the BSD historically calls
+    the "hostname", and is set via <b>sethostname</b>(2)). Similarly,
+    the <i>domainname</i> field is set via <b>setdomainname</b>(2).</p>
+<p class="Pp">The length of the fields in the struct varies. Some operating
+    systems or libraries use a hardcoded 9 or 33 or 65 or 257. Other systems use
+    <b>SYS_NMLN</b> or <b>_SYS_NMLN</b> or <b>UTSLEN</b> or
+    <b>_UTSNAME_LENGTH</b>. Clearly, it is a bad idea to use any of these
+    constants; just use sizeof(...). SVr4 uses 257, "to support Internet
+    hostnames" — this is the largest value likely to be encountered
+    in the wild.</p>
+<p class="Pp">Part of the utsname information is also accessible via
+    <i>/proc/sys/kernel/</i>{<i>ostype</i>, <i>hostname</i>, <i>osrelease</i>,
+    <i>version</i>, <i>domainname</i>}.</p>
+<section class="Ss">
+<h2 class="Ss" id="C_library/kernel_differences"><a class="permalink" href="#C_library/kernel_differences">C
+  library/kernel differences</a></h2>
+<p class="Pp">Over time, increases in the size of the <i>utsname</i> structure
+    have led to three successive versions of <b>uname</b>():
+    <i>sys_olduname</i>() (slot <i>__NR_oldolduname</i>), <i>sys_uname</i>()
+    (slot <i>__NR_olduname</i>), and <i>sys_newuname</i>() (slot
+    <i>__NR_uname)</i>. The first one used length 9 for all fields; the second
+    used 65; the third also uses 65 but adds the <i>domainname</i> field. The
+    glibc <b>uname</b>() wrapper function hides these details from applications,
+    invoking the most recent version of the system call provided by the
+  kernel.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>uname</b>(1), <b>getdomainname</b>(2), <b>gethostname</b>(2),
+    <b>uts_namespaces</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

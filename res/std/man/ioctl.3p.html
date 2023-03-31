@@ -1,0 +1,932 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/922e90d85d3a57354624b422b91051531a9cdaac">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>IOCTL(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">IOCTL(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">IOCTL(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">ioctl — control a STREAMS device (<b>STREAMS</b>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;stropts.h&gt;</pre>
+<pre>int ioctl(int <i>fildes</i>, int <i>request</i>, ... /* arg */);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>ioctl</i>() function shall perform a variety of control
+    functions on STREAMS devices. For non-STREAMS devices, the functions
+    performed by this call are unspecified. The <i>request</i> argument and an
+    optional third argument (with varying type) shall be passed to and
+    interpreted by the appropriate part of the STREAM associated with
+    <i>fildes</i>.</p>
+<p class="Pp">The <i>fildes</i> argument is an open file descriptor that refers
+    to a device.</p>
+<p class="Pp">The <i>request</i> argument selects the control function to be
+    performed and shall depend on the STREAMS device being addressed.</p>
+<p class="Pp">The <i>arg</i> argument represents additional information that is
+    needed by this specific STREAMS device to perform the requested function.
+    The type of <i>arg</i> depends upon the particular control request, but it
+    shall be either an integer or a pointer to a device-specific data
+  structure.</p>
+<p class="Pp">The <i>ioctl</i>() commands applicable to STREAMS, their
+    arguments, and error conditions that apply to each individual command are
+    described below.</p>
+<p class="Pp">The following <i>ioctl</i>() commands, with error values
+    indicated, are applicable to all STREAMS files:</p>
+<dl class="Bl-tag">
+  <dt id="I_PUSH"><a class="permalink" href="#I_PUSH">I_PUSH</a></dt>
+  <dd>Pushes the module whose name is pointed to by <i>arg</i> onto the top of
+      the current STREAM, just below the STREAM head. It then calls the
+      <i>open</i>() function of the newly-pushed module.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">The <i>ioctl</i>() function with the I_PUSH command shall fail
+  if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>Invalid module name.</dd>
+  <dt id="ENXIO"><a class="permalink" href="#ENXIO"><b>ENXIO</b></a></dt>
+  <dd>Open function of new module failed.</dd>
+  <dt id="ENXIO~2"><a class="permalink" href="#ENXIO~2"><b>ENXIO</b></a></dt>
+  <dd>Hangup received on <i>fildes</i>.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="I_POP"><a class="permalink" href="#I_POP">I_POP</a></dt>
+  <dd>Removes the module just below the STREAM head of the STREAM pointed to by
+      <i>fildes</i>. The <i>arg</i> argument should be 0 in an I_POP
+    request.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">The <i>ioctl</i>() function with the I_POP command shall fail
+  if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>No module present in the STREAM.</dd>
+  <dt id="ENXIO~3"><a class="permalink" href="#ENXIO~3"><b>ENXIO</b></a></dt>
+  <dd>Hangup received on <i>fildes</i>.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="I_LOOK"><a class="permalink" href="#I_LOOK">I_LOOK</a></dt>
+  <dd>Retrieves the name of the module just below the STREAM head of the STREAM
+      pointed to by <i>fildes</i>, and places it in a character string pointed
+      to by <i>arg</i>. The buffer pointed to by <i>arg</i> should be at least
+      FMNAMESZ+1 bytes long, where FMNAMESZ is defined in
+      <i>&lt;stropts.h&gt;</i>.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">The <i>ioctl</i>() function with the I_LOOK command shall fail
+  if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~3"><a class="permalink" href="#EINVAL~3"><b>EINVAL</b></a></dt>
+  <dd>No module present in the STREAM.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="I_FLUSH"><a class="permalink" href="#I_FLUSH">I_FLUSH</a></dt>
+  <dd>Flushes read and/or write queues, depending on the value of <i>arg</i>.
+      Valid <i>arg</i> values are:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="FLUSHR"><a class="permalink" href="#FLUSHR">FLUSHR</a></dt>
+  <dd>Flush all read queues.</dd>
+  <dt id="FLUSHW"><a class="permalink" href="#FLUSHW">FLUSHW</a></dt>
+  <dd>Flush all write queues.</dd>
+  <dt id="FLUSHRW"><a class="permalink" href="#FLUSHRW">FLUSHRW</a></dt>
+  <dd>Flush all read and all write queues.</dd>
+</dl>
+<p class="Pp">The <i>ioctl</i>() function with the I_FLUSH command shall fail
+    if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~4"><a class="permalink" href="#EINVAL~4"><b>EINVAL</b></a></dt>
+  <dd>Invalid <i>arg</i> value.</dd>
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b> or
+    <b>ENOSR</b></a></dt>
+  <dd>
+    <br>
+    Unable to allocate buffers for flush message.</dd>
+  <dt id="ENXIO~4"><a class="permalink" href="#ENXIO~4"><b>ENXIO</b></a></dt>
+  <dd>Hangup received on <i>fildes</i>.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="I_FLUSHBAND"><a class="permalink" href="#I_FLUSHBAND">I_FLUSHBAND</a></dt>
+  <dd>Flushes a particular band of messages. The <i>arg</i> argument points to a
+      <b>bandinfo</b> structure. The <i>bi_flag</i> member may be one of FLUSHR,
+      FLUSHW, or FLUSHRW as described above. The <i>bi_pri</i> member determines
+      the priority band to be flushed.</dd>
+  <dt id="I_SETSIG"><a class="permalink" href="#I_SETSIG">I_SETSIG</a></dt>
+  <dd>Requests that the STREAMS implementation send the SIGPOLL signal to the
+      calling process when a particular event has occurred on the STREAM
+      associated with <i>fildes</i>. I_SETSIG supports an asynchronous
+      processing capability in STREAMS. The value of <i>arg</i> is a bitmask
+      that specifies the events for which the process should be signaled. It is
+      the bitwise-inclusive OR of any combination of the following
+    constants:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="S_RDNORM"><a class="permalink" href="#S_RDNORM">S_RDNORM</a></dt>
+  <dd>A normal (priority band set to 0) message has arrived at the head of a
+      STREAM head read queue. A signal shall be generated even if the message is
+      of zero length.</dd>
+  <dt id="S_RDBAND"><a class="permalink" href="#S_RDBAND">S_RDBAND</a></dt>
+  <dd>A message with a non-zero priority band has arrived at the head of a
+      STREAM head read queue. A signal shall be generated even if the message is
+      of zero length.</dd>
+  <dt id="S_INPUT"><a class="permalink" href="#S_INPUT">S_INPUT</a></dt>
+  <dd>A message, other than a high-priority message, has arrived at the head of
+      a STREAM head read queue. A signal shall be generated even if the message
+      is of zero length.</dd>
+  <dt id="S_HIPRI"><a class="permalink" href="#S_HIPRI">S_HIPRI</a></dt>
+  <dd>A high-priority message is present on a STREAM head read queue. A signal
+      shall be generated even if the message is of zero length.</dd>
+  <dt id="S_OUTPUT"><a class="permalink" href="#S_OUTPUT">S_OUTPUT</a></dt>
+  <dd>The write queue for normal data (priority band 0) just below the STREAM
+      head is no longer full. This notifies the process that there is room on
+      the queue for sending (or writing) normal data downstream.</dd>
+  <dt id="S_WRNORM"><a class="permalink" href="#S_WRNORM">S_WRNORM</a></dt>
+  <dd>Equivalent to S_OUTPUT.</dd>
+  <dt id="S_WRBAND"><a class="permalink" href="#S_WRBAND">S_WRBAND</a></dt>
+  <dd>The write queue for a non-zero priority band just below the STREAM head is
+      no longer full. This notifies the process that there is room on the queue
+      for sending (or writing) priority data downstream.</dd>
+  <dt id="S_MSG"><a class="permalink" href="#S_MSG">S_MSG</a></dt>
+  <dd>A STREAMS signal message that contains the SIGPOLL signal has reached the
+      front of the STREAM head read queue.</dd>
+  <dt id="S_ERROR"><a class="permalink" href="#S_ERROR">S_ERROR</a></dt>
+  <dd>Notification of an error condition has reached the STREAM head.</dd>
+  <dt id="S_HANGUP"><a class="permalink" href="#S_HANGUP">S_HANGUP</a></dt>
+  <dd>Notification of a hangup has reached the STREAM head.</dd>
+  <dt id="S_BANDURG"><a class="permalink" href="#S_BANDURG">S_BANDURG</a></dt>
+  <dd>When used in conjunction with S_RDBAND, SIGURG is generated instead of
+      SIGPOLL when a priority message reaches the front of the STREAM head read
+      queue.</dd>
+</dl>
+<p class="Pp">If <i>arg</i> is 0, the calling process shall be unregistered and
+    shall not receive further SIGPOLL signals for the stream associated with
+    <i>fildes</i>.</p>
+<p class="Pp">Processes that wish to receive SIGPOLL signals shall ensure that
+    they explicitly register to receive them using I_SETSIG. If several
+    processes register to receive this signal for the same event on the same
+    STREAM, each process shall be signaled when the event occurs.</p>
+<p class="Pp">The <i>ioctl</i>() function with the I_SETSIG command shall fail
+    if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~5"><a class="permalink" href="#EINVAL~5"><b>EINVAL</b></a></dt>
+  <dd>The value of <i>arg</i> is invalid.</dd>
+  <dt id="EINVAL~6"><a class="permalink" href="#EINVAL~6"><b>EINVAL</b></a></dt>
+  <dd>The value of <i>arg</i> is 0 and the calling process is not registered to
+      receive the SIGPOLL signal.</dd>
+  <dt id="EAGAIN~2"><a class="permalink" href="#EAGAIN~2"><b>EAGAIN</b></a></dt>
+  <dd>There were insufficient resources to store the signal request.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="I_GETSIG"><a class="permalink" href="#I_GETSIG">I_GETSIG</a></dt>
+  <dd>Returns the events for which the calling process is currently registered
+      to be sent a SIGPOLL signal. The events are returned as a bitmask in an
+      <b>int</b> pointed to by <i>arg</i>, where the events are those specified
+      in the description of I_SETSIG above.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">The <i>ioctl</i>() function with the I_GETSIG command shall fail
+    if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~7"><a class="permalink" href="#EINVAL~7"><b>EINVAL</b></a></dt>
+  <dd>Process is not registered to receive the SIGPOLL signal.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="I_FIND"><a class="permalink" href="#I_FIND">I_FIND</a></dt>
+  <dd>Compares the names of all modules currently present in the STREAM to the
+      name pointed to by <i>arg</i>, and returns 1 if the named module is
+      present in the STREAM, or returns 0 if the named module is not
+    present.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">The <i>ioctl</i>() function with the I_FIND command shall fail
+  if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~8"><a class="permalink" href="#EINVAL~8"><b>EINVAL</b></a></dt>
+  <dd><i>arg</i> does not contain a valid module name.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="I_PEEK"><a class="permalink" href="#I_PEEK">I_PEEK</a></dt>
+  <dd>Retrieves the information in the first message on the STREAM head read
+      queue without taking the message off the queue. It is analogous to
+      <i>getmsg</i>() except that this command does not remove the message from
+      the queue. The <i>arg</i> argument points to a <b>strpeek</b>
+    structure.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">The application shall ensure that the <i>maxlen</i> member in the
+    <b>ctlbuf</b> and <b>databuf strbuf</b> structures is set to the number of
+    bytes of control information and/or data information, respectively, to
+    retrieve. The <i>flags</i> member may be marked RS_HIPRI or 0, as described
+    by <i>getmsg</i>(). If the process sets <i>flags</i> to RS_HIPRI, for
+    example, I_PEEK shall only look for a high-priority message on the STREAM
+    head read queue.</p>
+<p class="Pp">I_PEEK returns 1 if a message was retrieved, and returns 0 if no
+    message was found on the STREAM head read queue, or if the RS_HIPRI flag was
+    set in <i>flags</i> and a high-priority message was not present on the
+    STREAM head read queue. It does not wait for a message to arrive. On return,
+    <b>ctlbuf</b> specifies information in the control buffer, <b>databuf</b>
+    specifies information in the data buffer, and <i>flags</i> contains the
+    value RS_HIPRI or 0.</p>
+</div>
+<dl class="Bl-tag">
+  <dt id="I_SRDOPT"><a class="permalink" href="#I_SRDOPT">I_SRDOPT</a></dt>
+  <dd>Sets the read mode using the value of the argument <i>arg</i>. Read modes
+      are described in <i>read</i>(). Valid <i>arg</i> flags are:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="RNORM"><a class="permalink" href="#RNORM">RNORM</a></dt>
+  <dd>Byte-stream mode, the default.</dd>
+  <dt id="RMSGD"><a class="permalink" href="#RMSGD">RMSGD</a></dt>
+  <dd>Message-discard mode.</dd>
+  <dt id="RMSGN"><a class="permalink" href="#RMSGN">RMSGN</a></dt>
+  <dd>Message-nondiscard mode.</dd>
+</dl>
+<p class="Pp">The bitwise-inclusive OR of RMSGD and RMSGN shall return
+    <b>[EINVAL]</b>. The bitwise-inclusive OR of RNORM and either RMSGD or RMSGN
+    shall result in the other flag overriding RNORM which is the default.</p>
+<p class="Pp">In addition, treatment of control messages by the STREAM head may
+    be changed by setting any of the following flags in <i>arg</i>:</p>
+<dl class="Bl-tag">
+  <dt id="RPROTNORM"><a class="permalink" href="#RPROTNORM">RPROTNORM</a></dt>
+  <dd>Fail <i>read</i>() with <b>[EBADMSG]</b> if a message containing a control
+      part is at the front of the STREAM head read queue.</dd>
+  <dt id="RPROTDAT"><a class="permalink" href="#RPROTDAT">RPROTDAT</a></dt>
+  <dd>Deliver the control part of a message as data when a process issues a
+      <i>read</i>().</dd>
+  <dt id="RPROTDIS"><a class="permalink" href="#RPROTDIS">RPROTDIS</a></dt>
+  <dd>Discard the control part of a message, delivering any data portion, when a
+      process issues a <i>read</i>().</dd>
+</dl>
+<p class="Pp">The <i>ioctl</i>() function with the I_SRDOPT command shall fail
+    if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~9"><a class="permalink" href="#EINVAL~9"><b>EINVAL</b></a></dt>
+  <dd>The <i>arg</i> argument is not valid.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="I_GRDOPT"><a class="permalink" href="#I_GRDOPT">I_GRDOPT</a></dt>
+  <dd>Returns the current read mode setting, as described above, in an
+      <b>int</b> pointed to by the argument <i>arg</i>. Read modes are described
+      in <i>read</i>().</dd>
+  <dt id="I_NREAD"><a class="permalink" href="#I_NREAD">I_NREAD</a></dt>
+  <dd>Counts the number of data bytes in the data part of the first message on
+      the STREAM head read queue and places this value in the <b>int</b> pointed
+      to by <i>arg</i>. The return value for the command shall be the number of
+      messages on the STREAM head read queue. For example, if 0 is returned in
+      <i>arg</i>, but the <i>ioctl</i>() return value is greater than 0, this
+      indicates that a zero-length message is next on the queue.</dd>
+  <dt id="I_FDINSERT"><a class="permalink" href="#I_FDINSERT">I_FDINSERT</a></dt>
+  <dd>Creates a message from specified buffer(s), adds information about another
+      STREAM, and sends the message downstream. The message contains a control
+      part and an optional data part. The data and control parts to be sent are
+      distinguished by placement in separate buffers, as described below. The
+      <i>arg</i> argument points to a <b>strfdinsert</b> structure.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">The application shall ensure that the <i>len</i> member in the
+    <b>ctlbuf strbuf</b> structure is set to the size of a <b>t_uscalar_t</b>
+    plus the number of bytes of control information to be sent with the message.
+    The <i>fildes</i> member specifies the file descriptor of the other STREAM,
+    and the <i>offset</i> member, which must be suitably aligned for use as a
+    <b>t_uscalar_t</b>, specifies the offset from the start of the control
+    buffer where I_FDINSERT shall store a <b>t_uscalar_t</b> whose
+    interpretation is specific to the STREAM end. The application shall ensure
+    that the <i>len</i> member in the <b>databuf strbuf</b> structure is set to
+    the number of bytes of data information to be sent with the message, or to 0
+    if no data part is to be sent.</p>
+<p class="Pp">The <i>flags</i> member specifies the type of message to be
+    created. A normal message is created if <i>flags</i> is set to 0, and a
+    high-priority message is created if <i>flags</i> is set to RS_HIPRI. For
+    non-priority messages, I_FDINSERT shall block if the STREAM write queue is
+    full due to internal flow control conditions. For priority messages,
+    I_FDINSERT does not block on this condition. For non-priority messages,
+    I_FDINSERT does not block when the write queue is full and O_NONBLOCK is
+    set. Instead, it fails and sets <i>errno</i> to <b>[EAGAIN]</b>.</p>
+<p class="Pp">I_FDINSERT also blocks, unless prevented by lack of internal
+    resources, waiting for the availability of message blocks in the STREAM,
+    regardless of priority or whether O_NONBLOCK has been specified. No partial
+    message is sent.</p>
+<p class="Pp">The <i>ioctl</i>() function with the I_FDINSERT command shall fail
+    if:</p>
+<dl class="Bl-tag">
+  <dt id="EAGAIN~3"><a class="permalink" href="#EAGAIN~3"><b>EAGAIN</b></a></dt>
+  <dd>A non-priority message is specified, the O_NONBLOCK flag is set, and the
+      STREAM write queue is full due to internal flow control conditions.</dd>
+  <dt id="EAGAIN~4"><a class="permalink" href="#EAGAIN~4"><b>EAGAIN</b> or
+    <b>ENOSR</b></a></dt>
+  <dd>
+    <br>
+    Buffers cannot be allocated for the message that is to be created.</dd>
+  <dt id="EINVAL~10"><a class="permalink" href="#EINVAL~10"><b>EINVAL</b></a></dt>
+  <dd>One of the following:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>--</dt>
+  <dd>The <i>fildes</i> member of the <b>strfdinsert</b> structure is not a
+      valid, open STREAM file descriptor.</dd>
+  <dt>--</dt>
+  <dd>The size of a <b>t_uscalar_t</b> plus <i>offset</i> is greater than the
+      <i>len</i> member for the buffer specified through <b>ctlbuf</b>.</dd>
+  <dt>--</dt>
+  <dd>The <i>offset</i> member does not specify a properly-aligned location in
+      the data buffer.</dd>
+  <dt>--</dt>
+  <dd>An undefined value is stored in <i>flags</i>.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="ENXIO~5"><a class="permalink" href="#ENXIO~5"><b>ENXIO</b></a></dt>
+  <dd>Hangup received on the STREAM identified by either the <i>fildes</i>
+      argument or the <i>fildes</i> member of the <b>strfdinsert</b>
+    structure.</dd>
+  <dt id="ERANGE"><a class="permalink" href="#ERANGE"><b>ERANGE</b></a></dt>
+  <dd>The <i>len</i> member for the buffer specified through <b>databuf</b> does
+      not fall within the range specified by the maximum and minimum packet
+      sizes of the topmost STREAM module; or the <i>len</i> member for the
+      buffer specified through <b>databuf</b> is larger than the maximum
+      configured size of the data part of a message; or the <i>len</i> member
+      for the buffer specified through <b>ctlbuf</b> is larger than the maximum
+      configured size of the control part of a message.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="I_STR"><a class="permalink" href="#I_STR">I_STR</a></dt>
+  <dd>Constructs an internal STREAMS <i>ioctl</i>() message from the data
+      pointed to by <i>arg</i>, and sends that message downstream.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">This mechanism is provided to send <i>ioctl</i>() requests to
+    downstream modules and drivers. It allows information to be sent with
+    <i>ioctl</i>(), and returns to the process any information sent upstream by
+    the downstream recipient. I_STR shall block until the system responds with
+    either a positive or negative acknowledgement message, or until the request
+    times out after some period of time. If the request times out, it shall fail
+    with <i>errno</i> set to <b>[ETIME]</b>.</p>
+<p class="Pp">At most, one I_STR can be active on a STREAM. Further I_STR calls
+    shall block until the active I_STR completes at the STREAM head. The default
+    timeout interval for these requests is 15 seconds. The O_NONBLOCK flag has
+    no effect on this call.</p>
+<p class="Pp">To send requests downstream, the application shall ensure that
+    <i>arg</i> points to a <b>strioctl</b> structure.</p>
+<p class="Pp">The <i>ic_cmd</i> member is the internal <i>ioctl</i>() command
+    intended for a downstream module or driver and <i>ic_timout</i> is the
+    number of seconds (-1=infinite, 0=use implementation-defined timeout
+    interval, &gt;0=as specified) an I_STR request shall wait for
+    acknowledgement before timing out. <i>ic_len</i> is the number of bytes in
+    the data argument, and <i>ic_dp</i> is a pointer to the data argument. The
+    <i>ic_len</i> member has two uses: on input, it contains the length of the
+    data argument passed in, and on return from the command, it contains the
+    number of bytes being returned to the process (the buffer pointed to by
+    <i>ic_dp</i> should be large enough to contain the maximum amount of data
+    that any module or the driver in the STREAM can return).</p>
+<p class="Pp">The STREAM head shall convert the information pointed to by the
+    <b>strioctl</b> structure to an internal <i>ioctl</i>() command message and
+    send it downstream.</p>
+<p class="Pp">The <i>ioctl</i>() function with the I_STR command shall fail
+  if:</p>
+<dl class="Bl-tag">
+  <dt id="EAGAIN~5"><a class="permalink" href="#EAGAIN~5"><b>EAGAIN</b> or
+    <b>ENOSR</b></a></dt>
+  <dd>
+    <br>
+    Unable to allocate buffers for the <i>ioctl</i>() message.</dd>
+  <dt id="EINVAL~11"><a class="permalink" href="#EINVAL~11"><b>EINVAL</b></a></dt>
+  <dd>The <i>ic_len</i> member is less than 0 or larger than the maximum
+      configured size of the data part of a message, or <i>ic_timout</i> is less
+      than -1.</dd>
+  <dt id="ENXIO~6"><a class="permalink" href="#ENXIO~6"><b>ENXIO</b></a></dt>
+  <dd>Hangup received on <i>fildes</i>.</dd>
+  <dt id="ETIME"><a class="permalink" href="#ETIME"><b>ETIME</b></a></dt>
+  <dd>A downstream <i>ioctl</i>() timed out before acknowledgement was
+    received.</dd>
+</dl>
+<p class="Pp">An I_STR can also fail while waiting for an acknowledgement if a
+    message indicating an error or a hangup is received at the STREAM head. In
+    addition, an error code can be returned in the positive or negative
+    acknowledgement message, in the event the <i>ioctl</i>() command sent
+    downstream fails. For these cases, I_STR shall fail with <i>errno</i> set to
+    the value in the message.</p>
+</div>
+<dl class="Bl-tag">
+  <dt id="I_SWROPT"><a class="permalink" href="#I_SWROPT">I_SWROPT</a></dt>
+  <dd>Sets the write mode using the value of the argument <i>arg</i>. Valid bit
+      settings for <i>arg</i> are:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="SNDZERO"><a class="permalink" href="#SNDZERO">SNDZERO</a></dt>
+  <dd>Send a zero-length message downstream when a <i>write</i>() of 0 bytes
+      occurs. To not send a zero-length message when a <i>write</i>() of 0 bytes
+      occurs, the application shall ensure that this bit is not set in
+      <i>arg</i> (for example, <i>arg</i> would be set to 0).</dd>
+</dl>
+<p class="Pp">The <i>ioctl</i>() function with the I_SWROPT command shall fail
+    if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~12"><a class="permalink" href="#EINVAL~12"><b>EINVAL</b></a></dt>
+  <dd><i>arg</i> is not the above value.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="I_GWROPT"><a class="permalink" href="#I_GWROPT">I_GWROPT</a></dt>
+  <dd>Returns the current write mode setting, as described above, in the
+      <b>int</b> that is pointed to by the argument <i>arg</i>.</dd>
+  <dt id="I_SENDFD"><a class="permalink" href="#I_SENDFD">I_SENDFD</a></dt>
+  <dd>Creates a new reference to the open file description associated with the
+      file descriptor <i>arg</i>, and writes a message on the STREAMS-based pipe
+      <i>fildes</i> containing this reference, together with the user ID and
+      group ID of the calling process.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">The <i>ioctl</i>() function with the I_SENDFD command shall fail
+    if:</p>
+<dl class="Bl-tag">
+  <dt id="EAGAIN~6"><a class="permalink" href="#EAGAIN~6"><b>EAGAIN</b></a></dt>
+  <dd>The sending STREAM is unable to allocate a message block to contain the
+      file pointer; or the read queue of the receiving STREAM head is full and
+      cannot accept the message sent by I_SENDFD.</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The <i>arg</i> argument is not a valid, open file descriptor.</dd>
+  <dt id="EINVAL~13"><a class="permalink" href="#EINVAL~13"><b>EINVAL</b></a></dt>
+  <dd>The <i>fildes</i> argument is not connected to a STREAM pipe.</dd>
+  <dt id="ENXIO~7"><a class="permalink" href="#ENXIO~7"><b>ENXIO</b></a></dt>
+  <dd>Hangup received on <i>fildes</i>.</dd>
+</dl>
+<p class="Pp">The <i>ioctl</i>() function with the I_SENDFD command may fail
+  if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~14"><a class="permalink" href="#EINVAL~14"><b>EINVAL</b></a></dt>
+  <dd>The <i>arg</i> argument is equal to the <i>fildes</i> argument.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="I_RECVFD"><a class="permalink" href="#I_RECVFD">I_RECVFD</a></dt>
+  <dd>Retrieves the reference to an open file description from a message written
+      to a STREAMS-based pipe using the I_SENDFD command, and allocates a new
+      file descriptor in the calling process that refers to this open file
+      description. The <i>arg</i> argument is a pointer to a <b>strrecvfd</b>
+      data structure as defined in <i>&lt;stropts.h&gt;</i>.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">The <i>fd</i> member is a file descriptor. The <i>uid</i> and
+    <i>gid</i> members are the effective user ID and effective group ID,
+    respectively, of the sending process.</p>
+<p class="Pp">If O_NONBLOCK is not set, I_RECVFD shall block until a message is
+    present at the STREAM head. If O_NONBLOCK is set, I_RECVFD shall fail with
+    <i>errno</i> set to <b>[EAGAIN]</b> if no message is present at the STREAM
+    head.</p>
+<p class="Pp">If the message at the STREAM head is a message sent by an
+    I_SENDFD, a new file descriptor shall be allocated for the open file
+    descriptor referenced in the message. The new file descriptor is placed in
+    the <i>fd</i> member of the <b>strrecvfd</b> structure pointed to by
+    <i>arg</i>.</p>
+<p class="Pp">The <i>ioctl</i>() function with the I_RECVFD command shall fail
+    if:</p>
+<dl class="Bl-tag">
+  <dt id="EAGAIN~7"><a class="permalink" href="#EAGAIN~7"><b>EAGAIN</b></a></dt>
+  <dd>A message is not present at the STREAM head read queue and the O_NONBLOCK
+      flag is set.</dd>
+  <dt id="EBADMSG"><a class="permalink" href="#EBADMSG"><b>EBADMSG</b></a></dt>
+  <dd>The message at the STREAM head read queue is not a message containing a
+      passed file descriptor.</dd>
+  <dt id="EMFILE"><a class="permalink" href="#EMFILE"><b>EMFILE</b></a></dt>
+  <dd>All file descriptors available to the process are currently open.</dd>
+  <dt id="ENXIO~8"><a class="permalink" href="#ENXIO~8"><b>ENXIO</b></a></dt>
+  <dd>Hangup received on <i>fildes</i>.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="I_LIST"><a class="permalink" href="#I_LIST">I_LIST</a></dt>
+  <dd>Allows the process to list all the module names on the STREAM, up to and
+      including the topmost driver name. If <i>arg</i> is a null pointer, the
+      return value shall be the number of modules, including the driver, that
+      are on the STREAM pointed to by <i>fildes</i>. This lets the process
+      allocate enough space for the module names. Otherwise, it should point to
+      a <b>str_list</b> structure.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">The <i>sl_nmods</i> member indicates the number of entries the
+    process has allocated in the array. Upon return, the <i>sl_modlist</i>
+    member of the <b>str_list</b> structure shall contain the list of module
+    names, and the number of entries that have been filled into the
+    <i>sl_modlist</i> array is found in the <i>sl_nmods</i> member (the number
+    includes the number of modules including the driver). The return value from
+    <i>ioctl</i>() shall be 0. The entries are filled in starting at the top of
+    the STREAM and continuing downstream until either the end of the STREAM is
+    reached, or the number of requested modules (<i>sl_nmods</i>) is
+  satisfied.</p>
+<p class="Pp">The <i>ioctl</i>() function with the I_LIST command shall fail
+  if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~15"><a class="permalink" href="#EINVAL~15"><b>EINVAL</b></a></dt>
+  <dd>The <i>sl_nmods</i> member is less than 1.</dd>
+  <dt id="EAGAIN~8"><a class="permalink" href="#EAGAIN~8"><b>EAGAIN</b> or
+    <b>ENOSR</b></a></dt>
+  <dd>
+    <br>
+    Unable to allocate buffers.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="I_ATMARK"><a class="permalink" href="#I_ATMARK">I_ATMARK</a></dt>
+  <dd>Allows the process to see if the message at the head of the STREAM head
+      read queue is marked by some module downstream. The <i>arg</i> argument
+      determines how the checking is done when there may be multiple marked
+      messages on the STREAM head read queue. It may take on the following
+      values:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="ANYMARK"><a class="permalink" href="#ANYMARK">ANYMARK</a></dt>
+  <dd>Check if the message is marked.</dd>
+  <dt id="LASTMARK"><a class="permalink" href="#LASTMARK">LASTMARK</a></dt>
+  <dd>Check if the message is the last one marked on the queue.</dd>
+</dl>
+<p class="Pp">The bitwise-inclusive OR of the flags ANYMARK and LASTMARK is
+    permitted.</p>
+<p class="Pp">The return value shall be 1 if the mark condition is satisfied;
+    otherwise, the value shall be 0.</p>
+<p class="Pp">The <i>ioctl</i>() function with the I_ATMARK command shall fail
+    if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~16"><a class="permalink" href="#EINVAL~16"><b>EINVAL</b></a></dt>
+  <dd>Invalid <i>arg</i> value.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="I_CKBAND"><a class="permalink" href="#I_CKBAND">I_CKBAND</a></dt>
+  <dd>Checks if the message of a given priority band exists on the STREAM head
+      read queue. This shall return 1 if a message of the given priority exists,
+      0 if no such message exists, or -1 on error. <i>arg</i> should be of type
+      <b>int</b>.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">The <i>ioctl</i>() function with the I_CKBAND command shall fail
+    if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~17"><a class="permalink" href="#EINVAL~17"><b>EINVAL</b></a></dt>
+  <dd>Invalid <i>arg</i> value.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="I_GETBAND"><a class="permalink" href="#I_GETBAND">I_GETBAND</a></dt>
+  <dd>Returns the priority band of the first message on the STREAM head read
+      queue in the integer referenced by <i>arg</i>.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">The <i>ioctl</i>() function with the I_GETBAND command shall fail
+    if:</p>
+<dl class="Bl-tag">
+  <dt id="ENODATA"><a class="permalink" href="#ENODATA"><b>ENODATA</b></a></dt>
+  <dd>No message on the STREAM head read queue.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="I_CANPUT"><a class="permalink" href="#I_CANPUT">I_CANPUT</a></dt>
+  <dd>Checks if a certain band is writable. <i>arg</i> is set to the priority
+      band in question. The return value shall be 0 if the band is
+      flow-controlled, 1 if the band is writable, or -1 on error.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">The <i>ioctl</i>() function with the I_CANPUT command shall fail
+    if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~18"><a class="permalink" href="#EINVAL~18"><b>EINVAL</b></a></dt>
+  <dd>Invalid <i>arg</i> value.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="I_SETCLTIME"><a class="permalink" href="#I_SETCLTIME">I_SETCLTIME</a></dt>
+  <dd>This request allows the process to set the time the STREAM head shall
+      delay when a STREAM is closing and there is data on the write queues.
+      Before closing each module or driver, if there is data on its write queue,
+      the STREAM head shall delay for the specified amount of time to allow the
+      data to drain. If, after the delay, data is still present, it shall be
+      flushed. The <i>arg</i> argument is a pointer to an integer specifying the
+      number of milliseconds to delay, rounded up to the nearest valid value. If
+      I_SETCLTIME is not performed on a STREAM, an implementation-defined
+      default timeout interval is used.
+    <br>
+  </dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">The <i>ioctl</i>() function with the I_SETCLTIME command shall
+    fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~19"><a class="permalink" href="#EINVAL~19"><b>EINVAL</b></a></dt>
+  <dd>Invalid <i>arg</i> value.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="I_GETCLTIME"><a class="permalink" href="#I_GETCLTIME">I_GETCLTIME</a></dt>
+  <dd>Returns the close time delay in the integer pointed to by <i>arg</i>.</dd>
+</dl>
+<section class="Ss">
+<h2 class="Ss" id="Multiplexed_STREAMS_Configurations"><a class="permalink" href="#Multiplexed_STREAMS_Configurations">Multiplexed
+  STREAMS Configurations</a></h2>
+<p class="Pp">The following commands are used for connecting and disconnecting
+    multiplexed STREAMS configurations. These commands use an
+    implementation-defined default timeout interval.</p>
+<dl class="Bl-tag">
+  <dt id="I_LINK"><a class="permalink" href="#I_LINK">I_LINK</a></dt>
+  <dd>Connects two STREAMs, where <i>fildes</i> is the file descriptor of the
+      STREAM connected to the multiplexing driver, and <i>arg</i> is the file
+      descriptor of the STREAM connected to another driver. The STREAM
+      designated by <i>arg</i> is connected below the multiplexing driver.
+      I_LINK requires the multiplexing driver to send an acknowledgement message
+      to the STREAM head regarding the connection. This call shall return a
+      multiplexer ID number (an identifier used to disconnect the multiplexer;
+      see I_UNLINK) on success, and -1 on failure.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">The <i>ioctl</i>() function with the I_LINK command shall fail
+  if:</p>
+<dl class="Bl-tag">
+  <dt id="ENXIO~9"><a class="permalink" href="#ENXIO~9"><b>ENXIO</b></a></dt>
+  <dd>Hangup received on <i>fildes</i>.</dd>
+  <dt id="ETIME~2"><a class="permalink" href="#ETIME~2"><b>ETIME</b></a></dt>
+  <dd>Timeout before acknowledgement message was received at STREAM head.</dd>
+  <dt id="EAGAIN~9"><a class="permalink" href="#EAGAIN~9"><b>EAGAIN</b> or
+    <b>ENOSR</b></a></dt>
+  <dd>
+    <br>
+    Unable to allocate STREAMS storage to perform the I_LINK.</dd>
+  <dt id="EBADF~2"><a class="permalink" href="#EBADF~2"><b>EBADF</b></a></dt>
+  <dd>The <i>arg</i> argument is not a valid, open file descriptor.</dd>
+  <dt id="EINVAL~20"><a class="permalink" href="#EINVAL~20"><b>EINVAL</b></a></dt>
+  <dd>The <i>fildes</i> argument does not support multiplexing; or <i>arg</i> is
+      not a STREAM or is already connected downstream from a multiplexer; or the
+      specified I_LINK operation would connect the STREAM head in more than one
+      place in the multiplexed STREAM.</dd>
+</dl>
+<p class="Pp">An I_LINK can also fail while waiting for the multiplexing driver
+    to acknowledge the request, if a message indicating an error or a hangup is
+    received at the STREAM head of <i>fildes</i>. In addition, an error code can
+    be returned in the positive or negative acknowledgement message. For these
+    cases, I_LINK fails with <i>errno</i> set to the value in the message.</p>
+</div>
+<dl class="Bl-tag">
+  <dt id="I_UNLINK"><a class="permalink" href="#I_UNLINK">I_UNLINK</a></dt>
+  <dd>Disconnects the two STREAMs specified by <i>fildes</i> and <i>arg</i>.
+      <i>fildes</i> is the file descriptor of the STREAM connected to the
+      multiplexing driver. The <i>arg</i> argument is the multiplexer ID number
+      that was returned by the I_LINK <i>ioctl</i>() command when a STREAM was
+      connected downstream from the multiplexing driver. If <i>arg</i> is
+      MUXID_ALL, then all STREAMs that were connected to <i>fildes</i> shall be
+      disconnected. As in I_LINK, this command requires acknowledgement.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">The <i>ioctl</i>() function with the I_UNLINK command shall fail
+    if:</p>
+<dl class="Bl-tag">
+  <dt id="ENXIO~10"><a class="permalink" href="#ENXIO~10"><b>ENXIO</b></a></dt>
+  <dd>Hangup received on <i>fildes</i>.</dd>
+  <dt id="ETIME~3"><a class="permalink" href="#ETIME~3"><b>ETIME</b></a></dt>
+  <dd>Timeout before acknowledgement message was received at STREAM head.</dd>
+  <dt id="EAGAIN~10"><a class="permalink" href="#EAGAIN~10"><b>EAGAIN</b> or
+    <b>ENOSR</b></a></dt>
+  <dd>
+    <br>
+    Unable to allocate buffers for the acknowledgement message.</dd>
+  <dt id="EINVAL~21"><a class="permalink" href="#EINVAL~21"><b>EINVAL</b></a></dt>
+  <dd>Invalid multiplexer ID number.</dd>
+</dl>
+<p class="Pp">An I_UNLINK can also fail while waiting for the multiplexing
+    driver to acknowledge the request if a message indicating an error or a
+    hangup is received at the STREAM head of <i>fildes</i>. In addition, an
+    error code can be returned in the positive or negative acknowledgement
+    message. For these cases, I_UNLINK shall fail with <i>errno</i> set to the
+    value in the message.</p>
+</div>
+<dl class="Bl-tag">
+  <dt id="I_PLINK"><a class="permalink" href="#I_PLINK">I_PLINK</a></dt>
+  <dd>Creates a <i>persistent connection</i> between two STREAMs, where
+      <i>fildes</i> is the file descriptor of the STREAM connected to the
+      multiplexing driver, and <i>arg</i> is the file descriptor of the STREAM
+      connected to another driver. This call shall create a persistent
+      connection which can exist even if the file descriptor <i>fildes</i>
+      associated with the upper STREAM to the multiplexing driver is closed. The
+      STREAM designated by <i>arg</i> gets connected via a persistent connection
+      below the multiplexing driver. I_PLINK requires the multiplexing driver to
+      send an acknowledgement message to the STREAM head. This call shall return
+      a multiplexer ID number (an identifier that may be used to disconnect the
+      multiplexer; see I_PUNLINK) on success, and -1 on failure.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">The <i>ioctl</i>() function with the I_PLINK command shall fail
+    if:</p>
+<dl class="Bl-tag">
+  <dt id="ENXIO~11"><a class="permalink" href="#ENXIO~11"><b>ENXIO</b></a></dt>
+  <dd>Hangup received on <i>fildes</i>.</dd>
+  <dt id="ETIME~4"><a class="permalink" href="#ETIME~4"><b>ETIME</b></a></dt>
+  <dd>Timeout before acknowledgement message was received at STREAM head.</dd>
+  <dt id="EAGAIN~11"><a class="permalink" href="#EAGAIN~11"><b>EAGAIN</b> or
+    <b>ENOSR</b></a></dt>
+  <dd>
+    <br>
+    Unable to allocate STREAMS storage to perform the I_PLINK.</dd>
+  <dt id="EBADF~3"><a class="permalink" href="#EBADF~3"><b>EBADF</b></a></dt>
+  <dd>The <i>arg</i> argument is not a valid, open file descriptor.</dd>
+  <dt id="EINVAL~22"><a class="permalink" href="#EINVAL~22"><b>EINVAL</b></a></dt>
+  <dd>The <i>fildes</i> argument does not support multiplexing; or <i>arg</i> is
+      not a STREAM or is already connected downstream from a multiplexer; or the
+      specified I_PLINK operation would connect the STREAM head in more than one
+      place in the multiplexed STREAM.</dd>
+</dl>
+<p class="Pp">An I_PLINK can also fail while waiting for the multiplexing driver
+    to acknowledge the request, if a message indicating an error or a hangup is
+    received at the STREAM head of <i>fildes</i>. In addition, an error code can
+    be returned in the positive or negative acknowledgement message. For these
+    cases, I_PLINK shall fail with <i>errno</i> set to the value in the
+  message.</p>
+</div>
+<dl class="Bl-tag">
+  <dt id="I_PUNLINK"><a class="permalink" href="#I_PUNLINK">I_PUNLINK</a></dt>
+  <dd>Disconnects the two STREAMs specified by <i>fildes</i> and <i>arg</i> from
+      a persistent connection. The <i>fildes</i> argument is the file descriptor
+      of the STREAM connected to the multiplexing driver. The <i>arg</i>
+      argument is the multiplexer ID number that was returned by the I_PLINK
+      <i>ioctl</i>() command when a STREAM was connected downstream from the
+      multiplexing driver. If <i>arg</i> is MUXID_ALL, then all STREAMs which
+      are persistent connections to <i>fildes</i> shall be disconnected. As in
+      I_PLINK, this command requires the multiplexing driver to acknowledge the
+      request.
+    <br>
+  </dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">The <i>ioctl</i>() function with the I_PUNLINK command shall fail
+    if:</p>
+<dl class="Bl-tag">
+  <dt id="ENXIO~12"><a class="permalink" href="#ENXIO~12"><b>ENXIO</b></a></dt>
+  <dd>Hangup received on <i>fildes</i>.</dd>
+  <dt id="ETIME~5"><a class="permalink" href="#ETIME~5"><b>ETIME</b></a></dt>
+  <dd>Timeout before acknowledgement message was received at STREAM head.</dd>
+  <dt id="EAGAIN~12"><a class="permalink" href="#EAGAIN~12"><b>EAGAIN</b> or
+    <b>ENOSR</b></a></dt>
+  <dd>
+    <br>
+    Unable to allocate buffers for the acknowledgement message.</dd>
+  <dt id="EINVAL~23"><a class="permalink" href="#EINVAL~23"><b>EINVAL</b></a></dt>
+  <dd>Invalid multiplexer ID number.</dd>
+</dl>
+<p class="Pp">An I_PUNLINK can also fail while waiting for the multiplexing
+    driver to acknowledge the request if a message indicating an error or a
+    hangup is received at the STREAM head of <i>fildes</i>. In addition, an
+    error code can be returned in the positive or negative acknowledgement
+    message. For these cases, I_PUNLINK shall fail with <i>errno</i> set to the
+    value in the message.</p>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>ioctl</i>() shall return a value
+    other than -1 that depends upon the STREAMS device control function.
+    Otherwise, it shall return -1 and set <i>errno</i> to indicate the
+  error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">Under the following general conditions, <i>ioctl</i>() shall fail
+    if:</p>
+<dl class="Bl-tag">
+  <dt id="EBADF~4"><a class="permalink" href="#EBADF~4"><b>EBADF</b></a></dt>
+  <dd>The <i>fildes</i> argument is not a valid open file descriptor.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>A signal was caught during the <i>ioctl</i>() operation.</dd>
+  <dt id="EINVAL~24"><a class="permalink" href="#EINVAL~24"><b>EINVAL</b></a></dt>
+  <dd>The STREAM or multiplexer referenced by <i>fildes</i> is linked (directly
+      or indirectly) downstream from a multiplexer.</dd>
+</dl>
+<p class="Pp">If an underlying device driver detects an error, then
+    <i>ioctl</i>() shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~25"><a class="permalink" href="#EINVAL~25"><b>EINVAL</b></a></dt>
+  <dd>The <i>request</i> or <i>arg</i> argument is not valid for this
+    device.</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>Some physical I/O error has occurred.</dd>
+  <dt id="ENOTTY"><a class="permalink" href="#ENOTTY"><b>ENOTTY</b></a></dt>
+  <dd>The file associated with the <i>fildes</i> argument is not a STREAMS
+      device that accepts control functions.</dd>
+  <dt id="ENXIO~13"><a class="permalink" href="#ENXIO~13"><b>ENXIO</b></a></dt>
+  <dd>The <i>request</i> and <i>arg</i> arguments are valid for this device
+      driver, but the service requested cannot be performed on this particular
+      sub-device.</dd>
+  <dt id="ENODEV"><a class="permalink" href="#ENODEV"><b>ENODEV</b></a></dt>
+  <dd>The <i>fildes</i> argument refers to a valid STREAMS device, but the
+      corresponding device driver does not support the <i>ioctl</i>()
+    function.</dd>
+</dl>
+<p class="Pp">If a STREAM is connected downstream from a multiplexer, any
+    <i>ioctl</i>() command except I_UNLINK and I_PUNLINK shall set <i>errno</i>
+    to <b>[EINVAL]</b>.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The implementation-defined timeout interval for STREAMS has
+    historically been 15 seconds.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">The <i>ioctl</i>() function may be removed in a future
+  version.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i>Section 2.6</i>, <i>STREAMS</i>, <i><i>close</i>()</i>,
+    <i><i>fcntl</i>()</i>, <i><i>getmsg</i>()</i>, <i><i>open</i>()</i>,
+    <i><i>pipe</i>()</i>, <i><i>poll</i>()</i>, <i><i>putmsg</i>()</i>,
+    <i><i>read</i>()</i>, <i><i>sigaction</i>()</i>, <i><i>write</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;stropts.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

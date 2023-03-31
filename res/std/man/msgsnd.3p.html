@@ -1,0 +1,241 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/b8add191f4b78ad1a3e3c9f1beacd43f225e964c">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>MSGSND(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">MSGSND(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">MSGSND(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">msgsnd — XSI message send operation</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;sys/msg.h&gt;</pre>
+<pre>int msgsnd(int <i>msqid</i>, const void *<i>msgp</i>, size_t <i>msgsz</i>, int <i>msgflg</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>msgsnd</i>() function operates on XSI message queues (see
+    the Base Definitions volume of POSIX.1‐2017, <i>Section 3.226</i>,
+    <i>Message Queue</i>). It is unspecified whether this function interoperates
+    with the realtime interprocess communication facilities defined in
+    <i>Section 2.8</i>, <i>Realtime</i>.</p>
+<p class="Pp">The <i>msgsnd</i>() function shall send a message to the queue
+    associated with the message queue identifier specified by <i>msqid</i>.</p>
+<p class="Pp">The application shall ensure that the argument <i>msgp</i> points
+    to a user-defined buffer that contains first a field of type <b>long</b>
+    specifying the type of the message, and then a data portion that holds the
+    data bytes of the message. The structure below is an example of what this
+    user-defined buffer might look like:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>struct mymsg {
+<br>
+    long   mtype;       /* Message type. */
+<br>
+    char   mtext[1];    /* Message text. */
+}</pre>
+</div>
+<p class="Pp">The structure member <i>mtype</i> is a non-zero positive type
+    <b>long</b> that can be used by the receiving process for message
+  selection.</p>
+<p class="Pp">The structure member <i>mtext</i> is any text of length
+    <i>msgsz</i> bytes. The argument <i>msgsz</i> can range from 0 to a
+    system-imposed maximum.</p>
+<p class="Pp">The argument <i>msgflg</i> specifies the action to be taken if one
+    or more of the following is true:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>The number of bytes already on the queue is equal to <b>msg_qbytes</b>;
+      see <i>&lt;sys/msg.h&gt;</i>.</dd>
+  <dt> *</dt>
+  <dd>The total number of messages on all queues system-wide is equal to the
+      system-imposed limit.</dd>
+</dl>
+<p class="Pp">These actions are as follows:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>If (<i>msgflg</i> &amp; IPC_NOWAIT) is non-zero, the message shall not be
+      sent and the calling thread shall return immediately.</dd>
+  <dt> *</dt>
+  <dd>If (<i>msgflg</i> &amp; IPC_NOWAIT) is 0, the calling thread shall suspend
+      execution until one of the following occurs:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>--</dt>
+  <dd>The condition responsible for the suspension no longer exists, in which
+      case the message is sent.</dd>
+  <dt>--</dt>
+  <dd>The message queue identifier <i>msqid</i> is removed from the system; when
+      this occurs, <i>errno</i> shall be set to <b>[EIDRM]</b> and -1 shall be
+      returned.</dd>
+  <dt>--</dt>
+  <dd>The calling thread receives a signal that is to be caught; in this case
+      the message is not sent and the calling thread resumes execution in the
+      manner prescribed in <i><i>sigaction</i>()</i>.</dd>
+</dl>
+</div>
+<br>
+<p class="Pp">Upon successful completion, the following actions are taken with
+    respect to the data structure associated with <i>msqid</i>; see
+    <i>&lt;sys/msg.h&gt;</i>:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd><b>msg_qnum</b> shall be incremented by 1.</dd>
+  <dt> *</dt>
+  <dd><b>msg_lspid</b> shall be set to the process ID of the calling
+    process.</dd>
+  <dt> *</dt>
+  <dd><b>msg_stime</b> shall be set to the current time, as described in
+      <i>Section 2.7.1</i>, <i>IPC General Description</i>.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>msgsnd</i>() shall return 0;
+    otherwise, no message shall be sent, <i>msgsnd</i>() shall return -1, and
+    <i>errno</i> shall be set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>msgsnd</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>Operation permission is denied to the calling process; see <i>Section
+      2.7</i>, <i>XSI Interprocess Communication</i>.</dd>
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>The message cannot be sent for one of the reasons cited above and
+      (<i>msgflg</i> &amp; IPC_NOWAIT) is non-zero.</dd>
+  <dt id="EIDRM"><a class="permalink" href="#EIDRM"><b>EIDRM</b></a></dt>
+  <dd>The message queue identifier <i>msqid</i> is removed from the system.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The <i>msgsnd</i>() function was interrupted by a signal.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The value of <i>msqid</i> is not a valid message queue identifier, or the
+      value of <i>mtype</i> is less than 1; or the value of <i>msgsz</i> is
+      greater than the system-imposed limit.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Sending_a_Message"><a class="permalink" href="#Sending_a_Message">Sending
+  a Message</a></h2>
+<p class="Pp">The following example sends a message to the queue identified by
+    the <i>msqid</i> argument (assuming that value has previously been set).
+    This call specifies that an error should be reported if no message is
+    available. The message size is calculated directly using the <i>sizeof</i>
+    operator.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;sys/msg.h&gt;
+...
+int result;
+int msqid;
+struct message {
+<br>
+    long type;
+<br>
+    char text[20];
+} msg;</pre>
+<pre>msg.type = 1;
+strcpy(msg.text, "This is message 1");
+...
+result = msgsnd(msqid, (void *) &amp;msg, sizeof(msg.text), IPC_NOWAIT);</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The POSIX Realtime Extension defines alternative interfaces for
+    interprocess communication (IPC). Application developers who need to use IPC
+    should design their applications so that modules using the IPC routines
+    described in <i>Section 2.7</i>, <i>XSI Interprocess Communication</i> can
+    be easily modified to use the alternative interfaces.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i>Section 2.7</i>, <i>XSI Interprocess Communication</i>,
+    <i>Section 2.8</i>, <i>Realtime</i>, <i><i>mq_close</i>()</i>,
+    <i><i>mq_getattr</i>()</i>, <i><i>mq_notify</i>()</i>,
+    <i><i>mq_open</i>()</i>, <i><i>mq_receive</i>()</i>,
+    <i><i>mq_send</i>()</i>, <i><i>mq_setattr</i>()</i>,
+    <i><i>mq_unlink</i>()</i>, <i><i>msgctl</i>()</i>, <i><i>msgget</i>()</i>,
+    <i><i>msgrcv</i>()</i>, <i><i>sigaction</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Section
+    3.226</i>, <i>Message Queue</i>, <i><b>&lt;sys_msg.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

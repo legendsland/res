@@ -1,0 +1,271 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/230ba91f119d080afb41c92b5897ca42658473b7">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>strtok(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">strtok(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">strtok(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">strtok, strtok_r - extract tokens from strings</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;string.h&gt;</b></pre>
+<pre><b>char *strtok(char *restrict </b><i>str</i><b>, const char *restrict </b><i>delim</i><b>);</b>
+<b>char *strtok_r(char *restrict </b><i>str</i><b>, const char *restrict </b><i>delim</i><b>,</b>
+<b>               char **restrict </b><i>saveptr</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>strtok_r</b>():</p>
+<pre><br>
+    _POSIX_C_SOURCE
+<br>
+        || /* glibc &lt;= 2.19: */ _BSD_SOURCE || _SVID_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>strtok</b>() function breaks a string into a sequence of
+    zero or more nonempty tokens. On the first call to <b>strtok</b>(), the
+    string to be parsed should be specified in <i>str</i>. In each subsequent
+    call that should parse the same string, <i>str</i> must be NULL.</p>
+<p class="Pp">The <i>delim</i> argument specifies a set of bytes that delimit
+    the tokens in the parsed string. The caller may specify different strings in
+    <i>delim</i> in successive calls that parse the same string.</p>
+<p class="Pp">Each call to <b>strtok</b>() returns a pointer to a
+    null-terminated string containing the next token. This string does not
+    include the delimiting byte. If no more tokens are found, <b>strtok</b>()
+    returns NULL.</p>
+<p class="Pp">A sequence of calls to <b>strtok</b>() that operate on the same
+    string maintains a pointer that determines the point from which to start
+    searching for the next token. The first call to <b>strtok</b>() sets this
+    pointer to point to the first byte of the string. The start of the next
+    token is determined by scanning forward for the next nondelimiter byte in
+    <i>str</i>. If such a byte is found, it is taken as the start of the next
+    token. If no such byte is found, then there are no more tokens, and
+    <b>strtok</b>() returns NULL. (A string that is empty or that contains only
+    delimiters will thus cause <b>strtok</b>() to return NULL on the first
+    call.)</p>
+<p class="Pp">The end of each token is found by scanning forward until either
+    the next delimiter byte is found or until the terminating null byte ('\0')
+    is encountered. If a delimiter byte is found, it is overwritten with a null
+    byte to terminate the current token, and <b>strtok</b>() saves a pointer to
+    the following byte; that pointer will be used as the starting point when
+    searching for the next token. In this case, <b>strtok</b>() returns a
+    pointer to the start of the found token.</p>
+<p class="Pp">From the above description, it follows that a sequence of two or
+    more contiguous delimiter bytes in the parsed string is considered to be a
+    single delimiter, and that delimiter bytes at the start or end of the string
+    are ignored. Put another way: the tokens returned by <b>strtok</b>() are
+    always nonempty strings. Thus, for example, given the string
+    "<i>aaa;;bbb,</i>", successive calls to <b>strtok</b>() that
+    specify the delimiter string "<i>;,</i>" would return the strings
+    "<i>aaa</i>" and "<i>bbb</i>", and then a null
+  pointer.</p>
+<p class="Pp">The <b>strtok_r</b>() function is a reentrant version of
+    <b>strtok</b>(). The <i>saveptr</i> argument is a pointer to a
+    <i>char&nbsp;*</i> variable that is used internally by <b>strtok_r</b>()
+    in order to maintain context between successive calls that parse the same
+    string.</p>
+<p class="Pp">On the first call to <b>strtok_r</b>(), <i>str</i> should point to
+    the string to be parsed, and the value of <i>*saveptr</i> is ignored (but
+    see NOTES). In subsequent calls, <i>str</i> should be NULL, and
+    <i>saveptr</i> (and the buffer that it points to) should be unchanged since
+    the previous call.</p>
+<p class="Pp">Different strings may be parsed concurrently using sequences of
+    calls to <b>strtok_r</b>() that specify different <i>saveptr</i>
+  arguments.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <b>strtok</b>() and <b>strtok_r</b>() functions return a
+    pointer to the next token, or NULL if there are no more tokens.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>strtok ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race:strtok</td>
+  </tr>
+  <tr>
+    <td>strtok_r ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<dl class="Bl-tag">
+  <dt id="strtok"><a class="permalink" href="#strtok"><b>strtok</b>()</a></dt>
+  <dd>POSIX.1-2001, POSIX.1-2008, C89, C99, SVr4, 4.3BSD.</dd>
+  <dt id="strtok_r"><a class="permalink" href="#strtok_r"><b>strtok_r</b>()</a></dt>
+  <dd>POSIX.1-2001, POSIX.1-2008.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">On some implementations, <i>*saveptr</i> is required to be NULL on
+    the first call to <b>strtok_r</b>() that is being used to parse
+  <i>str</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">Be cautious when using these functions. If you do use them, note
+    that:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>These functions modify their first argument.</dd>
+  <dt>•</dt>
+  <dd>These functions cannot be used on constant strings.</dd>
+  <dt>•</dt>
+  <dd>The identity of the delimiting byte is lost.</dd>
+  <dt>•</dt>
+  <dd>The <b>strtok</b>() function uses a static buffer while parsing, so it's
+      not thread safe. Use <b>strtok_r</b>() if this matters to you.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below uses nested loops that employ <b>strtok_r</b>()
+    to break a string into a two-level hierarchy of tokens. The first
+    command-line argument specifies the string to be parsed. The second argument
+    specifies the delimiter byte(s) to be used to separate that string into
+    "major" tokens. The third argument specifies the delimiter byte(s)
+    to be used to separate the "major" tokens into subtokens.</p>
+<p class="Pp">An example of the output produced by this program is the
+    following:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$<b> ./a.out 'a/bbb///cc;xxx:yyy:' ':;' '/'</b>
+1: a/bbb///cc
+<br>
+         --&gt; a
+<br>
+         --&gt; bbb
+<br>
+         --&gt; cc
+2: xxx
+<br>
+         --&gt; xxx
+3: yyy
+<br>
+         --&gt; yyy
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+int
+main(int argc, char *argv[])
+{
+<br>
+    char *str1, *str2, *token, *subtoken;
+<br>
+    char *saveptr1, *saveptr2;
+<br>
+    int j;
+<br>
+    if (argc != 4) {
+<br>
+        fprintf(stderr, "Usage: %s string delim subdelim\n",
+<br>
+                argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    for (j = 1, str1 = argv[1]; ; j++, str1 = NULL) {
+<br>
+        token = strtok_r(str1, argv[2], &amp;saveptr1);
+<br>
+        if (token == NULL)
+<br>
+            break;
+<br>
+        printf("%d: %s\n", j, token);
+<br>
+        for (str2 = token; ; str2 = NULL) {
+<br>
+            subtoken = strtok_r(str2, argv[3], &amp;saveptr2);
+<br>
+            if (subtoken == NULL)
+<br>
+                break;
+<br>
+            printf("\t --&gt; %s\n", subtoken);
+<br>
+        }
+<br>
+    }
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+<p class="Pp">Another example program using <b>strtok</b>() can be found in
+    <b>getaddrinfo_a</b>(3).</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>memchr</b>(3), <b>strchr</b>(3), <b>string</b>(3),
+    <b>strpbrk</b>(3), <b>strsep</b>(3), <b>strspn</b>(3), <b>strstr</b>(3),
+    <b>wcstok</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

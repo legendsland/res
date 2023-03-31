@@ -1,0 +1,219 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/4a7201142bca7a1f38526721df83043bf618f519">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>DUP(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">DUP(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">DUP(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">dup, dup2 — duplicate an open file descriptor</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;unistd.h&gt;</pre>
+<pre>int dup(int <i>fildes</i>);
+int dup2(int <i>fildes</i>, int <i>fildes2</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>dup</i>() function provides an alternative interface to the
+    service provided by <i>fcntl</i>() using the F_DUPFD command. The call
+    <i>dup</i>(<i>fildes</i>) shall be equivalent to:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>fcntl(fildes, F_DUPFD, 0);</pre>
+</div>
+<p class="Pp">The <i>dup2</i>() function shall cause the file descriptor
+    <i>fildes2</i> to refer to the same open file description as the file
+    descriptor <i>fildes</i> and to share any locks, and shall return
+    <i>fildes2</i>. If <i>fildes2</i> is already a valid open file descriptor,
+    it shall be closed first, unless <i>fildes</i> is equal to <i>fildes2</i> in
+    which case <i>dup2</i>() shall return <i>fildes2</i> without closing it. If
+    the close operation fails to close <i>fildes2</i>, <i>dup2</i>() shall
+    return -1 without changing the open file description to which <i>fildes2</i>
+    refers. If <i>fildes</i> is not a valid file descriptor, <i>dup2</i>() shall
+    return -1 and shall not close <i>fildes2</i>. If <i>fildes2</i> is less than
+    0 or greater than or equal to {OPEN_MAX}, <i>dup2</i>() shall return -1 with
+    <i>errno</i> set to <b>[EBADF]</b>.</p>
+<p class="Pp">Upon successful completion, if <i>fildes</i> is not equal to
+    <i>fildes2</i>, the FD_CLOEXEC flag associated with <i>fildes2</i> shall be
+    cleared. If <i>fildes</i> is equal to <i>fildes2</i>, the FD_CLOEXEC flag
+    associated with <i>fildes2</i> shall not be changed.</p>
+<p class="Pp">If <i>fildes</i> refers to a typed memory object, the result of
+    the <i>dup2</i>() function is unspecified.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion a non-negative integer, namely the file
+    descriptor, shall be returned; otherwise, -1 shall be returned and
+    <i>errno</i> set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>dup</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The <i>fildes</i> argument is not a valid open file descriptor.</dd>
+  <dt id="EMFILE"><a class="permalink" href="#EMFILE"><b>EMFILE</b></a></dt>
+  <dd>All file descriptors available to the process are currently open.</dd>
+</dl>
+<p class="Pp">The <i>dup2</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EBADF~2"><a class="permalink" href="#EBADF~2"><b>EBADF</b></a></dt>
+  <dd>The <i>fildes</i> argument is not a valid open file descriptor or the
+      argument <i>fildes2</i> is negative or greater than or equal to
+      {OPEN_MAX}.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The <i>dup2</i>() function was interrupted by a signal.</dd>
+</dl>
+<p class="Pp">The <i>dup2</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>An I/O error occurred while attempting to close <i>fildes2</i>.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Redirecting_Standard_Output_to_a_File_S"><a class="permalink" href="#Redirecting_Standard_Output_to_a_File_S">Redirecting
+  Standard Output to a File S</a></h2>
+<p class="Pp">The following example closes standard output for the current
+    processes, re-assigns standard output to go to the file referenced by
+    <i>pfd</i>, and closes the original file descriptor to clean up.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;unistd.h&gt;
+...
+int pfd;
+...
+close(1);
+dup(pfd);
+close(pfd);
+...</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Redirecting_Error_Messages"><a class="permalink" href="#Redirecting_Error_Messages">Redirecting
+  Error Messages</a></h2>
+<p class="Pp">The following example redirects messages from <i>stderr</i> to
+    <i>stdout</i>.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;unistd.h&gt;
+...
+dup2(1, 2);
+...</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">Implementations may use file descriptors that must be inherited
+    into child processes for the child process to remain conforming, such as for
+    message catalog or tracing purposes. Therefore, an application that calls
+    <i>dup2</i>() with an arbitrary integer for <i>fildes2</i> risks
+    non-conforming behavior, and <i>dup2</i>() can only portably be used to
+    overwrite file descriptor values that the application has obtained through
+    explicit actions, or for the three file descriptors corresponding to the
+    standard file streams. In order to avoid a race condition of leaking an
+    unintended file descriptor into a child process, an application should
+    consider opening all file descriptors with the FD_CLOEXEC bit set unless the
+    file descriptor is intended to be inherited across <i>exec</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The <i>dup</i>() function is redundant. Its services are also
+    provided by the <i>fcntl</i>() function. It has been included in this volume
+    of POSIX.1‐2017 primarily for historical reasons, since many existing
+    applications use it. On the other hand, the <i>dup2</i>() function provides
+    unique services, as no other interface is able to atomically replace an
+    existing file descriptor.</p>
+<p class="Pp">The <i>dup2</i>() function is not marked obsolescent because it
+    presents a type-safe version of functionality provided in a type-unsafe
+    version by <i>fcntl</i>(). It is used in the POSIX Ada binding.</p>
+<p class="Pp">The <i>dup2</i>() function is not intended for use in critical
+    regions as a synchronization mechanism.</p>
+<p class="Pp">In the description of <b>[EBADF]</b>, the case of <i>fildes</i>
+    being out of range is covered by the given case of <i>fildes</i> not being
+    valid. The descriptions for <i>fildes</i> and <i>fildes2</i> are different
+    because the only kind of invalidity that is relevant for <i>fildes2</i> is
+    whether it is out of range; that is, it does not matter whether
+    <i>fildes2</i> refers to an open file when the <i>dup2</i>() call is
+  made.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>close</i>()</i>, <i><i>fcntl</i>()</i>,
+  <i><i>open</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;unistd.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

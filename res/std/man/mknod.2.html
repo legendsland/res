@@ -1,0 +1,209 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   This manpage is Copyright (C) 1992 Drew Eckhardt;
+               and Copyright (C) 1993 Michael Haardt
+               and Copyright (C) 1993,1994 Ian Jackson
+  		and Copyright (C) 2006, 2014, Michael Kerrisk
+  
+   SPDX-License-Identifier: GPL-1.0-or-later
+  
+   Modified 1996-08-18 by urs
+   Modified 2003-04-23 by Michael Kerrisk
+   Modified 2004-06-23 by Michael Kerrisk <mtk.manpages@gmail.com>
+   --><head>
+<meta name="dc.identifier" content="res/b9983e5ea645f687a6d0fd2150dcecc82dae9893">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>mknod(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">mknod(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">mknod(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">mknod, mknodat - create a special or ordinary file</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/stat.h&gt;</b></pre>
+<pre><b>int mknod(const char *</b><i>pathname</i><b>, mode_t </b><i>mode</i><b>, dev_t </b><i>dev</i><b>);</b></pre>
+<pre><b>#include &lt;fcntl.h&gt;           </b>/* Definition of AT_* constants */
+<b>#include &lt;sys/stat.h&gt;</b></pre>
+<pre><b>int mknodat(int </b><i>dirfd</i><b>, const char *</b><i>pathname</i><b>, mode_t </b><i>mode</i><b>, dev_t </b><i>dev</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>mknod</b>():</p>
+<pre><br>
+    _XOPEN_SOURCE &gt;= 500
+<br>
+        || /* Since glibc 2.19: */ _DEFAULT_SOURCE
+<br>
+        || /* glibc &lt;= 2.19: */ _BSD_SOURCE || _SVID_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The system call <b>mknod</b>() creates a filesystem node (file,
+    device special file, or named pipe) named <i>pathname</i>, with attributes
+    specified by <i>mode</i> and <i>dev</i>.</p>
+<p class="Pp">The <i>mode</i> argument specifies both the file mode to use and
+    the type of node to be created. It should be a combination (using bitwise
+    OR) of one of the file types listed below and zero or more of the file mode
+    bits listed in <b>inode</b>(7).</p>
+<p class="Pp">The file mode is modified by the process's <i>umask</i> in the
+    usual way: in the absence of a default ACL, the permissions of the created
+    node are (<i>mode</i> &amp; ~<i>umask</i>).</p>
+<p class="Pp">The file type must be one of <b>S_IFREG</b>, <b>S_IFCHR</b>,
+    <b>S_IFBLK</b>, <b>S_IFIFO</b>, or <b>S_IFSOCK</b> to specify a regular file
+    (which will be created empty), character special file, block special file,
+    FIFO (named pipe), or UNIX domain socket, respectively. (Zero file type is
+    equivalent to type <b>S_IFREG</b>.)</p>
+<p class="Pp">If the file type is <b>S_IFCHR</b> or <b>S_IFBLK</b>, then
+    <i>dev</i> specifies the major and minor numbers of the newly created device
+    special file (<b>makedev</b>(3) may be useful to build the value for
+    <i>dev</i>); otherwise it is ignored.</p>
+<p class="Pp">If <i>pathname</i> already exists, or is a symbolic link, this
+    call fails with an <b>EEXIST</b> error.</p>
+<p class="Pp">The newly created node will be owned by the effective user ID of
+    the process. If the directory containing the node has the set-group-ID bit
+    set, or if the filesystem is mounted with BSD group semantics, the new node
+    will inherit the group ownership from its parent directory; otherwise it
+    will be owned by the effective group ID of the process.</p>
+<section class="Ss">
+<h2 class="Ss" id="mknodat()"><a class="permalink" href="#mknodat()">mknodat()</a></h2>
+<p class="Pp">The <b>mknodat</b>() system call operates in exactly the same way
+    as <b>mknod</b>(), except for the differences described here.</p>
+<p class="Pp">If the pathname given in <i>pathname</i> is relative, then it is
+    interpreted relative to the directory referred to by the file descriptor
+    <i>dirfd</i> (rather than relative to the current working directory of the
+    calling process, as is done by <b>mknod</b>() for a relative pathname).</p>
+<p class="Pp">If <i>pathname</i> is relative and <i>dirfd</i> is the special
+    value <b>AT_FDCWD</b>, then <i>pathname</i> is interpreted relative to the
+    current working directory of the calling process (like <b>mknod</b>()).</p>
+<p class="Pp">If <i>pathname</i> is absolute, then <i>dirfd</i> is ignored.</p>
+<p class="Pp">See <b>openat</b>(2) for an explanation of the need for
+    <b>mknodat</b>().</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp"><b>mknod</b>() and <b>mknodat</b>() return zero on success. On
+    error, -1 is returned and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>The parent directory does not allow write permission to the process, or
+      one of the directories in the path prefix of <i>pathname</i> did not allow
+      search permission. (See also <b>path_resolution</b>(7).)</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd><b>(</b>mknodat<b>())</b> <i>pathname</i> is relative but <i>dirfd</i> is
+      neither <b>AT_FDCWD</b> nor a valid file descriptor.</dd>
+  <dt id="EDQUOT"><a class="permalink" href="#EDQUOT"><b>EDQUOT</b></a></dt>
+  <dd>The user's quota of disk blocks or inodes on the filesystem has been
+      exhausted.</dd>
+  <dt id="EEXIST"><a class="permalink" href="#EEXIST"><b>EEXIST</b></a></dt>
+  <dd><i>pathname</i> already exists. This includes the case where
+      <i>pathname</i> is a symbolic link, dangling or not.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>pathname</i> points outside your accessible address space.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>mode</i> requested creation of something other than a regular file,
+      device special file, FIFO or socket.</dd>
+  <dt id="ELOOP"><a class="permalink" href="#ELOOP"><b>ELOOP</b></a></dt>
+  <dd>Too many symbolic links were encountered in resolving
+    <i>pathname</i>.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd><i>pathname</i> was too long.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>A directory component in <i>pathname</i> does not exist or is a dangling
+      symbolic link.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient kernel memory was available.</dd>
+  <dt id="ENOSPC"><a class="permalink" href="#ENOSPC"><b>ENOSPC</b></a></dt>
+  <dd>The device containing <i>pathname</i> has no room for the new node.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>A component used as a directory in <i>pathname</i> is not, in fact, a
+      directory.</dd>
+  <dt id="ENOTDIR~2"><a class="permalink" href="#ENOTDIR~2"><b>ENOTDIR</b></a></dt>
+  <dd><b>(</b>mknodat<b>())</b> <i>pathname</i> is relative and <i>dirfd</i> is
+      a file descriptor referring to a file other than a directory.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd><i>mode</i> requested creation of something other than a regular file,
+      FIFO (named pipe), or UNIX domain socket, and the caller is not privileged
+      (Linux: does not have the <b>CAP_MKNOD</b> capability); also returned if
+      the filesystem containing <i>pathname</i> does not support the type of
+      node requested.</dd>
+  <dt id="EROFS"><a class="permalink" href="#EROFS"><b>EROFS</b></a></dt>
+  <dd><i>pathname</i> refers to a file on a read-only filesystem.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>mknodat</b>() was added in Linux 2.6.16; library support was
+    added in glibc 2.4.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>mknod</b>(): SVr4, 4.4BSD, POSIX.1-2001 (but see below),
+    POSIX.1-2008.</p>
+<p class="Pp"><b>mknodat</b>(): POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">POSIX.1-2001 says: "The only portable use of <b>mknod</b>()
+    is to create a FIFO-special file. If <i>mode</i> is not <b>S_IFIFO</b> or
+    <i>dev</i> is not 0, the behavior of <b>mknod</b>() is unspecified."
+    However, nowadays one should never use <b>mknod</b>() for this purpose; one
+    should use <b>mkfifo</b>(3), a function especially defined for this
+  purpose.</p>
+<p class="Pp">Under Linux, <b>mknod</b>() cannot be used to create directories.
+    One should make directories with <b>mkdir</b>(2).</p>
+<p class="Pp">There are many infelicities in the protocol underlying NFS. Some
+    of these affect <b>mknod</b>() and <b>mknodat</b>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>mknod</b>(1), <b>chmod</b>(2), <b>chown</b>(2),
+    <b>fcntl</b>(2), <b>mkdir</b>(2), <b>mount</b>(2), <b>socket</b>(2),
+    <b>stat</b>(2), <b>umask</b>(2), <b>unlink</b>(2), <b>makedev</b>(3),
+    <b>mkfifo</b>(3), <b>acl</b>(5), <b>path_resolution</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

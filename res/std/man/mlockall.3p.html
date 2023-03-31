@@ -1,0 +1,179 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/b001640bab7f604d803b91789627a283ed3bfd08">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>MLOCKALL(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">MLOCKALL(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">MLOCKALL(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">mlockall, munlockall — lock/unlock the address space of a
+    process (<b>REALTIME</b>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;sys/mman.h&gt;</pre>
+<pre>int mlockall(int <i>flags</i>);
+int munlockall(void);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>mlockall</i>() function shall cause all of the pages mapped
+    by the address space of a process to be memory-resident until unlocked or
+    until the process exits or <i>exec</i>s another process image. The
+    <i>flags</i> argument determines whether the pages to be locked are those
+    currently mapped by the address space of the process, those that are mapped
+    in the future, or both. The <i>flags</i> argument is constructed from the
+    bitwise-inclusive OR of one or more of the following symbolic constants,
+    defined in <i>&lt;sys/mman.h&gt;</i>:</p>
+<dl class="Bl-tag">
+  <dt id="MCL_CURRENT"><a class="permalink" href="#MCL_CURRENT">MCL_CURRENT</a></dt>
+  <dd>Lock all of the pages currently mapped into the address space of the
+      process.</dd>
+  <dt id="MCL_FUTURE"><a class="permalink" href="#MCL_FUTURE">MCL_FUTURE</a></dt>
+  <dd>Lock all of the pages that become mapped into the address space of the
+      process in the future, when those mappings are established.</dd>
+</dl>
+<p class="Pp">If MCL_FUTURE is specified, and the automatic locking of future
+    mappings eventually causes the amount of locked memory to exceed the amount
+    of available physical memory or any other implementation-defined limit, the
+    behavior is implementation-defined. The manner in which the implementation
+    informs the application of these situations is also
+  implementation-defined.</p>
+<p class="Pp">The <i>munlockall</i>() function shall unlock all currently mapped
+    pages of the address space of the process. Any pages that become mapped into
+    the address space of the process after a call to <i>munlockall</i>() shall
+    not be locked, unless there is an intervening call to <i>mlockall</i>()
+    specifying MCL_FUTURE or a subsequent call to <i>mlockall</i>() specifying
+    MCL_CURRENT. If pages mapped into the address space of the process are also
+    mapped into the address spaces of other processes and are locked by those
+    processes, the locks established by the other processes shall be unaffected
+    by a call by this process to <i>munlockall</i>().</p>
+<p class="Pp">Upon successful return from the <i>mlockall</i>() function that
+    specifies MCL_CURRENT, all currently mapped pages of the address space of
+    the process shall be memory-resident and locked. Upon return from the
+    <i>munlockall</i>() function, all currently mapped pages of the address
+    space of the process shall be unlocked with respect to the address space of
+    the process. The memory residency of unlocked pages is unspecified.</p>
+<p class="Pp">Appropriate privileges are required to lock process memory with
+    <i>mlockall</i>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, the <i>mlockall</i>() function shall
+    return a value of zero. Otherwise, no additional memory shall be locked, and
+    the function shall return a value of -1 and set <i>errno</i> to indicate the
+    error. The effect of failure of <i>mlockall</i>() on previously existing
+    locks in the address space is unspecified.</p>
+<p class="Pp">If it is supported by the implementation, the <i>munlockall</i>()
+    function shall always return a value of zero. Otherwise, the function shall
+    return a value of -1 and set <i>errno</i> to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>mlockall</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>Some or all of the memory identified by the operation could not be locked
+      when the call was made.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The <i>flags</i> argument is zero, or includes unimplemented flags.</dd>
+</dl>
+<p class="Pp">The <i>mlockall</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Locking all of the pages currently mapped into the address space of the
+      process would exceed an implementation-defined limit on the amount of
+      memory that the process may lock.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The calling process does not have appropriate privileges to perform the
+      requested operation.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>exec</i></i>, <i><i>exit</i>()</i>, <i><i>fork</i>()</i>,
+    <i><i>mlock</i>()</i>, <i><i>munmap</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;sys_mman.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

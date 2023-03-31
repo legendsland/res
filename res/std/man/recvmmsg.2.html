@@ -1,0 +1,292 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2011 by Andi Kleen <andi@firstfloor.org>
+   and Copyright (c) 2011 by Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Syscall added in following commit
+  	commit a2e2725541fad72416326798c2d7fa4dafb7d337
+  	Author: Arnaldo Carvalho de Melo <acme@redhat.com>
+  	Date:   Mon Oct 12 23:40:10 2009 -0700
+   --><head>
+<meta name="dc.identifier" content="res/760044d1b49801c414cfe8b08cb32d7f3cadf77d">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>recvmmsg(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">recvmmsg(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">recvmmsg(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">recvmmsg - receive multiple messages on a socket</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#define _GNU_SOURCE</b>         /* See feature_test_macros(7) */
+<b>#include &lt;sys/socket.h&gt;</b></pre>
+<pre><b>int recvmmsg(int </b><i>sockfd</i><b>, struct mmsghdr *</b><i>msgvec</i><b>, unsigned int </b><i>vlen</i><b>,</b>
+<b>             int </b><i>flags</i><b>, struct timespec *</b><i>timeout</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>recvmmsg</b>() system call is an extension of
+    <b>recvmsg</b>(2) that allows the caller to receive multiple messages from a
+    socket using a single system call. (This has performance benefits for some
+    applications.) A further extension over <b>recvmsg</b>(2) is support for a
+    timeout on the receive operation.</p>
+<p class="Pp">The <i>sockfd</i> argument is the file descriptor of the socket to
+    receive data from.</p>
+<p class="Pp">The <i>msgvec</i> argument is a pointer to an array of
+    <i>mmsghdr</i> structures. The size of this array is specified in
+    <i>vlen</i>.</p>
+<p class="Pp">The <i>mmsghdr</i> structure is defined in
+    <i>&lt;sys/socket.h&gt;</i> as:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct mmsghdr {
+<br>
+    struct msghdr msg_hdr;  /* Message header */
+<br>
+    unsigned int  msg_len;  /* Number of received bytes for header */
+};
+</pre>
+<br>
+<p class="Pp">The <i>msg_hdr</i> field is a <i>msghdr</i> structure, as
+    described in <b>recvmsg</b>(2). The <i>msg_len</i> field is the number of
+    bytes returned for the message in the entry. This field has the same value
+    as the return value of a single <b>recvmsg</b>(2) on the header.</p>
+<p class="Pp">The <i>flags</i> argument contains flags ORed together. The flags
+    are the same as documented for <b>recvmsg</b>(2), with the following
+    addition:</p>
+<dl class="Bl-tag">
+  <dt id="MSG_WAITFORONE"><a class="permalink" href="#MSG_WAITFORONE"><b>MSG_WAITFORONE</b>
+    (since Linux 2.6.34)</a></dt>
+  <dd>Turns on <b>MSG_DONTWAIT</b> after the first message has been
+    received.</dd>
+</dl>
+<p class="Pp">The <i>timeout</i> argument points to a <i>struct timespec</i>
+    (see <b>clock_gettime</b>(2)) defining a timeout (seconds plus nanoseconds)
+    for the receive operation (<i>but see BUGS!</i>). (This interval will be
+    rounded up to the system clock granularity, and kernel scheduling delays
+    mean that the blocking interval may overrun by a small amount.) If
+    <i>timeout</i> is NULL, then the operation blocks indefinitely.</p>
+<p class="Pp">A blocking <b>recvmmsg</b>() call blocks until <i>vlen</i>
+    messages have been received or until the timeout expires. A nonblocking call
+    reads as many messages as are available (up to the limit specified by
+    <i>vlen</i>) and returns immediately.</p>
+<p class="Pp">On return from <b>recvmmsg</b>(), successive elements of
+    <i>msgvec</i> are updated to contain information about each received
+    message: <i>msg_len</i> contains the size of the received message; the
+    subfields of <i>msg_hdr</i> are updated as described in <b>recvmsg</b>(2).
+    The return value of the call indicates the number of elements of
+    <i>msgvec</i> that have been updated.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>recvmmsg</b>() returns the number of messages
+    received in <i>msgvec</i>; on error, -1 is returned, and <i>errno</i> is set
+    to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">Errors are as for <b>recvmsg</b>(2). In addition, the following
+    error can occur:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>timeout</i> is invalid.</dd>
+</dl>
+<p class="Pp">See also BUGS.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>recvmmsg</b>() system call was added in Linux 2.6.33.
+    Support in glibc was added in glibc 2.12.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>recvmmsg</b>() is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">The <i>timeout</i> argument does not work as intended. The timeout
+    is checked only after the receipt of each datagram, so that if up to
+    <i>vlen-1</i> datagrams are received before the timeout expires, but then no
+    further datagrams are received, the call will block forever.</p>
+<p class="Pp">If an error occurs after at least one message has been received,
+    the call succeeds, and returns the number of messages received. The error
+    code is expected to be returned on a subsequent call to <b>recvmmsg</b>().
+    In the current implementation, however, the error code can be overwritten in
+    the meantime by an unrelated network event on a socket, for example an
+    incoming ICMP packet.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The following program uses <b>recvmmsg</b>() to receive multiple
+    messages on a socket and stores them in multiple buffers. The call returns
+    if all buffers are filled or if the timeout specified has expired.</p>
+<p class="Pp">The following snippet periodically generates UDP datagrams
+    containing a random number:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$<b> while true; do echo $RANDOM &gt; /dev/udp/127.0.0.1/1234;</b>
+<b>      sleep 0.25; done</b>
+</pre>
+<br>
+<p class="Pp">These datagrams are read by the example application, which can
+    give the following output:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$<b> ./a.out</b>
+5 messages received
+1 11782
+2 11345
+3 304
+4 13514
+5 28421
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#define _GNU_SOURCE
+#include &lt;arpa/inet.h&gt;
+#include &lt;netinet/in.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;sys/socket.h&gt;
+#include &lt;time.h&gt;
+int
+main(void)
+{
+#define VLEN 10
+#define BUFSIZE 200
+#define TIMEOUT 1
+<br>
+    int                 sockfd, retval;
+<br>
+    char                bufs[VLEN][BUFSIZE+1];
+<br>
+    struct iovec        iovecs[VLEN];
+<br>
+    struct mmsghdr      msgs[VLEN];
+<br>
+    struct timespec     timeout;
+<br>
+    struct sockaddr_in  addr;
+<br>
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+<br>
+    if (sockfd == -1) {
+<br>
+        perror("socket()");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    addr.sin_family = AF_INET;
+<br>
+    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+<br>
+    addr.sin_port = htons(1234);
+<br>
+    if (bind(sockfd, (struct sockaddr *) &amp;addr, sizeof(addr)) == -1) {
+<br>
+        perror("bind()");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    memset(msgs, 0, sizeof(msgs));
+<br>
+    for (size_t i = 0; i &lt; VLEN; i++) {
+<br>
+        iovecs[i].iov_base         = bufs[i];
+<br>
+        iovecs[i].iov_len          = BUFSIZE;
+<br>
+        msgs[i].msg_hdr.msg_iov    = &amp;iovecs[i];
+<br>
+        msgs[i].msg_hdr.msg_iovlen = 1;
+<br>
+    }
+<br>
+    timeout.tv_sec = TIMEOUT;
+<br>
+    timeout.tv_nsec = 0;
+<br>
+    retval = recvmmsg(sockfd, msgs, VLEN, 0, &amp;timeout);
+<br>
+    if (retval == -1) {
+<br>
+        perror("recvmmsg()");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    printf("%d messages received\n", retval);
+<br>
+    for (size_t i = 0; i &lt; retval; i++) {
+<br>
+        bufs[i][msgs[i].msg_len] = 0;
+<br>
+        printf("%zu %s", i+1, bufs[i]);
+<br>
+    }
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>clock_gettime</b>(2), <b>recvmsg</b>(2), <b>sendmmsg</b>(2),
+    <b>sendmsg</b>(2), <b>socket</b>(2), <b>socket</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

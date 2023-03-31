@@ -1,0 +1,175 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/834801441db37badf939d271a502a0e60b678b3b">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>SETSOCKOPT(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">SETSOCKOPT(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">SETSOCKOPT(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">setsockopt — set the socket options</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;sys/socket.h&gt;</pre>
+<pre>int setsockopt(int <i>socket</i>, int <i>level</i>, int <i>option_name</i>,
+<br>
+    const void *<i>option_value</i>, socklen_t <i>option_len</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>setsockopt</i>() function shall set the option specified by
+    the <i>option_name</i> argument, at the protocol level specified by the
+    <i>level</i> argument, to the value pointed to by the <i>option_value</i>
+    argument for the socket associated with the file descriptor specified by the
+    <i>socket</i> argument.</p>
+<p class="Pp">The <i>level</i> argument specifies the protocol level at which
+    the option resides. To set options at the socket level, specify the
+    <i>level</i> argument as SOL_SOCKET. To set options at other levels, supply
+    the appropriate <i>level</i> identifier for the protocol controlling the
+    option. For example, to indicate that an option is interpreted by the TCP
+    (Transport Control Protocol), set <i>level</i> to IPPROTO_TCP as defined in
+    the <i>&lt;netinet/in.h&gt;</i> header.</p>
+<p class="Pp">The <i>option_name</i> argument specifies a single option to set.
+    It can be one of the socket-level options defined in
+    <i><b>&lt;sys_socket.h&gt;</b></i> and described in <i>Section 2.10.16</i>,
+    <i>Use of Options</i>. If <i>option_name</i> is equal to SO_RCVTIMEO or
+    SO_SNDTIMEO and the implementation supports setting the option, it is
+    unspecified whether the <b>struct timeval</b> pointed to by
+    <i>option_value</i> is stored as provided by this function or is rounded up
+    to align with the resolution of the clock being used. If <i>setsockopt</i>()
+    is called with <i>option_name</i> equal to SO_ACCEPTCONN, SO_ERROR, or
+    SO_TYPE, the behavior is unspecified.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>setsockopt</i>() shall return 0.
+    Otherwise, -1 shall be returned and <i>errno</i> set to indicate the
+  error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>setsockopt</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The <i>socket</i> argument is not a valid file descriptor.</dd>
+  <dt id="EDOM"><a class="permalink" href="#EDOM"><b>EDOM</b></a></dt>
+  <dd>The send and receive timeout values are too big to fit into the timeout
+      fields in the socket structure.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The specified option is invalid at the specified socket level or the
+      socket has been shut down.</dd>
+  <dt id="EISCONN"><a class="permalink" href="#EISCONN"><b>EISCONN</b></a></dt>
+  <dd>The socket is already connected, and a specified option cannot be set
+      while the socket is connected.</dd>
+  <dt id="ENOPROTOOPT"><a class="permalink" href="#ENOPROTOOPT"><b>ENOPROTOOPT</b></a></dt>
+  <dd>
+    <br>
+    The option is not supported by the protocol.</dd>
+  <dt id="ENOTSOCK"><a class="permalink" href="#ENOTSOCK"><b>ENOTSOCK</b></a></dt>
+  <dd>The <i>socket</i> argument does not refer to a socket.</dd>
+</dl>
+<p class="Pp">The <i>setsockopt</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>There was insufficient memory available for the operation to
+    complete.</dd>
+  <dt id="ENOBUFS"><a class="permalink" href="#ENOBUFS"><b>ENOBUFS</b></a></dt>
+  <dd>Insufficient resources are available in the system to complete the
+    call.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The <i>setsockopt</i>() function provides an application program
+    with the means to control socket behavior. An application program can use
+    <i>setsockopt</i>() to allocate buffer space, control timeouts, or permit
+    socket data broadcasts. The <i>&lt;sys/socket.h&gt;</i> header defines the
+    socket-level options available to <i>setsockopt</i>().</p>
+<p class="Pp">Options may exist at multiple protocol levels. The SO_ options are
+    always present at the uppermost socket level.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i>Section 2.10</i>, <i>Sockets</i>, <i><i>bind</i>()</i>,
+    <i><i>endprotoent</i>()</i>, <i><i>getsockopt</i>()</i>,
+    <i><i>socket</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;netinet_in.h&gt;</b></i>, <i><b>&lt;sys_socket.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

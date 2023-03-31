@@ -1,0 +1,211 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright 2000 Sam Varshavchik <mrsam@courier-mta.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   References: RFC 2553
+ --><head>
+<meta name="dc.identifier" content="res/c4817bea28759c809a7437bf4031de58634647f4">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>getipnodebyname(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">getipnodebyname(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">getipnodebyname(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getipnodebyname, getipnodebyaddr, freehostent - get network
+    hostnames and addresses</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/types.h&gt;</b>
+<b>#include &lt;sys/socket.h&gt;</b>
+<b>#include &lt;netdb.h&gt;</b></pre>
+<pre><b>[[deprecated]] struct hostent *getipnodebyname(const char *</b><i>name</i><b>, int </b><i>af</i><b>,</b>
+<b>                                            int </b><i>flags</i><b>, int *</b><i>error_num</i><b>);</b>
+<b>[[deprecated]] struct hostent *getipnodebyaddr(const void </b><i>addr</i><b>[.</b><i>len</i><b>],</b>
+<b>                                            size_t </b><i>len</i><b>, int </b><i>af</i><b>,</b>
+<b>                                            int *</b><i>error_num</i><b>);</b>
+<b>[[deprecated]] void freehostent(struct hostent *</b><i>ip</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">These functions are deprecated (and unavailable in glibc). Use
+    <b>getaddrinfo</b>(3) and <b>getnameinfo</b>(3) instead.</p>
+<p class="Pp">The <b>getipnodebyname</b>() and <b>getipnodebyaddr</b>()
+    functions return the names and addresses of a network host. These functions
+    return a pointer to the following structure:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct hostent {
+<br>
+    char  *h_name;
+<br>
+    char **h_aliases;
+<br>
+    int    h_addrtype;
+<br>
+    int    h_length;
+<br>
+    char **h_addr_list;
+};
+</pre>
+<br>
+<p class="Pp">These functions replace the <b>gethostbyname</b>(3) and
+    <b>gethostbyaddr</b>(3) functions, which could access only the IPv4 network
+    address family. The <b>getipnodebyname</b>() and <b>getipnodebyaddr</b>()
+    functions can access multiple network address families.</p>
+<p class="Pp">Unlike the <b>gethostby</b> functions, these functions return
+    pointers to dynamically allocated memory. The <b>freehostent</b>() function
+    is used to release the dynamically allocated memory after the caller no
+    longer needs the <i>hostent</i> structure.</p>
+<section class="Ss">
+<h2 class="Ss" id="getipnodebyname()_arguments"><a class="permalink" href="#getipnodebyname()_arguments">getipnodebyname()
+  arguments</a></h2>
+<p class="Pp">The <b>getipnodebyname</b>() function looks up network addresses
+    for the host specified by the <i>name</i> argument. The <i>af</i> argument
+    specifies one of the following values:</p>
+<dl class="Bl-tag">
+  <dt id="AF_INET"><a class="permalink" href="#AF_INET"><b>AF_INET</b></a></dt>
+  <dd>The <i>name</i> argument points to a dotted-quad IPv4 address or a name of
+      an IPv4 network host.</dd>
+  <dt id="AF_INET6"><a class="permalink" href="#AF_INET6"><b>AF_INET6</b></a></dt>
+  <dd>The <i>name</i> argument points to a hexadecimal IPv6 address or a name of
+      an IPv6 network host.</dd>
+</dl>
+<p class="Pp">The <i>flags</i> argument specifies additional options. More than
+    one option can be specified by bitwise OR-ing them together. <i>flags</i>
+    should be set to 0 if no options are desired.</p>
+<dl class="Bl-tag">
+  <dt id="AI_V4MAPPED"><a class="permalink" href="#AI_V4MAPPED"><b>AI_V4MAPPED</b></a></dt>
+  <dd>This flag is used with <b>AF_INET6</b> to request a query for IPv4
+      addresses instead of IPv6 addresses; the IPv4 addresses will be mapped to
+      IPv6 addresses.</dd>
+  <dt id="AI_ALL"><a class="permalink" href="#AI_ALL"><b>AI_ALL</b></a></dt>
+  <dd>This flag is used with <b>AI_V4MAPPED</b> to request a query for both IPv4
+      and IPv6 addresses. Any IPv4 address found will be mapped to an IPv6
+      address.</dd>
+  <dt id="AI_ADDRCONFIG"><a class="permalink" href="#AI_ADDRCONFIG"><b>AI_ADDRCONFIG</b></a></dt>
+  <dd>This flag is used with <b>AF_INET6</b> to further request that queries for
+      IPv6 addresses should not be made unless the system has at least one IPv6
+      address assigned to a network interface, and that queries for IPv4
+      addresses should not be made unless the system has at least one IPv4
+      address assigned to a network interface. This flag may be used by itself
+      or with the <b>AI_V4MAPPED</b> flag.</dd>
+  <dt id="AI_DEFAULT"><a class="permalink" href="#AI_DEFAULT"><b>AI_DEFAULT</b></a></dt>
+  <dd>This flag is equivalent to <b>(AI_ADDRCONFIG | AI_V4MAPPED)</b>.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="getipnodebyaddr()_arguments"><a class="permalink" href="#getipnodebyaddr()_arguments">getipnodebyaddr()
+  arguments</a></h2>
+<p class="Pp">The <b>getipnodebyaddr</b>() function looks up the name of the
+    host whose network address is specified by the <i>addr</i> argument. The
+    <i>af</i> argument specifies one of the following values:</p>
+<dl class="Bl-tag">
+  <dt id="AF_INET~2"><a class="permalink" href="#AF_INET~2"><b>AF_INET</b></a></dt>
+  <dd>The <i>addr</i> argument points to a <i>struct in_addr</i> and <i>len</i>
+      must be set to <i>sizeof(struct in_addr)</i>.</dd>
+  <dt id="AF_INET6~2"><a class="permalink" href="#AF_INET6~2"><b>AF_INET6</b></a></dt>
+  <dd>The <i>addr</i> argument points to a <i>struct in6_addr</i> and <i>len</i>
+      must be set to <i>sizeof(struct in6_addr)</i>.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">NULL is returned if an error occurred, and <i>error_num</i> will
+    contain an error code from the following list:</p>
+<dl class="Bl-tag">
+  <dt id="HOST_NOT_FOUND"><a class="permalink" href="#HOST_NOT_FOUND"><b>HOST_NOT_FOUND</b></a></dt>
+  <dd>The hostname or network address was not found.</dd>
+  <dt id="NO_ADDRESS"><a class="permalink" href="#NO_ADDRESS"><b>NO_ADDRESS</b></a></dt>
+  <dd>The domain name server recognized the network address or name, but no
+      answer was returned. This can happen if the network host has only IPv4
+      addresses and a request has been made for IPv6 information only, or vice
+      versa.</dd>
+  <dt id="NO_RECOVERY"><a class="permalink" href="#NO_RECOVERY"><b>NO_RECOVERY</b></a></dt>
+  <dd>The domain name server returned a permanent failure response.</dd>
+  <dt id="TRY_AGAIN"><a class="permalink" href="#TRY_AGAIN"><b>TRY_AGAIN</b></a></dt>
+  <dd>The domain name server returned a temporary failure response. You might
+      have better luck next time.</dd>
+</dl>
+<p class="Pp">A successful query returns a pointer to a <i>hostent</i> structure
+    that contains the following fields:</p>
+<dl class="Bl-tag">
+  <dt id="h_name"><a class="permalink" href="#h_name"><i>h_name</i></a></dt>
+  <dd>This is the official name of this network host.</dd>
+  <dt id="h_aliases"><a class="permalink" href="#h_aliases"><i>h_aliases</i></a></dt>
+  <dd>This is an array of pointers to unofficial aliases for the same host. The
+      array is terminated by a null pointer.</dd>
+  <dt id="h_addrtype"><a class="permalink" href="#h_addrtype"><i>h_addrtype</i></a></dt>
+  <dd>This is a copy of the <i>af</i> argument to <b>getipnodebyname</b>() or
+      <b>getipnodebyaddr</b>(). <i>h_addrtype</i> will always be <b>AF_INET</b>
+      if the <i>af</i> argument was <b>AF_INET</b>. <i>h_addrtype</i> will
+      always be <b>AF_INET6</b> if the <i>af</i> argument was
+    <b>AF_INET6</b>.</dd>
+  <dt id="h_length"><a class="permalink" href="#h_length"><i>h_length</i></a></dt>
+  <dd>This field will be set to <i>sizeof(struct in_addr)</i> if
+      <i>h_addrtype</i> is <b>AF_INET</b>, and to <i>sizeof(struct in6_addr)</i>
+      if <i>h_addrtype</i> is <b>AF_INET6</b>.</dd>
+  <dt id="h_addr_list"><a class="permalink" href="#h_addr_list"><i>h_addr_list</i></a></dt>
+  <dd>This is an array of one or more pointers to network address structures for
+      the network host. The array is terminated by a null pointer.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">RFC&nbsp;2553.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">These functions were present in glibc 2.1.91-95, but were removed
+    again. Several UNIX-like systems support them, but all call them
+  deprecated.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>getaddrinfo</b>(3), <b>getnameinfo</b>(3), <b>inet_ntop</b>(3),
+    <b>inet_pton</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 1992 Drew Eckhardt (drew@cs.colorado.edu), March 28, 1992
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Modified by Michael Haardt <michael@moria.de>
+   Modified 1993-07-24 by Rik Faith <faith@cs.unc.edu>
+   Modified 1995-06-10 by Andries Brouwer <aeb@cwi.nl>
+   Modified 2004-06-23 by Michael Kerrisk <mtk.manpages@gmail.com>
+   Modified 2004-10-10 by Andries Brouwer <aeb@cwi.nl>
+   --><head>
+<meta name="dc.identifier" content="res/47890f00b7b726a00d8864a57357468530a39dc7">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>utime(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">utime(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">utime(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">utime, utimes - change file last access and modification times</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;utime.h&gt;</b></pre>
+<pre><b>int utime(const char *</b><i>filename</i><b>,</b>
+<b>          const struct utimbuf *_Nullable </b><i>times</i><b>);</b></pre>
+<pre><b>#include &lt;sys/time.h&gt;</b></pre>
+<pre><b>int utimes(const char *</b><i>filename</i><b>,</b>
+<b>          const struct timeval </b><i>times</i><b>[_Nullable 2]);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>Note:</b> modern applications may prefer to use the interfaces
+    described in <b>utimensat</b>(2).</p>
+<p class="Pp">The <b>utime</b>() system call changes the access and modification
+    times of the inode specified by <i>filename</i> to the <i>actime</i> and
+    <i>modtime</i> fields of <i>times</i> respectively. The status change time
+    (ctime) will be set to the current time, even if the other time stamps don't
+    actually change.</p>
+<p class="Pp">If <i>times</i> is NULL, then the access and modification times of
+    the file are set to the current time.</p>
+<p class="Pp">Changing timestamps is permitted when: either the process has
+    appropriate privileges, or the effective user ID equals the user ID of the
+    file, or <i>times</i> is NULL and the process has write permission for the
+    file.</p>
+<p class="Pp">The <i>utimbuf</i> structure is:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct utimbuf {
+<br>
+    time_t actime;       /* access time */
+<br>
+    time_t modtime;      /* modification time */
+};
+</pre>
+<br>
+<p class="Pp">The <b>utime</b>() system call allows specification of timestamps
+    with a resolution of 1 second.</p>
+<p class="Pp">The <b>utimes</b>() system call is similar, but the <i>times</i>
+    argument refers to an array rather than a structure. The elements of this
+    array are <i>timeval</i> structures, which allow a precision of 1
+    microsecond for specifying timestamps. The <i>timeval</i> structure is:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct timeval {
+<br>
+    long tv_sec;        /* seconds */
+<br>
+    long tv_usec;       /* microseconds */
+};
+</pre>
+<br>
+<p class="Pp"><i>times[0]</i> specifies the new access time, and <i>times[1]</i>
+    specifies the new modification time. If <i>times</i> is NULL, then
+    analogously to <b>utime</b>(), the access and modification times of the file
+    are set to the current time.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, zero is returned. On error, -1 is returned, and
+    <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>Search permission is denied for one of the directories in the path prefix
+      of <i>path</i> (see also <b>path_resolution</b>(7)).</dd>
+  <dt id="EACCES~2"><a class="permalink" href="#EACCES~2"><b>EACCES</b></a></dt>
+  <dd><i>times</i> is NULL, the caller's effective user ID does not match the
+      owner of the file, the caller does not have write access to the file, and
+      the caller is not privileged (Linux: does not have either the
+      <b>CAP_DAC_OVERRIDE</b> or the <b>CAP_FOWNER</b> capability).</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd><i>filename</i> does not exist.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd><i>times</i> is not NULL, the caller's effective UID does not match the
+      owner of the file, and the caller is not privileged (Linux: does not have
+      the <b>CAP_FOWNER</b> capability).</dd>
+  <dt id="EROFS"><a class="permalink" href="#EROFS"><b>EROFS</b></a></dt>
+  <dd><i>path</i> resides on a read-only filesystem.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>utime</b>(): SVr4, POSIX.1-2001. POSIX.1-2008 marks
+    <b>utime</b>() as obsolete.</p>
+<p class="Pp"><b>utimes</b>(): 4.3BSD, POSIX.1-2001.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Linux does not allow changing the timestamps on an immutable file,
+    or setting the timestamps to something other than the current time on an
+    append-only file.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>chattr</b>(1), <b>touch</b>(1), <b>futimesat</b>(2),
+    <b>stat</b>(2), <b>utimensat</b>(2), <b>futimens</b>(3), <b>futimes</b>(3),
+    <b>inode</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

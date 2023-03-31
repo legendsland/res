@@ -1,0 +1,617 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/70b800c0bf398242c8fcaed233a830da708adcf4">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>OPEN(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">OPEN(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">OPEN(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">open, openat — open file</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;sys/stat.h&gt;
+#include &lt;fcntl.h&gt;</pre>
+<pre>int open(const char *<i>path</i>, int <i>oflag</i>, ...);
+int openat(int <i>fd</i>, const char *<i>path</i>, int <i>oflag</i>, ...);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>open</i>() function shall establish the connection between
+    a file and a file descriptor. It shall create an open file description that
+    refers to a file and a file descriptor that refers to that open file
+    description. The file descriptor is used by other I/O functions to refer to
+    that file. The <i>path</i> argument points to a pathname naming the
+  file.</p>
+<p class="Pp">The <i>open</i>() function shall return a file descriptor for the
+    named file, allocated as described in <i>Section 2.14</i>, <i>File
+    Descriptor Allocation</i>. The open file description is new, and therefore
+    the file descriptor shall not share it with any other process in the system.
+    The FD_CLOEXEC file descriptor flag associated with the new file descriptor
+    shall be cleared unless the O_CLOEXEC flag is set in <i>oflag</i>.</p>
+<p class="Pp">The file offset used to mark the current position within the file
+    shall be set to the beginning of the file.</p>
+<p class="Pp">The file status flags and file access modes of the open file
+    description shall be set according to the value of <i>oflag</i>.</p>
+<p class="Pp">Values for <i>oflag</i> are constructed by a bitwise-inclusive OR
+    of flags from the following list, defined in <i>&lt;fcntl.h&gt;</i>.
+    Applications shall specify exactly one of the first five values (file access
+    modes) below in the value of <i>oflag</i>:</p>
+<dl class="Bl-tag">
+  <dt id="O_EXEC"><a class="permalink" href="#O_EXEC">O_EXEC</a></dt>
+  <dd>Open for execute only (non-directory files). The result is unspecified if
+      this flag is applied to a directory.</dd>
+  <dt id="O_RDONLY"><a class="permalink" href="#O_RDONLY">O_RDONLY</a></dt>
+  <dd>Open for reading only.</dd>
+  <dt id="O_RDWR"><a class="permalink" href="#O_RDWR">O_RDWR</a></dt>
+  <dd>Open for reading and writing. The result is undefined if this flag is
+      applied to a FIFO.</dd>
+  <dt id="O_SEARCH"><a class="permalink" href="#O_SEARCH">O_SEARCH</a></dt>
+  <dd>Open directory for search only. The result is unspecified if this flag is
+      applied to a non-directory file.</dd>
+  <dt id="O_WRONLY"><a class="permalink" href="#O_WRONLY">O_WRONLY</a></dt>
+  <dd>Open for writing only.</dd>
+</dl>
+<p class="Pp">Any combination of the following may be used:</p>
+<dl class="Bl-tag">
+  <dt id="O_APPEND"><a class="permalink" href="#O_APPEND">O_APPEND</a></dt>
+  <dd>If set, the file offset shall be set to the end of the file prior to each
+      write.</dd>
+  <dt id="O_CLOEXEC"><a class="permalink" href="#O_CLOEXEC">O_CLOEXEC</a></dt>
+  <dd>If set, the FD_CLOEXEC flag for the new file descriptor shall be set.</dd>
+  <dt id="O_CREAT"><a class="permalink" href="#O_CREAT">O_CREAT</a></dt>
+  <dd>If the file exists, this flag has no effect except as noted under O_EXCL
+      below. Otherwise, if O_DIRECTORY is not set the file shall be created as a
+      regular file; the user ID of the file shall be set to the effective user
+      ID of the process; the group ID of the file shall be set to the group ID
+      of the file's parent directory or to the effective group ID of the
+      process; and the access permission bits (see <i>&lt;sys/stat.h&gt;</i>) of
+      the file mode shall be set to the value of the argument following the
+      <i>oflag</i> argument taken as type <b>mode_t</b> modified as follows: a
+      bitwise AND is performed on the file-mode bits and the corresponding bits
+      in the complement of the process' file mode creation mask. Thus, all bits
+      in the file mode whose corresponding bit in the file mode creation mask is
+      set are cleared. When bits other than the file permission bits are set,
+      the effect is unspecified. The argument following the <i>oflag</i>
+      argument does not affect whether the file is open for reading, writing, or
+      for both. Implementations shall provide a way to initialize the file's
+      group ID to the group ID of the parent directory. Implementations may, but
+      need not, provide an implementation-defined way to initialize the file's
+      group ID to the effective group ID of the calling process.</dd>
+  <dt id="O_DIRECTORY"><a class="permalink" href="#O_DIRECTORY">O_DIRECTORY</a></dt>
+  <dd>If <i>path</i> resolves to a non-directory file, fail and set <i>errno</i>
+      to <b>[ENOTDIR]</b>.</dd>
+  <dt id="O_DSYNC"><a class="permalink" href="#O_DSYNC">O_DSYNC</a></dt>
+  <dd>Write I/O operations on the file descriptor shall complete as defined by
+      synchronized I/O data integrity completion.</dd>
+  <dt id="O_EXCL"><a class="permalink" href="#O_EXCL">O_EXCL</a></dt>
+  <dd>If O_CREAT and O_EXCL are set, <i>open</i>() shall fail if the file
+      exists. The check for the existence of the file and the creation of the
+      file if it does not exist shall be atomic with respect to other threads
+      executing <i>open</i>() naming the same filename in the same directory
+      with O_EXCL and O_CREAT set. If O_EXCL and O_CREAT are set, and
+      <i>path</i> names a symbolic link, <i>open</i>() shall fail and set
+      <i>errno</i> to <b>[EEXIST]</b>, regardless of the contents of the
+      symbolic link. If O_EXCL is set and O_CREAT is not set, the result is
+      undefined.</dd>
+  <dt id="O_NOCTTY"><a class="permalink" href="#O_NOCTTY">O_NOCTTY</a></dt>
+  <dd>If set and <i>path</i> identifies a terminal device, <i>open</i>() shall
+      not cause the terminal device to become the controlling terminal for the
+      process. If <i>path</i> does not identify a terminal device, O_NOCTTY
+      shall be ignored.</dd>
+  <dt id="O_NOFOLLOW"><a class="permalink" href="#O_NOFOLLOW">O_NOFOLLOW</a></dt>
+  <dd>If <i>path</i> names a symbolic link, fail and set <i>errno</i> to
+      <b>[ELOOP]</b>.</dd>
+  <dt id="O_NONBLOCK"><a class="permalink" href="#O_NONBLOCK">O_NONBLOCK</a></dt>
+  <dd>When opening a FIFO with O_RDONLY or O_WRONLY set:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>If O_NONBLOCK is set, an <i>open</i>() for reading-only shall return
+      without delay. An <i>open</i>() for writing-only shall return an error if
+      no process currently has the file open for reading.</dd>
+  <dt> *</dt>
+  <dd>If O_NONBLOCK is clear, an <i>open</i>() for reading-only shall block the
+      calling thread until a thread opens the file for writing. An <i>open</i>()
+      for writing-only shall block the calling thread until a thread opens the
+      file for reading.</dd>
+</dl>
+<p class="Pp">When opening a block special or character special file that
+    supports non-blocking opens:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>If O_NONBLOCK is set, the <i>open</i>() function shall return without
+      blocking for the device to be ready or available. Subsequent behavior of
+      the device is device-specific.</dd>
+  <dt> *</dt>
+  <dd>If O_NONBLOCK is clear, the <i>open</i>() function shall block the calling
+      thread until the device is ready or available before returning.</dd>
+</dl>
+<p class="Pp">Otherwise, the O_NONBLOCK flag shall not cause an error, but it is
+    unspecified whether the file status flags will include the O_NONBLOCK
+  flag.</p>
+</div>
+<dl class="Bl-tag">
+  <dt id="O_RSYNC"><a class="permalink" href="#O_RSYNC">O_RSYNC</a></dt>
+  <dd>Read I/O operations on the file descriptor shall complete at the same
+      level of integrity as specified by the O_DSYNC and O_SYNC flags. If both
+      O_DSYNC and O_RSYNC are set in <i>oflag</i>, all I/O operations on the
+      file descriptor shall complete as defined by synchronized I/O data
+      integrity completion. If both O_SYNC and O_RSYNC are set in flags, all I/O
+      operations on the file descriptor shall complete as defined by
+      synchronized I/O file integrity completion.</dd>
+  <dt id="O_SYNC"><a class="permalink" href="#O_SYNC">O_SYNC</a></dt>
+  <dd>Write I/O operations on the file descriptor shall complete as defined by
+      synchronized I/O file integrity completion.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">The O_SYNC flag shall be supported for regular files, even if the
+    Synchronized Input and Output option is not supported.</p>
+</div>
+<dl class="Bl-tag">
+  <dt id="O_TRUNC"><a class="permalink" href="#O_TRUNC">O_TRUNC</a></dt>
+  <dd>If the file exists and is a regular file, and the file is successfully
+      opened O_RDWR or O_WRONLY, its length shall be truncated to 0, and the
+      mode and owner shall be unchanged. It shall have no effect on FIFO special
+      files or terminal device files. Its effect on other file types is
+      implementation-defined. The result of using O_TRUNC without either O_RDWR
+      or O_WRONLY is undefined.</dd>
+  <dt id="O_TTY_INIT"><a class="permalink" href="#O_TTY_INIT">O_TTY_INIT</a></dt>
+  <dd>If <i>path</i> identifies a terminal device other than a pseudo-terminal,
+      the device is not already open in any process, and either O_TTY_INIT is
+      set in <i>oflag</i> or O_TTY_INIT has the value zero, <i>open</i>() shall
+      set any non-standard <b>termios</b> structure terminal parameters to a
+      state that provides conforming behavior; see the Base Definitions volume
+      of POSIX.1‐2017, <i>Section 11.2</i>, <i>Parameters that Can be
+      Set</i>. It is unspecified whether O_TTY_INIT has any effect if the device
+      is already open in any process. If <i>path</i> identifies the slave side
+      of a pseudo-terminal that is not already open in any process,
+      <i>open</i>() shall set any non-standard <b>termios</b> structure terminal
+      parameters to a state that provides conforming behavior, regardless of
+      whether O_TTY_INIT is set. If <i>path</i> does not identify a terminal
+      device, O_TTY_INIT shall be ignored.</dd>
+</dl>
+<p class="Pp">If O_CREAT and O_DIRECTORY are set and the requested access mode
+    is neither O_WRONLY nor O_RDWR, the result is unspecified.</p>
+<p class="Pp">If O_CREAT is set and the file did not previously exist, upon
+    successful completion, <i>open</i>() shall mark for update the last data
+    access, last data modification, and last file status change timestamps of
+    the file and the last data modification and last file status change
+    timestamps of the parent directory.</p>
+<p class="Pp">If O_TRUNC is set and the file did previously exist, upon
+    successful completion, <i>open</i>() shall mark for update the last data
+    modification and last file status change timestamps of the file.</p>
+<p class="Pp">If both the O_SYNC and O_DSYNC flags are set, the effect is as if
+    only the O_SYNC flag was set.</p>
+<p class="Pp">If <i>path</i> refers to a STREAMS file, <i>oflag</i> may be
+    constructed from O_NONBLOCK OR'ed with either O_RDONLY, O_WRONLY, or O_RDWR.
+    Other flag values are not applicable to STREAMS devices and shall have no
+    effect on them. The value O_NONBLOCK affects the operation of STREAMS
+    drivers and certain functions applied to file descriptors associated with
+    STREAMS files. For STREAMS drivers, the implementation of O_NONBLOCK is
+    device-specific.</p>
+<p class="Pp">The application shall ensure that it specifies the O_TTY_INIT flag
+    on the first open of a terminal device since system boot or since the device
+    was closed by the process that last had it open. The application need not
+    specify the O_TTY_INIT flag when opening pseudo-terminals. If <i>path</i>
+    names the master side of a pseudo-terminal device, then it is unspecified
+    whether <i>open</i>() locks the slave side so that it cannot be opened.
+    Conforming applications shall call <i>unlockpt</i>() before opening the
+    slave side.</p>
+<p class="Pp">The largest value that can be represented correctly in an object
+    of type <b>off_t</b> shall be established as the offset maximum in the open
+    file description.</p>
+<p class="Pp">The <i>openat</i>() function shall be equivalent to the
+    <i>open</i>() function except in the case where <i>path</i> specifies a
+    relative path. In this case the file to be opened is determined relative to
+    the directory associated with the file descriptor <i>fd</i> instead of the
+    current working directory. If the access mode of the open file description
+    associated with the file descriptor is not O_SEARCH, the function shall
+    check whether directory searches are permitted using the current permissions
+    of the directory underlying the file descriptor. If the access mode is
+    O_SEARCH, the function shall not perform the check.</p>
+<p class="Pp">The <i>oflag</i> parameter and the optional fourth parameter
+    correspond exactly to the parameters of <i>open</i>().</p>
+<p class="Pp">If <i>openat</i>() is passed the special value AT_FDCWD in the
+    <i>fd</i> parameter, the current working directory shall be used and the
+    behavior shall be identical to a call to <i>open</i>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, these functions shall open the file
+    and return a non-negative integer representing the file descriptor.
+    Otherwise, these functions shall return -1 and set <i>errno</i> to indicate
+    the error. If -1 is returned, no files shall be created or modified.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">These functions shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>Search permission is denied on a component of the path prefix, or the file
+      exists and the permissions specified by <i>oflag</i> are denied, or the
+      file does not exist and write permission is denied for the parent
+      directory of the file to be created, or O_TRUNC is specified and write
+      permission is denied.</dd>
+  <dt id="EEXIST"><a class="permalink" href="#EEXIST"><b>EEXIST</b></a></dt>
+  <dd>O_CREAT and O_EXCL are set, and the named file exists.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>A signal was caught during <i>open</i>().</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The implementation does not support synchronized I/O for this file.</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>The <i>path</i> argument names a STREAMS file and a hangup or error
+      occurred during the <i>open</i>().</dd>
+  <dt id="EISDIR"><a class="permalink" href="#EISDIR"><b>EISDIR</b></a></dt>
+  <dd>The named file is a directory and <i>oflag</i> includes O_WRONLY or
+      O_RDWR, or includes O_CREAT without O_DIRECTORY.</dd>
+  <dt id="ELOOP"><a class="permalink" href="#ELOOP"><b>ELOOP</b></a></dt>
+  <dd>A loop exists in symbolic links encountered during resolution of the
+      <i>path</i> argument, or O_NOFOLLOW was specified and the <i>path</i>
+      argument names a symbolic link.</dd>
+  <dt id="EMFILE"><a class="permalink" href="#EMFILE"><b>EMFILE</b></a></dt>
+  <dd>All file descriptors available to the process are currently open.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of a component of a pathname is longer than {NAME_MAX}.</dd>
+  <dt id="ENFILE"><a class="permalink" href="#ENFILE"><b>ENFILE</b></a></dt>
+  <dd>The maximum allowable number of files is currently open in the
+    system.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>O_CREAT is not set and a component of <i>path</i> does not name an
+      existing file, or O_CREAT is set and a component of the path prefix of
+      <i>path</i> does not name an existing file, or <i>path</i> points to an
+      empty string.</dd>
+  <dt id="ENOENT~2"><a class="permalink" href="#ENOENT~2"><b>ENOENT</b> or
+    <b>ENOTDIR</b></a></dt>
+  <dd>
+    <br>
+    O_CREAT is set, and the <i>path</i> argument contains at least one
+      non-&lt;slash&gt; character and ends with one or more trailing
+      &lt;slash&gt; characters. If <i>path</i> without the trailing
+      &lt;slash&gt; characters would name an existing file, an <b>[ENOENT]</b>
+      error shall not occur.</dd>
+  <dt id="ENOSR"><a class="permalink" href="#ENOSR"><b>ENOSR</b></a></dt>
+  <dd>The <i>path</i> argument names a STREAMS-based file and the system is
+      unable to allocate a STREAM.</dd>
+  <dt id="ENOSPC"><a class="permalink" href="#ENOSPC"><b>ENOSPC</b></a></dt>
+  <dd>The directory or file system that would contain the new file cannot be
+      expanded, the file does not exist, and O_CREAT is specified.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>A component of the path prefix names an existing file that is neither a
+      directory nor a symbolic link to a directory; or O_CREAT and O_EXCL are
+      not specified, the <i>path</i> argument contains at least one
+      non-&lt;slash&gt; character and ends with one or more trailing
+      &lt;slash&gt; characters, and the last pathname component names an
+      existing file that is neither a directory nor a symbolic link to a
+      directory; or O_DIRECTORY was specified and the <i>path</i> argument
+      resolves to a non-directory file.</dd>
+  <dt id="ENXIO"><a class="permalink" href="#ENXIO"><b>ENXIO</b></a></dt>
+  <dd>O_NONBLOCK is set, the named file is a FIFO, O_WRONLY is set, and no
+      process has the file open for reading.</dd>
+  <dt id="ENXIO~2"><a class="permalink" href="#ENXIO~2"><b>ENXIO</b></a></dt>
+  <dd>The named file is a character special or block special file, and the
+      device associated with this special file does not exist.</dd>
+  <dt id="EOVERFLOW"><a class="permalink" href="#EOVERFLOW"><b>EOVERFLOW</b></a></dt>
+  <dd>The named file is a regular file and the size of the file cannot be
+      represented correctly in an object of type <b>off_t</b>.</dd>
+  <dt id="EROFS"><a class="permalink" href="#EROFS"><b>EROFS</b></a></dt>
+  <dd>The named file resides on a read-only file system and either O_WRONLY,
+      O_RDWR, O_CREAT (if the file does not exist), or O_TRUNC is set in the
+      <i>oflag</i> argument.</dd>
+</dl>
+<p class="Pp">The <i>openat</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES~2"><a class="permalink" href="#EACCES~2"><b>EACCES</b></a></dt>
+  <dd>The access mode of the open file description associated with <i>fd</i> is
+      not O_SEARCH and the permissions of the directory underlying <i>fd</i> do
+      not permit directory searches.</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The <i>path</i> argument does not specify an absolute path and the
+      <i>fd</i> argument is neither AT_FDCWD nor a valid file descriptor open
+      for reading or searching.</dd>
+  <dt id="ENOTDIR~2"><a class="permalink" href="#ENOTDIR~2"><b>ENOTDIR</b></a></dt>
+  <dd>The <i>path</i> argument is not an absolute path and <i>fd</i> is a file
+      descriptor associated with a non-directory file.</dd>
+</dl>
+<p class="Pp">These functions may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>The <i>path</i> argument names the slave side of a pseudo-terminal device
+      that is locked.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>The value of the <i>oflag</i> argument is not valid.</dd>
+  <dt id="ELOOP~2"><a class="permalink" href="#ELOOP~2"><b>ELOOP</b></a></dt>
+  <dd>More than {SYMLOOP_MAX} symbolic links were encountered during resolution
+      of the <i>path</i> argument.</dd>
+  <dt id="ENAMETOOLONG~2"><a class="permalink" href="#ENAMETOOLONG~2"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of a pathname exceeds {PATH_MAX}, or pathname resolution of a
+      symbolic link produced an intermediate result with a length that exceeds
+      {PATH_MAX}.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>The <i>path</i> argument names a STREAMS file and the system is unable to
+      allocate resources.</dd>
+  <dt id="EOPNOTSUPP"><a class="permalink" href="#EOPNOTSUPP"><b>EOPNOTSUPP</b></a></dt>
+  <dd>The <i>path</i> argument names a socket.</dd>
+  <dt id="ETXTBSY"><a class="permalink" href="#ETXTBSY"><b>ETXTBSY</b></a></dt>
+  <dd>The file is a pure procedure (shared text) file that is being executed and
+      <i>oflag</i> is O_WRONLY or O_RDWR.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Opening_a_File_for_Writing_by_the_Owner"><a class="permalink" href="#Opening_a_File_for_Writing_by_the_Owner">Opening
+  a File for Writing by the Owner</a></h2>
+<p class="Pp">The following example opens the file <b>/tmp/file</b>, either by
+    creating it (if it does not already exist), or by truncating its length to 0
+    (if it does exist). In the former case, if the call creates a new file, the
+    access permission bits in the file mode of the file are set to permit
+    reading and writing by the owner, and to permit reading only by group
+    members and others.</p>
+<p class="Pp">If the call to <i>open</i>() is successful, the file is opened for
+    writing.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;fcntl.h&gt;
+...
+int fd;
+mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+char *pathname = "/tmp/file";
+...
+fd = open(pathname, O_WRONLY | O_CREAT | O_TRUNC, mode);
+...</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Opening_a_File_Using_an_Existence_Check"><a class="permalink" href="#Opening_a_File_Using_an_Existence_Check">Opening
+  a File Using an Existence Check</a></h2>
+<p class="Pp">The following example uses the <i>open</i>() function to try to
+    create the <b>LOCKFILE</b> file and open it for writing. Since the
+    <i>open</i>() function specifies the O_EXCL flag, the call fails if the file
+    already exists. In that case, the program assumes that someone else is
+    updating the password file and exits.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;fcntl.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;</pre>
+<pre>#define LOCKFILE "/etc/ptmp"
+...
+int pfd; /* Integer for file descriptor returned by open() call. */
+...
+if ((pfd = open(LOCKFILE, O_WRONLY | O_CREAT | O_EXCL,
+<br>
+    S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) == -1)
+{
+<br>
+    fprintf(stderr, "Cannot open /etc/ptmp. Try again later.\n");
+<br>
+    exit(1);
+}
+...</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Opening_a_File_for_Writing"><a class="permalink" href="#Opening_a_File_for_Writing">Opening
+  a File for Writing</a></h2>
+<p class="Pp">The following example opens a file for writing, creating the file
+    if it does not already exist. If the file does exist, the system truncates
+    the file to zero bytes.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;fcntl.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;</pre>
+<pre>#define LOCKFILE "/etc/ptmp"
+...
+int pfd;
+char pathname[PATH_MAX+1];
+...
+if ((pfd = open(pathname, O_WRONLY | O_CREAT | O_TRUNC,
+<br>
+    S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) == -1)
+{
+<br>
+    perror("Cannot open output file\n"); exit(1);
+}
+...</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">POSIX.1‐2008 does not require that terminal parameters be
+    automatically set to any state on first open, nor that they be reset after
+    the last close. It is possible for a non-conforming application to leave a
+    terminal device in a state where the next process to use that device finds
+    it in a non-conforming state, but has no way of determining this. To ensure
+    that the device is set to a conforming initial state, applications which
+    perform a first open of a terminal (other than a pseudo-terminal) should do
+    so using the O_TTY_INIT flag to set the parameters associated with the
+    terminal to a conforming state.</p>
+<p class="Pp">Except as specified in this volume of POSIX.1‐2017, the
+    flags allowed in <i>oflag</i> are not mutually-exclusive and any number of
+    them may be used simultaneously. Not all combinations of flags make sense.
+    For example, using O_SEARCH | O_CREAT will successfully open a pre-existing
+    directory for searching, but if there is no existing file by that name, then
+    it is unspecified whether a regular file will be created. Likewise, if a
+    non-directory file descriptor is successfully returned, it is unspecified
+    whether that descriptor will have execute permissions as if by O_EXEC (note
+    that it is unspecified whether O_EXEC and O_SEARCH have the same value).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">Some implementations permit opening FIFOs with O_RDWR. Since FIFOs
+    could be implemented in other ways, and since two file descriptors can be
+    used to the same effect, this possibility is left as undefined.</p>
+<p class="Pp">See <i><i>getgroups</i>()</i> about the group of a newly created
+    file.</p>
+<p class="Pp">The use of <i>open</i>() to create a regular file is preferable to
+    the use of <i>creat</i>(), because the latter is redundant and included only
+    for historical reasons.</p>
+<p class="Pp">The use of the O_TRUNC flag on FIFOs and directories (pipes cannot
+    be <i>open</i>()-ed) must be permissible without unexpected side-effects
+    (for example, <i>creat</i>() on a FIFO must not remove data). Since terminal
+    special files might have type-ahead data stored in the buffer, O_TRUNC
+    should not affect their content, particularly if a program that normally
+    opens a regular file should open the current controlling terminal instead.
+    Other file types, particularly implementation-defined ones, are left
+    implementation-defined.</p>
+<p class="Pp">POSIX.1‐2008 permits <b>[EACCES]</b> to be returned for
+    conditions other than those explicitly listed.</p>
+<p class="Pp">The O_NOCTTY flag was added to allow applications to avoid
+    unintentionally acquiring a controlling terminal as a side-effect of opening
+    a terminal file. This volume of POSIX.1‐2017 does not specify how a
+    controlling terminal is acquired, but it allows an implementation to provide
+    this on <i>open</i>() if the O_NOCTTY flag is not set and other conditions
+    specified in the Base Definitions volume of POSIX.1‐2017, <i>Chapter
+    11</i>, <i>General Terminal Interface</i> are met.</p>
+<p class="Pp">In historical implementations the value of O_RDONLY is zero.
+    Because of that, it is not possible to detect the presence of O_RDONLY and
+    another option. Future implementations should encode O_RDONLY and O_WRONLY
+    as bit flags so that:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>O_RDONLY | O_WRONLY == O_RDWR</pre>
+</div>
+<p class="Pp">O_EXEC and O_SEARCH are specified as two of the five file access
+    modes. Since O_EXEC does not apply to directories, and O_SEARCH only applies
+    to directories, their values need not be distinct. Since O_RDONLY has
+    historically had the value zero, implementations are not able to distinguish
+    between O_SEARCH and O_SEARCH | O_RDONLY, and similarly for O_EXEC.</p>
+<p class="Pp">In general, the <i>open</i>() function follows the symbolic link
+    if <i>path</i> names a symbolic link. However, the <i>open</i>() function,
+    when called with O_CREAT and O_EXCL, is required to fail with
+    <b>[EEXIST]</b> if <i>path</i> names an existing symbolic link, even if the
+    symbolic link refers to a nonexistent file. This behavior is required so
+    that privileged applications can create a new file in a known location
+    without the possibility that a symbolic link might cause the file to be
+    created in a different location.</p>
+<p class="Pp">For example, a privileged application that must create a file with
+    a predictable name in a user-writable directory, such as the user's home
+    directory, could be compromised if the user creates a symbolic link with
+    that name that refers to a nonexistent file in a system directory. If the
+    user can influence the contents of a file, the user could compromise the
+    system by creating a new system configuration or spool file that would then
+    be interpreted by the system. The test for a symbolic link which refers to a
+    nonexisting file must be atomic with the creation of a new file.</p>
+<p class="Pp">In addition, the <i>open</i>() function refuses to open
+    non-directories if the O_DIRECTORY flag is set. This avoids race conditions
+    whereby a user might compromise the system by substituting a hard link to a
+    sensitive file (e.g., a device or a FIFO) while a privileged application is
+    running, where opening a file even for read access might have undesirable
+    side-effects.</p>
+<p class="Pp">In addition, the <i>open</i>() function does not follow symbolic
+    links if the O_NOFOLLOW flag is set. This avoids race conditions whereby a
+    user might compromise the system by substituting a symbolic link to a
+    sensitive file (e.g., a device) while a privileged application is running,
+    where opening a file even for read access might have undesirable
+    side-effects.</p>
+<p class="Pp">The POSIX.1‐1990 standard required that the group ID of a
+    newly created file be set to the group ID of its parent directory or to the
+    effective group ID of the creating process. FIPS 151‐2 required that
+    implementations provide a way to have the group ID be set to the group ID of
+    the containing directory, but did not prohibit implementations also
+    supporting a way to set the group ID to the effective group ID of the
+    creating process. Conforming applications should not assume which group ID
+    will be used. If it matters, an application can use <i>chown</i>() to set
+    the group ID after the file is created, or determine under what conditions
+    the implementation will set the desired group ID.</p>
+<p class="Pp">The purpose of the <i>openat</i>() function is to enable opening
+    files in directories other than the current working directory without
+    exposure to race conditions. Any part of the path of a file could be changed
+    in parallel to a call to <i>open</i>(), resulting in unspecified behavior.
+    By opening a file descriptor for the target directory and using the
+    <i>openat</i>() function it can be guaranteed that the opened file is
+    located relative to the desired directory. Some implementations use the
+    <i>openat</i>() function for other purposes as well. In some cases, if the
+    <i>oflag</i> parameter has the O_XATTR bit set, the returned file descriptor
+    provides access to extended attributes. This functionality is not
+    standardized here.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>chmod</i>()</i>, <i><i>close</i>()</i>,
+    <i><i>creat</i>()</i>, <i><i>dirfd</i>()</i>, <i><i>dup</i>()</i>,
+    <i><i>exec</i></i>, <i><i>fcntl</i>()</i>, <i><i>fdopendir</i>()</i>,
+    <i><i>link</i>()</i>, <i><i>lseek</i>()</i>, <i><i>mkdtemp</i>()</i>,
+    <i><i>mknod</i>()</i>, <i><i>read</i>()</i>, <i><i>symlink</i>()</i>,
+    <i><i>umask</i>()</i>, <i><i>unlockpt</i>()</i>, <i><i>write</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Chapter
+    11</i>, <i>General Terminal Interface</i>, <i><b>&lt;fcntl.h&gt;</b></i>,
+    <i><b>&lt;sys_stat.h&gt;</b></i>, <i><b>&lt;sys_types.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

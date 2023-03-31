@@ -1,0 +1,769 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/7ed0fcc747eb2cbd35beeb6af5a9f2c86ea5069f">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>ioctl_console(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">ioctl_console(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">ioctl_console(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">ioctl_console - ioctls for console terminal and virtual
+  consoles</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The following Linux-specific <b>ioctl</b>(2) requests are
+    supported for console terminals and virtual consoles. Each requires a third
+    argument, assumed here to be <i>argp</i>.</p>
+<dl class="Bl-tag">
+  <dt id="KDGETLED"><a class="permalink" href="#KDGETLED"><b>KDGETLED</b></a></dt>
+  <dd>Get state of LEDs. <i>argp</i> points to a <i>char</i>. The lower three
+      bits of <i>*argp</i> are set to the state of the LEDs, as follows:
+    <table class="tbl">
+      <tbody><tr>
+        <td>LED_CAP </td>
+        <td>0x04</td>
+        <td>caps lock led</td>
+      </tr>
+      <tr>
+        <td>LED_NUM </td>
+        <td>0x02</td>
+        <td>num lock led</td>
+      </tr>
+      <tr>
+        <td>LED_SCR </td>
+        <td>0x01</td>
+        <td>scroll lock led</td>
+      </tr>
+    </tbody></table>
+  </dd>
+  <dt id="KDSETLED"><a class="permalink" href="#KDSETLED"><b>KDSETLED</b></a></dt>
+  <dd>Set the LEDs. The LEDs are set to correspond to the lower three bits of
+      the unsigned long integer in <i>argp</i>. However, if a higher order bit
+      is set, the LEDs revert to normal: displaying the state of the keyboard
+      functions of caps lock, num lock, and scroll lock.</dd>
+</dl>
+<p class="Pp">Before Linux 1.1.54, the LEDs just reflected the state of the
+    corresponding keyboard flags, and KDGETLED/KDSETLED would also change the
+    keyboard flags. Since Linux 1.1.54 the LEDs can be made to display arbitrary
+    information, but by default they display the keyboard flags. The following
+    two ioctls are used to access the keyboard flags.</p>
+<dl class="Bl-tag">
+  <dt id="KDGKBLED"><a class="permalink" href="#KDGKBLED"><b>KDGKBLED</b></a></dt>
+  <dd>Get keyboard flags CapsLock, NumLock, ScrollLock (not lights). <i>argp</i>
+      points to a char which is set to the flag state. The low order three bits
+      (mask 0x7) get the current flag state, and the low order bits of the next
+      nibble (mask 0x70) get the default flag state. (Since Linux 1.1.54.)</dd>
+  <dt id="KDSKBLED"><a class="permalink" href="#KDSKBLED"><b>KDSKBLED</b></a></dt>
+  <dd>Set keyboard flags CapsLock, NumLock, ScrollLock (not lights). <i>argp</i>
+      is an unsigned long integer that has the desired flag state. The low order
+      three bits (mask 0x7) have the flag state, and the low order bits of the
+      next nibble (mask 0x70) have the default flag state. (Since Linux
+    1.1.54.)</dd>
+  <dt id="KDGKBTYPE"><a class="permalink" href="#KDGKBTYPE"><b>KDGKBTYPE</b></a></dt>
+  <dd>Get keyboard type. This returns the value KB_101, defined as 0x02.</dd>
+  <dt id="KDADDIO"><a class="permalink" href="#KDADDIO"><b>KDADDIO</b></a></dt>
+  <dd>Add I/O port as valid. Equivalent to <i>ioperm(arg,1,1)</i>.</dd>
+  <dt id="KDDELIO"><a class="permalink" href="#KDDELIO"><b>KDDELIO</b></a></dt>
+  <dd>Delete I/O port as valid. Equivalent to <i>ioperm(arg,1,0)</i>.</dd>
+  <dt id="KDENABIO"><a class="permalink" href="#KDENABIO"><b>KDENABIO</b></a></dt>
+  <dd>Enable I/O to video board. Equivalent to <i>ioperm(0x3b4, 0x3df-0x3b4+1,
+      1)</i>.</dd>
+  <dt id="KDDISABIO"><a class="permalink" href="#KDDISABIO"><b>KDDISABIO</b></a></dt>
+  <dd>Disable I/O to video board. Equivalent to <i>ioperm(0x3b4, 0x3df-0x3b4+1,
+      0)</i>.</dd>
+  <dt id="KDSETMODE"><a class="permalink" href="#KDSETMODE"><b>KDSETMODE</b></a></dt>
+  <dd>Set text/graphics mode. <i>argp</i> is an unsigned integer containing one
+      of:
+    <table class="tbl">
+      <tbody><tr>
+        <td>KD_TEXT</td>
+        <td>0x00</td>
+      </tr>
+      <tr>
+        <td>KD_GRAPHICS</td>
+        <td>0x01</td>
+      </tr>
+    </tbody></table>
+  </dd>
+  <dt id="KDGETMODE"><a class="permalink" href="#KDGETMODE"><b>KDGETMODE</b></a></dt>
+  <dd>Get text/graphics mode. <i>argp</i> points to an <i>int</i> which is set
+      to one of the values shown above for <b>KDSETMODE</b>.</dd>
+  <dt id="KDMKTONE"><a class="permalink" href="#KDMKTONE"><b>KDMKTONE</b></a></dt>
+  <dd>Generate tone of specified length. The lower 16 bits of the unsigned long
+      integer in <i>argp</i> specify the period in clock cycles, and the upper
+      16 bits give the duration in msec. If the duration is zero, the sound is
+      turned off. Control returns immediately. For example, <i>argp</i> =
+      (125&lt;&lt;16) + 0x637 would specify the beep normally associated with a
+      ctrl-G. (Thus since Linux 0.99pl1; broken in Linux 2.1.49-50.)</dd>
+  <dt id="KIOCSOUND"><a class="permalink" href="#KIOCSOUND"><b>KIOCSOUND</b></a></dt>
+  <dd>Start or stop sound generation. The lower 16 bits of <i>argp</i> specify
+      the period in clock cycles (that is, <i>argp</i> = 1193180/frequency).
+      <i>argp</i> = 0 turns sound off. In either case, control returns
+      immediately.</dd>
+  <dt id="GIO_CMAP"><a class="permalink" href="#GIO_CMAP"><b>GIO_CMAP</b></a></dt>
+  <dd>Get the current default color map from kernel. <i>argp</i> points to a
+      48-byte array. (Since Linux 1.3.3.)</dd>
+  <dt id="PIO_CMAP"><a class="permalink" href="#PIO_CMAP"><b>PIO_CMAP</b></a></dt>
+  <dd>Change the default text-mode color map. <i>argp</i> points to a 48-byte
+      array which contains, in order, the Red, Green, and Blue values for the 16
+      available screen colors: 0 is off, and 255 is full intensity. The default
+      colors are, in order: black, dark red, dark green, brown, dark blue, dark
+      purple, dark cyan, light grey, dark grey, bright red, bright green,
+      yellow, bright blue, bright purple, bright cyan, and white. (Since Linux
+      1.3.3.)</dd>
+  <dt id="GIO_FONT"><a class="permalink" href="#GIO_FONT"><b>GIO_FONT</b></a></dt>
+  <dd>Gets 256-character screen font in expanded form. <i>argp</i> points to an
+      8192-byte array. Fails with error code <b>EINVAL</b> if the currently
+      loaded font is a 512-character font, or if the console is not in text
+      mode.</dd>
+  <dt id="GIO_FONTX"><a class="permalink" href="#GIO_FONTX"><b>GIO_FONTX</b></a></dt>
+  <dd>Gets screen font and associated information. <i>argp</i> points to a
+      <i>struct consolefontdesc</i> (see <b>PIO_FONTX</b>). On call, the
+      <i>charcount</i> field should be set to the maximum number of characters
+      that would fit in the buffer pointed to by <i>chardata</i>. On return, the
+      <i>charcount</i> and <i>charheight</i> are filled with the respective data
+      for the currently loaded font, and the <i>chardata</i> array contains the
+      font data if the initial value of <i>charcount</i> indicated enough space
+      was available; otherwise the buffer is untouched and <i>errno</i> is set
+      to <b>ENOMEM</b>. (Since Linux 1.3.1.)</dd>
+  <dt id="PIO_FONT"><a class="permalink" href="#PIO_FONT"><b>PIO_FONT</b></a></dt>
+  <dd>Sets 256-character screen font. Load font into the EGA/VGA character
+      generator. <i>argp</i> points to an 8192-byte map, with 32 bytes per
+      character. Only the first <i>N</i> of them are used for an 8x<i>N</i> font
+      (0 &lt; <i>N</i> &lt;= 32). This call also invalidates the Unicode
+      mapping.</dd>
+  <dt id="PIO_FONTX"><a class="permalink" href="#PIO_FONTX"><b>PIO_FONTX</b></a></dt>
+  <dd>Sets screen font and associated rendering information. <i>argp</i> points
+      to a</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct consolefontdesc {
+<br>
+    unsigned short charcount;  /* characters in font
+<br>
+                                  (256 or 512) */
+<br>
+    unsigned short charheight; /* scan lines per
+<br>
+                                  character (1-32) */
+<br>
+    char          *chardata;   /* font data in
+<br>
+                                  expanded form */
+};
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>If necessary, the screen will be appropriately resized, and
+      <b>SIGWINCH</b> sent to the appropriate processes. This call also
+      invalidates the Unicode mapping. (Since Linux 1.3.1.)</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="PIO_FONTRESET"><a class="permalink" href="#PIO_FONTRESET"><b>PIO_FONTRESET</b></a></dt>
+  <dd>Resets the screen font, size, and Unicode mapping to the bootup defaults.
+      <i>argp</i> is unused, but should be set to NULL to ensure compatibility
+      with future versions of Linux. (Since Linux 1.3.28.)</dd>
+  <dt id="GIO_SCRNMAP"><a class="permalink" href="#GIO_SCRNMAP"><b>GIO_SCRNMAP</b></a></dt>
+  <dd>Get screen mapping from kernel. <i>argp</i> points to an area of size
+      E_TABSZ, which is loaded with the font positions used to display each
+      character. This call is likely to return useless information if the
+      currently loaded font is more than 256 characters.</dd>
+  <dt id="GIO_UNISCRNMAP"><a class="permalink" href="#GIO_UNISCRNMAP"><b>GIO_UNISCRNMAP</b></a></dt>
+  <dd>Get full Unicode screen mapping from kernel. <i>argp</i> points to an area
+      of size <i>E_TABSZ*sizeof(unsigned short)</i>, which is loaded with the
+      Unicodes each character represent. A special set of Unicodes, starting at
+      U+F000, are used to represent "direct to font" mappings. (Since
+      Linux 1.3.1.)</dd>
+  <dt id="PIO_SCRNMAP"><a class="permalink" href="#PIO_SCRNMAP"><b>PIO_SCRNMAP</b></a></dt>
+  <dd>Loads the "user definable" (fourth) table in the kernel which
+      maps bytes into console screen symbols. <i>argp</i> points to an area of
+      size E_TABSZ.</dd>
+  <dt id="PIO_UNISCRNMAP"><a class="permalink" href="#PIO_UNISCRNMAP"><b>PIO_UNISCRNMAP</b></a></dt>
+  <dd>Loads the "user definable" (fourth) table in the kernel which
+      maps bytes into Unicodes, which are then translated into screen symbols
+      according to the currently loaded Unicode-to-font map. Special Unicodes
+      starting at U+F000 can be used to map directly to the font symbols. (Since
+      Linux 1.3.1.)</dd>
+  <dt id="GIO_UNIMAP"><a class="permalink" href="#GIO_UNIMAP"><b>GIO_UNIMAP</b></a></dt>
+  <dd>Get Unicode-to-font mapping from kernel. <i>argp</i> points to a</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct unimapdesc {
+<br>
+    unsigned short  entry_ct;
+<br>
+    struct unipair *entries;
+};
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>where <i>entries</i> points to an array of</dd>
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct unipair {
+<br>
+    unsigned short unicode;
+<br>
+    unsigned short fontpos;
+};
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>(Since Linux 1.1.92.)</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="PIO_UNIMAP"><a class="permalink" href="#PIO_UNIMAP"><b>PIO_UNIMAP</b></a></dt>
+  <dd>Put unicode-to-font mapping in kernel. <i>argp</i> points to a <i>struct
+      unimapdesc</i>. (Since Linux 1.1.92)</dd>
+  <dt id="PIO_UNIMAPCLR"><a class="permalink" href="#PIO_UNIMAPCLR"><b>PIO_UNIMAPCLR</b></a></dt>
+  <dd>Clear table, possibly advise hash algorithm. <i>argp</i> points to a</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct unimapinit {
+<br>
+    unsigned short advised_hashsize;  /* 0 if no opinion */
+<br>
+    unsigned short advised_hashstep;  /* 0 if no opinion */
+<br>
+    unsigned short advised_hashlevel; /* 0 if no opinion */
+};
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>(Since Linux 1.1.92.)</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="KDGKBMODE"><a class="permalink" href="#KDGKBMODE"><b>KDGKBMODE</b></a></dt>
+  <dd>Gets current keyboard mode. <i>argp</i> points to a <i>long</i> which is
+      set to one of these:
+    <table class="tbl">
+      <tbody><tr>
+        <td>K_RAW</td>
+        <td>0x00 /* Raw (scancode) mode */</td>
+      </tr>
+      <tr>
+        <td>K_XLATE</td>
+        <td>0x01 /* Translate keycodes using keymap */</td>
+      </tr>
+      <tr>
+        <td>K_MEDIUMRAW</td>
+        <td>0x02 /* Medium raw (scancode) mode */</td>
+      </tr>
+      <tr>
+        <td>K_UNICODE</td>
+        <td>0x03 /* Unicode mode */</td>
+      </tr>
+      <tr>
+        <td>K_OFF</td>
+        <td>0x04 /* Disabled mode; since Linux 2.6.39 */</td>
+      </tr>
+    </tbody></table>
+  </dd>
+  <dt id="KDSKBMODE"><a class="permalink" href="#KDSKBMODE"><b>KDSKBMODE</b></a></dt>
+  <dd>Sets current keyboard mode. <i>argp</i> is a <i>long</i> equal to one of
+      the values shown for <b>KDGKBMODE</b>.</dd>
+  <dt id="KDGKBMETA"><a class="permalink" href="#KDGKBMETA"><b>KDGKBMETA</b></a></dt>
+  <dd>Gets meta key handling mode. <i>argp</i> points to a <i>long</i> which is
+      set to one of these:
+    <table class="tbl">
+      <tbody><tr>
+        <td>K_METABIT</td>
+        <td>0x03</td>
+        <td>set high order bit</td>
+      </tr>
+      <tr>
+        <td>K_ESCPREFIX</td>
+        <td>0x04</td>
+        <td>escape prefix</td>
+      </tr>
+    </tbody></table>
+  </dd>
+  <dt id="KDSKBMETA"><a class="permalink" href="#KDSKBMETA"><b>KDSKBMETA</b></a></dt>
+  <dd>Sets meta key handling mode. <i>argp</i> is a <i>long</i> equal to one of
+      the values shown above for <b>KDGKBMETA</b>.</dd>
+  <dt id="KDGKBENT"><a class="permalink" href="#KDGKBENT"><b>KDGKBENT</b></a></dt>
+  <dd>Gets one entry in key translation table (keycode to action code).
+      <i>argp</i> points to a</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct kbentry {
+<br>
+    unsigned char  kb_table;
+<br>
+    unsigned char  kb_index;
+<br>
+    unsigned short kb_value;
+};
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>with the first two members filled in: <i>kb_table</i> selects the key
+      table (0 &lt;= <i>kb_table</i> &lt; MAX_NR_KEYMAPS), and <i>kb_index</i>
+      is the keycode (0 &lt;= <i>kb_index</i> &lt; NR_KEYS). <i>kb_value</i> is
+      set to the corresponding action code, or K_HOLE if there is no such key,
+      or K_NOSUCHMAP if <i>kb_table</i> is invalid.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="KDSKBENT"><a class="permalink" href="#KDSKBENT"><b>KDSKBENT</b></a></dt>
+  <dd>Sets one entry in translation table. <i>argp</i> points to a <i>struct
+      kbentry</i>.</dd>
+  <dt id="KDGKBSENT"><a class="permalink" href="#KDGKBSENT"><b>KDGKBSENT</b></a></dt>
+  <dd>Gets one function key string. <i>argp</i> points to a</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct kbsentry {
+<br>
+    unsigned char kb_func;
+<br>
+    unsigned char kb_string[512];
+};
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd><i>kb_string</i> is set to the (null-terminated) string corresponding to
+      the <i>kb_func</i>th function key action code.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="KDSKBSENT"><a class="permalink" href="#KDSKBSENT"><b>KDSKBSENT</b></a></dt>
+  <dd>Sets one function key string entry. <i>argp</i> points to a <i>struct
+      kbsentry</i>.</dd>
+  <dt id="KDGKBDIACR"><a class="permalink" href="#KDGKBDIACR"><b>KDGKBDIACR</b></a></dt>
+  <dd>Read kernel accent table. <i>argp</i> points to a</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct kbdiacrs {
+<br>
+    unsigned int   kb_cnt;
+<br>
+    struct kbdiacr kbdiacr[256];
+};
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>where <i>kb_cnt</i> is the number of entries in the array, each of which
+      is a</dd>
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct kbdiacr {
+<br>
+    unsigned char diacr;
+<br>
+    unsigned char base;
+<br>
+    unsigned char result;
+};
+    </pre>
+    <br>
+  </dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="KDGETKEYCODE"><a class="permalink" href="#KDGETKEYCODE"><b>KDGETKEYCODE</b></a></dt>
+  <dd>Read kernel keycode table entry (scan code to keycode). <i>argp</i> points
+      to a</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct kbkeycode {
+<br>
+    unsigned int scancode;
+<br>
+    unsigned int keycode;
+};
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd><i>keycode</i> is set to correspond to the given <i>scancode</i>. (89
+      &lt;= <i>scancode</i> &lt;= 255 only. For 1 &lt;= <i>scancode</i> &lt;=
+      88, <i>keycode</i>==<i>scancode</i>.) (Since Linux 1.1.63.)</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="KDSETKEYCODE"><a class="permalink" href="#KDSETKEYCODE"><b>KDSETKEYCODE</b></a></dt>
+  <dd>Write kernel keycode table entry. <i>argp</i> points to a <i>struct
+      kbkeycode</i>. (Since Linux 1.1.63.)</dd>
+  <dt id="KDSIGACCEPT"><a class="permalink" href="#KDSIGACCEPT"><b>KDSIGACCEPT</b></a></dt>
+  <dd>The calling process indicates its willingness to accept the signal
+      <i>argp</i> when it is generated by pressing an appropriate key
+      combination. (1 &lt;= <i>argp</i> &lt;= NSIG). (See <i>spawn_console</i>()
+      in <i>linux/drivers/char/keyboard.c</i>.)</dd>
+  <dt id="VT_OPENQRY"><a class="permalink" href="#VT_OPENQRY"><b>VT_OPENQRY</b></a></dt>
+  <dd>Returns the first available (non-opened) console. <i>argp</i> points to an
+      <i>int</i> which is set to the number of the vt (1 &lt;= <i>*argp</i>
+      &lt;= MAX_NR_CONSOLES).</dd>
+  <dt id="VT_GETMODE"><a class="permalink" href="#VT_GETMODE"><b>VT_GETMODE</b></a></dt>
+  <dd>Get mode of active vt. <i>argp</i> points to a</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct vt_mode {
+<br>
+    char  mode;    /* vt mode */
+<br>
+    char  waitv;   /* if set, hang on writes if not active */
+<br>
+    short relsig;  /* signal to raise on release req */
+<br>
+    short acqsig;  /* signal to raise on acquisition */
+<br>
+    short frsig;   /* unused (set to 0) */
+};
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>which is set to the mode of the active vt. <i>mode</i> is set to one of
+      these values:
+    <table class="tbl">
+      <tbody><tr>
+        <td>VT_AUTO</td>
+        <td>auto vt switching</td>
+      </tr>
+      <tr>
+        <td>VT_PROCESS</td>
+        <td>process controls switching</td>
+      </tr>
+      <tr>
+        <td>VT_ACKACQ</td>
+        <td>acknowledge switch</td>
+      </tr>
+    </tbody></table>
+  </dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="VT_SETMODE"><a class="permalink" href="#VT_SETMODE"><b>VT_SETMODE</b></a></dt>
+  <dd>Set mode of active vt. <i>argp</i> points to a <i>struct vt_mode</i>.</dd>
+  <dt id="VT_GETSTATE"><a class="permalink" href="#VT_GETSTATE"><b>VT_GETSTATE</b></a></dt>
+  <dd>Get global vt state info. <i>argp</i> points to a</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct vt_stat {
+<br>
+    unsigned short v_active;  /* active vt */
+<br>
+    unsigned short v_signal;  /* signal to send */
+<br>
+    unsigned short v_state;   /* vt bit mask */
+};
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>For each vt in use, the corresponding bit in the <i>v_state</i> member is
+      set. (Linux 1.0 through Linux 1.1.92.)</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="VT_RELDISP"><a class="permalink" href="#VT_RELDISP"><b>VT_RELDISP</b></a></dt>
+  <dd>Release a display.</dd>
+  <dt id="VT_ACTIVATE"><a class="permalink" href="#VT_ACTIVATE"><b>VT_ACTIVATE</b></a></dt>
+  <dd>Switch to vt <i>argp</i> (1 &lt;= <i>argp</i> &lt;= MAX_NR_CONSOLES).</dd>
+  <dt id="VT_WAITACTIVE"><a class="permalink" href="#VT_WAITACTIVE"><b>VT_WAITACTIVE</b></a></dt>
+  <dd>Wait until vt <i>argp</i> has been activated.</dd>
+  <dt id="VT_DISALLOCATE"><a class="permalink" href="#VT_DISALLOCATE"><b>VT_DISALLOCATE</b></a></dt>
+  <dd>Deallocate the memory associated with vt <i>argp</i>. (Since Linux
+      1.1.54.)</dd>
+  <dt id="VT_RESIZE"><a class="permalink" href="#VT_RESIZE"><b>VT_RESIZE</b></a></dt>
+  <dd>Set the kernel's idea of screensize. <i>argp</i> points to a</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct vt_sizes {
+<br>
+    unsigned short v_rows;       /* # rows */
+<br>
+    unsigned short v_cols;       /* # columns */
+<br>
+    unsigned short v_scrollsize; /* no longer used */
+};
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>Note that this does not change the videomode. See <b>resizecons</b>(8).
+      (Since Linux 1.1.54.)</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="VT_RESIZEX"><a class="permalink" href="#VT_RESIZEX"><b>VT_RESIZEX</b></a></dt>
+  <dd>Set the kernel's idea of various screen parameters. <i>argp</i> points to
+      a</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct vt_consize {
+<br>
+    unsigned short v_rows;  /* number of rows */
+<br>
+    unsigned short v_cols;  /* number of columns */
+<br>
+    unsigned short v_vlin;  /* number of pixel rows
+<br>
+                               on screen */
+<br>
+    unsigned short v_clin;  /* number of pixel rows
+<br>
+                               per character */
+<br>
+    unsigned short v_vcol;  /* number of pixel columns
+<br>
+                               on screen */
+<br>
+    unsigned short v_ccol;  /* number of pixel columns
+<br>
+                               per character */
+};
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>Any parameter may be set to zero, indicating "no change", but if
+      multiple parameters are set, they must be self-consistent. Note that this
+      does not change the videomode. See <b>resizecons</b>(8). (Since Linux
+      1.3.3.)</dd>
+</dl>
+<p class="Pp">The action of the following ioctls depends on the first byte in
+    the struct pointed to by <i>argp</i>, referred to here as the
+    <i>subcode</i>. These are legal only for the superuser or the owner of the
+    current terminal. Symbolic <i>subcode</i>s are available in
+    <i>&lt;linux/tiocl.h&gt;</i> since Linux 2.5.71.</p>
+<dl class="Bl-tag">
+  <dt id="TIOCLINUX"><a class="permalink" href="#TIOCLINUX"><b>TIOCLINUX</b>,
+    <b>subcode</b>=<b>0</b></a></dt>
+  <dd>Dump the screen. Disappeared in Linux 1.1.92. (With Linux 1.1.92 or later,
+      read from <i>/dev/vcsN</i> or <i>/dev/vcsaN</i> instead.)</dd>
+  <dt id="TIOCLINUX~2"><a class="permalink" href="#TIOCLINUX~2"><b>TIOCLINUX</b>,
+    <b>subcode</b>=<b>1</b></a></dt>
+  <dd>Get task information. Disappeared in Linux 1.1.92.</dd>
+  <dt id="TIOCLINUX~3"><a class="permalink" href="#TIOCLINUX~3"><b>TIOCLINUX</b>,
+    <b>subcode</b>=<b>TIOCL_SETSEL</b></a></dt>
+  <dd>Set selection. <i>argp</i> points to a</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct {
+<br>
+    char  subcode;
+<br>
+    short xs, ys, xe, ye;
+<br>
+    short sel_mode;
+};
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd><i>xs</i> and <i>ys</i> are the starting column and row. <i>xe</i> and
+      <i>ye</i> are the ending column and row. (Upper left corner is
+      row=column=1.) <i>sel_mode</i> is 0 for character-by-character selection,
+      1 for word-by-word selection, or 2 for line-by-line selection. The
+      indicated screen characters are highlighted and saved in a kernel
+    buffer.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TIOCLINUX~4"><a class="permalink" href="#TIOCLINUX~4"><b>TIOCLINUX</b>,
+    <b>subcode</b>=<b>TIOCL_PASTESEL</b></a></dt>
+  <dd>Paste selection. The characters in the selection buffer are written to
+      <i>fd</i>.</dd>
+  <dt id="TIOCLINUX~5"><a class="permalink" href="#TIOCLINUX~5"><b>TIOCLINUX</b>,
+    <b>subcode</b>=<b>TIOCL_UNBLANKSCREEN</b></a></dt>
+  <dd>Unblank the screen.</dd>
+  <dt id="TIOCLINUX~6"><a class="permalink" href="#TIOCLINUX~6"><b>TIOCLINUX</b>,
+    <b>subcode</b>=<b>TIOCL_SELLOADLUT</b></a></dt>
+  <dd>Sets contents of a 256-bit look up table defining characters in a
+      "word", for word-by-word selection. (Since Linux 1.1.32.)</dd>
+  <dt id="TIOCLINUX~7"><a class="permalink" href="#TIOCLINUX~7"><b>TIOCLINUX</b>,
+    <b>subcode</b>=<b>TIOCL_GETSHIFTSTATE</b></a></dt>
+  <dd><i>argp</i> points to a char which is set to the value of the kernel
+      variable <i>shift_state</i>. (Since Linux 1.1.32.)</dd>
+  <dt id="TIOCLINUX~8"><a class="permalink" href="#TIOCLINUX~8"><b>TIOCLINUX</b>,
+    <b>subcode</b>=<b>TIOCL_GETMOUSEREPORTING</b></a></dt>
+  <dd><i>argp</i> points to a char which is set to the value of the kernel
+      variable <i>report_mouse</i>. (Since Linux 1.1.33.)</dd>
+  <dt id="TIOCLINUX~9"><a class="permalink" href="#TIOCLINUX~9"><b>TIOCLINUX</b>,
+    <b>subcode</b>=<b>8</b></a></dt>
+  <dd>Dump screen width and height, cursor position, and all the
+      character-attribute pairs. (Linux 1.1.67 through Linux 1.1.91 only. With
+      Linux 1.1.92 or later, read from <i>/dev/vcsa*</i> instead.)</dd>
+  <dt id="TIOCLINUX~10"><a class="permalink" href="#TIOCLINUX~10"><b>TIOCLINUX</b>,
+    <b>subcode</b>=<b>9</b></a></dt>
+  <dd>Restore screen width and height, cursor position, and all the
+      character-attribute pairs. (Linux 1.1.67 through Linux 1.1.91 only. With
+      Linux 1.1.92 or later, write to <i>/dev/vcsa*</i> instead.)</dd>
+  <dt id="TIOCLINUX~11"><a class="permalink" href="#TIOCLINUX~11"><b>TIOCLINUX</b>,
+    <b>subcode</b>=<b>TIOCL_SETVESABLANK</b></a></dt>
+  <dd>Handles the Power Saving feature of the new generation of monitors. VESA
+      screen blanking mode is set to <i>argp[1]</i>, which governs what screen
+      blanking does:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt><b>0</b></dt>
+  <dd>Screen blanking is disabled.</dd>
+  <dt><b>1</b></dt>
+  <dd>The current video adapter register settings are saved, then the controller
+      is programmed to turn off the vertical synchronization pulses. This puts
+      the monitor into "standby" mode. If your monitor has an Off_Mode
+      timer, then it will eventually power down by itself.</dd>
+  <dt><b>2</b></dt>
+  <dd>The current settings are saved, then both the vertical and horizontal
+      synchronization pulses are turned off. This puts the monitor into
+      "off" mode. If your monitor has no Off_Mode timer, or if you
+      want your monitor to power down immediately when the blank_timer times
+      out, then you choose this option. (<i>Caution:</i> Powering down
+      frequently will damage the monitor.) (Since Linux 1.1.76.)</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="TIOCLINUX~12"><a class="permalink" href="#TIOCLINUX~12"><b>TIOCLINUX</b>,
+    <b>subcode</b>=<b>TIOCL_SETKMSGREDIRECT</b></a></dt>
+  <dd>Change target of kernel messages ("console"): by default, and if
+      this is set to <b>0</b>, messages are written to the currently active VT.
+      The VT to write to is a single byte following <b>subcode</b>. (Since Linux
+      2.5.36.)</dd>
+  <dt id="TIOCLINUX~13"><a class="permalink" href="#TIOCLINUX~13"><b>TIOCLINUX</b>,
+    <b>subcode</b>=<b>TIOCL_GETFGCONSOLE</b></a></dt>
+  <dd>Returns the number of VT currently in foreground. (Since Linux
+    2.5.36.)</dd>
+  <dt id="TIOCLINUX~14"><a class="permalink" href="#TIOCLINUX~14"><b>TIOCLINUX</b>,
+    <b>subcode</b>=<b>TIOCL_SCROLLCONSOLE</b></a></dt>
+  <dd>Scroll the foreground VT by the specified amount of <i>lines</i> down, or
+      half the screen if <b>0</b>. <i>lines</i> is *(((int32_t *)&amp;subcode) +
+      1). (Since Linux 2.5.67.)</dd>
+  <dt id="TIOCLINUX~15"><a class="permalink" href="#TIOCLINUX~15"><b>TIOCLINUX</b>,
+    <b>subcode</b>=<b>TIOCL_BLANKSCREEN</b></a></dt>
+  <dd>Blank the foreground VT, ignoring "pokes" (typing): can only be
+      unblanked explicitly (by switching VTs, to text mode, etc.). (Since Linux
+      2.5.71.)</dd>
+  <dt id="TIOCLINUX~16"><a class="permalink" href="#TIOCLINUX~16"><b>TIOCLINUX</b>,
+    <b>subcode</b>=<b>TIOCL_BLANKEDSCREEN</b></a></dt>
+  <dd>Returns the number of VT currently blanked, <b>0</b> if none. (Since Linux
+      2.5.71.)</dd>
+  <dt id="TIOCLINUX~17"><a class="permalink" href="#TIOCLINUX~17"><b>TIOCLINUX</b>,
+    <b>subcode</b>=<b>16</b></a></dt>
+  <dd>Never used.</dd>
+  <dt id="TIOCLINUX~18"><a class="permalink" href="#TIOCLINUX~18"><b>TIOCLINUX</b>,
+    <b>subcode</b>=<b>TIOCL_GETKMSGREDIRECT</b></a></dt>
+  <dd>Returns target of kernel messages. (Since Linux 2.6.17.)</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, 0 is returned (except where indicated). On failure, -1
+    is returned, and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The file descriptor is invalid.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The file descriptor or <i>argp</i> is invalid.</dd>
+  <dt id="ENOTTY"><a class="permalink" href="#ENOTTY"><b>ENOTTY</b></a></dt>
+  <dd>The file descriptor is not associated with a character special device, or
+      the specified request does not apply to it.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>Insufficient permission.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp"><b>Warning</b>: Do not regard this man page as documentation of
+    the Linux console ioctls. This is provided for the curious only, as an
+    alternative to reading the source. Ioctl's are undocumented Linux internals,
+    liable to be changed without warning. (And indeed, this page more or less
+    describes the situation as of kernel version 1.1.94; there are many minor
+    and not-so-minor differences with earlier versions.)</p>
+<p class="Pp">Very often, ioctls are introduced for communication between the
+    kernel and one particular well-known program (fdisk, hdparm, setserial,
+    tunelp, loadkeys, selection, setfont, etc.), and their behavior will be
+    changed when required by this particular program.</p>
+<p class="Pp">Programs using these ioctls will not be portable to other versions
+    of UNIX, will not work on older versions of Linux, and will not work on
+    future versions of Linux.</p>
+<p class="Pp">Use POSIX functions.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>dumpkeys</b>(1), <b>kbd_mode</b>(1), <b>loadkeys</b>(1),
+    <b>mknod</b>(1), <b>setleds</b>(1), <b>setmetamode</b>(1), <b>execve</b>(2),
+    <b>fcntl</b>(2), <b>ioctl_tty</b>(2), <b>ioperm</b>(2), <b>termios</b>(3),
+    <b>console_codes</b>(4), <b>mt</b>(4), <b>sd</b>(4), <b>tty</b>(4),
+    <b>ttyS</b>(4), <b>vcs</b>(4), <b>vcsa</b>(4), <b>charsets</b>(7),
+    <b>mapscrn</b>(8), <b>resizecons</b>(8), <b>setfont</b>(8)</p>
+<p class="Pp"><i>/usr/include/linux/kd.h</i>, <i>/usr/include/linux/vt.h</i></p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

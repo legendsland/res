@@ -1,0 +1,454 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/daafbf4f8f69bf2bf70ee2cb0587a12780106304">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>sys_socket.h(0P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">sys_socket.h(0P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">sys_socket.h(0P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">sys/socket.h — main sockets header</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;sys/socket.h&gt;</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>&lt;sys/socket.h&gt;</i> header shall define the
+    <b>socklen_t</b> type, which is an integer type of width of at least 32
+    bits; see APPLICATION USAGE.</p>
+<p class="Pp">The <i>&lt;sys/socket.h&gt;</i> header shall define the
+    <b>sa_family_t</b> unsigned integer type.</p>
+<p class="Pp">The <i>&lt;sys/socket.h&gt;</i> header shall define the
+    <b>sockaddr</b> structure, which shall include at least the following
+    members:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>sa_family_t  sa_family  Address family.
+char         sa_data[]  Socket address (variable-length data).</pre>
+</div>
+<p class="Pp">The <b>sockaddr</b> structure is used to define a socket address
+    which is used in the <i>bind</i>(), <i>connect</i>(), <i>getpeername</i>(),
+    <i>getsockname</i>(), <i>recvfrom</i>(), and <i>sendto</i>() functions.</p>
+<p class="Pp">The <i>&lt;sys/socket.h&gt;</i> header shall define the
+    <b>sockaddr_storage</b> structure, which shall be:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>Large enough to accommodate all supported protocol-specific address
+      structures</dd>
+  <dt> *</dt>
+  <dd>Aligned at an appropriate boundary so that pointers to it can be cast as
+      pointers to protocol-specific address structures and used to access the
+      fields of those structures without alignment problems</dd>
+</dl>
+<p class="Pp">The <b>sockaddr_storage</b> structure shall include at least the
+    following members:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>sa_family_t   ss_family</pre>
+</div>
+<p class="Pp">When a pointer to a <b>sockaddr_storage</b> structure is cast as a
+    pointer to a <b>sockaddr</b> structure, the <i>ss_family</i> field of the
+    <b>sockaddr_storage</b> structure shall map onto the <i>sa_family</i> field
+    of the <b>sockaddr</b> structure. When a pointer to a
+    <b>sockaddr_storage</b> structure is cast as a pointer to a
+    protocol-specific address structure, the <i>ss_family</i> field shall map
+    onto a field of that structure that is of type <b>sa_family_t</b> and that
+    identifies the protocol's address family.</p>
+<p class="Pp">The <i>&lt;sys/socket.h&gt;</i> header shall define the
+    <b>msghdr</b> structure, which shall include at least the following
+  members:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>void          *msg_name        Optional address.
+socklen_t      msg_namelen     Size of address.
+struct iovec  *msg_iov         Scatter/gather array.
+int            msg_iovlen      Members in <i>msg_iov</i>.
+void          *msg_control     Ancillary data; see below.
+socklen_t      msg_controllen  Ancillary data buffer <i>len</i>.
+int            msg_flags       Flags on received message.</pre>
+</div>
+<p class="Pp">The <b>msghdr</b> structure is used to minimize the number of
+    directly supplied parameters to the <i>recvmsg</i>() and <i>sendmsg</i>()
+    functions. This structure is used as a <i>value</i>‐<i>result</i>
+    parameter in the <i>recvmsg</i>() function and <i>value</i> only for the
+    <i>sendmsg</i>() function.</p>
+<p class="Pp">The <i>&lt;sys/socket.h&gt;</i> header shall define the
+    <b>iovec</b> structure as described in <i>&lt;sys/uio.h&gt;</i>.</p>
+<p class="Pp">The <i>&lt;sys/socket.h&gt;</i> header shall define the
+    <b>cmsghdr</b> structure, which shall include at least the following
+    members:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>socklen_t  cmsg_len    Data byte count, including the <b>cmsghdr</b>.
+int        cmsg_level  Originating protocol.
+int        cmsg_type   Protocol-specific type.</pre>
+</div>
+<p class="Pp">The <b>cmsghdr</b> structure is used for storage of ancillary data
+    object information.</p>
+<p class="Pp">Ancillary data consists of a sequence of pairs, each consisting of
+    a <b>cmsghdr</b> structure followed by a data array. The data array contains
+    the ancillary data message, and the <b>cmsghdr</b> structure contains
+    descriptive information that allows an application to correctly parse the
+    data.</p>
+<p class="Pp">The values for <i>cmsg_level</i> shall be legal values for the
+    <i>level</i> argument to the <i>getsockopt</i>() and <i>setsockopt</i>()
+    functions. The system documentation shall specify the <i>cmsg_type</i>
+    definitions for the supported protocols.</p>
+<p class="Pp">Ancillary data is also possible at the socket level. The
+    <i>&lt;sys/socket.h&gt;</i> header shall define the following symbolic
+    constant for use as the <i>cmsg_type</i> value when <i>cmsg_level</i> is
+    SOL_SOCKET:</p>
+<dl class="Bl-tag">
+  <dt id="SCM_RIGHTS"><a class="permalink" href="#SCM_RIGHTS">SCM_RIGHTS</a></dt>
+  <dd>Indicates that the data array contains the access rights to be sent or
+      received.</dd>
+</dl>
+<p class="Pp">The <i>&lt;sys/socket.h&gt;</i> header shall define the following
+    macros to gain access to the data arrays in the ancillary data associated
+    with a message header:</p>
+<dl class="Bl-tag">
+  <dt id="CMSG_DATA("><a class="permalink" href="#CMSG_DATA(">CMSG_DATA(<i>cmsg</i>)</a></dt>
+  <dd>
+    <br>
+    If the argument is a pointer to a <b>cmsghdr</b> structure, this macro shall
+      return an unsigned character pointer to the data array associated with the
+      <b>cmsghdr</b> structure.</dd>
+  <dt id="CMSG_NXTHDR("><a class="permalink" href="#CMSG_NXTHDR(">CMSG_NXTHDR(<i>mhdr,cmsg</i>)</a></dt>
+  <dd>
+    <br>
+    If the first argument is a pointer to a <b>msghdr</b> structure and the
+      second argument is a pointer to a <b>cmsghdr</b> structure in the
+      ancillary data pointed to by the <i>msg_control</i> field of that
+      <b>msghdr</b> structure, this macro shall return a pointer to the next
+      <b>cmsghdr</b> structure, or a null pointer if this structure is the last
+      <b>cmsghdr</b> in the ancillary data.</dd>
+  <dt id="CMSG_FIRSTHDR("><a class="permalink" href="#CMSG_FIRSTHDR(">CMSG_FIRSTHDR(<i>mhdr</i>)</a></dt>
+  <dd>
+    <br>
+    If the argument is a pointer to a <b>msghdr</b> structure, this macro shall
+      return a pointer to the first <b>cmsghdr</b> structure in the ancillary
+      data associated with this <b>msghdr</b> structure, or a null pointer if
+      there is no ancillary data associated with the <b>msghdr</b>
+    structure.</dd>
+</dl>
+<p class="Pp">The <i>&lt;sys/socket.h&gt;</i> header shall define the
+    <b>linger</b> structure, which shall include at least the following
+  members:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>int  l_onoff   Indicates whether linger option is enabled.
+int  l_linger  Linger time, in seconds.</pre>
+</div>
+<p class="Pp">The <i>&lt;sys/socket.h&gt;</i> header shall define the following
+    symbolic constants with distinct values:</p>
+<dl class="Bl-tag">
+  <dt id="SOCK_DGRAM"><a class="permalink" href="#SOCK_DGRAM">SOCK_DGRAM</a></dt>
+  <dd>Datagram socket.</dd>
+  <dt id="SOCK_RAW"><a class="permalink" href="#SOCK_RAW">SOCK_RAW</a></dt>
+  <dd>Raw Protocol Interface.</dd>
+  <dt id="SOCK_SEQPACKET"><a class="permalink" href="#SOCK_SEQPACKET">SOCK_SEQPACKET</a></dt>
+  <dd>Sequenced-packet socket.</dd>
+  <dt id="SOCK_STREAM"><a class="permalink" href="#SOCK_STREAM">SOCK_STREAM</a></dt>
+  <dd>Byte-stream socket.</dd>
+</dl>
+<p class="Pp">The <i>&lt;sys/socket.h&gt;</i> header shall define the following
+    symbolic constant for use as the <i>level</i> argument of
+    <i>setsockopt</i>() and <i>getsockopt</i>().</p>
+<dl class="Bl-tag">
+  <dt id="SOL_SOCKET"><a class="permalink" href="#SOL_SOCKET">SOL_SOCKET</a></dt>
+  <dd>Options to be accessed at socket level, not protocol level.</dd>
+</dl>
+<p class="Pp">The <i>&lt;sys/socket.h&gt;</i> header shall define the following
+    symbolic constants with distinct values for use as the <i>option_name</i>
+    argument in <i>getsockopt</i>() or <i>setsockopt</i>() calls (see the System
+    Interfaces volume of POSIX.1‐2017, <i>Section 2.10.16</i>, <i>Use of
+    Options</i>):</p>
+<dl class="Bl-tag">
+  <dt id="SO_ACCEPTCONN"><a class="permalink" href="#SO_ACCEPTCONN">SO_ACCEPTCONN</a></dt>
+  <dd>Socket is accepting connections.</dd>
+  <dt id="SO_BROADCAST"><a class="permalink" href="#SO_BROADCAST">SO_BROADCAST</a></dt>
+  <dd>Transmission of broadcast messages is supported.</dd>
+  <dt id="SO_DEBUG"><a class="permalink" href="#SO_DEBUG">SO_DEBUG</a></dt>
+  <dd>Debugging information is being recorded.</dd>
+  <dt id="SO_DONTROUTE"><a class="permalink" href="#SO_DONTROUTE">SO_DONTROUTE</a></dt>
+  <dd>Bypass normal routing.</dd>
+  <dt id="SO_ERROR"><a class="permalink" href="#SO_ERROR">SO_ERROR</a></dt>
+  <dd>Socket error status.</dd>
+  <dt id="SO_KEEPALIVE"><a class="permalink" href="#SO_KEEPALIVE">SO_KEEPALIVE</a></dt>
+  <dd>Connections are kept alive with periodic messages.</dd>
+  <dt id="SO_LINGER"><a class="permalink" href="#SO_LINGER">SO_LINGER</a></dt>
+  <dd>Socket lingers on close.</dd>
+  <dt id="SO_OOBINLINE"><a class="permalink" href="#SO_OOBINLINE">SO_OOBINLINE</a></dt>
+  <dd>Out-of-band data is transmitted in line.</dd>
+  <dt id="SO_RCVBUF"><a class="permalink" href="#SO_RCVBUF">SO_RCVBUF</a></dt>
+  <dd>Receive buffer size.</dd>
+  <dt id="SO_RCVLOWAT"><a class="permalink" href="#SO_RCVLOWAT">SO_RCVLOWAT</a></dt>
+  <dd>Receive ``low water mark''.</dd>
+  <dt id="SO_RCVTIMEO"><a class="permalink" href="#SO_RCVTIMEO">SO_RCVTIMEO</a></dt>
+  <dd>Receive timeout.</dd>
+  <dt id="SO_REUSEADDR"><a class="permalink" href="#SO_REUSEADDR">SO_REUSEADDR</a></dt>
+  <dd>Reuse of local addresses is supported.</dd>
+  <dt id="SO_SNDBUF"><a class="permalink" href="#SO_SNDBUF">SO_SNDBUF</a></dt>
+  <dd>Send buffer size.</dd>
+  <dt id="SO_SNDLOWAT"><a class="permalink" href="#SO_SNDLOWAT">SO_SNDLOWAT</a></dt>
+  <dd>Send ``low water mark''.</dd>
+  <dt id="SO_SNDTIMEO"><a class="permalink" href="#SO_SNDTIMEO">SO_SNDTIMEO</a></dt>
+  <dd>Send timeout.</dd>
+  <dt id="SO_TYPE"><a class="permalink" href="#SO_TYPE">SO_TYPE</a></dt>
+  <dd>Socket type.</dd>
+</dl>
+<p class="Pp">The <i>&lt;sys/socket.h&gt;</i> header shall define the following
+    symbolic constant for use as the maximum <i>backlog</i> queue length which
+    may be specified by the <i>backlog</i> field of the <i>listen</i>()
+    function:</p>
+<dl class="Bl-tag">
+  <dt id="SOMAXCONN"><a class="permalink" href="#SOMAXCONN">SOMAXCONN</a></dt>
+  <dd>The maximum <i>backlog</i> queue length.</dd>
+</dl>
+<p class="Pp">The <i>&lt;sys/socket.h&gt;</i> header shall define the following
+    symbolic constants with distinct values for use as the valid values for the
+    <i>msg_flags</i> field in the <b>msghdr</b> structure, or the <i>flags</i>
+    parameter in <i>recv</i>(), <i>recvfrom</i>(), <i>recvmsg</i>(),
+    <i>send</i>(), <i>sendmsg</i>(), or <i>sendto</i>() calls:</p>
+<dl class="Bl-tag">
+  <dt id="MSG_CTRUNC"><a class="permalink" href="#MSG_CTRUNC">MSG_CTRUNC</a></dt>
+  <dd>Control data truncated.</dd>
+  <dt id="MSG_DONTROUTE"><a class="permalink" href="#MSG_DONTROUTE">MSG_DONTROUTE</a></dt>
+  <dd>Send without using routing tables.</dd>
+  <dt id="MSG_EOR"><a class="permalink" href="#MSG_EOR">MSG_EOR</a></dt>
+  <dd>Terminates a record (if supported by the protocol).</dd>
+  <dt id="MSG_OOB"><a class="permalink" href="#MSG_OOB">MSG_OOB</a></dt>
+  <dd>Out-of-band data.</dd>
+  <dt id="MSG_NOSIGNAL"><a class="permalink" href="#MSG_NOSIGNAL">MSG_NOSIGNAL</a></dt>
+  <dd>No SIGPIPE generated when an attempt to send is made on a stream-oriented
+      socket that is no longer connected.</dd>
+  <dt id="MSG_PEEK"><a class="permalink" href="#MSG_PEEK">MSG_PEEK</a></dt>
+  <dd>Leave received data in queue.</dd>
+  <dt id="MSG_TRUNC"><a class="permalink" href="#MSG_TRUNC">MSG_TRUNC</a></dt>
+  <dd>Normal data truncated.</dd>
+  <dt id="MSG_WAITALL"><a class="permalink" href="#MSG_WAITALL">MSG_WAITALL</a></dt>
+  <dd>Attempt to fill the read buffer.</dd>
+</dl>
+<p class="Pp">The <i>&lt;sys/socket.h&gt;</i> header shall define the following
+    symbolic constants with distinct values:</p>
+<dl class="Bl-tag">
+  <dt id="AF_INET"><a class="permalink" href="#AF_INET">AF_INET</a></dt>
+  <dd>Internet domain sockets for use with IPv4 addresses.</dd>
+  <dt id="AF_INET6"><a class="permalink" href="#AF_INET6">AF_INET6</a></dt>
+  <dd>Internet domain sockets for use with IPv6 addresses.</dd>
+  <dt id="AF_UNIX"><a class="permalink" href="#AF_UNIX">AF_UNIX</a></dt>
+  <dd>UNIX domain sockets.</dd>
+  <dt id="AF_UNSPEC"><a class="permalink" href="#AF_UNSPEC">AF_UNSPEC</a></dt>
+  <dd>Unspecified.</dd>
+</dl>
+<p class="Pp">The value of AF_UNSPEC shall be 0.</p>
+<p class="Pp">The <i>&lt;sys/socket.h&gt;</i> header shall define the following
+    symbolic constants with distinct values:</p>
+<dl class="Bl-tag">
+  <dt id="SHUT_RD"><a class="permalink" href="#SHUT_RD">SHUT_RD</a></dt>
+  <dd>Disables further receive operations.</dd>
+  <dt id="SHUT_RDWR"><a class="permalink" href="#SHUT_RDWR">SHUT_RDWR</a></dt>
+  <dd>Disables further send and receive operations.</dd>
+  <dt id="SHUT_WR"><a class="permalink" href="#SHUT_WR">SHUT_WR</a></dt>
+  <dd>Disables further send operations.</dd>
+</dl>
+<p class="Pp">The <i>&lt;sys/socket.h&gt;</i> header shall define the
+    <b>size_t</b> and <b>ssize_t</b> types as described in
+    <i>&lt;sys/types.h&gt;</i>.</p>
+<p class="Pp">The following shall be declared as functions and may also be
+    defined as macros. Function prototypes shall be provided.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>int     accept(int, struct sockaddr *restrict, socklen_t *restrict);
+int     bind(int, const struct sockaddr *, socklen_t);
+int     connect(int, const struct sockaddr *, socklen_t);
+int     getpeername(int, struct sockaddr *restrict, socklen_t *restrict);
+int     getsockname(int, struct sockaddr *restrict, socklen_t *restrict);
+int     getsockopt(int, int, int, void *restrict, socklen_t *restrict);
+int     listen(int, int);
+ssize_t recv(int, void *, size_t, int);
+ssize_t recvfrom(int, void *restrict, size_t, int,
+<br>
+        struct sockaddr *restrict, socklen_t *restrict);
+ssize_t recvmsg(int, struct msghdr *, int);
+ssize_t send(int, const void *, size_t, int);
+ssize_t sendmsg(int, const struct msghdr *, int);
+ssize_t sendto(int, const void *, size_t, int, const struct sockaddr *,
+<br>
+        socklen_t);
+int     setsockopt(int, int, int, const void *, socklen_t);
+int     shutdown(int, int);
+int     sockatmark(int);
+int     socket(int, int, int);
+int     socketpair(int, int, int, int [2]);</pre>
+</div>
+<p class="Pp">Inclusion of <i>&lt;sys/socket.h&gt;</i> may also make visible all
+    symbols from <i>&lt;sys/uio.h&gt;</i>.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">To forestall portability problems, it is recommended that
+    applications not use values larger than 231 -1 for the <b>socklen_t</b>
+    type.</p>
+<p class="Pp">The <b>sockaddr_storage</b> structure solves the problem of
+    declaring storage for automatic variables which is both large enough and
+    aligned enough for storing the socket address data structure of any family.
+    For example, code with a file descriptor and without the context of the
+    address family can pass a pointer to a variable of this type, where a
+    pointer to a socket address structure is expected in calls such as
+    <i>getpeername</i>(), and determine the address family by accessing the
+    received content after the call.</p>
+<p class="Pp">The example below illustrates a data structure which aligns on a
+    64-bit boundary. An implementation-defined field <i>_ss_align</i> following
+    <i>_ss_pad1</i> is used to force a 64-bit alignment which covers proper
+    alignment good enough for needs of at least <b>sockaddr_in6</b> (IPv6) and
+    <b>sockaddr_in</b> (IPv4) address data structures. The size of padding field
+    <i>_ss_pad1</i> depends on the chosen alignment boundary. The size of
+    padding field <i>_ss_pad2</i> depends on the value of overall size chosen
+    for the total size of the structure. This size and alignment are represented
+    in the above example by implementation-defined (not required) constants
+    _SS_MAXSIZE (chosen value 128) and _SS_ALIGNMENT (with chosen value 8).
+    Constants _SS_PAD1SIZE (derived value 6) and _SS_PAD2SIZE (derived value
+    112) are also for illustration and not required. The implementation-defined
+    definitions and structure field names above start with an &lt;underscore&gt;
+    to denote implementation private name space. Portable code is not expected
+    to access or reference those fields or constants.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>/*
+<br>
+ *  Desired design of maximum size and alignment.
+<br>
+ */
+#define _SS_MAXSIZE 128
+<br>
+    /* Implementation-defined maximum size. */
+#define _SS_ALIGNSIZE (sizeof(int64_t))
+<br>
+    /* Implementation-defined desired alignment. */</pre>
+<pre>/*
+<br>
+ *  Definitions used for sockaddr_storage structure paddings design.
+<br>
+ */
+#define _SS_PAD1SIZE (_SS_ALIGNSIZE - sizeof(sa_family_t))
+#define _SS_PAD2SIZE (_SS_MAXSIZE - (sizeof(sa_family_t)+ \
+<br>
+                      _SS_PAD1SIZE + _SS_ALIGNSIZE))
+struct sockaddr_storage {
+<br>
+    sa_family_t  ss_family;  /* Address family. */
+/*
+<br>
+ *  Following fields are implementation-defined.
+<br>
+ */
+<br>
+    char _ss_pad1[_SS_PAD1SIZE];
+<br>
+        /* 6-byte pad; this is to make implementation-defined
+<br>
+           pad up to alignment field that follows explicit in
+<br>
+           the data structure. */
+<br>
+    int64_t _ss_align;  /* Field to force desired structure
+<br>
+                           storage alignment. */
+<br>
+    char _ss_pad2[_SS_PAD2SIZE];
+<br>
+        /* 112-byte pad to achieve desired size,
+<br>
+           _SS_MAXSIZE value minus size of ss_family
+<br>
+           __ss_pad1, __ss_align fields is 112. */
+};</pre>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><b>&lt;sys_types.h&gt;</b></i>,
+  <i><b>&lt;sys_uio.h&gt;</b></i></p>
+<p class="Pp">The System Interfaces volume of POSIX.1‐2017,
+    <i><i>accept</i>()</i>, <i><i>bind</i>()</i>, <i><i>connect</i>()</i>,
+    <i><i>getpeername</i>()</i>, <i><i>getsockname</i>()</i>,
+    <i><i>getsockopt</i>()</i>, <i><i>listen</i>()</i>, <i><i>recv</i>()</i>,
+    <i><i>recvfrom</i>()</i>, <i><i>recvmsg</i>()</i>, <i><i>send</i>()</i>,
+    <i><i>sendmsg</i>()</i>, <i><i>sendto</i>()</i>, <i><i>setsockopt</i>()</i>,
+    <i><i>shutdown</i>()</i>, <i><i>sockatmark</i>()</i>,
+    <i><i>socket</i>()</i>, <i><i>socketpair</i>()</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,504 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   This man page is Copyright (c) 1998 by Andi Kleen.
+  
+   SPDX-License-Identifier: GPL-1.0-or-later
+  
+   Based on the original comments from Alexey Kuznetsov
+   Modified 2005-12-27 by Hasso Tepper <hasso@estpak.ee>
+   $Id: netlink.7,v 1.8 2000/06/22 13:23:00 ak Exp $
+ --><head>
+<meta name="dc.identifier" content="res/b5267b1ec4136e7707b635bd0936db50e90f5ab0">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>netlink(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">netlink(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">netlink(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">netlink - communication between kernel and user space
+  (AF_NETLINK)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;asm/types.h&gt;</b>
+<b>#include &lt;sys/socket.h&gt;</b>
+<b>#include &lt;linux/netlink.h&gt;</b></pre>
+<pre><b>netlink_socket = socket(AF_NETLINK, </b><i>socket_type</i><b>, </b><i>netlink_family</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">Netlink is used to transfer information between the kernel and
+    user-space processes. It consists of a standard sockets-based interface for
+    user space processes and an internal kernel API for kernel modules. The
+    internal kernel interface is not documented in this manual page. There is
+    also an obsolete netlink interface via netlink character devices; this
+    interface is not documented here and is provided only for backward
+    compatibility.</p>
+<p class="Pp">Netlink is a datagram-oriented service. Both <b>SOCK_RAW</b> and
+    <b>SOCK_DGRAM</b> are valid values for <i>socket_type</i>. However, the
+    netlink protocol does not distinguish between datagram and raw sockets.</p>
+<p class="Pp"><i>netlink_family</i> selects the kernel module or netlink group
+    to communicate with. The currently assigned netlink families are:</p>
+<dl class="Bl-tag">
+  <dt id="NETLINK_ROUTE"><a class="permalink" href="#NETLINK_ROUTE"><b>NETLINK_ROUTE</b></a></dt>
+  <dd>Receives routing and link updates and may be used to modify the routing
+      tables (both IPv4 and IPv6), IP addresses, link parameters, neighbor
+      setups, queueing disciplines, traffic classes, and packet classifiers (see
+      <b>rtnetlink</b>(7)).</dd>
+  <dt id="NETLINK_W1"><a class="permalink" href="#NETLINK_W1"><b>NETLINK_W1</b>
+    (Linux 2.6.13 to Linux 2.16.17)</a></dt>
+  <dd>Messages from 1-wire subsystem.</dd>
+  <dt id="NETLINK_USERSOCK"><a class="permalink" href="#NETLINK_USERSOCK"><b>NETLINK_USERSOCK</b></a></dt>
+  <dd>Reserved for user-mode socket protocols.</dd>
+  <dt id="NETLINK_FIREWALL"><a class="permalink" href="#NETLINK_FIREWALL"><b>NETLINK_FIREWALL</b>
+    (up to and including Linux 3.4)</a></dt>
+  <dd>Transport IPv4 packets from netfilter to user space. Used by
+      <i>ip_queue</i> kernel module. After a long period of being declared
+      obsolete (in favor of the more advanced <i>nfnetlink_queue</i> feature),
+      <b>NETLINK_FIREWALL</b> was removed in Linux 3.5.</dd>
+  <dt id="NETLINK_SOCK_DIAG"><a class="permalink" href="#NETLINK_SOCK_DIAG"><b>NETLINK_SOCK_DIAG</b>
+    (since Linux 3.3)</a></dt>
+  <dd>Query information about sockets of various protocol families from the
+      kernel (see <b>sock_diag</b>(7)).</dd>
+  <dt id="NETLINK_INET_DIAG"><a class="permalink" href="#NETLINK_INET_DIAG"><b>NETLINK_INET_DIAG</b>
+    (since Linux 2.6.14)</a></dt>
+  <dd>An obsolete synonym for <b>NETLINK_SOCK_DIAG</b>.</dd>
+  <dt id="NETLINK_NFLOG"><a class="permalink" href="#NETLINK_NFLOG"><b>NETLINK_NFLOG</b>
+    (up to and including Linux 3.16)</a></dt>
+  <dd>Netfilter/iptables ULOG.</dd>
+  <dt id="NETLINK_XFRM"><a class="permalink" href="#NETLINK_XFRM"><b>NETLINK_XFRM</b></a></dt>
+  <dd>IPsec.</dd>
+  <dt id="NETLINK_SELINUX"><a class="permalink" href="#NETLINK_SELINUX"><b>NETLINK_SELINUX</b>
+    (since Linux 2.6.4)</a></dt>
+  <dd>SELinux event notifications.</dd>
+  <dt id="NETLINK_ISCSI"><a class="permalink" href="#NETLINK_ISCSI"><b>NETLINK_ISCSI</b>
+    (since Linux 2.6.15)</a></dt>
+  <dd>Open-iSCSI.</dd>
+  <dt id="NETLINK_AUDIT"><a class="permalink" href="#NETLINK_AUDIT"><b>NETLINK_AUDIT</b>
+    (since Linux 2.6.6)</a></dt>
+  <dd>Auditing.</dd>
+  <dt id="NETLINK_FIB_LOOKUP"><a class="permalink" href="#NETLINK_FIB_LOOKUP"><b>NETLINK_FIB_LOOKUP</b>
+    (since Linux 2.6.13)</a></dt>
+  <dd>Access to FIB lookup from user space.</dd>
+  <dt id="NETLINK_CONNECTOR"><a class="permalink" href="#NETLINK_CONNECTOR"><b>NETLINK_CONNECTOR</b>
+    (since Linux 2.6.14)</a></dt>
+  <dd>Kernel connector. See <i>Documentation/driver-api/connector.rst</i> (or
+      <i>/Documentation/connector/connector.*</i> in Linux 5.2 and earlier) in
+      the Linux kernel source tree for further information.</dd>
+  <dt id="NETLINK_NETFILTER"><a class="permalink" href="#NETLINK_NETFILTER"><b>NETLINK_NETFILTER</b>
+    (since Linux 2.6.14)</a></dt>
+  <dd>Netfilter subsystem.</dd>
+  <dt id="NETLINK_SCSITRANSPORT"><a class="permalink" href="#NETLINK_SCSITRANSPORT"><b>NETLINK_SCSITRANSPORT</b>
+    (since Linux 2.6.19)</a></dt>
+  <dd>SCSI Transports.</dd>
+  <dt id="NETLINK_RDMA"><a class="permalink" href="#NETLINK_RDMA"><b>NETLINK_RDMA</b>
+    (since Linux 3.0)</a></dt>
+  <dd>Infiniband RDMA.</dd>
+  <dt id="NETLINK_IP6_FW"><a class="permalink" href="#NETLINK_IP6_FW"><b>NETLINK_IP6_FW</b>
+    (up to and including Linux 3.4)</a></dt>
+  <dd>Transport IPv6 packets from netfilter to user space. Used by
+      <i>ip6_queue</i> kernel module.</dd>
+  <dt id="NETLINK_DNRTMSG"><a class="permalink" href="#NETLINK_DNRTMSG"><b>NETLINK_DNRTMSG</b></a></dt>
+  <dd>DECnet routing messages.</dd>
+  <dt id="NETLINK_KOBJECT_UEVENT"><a class="permalink" href="#NETLINK_KOBJECT_UEVENT"><b>NETLINK_KOBJECT_UEVENT</b>
+    (since Linux 2.6.10)</a></dt>
+  <dd>Kernel messages to user space.</dd>
+  <dt id="NETLINK_GENERIC"><a class="permalink" href="#NETLINK_GENERIC"><b>NETLINK_GENERIC</b>
+    (since Linux 2.6.15)</a></dt>
+  <dd>Generic netlink family for simplified netlink usage.</dd>
+  <dt id="NETLINK_CRYPTO"><a class="permalink" href="#NETLINK_CRYPTO"><b>NETLINK_CRYPTO</b>
+    (since Linux 3.2)</a></dt>
+  <dd>Netlink interface to request information about ciphers registered with the
+      kernel crypto API as well as allow configuration of the kernel crypto
+    API.</dd>
+</dl>
+<p class="Pp">Netlink messages consist of a byte stream with one or multiple
+    <i>nlmsghdr</i> headers and associated payload. The byte stream should be
+    accessed only with the standard <b>NLMSG_*</b> macros. See <b>netlink</b>(3)
+    for further information.</p>
+<p class="Pp">In multipart messages (multiple <i>nlmsghdr</i> headers with
+    associated payload in one byte stream) the first and all following headers
+    have the <b>NLM_F_MULTI</b> flag set, except for the last header which has
+    the type <b>NLMSG_DONE</b>.</p>
+<p class="Pp">After each <i>nlmsghdr</i> the payload follows.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct nlmsghdr {
+<br>
+    __u32 nlmsg_len;    /* Length of message including header */
+<br>
+    __u16 nlmsg_type;   /* Type of message content */
+<br>
+    __u16 nlmsg_flags;  /* Additional flags */
+<br>
+    __u32 nlmsg_seq;    /* Sequence number */
+<br>
+    __u32 nlmsg_pid;    /* Sender port ID */
+};
+</pre>
+<br>
+<p class="Pp"><i>nlmsg_type</i> can be one of the standard message types:
+    <b>NLMSG_NOOP</b> message is to be ignored, <b>NLMSG_ERROR</b> message
+    signals an error and the payload contains an <i>nlmsgerr</i> structure,
+    <b>NLMSG_DONE</b> message terminates a multipart message. Error messages get
+    the original request appended, unless the user requests to cap the error
+    message, and get extra error data if requested.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct nlmsgerr {
+<br>
+    int error;        /* Negative errno or 0 for acknowledgements */
+<br>
+    struct nlmsghdr msg;  /* Message header that caused the error */
+<br>
+    /*
+<br>
+     * followed by the message contents
+<br>
+     * unless NETLINK_CAP_ACK was set
+<br>
+     * or the ACK indicates success (error == 0).
+<br>
+     * For example Generic Netlink message with attributes.
+<br>
+     * message length is aligned with NLMSG_ALIGN()
+<br>
+     */
+<br>
+    /*
+<br>
+     * followed by TLVs defined in enum nlmsgerr_attrs
+<br>
+     * if NETLINK_EXT_ACK was set
+<br>
+     */
+};
+</pre>
+<br>
+<p class="Pp">A netlink family usually specifies more message types, see the
+    appropriate manual pages for that, for example, <b>rtnetlink</b>(7) for
+    <b>NETLINK_ROUTE</b>.</p>
+<table class="tbl">
+  <tbody><tr style="border-bottom-style: solid;">
+    <td colspan="2">Standard flag bits in <i>nlmsg_flags</i></td>
+  </tr>
+  <tr>
+    <td><b>NLM_F_REQUEST</b></td>
+    <td>Must be set on all request messages.</td>
+  </tr>
+  <tr>
+    <td><b>NLM_F_MULTI</b></td>
+    <td>The message is part of a multipart message terminated by NLMSG_DONE
+      .</td>
+  </tr>
+  <tr>
+    <td><b>NLM_F_ACK</b></td>
+    <td>Request for an acknowledgement on success.</td>
+  </tr>
+  <tr>
+    <td><b>NLM_F_ECHO</b></td>
+    <td>Echo this request.</td>
+  </tr>
+</tbody></table>
+<table class="tbl">
+  <tbody><tr style="border-bottom-style: solid;">
+    <td colspan="2">Additional flag bits for GET requests</td>
+  </tr>
+  <tr>
+    <td><b>NLM_F_ROOT</b></td>
+    <td>Return the complete table instead of a single entry.</td>
+  </tr>
+  <tr>
+    <td><b>NLM_F_MATCH</b></td>
+    <td>Return all entries matching criteria passed in message content. Not
+      implemented yet.</td>
+  </tr>
+  <tr>
+    <td><b>NLM_F_ATOMIC</b></td>
+    <td>Return an atomic snapshot of the table.</td>
+  </tr>
+  <tr>
+    <td><b>NLM_F_DUMP</b></td>
+    <td>Convenience macro; equivalent to (NLM_F_ROOT|NLM_F_MATCH).</td>
+  </tr>
+</tbody></table>
+<p class="Pp">Note that <b>NLM_F_ATOMIC</b> requires the <b>CAP_NET_ADMIN</b>
+    capability or an effective UID of 0.</p>
+<table class="tbl">
+  <tbody><tr style="border-bottom-style: solid;">
+    <td colspan="2">Additional flag bits for NEW requests</td>
+  </tr>
+  <tr>
+    <td><b>NLM_F_REPLACE</b></td>
+    <td>Replace existing matching object.</td>
+  </tr>
+  <tr>
+    <td><b>NLM_F_EXCL</b></td>
+    <td>Don't replace if the object already exists.</td>
+  </tr>
+  <tr>
+    <td><b>NLM_F_CREATE</b></td>
+    <td>Create object if it doesn't already exist.</td>
+  </tr>
+  <tr>
+    <td><b>NLM_F_APPEND</b></td>
+    <td>Add to the end of the object list.</td>
+  </tr>
+</tbody></table>
+<p class="Pp"><i>nlmsg_seq</i> and <i>nlmsg_pid</i> are used to track messages.
+    <i>nlmsg_pid</i> shows the origin of the message. Note that there isn't a
+    1:1 relationship between <i>nlmsg_pid</i> and the PID of the process if the
+    message originated from a netlink socket. See the <b>ADDRESS FORMATS</b>
+    section for further information.</p>
+<p class="Pp">Both <i>nlmsg_seq</i> and <i>nlmsg_pid</i> are opaque to netlink
+    core.</p>
+<p class="Pp">Netlink is not a reliable protocol. It tries its best to deliver a
+    message to its destination(s), but may drop messages when an out-of-memory
+    condition or other error occurs. For reliable transfer the sender can
+    request an acknowledgement from the receiver by setting the <b>NLM_F_ACK</b>
+    flag. An acknowledgement is an <b>NLMSG_ERROR</b> packet with the error
+    field set to 0. The application must generate acknowledgements for received
+    messages itself. The kernel tries to send an <b>NLMSG_ERROR</b> message for
+    every failed packet. A user process should follow this convention too.</p>
+<p class="Pp">However, reliable transmissions from kernel to user are impossible
+    in any case. The kernel can't send a netlink message if the socket buffer is
+    full: the message will be dropped and the kernel and the user-space process
+    will no longer have the same view of kernel state. It is up to the
+    application to detect when this happens (via the <b>ENOBUFS</b> error
+    returned by <b>recvmsg</b>(2)) and resynchronize.</p>
+<section class="Ss">
+<h2 class="Ss" id="Address_formats"><a class="permalink" href="#Address_formats">Address
+  formats</a></h2>
+<p class="Pp">The <i>sockaddr_nl</i> structure describes a netlink client in
+    user space or in the kernel. A <i>sockaddr_nl</i> can be either unicast
+    (only sent to one peer) or sent to netlink multicast groups
+    (<i>nl_groups</i> not equal 0).</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct sockaddr_nl {
+<br>
+    sa_family_t     nl_family;  /* AF_NETLINK */
+<br>
+    unsigned short  nl_pad;     /* Zero */
+<br>
+    pid_t           nl_pid;     /* Port ID */
+<br>
+    __u32           nl_groups;  /* Multicast groups mask */
+};
+</pre>
+<br>
+<p class="Pp"><i>nl_pid</i> is the unicast address of netlink socket. It's
+    always 0 if the destination is in the kernel. For a user-space process,
+    <i>nl_pid</i> is usually the PID of the process owning the destination
+    socket. However, <i>nl_pid</i> identifies a netlink socket, not a process.
+    If a process owns several netlink sockets, then <i>nl_pid</i> can be equal
+    to the process ID only for at most one socket. There are two ways to assign
+    <i>nl_pid</i> to a netlink socket. If the application sets <i>nl_pid</i>
+    before calling <b>bind</b>(2), then it is up to the application to make sure
+    that <i>nl_pid</i> is unique. If the application sets it to 0, the kernel
+    takes care of assigning it. The kernel assigns the process ID to the first
+    netlink socket the process opens and assigns a unique <i>nl_pid</i> to every
+    netlink socket that the process subsequently creates.</p>
+<p class="Pp"><i>nl_groups</i> is a bit mask with every bit representing a
+    netlink group number. Each netlink family has a set of 32 multicast groups.
+    When <b>bind</b>(2) is called on the socket, the <i>nl_groups</i> field in
+    the <i>sockaddr_nl</i> should be set to a bit mask of the groups which it
+    wishes to listen to. The default value for this field is zero which means
+    that no multicasts will be received. A socket may multicast messages to any
+    of the multicast groups by setting <i>nl_groups</i> to a bit mask of the
+    groups it wishes to send to when it calls <b>sendmsg</b>(2) or does a
+    <b>connect</b>(2). Only processes with an effective UID of 0 or the
+    <b>CAP_NET_ADMIN</b> capability may send or listen to a netlink multicast
+    group. Since Linux 2.6.13, messages can't be broadcast to multiple groups.
+    Any replies to a message received for a multicast group should be sent back
+    to the sending PID and the multicast group. Some Linux kernel subsystems may
+    additionally allow other users to send and/or receive messages. As at Linux
+    3.0, the <b>NETLINK_KOBJECT_UEVENT</b>, <b>NETLINK_GENERIC</b>,
+    <b>NETLINK_ROUTE</b>, and <b>NETLINK_SELINUX</b> groups allow other users to
+    receive messages. No groups allow other users to send messages.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Socket_options"><a class="permalink" href="#Socket_options">Socket
+  options</a></h2>
+<p class="Pp">To set or get a netlink socket option, call <b>getsockopt</b>(2)
+    to read or <b>setsockopt</b>(2) to write the option with the option level
+    argument set to <b>SOL_NETLINK</b>. Unless otherwise noted, <i>optval</i> is
+    a pointer to an <i>int</i>.</p>
+<dl class="Bl-tag">
+  <dt id="NETLINK_PKTINFO"><a class="permalink" href="#NETLINK_PKTINFO"><b>NETLINK_PKTINFO</b>
+    (since Linux 2.6.14)</a></dt>
+  <dd>Enable <b>nl_pktinfo</b> control messages for received packets to get the
+      extended destination group number.</dd>
+  <dt id="NETLINK_ADD_MEMBERSHIP"><a class="permalink" href="#NETLINK_ADD_MEMBERSHIP"><b>NETLINK_ADD_MEMBERSHIP</b>,&nbsp;<b>NETLINK_DROP_MEMBERSHIP</b>
+    (since Linux 2.6.14)</a></dt>
+  <dd>Join/leave a group specified by <i>optval</i>.</dd>
+  <dt id="NETLINK_LIST_MEMBERSHIPS"><a class="permalink" href="#NETLINK_LIST_MEMBERSHIPS"><b>NETLINK_LIST_MEMBERSHIPS</b>
+    (since Linux 4.2)</a></dt>
+  <dd>Retrieve all groups a socket is a member of. <i>optval</i> is a pointer to
+      <b>__u32</b> and <i>optlen</i> is the size of the array. The array is
+      filled with the full membership set of the socket, and the required array
+      size is returned in <i>optlen</i>.</dd>
+  <dt id="NETLINK_BROADCAST_ERROR"><a class="permalink" href="#NETLINK_BROADCAST_ERROR"><b>NETLINK_BROADCAST_ERROR</b>
+    (since Linux 2.6.30)</a></dt>
+  <dd>When not set, <b>netlink_broadcast()</b> only reports <b>ESRCH</b> errors
+      and silently ignore <b>ENOBUFS</b> errors.</dd>
+  <dt id="NETLINK_NO_ENOBUFS"><a class="permalink" href="#NETLINK_NO_ENOBUFS"><b>NETLINK_NO_ENOBUFS</b>
+    (since Linux 2.6.30)</a></dt>
+  <dd>This flag can be used by unicast and broadcast listeners to avoid
+      receiving <b>ENOBUFS</b> errors.</dd>
+  <dt id="NETLINK_LISTEN_ALL_NSID"><a class="permalink" href="#NETLINK_LISTEN_ALL_NSID"><b>NETLINK_LISTEN_ALL_NSID</b>
+    (since Linux 4.2)</a></dt>
+  <dd>When set, this socket will receive netlink notifications from all network
+      namespaces that have an <i>nsid</i> assigned into the network namespace
+      where the socket has been opened. The <i>nsid</i> is sent to user space
+      via an ancillary data.</dd>
+  <dt id="NETLINK_CAP_ACK"><a class="permalink" href="#NETLINK_CAP_ACK"><b>NETLINK_CAP_ACK</b>
+    (since Linux 4.3)</a></dt>
+  <dd>The kernel may fail to allocate the necessary room for the acknowledgement
+      message back to user space. This option trims off the payload of the
+      original netlink message. The netlink message header is still included, so
+      the user can guess from the sequence number which message triggered the
+      acknowledgement.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The socket interface to netlink first appeared Linux 2.2.</p>
+<p class="Pp">Linux 2.0 supported a more primitive device-based netlink
+    interface (which is still available as a compatibility option). This
+    obsolete interface is not described here.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">It is often better to use netlink via <i>libnetlink</i> or
+    <i>libnl</i> than via the low-level kernel interface.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">This manual page is not complete.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The following example creates a <b>NETLINK_ROUTE</b> netlink
+    socket which will listen to the <b>RTMGRP_LINK</b> (network interface
+    create/delete/up/down events) and <b>RTMGRP_IPV4_IFADDR</b> (IPv4 addresses
+    add/delete events) multicast groups.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct sockaddr_nl sa;
+memset(&amp;sa, 0, sizeof(sa));
+sa.nl_family = AF_NETLINK;
+sa.nl_groups = RTMGRP_LINK | RTMGRP_IPV4_IFADDR;
+fd = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
+bind(fd, (struct sockaddr *) &amp;sa, sizeof(sa));
+</pre>
+<br>
+<p class="Pp">The next example demonstrates how to send a netlink message to the
+    kernel (pid 0). Note that the application must take care of message sequence
+    numbers in order to reliably track acknowledgements.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct nlmsghdr *nh;    /* The nlmsghdr with payload to send */
+struct sockaddr_nl sa;
+struct iovec iov = { nh, nh-&gt;nlmsg_len };
+struct msghdr msg;
+msg = { &amp;sa, sizeof(sa), &amp;iov, 1, NULL, 0, 0 };
+memset(&amp;sa, 0, sizeof(sa));
+sa.nl_family = AF_NETLINK;
+nh-&gt;nlmsg_pid = 0;
+nh-&gt;nlmsg_seq = ++sequence_number;
+/* Request an ack from kernel by setting NLM_F_ACK */
+nh-&gt;nlmsg_flags |= NLM_F_ACK;
+sendmsg(fd, &amp;msg, 0);
+</pre>
+<br>
+<p class="Pp">And the last example is about reading netlink message.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>int len;
+/* 8192 to avoid message truncation on platforms with
+<br>
+   page size &gt; 4096 */
+struct nlmsghdr buf[8192/sizeof(struct nlmsghdr)];
+struct iovec iov = { buf, sizeof(buf) };
+struct sockaddr_nl sa;
+struct msghdr msg;
+struct nlmsghdr *nh;
+msg = { &amp;sa, sizeof(sa), &amp;iov, 1, NULL, 0, 0 };
+len = recvmsg(fd, &amp;msg, 0);
+for (nh = (struct nlmsghdr *) buf; NLMSG_OK (nh, len);
+<br>
+     nh = NLMSG_NEXT (nh, len)) {
+<br>
+    /* The end of multipart message */
+<br>
+    if (nh-&gt;nlmsg_type == NLMSG_DONE)
+<br>
+        return;
+<br>
+    if (nh-&gt;nlmsg_type == NLMSG_ERROR)
+<br>
+        /* Do some error handling */
+<br>
+    ...
+<br>
+    /* Continue with parsing payload */
+<br>
+    ...
+}
+</pre>
+<br>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>cmsg</b>(3), <b>netlink</b>(3), <b>capabilities</b>(7),
+    <b>rtnetlink</b>(7), <b>sock_diag</b>(7)</p>
+<p class="Pp"><a class="Lk" href="ftp://ftp.inr.ac.ru/ip-routing/iproute2*">information
+    about libnetlink</a></p>
+<p class="Pp"><a class="Lk" href="http://www.infradead.org/~tgr/libnl/">information
+    about libnl</a></p>
+<p class="Pp">RFC 3549 "Linux Netlink as an IP Services Protocol"</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

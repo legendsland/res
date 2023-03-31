@@ -1,0 +1,170 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright 2002 Walter Harms (walter.harms@informatik.uni-oldenburg.de)
+  
+   SPDX-License-Identifier: GPL-1.0-or-later
+  
+   Heavily based on glibc documentation
+   Polished, added docs, removed glibc doc bug, 2002-07-20, aeb
+   --><head>
+<meta name="dc.identifier" content="res/206c48ee8dcbd4d8d97d2a18e488403d19592359">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>__malloc_hook(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">__malloc_hook(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">__malloc_hook(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">__malloc_hook, __malloc_initialize_hook, __memalign_hook,
+    __free_hook, __realloc_hook, __after_morecore_hook - malloc debugging
+    variables (DEPRECATED)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;malloc.h&gt;</b></pre>
+<pre><b>void *(*volatile __malloc_hook)(size_t </b><i>size</i><b>, const void *</b><i>caller</i><b>);</b></pre>
+<pre><b>void *(*volatile __realloc_hook)(void *</b><i>ptr</i><b>, size_t </b><i>size</i><b>,</b>
+<b>                         const void *</b><i>caller</i><b>);</b></pre>
+<pre><b>void *(*volatile __memalign_hook)(size_t </b><i>alignment</i><b>, size_t </b><i>size</i><b>,</b>
+<b>                         const void *</b><i>caller</i><b>);</b></pre>
+<pre><b>void (*volatile __free_hook)(void *</b><i>ptr</i><b>, const void *</b><i>caller</i><b>);</b></pre>
+<pre><b>void (*__malloc_initialize_hook)(void);</b></pre>
+<pre><b>void (*volatile __after_morecore_hook)(void);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The GNU C library lets you modify the behavior of
+    <b>malloc</b>(3), <b>realloc</b>(3), and <b>free</b>(3) by specifying
+    appropriate hook functions. You can use these hooks to help you debug
+    programs that use dynamic memory allocation, for example.</p>
+<p class="Pp">The variable <b>__malloc_initialize_hook</b> points at a function
+    that is called once when the malloc implementation is initialized. This is a
+    weak variable, so it can be overridden in the application with a definition
+    like the following:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>void (*__malloc_initialize_hook)(void) = my_init_hook;
+</pre>
+<br>
+<p class="Pp">Now the function <i>my_init_hook</i>() can do the initialization
+    of all hooks.</p>
+<p class="Pp">The four functions pointed to by <b>__malloc_hook</b>,
+    <b>__realloc_hook</b>, <b>__memalign_hook</b>, <b>__free_hook</b> have a
+    prototype like the functions <b>malloc</b>(3), <b>realloc</b>(3),
+    <b>memalign</b>(3), <b>free</b>(3), respectively, except that they have a
+    final argument <i>caller</i> that gives the address of the caller of
+    <b>malloc</b>(3), etc.</p>
+<p class="Pp">The variable <b>__after_morecore_hook</b> points at a function
+    that is called each time after <b>sbrk</b>(2) was asked for more memory.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These functions are GNU extensions.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The use of these hook functions is not safe in multithreaded
+    programs, and they are now deprecated. From glibc 2.24 onwards, the
+    <b>__malloc_initialize_hook</b> variable has been removed from the API, and
+    from glibc 2.34 onwards, all the hook variables have been removed from the
+    API. Programmers should instead preempt calls to the relevant functions by
+    defining and exporting <b>malloc</b>(), <b>free</b>(), <b>realloc</b>(), and
+    <b>calloc</b>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">Here is a short example of how to use these variables.</p>
+<p class="Pp"></p>
+<pre>#include &lt;stdio.h&gt;
+#include &lt;malloc.h&gt;
+/* Prototypes for our hooks */
+static void my_init_hook(void);
+static void *my_malloc_hook(size_t, const void *);
+/* Variables to save original hooks */
+static void *(*old_malloc_hook)(size_t, const void *);
+/* Override initializing hook from the C library */
+void (*__malloc_initialize_hook)(void) = my_init_hook;
+static void
+my_init_hook(void)
+{
+<br>
+    old_malloc_hook = __malloc_hook;
+<br>
+    __malloc_hook = my_malloc_hook;
+}
+static void *
+my_malloc_hook(size_t size, const void *caller)
+{
+<br>
+    void *result;
+<br>
+    /* Restore all old hooks */
+<br>
+    __malloc_hook = old_malloc_hook;
+<br>
+    /* Call recursively */
+<br>
+    result = malloc(size);
+<br>
+    /* Save underlying hooks */
+<br>
+    old_malloc_hook = __malloc_hook;
+<br>
+    /* printf() might call malloc(), so protect it too */
+<br>
+    printf("malloc(%zu) called from %p returns %p\n",
+<br>
+            size, caller, result);
+<br>
+    /* Restore our own hooks */
+<br>
+    __malloc_hook = my_malloc_hook;
+<br>
+    return result;
+}
+</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>mallinfo</b>(3), <b>malloc</b>(3), <b>mcheck</b>(3),
+    <b>mtrace</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

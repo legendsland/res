@@ -1,0 +1,355 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright \[u00A9] 2017-2020 Micka\[u00EB]l Sala\[u00FC]n <mic@digikod.net>
+   Copyright \[u00A9] 2019-2020 ANSSI
+   Copyright \[u00A9] 2021 Microsoft Corporation
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/e091e4556862094e531690ab9693a3aad84fd4ee">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>Landlock(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">Landlock(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">Landlock(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">Landlock - unprivileged access-control</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">Landlock is an access-control system that enables any processes to
+    securely restrict themselves and their future children. Because Landlock is
+    a stackable Linux Security Module (LSM), it makes it possible to create safe
+    security sandboxes as new security layers in addition to the existing
+    system-wide access-controls. This kind of sandbox is expected to help
+    mitigate the security impact of bugs, and unexpected or malicious behaviors
+    in applications.</p>
+<p class="Pp">A Landlock security policy is a set of access rights (e.g., open a
+    file in read-only, make a directory, etc.) tied to a file hierarchy. Such
+    policy can be configured and enforced by processes for themselves using
+    three system calls:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><b>landlock_create_ruleset</b>(2) creates a new ruleset;</dd>
+  <dt>•</dt>
+  <dd><b>landlock_add_rule</b>(2) adds a new rule to a ruleset;</dd>
+  <dt>•</dt>
+  <dd><b>landlock_restrict_self</b>(2) enforces a ruleset on the calling
+    thread.</dd>
+</dl>
+<p class="Pp">To be able to use these system calls, the running kernel must
+    support Landlock and it must be enabled at boot time.</p>
+<section class="Ss">
+<h2 class="Ss" id="Landlock_rules"><a class="permalink" href="#Landlock_rules">Landlock
+  rules</a></h2>
+<p class="Pp">A Landlock rule describes an action on an object. An object is
+    currently a file hierarchy, and the related filesystem actions are defined
+    with access rights (see <b>landlock_add_rule</b>(2)). A set of rules is
+    aggregated in a ruleset, which can then restrict the thread enforcing it,
+    and its future children.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Filesystem_actions"><a class="permalink" href="#Filesystem_actions">Filesystem
+  actions</a></h2>
+<p class="Pp">These flags enable to restrict a sandboxed process to a set of
+    actions on files and directories. Files or directories opened before the
+    sandboxing are not subject to these restrictions. See
+    <b>landlock_add_rule</b>(2) and <b>landlock_create_ruleset</b>(2) for more
+    context.</p>
+<p class="Pp">A file can only receive these access rights:</p>
+<dl class="Bl-tag">
+  <dt id="LANDLOCK_ACCESS_FS_EXECUTE"><a class="permalink" href="#LANDLOCK_ACCESS_FS_EXECUTE"><b>LANDLOCK_ACCESS_FS_EXECUTE</b></a></dt>
+  <dd>Execute a file.</dd>
+  <dt id="LANDLOCK_ACCESS_FS_WRITE_FILE"><a class="permalink" href="#LANDLOCK_ACCESS_FS_WRITE_FILE"><b>LANDLOCK_ACCESS_FS_WRITE_FILE</b></a></dt>
+  <dd>Open a file with write access.</dd>
+  <dt id="LANDLOCK_ACCESS_FS_READ_FILE"><a class="permalink" href="#LANDLOCK_ACCESS_FS_READ_FILE"><b>LANDLOCK_ACCESS_FS_READ_FILE</b></a></dt>
+  <dd>Open a file with read access.</dd>
+</dl>
+<p class="Pp">A directory can receive access rights related to files or
+    directories. The following access right is applied to the directory itself,
+    and the directories beneath it:</p>
+<dl class="Bl-tag">
+  <dt id="LANDLOCK_ACCESS_FS_READ_DIR"><a class="permalink" href="#LANDLOCK_ACCESS_FS_READ_DIR"><b>LANDLOCK_ACCESS_FS_READ_DIR</b></a></dt>
+  <dd>Open a directory or list its content.</dd>
+</dl>
+<p class="Pp">However, the following access rights only apply to the content of
+    a directory, not the directory itself:</p>
+<dl class="Bl-tag">
+  <dt id="LANDLOCK_ACCESS_FS_REMOVE_DIR"><a class="permalink" href="#LANDLOCK_ACCESS_FS_REMOVE_DIR"><b>LANDLOCK_ACCESS_FS_REMOVE_DIR</b></a></dt>
+  <dd>Remove an empty directory or rename one.</dd>
+  <dt id="LANDLOCK_ACCESS_FS_REMOVE_FILE"><a class="permalink" href="#LANDLOCK_ACCESS_FS_REMOVE_FILE"><b>LANDLOCK_ACCESS_FS_REMOVE_FILE</b></a></dt>
+  <dd>Unlink (or rename) a file.</dd>
+  <dt id="LANDLOCK_ACCESS_FS_MAKE_CHAR"><a class="permalink" href="#LANDLOCK_ACCESS_FS_MAKE_CHAR"><b>LANDLOCK_ACCESS_FS_MAKE_CHAR</b></a></dt>
+  <dd>Create (or rename or link) a character device.</dd>
+  <dt id="LANDLOCK_ACCESS_FS_MAKE_DIR"><a class="permalink" href="#LANDLOCK_ACCESS_FS_MAKE_DIR"><b>LANDLOCK_ACCESS_FS_MAKE_DIR</b></a></dt>
+  <dd>Create (or rename) a directory.</dd>
+  <dt id="LANDLOCK_ACCESS_FS_MAKE_REG"><a class="permalink" href="#LANDLOCK_ACCESS_FS_MAKE_REG"><b>LANDLOCK_ACCESS_FS_MAKE_REG</b></a></dt>
+  <dd>Create (or rename or link) a regular file.</dd>
+  <dt id="LANDLOCK_ACCESS_FS_MAKE_SOCK"><a class="permalink" href="#LANDLOCK_ACCESS_FS_MAKE_SOCK"><b>LANDLOCK_ACCESS_FS_MAKE_SOCK</b></a></dt>
+  <dd>Create (or rename or link) a UNIX domain socket.</dd>
+  <dt id="LANDLOCK_ACCESS_FS_MAKE_FIFO"><a class="permalink" href="#LANDLOCK_ACCESS_FS_MAKE_FIFO"><b>LANDLOCK_ACCESS_FS_MAKE_FIFO</b></a></dt>
+  <dd>Create (or rename or link) a named pipe.</dd>
+  <dt id="LANDLOCK_ACCESS_FS_MAKE_BLOCK"><a class="permalink" href="#LANDLOCK_ACCESS_FS_MAKE_BLOCK"><b>LANDLOCK_ACCESS_FS_MAKE_BLOCK</b></a></dt>
+  <dd>Create (or rename or link) a block device.</dd>
+  <dt id="LANDLOCK_ACCESS_FS_MAKE_SYM"><a class="permalink" href="#LANDLOCK_ACCESS_FS_MAKE_SYM"><b>LANDLOCK_ACCESS_FS_MAKE_SYM</b></a></dt>
+  <dd>Create (or rename or link) a symbolic link.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Layers_of_file_path_access_rights"><a class="permalink" href="#Layers_of_file_path_access_rights">Layers
+  of file path access rights</a></h2>
+<p class="Pp">Each time a thread enforces a ruleset on itself, it updates its
+    Landlock domain with a new layer of policy. Indeed, this complementary
+    policy is composed with the potentially other rulesets already restricting
+    this thread. A sandboxed thread can then safely add more constraints to
+    itself with a new enforced ruleset.</p>
+<p class="Pp">One policy layer grants access to a file path if at least one of
+    its rules encountered on the path grants the access. A sandboxed thread can
+    only access a file path if all its enforced policy layers grant the access
+    as well as all the other system access controls (e.g., filesystem DAC, other
+    LSM policies, etc.).</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Bind_mounts_and_OverlayFS"><a class="permalink" href="#Bind_mounts_and_OverlayFS">Bind
+  mounts and OverlayFS</a></h2>
+<p class="Pp">Landlock enables restricting access to file hierarchies, which
+    means that these access rights can be propagated with bind mounts (cf.
+    <b>mount_namespaces</b>(7)) but not with OverlayFS.</p>
+<p class="Pp">A bind mount mirrors a source file hierarchy to a destination. The
+    destination hierarchy is then composed of the exact same files, on which
+    Landlock rules can be tied, either via the source or the destination path.
+    These rules restrict access when they are encountered on a path, which means
+    that they can restrict access to multiple file hierarchies at the same time,
+    whether these hierarchies are the result of bind mounts or not.</p>
+<p class="Pp">An OverlayFS mount point consists of upper and lower layers. These
+    layers are combined in a merge directory, result of the mount point. This
+    merge hierarchy may include files from the upper and lower layers, but
+    modifications performed on the merge hierarchy only reflect on the upper
+    layer. From a Landlock policy point of view, each of the OverlayFS layers
+    and merge hierarchies is standalone and contains its own set of files and
+    directories, which is different from a bind mount. A policy restricting an
+    OverlayFS layer will not restrict the resulted merged hierarchy, and vice
+    versa. Landlock users should then only think about file hierarchies they
+    want to allow access to, regardless of the underlying filesystem.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Inheritance"><a class="permalink" href="#Inheritance">Inheritance</a></h2>
+<p class="Pp">Every new thread resulting from a <b>clone</b>(2) inherits
+    Landlock domain restrictions from its parent. This is similar to the
+    <b>seccomp</b>(2) inheritance or any other LSM dealing with tasks'
+    <b>credentials</b>(7). For instance, one process's thread may apply Landlock
+    rules to itself, but they will not be automatically applied to other sibling
+    threads (unlike POSIX thread credential changes, cf. <b>nptl</b>(7)).</p>
+<p class="Pp">When a thread sandboxes itself, we have the guarantee that the
+    related security policy will stay enforced on all this thread's descendants.
+    This allows creating standalone and modular security policies per
+    application, which will automatically be composed between themselves
+    according to their runtime parent policies.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Ptrace_restrictions"><a class="permalink" href="#Ptrace_restrictions">Ptrace
+  restrictions</a></h2>
+<p class="Pp">A sandboxed process has less privileges than a non-sandboxed
+    process and must then be subject to additional restrictions when
+    manipulating another process. To be allowed to use <b>ptrace</b>(2) and
+    related syscalls on a target process, a sandboxed process should have a
+    subset of the target process rules, which means the tracee must be in a
+    sub-domain of the tracer.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">Landlock was added in Linux 5.13.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Landlock is enabled by <b>CONFIG_SECURITY_LANDLOCK</b>. The
+    <i>lsm=lsm1,...,lsmN</i> command line parameter controls the sequence of the
+    initialization of Linux Security Modules. It must contain the string
+    <i>landlock</i> to enable Landlock. If the command line parameter is not
+    specified, the initialization falls back to the value of the deprecated
+    <i>security=</i> command line parameter and further to the value of
+    <b>CONFIG_LSM</b>. We can check that Landlock is enabled by looking for
+    <i>landlock: Up and running.</i> in kernel logs.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="CAVEATS"><a class="permalink" href="#CAVEATS">CAVEATS</a></h1>
+<p class="Pp">It is currently not possible to restrict some file-related actions
+    accessible through these system call families: <b>chdir</b>(2),
+    <b>truncate</b>(2), <b>stat</b>(2), <b>flock</b>(2), <b>chmod</b>(2),
+    <b>chown</b>(2), <b>setxattr</b>(2), <b>utime</b>(2), <b>ioctl</b>(2),
+    <b>fcntl</b>(2), <b>access</b>(2). Future Landlock evolutions will enable to
+    restrict them.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">We first need to create the ruleset that will contain our rules.
+    For this example, the ruleset will contain rules that only allow read
+    actions, but write actions will be denied. The ruleset then needs to handle
+    both of these kinds of actions. See below for the description of filesystem
+    actions.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct landlock_ruleset_attr attr = {0};
+int ruleset_fd;
+attr.handled_access_fs =
+<br>
+        LANDLOCK_ACCESS_FS_EXECUTE |
+<br>
+        LANDLOCK_ACCESS_FS_WRITE_FILE |
+<br>
+        LANDLOCK_ACCESS_FS_READ_FILE |
+<br>
+        LANDLOCK_ACCESS_FS_READ_DIR |
+<br>
+        LANDLOCK_ACCESS_FS_REMOVE_DIR |
+<br>
+        LANDLOCK_ACCESS_FS_REMOVE_FILE |
+<br>
+        LANDLOCK_ACCESS_FS_MAKE_CHAR |
+<br>
+        LANDLOCK_ACCESS_FS_MAKE_DIR |
+<br>
+        LANDLOCK_ACCESS_FS_MAKE_REG |
+<br>
+        LANDLOCK_ACCESS_FS_MAKE_SOCK |
+<br>
+        LANDLOCK_ACCESS_FS_MAKE_FIFO |
+<br>
+        LANDLOCK_ACCESS_FS_MAKE_BLOCK |
+<br>
+        LANDLOCK_ACCESS_FS_MAKE_SYM;
+ruleset_fd = landlock_create_ruleset(&amp;attr, sizeof(attr), 0);
+if (ruleset_fd == -1) {
+<br>
+    perror("Failed to create a ruleset");
+<br>
+    exit(EXIT_FAILURE);
+}
+</pre>
+<br>
+<p class="Pp">We can now add a new rule to this ruleset thanks to the returned
+    file descriptor referring to this ruleset. The rule will only allow reading
+    the file hierarchy <i>/usr</i>. Without another rule, write actions would
+    then be denied by the ruleset. To add <i>/usr</i> to the ruleset, we open it
+    with the <i>O_PATH</i> flag and fill the <i>struct
+    landlock_path_beneath_attr</i> with this file descriptor.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct landlock_path_beneath_attr path_beneath = {0};
+int err;
+path_beneath.allowed_access =
+<br>
+        LANDLOCK_ACCESS_FS_EXECUTE |
+<br>
+        LANDLOCK_ACCESS_FS_READ_FILE |
+<br>
+        LANDLOCK_ACCESS_FS_READ_DIR;
+path_beneath.parent_fd = open("/usr", O_PATH | O_CLOEXEC);
+if (path_beneath.parent_fd == -1) {
+<br>
+    perror("Failed to open file");
+<br>
+    close(ruleset_fd);
+<br>
+    exit(EXIT_FAILURE);
+}
+err = landlock_add_rule(ruleset_fd, LANDLOCK_RULE_PATH_BENEATH,
+<br>
+                        &amp;path_beneath, 0);
+close(path_beneath.parent_fd);
+if (err) {
+<br>
+    perror("Failed to update ruleset");
+<br>
+    close(ruleset_fd);
+<br>
+    exit(EXIT_FAILURE);
+}
+</pre>
+<br>
+<p class="Pp">We now have a ruleset with one rule allowing read access to
+    <i>/usr</i> while denying all other handled accesses for the filesystem. The
+    next step is to restrict the current thread from gaining more privileges
+    (e.g., thanks to a set-user-ID binary).</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0)) {
+<br>
+    perror("Failed to restrict privileges");
+<br>
+    close(ruleset_fd);
+<br>
+    exit(EXIT_FAILURE);
+}
+</pre>
+<br>
+<p class="Pp">The current thread is now ready to sandbox itself with the
+    ruleset.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>if (landlock_restrict_self(ruleset_fd, 0)) {
+<br>
+    perror("Failed to enforce ruleset");
+<br>
+    close(ruleset_fd);
+<br>
+    exit(EXIT_FAILURE);
+}
+close(ruleset_fd);
+</pre>
+<br>
+<p class="Pp">If the <b>landlock_restrict_self</b>(2) system call succeeds, the
+    current thread is now restricted and this policy will be enforced on all its
+    subsequently created children as well. Once a thread is landlocked, there is
+    no way to remove its security policy; only adding more restrictions is
+    allowed. These threads are now in a new Landlock domain, merge of their
+    parent one (if any) with the new ruleset.</p>
+<p class="Pp">Full working code can be found in
+    <a class="Lk" href="https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/samples/landlock/sandboxer.c">https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/samples/landlock/sandboxer.c</a></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>landlock_create_ruleset</b>(2), <b>landlock_add_rule</b>(2),
+    <b>landlock_restrict_self</b>(2)</p>
+<p class="Pp"><a class="Lk" href="https://landlock.io/">https://landlock.io/</a></p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

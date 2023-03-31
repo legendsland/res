@@ -1,0 +1,250 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2010 Intel Corporation, Author: Andi Kleen
+   and Copyright 2014, Vivek Goyal <vgoyal@redhat.com>
+   and Copyright (c) 2015, Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/6cf4cc3a66700e51d0802006512355bd3509f9e8">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>kexec_load(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">kexec_load(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">kexec_load(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">kexec_load, kexec_file_load - load a new kernel for later
+    execution</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;linux/kexec.h&gt;</b>      /* Definition of <b>KEXEC_*</b> constants */
+<b>#include &lt;sys/syscall.h&gt;</b>      /* Definition of <b>SYS_*</b> constants */
+<b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>long syscall(SYS_kexec_load, unsigned long </b><i>entry</i><b>,</b>
+<b>             unsigned long </b><i>nr_segments</i><b>, struct kexec_segment *</b><i>segments</i><b>,</b>
+<b>             unsigned long </b><i>flags</i><b>);</b>
+<b>long syscall(SYS_kexec_file_load, int </b><i>kernel_fd</i><b>, int </b><i>initrd_fd</i><b>,</b>
+<b>             unsigned long </b><i>cmdline_len</i><b>, const char *</b><i>cmdline</i><b>,</b>
+<b>             unsigned long </b><i>flags</i><b>);</b></pre>
+<p class="Pp"><i>Note</i>: glibc provides no wrappers for these system calls,
+    necessitating the use of <b>syscall</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>kexec_load</b>() system call loads a new kernel that can be
+    executed later by <b>reboot</b>(2).</p>
+<p class="Pp">The <i>flags</i> argument is a bit mask that controls the
+    operation of the call. The following values can be specified in
+    <i>flags</i>:</p>
+<dl class="Bl-tag">
+  <dt id="KEXEC_ON_CRASH"><a class="permalink" href="#KEXEC_ON_CRASH"><b>KEXEC_ON_CRASH</b>
+    (since Linux 2.6.13)</a></dt>
+  <dd>Execute the new kernel automatically on a system crash. This "crash
+      kernel" is loaded into an area of reserved memory that is determined
+      at boot time using the <i>crashkernel</i> kernel command-line parameter.
+      The location of this reserved memory is exported to user space via the
+      <i>/proc/iomem</i> file, in an entry labeled "Crash kernel". A
+      user-space application can parse this file and prepare a list of segments
+      (see below) that specify this reserved memory as destination. If this flag
+      is specified, the kernel checks that the target segments specified in
+      <i>segments</i> fall within the reserved region.</dd>
+  <dt id="KEXEC_PRESERVE_CONTEXT"><a class="permalink" href="#KEXEC_PRESERVE_CONTEXT"><b>KEXEC_PRESERVE_CONTEXT</b>
+    (since Linux 2.6.27)</a></dt>
+  <dd>Preserve the system hardware and software states before executing the new
+      kernel. This could be used for system suspend. This flag is available only
+      if the kernel was configured with <b>CONFIG_KEXEC_JUMP</b>, and is
+      effective only if <i>nr_segments</i> is greater than 0.</dd>
+</dl>
+<p class="Pp">The high-order bits (corresponding to the mask 0xffff0000) of
+    <i>flags</i> contain the architecture of the to-be-executed kernel. Specify
+    (OR) the constant <b>KEXEC_ARCH_DEFAULT</b> to use the current architecture,
+    or one of the following architecture constants <b>KEXEC_ARCH_386</b>,
+    <b>KEXEC_ARCH_68K</b>, <b>KEXEC_ARCH_X86_64</b>, <b>KEXEC_ARCH_PPC</b>,
+    <b>KEXEC_ARCH_PPC64</b>, <b>KEXEC_ARCH_IA_64</b>, <b>KEXEC_ARCH_ARM</b>,
+    <b>KEXEC_ARCH_S390</b>, <b>KEXEC_ARCH_SH</b>, <b>KEXEC_ARCH_MIPS</b>, and
+    <b>KEXEC_ARCH_MIPS_LE</b>. The architecture must be executable on the CPU of
+    the system.</p>
+<p class="Pp">The <i>entry</i> argument is the physical entry address in the
+    kernel image. The <i>nr_segments</i> argument is the number of segments
+    pointed to by the <i>segments</i> pointer; the kernel imposes an (arbitrary)
+    limit of 16 on the number of segments. The <i>segments</i> argument is an
+    array of <i>kexec_segment</i> structures which define the kernel layout:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct kexec_segment {
+<br>
+    void   *buf;        /* Buffer in user space */
+<br>
+    size_t  bufsz;      /* Buffer length in user space */
+<br>
+    void   *mem;        /* Physical address of kernel */
+<br>
+    size_t  memsz;      /* Physical address length */
+};
+</pre>
+<br>
+<p class="Pp">The kernel image defined by <i>segments</i> is copied from the
+    calling process into the kernel either in regular memory or in reserved
+    memory (if <b>KEXEC_ON_CRASH</b> is set). The kernel first performs various
+    sanity checks on the information passed in <i>segments</i>. If these checks
+    pass, the kernel copies the segment data to kernel memory. Each segment
+    specified in <i>segments</i> is copied as follows:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><i>buf</i> and <i>bufsz</i> identify a memory region in the caller's
+      virtual address space that is the source of the copy. The value in
+      <i>bufsz</i> may not exceed the value in the <i>memsz</i> field.</dd>
+  <dt>•</dt>
+  <dd><i>mem</i> and <i>memsz</i> specify a physical address range that is the
+      target of the copy. The values specified in both fields must be multiples
+      of the system page size.</dd>
+  <dt>•</dt>
+  <dd><i>bufsz</i> bytes are copied from the source buffer to the target kernel
+      buffer. If <i>bufsz</i> is less than <i>memsz</i>, then the excess bytes
+      in the kernel buffer are zeroed out.</dd>
+</dl>
+<p class="Pp">In case of a normal kexec (i.e., the <b>KEXEC_ON_CRASH</b> flag is
+    not set), the segment data is loaded in any available memory and is moved to
+    the final destination at kexec reboot time (e.g., when the <b>kexec</b>(8)
+    command is executed with the <i>-e</i> option).</p>
+<p class="Pp">In case of kexec on panic (i.e., the <b>KEXEC_ON_CRASH</b> flag is
+    set), the segment data is loaded to reserved memory at the time of the call,
+    and, after a crash, the kexec mechanism simply passes control to that
+    kernel.</p>
+<p class="Pp">The <b>kexec_load</b>() system call is available only if the
+    kernel was configured with <b>CONFIG_KEXEC</b>.</p>
+<section class="Ss">
+<h2 class="Ss" id="kexec_file_load()"><a class="permalink" href="#kexec_file_load()">kexec_file_load()</a></h2>
+<p class="Pp">The <b>kexec_file_load</b>() system call is similar to
+    <b>kexec_load</b>(), but it takes a different set of arguments. It reads the
+    kernel to be loaded from the file referred to by the file descriptor
+    <i>kernel_fd</i>, and the initrd (initial RAM disk) to be loaded from file
+    referred to by the file descriptor <i>initrd_fd</i>. The <i>cmdline</i>
+    argument is a pointer to a buffer containing the command line for the new
+    kernel. The <i>cmdline_len</i> argument specifies size of the buffer. The
+    last byte in the buffer must be a null byte ('\0').</p>
+<p class="Pp">The <i>flags</i> argument is a bit mask which modifies the
+    behavior of the call. The following values can be specified in
+  <i>flags</i>:</p>
+<dl class="Bl-tag">
+  <dt id="KEXEC_FILE_UNLOAD"><a class="permalink" href="#KEXEC_FILE_UNLOAD"><b>KEXEC_FILE_UNLOAD</b></a></dt>
+  <dd>Unload the currently loaded kernel.</dd>
+  <dt id="KEXEC_FILE_ON_CRASH"><a class="permalink" href="#KEXEC_FILE_ON_CRASH"><b>KEXEC_FILE_ON_CRASH</b></a></dt>
+  <dd>Load the new kernel in the memory region reserved for the crash kernel (as
+      for <b>KEXEC_ON_CRASH</b>). This kernel is booted if the currently running
+      kernel crashes.</dd>
+  <dt id="KEXEC_FILE_NO_INITRAMFS"><a class="permalink" href="#KEXEC_FILE_NO_INITRAMFS"><b>KEXEC_FILE_NO_INITRAMFS</b></a></dt>
+  <dd>Loading initrd/initramfs is optional. Specify this flag if no initramfs is
+      being loaded. If this flag is set, the value passed in <i>initrd_fd</i> is
+      ignored.</dd>
+</dl>
+<p class="Pp">The <b>kexec_file_load</b>() system call was added to provide
+    support for systems where "kexec" loading should be restricted to
+    only kernels that are signed. This system call is available only if the
+    kernel was configured with <b>CONFIG_KEXEC_FILE</b>.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, these system calls returns 0. On error, -1 is returned
+    and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EADDRNOTAVAIL"><a class="permalink" href="#EADDRNOTAVAIL"><b>EADDRNOTAVAIL</b></a></dt>
+  <dd>The <b>KEXEC_ON_CRASH</b> flags was specified, but the region specified by
+      the <i>mem</i> and <i>memsz</i> fields of one of the <i>segments</i>
+      entries lies outside the range of memory reserved for the crash
+    kernel.</dd>
+  <dt id="EADDRNOTAVAIL~2"><a class="permalink" href="#EADDRNOTAVAIL~2"><b>EADDRNOTAVAIL</b></a></dt>
+  <dd>The value in a <i>mem</i> or <i>memsz</i> field in one of the
+      <i>segments</i> entries is not a multiple of the system page size.</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd><i>kernel_fd</i> or <i>initrd_fd</i> is not a valid file descriptor.</dd>
+  <dt id="EBUSY"><a class="permalink" href="#EBUSY"><b>EBUSY</b></a></dt>
+  <dd>Another crash kernel is already being loaded or a crash kernel is already
+      in use.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>flags</i> is invalid.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>The value of a <i>bufsz</i> field in one of the <i>segments</i> entries
+      exceeds the value in the corresponding <i>memsz</i> field.</dd>
+  <dt id="EINVAL~3"><a class="permalink" href="#EINVAL~3"><b>EINVAL</b></a></dt>
+  <dd><i>nr_segments</i> exceeds <b>KEXEC_SEGMENT_MAX</b> (16).</dd>
+  <dt id="EINVAL~4"><a class="permalink" href="#EINVAL~4"><b>EINVAL</b></a></dt>
+  <dd>Two or more of the kernel target buffers overlap.</dd>
+  <dt id="EINVAL~5"><a class="permalink" href="#EINVAL~5"><b>EINVAL</b></a></dt>
+  <dd>The value in <i>cmdline[cmdline_len-1]</i> is not '\0'.</dd>
+  <dt id="EINVAL~6"><a class="permalink" href="#EINVAL~6"><b>EINVAL</b></a></dt>
+  <dd>The file referred to by <i>kernel_fd</i> or <i>initrd_fd</i> is empty
+      (length zero).</dd>
+  <dt id="ENOEXEC"><a class="permalink" href="#ENOEXEC"><b>ENOEXEC</b></a></dt>
+  <dd><i>kernel_fd</i> does not refer to an open file, or the kernel can't load
+      this file. Currently, the file must be a bzImage and contain an x86 kernel
+      that is loadable above 4&nbsp;GiB in memory (see the kernel source file
+      <i>Documentation/x86/boot.txt</i>).</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Could not allocate memory.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The caller does not have the <b>CAP_SYS_BOOT</b> capability.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>kexec_load</b>() system call first appeared in Linux
+    2.6.13. The <b>kexec_file_load</b>() system call first appeared in Linux
+    3.17.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These system calls are Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>reboot</b>(2), <b>syscall</b>(2), <b>kexec</b>(8)</p>
+<p class="Pp">The kernel source files <i>Documentation/kdump/kdump.txt</i> and
+    <i>Documentation/admin-guide/kernel-parameters.txt</i></p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

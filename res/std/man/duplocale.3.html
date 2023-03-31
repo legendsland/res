@@ -1,0 +1,206 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2014 Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/a1106d01471f2be1efe0d64d7b91c1ad30f63151">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>duplocale(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">duplocale(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">duplocale(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">duplocale - duplicate a locale object</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;locale.h&gt;</b></pre>
+<pre><b>locale_t duplocale(locale_t </b><i>locobj</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>duplocale</b>():</p>
+<pre><br>
+    Since glibc 2.10:
+<br>
+        _XOPEN_SOURCE &gt;= 700
+<br>
+    Before glibc 2.10:
+<br>
+        _GNU_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>duplocale</b>() function creates a duplicate of the locale
+    object referred to by <i>locobj</i>.</p>
+<p class="Pp">If <i>locobj</i> is <b>LC_GLOBAL_LOCALE</b>, <b>duplocale</b>()
+    creates a locale object containing a copy of the global locale determined by
+    <b>setlocale</b>(3).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>duplocale</b>() returns a handle for the new locale
+    object. On error, it returns <i>(locale_t)&nbsp;0</i>, and sets
+    <i>errno</i> to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient memory to create the duplicate locale object.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>duplocale</b>() function were added in glibc 2.3.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Duplicating a locale can serve the following purposes:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>To create a copy of a locale object in which one of more categories are to
+      be modified (using <b>newlocale</b>(3)).</dd>
+  <dt>•</dt>
+  <dd>To obtain a handle for the current locale which can used in other
+      functions that employ a locale handle, such as <b>toupper_l</b>(3). This
+      is done by applying <b>duplocale</b>() to the value returned by the
+      following call:</dd>
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>loc = uselocale((locale_t) 0);
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>This technique is necessary, because the above <b>uselocale</b>(3) call
+      may return the value <b>LC_GLOBAL_LOCALE</b>, which results in undefined
+      behavior if passed to functions such as <b>toupper_l</b>(3). Calling
+      <b>duplocale</b>() can be used to ensure that the <b>LC_GLOBAL_LOCALE</b>
+      value is converted into a usable locale object. See EXAMPLES, below.</dd>
+</dl>
+<p class="Pp">Each locale object created by <b>duplocale</b>() should be
+    deallocated using <b>freelocale</b>(3).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below uses <b>uselocale</b>(3) and <b>duplocale</b>()
+    to obtain a handle for the current locale which is then passed to
+    <b>toupper_l</b>(3). The program takes one command-line argument, a string
+    of characters that is converted to uppercase and displayed on standard
+    output. An example of its use is the following:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>./a.out abc</b>
+ABC
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#define _XOPEN_SOURCE 700
+#include &lt;ctype.h&gt;
+#include &lt;locale.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#define errExit(msg)    do { perror(msg); exit(EXIT_FAILURE); \
+<br>
+                        } while (0)
+int
+main(int argc, char *argv[])
+{
+<br>
+    locale_t loc, nloc;
+<br>
+    if (argc != 2) {
+<br>
+        fprintf(stderr, "Usage: %s string\n", argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    /* This sequence is necessary, because uselocale() might return
+<br>
+       the value LC_GLOBAL_LOCALE, which can't be passed as an
+<br>
+       argument to toupper_l(). */
+<br>
+    loc = uselocale((locale_t) 0);
+<br>
+    if (loc == (locale_t) 0)
+<br>
+        errExit("uselocale");
+<br>
+    nloc = duplocale(loc);
+<br>
+    if (nloc == (locale_t) 0)
+<br>
+        errExit("duplocale");
+<br>
+    for (char *p = argv[1]; *p; p++)
+<br>
+        putchar(toupper_l(*p, nloc));
+<br>
+    printf("\n");
+<br>
+    freelocale(nloc);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>freelocale</b>(3), <b>newlocale</b>(3), <b>setlocale</b>(3),
+    <b>uselocale</b>(3), <b>locale</b>(5), <b>locale</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright 2000 Nicol\[u00E1]s Lichtmaier <nick@debian.org>
+   Created 2000-07-22 00:52-0300
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+  
+   Modified 2002-07-23 19:21:35 CEST 2002 Walter Harms
+   <walter.harms@informatik.uni-oldenburg.de>
+  
+   Modified 2003-04-04, aeb
+   --><head>
+<meta name="dc.identifier" content="res/e8594bc1167c08c2225856874627400527fe64c9">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>encrypt(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">encrypt(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">encrypt(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">encrypt, setkey, encrypt_r, setkey_r - encrypt 64-bit messages</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Encryption and decryption library (<i>libcrypto</i>,
+    <i>-lcrypto</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#define _XOPEN_SOURCE</b>       /* See feature_test_macros(7) */
+<b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>[[deprecated]] void encrypt(char </b><i>block</i><b>[64], int </b><i>edflag</i><b>);</b></pre>
+<pre><b>#define _XOPEN_SOURCE</b>       /* See feature_test_macros(7) */
+<b>#include &lt;stdlib.h&gt;</b></pre>
+<pre><b>[[deprecated]] void setkey(const char *</b><i>key</i><b>);</b></pre>
+<pre><b>#define _GNU_SOURCE</b>         /* See feature_test_macros(7) */
+<b>#include &lt;crypt.h&gt;</b></pre>
+<pre><b>[[deprecated]] void setkey_r(const char *</b><i>key</i><b>, struct crypt_data *</b><i>data</i><b>);</b>
+<b>[[deprecated]] void encrypt_r(char *</b><i>block</i><b>, int </b><i>edflag</i><b>,</b>
+<b>                              struct crypt_data *</b><i>data</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">These functions encrypt and decrypt 64-bit messages. The
+    <b>setkey</b>() function sets the key used by <b>encrypt</b>(). The
+    <i>key</i> argument used here is an array of 64 bytes, each of which has
+    numerical value 1 or 0. The bytes key[n] where n=8*i-1 are ignored, so that
+    the effective key length is 56 bits.</p>
+<p class="Pp">The <b>encrypt</b>() function modifies the passed buffer, encoding
+    if <i>edflag</i> is 0, and decoding if 1 is being passed. Like the
+    <i>key</i> argument, also <i>block</i> is a bit vector representation of the
+    actual value that is encoded. The result is returned in that same
+  vector.</p>
+<p class="Pp">These two functions are not reentrant, that is, the key data is
+    kept in static storage. The functions <b>setkey_r</b>() and
+    <b>encrypt_r</b>() are the reentrant versions. They use the following
+    structure to hold the key data:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct crypt_data {
+<br>
+    char keysched[16 * 8];
+<br>
+    char sb0[32768];
+<br>
+    char sb1[32768];
+<br>
+    char sb2[32768];
+<br>
+    char sb3[32768];
+<br>
+    char crypt_3_buf[14];
+<br>
+    char current_salt[2];
+<br>
+    long current_saltbits;
+<br>
+    int  direction;
+<br>
+    int  initialized;
+};
+</pre>
+<br>
+<p class="Pp">Before calling <b>setkey_r</b>() set <i>data-&gt;initialized</i>
+    to zero.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">These functions do not return any value.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">Set <i>errno</i> to zero before calling the above functions. On
+    success, <i>errno</i> is unchanged.</p>
+<dl class="Bl-tag">
+  <dt id="ENOSYS"><a class="permalink" href="#ENOSYS"><b>ENOSYS</b></a></dt>
+  <dd>The function is not provided. (For example because of former USA export
+      restrictions.)</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>encrypt (), setkey ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race:crypt</td>
+  </tr>
+  <tr>
+    <td>encrypt_r (), setkey_r ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">Because they employ the DES block cipher, which is no longer
+    considered secure, <b>encrypt</b>(), <b>encrypt_r</b>(), <b>setkey</b>(),
+    and <b>setkey_r</b>() were removed in glibc 2.28. Applications should switch
+    to a modern cryptography library, such as <b>libgcrypt</b>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>encrypt</b>(), <b>setkey</b>(): POSIX.1-2001, POSIX.1-2008,
+    SUS, SVr4.</p>
+<p class="Pp">The functions <b>encrypt_r</b>() and <b>setkey_r</b>() are GNU
+    extensions.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Availability_in_glibc"><a class="permalink" href="#Availability_in_glibc">Availability
+  in glibc</a></h2>
+<p class="Pp">See <b>crypt</b>(3).</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Features_in_glibc"><a class="permalink" href="#Features_in_glibc">Features
+  in glibc</a></h2>
+<p class="Pp">In glibc 2.2, these functions use the DES algorithm.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<pre>#define _XOPEN_SOURCE
+#include &lt;crypt.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+int
+main(void)
+{
+<br>
+    char key[64];
+<br>
+    char orig[9] = "eggplant";
+<br>
+    char buf[64];
+<br>
+    char txt[9];
+<br>
+    for (size_t i = 0; i &lt; 64; i++) {
+<br>
+        key[i] = rand() &amp; 1;
+<br>
+    }
+<br>
+    for (size_t i = 0; i &lt; 8; i++) {
+<br>
+        for (size_t j = 0; j &lt; 8; j++) {
+<br>
+            buf[i * 8 + j] = orig[i] &gt;&gt; j &amp; 1;
+<br>
+        }
+<br>
+        setkey(key);
+<br>
+    }
+<br>
+    printf("Before encrypting: %s\n", orig);
+<br>
+    encrypt(buf, 0);
+<br>
+    for (size_t i = 0; i &lt; 8; i++) {
+<br>
+        for (size_t j = 0, txt[i] = '\0'; j &lt; 8; j++) {
+<br>
+            txt[i] |= buf[i * 8 + j] &lt;&lt; j;
+<br>
+        }
+<br>
+        txt[8] = '\0';
+<br>
+    }
+<br>
+    printf("After encrypting:  %s\n", txt);
+<br>
+    encrypt(buf, 1);
+<br>
+    for (size_t i = 0; i &lt; 8; i++) {
+<br>
+        for (size_t j = 0, txt[i] = '\0'; j &lt; 8; j++) {
+<br>
+            txt[i] |= buf[i * 8 + j] &lt;&lt; j;
+<br>
+        }
+<br>
+        txt[8] = '\0';
+<br>
+    }
+<br>
+    printf("After decrypting:  %s\n", txt);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>cbc_crypt</b>(3), <b>crypt</b>(3), <b>ecb_crypt</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

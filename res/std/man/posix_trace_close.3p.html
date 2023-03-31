@@ -1,0 +1,178 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/ea36c37052d6dfc354567e31e0a3d098955241fa">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>POSIX_TRACE_CLOSE(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">POSIX_TRACE_CLOSE(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">POSIX_TRACE_CLOSE(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">posix_trace_close, posix_trace_open, posix_trace_rewind —
+    trace log management (<b>TRACING</b>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;trace.h&gt;</pre>
+<pre>int posix_trace_close(trace_id_t <i>trid</i>);
+int posix_trace_open(int <i>file_desc</i>, trace_id_t *<i>trid</i>);
+int posix_trace_rewind(trace_id_t <i>trid</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>posix_trace_close</i>() function shall deallocate the trace
+    log identifier indicated by <i>trid</i>, and all of its associated
+    resources. If there is no valid trace log pointed to by the <i>trid</i>,
+    this function shall fail.</p>
+<p class="Pp">The <i>posix_trace_open</i>() function shall allocate the
+    necessary resources and establish the connection between a trace log
+    identified by the <i>file_desc</i> argument and a trace stream identifier
+    identified by the object pointed to by the <i>trid</i> argument. The
+    <i>file_desc</i> argument should be a valid open file descriptor that
+    corresponds to a trace log. The <i>file_desc</i> argument shall be open for
+    reading. The current trace event timestamp, which specifies the timestamp of
+    the trace event that will be read by the next call to
+    <i>posix_trace_getnext_event</i>(), shall be set to the timestamp of the
+    oldest trace event recorded in the trace log identified by <i>trid</i>.</p>
+<p class="Pp">The <i>posix_trace_open</i>() function shall return a trace stream
+    identifier in the variable pointed to by the <i>trid</i> argument, that may
+    only be used by the following functions:</p>
+<table class="tbl">
+  <tbody><tr>
+    <td><i>posix_trace_close</i>() <i>posix_trace_eventid_equal</i>()
+      <i>posix_trace_eventid_get_name</i>()
+      <i>posix_trace_eventtypelist_getnext_id</i>()
+      <i>posix_trace_eventtypelist_rewind</i>()</td>
+    <td><i>posix_trace_get_attr</i>() <i>posix_trace_get_status</i>()
+      <i>posix_trace_getnext_event</i>() <i>posix_trace_rewind</i>()</td>
+  </tr>
+</tbody></table>
+<br>
+<p class="Pp">In particular, notice that the operations normally used by a trace
+    controller process, such as <i>posix_trace_start</i>(),
+    <i>posix_trace_stop</i>(), or <i>posix_trace_shutdown</i>(), cannot be
+    invoked using the trace stream identifier returned by the
+    <i>posix_trace_open</i>() function.</p>
+<p class="Pp">The <i>posix_trace_rewind</i>() function shall reset the current
+    trace event timestamp, which specifies the timestamp of the trace event that
+    will be read by the next call to <i>posix_trace_getnext_event</i>(), to the
+    timestamp of the oldest trace event recorded in the trace log identified by
+    <i>trid</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, these functions shall return a value
+    of zero. Otherwise, they shall return the corresponding error number.</p>
+<p class="Pp">If successful, the <i>posix_trace_open</i>() function stores the
+    trace stream identifier value in the object pointed to by <i>trid</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>posix_trace_open</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The operation was interrupted by a signal and thus no trace log was
+      opened.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The object pointed to by <i>file_desc</i> does not correspond to a valid
+      trace log.
+    <br>
+  </dd>
+</dl>
+<p class="Pp">The <i>posix_trace_close</i>() and <i>posix_trace_rewind</i>()
+    functions may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>The object pointed to by <i>trid</i> does not correspond to a valid trace
+      log.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">The <i>posix_trace_close</i>(), <i>posix_trace_open</i>(), and
+    <i>posix_trace_rewind</i>() functions may be removed in a future
+  version.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>posix_trace_get_attr</i>()</i>,
+    <i><i>posix_trace_get_filter</i>()</i>,
+    <i><i>posix_trace_getnext_event</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;trace.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

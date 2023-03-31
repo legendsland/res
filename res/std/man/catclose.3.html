@@ -1,0 +1,142 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/4e54944df7c6e4ab45e4f2110afb465ccc076c1d">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>catopen(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">catopen(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">catopen(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">catopen, catclose - open/close a message catalog</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;nl_types.h&gt;</b></pre>
+<pre><b>nl_catd catopen(const char *</b><i>name</i><b>, int </b><i>flag</i><b>);</b>
+<b>int catclose(nl_catd </b><i>catalog</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The function <b>catopen</b>() opens a message catalog and returns
+    a catalog descriptor. The descriptor remains valid until <b>catclose</b>()
+    or <b>execve</b>(2). If a file descriptor is used to implement catalog
+    descriptors, then the <b>FD_CLOEXEC</b> flag will be set.</p>
+<p class="Pp">The argument <i>name</i> specifies the name of the message catalog
+    to be opened. If <i>name</i> specifies an absolute path (i.e., contains a
+    '/'), then <i>name</i> specifies a pathname for the message catalog.
+    Otherwise, the environment variable <b>NLSPATH</b> is used with <i>name</i>
+    substituted for <b>%N</b> (see <b>locale</b>(7)). It is unspecified whether
+    <b>NLSPATH</b> will be used when the process has root privileges. If
+    <b>NLSPATH</b> does not exist in the environment, or if a message catalog
+    cannot be opened in any of the paths specified by it, then an implementation
+    defined path is used. This latter default path may depend on the
+    <b>LC_MESSAGES</b> locale setting when the <i>flag</i> argument is
+    <b>NL_CAT_LOCALE</b> and on the <b>LANG</b> environment variable when the
+    <i>flag</i> argument is 0. Changing the <b>LC_MESSAGES</b> part of the
+    locale may invalidate open catalog descriptors.</p>
+<p class="Pp">The <i>flag</i> argument to <b>catopen</b>() is used to indicate
+    the source for the language to use. If it is set to <b>NL_CAT_LOCALE</b>,
+    then it will use the current locale setting for <b>LC_MESSAGES</b>.
+    Otherwise, it will use the <b>LANG</b> environment variable.</p>
+<p class="Pp">The function <b>catclose</b>() closes the message catalog
+    identified by <i>catalog</i>. It invalidates any subsequent references to
+    the message catalog defined by <i>catalog</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The function <b>catopen</b>() returns a message catalog descriptor
+    of type <i>nl_catd</i> on success. On failure, it returns
+    <i>(nl_catd)&nbsp;-1</i> and sets <i>errno</i> to indicate the error. The
+    possible error values include all possible values for the <b>open</b>(2)
+    call.</p>
+<p class="Pp">The function <b>catclose</b>() returns 0 on success, or -1 on
+    failure.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ENVIRONMENT"><a class="permalink" href="#ENVIRONMENT">ENVIRONMENT</a></h1>
+<dl class="Bl-tag">
+  <dt id="LC_MESSAGES"><a class="permalink" href="#LC_MESSAGES"><b>LC_MESSAGES</b></a></dt>
+  <dd>May be the source of the <b>LC_MESSAGES</b> locale setting, and thus
+      determine the language to use if <i>flag</i> is set to
+      <b>NL_CAT_LOCALE</b>.</dd>
+  <dt id="LANG"><a class="permalink" href="#LANG"><b>LANG</b></a></dt>
+  <dd>The language to use if <i>flag</i> is 0.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>catopen ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe env</td>
+  </tr>
+  <tr>
+    <td>catclose ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The above is the POSIX.1 description. The glibc value for
+    <b>NL_CAT_LOCALE</b> is 1. The default path varies, but usually looks at a
+    number of places below <i>/usr/share/locale</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>catgets</b>(3), <b>setlocale</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

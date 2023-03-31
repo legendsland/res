@@ -1,0 +1,150 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright IBM Corp. 2017
+   Author: QingFeng Hao <haoqf@linux.vnet.ibm.com>
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+   --><head>
+<meta name="dc.identifier" content="res/e3f2c5e45dae94bec294cd326fc06ef408cc354a">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>s390_sthyi(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">s390_sthyi(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">s390_sthyi(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">s390_sthyi - emulate STHYI instruction</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;asm/sthyi.h&gt;</b>        /* Definition of <b>STHYI_*</b> constants */
+<b>#include &lt;sys/syscall.h&gt;</b>      /* Definition of <b>SYS_*</b> constants */
+<b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int syscall(SYS_s390_sthyi, unsigned long </b><i>function_code</i><b>,</b>
+<b>            void *</b><i>resp_buffer</i><b>, uint64_t *</b><i>return_code</i><b>,</b>
+<b>            unsigned long </b><i>flags</i><b>);</b></pre>
+<p class="Pp"><i>Note</i>: glibc provides no wrapper for <b>s390_sthyi</b>(),
+    necessitating the use of <b>syscall</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>s390_sthyi</b>() system call emulates the STHYI (Store
+    Hypervisor Information) instruction. It provides hardware resource
+    information for the machine and its virtualization levels. This includes CPU
+    type and capacity, as well as the machine model and other metrics.</p>
+<p class="Pp">The <i>function_code</i> argument indicates which function to
+    perform. The following code(s) are supported:</p>
+<dl class="Bl-tag">
+  <dt id="STHYI_FC_CP_IFL_CAP"><a class="permalink" href="#STHYI_FC_CP_IFL_CAP"><b>STHYI_FC_CP_IFL_CAP</b></a></dt>
+  <dd>Return CP (Central Processor) and IFL (Integrated Facility for Linux)
+      capacity information.</dd>
+</dl>
+<p class="Pp">The <i>resp_buffer</i> argument specifies the address of a
+    response buffer. When the <i>function_code</i> is
+    <b>STHYI_FC_CP_IFL_CAP</b>, the buffer must be one page (4K) in size. If the
+    system call returns 0, the response buffer will be filled with CPU capacity
+    information. Otherwise, the response buffer's content is unchanged.</p>
+<p class="Pp">The <i>return_code</i> argument stores the return code of the
+    STHYI instruction, using one of the following values:</p>
+<dl class="Bl-tag">
+  <dt>0</dt>
+  <dd>Success.</dd>
+  <dt>4</dt>
+  <dd>Unsupported function code.</dd>
+</dl>
+<p class="Pp">For further details about <i>return_code</i>,
+    <i>function_code</i>, and <i>resp_buffer</i>, see the reference given in
+    NOTES.</p>
+<p class="Pp">The <i>flags</i> argument is provided to allow for future
+    extensions and currently must be set to 0.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success (that is: emulation succeeded), the return value of
+    <b>s390_sthyi</b>() matches the condition code of the STHYI instructions,
+    which is a value in the range [0..3]. A return value of 0 indicates that CPU
+    capacity information is stored in <i>*resp_buffer</i>. A return value of 3
+    indicates "unsupported function code" and the content of
+    <i>*resp_buffer</i> is unchanged. The return values 1 and 2 are
+  reserved.</p>
+<p class="Pp">On error, -1 is returned, and <i>errno</i> is set to indicate the
+    error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>The value specified in <i>resp_buffer</i> or <i>return_code</i> is not a
+      valid address.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The value specified in <i>flags</i> is nonzero.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Allocating memory for handling the CPU capacity information failed.</dd>
+  <dt id="EOPNOTSUPP"><a class="permalink" href="#EOPNOTSUPP"><b>EOPNOTSUPP</b></a></dt>
+  <dd>The value specified in <i>function_code</i> is not valid.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">This system call is available since Linux 4.15.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This Linux-specific system call is available only on the s390
+    architecture.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">For details of the STHYI instruction, see
+    <a class="Lk" href="https://www.ibm.com/support/knowledgecenter/SSB27U_6.3.0/com.ibm.zvm.v630.hcpb4/hcpb4sth.htm">the
+    documentation page</a>.</p>
+<p class="Pp">When the system call interface is used, the response buffer
+    doesn't have to fulfill alignment requirements described in the STHYI
+    instruction definition.</p>
+<p class="Pp">The kernel caches the response (for up to one second, as of Linux
+    4.16). Subsequent system call invocations may return the cached
+  response.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>syscall</b>(2)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

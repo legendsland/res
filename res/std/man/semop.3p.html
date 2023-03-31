@@ -1,0 +1,453 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/0e0a6d17836deb06679efb59b0c7474a9c5990d2">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>SEMOP(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">SEMOP(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">SEMOP(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">semop — XSI semaphore operations</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;sys/sem.h&gt;</pre>
+<pre>int semop(int <i>semid</i>, struct sembuf *<i>sops</i>, size_t <i>nsops</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>semop</i>() function operates on XSI semaphores (see the
+    Base Definitions volume of POSIX.1‐2017, <i>Section 4.17</i>,
+    <i>Semaphore</i>). It is unspecified whether this function interoperates
+    with the realtime interprocess communication facilities defined in
+    <i>Section 2.8</i>, <i>Realtime</i>.</p>
+<p class="Pp">The <i>semop</i>() function shall perform atomically a
+    user-defined array of semaphore operations in array order on the set of
+    semaphores associated with the semaphore identifier specified by the
+    argument <i>semid</i>.</p>
+<p class="Pp">The argument <i>sops</i> is a pointer to a user-defined array of
+    semaphore operation structures. The implementation shall not modify elements
+    of this array unless the application uses implementation-defined
+  extensions.</p>
+<p class="Pp">The argument <i>nsops</i> is the number of such structures in the
+    array.</p>
+<p class="Pp">Each structure, <b>sembuf</b>, includes the following members:</p>
+<table class="tbl" style="border-style: solid;">
+  <tbody><tr style="border-bottom-style: solid;">
+    <td style="text-align: center; border-right-style: solid;"><b>Member
+      Type</b></td>
+    <td style="text-align: center; border-right-style: solid;"><b>Member
+      Name</b></td>
+    <td style="text-align: center;"><b>Description</b></td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"><b>unsigned short</b></td>
+    <td style="border-right-style: solid;"><i>sem_num</i></td>
+    <td>Semaphore number.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"><b>short</b></td>
+    <td style="border-right-style: solid;"><i>sem_op</i></td>
+    <td>Semaphore operation.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"><b>short</b></td>
+    <td style="border-right-style: solid;"><i>sem_flg</i></td>
+    <td>Operation flags.</td>
+  </tr>
+</tbody></table>
+<p class="Pp">Each semaphore operation specified by <i>sem_op</i> is performed
+    on the corresponding semaphore specified by <i>semid</i> and
+  <i>sem_num</i>.</p>
+<p class="Pp">The variable <i>sem_op</i> specifies one of three semaphore
+    operations:</p>
+<dl class="Bl-tag">
+  <dt> 1.</dt>
+  <dd>If <i>sem_op</i> is a negative integer and the calling process has alter
+      permission, one of the following shall occur:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>If <i>semval</i>(see <i>&lt;sys/sem.h&gt;</i>) is greater than or equal to
+      the absolute value of <i>sem_op</i>, the absolute value of <i>sem_op</i>
+      is subtracted from <i>semval</i>. Also, if (<i>sem_flg</i> &amp;SEM_UNDO)
+      is non-zero, the absolute value of <i>sem_op</i> shall be added to the
+      <i>semadj</i> value of the calling process for the specified
+    semaphore.</dd>
+  <dt> *</dt>
+  <dd>If <i>semval</i> is less than the absolute value of <i>sem_op</i> and
+      (<i>sem_flg</i> &amp;IPC_NOWAIT) is non-zero, <i>semop</i>() shall return
+      immediately.</dd>
+  <dt> *</dt>
+  <dd>If <i>semval</i> is less than the absolute value of <i>sem_op</i> and
+      (<i>sem_flg</i> &amp;IPC_NOWAIT) is 0, <i>semop</i>() shall increment the
+      <i>semncnt</i> associated with the specified semaphore and suspend
+      execution of the calling thread until one of the following conditions
+      occurs:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>--</dt>
+  <dd>The value of <i>semval</i> becomes greater than or equal to the absolute
+      value of <i>sem_op</i>. When this occurs, the value of <i>semncnt</i>
+      associated with the specified semaphore shall be decremented, the absolute
+      value of <i>sem_op</i> shall be subtracted from <i>semval</i> and, if
+      (<i>sem_flg</i> &amp;SEM_UNDO) is non-zero, the absolute value of
+      <i>sem_op</i> shall be added to the <i>semadj</i> value of the calling
+      process for the specified semaphore.</dd>
+  <dt>--</dt>
+  <dd>The <i>semid</i> for which the calling thread is awaiting action is
+      removed from the system. When this occurs, <i>errno</i> shall be set to
+      <b>[EIDRM]</b> and -1 shall be returned.</dd>
+  <dt>--</dt>
+  <dd>The calling thread receives a signal that is to be caught. When this
+      occurs, the value of <i>semncnt</i> associated with the specified
+      semaphore shall be decremented, and the calling thread shall resume
+      execution in the manner prescribed in <i><i>sigaction</i>()</i>.</dd>
+</dl>
+</div>
+</div>
+<dl class="Bl-tag">
+  <dt> 2.</dt>
+  <dd>If <i>sem_op</i> is a positive integer and the calling process has alter
+      permission, the value of <i>sem_op</i> shall be added to <i>semval</i>
+      and, if (<i>sem_flg</i> &amp;SEM_UNDO) is non-zero, the value of
+      <i>sem_op</i> shall be subtracted from the <i>semadj</i> value of the
+      calling process for the specified semaphore.</dd>
+  <dt> 3.</dt>
+  <dd>If <i>sem_op</i> is 0 and the calling process has read permission, one of
+      the following shall occur:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>If <i>semval</i> is 0, <i>semop</i>() shall return immediately.</dd>
+  <dt> *</dt>
+  <dd>If <i>semval</i> is non-zero and (<i>sem_flg</i> &amp;IPC_NOWAIT) is
+      non-zero, <i>semop</i>() shall return immediately.</dd>
+  <dt> *</dt>
+  <dd>If <i>semval</i> is non-zero and (<i>sem_flg</i> &amp;IPC_NOWAIT) is 0,
+      <i>semop</i>() shall increment the <i>semzcnt</i> associated with the
+      specified semaphore and suspend execution of the calling thread until one
+      of the following occurs:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>--</dt>
+  <dd>The value of <i>semval</i> becomes 0, at which time the value of
+      <i>semzcnt</i> associated with the specified semaphore shall be
+      decremented.</dd>
+  <dt>--</dt>
+  <dd>The <i>semid</i> for which the calling thread is awaiting action is
+      removed from the system. When this occurs, <i>errno</i> shall be set to
+      <b>[EIDRM]</b> and -1 shall be returned.</dd>
+  <dt>--</dt>
+  <dd>The calling thread receives a signal that is to be caught. When this
+      occurs, the value of <i>semzcnt</i> associated with the specified
+      semaphore shall be decremented, and the calling thread shall resume
+      execution in the manner prescribed in <i><i>sigaction</i>()</i>.</dd>
+</dl>
+</div>
+</div>
+<p class="Pp">Upon successful completion, the value of <i>sempid</i> for each
+    semaphore specified in the array pointed to by <i>sops</i> shall be set to
+    the process ID of the calling process. Also, the <i>sem_otime</i> timestamp
+    shall be set to the current time, as described in <i>Section 2.7.1</i>,
+    <i>IPC General Description</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>semop</i>() shall return 0;
+    otherwise, it shall return -1 and set <i>errno</i> to indicate the
+  error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>semop</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="E2BIG"><a class="permalink" href="#E2BIG"><b>E2BIG</b></a></dt>
+  <dd>The value of <i>nsops</i> is greater than the system-imposed maximum.</dd>
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>Operation permission is denied to the calling process; see <i>Section
+      2.7</i>, <i>XSI Interprocess Communication</i>.</dd>
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>The operation would result in suspension of the calling process but
+      (<i>sem_flg</i> &amp;IPC_NOWAIT) is non-zero.</dd>
+  <dt id="EFBIG"><a class="permalink" href="#EFBIG"><b>EFBIG</b></a></dt>
+  <dd>The value of <i>sem_num</i> is greater than or equal to the number of
+      semaphores in the set associated with <i>semid</i>.</dd>
+  <dt id="EIDRM"><a class="permalink" href="#EIDRM"><b>EIDRM</b></a></dt>
+  <dd>The semaphore identifier <i>semid</i> is removed from the system.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The <i>semop</i>() function was interrupted by a signal.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The value of <i>semid</i> is not a valid semaphore identifier, or the
+      number of individual semaphores for which the calling process requests a
+      SEM_UNDO would exceed the system-imposed limit.</dd>
+  <dt id="ENOSPC"><a class="permalink" href="#ENOSPC"><b>ENOSPC</b></a></dt>
+  <dd>The limit on the number of individual processes requesting a SEM_UNDO
+      would be exceeded.</dd>
+  <dt id="ERANGE"><a class="permalink" href="#ERANGE"><b>ERANGE</b></a></dt>
+  <dd>An operation would cause a <i>semval</i> to overflow the system-imposed
+      limit, or an operation would cause a <i>semadj</i> value to overflow the
+      system-imposed limit.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Setting_Values_in_Semaphores"><a class="permalink" href="#Setting_Values_in_Semaphores">Setting
+  Values in Semaphores</a></h2>
+<p class="Pp">The following example sets the values of the two semaphores
+    associated with the <i>semid</i> identifier to the values contained in the
+    <i>sb</i> array.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;sys/sem.h&gt;
+...
+int semid;
+struct sembuf sb[2];
+int nsops = 2;
+int result;</pre>
+<pre>/* Code to initialize semid. */
+...</pre>
+<pre>/* Adjust value of semaphore in the semaphore array semid. */
+sb[0].sem_num = 0;
+sb[0].sem_op = -1;
+sb[0].sem_flg = SEM_UNDO | IPC_NOWAIT;
+sb[1].sem_num = 1;
+sb[1].sem_op = 1;
+sb[1].sem_flg = 0;</pre>
+<pre>result = semop(semid, sb, nsops);</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Creating_a_Semaphore_Identifier"><a class="permalink" href="#Creating_a_Semaphore_Identifier">Creating
+  a Semaphore Identifier</a></h2>
+<p class="Pp">The following example gets a unique semaphore key using the
+    <i>ftok</i>() function, then gets a semaphore ID associated with that key
+    using the <i>semget</i>() function (the first call also tests to make sure
+    the semaphore exists). If the semaphore does not exist, the program creates
+    it, as shown by the second call to <i>semget</i>(). In creating the
+    semaphore for the queuing process, the program attempts to create one
+    semaphore with read/write permission for all. It also uses the IPC_EXCL
+    flag, which forces <i>semget</i>() to fail if the semaphore already
+  exists.</p>
+<p class="Pp">After creating the semaphore, the program uses calls to
+    <i>semctl</i>() and <i>semop</i>() to initialize it to the values in the
+    <i>sbuf</i> array. The number of processes that can execute concurrently
+    without queuing is initially set to 2. The final call to <i>semget</i>()
+    creates a semaphore identifier that can be used later in the program.</p>
+<p class="Pp">Processes that obtain <i>semid</i> without creating it check that
+    <i>sem_otime</i> is non-zero, to ensure that the creating process has
+    completed the <i>semop</i>() initialization.</p>
+<p class="Pp">The final call to <i>semop</i>() acquires the semaphore and waits
+    until it is free; the SEM_UNDO option releases the semaphore when the
+    process exits, waiting until there are less than two processes running
+    concurrently.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;stdio.h&gt;
+#include &lt;sys/sem.h&gt;
+#include &lt;sys/stat.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdlib.h&gt;
+...
+key_t semkey;
+int semid;
+struct sembuf sbuf;
+union semun {
+<br>
+    int val;
+<br>
+    struct semid_ds *buf;
+<br>
+    unsigned short *array;
+} arg;
+struct semid_ds ds;
+...
+/* Get unique key for semaphore. */
+if ((semkey = ftok("/tmp", 'a')) == (key_t) -1) {
+<br>
+    perror("IPC error: ftok"); exit(1);
+}</pre>
+<pre>/* Get semaphore ID associated with this key. */
+if ((semid = semget(semkey, 0, 0)) == -1) {</pre>
+<pre><br>
+    /* Semaphore does not exist - Create. */
+<br>
+    if ((semid = semget(semkey, 1, IPC_CREAT | IPC_EXCL | S_IRUSR |
+<br>
+        S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)) != -1)
+<br>
+    {
+<br>
+        /* Initialize the semaphore. */
+<br>
+        arg.val = 0;
+<br>
+        sbuf.sem_num = 0;
+<br>
+        sbuf.sem_op = 2;  /* This is the number of runs without queuing. */
+<br>
+        sbuf.sem_flg = 0;
+<br>
+        if (semctl(semid, 0, SETVAL, arg) == -1
+<br>
+            || semop(semid, &amp;sbuf, 1) == -1) {
+<br>
+            perror("IPC error: semop"); exit(1);
+<br>
+        }
+<br>
+    }
+<br>
+    else if (errno == EEXIST) {
+<br>
+        if ((semid = semget(semkey, 0, 0)) == -1) {
+<br>
+            perror("IPC error 1: semget"); exit(1);
+<br>
+        }
+<br>
+        goto check_init;
+<br>
+    }
+<br>
+    else {
+<br>
+        perror("IPC error 2: semget"); exit(1);
+<br>
+    }
+}
+else
+{
+<br>
+    /* Check that semid has completed initialization. */
+<br>
+    /* An application can use a retry loop at this point rather than
+<br>
+       exiting. */
+<br>
+    check_init:
+<br>
+    arg.buf = &amp;ds;
+<br>
+    if (semctl(semid, 0, IPC_STAT, arg) &lt; 0) {
+<br>
+        perror("IPC error 3: semctl"); exit(1);
+<br>
+    }
+<br>
+    if (ds.sem_otime == 0) {
+<br>
+        perror("IPC error 4: semctl"); exit(1);
+<br>
+    }
+}
+...
+sbuf.sem_num = 0;
+sbuf.sem_op = -1;
+sbuf.sem_flg = SEM_UNDO;
+if (semop(semid, &amp;sbuf, 1) == -1) {
+<br>
+    perror("IPC Error: semop"); exit(1);
+}</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The POSIX Realtime Extension defines alternative interfaces for
+    interprocess communication. Application developers who need to use IPC
+    should design their applications so that modules using the IPC routines
+    described in <i>Section 2.7</i>, <i>XSI Interprocess Communication</i> can
+    be easily modified to use the alternative interfaces.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i>Section 2.7</i>, <i>XSI Interprocess Communication</i>,
+    <i>Section 2.8</i>, <i>Realtime</i>, <i><i>exec</i></i>,
+    <i><i>exit</i>()</i>, <i><i>fork</i>()</i>, <i><i>semctl</i>()</i>,
+    <i><i>semget</i>()</i>, <i><i>sem_close</i>()</i>,
+    <i><i>sem_destroy</i>()</i>, <i><i>sem_getvalue</i>()</i>,
+    <i><i>sem_init</i>()</i>, <i><i>sem_open</i>()</i>,
+    <i><i>sem_post</i>()</i>, <i><i>sem_trywait</i>()</i>,
+    <i><i>sem_unlink</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Section
+    4.17</i>, <i>Semaphore</i>, <i><b>&lt;sys_ipc.h&gt;</b></i>,
+    <i><b>&lt;sys_sem.h&gt;</b></i>, <i><b>&lt;sys_types.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

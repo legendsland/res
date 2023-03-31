@@ -1,0 +1,220 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/147f71ad91ecdce9fe78f9f05fff56bba74fbb24">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>statvfs(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">statvfs(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">statvfs(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">statvfs, fstatvfs - get filesystem statistics</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/statvfs.h&gt;</b></pre>
+<pre><b>int statvfs(const char *restrict </b><i>path</i><b>, struct statvfs *restrict </b><i>buf</i><b>);</b>
+<b>int fstatvfs(int </b><i>fd</i><b>, struct statvfs *</b><i>buf</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The function <b>statvfs</b>() returns information about a mounted
+    filesystem. <i>path</i> is the pathname of any file within the mounted
+    filesystem. <i>buf</i> is a pointer to a <i>statvfs</i> structure defined
+    approximately as follows:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct statvfs {
+<br>
+    unsigned long  f_bsize;    /* Filesystem block size */
+<br>
+    unsigned long  f_frsize;   /* Fragment size */
+<br>
+    fsblkcnt_t     f_blocks;   /* Size of fs in f_frsize units */
+<br>
+    fsblkcnt_t     f_bfree;    /* Number of free blocks */
+<br>
+    fsblkcnt_t     f_bavail;   /* Number of free blocks for
+<br>
+                                  unprivileged users */
+<br>
+    fsfilcnt_t     f_files;    /* Number of inodes */
+<br>
+    fsfilcnt_t     f_ffree;    /* Number of free inodes */
+<br>
+    fsfilcnt_t     f_favail;   /* Number of free inodes for
+<br>
+                                  unprivileged users */
+<br>
+    unsigned long  f_fsid;     /* Filesystem ID */
+<br>
+    unsigned long  f_flag;     /* Mount flags */
+<br>
+    unsigned long  f_namemax;  /* Maximum filename length */
+};
+</pre>
+<br>
+<p class="Pp">Here the types <i>fsblkcnt_t</i> and <i>fsfilcnt_t</i> are defined
+    in <i>&lt;sys/types.h&gt;</i>. Both used to be <i>unsigned long</i>.</p>
+<p class="Pp">The field <i>f_flag</i> is a bit mask indicating various options
+    that were employed when mounting this filesystem. It contains zero or more
+    of the following flags:</p>
+<dl class="Bl-tag">
+  <dt id="ST_MANDLOCK"><a class="permalink" href="#ST_MANDLOCK"><b>ST_MANDLOCK</b></a></dt>
+  <dd>Mandatory locking is permitted on the filesystem (see
+    <b>fcntl</b>(2)).</dd>
+  <dt id="ST_NOATIME"><a class="permalink" href="#ST_NOATIME"><b>ST_NOATIME</b></a></dt>
+  <dd>Do not update access times; see <b>mount</b>(2).</dd>
+  <dt id="ST_NODEV"><a class="permalink" href="#ST_NODEV"><b>ST_NODEV</b></a></dt>
+  <dd>Disallow access to device special files on this filesystem.</dd>
+  <dt id="ST_NODIRATIME"><a class="permalink" href="#ST_NODIRATIME"><b>ST_NODIRATIME</b></a></dt>
+  <dd>Do not update directory access times; see <b>mount</b>(2).</dd>
+  <dt id="ST_NOEXEC"><a class="permalink" href="#ST_NOEXEC"><b>ST_NOEXEC</b></a></dt>
+  <dd>Execution of programs is disallowed on this filesystem.</dd>
+  <dt id="ST_NOSUID"><a class="permalink" href="#ST_NOSUID"><b>ST_NOSUID</b></a></dt>
+  <dd>The set-user-ID and set-group-ID bits are ignored by <b>exec</b>(3) for
+      executable files on this filesystem</dd>
+  <dt id="ST_RDONLY"><a class="permalink" href="#ST_RDONLY"><b>ST_RDONLY</b></a></dt>
+  <dd>This filesystem is mounted read-only.</dd>
+  <dt id="ST_RELATIME"><a class="permalink" href="#ST_RELATIME"><b>ST_RELATIME</b></a></dt>
+  <dd>Update atime relative to mtime/ctime; see <b>mount</b>(2).</dd>
+  <dt id="ST_SYNCHRONOUS"><a class="permalink" href="#ST_SYNCHRONOUS"><b>ST_SYNCHRONOUS</b></a></dt>
+  <dd>Writes are synched to the filesystem immediately (see the description of
+      <b>O_SYNC</b> in <b>open</b>(2)).</dd>
+</dl>
+<p class="Pp">It is unspecified whether all members of the returned struct have
+    meaningful values on all filesystems.</p>
+<p class="Pp"><b>fstatvfs</b>() returns the same information about an open file
+    referenced by descriptor <i>fd</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, zero is returned. On error, -1 is returned, and
+    <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>(<b>statvfs</b>()) Search permission is denied for a component of the path
+      prefix of <i>path</i>. (See also <b>path_resolution</b>(7).)</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>(<b>fstatvfs</b>()) <i>fd</i> is not a valid open file descriptor.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>Buf</i> or <i>path</i> points to an invalid address.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>This call was interrupted by a signal; see <b>signal</b>(7).</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>An I/O error occurred while reading from the filesystem.</dd>
+  <dt id="ELOOP"><a class="permalink" href="#ELOOP"><b>ELOOP</b></a></dt>
+  <dd>(<b>statvfs</b>()) Too many symbolic links were encountered in translating
+      <i>path</i>.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd>(<b>statvfs</b>()) <i>path</i> is too long.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>(<b>statvfs</b>()) The file referred to by <i>path</i> does not
+    exist.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient kernel memory was available.</dd>
+  <dt id="ENOSYS"><a class="permalink" href="#ENOSYS"><b>ENOSYS</b></a></dt>
+  <dd>The filesystem does not support this call.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>(<b>statvfs</b>()) A component of the path prefix of <i>path</i> is not a
+      directory.</dd>
+  <dt id="EOVERFLOW"><a class="permalink" href="#EOVERFLOW"><b>EOVERFLOW</b></a></dt>
+  <dd>Some values were too large to be represented in the returned struct.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>statvfs (), fstatvfs ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+<p class="Pp">Only the <b>ST_NOSUID</b> and <b>ST_RDONLY</b> flags of the
+    <i>f_flag</i> field are specified in POSIX.1. To obtain definitions of the
+    remaining flags, one must define <b>_GNU_SOURCE</b>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The Linux kernel has system calls <b>statfs</b>(2) and
+    <b>fstatfs</b>(2) to support this library call.</p>
+<p class="Pp">Before glibc 2.13, <b>statvfs</b>() populated the bits of the
+    <i>f_flag</i> field by scanning the mount options shown in
+    <i>/proc/mounts</i>. However, starting with Linux 2.6.36, the underlying
+    <b>statfs</b>(2) system call provides the necessary information via the
+    <i>f_flags</i> field, and since glibc 2.13, the <b>statvfs</b>() function
+    will use information from that field rather than scanning
+    <i>/proc/mounts</i>.</p>
+<p class="Pp">The glibc implementations of</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>pathconf(path, _PC_REC_XFER_ALIGN);
+pathconf(path, _PC_ALLOC_SIZE_MIN);
+pathconf(path, _PC_REC_MIN_XFER_SIZE);
+</pre>
+<br>
+<p class="Pp">respectively use the <i>f_frsize</i>, <i>f_frsize</i>, and
+    <i>f_bsize</i> fields returned by a call to <b>statvfs</b>() with the
+    argument <i>path</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>statfs</b>(2)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/805bd7951ffa5cd4cead55268e4e65d92143bc41">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>CATOPEN(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">CATOPEN(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">CATOPEN(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">catopen — open a message catalog</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;nl_types.h&gt;</pre>
+<pre>nl_catd catopen(const char *<i>name</i>, int <i>oflag</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>catopen</i>() function shall open a message catalog and
+    return a message catalog descriptor. The <i>name</i> argument specifies the
+    name of the message catalog to be opened. If <i>name</i> contains a
+    <b>'/'</b>, then <i>name</i> specifies a pathname for the message catalog.
+    Otherwise, the environment variable <i>NLSPATH</i> is used with <i>name</i>
+    substituted for the <b>%N</b> conversion specification (see the Base
+    Definitions volume of POSIX.1‐2017, <i>Chapter 8</i>, <i>Environment
+    Variables</i>); if <i>NLSPATH</i> exists in the environment when the process
+    starts, then if the process has appropriate privileges, the behavior of
+    <i>catopen</i>() is undefined. If <i>NLSPATH</i> does not exist in the
+    environment, or if a message catalog cannot be found in any of the
+    components specified by <i>NLSPATH</i>, then an implementation-defined
+    default path shall be used. This default may be affected by the setting of
+    <i>LC_MESSAGES</i> if the value of <i>oflag</i> is NL_CAT_LOCALE, or the
+    <i>LANG</i> environment variable if <i>oflag</i> is 0.</p>
+<p class="Pp">A message catalog descriptor shall remain valid in a process until
+    that process closes it, or a successful call to one of the <i>exec</i>
+    functions. A change in the setting of the <i>LC_MESSAGES</i> category may
+    invalidate existing open catalogs.</p>
+<p class="Pp">If a file descriptor is used to implement message catalog
+    descriptors, the FD_CLOEXEC flag shall be set; see
+  <i>&lt;fcntl.h&gt;</i>.</p>
+<p class="Pp">If the value of the <i>oflag</i> argument is 0, the <i>LANG</i>
+    environment variable is used to locate the catalog without regard to the
+    <i>LC_MESSAGES</i> category. If the <i>oflag</i> argument is NL_CAT_LOCALE,
+    the <i>LC_MESSAGES</i> category is used to locate the message catalog (see
+    the Base Definitions volume of POSIX.1‐2017, <i>Section 8.2</i>,
+    <i>Internationalization Variables</i>).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>catopen</i>() shall return a
+    message catalog descriptor for use on subsequent calls to <i>catgets</i>()
+    and <i>catclose</i>(). Otherwise, <i>catopen</i>() shall return
+    (<b>nl_catd</b>) -1 and set <i>errno</i> to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>catopen</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>Search permission is denied for the component of the path prefix of the
+      message catalog or read permission is denied for the message catalog.</dd>
+  <dt id="EMFILE"><a class="permalink" href="#EMFILE"><b>EMFILE</b></a></dt>
+  <dd>All file descriptors available to the process are currently open.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of a component of a pathname is longer than {NAME_MAX}.</dd>
+  <dt id="ENAMETOOLONG~2"><a class="permalink" href="#ENAMETOOLONG~2"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of a pathname exceeds {PATH_MAX}, or pathname resolution of a
+      symbolic link produced an intermediate result with a length that exceeds
+      {PATH_MAX}.</dd>
+  <dt id="ENFILE"><a class="permalink" href="#ENFILE"><b>ENFILE</b></a></dt>
+  <dd>Too many files are currently open in the system.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>The message catalog does not exist or the <i>name</i> argument points to
+      an empty string.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient storage space is available.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>A component of the path prefix of the message catalog names an existing
+      file that is neither a directory nor a symbolic link to a directory, or
+      the pathname of the message catalog contains at least one
+      non-&lt;slash&gt; character and ends with one or more trailing
+      &lt;slash&gt; characters and the last pathname component names an existing
+      file that is neither a directory nor a symbolic link to a directory.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">Some implementations of <i>catopen</i>() use <i>malloc</i>() to
+    allocate space for internal buffer areas. The <i>catopen</i>() function may
+    fail if there is insufficient storage space available to accommodate these
+    buffers.</p>
+<p class="Pp">Conforming applications must assume that message catalog
+    descriptors are not valid after a call to one of the <i>exec</i>
+  functions.</p>
+<p class="Pp">Application developers should be aware that guidelines for the
+    location of message catalogs have not yet been developed. Therefore they
+    should take care to avoid conflicting with catalogs used by other
+    applications and the standard utilities.</p>
+<p class="Pp">To be sure that messages produced by an application running with
+    appropriate privileges cannot be used by an attacker setting an unexpected
+    value for <i>NLSPATH</i> in the environment to confuse a system
+    administrator, such applications should use pathnames containing a
+    <b>'/'</b> to get defined behavior when using <i>catopen</i>() to open a
+    message catalog.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>catclose</i>()</i>, <i><i>catgets</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Chapter
+    8</i>, <i>Environment Variables</i>, <i><b>&lt;fcntl.h&gt;</b></i>,
+    <i><b>&lt;nl_types.h&gt;</b></i>,</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

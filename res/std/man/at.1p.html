@@ -1,0 +1,716 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/4920fcaa0bf1c26b577d5c37ea9e7e414dc81f90">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>AT(1P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">AT(1P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">AT(1P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">at — execute commands at a later time</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>at <b>[</b>-m<b>] [</b>-f <i>file</i><b>] [</b>-q <i>queuename</i><b>] </b>-t <i>time_arg</i></pre>
+<pre>at <b>[</b>-m<b>] [</b>-f <i>file</i><b>] [</b>-q <i>queuename</i><b>] </b><i>timespec</i>...</pre>
+<pre>at -r <i>at_job_id</i>...</pre>
+<pre>at -l -q <i>queuename</i></pre>
+<pre>at -l <b>[</b><i>at_job_id</i>...<b>]</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>at</i> utility shall read commands from standard input and
+    group them together as an <i>at-job</i>, to be executed at a later time.</p>
+<p class="Pp">The at-job shall be executed in a separate invocation of the
+    shell, running in a separate process group with no controlling terminal,
+    except that the environment variables, current working directory, file
+    creation mask, and other implementation-defined execution-time attributes in
+    effect when the <i>at</i> utility is executed shall be retained and used
+    when the at-job is executed.</p>
+<p class="Pp">When the at-job is submitted, the <i>at_job_id</i> and scheduled
+    time shall be written to standard error. The <i>at_job_id</i> is an
+    identifier that shall be a string consisting solely of alphanumeric
+    characters and the &lt;period&gt; character. The <i>at_job_id</i> shall be
+    assigned by the system when the job is scheduled such that it uniquely
+    identifies a particular job.</p>
+<p class="Pp">User notification and the processing of the job's standard output
+    and standard error are described under the <b>-m</b> option.</p>
+<p class="Pp">Users shall be permitted to use <i>at</i> if their name appears in
+    the file <b>at.allow</b> which is located in an implementation-defined
+    directory. If that file does not exist, the file <b>at.deny</b>, which is
+    located in an implementation-defined directory, shall be checked to
+    determine whether the user shall be denied access to <i>at</i>. If neither
+    file exists, only a process with appropriate privileges shall be allowed to
+    submit a job. If only <b>at.deny</b> exists and is empty, global usage shall
+    be permitted. The <b>at.allow</b> and <b>at.deny</b> files shall consist of
+    one user name per line.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OPTIONS"><a class="permalink" href="#OPTIONS">OPTIONS</a></h1>
+<p class="Pp">The <i>at</i> utility shall conform to the Base Definitions volume
+    of POSIX.1‐2017, <i>Section 12.2</i>, <i>Utility Syntax
+    Guidelines</i>.</p>
+<p class="Pp">The following options shall be supported:</p>
+<dl class="Bl-tag">
+  <dt id="f"><a class="permalink" href="#f"><b>-f&nbsp;</b><i>file</i></a></dt>
+  <dd>Specify the pathname of a file to be used as the source of the at-job,
+      instead of standard input.</dd>
+  <dt id="l"><a class="permalink" href="#l"><b>-l</b></a></dt>
+  <dd>(The letter ell.) Report all jobs scheduled for the invoking user if no
+      <i>at_job_id</i> operands are specified. If <i>at_job_id</i>s are
+      specified, report only information for these jobs. The output shall be
+      written to standard output.</dd>
+  <dt id="m"><a class="permalink" href="#m"><b>-m</b></a></dt>
+  <dd>Send mail to the invoking user after the at-job has run, announcing its
+      completion. Standard output and standard error produced by the at-job
+      shall be mailed to the user as well, unless redirected elsewhere. Mail
+      shall be sent even if the job produces no output.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">If <b>-m</b> is not used, the job's standard output and standard
+    error shall be provided to the user by means of mail, unless they are
+    redirected elsewhere; if there is no such output to provide, the
+    implementation need not notify the user of the job's completion.</p>
+</div>
+<dl class="Bl-tag">
+  <dt id="q"><a class="permalink" href="#q"><b>-q&nbsp;</b><i>queuename</i></a></dt>
+  <dd>
+    <br>
+    Specify in which queue to schedule a job for submission. When used with the
+      <b>-l</b> option, limit the search to that particular queue. By default,
+      at-jobs shall be scheduled in queue <i>a</i>. In contrast, queue <i>b</i>
+      shall be reserved for batch jobs; see <i>batch</i>. The meanings of all
+      other <i>queuename</i>s are implementation-defined. If <b>-q</b> is
+      specified along with either of the <b>-t</b> <i>time_arg</i> or
+      <i>timespec</i> arguments, the results are unspecified.</dd>
+  <dt id="r"><a class="permalink" href="#r"><b>-r</b></a></dt>
+  <dd>Remove the jobs with the specified <i>at_job_id</i> operands that were
+      previously scheduled by the <i>at</i> utility.</dd>
+  <dt id="t"><a class="permalink" href="#t"><b>-t&nbsp;</b><i>time_arg</i></a></dt>
+  <dd>Submit the job to be run at the time specified by the <i>time</i>
+      option-argument, which the application shall ensure has the format as
+      specified by the <i>touch</i> <b>-t</b> <i>time</i> utility.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OPERANDS"><a class="permalink" href="#OPERANDS">OPERANDS</a></h1>
+<p class="Pp">The following operands shall be supported:</p>
+<dl class="Bl-tag">
+  <dt id="at_job_id"><a class="permalink" href="#at_job_id"><i>at_job_id</i></a></dt>
+  <dd>The name reported by a previous invocation of the <i>at</i> utility at the
+      time the job was scheduled.</dd>
+  <dt id="timespec"><a class="permalink" href="#timespec"><i>timespec</i></a></dt>
+  <dd>Submit the job to be run at the date and time specified. All of the
+      <i>timespec</i> operands are interpreted as if they were separated by
+      &lt;space&gt; characters and concatenated, and shall be parsed as
+      described in the grammar at the end of this section. The date and time
+      shall be interpreted as being in the timezone of the user (as determined
+      by the <i>TZ</i> variable), unless a timezone name appears as part of
+      <i>time</i>, below.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">In the POSIX locale, the following describes the three parts of
+    the time specification string. All of the values from the <i>LC_TIME</i>
+    categories in the POSIX locale shall be recognized in a case-insensitive
+    manner.</p>
+<dl class="Bl-tag">
+  <dt id="time"><a class="permalink" href="#time"><i>time</i></a></dt>
+  <dd>The time can be specified as one, two, or four digits. One-digit and
+      two-digit numbers shall be taken to be hours; four-digit numbers to be
+      hours and minutes. The time can alternatively be specified as two numbers
+      separated by a &lt;colon&gt;, meaning <i>hour</i>:<i>minute</i>. An AM/PM
+      indication (one of the values from the <b>am_pm</b> keywords in the
+      <i>LC_TIME</i> locale category) can follow the time; otherwise, a 24-hour
+      clock time shall be understood. A timezone name can also follow to further
+      qualify the time. The acceptable timezone names are
+      implementation-defined, except that they shall be case-insensitive and the
+      string <b>utc</b> is supported to indicate the time is in Coordinated
+      Universal Time. In the POSIX locale, the <i>time</i> field can also be one
+      of the following tokens:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="midnight"><a class="permalink" href="#midnight"><b>midnight</b></a></dt>
+  <dd>Indicates the time 12:00 am (00:00).</dd>
+  <dt id="noon"><a class="permalink" href="#noon"><b>noon</b></a></dt>
+  <dd>Indicates the time 12:00 pm.</dd>
+  <dt id="now"><a class="permalink" href="#now"><b>now</b></a></dt>
+  <dd>Indicates the current day and time. Invoking <i>at</i> &lt;<b>now</b>&gt;
+      shall submit an at-job for potentially immediate execution (that is,
+      subject only to unspecified scheduling delays).</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="date"><a class="permalink" href="#date"><i>date</i></a></dt>
+  <dd>An optional <i>date</i> can be specified as either a month name (one of
+      the values from the <b>mon</b> or <b>abmon</b> keywords in the
+      <i>LC_TIME</i> locale category) followed by a day number (and possibly
+      year number preceded by a comma), or a day of the week (one of the values
+      from the <b>day</b> or <b>abday</b> keywords in the <i>LC_TIME</i> locale
+      category). In the POSIX locale, two special days shall be recognized:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="today"><a class="permalink" href="#today"><b>today</b></a></dt>
+  <dd>Indicates the current day.</dd>
+  <dt id="tomorrow"><a class="permalink" href="#tomorrow"><b>tomorrow</b></a></dt>
+  <dd>Indicates the day following the current day.</dd>
+</dl>
+<p class="Pp">If no <i>date</i> is given, <b>today</b> shall be assumed if the
+    given time is greater than the current time, and <b>tomorrow</b> shall be
+    assumed if it is less. If the given month is less than the current month
+    (and no year is given), next year shall be assumed.</p>
+</div>
+<dl class="Bl-tag">
+  <dt id="increment"><a class="permalink" href="#increment"><i>increment</i></a></dt>
+  <dd>The optional <i>increment</i> shall be a number preceded by a
+      &lt;plus-sign&gt; (<b>'+'</b>) and suffixed by one of the following:
+      <b>minutes</b>, <b>hours</b>, <b>days</b>, <b>weeks</b>, <b>months</b>, or
+      <b>years</b>. (The singular forms shall also be accepted.) The keyword
+      <b>next</b> shall be equivalent to an increment number of +1. For example,
+      the following are equivalent commands:</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>at 2pm + 1 week
+at 2pm next week</pre>
+</div>
+</div>
+</div>
+<p class="Pp">The following grammar describes the precise format of
+    <i>timespec</i> in the POSIX locale. The general conventions for this style
+    of grammar are described in <i>Section 1.3</i>, <i>Grammar Conventions</i>.
+    This formal syntax shall take precedence over the preceding text syntax
+    description. The longest possible token or delimiter shall be recognized at
+    a given point. When used in a <i>timespec</i>, white space shall also
+    delimit tokens.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>%token hr24clock_hr_min
+%token hr24clock_hour
+/*
+<br>
+  An hr24clock_hr_min is a one, two, or four-digit number. A one-digit
+<br>
+  or two-digit number constitutes an hr24clock_hour. An hr24clock_hour
+<br>
+  may be any of the single digits [0,9], or may be double digits, ranging
+<br>
+  from [00,23]. If an hr24clock_hr_min is a four-digit number, the
+<br>
+  first two digits shall be a valid hr24clock_hour, while the last two
+<br>
+  represent the number of minutes, from [00,59].
+*/</pre>
+<pre>%token wallclock_hr_min
+%token wallclock_hour
+/*
+<br>
+  A wallclock_hr_min is a one, two-digit, or four-digit number.
+<br>
+  A one-digit or two-digit number constitutes a wallclock_hour.
+<br>
+  A wallclock_hour may be any of the single digits [1,9], or may
+<br>
+  be double digits, ranging from [01,12]. If a wallclock_hr_min
+<br>
+  is a four-digit number, the first two digits shall be a valid
+<br>
+  wallclock_hour, while the last two represent the number of
+<br>
+  minutes, from [00,59].
+*/</pre>
+<pre>%token minute
+/*
+<br>
+  A minute is a one or two-digit number whose value can be [0,9]
+<br>
+  or [00,59].
+*/</pre>
+<pre>%token day_number
+/*
+<br>
+  A day_number is a number in the range appropriate for the particular
+<br>
+  month and year specified by month_name and year_number, respectively.
+<br>
+  If no year_number is given, the current year is assumed if the given
+<br>
+  date and time are later this year. If no year_number is given and
+<br>
+  the date and time have already occurred this year and the month is
+<br>
+  not the current month, next year is the assumed year.
+*/</pre>
+<pre>%token year_number
+/*
+<br>
+  A year_number is a four-digit number representing the year A.D., in
+<br>
+  which the at_job is to be run.
+*/</pre>
+<pre>%token inc_number
+/*
+<br>
+  The inc_number is the number of times the succeeding increment
+<br>
+  period is to be added to the specified date and time.
+*/</pre>
+<pre>%token timezone_name
+/*
+<br>
+  The name of an optional timezone suffix to the time field, in an
+<br>
+  implementation-defined format.
+*/</pre>
+<pre>%token month_name
+/*
+<br>
+  One of the values from the mon or abmon keywords in the LC_TIME
+<br>
+  locale category.
+*/</pre>
+<pre>%token day_of_week
+/*
+<br>
+  One of the values from the day or abday keywords in the LC_TIME
+<br>
+  locale category.
+*/</pre>
+<pre>%token am_pm
+/*
+<br>
+  One of the values from the am_pm keyword in the LC_TIME locale
+<br>
+  category.
+*/</pre>
+<pre>%start timespec
+%%
+timespec    : time
+<br>
+            | time date
+<br>
+            | time increment
+<br>
+            | time date increment
+<br>
+            | nowspec
+<br>
+            ;</pre>
+<pre>nowspec     : "now"
+<br>
+            | "now" increment
+<br>
+            ;</pre>
+<pre>time        : hr24clock_hr_min
+<br>
+            | hr24clock_hr_min timezone_name
+<br>
+            | hr24clock_hour ":" minute
+<br>
+            | hr24clock_hour ":" minute timezone_name
+<br>
+            | wallclock_hr_min am_pm
+<br>
+            | wallclock_hr_min am_pm timezone_name
+<br>
+            | wallclock_hour ":" minute am_pm
+<br>
+            | wallclock_hour ":" minute am_pm timezone_name
+<br>
+            | "noon"
+<br>
+            | "midnight"
+<br>
+            ;</pre>
+<pre>date        : month_name day_number
+<br>
+            | month_name day_number "," year_number
+<br>
+            | day_of_week
+<br>
+            | "today"
+<br>
+            | "tomorrow"
+<br>
+            ;</pre>
+<pre>increment   : "+" inc_number inc_period
+<br>
+            | "next" inc_period
+<br>
+            ;</pre>
+<pre>inc_period  : "minute" | "minutes"
+<br>
+            | "hour" | "hours"
+<br>
+            | "day" | "days"
+<br>
+            | "week" | "weeks"
+<br>
+            | "month" | "months"
+<br>
+            | "year" | "years"
+<br>
+            ;</pre>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDIN"><a class="permalink" href="#STDIN">STDIN</a></h1>
+<p class="Pp">The standard input shall be a text file consisting of commands
+    acceptable to the shell command language described in <i>Chapter 2</i>,
+    <i>Shell Command Language</i>. The standard input shall only be used if no
+    <b>-f</b> <i>file</i> option is specified.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="INPUT_FILES"><a class="permalink" href="#INPUT_FILES">INPUT
+  FILES</a></h1>
+<p class="Pp">See the STDIN section.</p>
+<p class="Pp">The text files <b>at.allow</b> and <b>at.deny</b>, which are
+    located in an implementation-defined directory, shall contain zero or more
+    user names, one per line, of users who are, respectively, authorized or
+    denied access to the <i>at</i> and <i>batch</i> utilities.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ENVIRONMENT_VARIABLES"><a class="permalink" href="#ENVIRONMENT_VARIABLES">ENVIRONMENT
+  VARIABLES</a></h1>
+<p class="Pp">The following environment variables shall affect the execution of
+    <i>at</i>:</p>
+<dl class="Bl-tag">
+  <dt id="LANG"><a class="permalink" href="#LANG"><i>LANG</i></a></dt>
+  <dd>Provide a default value for the internationalization variables that are
+      unset or null. (See the Base Definitions volume of POSIX.1‐2017,
+      <i>Section 8.2</i>, <i>Internationalization Variables</i> for the
+      precedence of internationalization variables used to determine the values
+      of locale categories.)</dd>
+  <dt id="LC_ALL"><a class="permalink" href="#LC_ALL"><i>LC_ALL</i></a></dt>
+  <dd>If set to a non-empty string value, override the values of all the other
+      internationalization variables.</dd>
+  <dt id="LC_CTYPE"><a class="permalink" href="#LC_CTYPE"><i>LC_CTYPE</i></a></dt>
+  <dd>Determine the locale for the interpretation of sequences of bytes of text
+      data as characters (for example, single-byte as opposed to multi-byte
+      characters in arguments and input files).</dd>
+  <dt id="LC_MESSAGES"><a class="permalink" href="#LC_MESSAGES"><i>LC_MESSAGES</i></a></dt>
+  <dd>
+    <br>
+    Determine the locale that should be used to affect the format and contents
+      of diagnostic messages written to standard error and informative messages
+      written to standard output.</dd>
+  <dt id="NLSPATH"><a class="permalink" href="#NLSPATH"><i>NLSPATH</i></a></dt>
+  <dd>Determine the location of message catalogs for the processing of
+      <i>LC_MESSAGES</i>.</dd>
+  <dt id="LC_TIME"><a class="permalink" href="#LC_TIME"><i>LC_TIME</i></a></dt>
+  <dd>Determine the format and contents for date and time strings written and
+      accepted by <i>at</i>.</dd>
+  <dt id="SHELL"><a class="permalink" href="#SHELL"><i>SHELL</i></a></dt>
+  <dd>Determine a name of a command interpreter to be used to invoke the at-job.
+      If the variable is unset or null, <i>sh</i> shall be used. If it is set to
+      a value other than a name for <i>sh</i>, the implementation shall do one
+      of the following: use that shell; use <i>sh</i>; use the login shell from
+      the user database; or any of the preceding accompanied by a warning
+      diagnostic about which was chosen.</dd>
+  <dt id="TZ"><a class="permalink" href="#TZ"><i>TZ</i></a></dt>
+  <dd>Determine the timezone. The job shall be submitted for execution at the
+      time specified by <i>timespec</i> or <b>-t</b> <i>time</i> relative to the
+      timezone specified by the <i>TZ</i> variable. If <i>timespec</i> specifies
+      a timezone, it shall override <i>TZ</i>. If <i>timespec</i> does not
+      specify a timezone and <i>TZ</i> is unset or null, an unspecified default
+      timezone shall be used.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ASYNCHRONOUS_EVENTS"><a class="permalink" href="#ASYNCHRONOUS_EVENTS">ASYNCHRONOUS
+  EVENTS</a></h1>
+<p class="Pp">Default.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDOUT"><a class="permalink" href="#STDOUT">STDOUT</a></h1>
+<p class="Pp">When standard input is a terminal, prompts of unspecified format
+    for each line of the user input described in the STDIN section may be
+    written to standard output.</p>
+<p class="Pp">In the POSIX locale, the following shall be written to the
+    standard output for each job when jobs are listed in response to the
+    <b>-l</b> option:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>"%s\t%s\n", <i>at_job_id</i>, &lt;<i>date</i>&gt;</pre>
+</div>
+<p class="Pp">where <i>date</i> shall be equivalent in format to the output
+  of:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>date +"%a %b %e %T %Y"</pre>
+</div>
+<p class="Pp">The date and time written shall be adjusted so that they appear in
+    the timezone of the user (as determined by the <i>TZ</i> variable).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDERR"><a class="permalink" href="#STDERR">STDERR</a></h1>
+<p class="Pp">In the POSIX locale, the following shall be written to standard
+    error when a job has been successfully submitted:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>"job %s at %s\n", <i>at_job_id</i>, &lt;<i>date</i>&gt;</pre>
+</div>
+<p class="Pp">where <i>date</i> has the same format as that described in the
+    STDOUT section. Neither this, nor warning messages concerning the selection
+    of the command interpreter, shall be considered a diagnostic that changes
+    the exit status.</p>
+<p class="Pp">Diagnostic messages, if any, shall be written to standard
+  error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OUTPUT_FILES"><a class="permalink" href="#OUTPUT_FILES">OUTPUT
+  FILES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXTENDED_DESCRIPTION"><a class="permalink" href="#EXTENDED_DESCRIPTION">EXTENDED
+  DESCRIPTION</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXIT_STATUS"><a class="permalink" href="#EXIT_STATUS">EXIT
+  STATUS</a></h1>
+<p class="Pp">The following exit values shall be returned:</p>
+<dl class="Bl-tag">
+  <dt>&nbsp;0</dt>
+  <dd>The <i>at</i> utility successfully submitted, removed, or listed a job or
+      jobs.</dd>
+  <dt>&gt;0</dt>
+  <dd>An error occurred.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="CONSEQUENCES_OF_ERRORS"><a class="permalink" href="#CONSEQUENCES_OF_ERRORS">CONSEQUENCES
+  OF ERRORS</a></h1>
+<p class="Pp">The job shall not be scheduled, removed, or listed.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The format of the <i>at</i> command line shown here is guaranteed
+    only for the POSIX locale. Other cultures may be supported with
+    substantially different interfaces, although implementations are encouraged
+    to provide comparable levels of functionality.</p>
+<p class="Pp">Since the commands run in a separate shell invocation, running in
+    a separate process group with no controlling terminal, open file
+    descriptors, traps, and priority inherited from the invoking environment are
+    lost.</p>
+<p class="Pp">Some implementations do not allow substitution of different shells
+    using <i>SHELL</i>. System V systems, for example, have used the login shell
+    value for the user in <b>/etc/passwd</b>. To select reliably another command
+    interpreter, the user must include it as part of the script, such as:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre><b>$</b> at 1800
+myshell myscript
+EOT
+<b>job ... at ...</b>
+<b></b><b>$</b></pre>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<dl class="Bl-tag">
+  <dt> 1.</dt>
+  <dd>This sequence can be used at a terminal:</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>at -m 0730 tomorrow
+sort &lt; file &gt;outfile
+EOT</pre>
+</div>
+</div>
+<dl class="Bl-tag">
+  <dt> 2.</dt>
+  <dd>This sequence, which demonstrates redirecting standard error to a pipe, is
+      useful in a command procedure (the sequence of output redirection
+      specifications is significant):</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>at now + 1 hour &lt;&lt;!
+diff file1 file2 2&gt;&amp;1 &gt;outfile | mailx mygroup
+!</pre>
+</div>
+</div>
+<dl class="Bl-tag">
+  <dt> 3.</dt>
+  <dd>To have a job reschedule itself, <i>at</i> can be invoked from within the
+      at-job. For example, this daily processing script named <b>my.daily</b>
+      runs every day (although <i>crontab</i> is a more appropriate vehicle for
+      such work):</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre># my.daily runs every day
+<i>daily processing</i>
+at now tomorrow &lt; my.daily</pre>
+</div>
+</div>
+<dl class="Bl-tag">
+  <dt> 4.</dt>
+  <dd>The spacing of the three portions of the POSIX locale <i>timespec</i> is
+      quite flexible as long as there are no ambiguities. Examples of various
+      times and operand presentation include:</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>at 0815am Jan 24
+at 8 :15amjan24
+at now "+ 1day"
+at 5 pm FRIday
+at '17
+<br>
+    utc+
+<br>
+    30minutes'</pre>
+</div>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The <i>at</i> utility reads from standard input the commands to be
+    executed at a later time. It may be useful to redirect standard output and
+    standard error within the specified commands.</p>
+<p class="Pp">The <b>-t</b> <i>time</i> option was added as a new capability to
+    support an internationalized way of specifying a time for execution of the
+    submitted job.</p>
+<p class="Pp">Early proposals added a ``jobname'' concept as a way of giving
+    submitted jobs names that are meaningful to the user submitting them. The
+    historical, system-specified <i>at_job_id</i> gives no indication of what
+    the job is. Upon further reflection, it was decided that the benefit of this
+    was not worth the change in historical interface. The <i>at</i>
+    functionality is useful in simple environments, but in large or complex
+    situations, the functionality provided by the Batch Services option is more
+    suitable.</p>
+<p class="Pp">The <b>-q</b> option historically has been an undocumented option,
+    used mainly by the <i>batch</i> utility.</p>
+<p class="Pp">The System V <b>-m</b> option was added to provide a method for
+    informing users that an at-job had completed. Otherwise, users are only
+    informed when output to standard error or standard output are not
+    redirected.</p>
+<p class="Pp">The behavior of <i>at</i> &lt;<b>now</b>&gt; was changed in an
+    early proposal from being unspecified to submitting a job for potentially
+    immediate execution. Historical BSD <i>at</i> implementations support this.
+    Historical System V implementations give an error in that case, but a change
+    to the System V versions should have no backwards-compatibility
+    ramifications.</p>
+<p class="Pp">On BSD-based systems, a <b>-u</b> <i>user</i> option has allowed
+    those with appropriate privileges to access the work of other users. Since
+    this is primarily a system administration feature and is not universally
+    implemented, it has been omitted. Similarly, a specification for the output
+    format for a user with appropriate privileges viewing the queues of other
+    users has been omitted.</p>
+<p class="Pp">The <b>-f</b> <i>file</i> option from System V is used instead of
+    the BSD method of using the last operand as the pathname. The BSD method is
+    ambiguous—does:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>at 1200 friday</pre>
+</div>
+<p class="Pp">mean the same thing if there is a file named <b>friday</b> in the
+    current directory?</p>
+<p class="Pp">The <i>at_job_id</i> is composed of a limited character set in
+    historical practice, and it is mandated here to invalidate systems that
+    might try using characters that require shell quoting or that could not be
+    easily parsed by shell scripts.</p>
+<p class="Pp">The <i>at</i> utility varies between System V and BSD systems in
+    the way timezones are used. On System V systems, the <i>TZ</i> variable
+    affects the at-job submission times and the times displayed for the user. On
+    BSD systems, <i>TZ</i> is not taken into account. The BSD behavior is easily
+    achieved with the current specification. If the user wishes to have the
+    timezone default to that of the system, they merely need to issue the
+    <i>at</i> command immediately following an unsetting or null assignment to
+    <i>TZ</i>. For example:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>TZ= at noon ...</pre>
+</div>
+<p class="Pp">gives the desired BSD result.</p>
+<p class="Pp">While the <i>yacc</i>-like grammar specified in the OPERANDS
+    section is lexically unambiguous with respect to the digit strings, a
+    lexical analyzer would probably be written to look for and return digit
+    strings in those cases. The parser could then check whether the digit string
+    returned is a valid <i>day_number</i>, <i>year_number</i>, and so on, based
+    on the context.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>batch</i></i>, <i><i>crontab</i></i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Chapter
+    8</i>, <i>Environment Variables</i>, <i>Section 12.2</i>, <i>Utility Syntax
+    Guidelines</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

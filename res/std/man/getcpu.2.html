@@ -1,0 +1,142 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   This man page is Copyright (C) 2006 Andi Kleen <ak@muc.de>.
+  
+   %%%LICENSE_START(VERBATIM_ONE_PARA)
+   Permission is granted to distribute possibly modified copies
+   of this page provided the header is included verbatim,
+   and in case of nontrivial modification author and date
+   of the modification is added to the header.
+   %%%LICENSE_END
+  
+   2008, mtk, various edits
+   --><head>
+<meta name="dc.identifier" content="res/a83305075f42eccdc9ec496accabbb3376f590ff">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>getcpu(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">getcpu(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">getcpu(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getcpu - determine CPU and NUMA node on which the calling thread
+    is running</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#define _GNU_SOURCE</b>             /* See feature_test_macros(7) */
+<b>#include &lt;sched.h&gt;</b></pre>
+<pre><b>int getcpu(unsigned int *_Nullable </b><i>cpu</i><b>, unsigned int *_Nullable </b><i>node</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>getcpu</b>() system call identifies the processor and node
+    on which the calling thread or process is currently running and writes them
+    into the integers pointed to by the <i>cpu</i> and <i>node</i> arguments.
+    The processor is a unique small integer identifying a CPU. The node is a
+    unique small identifier identifying a NUMA node. When either <i>cpu</i> or
+    <i>node</i> is NULL nothing is written to the respective pointer.</p>
+<p class="Pp">The information placed in <i>cpu</i> is guaranteed to be current
+    only at the time of the call: unless the CPU affinity has been fixed using
+    <b>sched_setaffinity</b>(2), the kernel might change the CPU at any time.
+    (Normally this does not happen because the scheduler tries to minimize
+    movements between CPUs to keep caches hot, but it is possible.) The caller
+    must allow for the possibility that the information returned in <i>cpu</i>
+    and <i>node</i> is no longer current by the time the call returns.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, 0 is returned. On error, -1 is returned, and
+    <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>Arguments point outside the calling process's address space.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>getcpu</b>() was added in Linux 2.6.19 for x86-64 and i386.
+    Library support was added in glibc 2.29 (Earlier glibc versions did not
+    provide a wrapper for this system call, necessitating the use of
+    <b>syscall</b>(2).)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>getcpu</b>() is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Linux makes a best effort to make this call as fast as possible.
+    (On some architectures, this is done via an implementation in the
+    <b>vdso</b>(7).) The intention of <b>getcpu</b>() is to allow programs to
+    make optimizations with per-CPU data or for NUMA optimization.</p>
+<section class="Ss">
+<h2 class="Ss" id="C_library/kernel_differences"><a class="permalink" href="#C_library/kernel_differences">C
+  library/kernel differences</a></h2>
+<p class="Pp">The kernel system call has a third argument:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre><b>int getcpu(unsigned int *</b><i>cpu</i><b>, unsigned int *</b><i>node</i><b>,</b>
+<b>           struct getcpu_cache *</b><i>tcache</i><b>);</b></pre>
+<br>
+<p class="Pp">The <i>tcache</i> argument is unused since Linux 2.6.24, and (when
+    invoking the system call directly) should be specified as NULL, unless
+    portability to Linux 2.6.23 or earlier is required.</p>
+<p class="Pp">In Linux 2.6.23 and earlier, if the <i>tcache</i> argument was
+    non-NULL, then it specified a pointer to a caller-allocated buffer in
+    thread-local storage that was used to provide a caching mechanism for
+    <b>getcpu</b>(). Use of the cache could speed <b>getcpu</b>() calls, at the
+    cost that there was a very small chance that the returned information would
+    be out of date. The caching mechanism was considered to cause problems when
+    migrating threads between CPUs, and so the argument is now ignored.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>mbind</b>(2), <b>sched_setaffinity</b>(2),
+    <b>set_mempolicy</b>(2), <b>sched_getcpu</b>(3), <b>cpuset</b>(7),
+    <b>vdso</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

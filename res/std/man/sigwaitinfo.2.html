@@ -1,0 +1,179 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2002 Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/6e0c420ddb553dd9f32f6aabb254d38e792f3050">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>sigwaitinfo(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">sigwaitinfo(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">sigwaitinfo(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">sigwaitinfo, sigtimedwait, rt_sigtimedwait - synchronously wait
+    for queued signals</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;signal.h&gt;</b></pre>
+<pre><b>int sigwaitinfo(const sigset_t *restrict </b><i>set</i><b>,</b>
+<b>                siginfo_t *_Nullable restrict </b><i>info</i><b>);</b>
+<b>int sigtimedwait(const sigset_t *restrict </b><i>set</i><b>,</b>
+<b>                siginfo_t *_Nullable restrict </b><i>info</i><b>,</b>
+<b>                const struct timespec *restrict </b><i>timeout</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>sigwaitinfo</b>(), <b>sigtimedwait</b>():</p>
+<pre><br>
+    _POSIX_C_SOURCE &gt;= 199309L</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>sigwaitinfo</b>() suspends execution of the calling thread
+    until one of the signals in <i>set</i> is pending (If one of the signals in
+    <i>set</i> is already pending for the calling thread, <b>sigwaitinfo</b>()
+    will return immediately.)</p>
+<p class="Pp"><b>sigwaitinfo</b>() removes the signal from the set of pending
+    signals and returns the signal number as its function result. If the
+    <i>info</i> argument is not NULL, then the buffer that it points to is used
+    to return a structure of type <i>siginfo_t</i> (see <b>sigaction</b>(2))
+    containing information about the signal.</p>
+<p class="Pp">If multiple signals in <i>set</i> are pending for the caller, the
+    signal that is retrieved by <b>sigwaitinfo</b>() is determined according to
+    the usual ordering rules; see <b>signal</b>(7) for further details.</p>
+<p class="Pp"><b>sigtimedwait</b>() operates in exactly the same way as
+    <b>sigwaitinfo</b>() except that it has an additional argument,
+    <i>timeout</i>, which specifies the interval for which the thread is
+    suspended waiting for a signal. (This interval will be rounded up to the
+    system clock granularity, and kernel scheduling delays mean that the
+    interval may overrun by a small amount.) This argument is a
+    <b>timespec</b>(3) structure.</p>
+<p class="Pp">If both fields of this structure are specified as 0, a poll is
+    performed: <b>sigtimedwait</b>() returns immediately, either with
+    information about a signal that was pending for the caller, or with an error
+    if none of the signals in <i>set</i> was pending.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, both <b>sigwaitinfo</b>() and <b>sigtimedwait</b>()
+    return a signal number (i.e., a value greater than zero). On failure both
+    calls return -1, with <i>errno</i> set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>No signal in <i>set</i> became pending within the <i>timeout</i> period
+      specified to <b>sigtimedwait</b>().</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The wait was interrupted by a signal handler; see <b>signal</b>(7). (This
+      handler was for a signal other than one of those in <i>set</i>.)</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>timeout</i> was invalid.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">In normal usage, the calling program blocks the signals in
+    <i>set</i> via a prior call to <b>sigprocmask</b>(2) (so that the default
+    disposition for these signals does not occur if they become pending between
+    successive calls to <b>sigwaitinfo</b>() or <b>sigtimedwait</b>()) and does
+    not establish handlers for these signals. In a multithreaded program, the
+    signal should be blocked in all threads, in order to prevent the signal
+    being treated according to its default disposition in a thread other than
+    the one calling <b>sigwaitinfo</b>() or <b>sigtimedwait</b>()).</p>
+<p class="Pp">The set of signals that is pending for a given thread is the union
+    of the set of signals that is pending specifically for that thread and the
+    set of signals that is pending for the process as a whole (see
+    <b>signal</b>(7)).</p>
+<p class="Pp">Attempts to wait for <b>SIGKILL</b> and <b>SIGSTOP</b> are
+    silently ignored.</p>
+<p class="Pp">If multiple threads of a process are blocked waiting for the same
+    signal(s) in <b>sigwaitinfo</b>() or <b>sigtimedwait</b>(), then exactly one
+    of the threads will actually receive the signal if it becomes pending for
+    the process as a whole; which of the threads receives the signal is
+    indeterminate.</p>
+<p class="Pp"><b>sigwaitinfo</b>() or <b>sigtimedwait</b>(), can't be used to
+    receive signals that are synchronously generated, such as the <b>SIGSEGV</b>
+    signal that results from accessing an invalid memory address or the
+    <b>SIGFPE</b> signal that results from an arithmetic error. Such signals can
+    be caught only via signal handler.</p>
+<p class="Pp">POSIX leaves the meaning of a NULL value for the <i>timeout</i>
+    argument of <b>sigtimedwait</b>() unspecified, permitting the possibility
+    that this has the same meaning as a call to <b>sigwaitinfo</b>(), and indeed
+    this is what is done on Linux.</p>
+<section class="Ss">
+<h2 class="Ss" id="C_library/kernel_differences"><a class="permalink" href="#C_library/kernel_differences">C
+  library/kernel differences</a></h2>
+<p class="Pp">On Linux, <b>sigwaitinfo</b>() is a library function implemented
+    on top of <b>sigtimedwait</b>().</p>
+<p class="Pp">The glibc wrapper functions for <b>sigwaitinfo</b>() and
+    <b>sigtimedwait</b>() silently ignore attempts to wait for the two real-time
+    signals that are used internally by the NPTL threading implementation. See
+    <b>nptl</b>(7) for details.</p>
+<p class="Pp">The original Linux system call was named <b>sigtimedwait</b>().
+    However, with the addition of real-time signals in Linux 2.2, the
+    fixed-size, 32-bit <i>sigset_t</i> type supported by that system call was no
+    longer fit for purpose. Consequently, a new system call,
+    <b>rt_sigtimedwait</b>(), was added to support an enlarged <i>sigset_t</i>
+    type. The new system call takes a fourth argument, <i>size_t sigsetsize</i>,
+    which specifies the size in bytes of the signal set in <i>set</i>. This
+    argument is currently required to have the value <i>sizeof(sigset_t)</i> (or
+    the error <b>EINVAL</b> results). The glibc <b>sigtimedwait</b>() wrapper
+    function hides these details from us, transparently calling
+    <b>rt_sigtimedwait</b>() when the kernel provides it.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>kill</b>(2), <b>sigaction</b>(2), <b>signal</b>(2),
+    <b>signalfd</b>(2), <b>sigpending</b>(2), <b>sigprocmask</b>(2),
+    <b>sigqueue</b>(3), <b>sigsetops</b>(3), <b>sigwait</b>(3),
+    <b>timespec</b>(3), <b>signal</b>(7), <b>time</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

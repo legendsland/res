@@ -1,0 +1,345 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/e65e418aaa4dc8d5d006447716203b95c7987239">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>STRFMON(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">STRFMON(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">STRFMON(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">strfmon, strfmon_l — convert monetary value to a string</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;monetary.h&gt;</pre>
+<pre>ssize_t strfmon(char *restrict <i>s</i>, size_t <i>maxsize</i>,
+<br>
+    const char *restrict <i>format</i>, ...);
+ssize_t strfmon_l(char *restrict <i>s</i>, size_t <i>maxsize</i>,
+<br>
+    locale_t <i>locale</i>, const char *restrict <i>format</i>, ...);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>strfmon</i>() function shall place characters into the
+    array pointed to by <i>s</i> as controlled by the string pointed to by
+    <i>format</i>. No more than <i>maxsize</i> bytes are placed into the
+  array.</p>
+<p class="Pp">The format is a character string, beginning and ending in its
+    initial state, if any, that contains two types of objects: <i>plain
+    characters</i>, which are simply copied to the output stream, and
+    <i>conversion</i> <i>specifications</i>, each of which shall result in the
+    fetching of zero or more arguments which are converted and formatted. The
+    results are undefined if there are insufficient arguments for the format. If
+    the format is exhausted while arguments remain, the excess arguments are
+    simply ignored.</p>
+<p class="Pp">The application shall ensure that a conversion specification
+    consists of the following sequence:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>A <b>'%'</b> character</dd>
+  <dt> *</dt>
+  <dd>Optional flags</dd>
+  <dt> *</dt>
+  <dd>Optional field width</dd>
+  <dt> *</dt>
+  <dd>Optional left precision</dd>
+  <dt> *</dt>
+  <dd>Optional right precision</dd>
+  <dt> *</dt>
+  <dd>A required conversion specifier character that determines the conversion
+      to be performed</dd>
+</dl>
+<p class="Pp">The <i>strfmon_l</i>() function shall be equivalent to the
+    <i>strfmon</i>() function, except that the locale data used is from the
+    locale represented by <i>locale</i>.</p>
+<section class="Ss">
+<h2 class="Ss" id="Flags"><a class="permalink" href="#Flags">Flags</a></h2>
+<p class="Pp">One or more of the following optional flags can be specified to
+    control the conversion:</p>
+<dl class="Bl-tag">
+  <dt>=<i>f</i></dt>
+  <dd>An <b>'='</b> followed by a single character <i>f</i> which is used as the
+      numeric fill character. In order to work with precision or width counts,
+      the fill character shall be a single byte character; if not, the behavior
+      is undefined. The default numeric fill character is the &lt;space&gt;.
+      This flag does not affect field width filling which always uses the
+      &lt;space&gt;. This flag is ignored unless a left precision (see below) is
+      specified.</dd>
+  <dt>^</dt>
+  <dd>Do not format the currency amount with grouping characters. The default is
+      to insert the grouping characters if defined for the current locale.</dd>
+  <dt>+&nbsp;or&nbsp;(</dt>
+  <dd>Specify the style of representing positive and negative currency amounts.
+      Only one of <b>'+'</b> or <b>'('</b> may be specified. If <b>'+'</b> is
+      specified, the locale's equivalent of <b>'+'</b> and <b>'-'</b> are used
+      (for example, in many locales, the empty string if positive and <b>'-'</b>
+      if negative). If <b>'('</b> is specified, negative amounts are enclosed
+      within parentheses. If neither flag is specified, the <b>'+'</b> style is
+      used.</dd>
+  <dt>!</dt>
+  <dd>Suppress the currency symbol from the output conversion.</dd>
+  <dt>-</dt>
+  <dd>Specify the alignment. If this flag is present the result of the
+      conversion is left-justified (padded to the right) rather than
+      right-justified. This flag shall be ignored unless a field width (see
+      below) is specified.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Field_Width"><a class="permalink" href="#Field_Width">Field
+  Width</a></h2>
+<dl class="Bl-tag">
+  <dt id="w"><a class="permalink" href="#w"><i>w</i></a></dt>
+  <dd>A decimal digit string <i>w</i> specifying a minimum field width in bytes
+      in which the result of the conversion is right-justified (or
+      left-justified if the flag <b>'-'</b> is specified). The default is
+    0.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Left_Precision"><a class="permalink" href="#Left_Precision">Left
+  Precision</a></h2>
+<dl class="Bl-tag">
+  <dt>#<i>n</i></dt>
+  <dd>A <b>'#'</b> followed by a decimal digit string <i>n</i> specifying a
+      maximum number of digits expected to be formatted to the left of the radix
+      character. This option can be used to keep the formatted output from
+      multiple calls to the <i>strfmon</i>() function aligned in the same
+      columns. It can also be used to fill unused positions with a special
+      character as in <b>"$***123.45"</b>. This option causes an
+      amount to be formatted as if it has the number of digits specified by
+      <i>n</i>. If more than <i>n</i> digit positions are required, this
+      conversion specification is ignored. Digit positions in excess of those
+      actually required are filled with the numeric fill character (see the
+      =<i>f</i> flag above).</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">If grouping has not been suppressed with the <b>'^'</b> flag, and
+    it is defined for the current locale, grouping separators are inserted
+    before the fill characters (if any) are added. Grouping separators are not
+    applied to fill characters even if the fill character is a digit.</p>
+<p class="Pp">To ensure alignment, any characters appearing before or after the
+    number in the formatted output such as currency or sign symbols are padded
+    as necessary with &lt;space&gt; characters to make their positive and
+    negative formats an equal length.</p>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Right_Precision"><a class="permalink" href="#Right_Precision">Right
+  Precision</a></h2>
+<dl class="Bl-tag">
+  <dt>.<i>p</i></dt>
+  <dd>A &lt;period&gt; followed by a decimal digit string <i>p</i> specifying
+      the number of digits after the radix character. If the value of the right
+      precision <i>p</i> is 0, no radix character appears. If a right precision
+      is not included, a default specified by the current locale is used. The
+      amount being formatted is rounded to the specified number of digits prior
+      to formatting.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Conversion_Specifier_Characters"><a class="permalink" href="#Conversion_Specifier_Characters">Conversion
+  Specifier Characters</a></h2>
+<p class="Pp">The conversion specifier characters and their meanings are:</p>
+<dl class="Bl-tag">
+  <dt id="i"><a class="permalink" href="#i">i</a></dt>
+  <dd>The <b>double</b> argument is formatted according to the locale's
+      international currency format (for example, in the US: USD 1,234.56). If
+      the argument is ±Inf or NaN, the result of the conversion is
+      unspecified.</dd>
+  <dt id="n"><a class="permalink" href="#n">n</a></dt>
+  <dd>The <b>double</b> argument is formatted according to the locale's national
+      currency format (for example, in the US: $1,234.56). If the argument is
+      ±Inf or NaN, the result of the conversion is unspecified.</dd>
+  <dt>%</dt>
+  <dd>Convert to a <b>'%'</b>; no argument is converted. The entire conversion
+      specification shall be <b>%%</b>.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Locale_Information"><a class="permalink" href="#Locale_Information">Locale
+  Information</a></h2>
+<p class="Pp">The <i>LC_MONETARY</i> category of the current locale affects the
+    behavior of this function including the monetary radix character (which may
+    be different from the numeric radix character affected by the
+    <i>LC_NUMERIC</i> category), the grouping separator, the currency symbols,
+    and formats. The international currency symbol should be conformant with the
+    ISO&nbsp;4217:2001 standard.</p>
+<p class="Pp">If the value of <i>maxsize</i> is greater than {SSIZE_MAX}, the
+    result is implementation-defined.</p>
+<p class="Pp">The behavior is undefined if the <i>locale</i> argument to
+    <i>strfmon_l</i>() is the special locale object LC_GLOBAL_LOCALE or is not a
+    valid locale object handle.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">If the total number of resulting bytes including the terminating
+    null byte is not more than <i>maxsize</i>, these functions shall return the
+    number of bytes placed into the array pointed to by <i>s</i>, not including
+    the terminating NUL character. Otherwise, -1 shall be returned, the contents
+    of the array are unspecified, and <i>errno</i> shall be set to indicate the
+    error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">These functions shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="E2BIG"><a class="permalink" href="#E2BIG"><b>E2BIG</b></a></dt>
+  <dd>Conversion stopped due to lack of space in the buffer.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">Given a locale for the US and the values 123.45, -123.45, and
+    3456.781, the following output might be produced. Square brackets
+    (<b>"[]"</b>) are used in this example to delimit the output.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>%n         [$123.45]         Default formatting
+<br>
+           [-$123.45]
+<br>
+           [$3,456.78]</pre>
+<pre>%11n       [    $123.45]     Right align within an 11-character field
+<br>
+           [   -$123.45]
+<br>
+           [  $3,456.78]</pre>
+<pre>%#5n       [ $   123.45]     Aligned columns for values up to 99999
+<br>
+           [-$   123.45]
+<br>
+           [ $ 3,456.78]</pre>
+<pre>%=*#5n     [ $***123.45]     Specify a fill character
+<br>
+           [-$***123.45]
+<br>
+           [ $*3,456.78]</pre>
+<pre>%=0#5n     [ $000123.45]     Fill characters do not use grouping
+<br>
+           [-$000123.45]     even if the fill character is a digit
+<br>
+           [ $03,456.78]</pre>
+<pre>%^#5n      [ $  123.45]      Disable the grouping separator
+<br>
+           [-$  123.45]
+<br>
+           [ $ 3456.78]</pre>
+<pre>%^#5.0n    [ $  123]         Round off to whole units
+<br>
+           [-$  123]
+<br>
+           [ $ 3457]</pre>
+<pre>%^#5.4n    [ $  123.4500]    Increase the precision
+<br>
+           [-$  123.4500]
+<br>
+           [ $ 3456.7810]</pre>
+<pre>%(#5n      [ $   123.45 ]    Use an alternative pos/neg style
+<br>
+           [($   123.45)]
+<br>
+           [ $ 3,456.78 ]</pre>
+<pre>%!(#5n     [    123.45 ]     Disable the currency symbol
+<br>
+           [(   123.45)]
+<br>
+           [  3,456.78 ]</pre>
+<pre>%-14#5.4n  [ $   123.4500 ]  Left-justify the output
+<br>
+           [-$   123.4500 ]
+<br>
+           [ $ 3,456.7810 ]</pre>
+<pre>%14#5.4n   [  $   123.4500]  Corresponding right-justified output
+<br>
+           [ -$   123.4500]
+<br>
+           [  $ 3,456.7810]</pre>
+</div>
+<p class="Pp">See also the EXAMPLES section in <i>fprintf</i>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">Lowercase conversion characters are reserved for future standards
+    use and uppercase for implementation-defined use.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>fprintf</i>()</i>, <i><i>localeconv</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;monetary.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

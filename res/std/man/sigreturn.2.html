@@ -1,0 +1,141 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2008, 2014, Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Created   Sat Aug 21 1995     Thomas K. Dyas <tdyas@eden.rutgers.edu>
+   Modified Tue Oct 22 22:09:03 1996 by Eric S. Raymond <esr@thyrsus.com>
+   2008-06-26, mtk, added some more detail on the work done by sigreturn()
+   2014-12-05, mtk, rewrote all of the rest of the original page
+   --><head>
+<meta name="dc.identifier" content="res/b9883d196593692d31c20f5cc385b4adb86bfca1">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>sigreturn(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">sigreturn(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">sigreturn(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">sigreturn, rt_sigreturn - return from signal handler and cleanup
+    stack frame</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>int sigreturn(...);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">If the Linux kernel determines that an unblocked signal is pending
+    for a process, then, at the next transition back to user mode in that
+    process (e.g., upon return from a system call or when the process is
+    rescheduled onto the CPU), it creates a new frame on the user-space stack
+    where it saves various pieces of process context (processor status word,
+    registers, signal mask, and signal stack settings).</p>
+<p class="Pp">The kernel also arranges that, during the transition back to user
+    mode, the signal handler is called, and that, upon return from the handler,
+    control passes to a piece of user-space code commonly called the
+    "signal trampoline". The signal trampoline code in turn calls
+    <b>sigreturn</b>().</p>
+<p class="Pp">This <b>sigreturn</b>() call undoes everything that was
+    done—changing the process's signal mask, switching signal stacks (see
+    <b>sigaltstack</b>(2))—in order to invoke the signal handler. Using
+    the information that was earlier saved on the user-space stack
+    <b>sigreturn</b>() restores the process's signal mask, switches stacks, and
+    restores the process's context (processor flags and registers, including the
+    stack pointer and instruction pointer), so that the process resumes
+    execution at the point where it was interrupted by the signal.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp"><b>sigreturn</b>() never returns.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">Many UNIX-type systems have a <b>sigreturn</b>() system call or
+    near equivalent. However, this call is not specified in POSIX, and details
+    of its behavior vary across systems.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp"><b>sigreturn</b>() exists only to allow the implementation of
+    signal handlers. It should <b>never</b> be called directly. (Indeed, a
+    simple <b>sigreturn</b>() wrapper in the GNU C library simply returns -1,
+    with <i>errno</i> set to <b>ENOSYS</b>.) Details of the arguments (if any)
+    passed to <b>sigreturn</b>() vary depending on the architecture. (On some
+    architectures, such as x86-64, <b>sigreturn</b>() takes no arguments, since
+    all of the information that it requires is available in the stack frame that
+    was previously created by the kernel on the user-space stack.)</p>
+<p class="Pp">Once upon a time, UNIX systems placed the signal trampoline code
+    onto the user stack. Nowadays, pages of the user stack are protected so as
+    to disallow code execution. Thus, on contemporary Linux systems, depending
+    on the architecture, the signal trampoline code lives either in the
+    <b>vdso</b>(7) or in the C library. In the latter case, the C library's
+    <b>sigaction</b>(2) wrapper function informs the kernel of the location of
+    the trampoline code by placing its address in the <i>sa_restorer</i> field
+    of the <i>sigaction</i> structure, and sets the <b>SA_RESTORER</b> flag in
+    the <i>sa_flags</i> field.</p>
+<p class="Pp">The saved process context information is placed in a
+    <i>ucontext_t</i> structure (see <i>&lt;sys/ucontext.h&gt;</i>). That
+    structure is visible within the signal handler as the third argument of a
+    handler established via <b>sigaction</b>(2) with the <b>SA_SIGINFO</b>
+  flag.</p>
+<p class="Pp">On some other UNIX systems, the operation of the signal trampoline
+    differs a little. In particular, on some systems, upon transitioning back to
+    user mode, the kernel passes control to the trampoline (rather than the
+    signal handler), and the trampoline code calls the signal handler (and then
+    calls <b>sigreturn</b>() once the handler returns).</p>
+<section class="Ss">
+<h2 class="Ss" id="C_library/kernel_differences"><a class="permalink" href="#C_library/kernel_differences">C
+  library/kernel differences</a></h2>
+<p class="Pp">The original Linux system call was named <b>sigreturn</b>().
+    However, with the addition of real-time signals in Linux 2.2, a new system
+    call, <b>rt_sigreturn</b>() was added to support an enlarged <i>sigset_t</i>
+    type. The GNU C library hides these details from us, transparently employing
+    <b>rt_sigreturn</b>() when the kernel provides it.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>kill</b>(2), <b>restart_syscall</b>(2), <b>sigaltstack</b>(2),
+    <b>signal</b>(2), <b>getcontext</b>(3), <b>signal</b>(7), <b>vdso</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

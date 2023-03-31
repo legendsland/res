@@ -1,0 +1,144 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright \[u00A9] 2017-2020 Micka\[u00EB]l Sala\[u00FC]n <mic@digikod.net>
+   Copyright \[u00A9] 2019-2020 ANSSI
+   Copyright \[u00A9] 2021 Microsoft Corporation
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/f3d6f23911f31758f80d2581c4950f9db97813ca">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>landlock_restrict_self(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">landlock_restrict_self(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">landlock_restrict_self(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">landlock_restrict_self - enforce a Landlock ruleset</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;linux/landlock.h&gt;</b>  /* Definition of <b>LANDLOCK_*</b> constants */
+<b>#include &lt;sys/syscall.h&gt;</b>     /* Definition of <b>SYS_*</b> constants */</pre>
+<pre><b>int syscall(SYS_landlock_restrict_self, int </b><i>ruleset_fd</i><b>,</b>
+<b>            uint32_t </b><i>flags</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">Once a Landlock ruleset is populated with the desired rules, the
+    <b>landlock_restrict_self</b>() system call enables enforcing this ruleset
+    on the calling thread. See <b>landlock</b>(7) for a global overview.</p>
+<p class="Pp">A thread can be restricted with multiple rulesets that are then
+    composed together to form the thread's Landlock domain. This can be seen as
+    a stack of rulesets but it is implemented in a more efficient way. A domain
+    can only be updated in such a way that the constraints of each past and
+    future composed rulesets will restrict the thread and its future children
+    for their entire life. It is then possible to gradually enforce tailored
+    access control policies with multiple independent rulesets coming from
+    different sources (e.g., init system configuration, user session policy,
+    built-in application policy). However, most applications should only need
+    one call to <b>landlock_restrict_self</b>() and they should avoid arbitrary
+    numbers of such calls because of the composed rulesets limit. Instead,
+    developers are encouraged to build a tailored ruleset thanks to multiple
+    calls to <b>landlock_add_rule</b>(2).</p>
+<p class="Pp">In order to enforce a ruleset, either the caller must have the
+    <b>CAP_SYS_ADMIN</b> capability in its user namespace, or the thread must
+    already have the <i>no_new_privs</i> bit set. As for <b>seccomp</b>(2), this
+    avoids scenarios where unprivileged processes can affect the behavior of
+    privileged children (e.g., because of set-user-ID binaries). If that bit was
+    not already set by an ancestor of this thread, the thread must make the
+    following call:</p>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <pre>prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
+    </pre>
+  </dd>
+</dl>
+<p class="Pp"><i>ruleset_fd</i> is a Landlock ruleset file descriptor obtained
+    with <b>landlock_create_ruleset</b>(2) and fully populated with a set of
+    calls to <b>landlock_add_rule</b>(2).</p>
+<p class="Pp"><i>flags</i> must be 0.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>landlock_restrict_self</b>() returns 0.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp"><b>landlock_restrict_self</b>() can fail for the following
+    reasons:</p>
+<dl class="Bl-tag">
+  <dt id="EOPNOTSUPP"><a class="permalink" href="#EOPNOTSUPP"><b>EOPNOTSUPP</b></a></dt>
+  <dd>Landlock is supported by the kernel but disabled at boot time.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>flags</i> is not 0.</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd><i>ruleset_fd</i> is not a file descriptor for the current thread.</dd>
+  <dt id="EBADFD"><a class="permalink" href="#EBADFD"><b>EBADFD</b></a></dt>
+  <dd><i>ruleset_fd</i> is not a ruleset file descriptor.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd><i>ruleset_fd</i> has no read access to the underlying ruleset, or the
+      calling thread is not running with <i>no_new_privs</i>, or it doesn't have
+      the <b>CAP_SYS_ADMIN</b> in its user namespace.</dd>
+  <dt id="E2BIG"><a class="permalink" href="#E2BIG"><b>E2BIG</b></a></dt>
+  <dd>The maximum number of composed rulesets is reached for the calling thread.
+      This limit is currently 64.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">Landlock was added in Linux 5.13.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This system call is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">See <b>landlock</b>(7).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>landlock_create_ruleset</b>(2), <b>landlock_add_rule</b>(2),
+    <b>landlock</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

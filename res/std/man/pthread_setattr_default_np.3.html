@@ -1,0 +1,261 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/e548d88eb4dc6faa16aec1b334ec8bf79e430c65">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>pthread_getattr_default_np(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">pthread_getattr_default_np(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">pthread_getattr_default_np(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pthread_getattr_default_np, pthread_setattr_default_np, - get or
+    set default thread-creation attributes</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">POSIX threads library (<i>libpthread</i>, <i>-lpthread</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#define _GNU_SOURCE</b>             /* See feature_test_macros(7) */
+<b>#include &lt;pthread.h&gt;</b></pre>
+<pre><b>int pthread_getattr_default_np(pthread_attr_t *</b><i>attr</i><b>);</b>
+<b>int pthread_setattr_default_np(const pthread_attr_t *</b><i>attr</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>pthread_setattr_default_np</b>() function sets the default
+    attributes used for creation of a new thread—that is, the attributes
+    that are used when <b>pthread_create</b>(3) is called with a second argument
+    that is NULL. The default attributes are set using the attributes supplied
+    in <i>*attr</i>, a previously initialized thread attributes object. Note the
+    following details about the supplied attributes object:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>The attribute settings in the object must be valid.</dd>
+  <dt>•</dt>
+  <dd>The <i>stack address</i> attribute must not be set in the object.</dd>
+  <dt>•</dt>
+  <dd>Setting the <i>stack size</i> attribute to zero means leave the default
+      stack size unchanged.</dd>
+</dl>
+<p class="Pp">The <b>pthread_getattr_default_np</b>() function initializes the
+    thread attributes object referred to by <i>attr</i> so that it contains the
+    default attributes used for thread creation.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>(<b>pthread_setattr_default_np</b>()) One of the attribute settings in
+      <i>attr</i> is invalid, or the stack address attribute is set in
+      <i>attr</i>.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>(<b>pthread_setattr_default_np</b>()) Insufficient memory.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>pthread_getattr_default_np (), pthread_setattr_default_np ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">These functions are available since glibc 2.18.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These functions are nonstandard GNU extensions; hence the suffix
+    "_np" (nonportable) in their names.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below uses <b>pthread_getattr_default_np</b>() to
+    fetch the default thread-creation attributes and then displays various
+    settings from the returned thread attributes object. When running the
+    program, we see the following output:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>./a.out</b>
+Stack size:          8388608
+Guard size:          4096
+Scheduling policy:   SCHED_OTHER
+Scheduling priority: 0
+Detach state:        JOINABLE
+Inherit scheduler:   INHERIT
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#define _GNU_SOURCE
+#include &lt;err.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+static void
+display_pthread_attr(pthread_attr_t *attr)
+{
+<br>
+    int s;
+<br>
+    size_t stacksize;
+<br>
+    size_t guardsize;
+<br>
+    int policy;
+<br>
+    struct sched_param schedparam;
+<br>
+    int detachstate;
+<br>
+    int inheritsched;
+<br>
+    s = pthread_attr_getstacksize(attr, &amp;stacksize);
+<br>
+    if (s != 0)
+<br>
+        errc(EXIT_FAILURE, s, "pthread_attr_getstacksize");
+<br>
+    printf("Stack size:          %zd\n", stacksize);
+<br>
+    s = pthread_attr_getguardsize(attr, &amp;guardsize);
+<br>
+    if (s != 0)
+<br>
+        errc(EXIT_FAILURE, s, "pthread_attr_getguardsize");
+<br>
+    printf("Guard size:          %zd\n", guardsize);
+<br>
+    s = pthread_attr_getschedpolicy(attr, &amp;policy);
+<br>
+    if (s != 0)
+<br>
+        errc(EXIT_FAILURE, s, "pthread_attr_getschedpolicy");
+<br>
+    printf("Scheduling policy:   %s\n",
+<br>
+           (policy == SCHED_FIFO) ? "SCHED_FIFO" :
+<br>
+           (policy == SCHED_RR) ? "SCHED_RR" :
+<br>
+           (policy == SCHED_OTHER) ? "SCHED_OTHER" : "[unknown]");
+<br>
+    s = pthread_attr_getschedparam(attr, &amp;schedparam);
+<br>
+    if (s != 0)
+<br>
+        errc(EXIT_FAILURE, s, "pthread_attr_getschedparam");
+<br>
+    printf("Scheduling priority: %d\n", schedparam.sched_priority);
+<br>
+    s = pthread_attr_getdetachstate(attr, &amp;detachstate);
+<br>
+    if (s != 0)
+<br>
+        errc(EXIT_FAILURE, s, "pthread_attr_getdetachstate");
+<br>
+    printf("Detach state:        %s\n",
+<br>
+           (detachstate == PTHREAD_CREATE_DETACHED) ? "DETACHED" :
+<br>
+           (detachstate == PTHREAD_CREATE_JOINABLE) ? "JOINABLE" :
+<br>
+           "???");
+<br>
+    s = pthread_attr_getinheritsched(attr, &amp;inheritsched);
+<br>
+    if (s != 0)
+<br>
+        errc(EXIT_FAILURE, s, "pthread_attr_getinheritsched");
+<br>
+    printf("Inherit scheduler:   %s\n",
+<br>
+           (inheritsched == PTHREAD_INHERIT_SCHED) ? "INHERIT" :
+<br>
+           (inheritsched == PTHREAD_EXPLICIT_SCHED) ? "EXPLICIT" :
+<br>
+           "???");
+}
+int
+main(void)
+{
+<br>
+    int s;
+<br>
+    pthread_attr_t attr;
+<br>
+    s = pthread_getattr_default_np(&amp;attr);
+<br>
+    if (s != 0)
+<br>
+        errc(EXIT_FAILURE, s, "pthread_getattr_default_np");
+<br>
+    display_pthread_attr(&amp;attr);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>pthread_attr_getaffinity_np</b>(3),
+    <b>pthread_attr_getdetachstate</b>(3), <b>pthread_attr_getguardsize</b>(3),
+    <b>pthread_attr_getinheritsched</b>(3),
+    <b>pthread_attr_getschedparam</b>(3), <b>pthread_attr_getschedpolicy</b>(3),
+    <b>pthread_attr_getscope</b>(3), <b>pthread_attr_getstack</b>(3),
+    <b>pthread_attr_getstackaddr</b>(3), <b>pthread_attr_getstacksize</b>(3),
+    <b>pthread_attr_init</b>(3), <b>pthread_create</b>(3),
+  <b>pthreads</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

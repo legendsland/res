@@ -1,0 +1,149 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   This man page is Copyright (C) 1999 Andi Kleen <ak@muc.de>.
+  
+   %%%LICENSE_START(VERBATIM_ONE_PARA)
+   Permission is granted to distribute possibly modified copies
+   of this page provided the header is included verbatim,
+   and in case of nontrivial modification author and date
+   of the modification is added to the header.
+   %%%LICENSE_END
+  
+   $Id: rtnetlink.3,v 1.2 1999/05/18 10:35:10 freitag Exp $
+   --><head>
+<meta name="dc.identifier" content="res/2d2f0edb4e5b301ee147254decbf8fad68bd2e82">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>rtnetlink(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">rtnetlink(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">rtnetlink(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">rtnetlink - macros to manipulate rtnetlink messages</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;asm/types.h&gt;</b>
+<b>#include &lt;linux/netlink.h&gt;</b>
+<b>#include &lt;linux/rtnetlink.h&gt;</b>
+<b>#include &lt;sys/socket.h&gt;</b></pre>
+<pre><b>rtnetlink_socket = socket(AF_NETLINK, int </b><i>socket_type</i><b>, NETLINK_ROUTE);</b></pre>
+<pre><b>int RTA_OK(struct rtattr *</b><i>rta</i><b>, int </b><i>rtabuflen</i><b>);</b></pre>
+<pre><b>void *RTA_DATA(struct rtattr *</b><i>rta</i><b>);</b>
+<b>unsigned int RTA_PAYLOAD(struct rtattr *</b><i>rta</i><b>);</b></pre>
+<pre><b>struct rtattr *RTA_NEXT(struct rtattr *</b><i>rta</i><b>, unsigned int </b><i>rtabuflen</i><b>);</b></pre>
+<pre><b>unsigned int RTA_LENGTH(unsigned int </b><i>length</i><b>);</b>
+<b>unsigned int RTA_SPACE(unsigned int </b><i>length</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">All <b>rtnetlink</b>(7) messages consist of a <b>netlink</b>(7)
+    message header and appended attributes. The attributes should be manipulated
+    only using the macros provided here.</p>
+<p class="Pp"><b>RTA_OK(</b><i>rta</i><b>, </b><i>attrlen</i><b>)</b> returns
+    true if <i>rta</i> points to a valid routing attribute; <i>attrlen</i> is
+    the running length of the attribute buffer. When not true then you must
+    assume there are no more attributes in the message, even if <i>attrlen</i>
+    is nonzero.</p>
+<p class="Pp"><b>RTA_DATA(</b><i>rta</i><b>)</b> returns a pointer to the start
+    of this attribute's data.</p>
+<p class="Pp"><b>RTA_PAYLOAD(</b><i>rta</i><b>)</b> returns the length of this
+    attribute's data.</p>
+<p class="Pp"><b>RTA_NEXT(</b><i>rta</i><b>, </b><i>attrlen</i><b>)</b> gets the
+    next attribute after <i>rta</i>. Calling this macro will update
+    <i>attrlen</i>. You should use <b>RTA_OK</b> to check the validity of the
+    returned pointer.</p>
+<p class="Pp"><b>RTA_LENGTH(</b><i>len</i><b>)</b> returns the length which is
+    required for <i>len</i> bytes of data plus the header.</p>
+<p class="Pp"><b>RTA_SPACE(</b><i>len</i><b>)</b> returns the amount of space
+    which will be needed in a message with <i>len</i> bytes of data.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These macros are nonstandard Linux extensions.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">This manual page is incomplete.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">Creating a rtnetlink message to set the MTU of a device:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>#include &lt;linux/rtnetlink.h&gt;
+...
+struct {
+<br>
+    struct nlmsghdr  nh;
+<br>
+    struct ifinfomsg if;
+<br>
+    char             attrbuf[512];
+} req;
+struct rtattr *rta;
+unsigned int mtu = 1000;
+int rtnetlink_sk = socket(AF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
+memset(&amp;req, 0, sizeof(req));
+req.nh.nlmsg_len = NLMSG_LENGTH(sizeof(req.if));
+req.nh.nlmsg_flags = NLM_F_REQUEST;
+req.nh.nlmsg_type = RTM_NEWLINK;
+req.if.ifi_family = AF_UNSPEC;
+req.if.ifi_index = INTERFACE_INDEX;
+req.if.ifi_change = 0xffffffff; /* ??? */
+rta = (struct rtattr *)(((char *) &amp;req) +
+<br>
+                         NLMSG_ALIGN(req.nh.nlmsg_len));
+rta-&gt;rta_type = IFLA_MTU;
+rta-&gt;rta_len = RTA_LENGTH(sizeof(mtu));
+req.nh.nlmsg_len = NLMSG_ALIGN(req.nh.nlmsg_len) +
+<br>
+                              RTA_LENGTH(sizeof(mtu));
+memcpy(RTA_DATA(rta), &amp;mtu, sizeof(mtu));
+send(rtnetlink_sk, &amp;req, req.nh.nlmsg_len, 0);
+</pre>
+<br>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>netlink</b>(3), <b>netlink</b>(7), <b>rtnetlink</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

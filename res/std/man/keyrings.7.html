@@ -1,0 +1,808 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2014 Red Hat, Inc. All Rights Reserved.
+   Written by David Howells (dhowells@redhat.com)
+   and Copyright (C) 2016 Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+   --><head>
+<meta name="dc.identifier" content="res/3abc43e5ba96f5f064ced6c11a1d3aaf9eddbb37">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>keyrings(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">keyrings(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">keyrings(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">keyrings - in-kernel key management and retention facility</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The Linux key-management facility is primarily a way for various
+    kernel components to retain or cache security data, authentication keys,
+    encryption keys, and other data in the kernel.</p>
+<p class="Pp">System call interfaces are provided so that user-space programs
+    can manage those objects and also use the facility for their own purposes;
+    see <b>add_key</b>(2), <b>request_key</b>(2), and <b>keyctl</b>(2).</p>
+<p class="Pp">A library and some user-space utilities are provided to allow
+    access to the facility. See <b>keyctl</b>(1), <b>keyctl</b>(3), and
+    <b>keyutils</b>(7) for more information.</p>
+<section class="Ss">
+<h2 class="Ss" id="Keys"><a class="permalink" href="#Keys">Keys</a></h2>
+<p class="Pp">A key has the following attributes:</p>
+<dl class="Bl-tag">
+  <dt id="Serial"><a class="permalink" href="#Serial">Serial number
+    (ID)</a></dt>
+  <dd>This is a unique integer handle by which a key is referred to in system
+      calls. The serial number is sometimes synonymously referred as the key ID.
+      Programmatically, key serial numbers are represented using the type
+      <i>key_serial_t</i>.</dd>
+  <dt id="Type"><a class="permalink" href="#Type">Type</a></dt>
+  <dd>A key's type defines what sort of data can be held in the key, how the
+      proposed content of the key will be parsed, and how the payload will be
+      used.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>There are a number of general-purpose types available, plus some
+      specialist types defined by specific kernel components.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="Description"><a class="permalink" href="#Description">Description
+    (name)</a></dt>
+  <dd>The key description is a printable string that is used as the search term
+      for the key (in conjunction with the key type) as well as a display name.
+      During searches, the description may be partially matched or exactly
+      matched.</dd>
+  <dt id="Payload"><a class="permalink" href="#Payload">Payload (data)</a></dt>
+  <dd>The payload is the actual content of a key. This is usually set when a key
+      is created, but it is possible for the kernel to upcall to user space to
+      finish the instantiation of a key if that key wasn't already known to the
+      kernel when it was requested. For further details, see
+      <b>request_key</b>(2).</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>A key's payload can be read and updated if the key type supports it and if
+      suitable permission is granted to the caller.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="Access"><a class="permalink" href="#Access">Access rights</a></dt>
+  <dd>Much as files do, each key has an owning user ID, an owning group ID, and
+      a security label. Each key also has a set of permissions, though there are
+      more than for a normal UNIX file, and there is an additional
+      category—possessor—beyond the usual user, group, and other
+      (see <i>Possession</i>, below).</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Note that keys are quota controlled, since they require unswappable kernel
+      memory. The owning user ID specifies whose quota is to be debited.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="Expiration"><a class="permalink" href="#Expiration">Expiration
+    time</a></dt>
+  <dd>Each key can have an expiration time set. When that time is reached, the
+      key is marked as being expired and accesses to it fail with the error
+      <b>EKEYEXPIRED</b>. If not deleted, updated, or replaced, then, after a
+      set amount of time, an expired key is automatically removed (garbage
+      collected) along with all links to it, and attempts to access the key fail
+      with the error <b>ENOKEY</b>.</dd>
+  <dt id="Reference"><a class="permalink" href="#Reference">Reference
+    count</a></dt>
+  <dd>Each key has a reference count. Keys are referenced by keyrings, by
+      currently active users, and by a process's credentials. When the reference
+      count reaches zero, the key is scheduled for garbage collection.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Key_types"><a class="permalink" href="#Key_types">Key
+  types</a></h2>
+<p class="Pp">The kernel provides several basic types of key:</p>
+<dl class="Bl-tag">
+  <dt><i>"keyring"</i></dt>
+  <dd>Keyrings are special keys which store a set of links to other keys
+      (including other keyrings), analogous to a directory holding links to
+      files. The main purpose of a keyring is to prevent other keys from being
+      garbage collected because nothing refers to them.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Keyrings with descriptions (names) that begin with a period ('.') are
+      reserved to the implementation.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt><i>"user"</i></dt>
+  <dd>This is a general-purpose key type. The key is kept entirely within kernel
+      memory. The payload may be read and updated by user-space
+    applications.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The payload for keys of this type is a blob of arbitrary data of up to
+      32,767 bytes.</dd>
+  <dt></dt>
+  <dd>The description may be any valid string, though it is preferred that it
+      start with a colon-delimited prefix representing the service to which the
+      key is of interest (for instance <i>"afs:mykey"</i>).</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt><i>"logon"</i> (since Linux 3.3)</dt>
+  <dd>This key type is essentially the same as <i>"user"</i>, but it
+      does not provide reading (i.e., the <b>keyctl</b>(2) <b>KEYCTL_READ</b>
+      operation), meaning that the key payload is never visible from user space.
+      This is suitable for storing username-password pairs that should not be
+      readable from user space.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The description of a <i>"logon"</i> key <i>must</i> start with a
+      non-empty colon-delimited prefix whose purpose is to identify the service
+      to which the key belongs. (Note that this differs from keys of the
+      <i>"user"</i> type, where the inclusion of a prefix is
+      recommended but is not enforced.)</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt><i>"big_key"</i> (since Linux 3.13)</dt>
+  <dd>This key type is similar to the <i>"user"</i> key type, but it
+      may hold a payload of up to 1&nbsp;MiB in size. This key type is useful
+      for purposes such as holding Kerberos ticket caches.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The payload data may be stored in a tmpfs filesystem, rather than in
+      kernel memory, if the data size exceeds the overhead of storing the data
+      in the filesystem. (Storing the data in a filesystem requires filesystem
+      structures to be allocated in the kernel. The size of these structures
+      determines the size threshold above which the tmpfs storage method is
+      used.) Since Linux 4.8, the payload data is encrypted when stored in
+      tmpfs, thereby preventing it from being written unencrypted into swap
+      space.</dd>
+</dl>
+<p class="Pp">There are more specialized key types available also, but they
+    aren't discussed here because they aren't intended for normal user-space
+    use.</p>
+<p class="Pp">Key type names that begin with a period ('.') are reserved to the
+    implementation.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Keyrings"><a class="permalink" href="#Keyrings">Keyrings</a></h2>
+<p class="Pp">As previously mentioned, keyrings are a special type of key that
+    contain links to other keys (which may include other keyrings). Keys may be
+    linked to by multiple keyrings. Keyrings may be considered as analogous to
+    UNIX directories where each directory contains a set of hard links to
+  files.</p>
+<p class="Pp">Various operations (system calls) may be applied only to
+  keyrings:</p>
+<dl class="Bl-tag">
+  <dt id="Adding"><a class="permalink" href="#Adding">Adding</a></dt>
+  <dd>A key may be added to a keyring by system calls that create keys. This
+      prevents the new key from being immediately deleted when the system call
+      releases its last reference to the key.</dd>
+  <dt id="Linking"><a class="permalink" href="#Linking">Linking</a></dt>
+  <dd>A link may be added to a keyring pointing to a key that is already known,
+      provided this does not create a self-referential cycle.</dd>
+  <dt id="Unlinking"><a class="permalink" href="#Unlinking">Unlinking</a></dt>
+  <dd>A link may be removed from a keyring. When the last link to a key is
+      removed, that key will be scheduled for deletion by the garbage
+    collector.</dd>
+  <dt id="Clearing"><a class="permalink" href="#Clearing">Clearing</a></dt>
+  <dd>All the links may be removed from a keyring.</dd>
+  <dt id="Searching"><a class="permalink" href="#Searching">Searching</a></dt>
+  <dd>A keyring may be considered the root of a tree or subtree in which
+      keyrings form the branches and non-keyrings the leaves. This tree may be
+      searched for a key matching a particular type and description.</dd>
+</dl>
+<p class="Pp">See <b>keyctl_clear</b>(3), <b>keyctl_link</b>(3),
+    <b>keyctl_search</b>(3), and <b>keyctl_unlink</b>(3) for more
+  information.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Anchoring_keys"><a class="permalink" href="#Anchoring_keys">Anchoring
+  keys</a></h2>
+<p class="Pp">To prevent a key from being garbage collected, it must be anchored
+    to keep its reference count elevated when it is not in active use by the
+    kernel.</p>
+<p class="Pp">Keyrings are used to anchor other keys: each link is a reference
+    on a key. Note that keyrings themselves are just keys and are also subject
+    to the same anchoring requirement to prevent them being garbage
+  collected.</p>
+<p class="Pp">The kernel makes available a number of anchor keyrings. Note that
+    some of these keyrings will be created only when first accessed.</p>
+<dl class="Bl-tag">
+  <dt id="Process"><a class="permalink" href="#Process">Process
+    keyrings</a></dt>
+  <dd>Process credentials themselves reference keyrings with specific semantics.
+      These keyrings are pinned as long as the set of credentials exists, which
+      is usually as long as the process exists.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>There are three keyrings with different inheritance/sharing rules: the
+      <b>session-keyring</b>(7) (inherited and shared by all child processes),
+      the <b>process-keyring</b>(7) (shared by all threads in a process) and the
+      <b>thread-keyring</b>(7) (specific to a particular thread).</dd>
+  <dt></dt>
+  <dd>As an alternative to using the actual keyring IDs, in calls to
+      <b>add_key</b>(2), <b>keyctl</b>(2), and <b>request_key</b>(2), the
+      special keyring values <b>KEY_SPEC_SESSION_KEYRING</b>,
+      <b>KEY_SPEC_PROCESS_KEYRING</b>, and <b>KEY_SPEC_THREAD_KEYRING</b> can be
+      used to refer to the caller's own instances of these keyrings.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="User"><a class="permalink" href="#User">User keyrings</a></dt>
+  <dd>Each UID known to the kernel has a record that contains two keyrings: the
+      <b>user-keyring</b>(7) and the <b>user-session-keyring</b>(7). These exist
+      for as long as the UID record in the kernel exists.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>As an alternative to using the actual keyring IDs, in calls to
+      <b>add_key</b>(2), <b>keyctl</b>(2), and <b>request_key</b>(2), the
+      special keyring values <b>KEY_SPEC_USER_KEYRING</b> and
+      <b>KEY_SPEC_USER_SESSION_KEYRING</b> can be used to refer to the caller's
+      own instances of these keyrings.</dd>
+  <dt></dt>
+  <dd>A link to the user keyring is placed in a new session keyring by
+      <b>pam_keyinit</b>(8) when a new login session is initiated.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="Persistent"><a class="permalink" href="#Persistent">Persistent
+    keyrings</a></dt>
+  <dd>There is a <b>persistent-keyring</b>(7) available to each UID known to the
+      system. It may persist beyond the life of the UID record previously
+      mentioned, but has an expiration time set such that it is automatically
+      cleaned up after a set time. The persistent keyring permits, for example,
+      <b>cron</b>(8) scripts to use credentials that are left in the persistent
+      keyring after the user logs out.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Note that the expiration time of the persistent keyring is reset every
+      time the persistent key is requested.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="Special"><a class="permalink" href="#Special">Special
+    keyrings</a></dt>
+  <dd>There are special keyrings owned by the kernel that can anchor keys for
+      special purposes. An example of this is the <i>system keyring</i> used for
+      holding encryption keys for module signature verification.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>These special keyrings are usually closed to direct alteration by user
+      space.</dd>
+</dl>
+<p class="Pp">An originally planned "group keyring", for storing keys
+    associated with each GID known to the kernel, is not so far implemented, is
+    unlikely to be implemented. Nevertheless, the constant
+    <b>KEY_SPEC_GROUP_KEYRING</b> has been defined for this keyring.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Possession"><a class="permalink" href="#Possession">Possession</a></h2>
+<p class="Pp">The concept of possession is important to understanding the
+    keyrings security model. Whether a thread possesses a key is determined by
+    the following rules:</p>
+<dl class="Bl-tag">
+  <dt>(1)</dt>
+  <dd>Any key or keyring that does not grant <i>search</i> permission to the
+      caller is ignored in all the following rules.</dd>
+  <dt>(2)</dt>
+  <dd>A thread possesses its <b>session-keyring</b>(7),
+      <b>process-keyring</b>(7), and <b>thread-keyring</b>(7) directly because
+      those keyrings are referred to by its credentials.</dd>
+  <dt>(3)</dt>
+  <dd>If a keyring is possessed, then any key it links to is also
+    possessed.</dd>
+  <dt>(4)</dt>
+  <dd>If any key a keyring links to is itself a keyring, then rule (3) applies
+      recursively.</dd>
+  <dt>(5)</dt>
+  <dd>If a process is upcalled from the kernel to instantiate a key (see
+      <b>request_key</b>(2)), then it also possesses the requester's keyrings as
+      in rule (1) as if it were the requester.</dd>
+</dl>
+<p class="Pp">Note that possession is not a fundamental property of a key, but
+    must rather be calculated each time the key is needed.</p>
+<p class="Pp">Possession is designed to allow set-user-ID programs run from, say
+    a user's shell to access the user's keys. Granting permissions to the key
+    possessor while denying them to the key owner and group allows the
+    prevention of access to keys on the basis of UID and GID matches.</p>
+<p class="Pp">When it creates the session keyring, <b>pam_keyinit</b>(8) adds a
+    link to the <b>user-keyring</b>(7), thus making the user keyring and
+    anything it contains possessed by default.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Access_rights"><a class="permalink" href="#Access_rights">Access
+  rights</a></h2>
+<p class="Pp">Each key has the following security-related attributes:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>The owning user ID</dd>
+  <dt>•</dt>
+  <dd>The ID of a group that is permitted to access the key</dd>
+  <dt>•</dt>
+  <dd>A security label</dd>
+  <dt>•</dt>
+  <dd>A permissions mask</dd>
+</dl>
+<p class="Pp">The permissions mask contains four sets of rights. The first three
+    sets are mutually exclusive. One and only one will be in force for a
+    particular access check. In order of descending priority, these three sets
+    are:</p>
+<dl class="Bl-tag">
+  <dt id="user"><a class="permalink" href="#user"><i>user</i></a></dt>
+  <dd>The set specifies the rights granted if the key's user ID matches the
+      caller's filesystem user ID.</dd>
+  <dt id="group"><a class="permalink" href="#group"><i>group</i></a></dt>
+  <dd>The set specifies the rights granted if the user ID didn't match and the
+      key's group ID matches the caller's filesystem GID or one of the caller's
+      supplementary group IDs.</dd>
+  <dt id="other"><a class="permalink" href="#other"><i>other</i></a></dt>
+  <dd>The set specifies the rights granted if neither the key's user ID nor
+      group ID matched.</dd>
+</dl>
+<p class="Pp">The fourth set of rights is:</p>
+<dl class="Bl-tag">
+  <dt id="possessor"><a class="permalink" href="#possessor"><i>possessor</i></a></dt>
+  <dd>The set specifies the rights granted if a key is determined to be
+      possessed by the caller.</dd>
+</dl>
+<p class="Pp">The complete set of rights for a key is the union of whichever of
+    the first three sets is applicable plus the fourth set if the key is
+    possessed.</p>
+<p class="Pp">The set of rights that may be granted in each of the four masks is
+    as follows:</p>
+<dl class="Bl-tag">
+  <dt id="view"><a class="permalink" href="#view"><i>view</i></a></dt>
+  <dd>The attributes of the key may be read. This includes the type,
+      description, and access rights (excluding the security label).</dd>
+  <dt id="read"><a class="permalink" href="#read"><i>read</i></a></dt>
+  <dd>For a key: the payload of the key may be read. For a keyring: the list of
+      serial numbers (keys) to which the keyring has links may be read.</dd>
+  <dt id="write"><a class="permalink" href="#write"><i>write</i></a></dt>
+  <dd>The payload of the key may be updated and the key may be revoked. For a
+      keyring, links may be added to or removed from the keyring, and the
+      keyring may be cleared completely (all links are removed),</dd>
+  <dt id="search"><a class="permalink" href="#search"><i>search</i></a></dt>
+  <dd>For a key (or a keyring): the key may be found by a search. For a keyring:
+      keys and keyrings that are linked to by the keyring may be searched.</dd>
+  <dt id="link"><a class="permalink" href="#link"><i>link</i></a></dt>
+  <dd>Links may be created from keyrings to the key. The initial link to a key
+      that is established when the key is created doesn't require this
+      permission.</dd>
+  <dt id="setattr"><a class="permalink" href="#setattr"><i>setattr</i></a></dt>
+  <dd>The ownership details and security label of the key may be changed, the
+      key's expiration time may be set, and the key may be revoked.</dd>
+</dl>
+<p class="Pp">In addition to access rights, any active Linux Security Module
+    (LSM) may prevent access to a key if its policy so dictates. A key may be
+    given a security label or other attribute by the LSM; this label is
+    retrievable via <b>keyctl_get_security</b>(3).</p>
+<p class="Pp">See <b>keyctl_chown</b>(3), <b>keyctl_describe</b>(3),
+    <b>keyctl_get_security</b>(3), <b>keyctl_setperm</b>(3), and
+    <b>selinux</b>(8) for more information.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Searching_for_keys"><a class="permalink" href="#Searching_for_keys">Searching
+  for keys</a></h2>
+<p class="Pp">One of the key features of the Linux key-management facility is
+    the ability to find a key that a process is retaining. The
+    <b>request_key</b>(2) system call is the primary point of access for
+    user-space applications to find a key. (Internally, the kernel has something
+    similar available for use by internal components that make use of keys.)</p>
+<p class="Pp">The search algorithm works as follows:</p>
+<dl class="Bl-tag">
+  <dt>(1)</dt>
+  <dd>The process keyrings are searched in the following order: the
+      <b>thread-keyring</b>(7) if it exists, the <b>process-keyring</b>(7) if it
+      exists, and then either the <b>session-keyring</b>(7) if it exists or the
+      <b>user-session-keyring</b>(7) if that exists.</dd>
+  <dt>(2)</dt>
+  <dd>If the caller was a process that was invoked by the <b>request_key</b>(2)
+      upcall mechanism, then the keyrings of the original caller of
+      <b>request_key</b>(2) will be searched as well.</dd>
+  <dt>(3)</dt>
+  <dd>The search of a keyring tree is in breadth-first order: each keyring is
+      searched first for a match, then the keyrings referred to by that keyring
+      are searched.</dd>
+  <dt>(4)</dt>
+  <dd>If a matching key is found that is valid, then the search terminates and
+      that key is returned.</dd>
+  <dt>(5)</dt>
+  <dd>If a matching key is found that has an error state attached, that error
+      state is noted and the search continues.</dd>
+  <dt>(6)</dt>
+  <dd>If no valid matching key is found, then the first noted error state is
+      returned; otherwise, an <b>ENOKEY</b> error is returned.</dd>
+</dl>
+<p class="Pp">It is also possible to search a specific keyring, in which case
+    only steps (3) to (6) apply.</p>
+<p class="Pp">See <b>request_key</b>(2) and <b>keyctl_search</b>(3) for more
+    information.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="On-demand_key_creation"><a class="permalink" href="#On-demand_key_creation">On-demand
+  key creation</a></h2>
+<p class="Pp">If a key cannot be found, <b>request_key</b>(2) will, if given a
+    <i>callout_info</i> argument, create a new key and then upcall to user space
+    to instantiate the key. This allows keys to be created on an as-needed
+    basis.</p>
+<p class="Pp">Typically, this will involve the kernel creating a new process
+    that executes the <b>request-key</b>(8) program, which will then execute the
+    appropriate handler based on its configuration.</p>
+<p class="Pp">The handler is passed a special authorization key that allows it
+    and only it to instantiate the new key. This is also used to permit searches
+    performed by the handler program to also search the requester's
+  keyrings.</p>
+<p class="Pp">See <b>request_key</b>(2), <b>keyctl_assume_authority</b>(3),
+    <b>keyctl_instantiate</b>(3), <b>keyctl_negate</b>(3),
+    <b>keyctl_reject</b>(3), <b>request-key</b>(8), and
+    <b>request-key.conf</b>(5) for more information.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="/proc_files"><a class="permalink" href="#/proc_files">/proc
+  files</a></h2>
+<p class="Pp">The kernel provides various <i>/proc</i> files that expose
+    information about keys or define limits on key usage.</p>
+<dl class="Bl-tag">
+  <dt><i>/proc/keys</i> (since Linux 2.6.10)</dt>
+  <dd>This file exposes a list of the keys for which the reading thread has
+      <i>view</i> permission, providing various information about each key. The
+      thread need not possess the key for it to be visible in this file.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The only keys included in the list are those that grant <i>view</i>
+      permission to the reading process (regardless of whether or not it
+      possesses them). LSM security checks are still performed, and may filter
+      out further keys that the process is not authorized to view.</dd>
+  <dt></dt>
+  <dd>An example of the data that one might see in this file (with the columns
+      numbered for easy reference below) is the following:</dd>
+  <dt></dt>
+  <dd>
+    <pre><br>
+  (1)     (2)     (3)(4)    (5)     (6)   (7)   (8)        (9)
+009a2028 I--Q---   1 perm 3f010000  1000  1000 user     krb_ccache:primary: 12
+1806c4ba I--Q---   1 perm 3f010000  1000  1000 keyring  _pid: 2
+25d3a08f I--Q---   1 perm 1f3f0000  1000 65534 keyring  _uid_ses.1000: 1
+28576bd8 I--Q---   3 perm 3f010000  1000  1000 keyring  _krb: 1
+2c546d21 I--Q--- 190 perm 3f030000  1000  1000 keyring  _ses: 2
+30a4e0be I------   4   2d 1f030000  1000 65534 keyring  _persistent.1000: 1
+32100fab I--Q---   4 perm 1f3f0000  1000 65534 keyring  _uid.1000: 2
+32a387ea I--Q---   1 perm 3f010000  1000  1000 keyring  _pid: 2
+3ce56aea I--Q---   5 perm 3f030000  1000  1000 keyring  _ses: 1
+    </pre>
+  </dd>
+  <dt></dt>
+  <dd>The fields shown in each line of this file are as follows:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="ID"><a class="permalink" href="#ID">ID (1)</a></dt>
+  <dd>The ID (serial number) of the key, expressed in hexadecimal.</dd>
+  <dt id="Flags"><a class="permalink" href="#Flags">Flags (2)</a></dt>
+  <dd>A set of flags describing the state of the key:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="I"><a class="permalink" href="#I">I</a></dt>
+  <dd>The key has been instantiated.</dd>
+  <dt id="R"><a class="permalink" href="#R">R</a></dt>
+  <dd>The key has been revoked.</dd>
+  <dt id="D"><a class="permalink" href="#D">D</a></dt>
+  <dd>The key is dead (i.e., the key type has been unregistered). (A key may be
+      briefly in this state during garbage collection.)</dd>
+  <dt id="Q"><a class="permalink" href="#Q">Q</a></dt>
+  <dd>The key contributes to the user's quota.</dd>
+  <dt id="U"><a class="permalink" href="#U">U</a></dt>
+  <dd>The key is under construction via a callback to user space; see
+      <b>request-key</b>(2).</dd>
+  <dt id="N"><a class="permalink" href="#N">N</a></dt>
+  <dd>The key is negatively instantiated.</dd>
+  <dt id="i"><a class="permalink" href="#i">i</a></dt>
+  <dd>The key has been invalidated.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="Usage"><a class="permalink" href="#Usage">Usage (3)</a></dt>
+  <dd>This is a count of the number of kernel credential structures that are
+      pinning the key (approximately: the number of threads and open file
+      references that refer to this key).</dd>
+  <dt id="Timeout"><a class="permalink" href="#Timeout">Timeout (4)</a></dt>
+  <dd>The amount of time until the key will expire, expressed in human-readable
+      form (weeks, days, hours, minutes, and seconds). The string <i>perm</i>
+      here means that the key is permanent (no timeout). The string <i>expd</i>
+      means that the key has already expired, but has not yet been garbage
+      collected.</dd>
+  <dt id="Permissions"><a class="permalink" href="#Permissions">Permissions
+    (5)</a></dt>
+  <dd>The key permissions, expressed as four hexadecimal bytes containing, from
+      left to right, the possessor, user, group, and other permissions. Within
+      each byte, the permission bits are as follows:</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd></dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>0x01</dt>
+  <dd><i>view</i></dd>
+  <dt>0x02</dt>
+  <dd><i>read</i></dd>
+  <dt>0x04</dt>
+  <dd><i>write</i></dd>
+  <dt>0x08</dt>
+  <dd><i>search</i></dd>
+  <dt>0x10</dt>
+  <dd><i>link</i></dd>
+  <dt>0x20</dt>
+  <dd><i>setattr</i></dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="UID"><a class="permalink" href="#UID">UID (6)</a></dt>
+  <dd>The user ID of the key owner.</dd>
+  <dt id="GID"><a class="permalink" href="#GID">GID (7)</a></dt>
+  <dd>The group ID of the key. The value -1 here means that the key has no group
+      ID; this can occur in certain circumstances for keys created by the
+      kernel.</dd>
+  <dt>Type (8)</dt>
+  <dd>The key type (user, keyring, etc.)</dd>
+  <dt id="Description~2"><a class="permalink" href="#Description~2">Description
+    (9)</a></dt>
+  <dd>The key description (name). This field contains descriptive information
+      about the key. For most key types, it has the form</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>name[: extra-info]
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>The <i>name</i> subfield is the key's description (name). The optional
+      <i>extra-info</i> field provides some further information about the key.
+      The information that appears here depends on the key type, as
+    follows:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt><i>"user"</i> and <i>"logon"</i></dt>
+  <dd>The size in bytes of the key payload (expressed in decimal).</dd>
+  <dt><i>"keyring"</i></dt>
+  <dd>The number of keys linked to the keyring, or the string <i>empty</i> if
+      there are no keys linked to the keyring.</dd>
+  <dt><i>"big_key"</i></dt>
+  <dd>The payload size in bytes, followed either by the string <i>[file]</i>, if
+      the key payload exceeds the threshold that means that the payload is
+      stored in a (swappable) <b>tmpfs</b>(5) filesystem, or otherwise the
+      string <i>[buff]</i>, indicating that the key is small enough to reside in
+      kernel memory.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>For the <i>".request_key_auth"</i> key type (authorization key;
+      see <b>request_key</b>(2)), the description field has the form shown in
+      the following example:</dd>
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>key:c9a9b19 pid:28880 ci:10
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>The three subfields are as follows:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="key"><a class="permalink" href="#key"><i>key</i></a></dt>
+  <dd>The hexadecimal ID of the key being instantiated in the requesting
+      program.</dd>
+  <dt id="pid"><a class="permalink" href="#pid"><i>pid</i></a></dt>
+  <dd>The PID of the requesting program.</dd>
+  <dt id="ci"><a class="permalink" href="#ci"><i>ci</i></a></dt>
+  <dd>The length of the callout data with which the requested key should be
+      instantiated (i.e., the length of the payload associated with the
+      authorization key).</dd>
+</dl>
+</div>
+</div>
+<dl class="Bl-tag">
+  <dt><i>/proc/key-users</i> (since Linux 2.6.10)</dt>
+  <dd>This file lists various information for each user ID that has at least one
+      key on the system. An example of the data that one might see in this file
+      is the following:</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre><br>
+   0:    10 9/9 2/1000000 22/25000000
+<br>
+  42:     9 9/9 8/200 106/20000
+1000:    11 11/11 10/200 271/20000
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>The fields shown in each line are as follows:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="uid"><a class="permalink" href="#uid"><i>uid</i></a></dt>
+  <dd>The user ID.</dd>
+  <dt id="usage"><a class="permalink" href="#usage"><i>usage</i></a></dt>
+  <dd>This is a kernel-internal usage count for the kernel structure used to
+      record key users.</dd>
+  <dt id="nkeys"><a class="permalink" href="#nkeys"><i>nkeys</i>/<i>nikeys</i></a></dt>
+  <dd>The total number of keys owned by the user, and the number of those keys
+      that have been instantiated.</dd>
+  <dt id="qnkeys"><a class="permalink" href="#qnkeys"><i>qnkeys</i>/<i>maxkeys</i></a></dt>
+  <dd>The number of keys owned by the user, and the maximum number of keys that
+      the user may own.</dd>
+  <dt id="qnbytes"><a class="permalink" href="#qnbytes"><i>qnbytes</i>/<i>maxbytes</i></a></dt>
+  <dd>The number of bytes consumed in payloads of the keys owned by this user,
+      and the upper limit on the number of bytes in key payloads for that
+    user.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt><i>/proc/sys/kernel/keys/gc_delay</i> (since Linux 2.6.32)</dt>
+  <dd>The value in this file specifies the interval, in seconds, after which
+      revoked and expired keys will be garbage collected. The purpose of having
+      such an interval is so that there is a window of time where user space can
+      see an error (respectively <b>EKEYREVOKED</b> and <b>EKEYEXPIRED</b>) that
+      indicates what happened to the key.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The default value in this file is 300 (i.e., 5 minutes).</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt><i>/proc/sys/kernel/keys/persistent_keyring_expiry</i> (since Linux
+    3.13)</dt>
+  <dd>This file defines an interval, in seconds, to which the persistent
+      keyring's expiration timer is reset each time the keyring is accessed (via
+      <b>keyctl_get_persistent</b>(3) or the <b>keyctl</b>(2)
+      <b>KEYCTL_GET_PERSISTENT</b> operation.)</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The default value in this file is 259200 (i.e., 3 days).</dd>
+</dl>
+<p class="Pp">The following files (which are writable by privileged processes)
+    are used to enforce quotas on the number of keys and number of bytes of data
+    that can be stored in key payloads:</p>
+<dl class="Bl-tag">
+  <dt><i>/proc/sys/kernel/keys/maxbytes</i> (since Linux 2.6.26)</dt>
+  <dd>This is the maximum number of bytes of data that a nonroot user can hold
+      in the payloads of the keys owned by the user.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The default value in this file is 20,000.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt><i>/proc/sys/kernel/keys/maxkeys</i> (since Linux 2.6.26)</dt>
+  <dd>This is the maximum number of keys that a nonroot user may own.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The default value in this file is 200.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt><i>/proc/sys/kernel/keys/root_maxbytes</i> (since Linux 2.6.26)</dt>
+  <dd>This is the maximum number of bytes of data that the root user (UID 0 in
+      the root user namespace) can hold in the payloads of the keys owned by
+      root.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The default value in this file is 25,000,000 (20,000 before Linux
+    3.17).</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt><i>/proc/sys/kernel/keys/root_maxkeys</i> (since Linux 2.6.26)</dt>
+  <dd>This is the maximum number of keys that the root user (UID 0 in the root
+      user namespace) may own.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The default value in this file is 1,000,000 (200 before Linux 3.17).</dd>
+</dl>
+<p class="Pp">With respect to keyrings, note that each link in a keyring
+    consumes 4 bytes of the keyring payload.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Users"><a class="permalink" href="#Users">Users</a></h2>
+<p class="Pp">The Linux key-management facility has a number of users and
+    usages, but is not limited to those that already exist.</p>
+<p class="Pp">In-kernel users of this facility include:</p>
+<dl class="Bl-tag">
+  <dt id="Network"><a class="permalink" href="#Network">Network filesystems -
+    DNS</a></dt>
+  <dd>The kernel uses the upcall mechanism provided by the keys to upcall to
+      user space to do DNS lookups and then to cache the results.</dd>
+  <dt id="AF_RXRPC"><a class="permalink" href="#AF_RXRPC">AF_RXRPC and kAFS -
+    Authentication</a></dt>
+  <dd>The AF_RXRPC network protocol and the in-kernel AFS filesystem use keys to
+      store the ticket needed to do secured or encrypted traffic. These are then
+      looked up by network operations on AF_RXRPC and filesystem operations on
+      kAFS.</dd>
+  <dt id="NFS"><a class="permalink" href="#NFS">NFS - User ID mapping</a></dt>
+  <dd>The NFS filesystem uses keys to store mappings of foreign user IDs to
+      local user IDs.</dd>
+  <dt id="CIFS"><a class="permalink" href="#CIFS">CIFS - Password</a></dt>
+  <dd>The CIFS filesystem uses keys to store passwords for accessing remote
+      shares.</dd>
+  <dt id="Module"><a class="permalink" href="#Module">Module
+    verification</a></dt>
+  <dd>The kernel build process can be made to cryptographically sign modules.
+      That signature is then checked when a module is loaded.</dd>
+</dl>
+<p class="Pp">User-space users of this facility include:</p>
+<dl class="Bl-tag">
+  <dt id="Kerberos"><a class="permalink" href="#Kerberos">Kerberos key
+    storage</a></dt>
+  <dd>The MIT Kerberos 5 facility (libkrb5) can use keys to store authentication
+      tokens which can be made to be automatically cleaned up a set time after
+      the user last uses them, but until then permits them to hang around after
+      the user has logged out so that <b>cron</b>(8) scripts can use them.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>keyctl</b>(1), <b>add_key</b>(2), <b>keyctl</b>(2),
+    <b>request_key</b>(2), <b>keyctl</b>(3), <b>keyutils</b>(7),
+    <b>persistent-keyring</b>(7), <b>process-keyring</b>(7),
+    <b>session-keyring</b>(7), <b>thread-keyring</b>(7), <b>user-keyring</b>(7),
+    <b>user-session-keyring</b>(7), <b>pam_keyinit</b>(8),
+  <b>request-key</b>(8)</p>
+<p class="Pp">The kernel source files
+    <i>Documentation/crypto/asymmetric-keys.txt</i> and under
+    <i>Documentation/security/keys</i> (or, before Linux 4.13, in the file
+    <i>Documentation/security/keys.txt</i>).</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

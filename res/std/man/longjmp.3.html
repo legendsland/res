@@ -1,0 +1,233 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/fcc3bc1bc6109bc0d08f4d5e036aca3217cd9006">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>setjmp(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">setjmp(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">setjmp(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">setjmp, sigsetjmp, longjmp, siglongjmp - performing a nonlocal
+    goto</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;setjmp.h&gt;</b></pre>
+<pre><b>int setjmp(jmp_buf </b><i>env</i><b>);</b>
+<b>int sigsetjmp(sigjmp_buf </b><i>env</i><b>, int </b><i>savesigs</i><b>);</b></pre>
+<pre><b>[[noreturn]] void longjmp(jmp_buf </b><i>env</i><b>, int </b><i>val</i><b>);</b>
+<b>[[noreturn]] void siglongjmp(sigjmp_buf </b><i>env</i><b>, int </b><i>val</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>setjmp</b>(): see NOTES.</p>
+<p class="Pp"><b>sigsetjmp</b>():</p>
+<pre><br>
+    _POSIX_C_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The functions described on this page are used for performing
+    "nonlocal gotos": transferring execution from one function to a
+    predetermined location in another function. The <b>setjmp</b>() function
+    dynamically establishes the target to which control will later be
+    transferred, and <b>longjmp</b>() performs the transfer of execution.</p>
+<p class="Pp">The <b>setjmp</b>() function saves various information about the
+    calling environment (typically, the stack pointer, the instruction pointer,
+    possibly the values of other registers and the signal mask) in the buffer
+    <i>env</i> for later use by <b>longjmp</b>(). In this case, <b>setjmp</b>()
+    returns 0.</p>
+<p class="Pp">The <b>longjmp</b>() function uses the information saved in
+    <i>env</i> to transfer control back to the point where <b>setjmp</b>() was
+    called and to restore ("rewind") the stack to its state at the
+    time of the <b>setjmp</b>() call. In addition, and depending on the
+    implementation (see NOTES), the values of some other registers and the
+    process signal mask may be restored to their state at the time of the
+    <b>setjmp</b>() call.</p>
+<p class="Pp">Following a successful <b>longjmp</b>(), execution continues as if
+    <b>setjmp</b>() had returned for a second time. This "fake" return
+    can be distinguished from a true <b>setjmp</b>() call because the
+    "fake" return returns the value provided in <i>val</i>. If the
+    programmer mistakenly passes the value 0 in <i>val</i>, the "fake"
+    return will instead return 1.</p>
+<section class="Ss">
+<h2 class="Ss" id="sigsetjmp()_and_siglongjmp()"><a class="permalink" href="#sigsetjmp()_and_siglongjmp()">sigsetjmp()
+  and siglongjmp()</a></h2>
+<p class="Pp"><b>sigsetjmp</b>() and <b>siglongjmp</b>() also perform nonlocal
+    gotos, but provide predictable handling of the process signal mask.</p>
+<p class="Pp">If, and only if, the <i>savesigs</i> argument provided to
+    <b>sigsetjmp</b>() is nonzero, the process's current signal mask is saved in
+    <i>env</i> and will be restored if a <b>siglongjmp</b>() is later performed
+    with this <i>env</i>.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp"><b>setjmp</b>() and <b>sigsetjmp</b>() return 0 when called
+    directly; on the "fake" return that occurs after <b>longjmp</b>()
+    or <b>siglongjmp</b>(), the nonzero value specified in <i>val</i> is
+    returned.</p>
+<p class="Pp">The <b>longjmp</b>() or <b>siglongjmp</b>() functions do not
+    return.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>setjmp (), sigsetjmp ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+  <tr>
+    <td>longjmp (), siglongjmp ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>setjmp</b>(), <b>longjmp</b>(): POSIX.1-2001, POSIX.1-2008,
+    C89, C99.</p>
+<p class="Pp"><b>sigsetjmp</b>(), <b>siglongjmp</b>(): POSIX.1-2001,
+    POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">POSIX does not specify whether <b>setjmp</b>() will save the
+    signal mask (to be later restored during <b>longjmp</b>()). In System V it
+    will not. In 4.3BSD it will, and there is a function <b>_setjmp</b>() that
+    will not. The behavior under Linux depends on the glibc version and the
+    setting of feature test macros. Before glibc 2.19, <b>setjmp</b>() follows
+    the System V behavior by default, but the BSD behavior is provided if the
+    <b>_BSD_SOURCE</b> feature test macro is explicitly defined and none of
+    <b>_POSIX_SOURCE</b>, <b>_POSIX_C_SOURCE</b>, <b>_XOPEN_SOURCE</b>,
+    <b>_GNU_SOURCE</b>, or <b>_SVID_SOURCE</b> is defined. Since glibc 2.19,
+    <i>&lt;setjmp.h&gt;</i> exposes only the System V version of
+    <b>setjmp</b>(). Programs that need the BSD semantics should replace calls
+    to <b>setjmp</b>() with calls to <b>sigsetjmp</b>() with a nonzero
+    <i>savesigs</i> argument.</p>
+<p class="Pp"><b>setjmp</b>() and <b>longjmp</b>() can be useful for dealing
+    with errors inside deeply nested function calls or to allow a signal handler
+    to pass control to a specific point in the program, rather than returning to
+    the point where the handler interrupted the main program. In the latter
+    case, if you want to portably save and restore signal masks, use
+    <b>sigsetjmp</b>() and <b>siglongjmp</b>(). See also the discussion of
+    program readability below.</p>
+<p class="Pp">The compiler may optimize variables into registers, and
+    <b>longjmp</b>() may restore the values of other registers in addition to
+    the stack pointer and program counter. Consequently, the values of automatic
+    variables are unspecified after a call to <b>longjmp</b>() if they meet all
+    the following criteria:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>they are local to the function that made the corresponding <b>setjmp</b>()
+      call;</dd>
+  <dt>•</dt>
+  <dd>their values are changed between the calls to <b>setjmp</b>() and
+      <b>longjmp</b>(); and</dd>
+  <dt>•</dt>
+  <dd>they are not declared as <i>volatile</i>.</dd>
+</dl>
+<p class="Pp">Analogous remarks apply for <b>siglongjmp</b>().</p>
+<section class="Ss">
+<h2 class="Ss" id="Nonlocal_gotos_and_program_readability"><a class="permalink" href="#Nonlocal_gotos_and_program_readability">Nonlocal
+  gotos and program readability</a></h2>
+<p class="Pp">While it can be abused, the traditional C "goto"
+    statement at least has the benefit that lexical cues (the goto statement and
+    the target label) allow the programmer to easily perceive the flow of
+    control. Nonlocal gotos provide no such cues: multiple <b>setjmp</b>() calls
+    might employ the same <i>jmp_buf</i> variable so that the content of the
+    variable may change over the lifetime of the application. Consequently, the
+    programmer may be forced to perform detailed reading of the code to
+    determine the dynamic target of a particular <b>longjmp</b>() call. (To make
+    the programmer's life easier, each <b>setjmp</b>() call should employ a
+    unique <i>jmp_buf</i> variable.)</p>
+<p class="Pp">Adding further difficulty, the <b>setjmp</b>() and
+    <b>longjmp</b>() calls may not even be in the same source code module.</p>
+<p class="Pp">In summary, nonlocal gotos can make programs harder to understand
+    and maintain, and an alternative should be used if possible.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Caveats"><a class="permalink" href="#Caveats">Caveats</a></h2>
+<p class="Pp">If the function which called <b>setjmp</b>() returns before
+    <b>longjmp</b>() is called, the behavior is undefined. Some kind of subtle
+    or unsubtle chaos is sure to result.</p>
+<p class="Pp">If, in a multithreaded program, a <b>longjmp</b>() call employs an
+    <i>env</i> buffer that was initialized by a call to <b>setjmp</b>() in a
+    different thread, the behavior is undefined.</p>
+<p class="Pp">POSIX.1-2008 Technical Corrigendum 2 adds <b>longjmp</b>() and
+    <b>siglongjmp</b>() to the list of async-signal-safe functions. However, the
+    standard recommends avoiding the use of these functions from signal handlers
+    and goes on to point out that if these functions are called from a signal
+    handler that interrupted a call to a non-async-signal-safe function (or some
+    equivalent, such as the steps equivalent to <b>exit</b>(3) that occur upon a
+    return from the initial call to <i>main</i>()), the behavior is undefined if
+    the program subsequently makes a call to a non-async-signal-safe function.
+    The only way of avoiding undefined behavior is to ensure one of the
+    following:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>After long jumping from the signal handler, the program does not call any
+      non-async-signal-safe functions and does not return from the initial call
+      to <i>main</i>().</dd>
+  <dt>•</dt>
+  <dd>Any signal whose handler performs a long jump must be blocked during
+      <i>every</i> call to a non-async-signal-safe function and no
+      non-async-signal-safe functions are called after returning from the
+      initial call to <i>main</i>().</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>signal</b>(7), <b>signal-safety</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

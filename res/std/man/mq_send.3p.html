@@ -1,0 +1,196 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/0181ba578bb493c6e0f2c3effdee2a8cff70956e">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>MQ_SEND(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">MQ_SEND(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">MQ_SEND(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">mq_send, mq_timedsend — send a message to a message queue
+    (<b>REALTIME</b>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;mqueue.h&gt;</pre>
+<pre>int mq_send(mqd_t <i>mqdes</i>, const char *<i>msg_ptr</i>, size_t <i>msg_len</i>,
+<br>
+    unsigned <i>msg_prio</i>);</pre>
+<pre>#include &lt;mqueue.h&gt;
+#include &lt;time.h&gt;</pre>
+<pre>int mq_timedsend(mqd_t <i>mqdes</i>, const char *<i>msg_ptr</i>, size_t <i>msg_len</i>,
+<br>
+    unsigned <i>msg_prio</i>, const struct timespec *<i>abstime</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>mq_send</i>() function shall add the message pointed to by
+    the argument <i>msg_ptr</i> to the message queue specified by <i>mqdes</i>.
+    The <i>msg_len</i> argument specifies the length of the message, in bytes,
+    pointed to by <i>msg_ptr</i>. The value of <i>msg_len</i> shall be less than
+    or equal to the <i>mq_msgsize</i> attribute of the message queue, or
+    <i>mq_send</i>() shall fail.</p>
+<p class="Pp">If the specified message queue is not full, <i>mq_send</i>() shall
+    behave as if the message is inserted into the message queue at the position
+    indicated by the <i>msg_prio</i> argument. A message with a larger numeric
+    value of <i>msg_prio</i> shall be inserted before messages with lower values
+    of <i>msg_prio</i>. A message shall be inserted after other messages in the
+    queue, if any, with equal <i>msg_prio</i>. The value of <i>msg_prio</i>
+    shall be less than {MQ_PRIO_MAX}.</p>
+<p class="Pp">If the specified message queue is full and O_NONBLOCK is not set
+    in the message queue description associated with <i>mqdes</i>,
+    <i>mq_send</i>() shall block until space becomes available to enqueue the
+    message, or until <i>mq_send</i>() is interrupted by a signal. If more than
+    one thread is waiting to send when space becomes available in the message
+    queue and the Priority Scheduling option is supported, then the thread of
+    the highest priority that has been waiting the longest shall be unblocked to
+    send its message. Otherwise, it is unspecified which waiting thread is
+    unblocked. If the specified message queue is full and O_NONBLOCK is set in
+    the message queue description associated with <i>mqdes</i>, the message
+    shall not be queued and <i>mq_send</i>() shall return an error.</p>
+<p class="Pp">The <i>mq_timedsend</i>() function shall add a message to the
+    message queue specified by <i>mqdes</i> in the manner defined for the
+    <i>mq_send</i>() function. However, if the specified message queue is full
+    and O_NONBLOCK is not set in the message queue description associated with
+    <i>mqdes</i>, the wait for sufficient room in the queue shall be terminated
+    when the specified timeout expires. If O_NONBLOCK is set in the message
+    queue description, this function shall be equivalent to
+  <i>mq_send</i>().</p>
+<p class="Pp">The timeout shall expire when the absolute time specified by
+    <i>abstime</i> passes, as measured by the clock on which timeouts are based
+    (that is, when the value of that clock equals or exceeds <i>abstime</i>), or
+    if the absolute time specified by <i>abstime</i> has already been passed at
+    the time of the call.</p>
+<p class="Pp">The timeout shall be based on the CLOCK_REALTIME clock. The
+    resolution of the timeout shall be the resolution of the clock on which it
+    is based. The <i>timespec</i> argument is defined in the
+    <i>&lt;time.h&gt;</i> header.</p>
+<p class="Pp">Under no circumstance shall the operation fail with a timeout if
+    there is sufficient room in the queue to add the message immediately. The
+    validity of the <i>abstime</i> parameter need not be checked when there is
+    sufficient room in the queue.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, the <i>mq_send</i>() and
+    <i>mq_timedsend</i>() functions shall return a value of zero. Otherwise, no
+    message shall be enqueued, the functions shall return -1, and <i>errno</i>
+    shall be set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>mq_send</i>() and <i>mq_timedsend</i>() functions shall
+    fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>The O_NONBLOCK flag is set in the message queue description associated
+      with <i>mqdes</i>, and the specified message queue is full.</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The <i>mqdes</i> argument is not a valid message queue descriptor open for
+      writing.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>A signal interrupted the call to <i>mq_send</i>() or
+      <i>mq_timedsend</i>().</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The value of <i>msg_prio</i> was outside the valid range.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>The process or thread would have blocked, and the <i>abstime</i> parameter
+      specified a nanoseconds field value less than zero or greater than or
+      equal to 1000 million.</dd>
+  <dt id="EMSGSIZE"><a class="permalink" href="#EMSGSIZE"><b>EMSGSIZE</b></a></dt>
+  <dd>The specified message length, <i>msg_len</i>, exceeds the message size
+      attribute of the message queue.</dd>
+  <dt id="ETIMEDOUT"><a class="permalink" href="#ETIMEDOUT"><b>ETIMEDOUT</b></a></dt>
+  <dd>The O_NONBLOCK flag was not set when the message queue was opened, but the
+      timeout expired before the message could be added to the queue.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The value of the symbol {MQ_PRIO_MAX} limits the number of
+    priority levels supported by the application. Message priorities range from
+    0 to {MQ_PRIO_MAX}-1.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>mq_open</i>()</i>, <i><i>mq_receive</i>()</i>,
+    <i><i>mq_setattr</i>()</i>, <i><i>time</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;mqueue.h&gt;</b></i>, <i><b>&lt;time.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

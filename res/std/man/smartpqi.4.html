@@ -1,0 +1,381 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (C) 2019, Microchip Technology Inc. and its subsidiaries
+   Copyright (C) 2016-2018, Microsemi Corporation
+   Copyright (C) 2016, PMC-Sierra, Inc.
+   Written by Kevin Barnett <kevin.barnett@microsemi.com>
+  
+   SPDX-License-Identifier: GPL-2.0-only
+ --><head>
+<meta name="dc.identifier" content="res/c8090a19efd137620eb83fc8bd26a08fdc4b9b49">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>smartpqi(4)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">smartpqi(4)</td>
+    <td class="head-vol">Device Drivers Manual</td>
+    <td class="head-rtitle">smartpqi(4)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">smartpqi - Microsemi Smart Family SCSI driver</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<table class="Nm">
+  <tbody><tr>
+    <td><code class="Nm">modprobe smartpqi</code></td>
+    <td>[<b>disable_device_id_wildcards=</b>{<b>0</b>|<b>1</b>}]
+      [<b>disable_heartbeat=</b>{<b>0</b>|<b>1</b>}]
+      [<b>disable_ctrl_shutdown=</b>{<b>0</b>|<b>1</b>}]
+      [<b>lockup_action=</b>{<b>none</b>|<b>reboot</b>|<b>panic</b>}]
+      [<b>expose_ld_first=</b>{<b>0</b>|<b>1</b>}]
+      [<b>hide_vsep=</b>{<b>0</b>|<b>1</b>}]</td>
+  </tr>
+</tbody></table>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>smartpqi</b> is a SCSI driver for Microsemi Smart Family
+    controllers.</p>
+<section class="Ss">
+<h2 class="Ss" id="Supported_"><a class="permalink" href="#Supported_">Supported
+  <b><i>ioctl</i></b>() operations</a></h2>
+<p class="Pp">For compatibility with applications written for the
+    <b>cciss</b>(4) and <b>hpsa</b>(4) drivers, many, but not all of the
+    <b>ioctl</b>(2) operations supported by the <b>hpsa</b> driver are also
+    supported by the <b>smartpqi</b> driver. The data structures used by these
+    operations are described in the Linux kernel source file
+    <i>include/linux/cciss_ioctl.h</i>.</p>
+<dl class="Bl-tag">
+  <dt id="CCISS_DEREGDISK"><a class="permalink" href="#CCISS_DEREGDISK"><b>CCISS_DEREGDISK</b>,
+    <b>CCISS_REGNEWDISK</b>, <b>CCISS_REGNEWD</b></a></dt>
+  <dd>These operations all do exactly the same thing, which is to cause the
+      driver to re-scan for new devices. This does exactly the same thing as
+      writing to the <b>smartpqi</b>-specific host <i>rescan</i> attribute.</dd>
+  <dt id="CCISS_GETPCIINFO"><a class="permalink" href="#CCISS_GETPCIINFO"><b>CCISS_GETPCIINFO</b></a></dt>
+  <dd>This operation returns the PCI domain, bus, device, and function and
+      "board ID" (PCI subsystem ID).</dd>
+  <dt id="CCISS_GETDRIVVER"><a class="permalink" href="#CCISS_GETDRIVVER"><b>CCISS_GETDRIVVER</b></a></dt>
+  <dd>This operation returns the driver version in four bytes, encoded as:</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>(major_version &lt;&lt; 28) | (minor_version &lt;&lt; 24) |
+<br>
+        (release &lt;&lt; 16) | revision
+    </pre>
+    <br>
+  </dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="CCISS_PASSTHRU"><a class="permalink" href="#CCISS_PASSTHRU"><b>CCISS_PASSTHRU</b></a></dt>
+  <dd>Allows BMIC and CISS commands to be passed through to the controller.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Boot_options"><a class="permalink" href="#Boot_options">Boot
+  options</a></h2>
+<dl class="Bl-tag">
+  <dt id="disable_device_id_wildcards="><a class="permalink" href="#disable_device_id_wildcards="><b>disable_device_id_wildcards=</b>{<b>0</b>|<b>1</b>}</a></dt>
+  <dd>Disables support for device ID wildcards. The default value is 0.</dd>
+  <dt id="disable_heartbeat="><a class="permalink" href="#disable_heartbeat="><b>disable_heartbeat=</b>{<b>0</b>|<b>1</b>}</a></dt>
+  <dd>Disables support for the controller's heartbeat check. This parameter is
+      used for debugging purposes. The default value is 0, leaving the
+      controller's heartbeat check active.</dd>
+  <dt id="disable_ctrl_shutdown="><a class="permalink" href="#disable_ctrl_shutdown="><b>disable_ctrl_shutdown=</b>{<b>0</b>|<b>1</b>}</a></dt>
+  <dd>Disables support for shutting down the controller in the event of a
+      controller lockup. The default value is 0.</dd>
+  <dt id="lockup_action="><a class="permalink" href="#lockup_action="><b>lockup_action=</b>{<b>none</b>|<b>reboot</b>|<b>panic</b>}</a></dt>
+  <dd>Specifies the action the driver takes when a controller lockup is
+      detected. The default action is <b>none</b>.
+    <table class="tbl">
+      <tbody><tr>
+        <td>parameter</td>
+        <td>action</td>
+      </tr>
+      <tr>
+      </tr>
+      <tr>
+        <td><b>none</b></td>
+        <td>take controller offline only</td>
+      </tr>
+      <tr>
+        <td><b>reboot</b></td>
+        <td>reboot the system</td>
+      </tr>
+      <tr>
+        <td><b>panic</b></td>
+        <td>panic the system</td>
+      </tr>
+    </tbody></table>
+  </dd>
+  <dt id="expose_ld_first="><a class="permalink" href="#expose_ld_first="><b>expose_ld_first=</b>{<b>0</b>|<b>1</b>}</a></dt>
+  <dd>This option enables support for exposing logical devices to the operating
+      system before physical devices. The default value is 0.</dd>
+  <dt id="hide_vsep="><a class="permalink" href="#hide_vsep="><b>hide_vsep=</b>{<b>0</b>|<b>1</b>}</a></dt>
+  <dd>This option enables disabling exposure of the virtual SEP to the host.
+      This is usually associated with direct attached drives. The default value
+      is 0.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FILES"><a class="permalink" href="#FILES">FILES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Device_nodes"><a class="permalink" href="#Device_nodes">Device
+  nodes</a></h2>
+<p class="Pp">Logical drives are accessed via the SCSI disk driver (<i>sd</i>),
+    tape drives via the SCSI tape driver (<i>st</i>), and the RAID controller
+    via the SCSI generic driver (<i>sg</i>), with device nodes named
+    <i>/dev/sd</i>*, <i>/dev/st</i>*, and <i>/dev/sg</i>*, respectively.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="SmartPQI-specific_host_attribute_files_in_"><a class="permalink" href="#SmartPQI-specific_host_attribute_files_in_">SmartPQI-specific
+  host attribute files in <b><i>/sys</i></b></a></h2>
+<dl class="Bl-tag">
+  <dt><i>/sys/class/scsi_host/host</i>*<i>/rescan</i></dt>
+  <dd>The host <i>rescan</i> attribute is a write-only attribute. Writing to
+      this attribute will cause the driver to scan for new, changed, or removed
+      devices (e.g., hot-plugged tape drives, or newly configured or deleted
+      logical drives) and notify the SCSI mid-layer of any changes detected.
+      Usually this action is triggered automatically by configuration changes,
+      so the user should not normally have to write to this file. Doing so may
+      be useful when hot-plugging devices such as tape drives or entire storage
+      boxes containing pre-configured logical drives.</dd>
+  <dt><i>/sys/class/scsi_host/host</i>*<i>/version</i></dt>
+  <dd>The host <i>version</i> attribute is a read-only attribute. This attribute
+      contains the driver version and the controller firmware version.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>For example:</dd>
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>$ 
+<b>cat /sys/class/scsi_host/host1/version</b>
+driver: 1.1.2-126
+firmware: 1.29-112
+    </pre>
+    <br>
+  </dd>
+</dl>
+<dl class="Bl-tag">
+  <dt><i>/sys/class/scsi_host/host</i>*<i>/lockup_action</i></dt>
+  <dd>The host <i>lockup_action</i> attribute is a read/write attribute. This
+      attribute will cause the driver to perform a specific action in the
+      unlikely event that a controller lockup has been detected. See
+      <b>OPTIONS</b> above for an explanation of the <i>lockup_action</i>
+      values.</dd>
+  <dt><i>/sys/class/scsi_host/host*/driver_version</i></dt>
+  <dd>The <i>driver_version</i> attribute is read-only. This attribute contains
+      the smartpqi driver version.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>For example:</dd>
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>$ 
+<b>cat /sys/class/scsi_host/host1/driver_version</b>
+1.1.2-126
+    </pre>
+    <br>
+  </dd>
+</dl>
+<dl class="Bl-tag">
+  <dt><i>/sys/class/scsi_host/host*/firmware_version</i></dt>
+  <dd>The <i>firmware_version</i> attribute is read-only. This attribute
+      contains the controller firmware version.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>For example:</dd>
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>$ 
+<b>cat /sys/class/scsi_host/host1/firmware_version</b>
+1.29-112
+    </pre>
+    <br>
+  </dd>
+</dl>
+<dl class="Bl-tag">
+  <dt><i>/sys/class/scsi_host/host*/model</i></dt>
+  <dd>The <i>model</i> attribute is read-only. This attribute contains the
+      product identification string of the controller.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>For example:</dd>
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>$ 
+<b>cat /sys/class/scsi_host/host1/model</b>
+1100-16i
+    </pre>
+    <br>
+  </dd>
+</dl>
+<dl class="Bl-tag">
+  <dt><i>/sys/class/scsi_host/host*/serial_number</i></dt>
+  <dd>The <i>serial_number</i> attribute is read-only. This attribute contains
+      the unique identification number of the controller.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>For example:</dd>
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>$ 
+<b>cat /sys/class/scsi_host/host1/serial_number</b>
+6A316373777
+    </pre>
+    <br>
+  </dd>
+</dl>
+<dl class="Bl-tag">
+  <dt><i>/sys/class/scsi_host/host*/vendor</i></dt>
+  <dd>The <i>vendor</i> attribute is read-only. This attribute contains the
+      vendor identification string of the controller.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>For example:</dd>
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>$ 
+<b>cat /sys/class/scsi_host/host1/vendor</b>
+Adaptec
+    </pre>
+    <br>
+  </dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="SmartPQI-specific_disk_attribute_files_in_"><a class="permalink" href="#SmartPQI-specific_disk_attribute_files_in_">SmartPQI-specific
+  disk attribute files in <b><i>/sys</i></b></a></h2>
+<p class="Pp">In the file specifications below, <i>c</i> stands for the number
+    of the appropriate SCSI controller, <i>b</i> is the bus number, <i>t</i> the
+    target number, and <i>l</i> is the logical unit number (LUN).</p>
+<dl class="Bl-tag">
+  <dt><i>/sys/class/scsi_disk/</i>c<i>:</i>b<i>:</i>t<i>:</i>l<i>/device/raid_level</i></dt>
+  <dd>The <i>raid_level</i> attribute is read-only. This attribute contains the
+      RAID level of each logical drive.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>For example:</dd>
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>$ 
+<b>cat /sys/class/scsi_disk/4:0:0:0/device/raid_level</b>
+RAID 0
+    </pre>
+    <br>
+  </dd>
+</dl>
+<dl class="Bl-tag">
+  <dt><i>/sys/class/scsi_disk/c</i>:<i>b</i>:<i>t</i>:<i>l/device/sas_address</i></dt>
+  <dd>The <i>sas_address</i> attribute is read-only. This attribute contains the
+      unique identifier of the disk.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>For example:</dd>
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>$ 
+<b>cat /sys/class/scsi_disk/1:0:3:0/device/sas_address</b>
+0x5001173d028543a2
+    </pre>
+    <br>
+  </dd>
+</dl>
+<dl class="Bl-tag">
+  <dt><i>/sys/class/scsi_disk/c</i>:<i>b</i>:<i>t</i>:<i>l/device/ssd_smart_path_enabled</i></dt>
+  <dd>The <i>ssd_smart_path_enabled</i> attribute is read-only. This attribute
+      is for ioaccel-enabled volumes. (Ioaccel is an alternative driver
+      submission path that allows the driver to send I/O requests directly to
+      backend SCSI devices, bypassing the controller firmware. This results in
+      an increase in performance. This method is used for HBA disks and for
+      logical volumes comprised of SSDs.) Contains 1 if ioaccel is enabled for
+      the volume and 0 otherwise.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>For example:</dd>
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>$ 
+<b>cat /sys/class/scsi_disk/1:0:3:0/device/ssd_smart_path_enabled</b>
+0
+    </pre>
+    <br>
+  </dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>smartpqi</b> driver was added in Linux 4.9.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Configuration"><a class="permalink" href="#Configuration">Configuration</a></h2>
+<p class="Pp">To configure a Microsemi Smart Family controller, refer to the
+    User Guide for the controller, which can be found by searching for the
+    specific controller at
+    <a class="Lk" href="https://storage.microsemi.com/">https://storage.microsemi.com/</a>.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>cciss</b>(4), <b>hpsa</b>(4), <b>sd</b>(4), <b>st</b>(4)</p>
+<p class="Pp"><i>Documentation/ABI/testing/sysfs-bus-pci-devices-cciss</i> in
+    the Linux kernel source tree.</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

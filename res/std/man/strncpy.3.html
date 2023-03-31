@@ -1,0 +1,202 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/5d4b12ea3095a7e4ce7d64a9fbf32e0e074d51ac">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>stpncpy(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">stpncpy(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">stpncpy(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">stpncpy, strncpy - zero a fixed-width buffer and copy a string
+    into a character sequence with truncation and zero the rest of it</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;string.h&gt;</b></pre>
+<pre><b>char *stpncpy(char </b><i>dst</i><b>[restrict .</b><i>sz</i><b>], const char *restrict </b><i>src</i><b>,</b>
+<b>               size_t </b><i>sz</i><b>);</b>
+<b>char *strncpy(char </b><i>dst</i><b>[restrict .</b><i>sz</i><b>], const char *restrict </b><i>src</i><b>,</b>
+<b>               size_t </b><i>sz</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>stpncpy</b>():</p>
+<pre><br>
+    Since glibc 2.10:
+<br>
+        _POSIX_C_SOURCE &gt;= 200809L
+<br>
+    Before glibc 2.10:
+<br>
+        _GNU_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">These functions copy the string pointed to by <i>src</i> into a
+    null-padded character sequence at the fixed-width buffer pointed to by
+    <i>dst</i>. If the destination buffer, limited by its size, isn't large
+    enough to hold the copy, the resulting character sequence is truncated. For
+    the difference between the two functions, see RETURN VALUE.</p>
+<p class="Pp">An implementation of these functions might be:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>char *
+stpncpy(char *restrict dst, const char *restrict src, size_t sz)
+{
+<br>
+    bzero(dst, sz);
+<br>
+    return mempcpy(dst, src, strnlen(src, sz));
+}
+char *
+strncpy(char *restrict dst, const char *restrict src, size_t sz)
+{
+<br>
+    stpncpy(dst, src, sz);
+<br>
+    return dst;
+}
+</pre>
+<br>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<dl class="Bl-tag">
+  <dt id="stpncpy"><a class="permalink" href="#stpncpy"><b>stpncpy</b>()</a></dt>
+  <dd>returns a pointer to one after the last character in the destination
+      character sequence.</dd>
+  <dt id="strncpy"><a class="permalink" href="#strncpy"><b>strncpy</b>()</a></dt>
+  <dd>returns <i>dst</i>.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>stpncpy (), strncpy ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<dl class="Bl-tag">
+  <dt id="stpncpy~2"><a class="permalink" href="#stpncpy~2"><b>stpncpy</b>()</a></dt>
+  <dd>POSIX.1-2008.</dd>
+  <dt id="strncpy~2"><a class="permalink" href="#strncpy~2"><b>strncpy</b>()</a></dt>
+  <dd>POSIX.1-2001, POSIX.1-2008, C89, C99, SVr4, 4.3BSD.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="CAVEATS"><a class="permalink" href="#CAVEATS">CAVEATS</a></h1>
+<p class="Pp">The name of these functions is confusing. These functions produce
+    a null-padded character sequence, not a string (see
+    <b>string_copying</b>(7)).</p>
+<p class="Pp">It's impossible to distinguish truncation by the result of the
+    call, from a character sequence that just fits the destination buffer;
+    truncation should be detected by comparing the length of the input string
+    with the size of the destination buffer.</p>
+<p class="Pp">If you're going to use this function in chained calls, it would be
+    useful to develop a similar function that accepts a pointer to the end (one
+    after the last element) of the destination buffer instead of its size.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<pre>#include &lt;err.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+int
+main(void)
+{
+<br>
+    char    *p;
+<br>
+    char    buf1[20];
+<br>
+    char    buf2[20];
+<br>
+    size_t  len;
+<br>
+    if (sizeof(buf1) &lt; strlen("Hello world!"))
+<br>
+        warnx("stpncpy: truncating character sequence");
+<br>
+    p = stpncpy(buf1, "Hello world!", sizeof(buf1));
+<br>
+    len = p - buf1;
+<br>
+    printf("[len = %zu]: ", len);
+<br>
+    printf("%.*s\n", (int) len, buf1);  // "Hello world!"
+<br>
+    if (sizeof(buf2) &lt; strlen("Hello world!"))
+<br>
+        warnx("strncpy: truncating character sequence");
+<br>
+    strncpy(buf2, "Hello world!", sizeof(buf2));
+<br>
+    len = strnlen(buf2, sizeof(buf2));
+<br>
+    printf("[len = %zu]: ", len);
+<br>
+    printf("%.*s\n", (int) len, buf2);  // "Hello world!"
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>wcpncpy</b>(3), <b>string_copying</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

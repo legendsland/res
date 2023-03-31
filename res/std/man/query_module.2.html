@@ -1,0 +1,195 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 1996 Free Software Foundation, Inc.
+  
+   SPDX-License-Identifier: GPL-1.0-or-later
+  
+   2006-02-09, some reformatting by Luc Van Oostenryck; some
+   reformatting and rewordings by mtk
+   --><head>
+<meta name="dc.identifier" content="res/137356675a138c909ec07ad23f4697bc3704f6b2">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>query_module(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">query_module(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">query_module(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">query_module - query the kernel for various bits pertaining to
+    modules</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;linux/module.h&gt;</b></pre>
+<pre><b>[[deprecated]] int query_module(const char *</b><i>name</i><b>, int </b><i>which</i><b>,</b>
+<b>                                void </b><i>buf</i><b>[.</b><i>bufsize</i><b>], size_t </b><i>bufsize</i><b>,</b>
+<b>                                size_t *</b><i>ret</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><i>Note</i>: This system call is present only before Linux
+  2.6.</p>
+<p class="Pp"><b>query_module</b>() requests information from the kernel about
+    loadable modules. The returned information is placed in the buffer pointed
+    to by <i>buf</i>. The caller must specify the size of <i>buf</i> in
+    <i>bufsize</i>. The precise nature and format of the returned information
+    depend on the operation specified by <i>which</i>. Some operations require
+    <i>name</i> to identify a currently loaded module, some allow <i>name</i> to
+    be NULL, indicating the kernel proper.</p>
+<p class="Pp">The following values can be specified for <i>which</i>:</p>
+<dl class="Bl-tag">
+  <dt><b>0</b></dt>
+  <dd>Returns success, if the kernel supports <b>query_module</b>(). Used to
+      probe for availability of the system call.</dd>
+  <dt id="QM_MODULES"><a class="permalink" href="#QM_MODULES"><b>QM_MODULES</b></a></dt>
+  <dd>Returns the names of all loaded modules. The returned buffer consists of a
+      sequence of null-terminated strings; <i>ret</i> is set to the number of
+      modules.</dd>
+  <dt id="QM_DEPS"><a class="permalink" href="#QM_DEPS"><b>QM_DEPS</b></a></dt>
+  <dd>Returns the names of all modules used by the indicated module. The
+      returned buffer consists of a sequence of null-terminated strings;
+      <i>ret</i> is set to the number of modules.</dd>
+  <dt id="QM_REFS"><a class="permalink" href="#QM_REFS"><b>QM_REFS</b></a></dt>
+  <dd>Returns the names of all modules using the indicated module. This is the
+      inverse of <b>QM_DEPS</b>. The returned buffer consists of a sequence of
+      null-terminated strings; <i>ret</i> is set to the number of modules.</dd>
+  <dt id="QM_SYMBOLS"><a class="permalink" href="#QM_SYMBOLS"><b>QM_SYMBOLS</b></a></dt>
+  <dd>Returns the symbols and values exported by the kernel or the indicated
+      module. The returned buffer is an array of structures of the following
+      form</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct module_symbol {
+<br>
+    unsigned long value;
+<br>
+    unsigned long name;
+};
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>followed by null-terminated strings. The value of <i>name</i> is the
+      character offset of the string relative to the start of <i>buf</i>;
+      <i>ret</i> is set to the number of symbols.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="QM_INFO"><a class="permalink" href="#QM_INFO"><b>QM_INFO</b></a></dt>
+  <dd>Returns miscellaneous information about the indicated module. The output
+      buffer format is:</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct module_info {
+<br>
+    unsigned long address;
+<br>
+    unsigned long size;
+<br>
+    unsigned long flags;
+};
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>where <i>address</i> is the kernel address at which the module resides,
+      <i>size</i> is the size of the module in bytes, and <i>flags</i> is a mask
+      of <b>MOD_RUNNING</b>, <b>MOD_AUTOCLEAN</b>, and so on, that indicates the
+      current status of the module (see the Linux kernel source file
+      <i>include/linux/module.h</i>). <i>ret</i> is set to the size of the
+      <i>module_info</i> structure.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, zero is returned. On error, -1 is returned and
+    <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>At least one of <i>name</i>, <i>buf</i>, or <i>ret</i> was outside the
+      program's accessible address space.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>Invalid <i>which</i>; or <i>name</i> is NULL (indicating "the
+      kernel"), but this is not permitted with the specified value of
+      <i>which</i>.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>No module by that <i>name</i> exists.</dd>
+  <dt id="ENOSPC"><a class="permalink" href="#ENOSPC"><b>ENOSPC</b></a></dt>
+  <dd>The buffer size provided was too small. <i>ret</i> is set to the minimum
+      size needed.</dd>
+  <dt id="ENOSYS"><a class="permalink" href="#ENOSYS"><b>ENOSYS</b></a></dt>
+  <dd><b>query_module</b>() is not supported in this version of the kernel
+      (e.g., Linux 2.6 or later).</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">This system call is present only up until Linux 2.4; it was
+    removed in Linux 2.6.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>query_module</b>() is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Some of the information that was formerly available via
+    <b>query_module</b>() can be obtained from <i>/proc/modules</i>,
+    <i>/proc/kallsyms</i>, and the files under the directory
+  <i>/sys/module</i>.</p>
+<p class="Pp">The <b>query_module</b>() system call is not supported by glibc.
+    No declaration is provided in glibc headers, but, through a quirk of
+    history, glibc does export an ABI for this system call. Therefore, in order
+    to employ this system call, it is sufficient to manually declare the
+    interface in your code; alternatively, you can invoke the system call using
+    <b>syscall</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>create_module</b>(2), <b>delete_module</b>(2),
+    <b>get_kernel_syms</b>(2), <b>init_module</b>(2), <b>lsmod</b>(8),
+    <b>modinfo</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

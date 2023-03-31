@@ -1,0 +1,173 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2021 Suren Baghdasaryan <surenb@google.com>
+   and Copyright (C) 2021 Minchan Kim <minchan@kernel.org>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Commit ecb8ac8b1f146915aa6b96449b66dd48984caacc
+   --><head>
+<meta name="dc.identifier" content="res/ac0a068ae036c2b1cd9f6d8c3d692bed83aa9be8">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>process_madvise(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">process_madvise(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">process_madvise(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">process_madvise - give advice about use of memory to a process</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/mman.h&gt;</b>      /* Definition of <b>MADV_*</b> constants */
+<b>#include &lt;sys/syscall.h&gt;</b>   /* Definition of <b>SYS_*</b> constants */
+<b>#include &lt;sys/uio.h&gt;</b>       /* Definition of <b>struct iovec</b> type */
+<b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>ssize_t syscall(SYS_process_madvise, int </b><i>pidfd</i><b>,</b>
+<b>                const struct iovec *</b><i>iovec</i><b>, size_t </b><i>vlen</i><b>, int </b><i>advice</i><b>,</b>
+<b>                unsigned int </b><i>flags</i><b>);</b></pre>
+<p class="Pp"><i>Note</i>: glibc provides no wrapper for
+    <b>process_madvise</b>(), necessitating the use of <b>syscall</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>process_madvise</b>() system call is used to give advice or
+    directions to the kernel about the address ranges of another process or of
+    the calling process. It provides the advice for the address ranges described
+    by <i>iovec</i> and <i>vlen</i>. The goal of such advice is to improve
+    system or application performance.</p>
+<p class="Pp">The <i>pidfd</i> argument is a PID file descriptor (see
+    <b>pidfd_open</b>(2)) that specifies the process to which the advice is to
+    be applied.</p>
+<p class="Pp">The pointer <i>iovec</i> points to an array of <i>iovec</i>
+    structures, described in <b>iovec</b>(3type).</p>
+<p class="Pp"><i>vlen</i> specifies the number of elements in the array of
+    <i>iovec</i> structures. This value must be less than or equal to
+    <b>IOV_MAX</b> (defined in <i>&lt;limits.h&gt;</i> or accessible via the
+    call <i>sysconf(_SC_IOV_MAX)</i>).</p>
+<p class="Pp">The <i>advice</i> argument is one of the following values:</p>
+<dl class="Bl-tag">
+  <dt id="MADV_COLD"><a class="permalink" href="#MADV_COLD"><b>MADV_COLD</b></a></dt>
+  <dd>See <b>madvise</b>(2).</dd>
+  <dt id="MADV_COLLAPSE"><a class="permalink" href="#MADV_COLLAPSE"><b>MADV_COLLAPSE</b></a></dt>
+  <dd>See <b>madvise</b>(2).</dd>
+  <dt id="MADV_PAGEOUT"><a class="permalink" href="#MADV_PAGEOUT"><b>MADV_PAGEOUT</b></a></dt>
+  <dd>See <b>madvise</b>(2).</dd>
+  <dt id="MADV_WILLNEED"><a class="permalink" href="#MADV_WILLNEED"><b>MADV_WILLNEED</b></a></dt>
+  <dd>See <b>madvise</b>(2).</dd>
+</dl>
+<p class="Pp">The <i>flags</i> argument is reserved for future use; currently,
+    this argument must be specified as 0.</p>
+<p class="Pp">The <i>vlen</i> and <i>iovec</i> arguments are checked before
+    applying any advice. If <i>vlen</i> is too big, or <i>iovec</i> is invalid,
+    then an error will be returned immediately and no advice will be
+  applied.</p>
+<p class="Pp">The advice might be applied to only a part of <i>iovec</i> if one
+    of its elements points to an invalid memory region in the remote process. No
+    further elements will be processed beyond that point. (See the discussion
+    regarding partial advice in RETURN VALUE.)</p>
+<p class="Pp">Starting in Linux 5.12, permission to apply advice to another
+    process is governed by ptrace access mode <b>PTRACE_MODE_READ_FSCREDS</b>
+    check (see <b>ptrace</b>(2)); in addition, because of the performance
+    implications of applying the advice, the caller must have the
+    <b>CAP_SYS_NICE</b> capability (see <b>capabilities</b>(7)).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>process_madvise</b>() returns the number of bytes
+    advised. This return value may be less than the total number of requested
+    bytes, if an error occurred after some <i>iovec</i> elements were already
+    processed. The caller should check the return value to determine whether a
+    partial advice occurred.</p>
+<p class="Pp">On error, -1 is returned and <i>errno</i> is set to indicate the
+    error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd><i>pidfd</i> is not a valid PID file descriptor.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>The memory described by <i>iovec</i> is outside the accessible address
+      space of the process referred to by <i>pidfd</i>.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>flags</i> is not 0.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>The sum of the <i>iov_len</i> values of <i>iovec</i> overflows a
+      <i>ssize_t</i> value.</dd>
+  <dt id="EINVAL~3"><a class="permalink" href="#EINVAL~3"><b>EINVAL</b></a></dt>
+  <dd><i>vlen</i> is too large.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Could not allocate memory for internal copies of the <i>iovec</i>
+      structures.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The caller does not have permission to access the address space of the
+      process <i>pidfd</i>.</dd>
+  <dt id="ESRCH"><a class="permalink" href="#ESRCH"><b>ESRCH</b></a></dt>
+  <dd>The target process does not exist (i.e., it has terminated and been waited
+      on).</dd>
+</dl>
+<p class="Pp">See <b>madvise</b>(2) for <i>advice</i>-specific errors.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">This system call first appeared in Linux 5.10. Support for this
+    system call is optional, depending on the setting of the
+    <b>CONFIG_ADVISE_SYSCALLS</b> configuration option.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">The <b>process_madvise</b>() system call is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">When this system call first appeared in Linux 5.10, permission to
+    apply advice to another process was entirely governed by ptrace access mode
+    <b>PTRACE_MODE_ATTACH_FSCREDS</b> check (see <b>ptrace</b>(2)). This
+    requirement was relaxed in Linux 5.12 so that the caller didn't require full
+    control over the target process.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>madvise</b>(2), <b>pidfd_open</b>(2),
+    <b>process_vm_readv</b>(2), <b>process_vm_write</b>(2)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

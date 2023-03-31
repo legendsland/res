@@ -1,0 +1,118 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/2e1401ed4a11b175fc10b6de112536ed89953272">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>getpid(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">getpid(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">getpid(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getpid, getppid - get process identification</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>pid_t getpid(void);</b>
+<b>pid_t getppid(void);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>getpid</b>() returns the process ID (PID) of the calling
+    process. (This is often used by routines that generate unique temporary
+    filenames.)</p>
+<p class="Pp"><b>getppid</b>() returns the process ID of the parent of the
+    calling process. This will be either the ID of the process that created this
+    process using <b>fork</b>(), or, if that process has already terminated, the
+    ID of the process to which this process has been reparented (either
+    <b>init</b>(1) or a "subreaper" process defined via the
+    <b>prctl</b>(2) <b>PR_SET_CHILD_SUBREAPER</b> operation).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">These functions are always successful.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, 4.3BSD, SVr4.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">If the caller's parent is in a different PID namespace (see
+    <b>pid_namespaces</b>(7)), <b>getppid</b>() returns 0.</p>
+<p class="Pp">From a kernel perspective, the PID (which is shared by all of the
+    threads in a multithreaded process) is sometimes also known as the thread
+    group ID (TGID). This contrasts with the kernel thread ID (TID), which is
+    unique for each thread. For further details, see <b>gettid</b>(2) and the
+    discussion of the <b>CLONE_THREAD</b> flag in <b>clone</b>(2).</p>
+<section class="Ss">
+<h2 class="Ss" id="C_library/kernel_differences"><a class="permalink" href="#C_library/kernel_differences">C
+  library/kernel differences</a></h2>
+<p class="Pp">From glibc 2.3.4 up to and including glibc 2.24, the glibc wrapper
+    function for <b>getpid</b>() cached PIDs, with the goal of avoiding
+    additional system calls when a process calls <b>getpid</b>() repeatedly.
+    Normally this caching was invisible, but its correct operation relied on
+    support in the wrapper functions for <b>fork</b>(2), <b>vfork</b>(2), and
+    <b>clone</b>(2): if an application bypassed the glibc wrappers for these
+    system calls by using <b>syscall</b>(2), then a call to <b>getpid</b>() in
+    the child would return the wrong value (to be precise: it would return the
+    PID of the parent process). In addition, there were cases where
+    <b>getpid</b>() could return the wrong value even when invoking
+    <b>clone</b>(2) via the glibc wrapper function. (For a discussion of one
+    such case, see BUGS in <b>clone</b>(2).) Furthermore, the complexity of the
+    caching code had been the source of a few bugs within glibc over the
+  years.</p>
+<p class="Pp">Because of the aforementioned problems, since glibc 2.25, the PID
+    cache is removed: calls to <b>getpid</b>() always invoke the actual system
+    call, rather than returning a cached value.</p>
+<p class="Pp">On Alpha, instead of a pair of <b>getpid</b>() and
+    <b>getppid</b>() system calls, a single <b>getxpid</b>() system call is
+    provided, which returns a pair of PID and parent PID. The glibc
+    <b>getpid</b>() and <b>getppid</b>() wrapper functions transparently deal
+    with this. See <b>syscall</b>(2) for details regarding register mapping.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>clone</b>(2), <b>fork</b>(2), <b>gettid</b>(2), <b>kill</b>(2),
+    <b>exec</b>(3), <b>mkstemp</b>(3), <b>tempnam</b>(3), <b>tmpfile</b>(3),
+    <b>tmpnam</b>(3), <b>credentials</b>(7), <b>pid_namespaces</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

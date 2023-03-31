@@ -1,0 +1,152 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 1980, 1991 Regents of the University of California.
+   All rights reserved.
+  
+   SPDX-License-Identifier: BSD-4-Clause-UC
+  
+       @(#)alloca.3	5.1 (Berkeley) 5/2/91
+  
+   Converted Mon Nov 29 11:05:55 1993 by Rik Faith <faith@cs.unc.edu>
+   Modified Tue Oct 22 23:41:56 1996 by Eric S. Raymond <esr@thyrsus.com>
+   Modified 2002-07-17, aeb
+   2008-01-24, mtk:
+       Various rewrites and additions (notes on longjmp() and SIGSEGV).
+       Weaken warning against use of alloca() (as per Debian bug 461100).
+   --><head>
+<meta name="dc.identifier" content="res/c3c88e865e5ce6b5037f6cd782efbe509206f8fa">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>alloca(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">alloca(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">alloca(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">alloca - allocate memory that is automatically freed</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;alloca.h&gt;</b></pre>
+<pre><b>void *alloca(size_t </b><i>size</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>alloca</b>() function allocates <i>size</i> bytes of space
+    in the stack frame of the caller. This temporary space is automatically
+    freed when the function that called <b>alloca</b>() returns to its
+  caller.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <b>alloca</b>() function returns a pointer to the beginning of
+    the allocated space. If the allocation causes stack overflow, program
+    behavior is undefined.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>alloca ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This function is not in POSIX.1.</p>
+<p class="Pp"><b>alloca</b>() originates from PWB and 32V, and appears in all
+    their derivatives.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The <b>alloca</b>() function is machine- and compiler-dependent.
+    Because it allocates from the stack, it's faster than <b>malloc</b>(3) and
+    <b>free</b>(3). In certain cases, it can also simplify memory deallocation
+    in applications that use <b>longjmp</b>(3) or <b>siglongjmp</b>(3).
+    Otherwise, its use is discouraged.</p>
+<p class="Pp">Because the space allocated by <b>alloca</b>() is allocated within
+    the stack frame, that space is automatically freed if the function return is
+    jumped over by a call to <b>longjmp</b>(3) or <b>siglongjmp</b>(3).</p>
+<p class="Pp">The space allocated by <b>alloca</b>() is <i>not</i> automatically
+    deallocated if the pointer that refers to it simply goes out of scope.</p>
+<p class="Pp">Do not attempt to <b>free</b>(3) space allocated by
+    <b>alloca</b>()!</p>
+<p class="Pp">By necessity, <b>alloca</b>() is a compiler built-in, also known
+    as <b>__builtin_alloca</b>(). By default, modern compilers automatically
+    translate all uses of <b>alloca</b>() into the built-in, but this is
+    forbidden if standards conformance is requested (<i>-ansi</i>,
+    <i>-std=c*</i>), in which case <i>&lt;alloca.h&gt;</i> is required, lest a
+    symbol dependency be emitted.</p>
+<p class="Pp">The fact that <b>alloca</b>() is a built-in means it is impossible
+    to take its address or to change its behavior by linking with a different
+    library.</p>
+<p class="Pp">Variable length arrays (VLAs) are part of the C99 standard,
+    optional since C11, and can be used for a similar purpose. However, they do
+    not port to standard C++, and, being variables, live in their block scope
+    and don't have an allocator-like interface, making them unfit for
+    implementing functionality like <b>strdupa</b>(3).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">Due to the nature of the stack, it is impossible to check if the
+    allocation would overflow the space available, and, hence, neither is
+    indicating an error. (However, the program is likely to receive a
+    <b>SIGSEGV</b> signal if it attempts to access unavailable space.)</p>
+<p class="Pp">On many systems <b>alloca</b>() cannot be used inside the list of
+    arguments of a function call, because the stack space reserved by
+    <b>alloca</b>() would appear on the stack in the middle of the space for the
+    function arguments.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>brk</b>(2), <b>longjmp</b>(3), <b>malloc</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

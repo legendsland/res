@@ -1,0 +1,161 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/b55203397a18aec6d515655704186c3beb4520f0">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>NANOSLEEP(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">NANOSLEEP(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">NANOSLEEP(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">nanosleep — high resolution sleep</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;time.h&gt;</pre>
+<pre>int nanosleep(const struct timespec *<i>rqtp</i>, struct timespec *<i>rmtp</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>nanosleep</i>() function shall cause the current thread to
+    be suspended from execution until either the time interval specified by the
+    <i>rqtp</i> argument has elapsed or a signal is delivered to the calling
+    thread, and its action is to invoke a signal-catching function or to
+    terminate the process. The suspension time may be longer than requested
+    because the argument value is rounded up to an integer multiple of the sleep
+    resolution or because of the scheduling of other activity by the system.
+    But, except for the case of being interrupted by a signal, the suspension
+    time shall not be less than the time specified by <i>rqtp</i>, as measured
+    by the system clock CLOCK_REALTIME.</p>
+<p class="Pp">The use of the <i>nanosleep</i>() function has no effect on the
+    action or blockage of any signal.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">If the <i>nanosleep</i>() function returns because the requested
+    time has elapsed, its return value shall be zero.</p>
+<p class="Pp">If the <i>nanosleep</i>() function returns because it has been
+    interrupted by a signal, it shall return a value of -1 and set <i>errno</i>
+    to indicate the interruption. If the <i>rmtp</i> argument is non-NULL, the
+    <b>timespec</b> structure referenced by it is updated to contain the amount
+    of time remaining in the interval (the requested time minus the time
+    actually slept). The <i>rqtp</i> and <i>rmtp</i> arguments can point to the
+    same object. If the <i>rmtp</i> argument is NULL, the remaining time is not
+    returned.</p>
+<p class="Pp">If <i>nanosleep</i>() fails, it shall return a value of -1 and set
+    <i>errno</i> to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>nanosleep</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The <i>nanosleep</i>() function was interrupted by a signal.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The <i>rqtp</i> argument specified a nanosecond value less than zero or
+      greater than or equal to 1000 million.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">It is common to suspend execution of a thread for an interval in
+    order to poll the status of a non-interrupting function. A large number of
+    actual needs can be met with a simple extension to <i>sleep</i>() that
+    provides finer resolution.</p>
+<p class="Pp">In the POSIX.1‐1990 standard and SVR4, it is possible to
+    implement such a routine, but the frequency of wakeup is limited by the
+    resolution of the <i>alarm</i>() and <i>sleep</i>() functions. In 4.3 BSD,
+    it is possible to write such a routine using no static storage and reserving
+    no system facilities. Although it is possible to write a function with
+    similar functionality to <i>sleep</i>() using the remainder of the
+    <i>timer_*</i>() functions, such a function requires the use of signals and
+    the reservation of some signal number. This volume of POSIX.1‐2017
+    requires that <i>nanosleep</i>() be non-intrusive of the signals
+  function.</p>
+<p class="Pp">The <i>nanosleep</i>() function shall return a value of 0 on
+    success and -1 on failure or if interrupted. This latter case is different
+    from <i>sleep</i>(). This was done because the remaining time is returned
+    via an argument structure pointer, <i>rmtp</i>, instead of as the return
+    value.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>clock_nanosleep</i>()</i>, <i><i>sleep</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;time.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

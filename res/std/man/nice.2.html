@@ -1,0 +1,137 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 1992 Drew Eckhardt <drew@cs.colorado.edu>, March 28, 1992
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Modified by Michael Haardt <michael@moria.de>
+   Modified 1993-07-24 by Rik Faith <faith@cs.unc.edu>
+   Modified 1996-11-04 by Eric S. Raymond <esr@thyrsus.com>
+   Modified 2001-06-04 by aeb
+   Modified 2004-05-27 by Michael Kerrisk <mtk.manpages@gmail.com>
+   --><head>
+<meta name="dc.identifier" content="res/2170c597c616092f1e9b74527418c212646208b3">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>nice(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">nice(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">nice(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">nice - change process priority</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int nice(int </b><i>inc</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>nice</b>():</p>
+<pre><br>
+    _XOPEN_SOURCE
+<br>
+        || /* Since glibc 2.19: */ _DEFAULT_SOURCE
+<br>
+        || /* glibc &lt;= 2.19: */ _BSD_SOURCE || _SVID_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>nice</b>() adds <i>inc</i> to the nice value for the calling
+    thread. (A higher nice value means a lower priority.)</p>
+<p class="Pp">The range of the nice value is +19 (low priority) to -20 (high
+    priority). Attempts to set a nice value outside the range are clamped to the
+    range.</p>
+<p class="Pp">Traditionally, only a privileged process could lower the nice
+    value (i.e., set a higher priority). However, since Linux 2.6.12, an
+    unprivileged process can decrease the nice value of a target process that
+    has a suitable <b>RLIMIT_NICE</b> soft limit; see <b>getrlimit</b>(2) for
+    details.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, the new nice value is returned (but see NOTES below).
+    On error, -1 is returned, and <i>errno</i> is set to indicate the error.</p>
+<p class="Pp">A successful call can legitimately return -1. To detect an error,
+    set <i>errno</i> to 0 before the call, and check whether it is nonzero after
+    <b>nice</b>() returns -1.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The calling process attempted to increase its priority by supplying a
+      negative <i>inc</i> but has insufficient privileges. Under Linux, the
+      <b>CAP_SYS_NICE</b> capability is required. (But see the discussion of the
+      <b>RLIMIT_NICE</b> resource limit in <b>setrlimit</b>(2).)</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, SVr4, 4.3BSD. However, the raw system
+    call and (g)libc (earlier than glibc 2.2.4) return value is nonstandard, see
+    below.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">For further details on the nice value, see <b>sched</b>(7).</p>
+<p class="Pp"><i>Note</i>: the addition of the "autogroup" feature in
+    Linux 2.6.38 means that the nice value no longer has its traditional effect
+    in many circumstances. For details, see <b>sched</b>(7).</p>
+<section class="Ss">
+<h2 class="Ss" id="C_library/kernel_differences"><a class="permalink" href="#C_library/kernel_differences">C
+  library/kernel differences</a></h2>
+<p class="Pp">POSIX.1 specifies that <b>nice</b>() should return the new nice
+    value. However, the raw Linux system call returns 0 on success. Likewise,
+    the <b>nice</b>() wrapper function provided in glibc 2.2.3 and earlier
+    returns 0 on success.</p>
+<p class="Pp">Since glibc 2.2.4, the <b>nice</b>() wrapper function provided by
+    glibc provides conformance to POSIX.1 by calling <b>getpriority</b>(2) to
+    obtain the new nice value, which is then returned to the caller.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>nice</b>(1), <b>renice</b>(1), <b>fork</b>(2),
+    <b>getpriority</b>(2), <b>getrlimit</b>(2), <b>setpriority</b>(2),
+    <b>capabilities</b>(7), <b>sched</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

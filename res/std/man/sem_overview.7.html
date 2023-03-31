@@ -1,0 +1,154 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2006 Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/7618e02cdbf238c4d020ef2b3853dcd0d94b1a56">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>sem_overview(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">sem_overview(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">sem_overview(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">sem_overview - overview of POSIX semaphores</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">POSIX semaphores allow processes and threads to synchronize their
+    actions.</p>
+<p class="Pp">A semaphore is an integer whose value is never allowed to fall
+    below zero. Two operations can be performed on semaphores: increment the
+    semaphore value by one (<b>sem_post</b>(3)); and decrement the semaphore
+    value by one (<b>sem_wait</b>(3)). If the value of a semaphore is currently
+    zero, then a <b>sem_wait</b>(3) operation will block until the value becomes
+    greater than zero.</p>
+<p class="Pp">POSIX semaphores come in two forms: named semaphores and unnamed
+    semaphores.</p>
+<dl class="Bl-tag">
+  <dt id="Named"><a class="permalink" href="#Named"><b>Named
+    semaphores</b></a></dt>
+  <dd>A named semaphore is identified by a name of the form <i>/somename</i>;
+      that is, a null-terminated string of up to <b>NAME_MAX</b><i>-4</i> (i.e.,
+      251) characters consisting of an initial slash, followed by one or more
+      characters, none of which are slashes. Two processes can operate on the
+      same named semaphore by passing the same name to <b>sem_open</b>(3).</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The <b>sem_open</b>(3) function creates a new named semaphore or opens an
+      existing named semaphore. After the semaphore has been opened, it can be
+      operated on using <b>sem_post</b>(3) and <b>sem_wait</b>(3). When a
+      process has finished using the semaphore, it can use <b>sem_close</b>(3)
+      to close the semaphore. When all processes have finished using the
+      semaphore, it can be removed from the system using
+    <b>sem_unlink</b>(3).</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="Unnamed"><a class="permalink" href="#Unnamed"><b>Unnamed semaphores
+    (memory-based semaphores)</b></a></dt>
+  <dd>An unnamed semaphore does not have a name. Instead the semaphore is placed
+      in a region of memory that is shared between multiple threads (a
+      <i>thread-shared semaphore</i>) or processes (a <i>process-shared
+      semaphore</i>). A thread-shared semaphore is placed in an area of memory
+      shared between the threads of a process, for example, a global variable. A
+      process-shared semaphore must be placed in a shared memory region (e.g., a
+      System V shared memory segment created using <b>shmget</b>(2), or a POSIX
+      shared memory object built created using <b>shm_open</b>(3)).</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Before being used, an unnamed semaphore must be initialized using
+      <b>sem_init</b>(3). It can then be operated on using <b>sem_post</b>(3)
+      and <b>sem_wait</b>(3). When the semaphore is no longer required, and
+      before the memory in which it is located is deallocated, the semaphore
+      should be destroyed using <b>sem_destroy</b>(3).</dd>
+</dl>
+<p class="Pp">The remainder of this section describes some specific details of
+    the Linux implementation of POSIX semaphores.</p>
+<section class="Ss">
+<h2 class="Ss" id="Versions"><a class="permalink" href="#Versions">Versions</a></h2>
+<p class="Pp">Before Linux 2.6, Linux supported only unnamed, thread-shared
+    semaphores. On a system with Linux 2.6 and a glibc that provides the NPTL
+    threading implementation, a complete implementation of POSIX semaphores is
+    provided.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Persistence"><a class="permalink" href="#Persistence">Persistence</a></h2>
+<p class="Pp">POSIX named semaphores have kernel persistence: if not removed by
+    <b>sem_unlink</b>(3), a semaphore will exist until the system is shut
+  down.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Linking"><a class="permalink" href="#Linking">Linking</a></h2>
+<p class="Pp">Programs using the POSIX semaphores API must be compiled with
+    <i>cc -pthread</i> to link against the real-time library, <i>librt</i>.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Accessing_named_semaphores_via_the_filesystem"><a class="permalink" href="#Accessing_named_semaphores_via_the_filesystem">Accessing
+  named semaphores via the filesystem</a></h2>
+<p class="Pp">On Linux, named semaphores are created in a virtual filesystem,
+    normally mounted under <i>/dev/shm</i>, with names of the form
+    <i><b>sem.</b>somename</i>. (This is the reason that semaphore names are
+    limited to <b>NAME_MAX</b><i>-4</i> rather than <b>NAME_MAX</b>
+  characters.)</p>
+<p class="Pp">Since Linux 2.6.19, ACLs can be placed on files under this
+    directory, to control object permissions on a per-user and per-group
+  basis.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">System V semaphores (<b>semget</b>(2), <b>semop</b>(2), etc.) are
+    an older semaphore API. POSIX semaphores provide a simpler, and better
+    designed interface than System V semaphores; on the other hand POSIX
+    semaphores are less widely available (especially on older systems) than
+    System V semaphores.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">An example of the use of various POSIX semaphore functions is
+    shown in <b>sem_wait</b>(3).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>sem_close</b>(3), <b>sem_destroy</b>(3),
+    <b>sem_getvalue</b>(3), <b>sem_init</b>(3), <b>sem_open</b>(3),
+    <b>sem_post</b>(3), <b>sem_unlink</b>(3), <b>sem_wait</b>(3),
+    <b>pthreads</b>(7), <b>shm_overview</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

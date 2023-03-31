@@ -1,0 +1,180 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/93417cf102931327bcddd48394f13b782400f0cb">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>mkfifo(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">mkfifo(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">mkfifo(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">mkfifo, mkfifoat - make a FIFO special file (a named pipe)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/types.h&gt;</b>
+<b>#include &lt;sys/stat.h&gt;</b></pre>
+<pre><b>int mkfifo(const char *</b><i>pathname</i><b>, mode_t </b><i>mode</i><b>);</b></pre>
+<pre><b>#include &lt;fcntl.h&gt;           </b>/* Definition of AT_* constants */
+<b>#include &lt;sys/stat.h&gt;</b></pre>
+<pre><b>int mkfifoat(int </b><i>dirfd</i><b>, const char *</b><i>pathname</i><b>, mode_t </b><i>mode</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>mkfifoat</b>():</p>
+<pre><br>
+    Since glibc 2.10:
+<br>
+        _POSIX_C_SOURCE &gt;= 200809L
+<br>
+    Before glibc 2.10:
+<br>
+        _ATFILE_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>mkfifo</b>() makes a FIFO special file with name
+    <i>pathname</i>. <i>mode</i> specifies the FIFO's permissions. It is
+    modified by the process's <b>umask</b> in the usual way: the permissions of
+    the created file are <b>(</b><i>mode</i><b> &amp; ~umask)</b>.</p>
+<p class="Pp">A FIFO special file is similar to a pipe, except that it is
+    created in a different way. Instead of being an anonymous communications
+    channel, a FIFO special file is entered into the filesystem by calling
+    <b>mkfifo</b>().</p>
+<p class="Pp">Once you have created a FIFO special file in this way, any process
+    can open it for reading or writing, in the same way as an ordinary file.
+    However, it has to be open at both ends simultaneously before you can
+    proceed to do any input or output operations on it. Opening a FIFO for
+    reading normally blocks until some other process opens the same FIFO for
+    writing, and vice versa. See <b>fifo</b>(7) for nonblocking handling of FIFO
+    special files.</p>
+<section class="Ss">
+<h2 class="Ss" id="mkfifoat()"><a class="permalink" href="#mkfifoat()">mkfifoat()</a></h2>
+<p class="Pp">The <b>mkfifoat</b>() function operates in exactly the same way as
+    <b>mkfifo</b>(), except for the differences described here.</p>
+<p class="Pp">If the pathname given in <i>pathname</i> is relative, then it is
+    interpreted relative to the directory referred to by the file descriptor
+    <i>dirfd</i> (rather than relative to the current working directory of the
+    calling process, as is done by <b>mkfifo</b>() for a relative pathname).</p>
+<p class="Pp">If <i>pathname</i> is relative and <i>dirfd</i> is the special
+    value <b>AT_FDCWD</b>, then <i>pathname</i> is interpreted relative to the
+    current working directory of the calling process (like <b>mkfifo</b>()).</p>
+<p class="Pp">If <i>pathname</i> is absolute, then <i>dirfd</i> is ignored.</p>
+<p class="Pp">See <b>openat</b>(2) for an explanation of the need for
+    <b>mkfifoat</b>().</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success <b>mkfifo</b>() and <b>mkfifoat</b>() return 0. On
+    error, -1 is returned and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>One of the directories in <i>pathname</i> did not allow search (execute)
+      permission.</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>(<b>mkfifoat</b>()) <i>pathname</i> is relative but <i>dirfd</i> is
+      neither <b>AT_FDCWD</b> nor a valid file descriptor.</dd>
+  <dt id="EDQUOT"><a class="permalink" href="#EDQUOT"><b>EDQUOT</b></a></dt>
+  <dd>The user's quota of disk blocks or inodes on the filesystem has been
+      exhausted.</dd>
+  <dt id="EEXIST"><a class="permalink" href="#EEXIST"><b>EEXIST</b></a></dt>
+  <dd><i>pathname</i> already exists. This includes the case where
+      <i>pathname</i> is a symbolic link, dangling or not.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd>Either the total length of <i>pathname</i> is greater than
+      <b>PATH_MAX</b>, or an individual filename component has a length greater
+      than <b>NAME_MAX</b>. In the GNU system, there is no imposed limit on
+      overall filename length, but some filesystems may place limits on the
+      length of a component.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>A directory component in <i>pathname</i> does not exist or is a dangling
+      symbolic link.</dd>
+  <dt id="ENOSPC"><a class="permalink" href="#ENOSPC"><b>ENOSPC</b></a></dt>
+  <dd>The directory or filesystem has no room for the new file.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>A component used as a directory in <i>pathname</i> is not, in fact, a
+      directory.</dd>
+  <dt id="ENOTDIR~2"><a class="permalink" href="#ENOTDIR~2"><b>ENOTDIR</b></a></dt>
+  <dd>(<b>mkfifoat</b>()) <i>pathname</i> is a relative pathname and
+      <i>dirfd</i> is a file descriptor referring to a file other than a
+      directory.</dd>
+  <dt id="EROFS"><a class="permalink" href="#EROFS"><b>EROFS</b></a></dt>
+  <dd><i>pathname</i> refers to a read-only filesystem.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>mkfifo (), mkfifoat ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>mkfifoat</b>() was added in glibc 2.4. It is implemented using
+    <b>mknodat</b>(2), available since Linux 2.6.16.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>mkfifo</b>(): POSIX.1-2001, POSIX.1-2008.</p>
+<p class="Pp"><b>mkfifoat</b>(): POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>mkfifo</b>(1), <b>close</b>(2), <b>open</b>(2), <b>read</b>(2),
+    <b>stat</b>(2), <b>umask</b>(2), <b>write</b>(2), <b>fifo</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

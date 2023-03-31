@@ -1,0 +1,321 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/08af84bd1bc395a1f5c4bb2b4662e6d327f1285c">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>sigaltstack(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">sigaltstack(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">sigaltstack(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">sigaltstack - set and/or get signal stack context</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;signal.h&gt;</b></pre>
+<pre><b>int sigaltstack(const stack_t *_Nullable restrict </b><i>ss</i><b>,</b>
+<b>                stack_t *_Nullable restrict </b><i>old_ss</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>sigaltstack</b>():</p>
+<pre><br>
+    _XOPEN_SOURCE &gt;= 500
+<br>
+        || /* Since glibc 2.12: */ _POSIX_C_SOURCE &gt;= 200809L
+<br>
+        || /* glibc &lt;= 2.19: */ _BSD_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>sigaltstack</b>() allows a thread to define a new alternate
+    signal stack and/or retrieve the state of an existing alternate signal
+    stack. An alternate signal stack is used during the execution of a signal
+    handler if the establishment of that handler (see <b>sigaction</b>(2))
+    requested it.</p>
+<p class="Pp">The normal sequence of events for using an alternate signal stack
+    is the following:</p>
+<dl class="Bl-tag">
+  <dt>1.</dt>
+  <dd>Allocate an area of memory to be used for the alternate signal stack.</dd>
+  <dt>2.</dt>
+  <dd>Use <b>sigaltstack</b>() to inform the system of the existence and
+      location of the alternate signal stack.</dd>
+  <dt>3.</dt>
+  <dd>When establishing a signal handler using <b>sigaction</b>(2), inform the
+      system that the signal handler should be executed on the alternate signal
+      stack by specifying the <b>SA_ONSTACK</b> flag.</dd>
+</dl>
+<p class="Pp">The <i>ss</i> argument is used to specify a new alternate signal
+    stack, while the <i>old_ss</i> argument is used to retrieve information
+    about the currently established signal stack. If we are interested in
+    performing just one of these tasks, then the other argument can be specified
+    as NULL.</p>
+<p class="Pp">The <i>stack_t</i> type used to type the arguments of this
+    function is defined as follows:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>typedef struct {
+<br>
+    void  *ss_sp;     /* Base address of stack */
+<br>
+    int    ss_flags;  /* Flags */
+<br>
+    size_t ss_size;   /* Number of bytes in stack */
+} stack_t;
+</pre>
+<br>
+<p class="Pp">To establish a new alternate signal stack, the fields of this
+    structure are set as follows:</p>
+<dl class="Bl-tag">
+  <dt id="ss.ss_flags"><a class="permalink" href="#ss.ss_flags"><i>ss.ss_flags</i></a></dt>
+  <dd>This field contains either 0, or the following flag:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="SS_AUTODISARM"><a class="permalink" href="#SS_AUTODISARM"><b>SS_AUTODISARM</b>
+    (since Linux 4.7)</a></dt>
+  <dd>Clear the alternate signal stack settings on entry to the signal handler.
+      When the signal handler returns, the previous alternate signal stack
+      settings are restored.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>This flag was added in order to make it safe to switch away from the
+      signal handler with <b>swapcontext</b>(3). Without this flag, a
+      subsequently handled signal will corrupt the state of the switched-away
+      signal handler. On kernels where this flag is not supported,
+      <b>sigaltstack</b>() fails with the error <b>EINVAL</b> when this flag is
+      supplied.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="ss.ss_sp"><a class="permalink" href="#ss.ss_sp"><i>ss.ss_sp</i></a></dt>
+  <dd>This field specifies the starting address of the stack. When a signal
+      handler is invoked on the alternate stack, the kernel automatically aligns
+      the address given in <i>ss.ss_sp</i> to a suitable address boundary for
+      the underlying hardware architecture.</dd>
+  <dt id="ss.ss_size"><a class="permalink" href="#ss.ss_size"><i>ss.ss_size</i></a></dt>
+  <dd>This field specifies the size of the stack. The constant <b>SIGSTKSZ</b>
+      is defined to be large enough to cover the usual size requirements for an
+      alternate signal stack, and the constant <b>MINSIGSTKSZ</b> defines the
+      minimum size required to execute a signal handler.</dd>
+</dl>
+<p class="Pp">To disable an existing stack, specify <i>ss.ss_flags</i> as
+    <b>SS_DISABLE</b>. In this case, the kernel ignores any other flags in
+    <i>ss.ss_flags</i> and the remaining fields in <i>ss</i>.</p>
+<p class="Pp">If <i>old_ss</i> is not NULL, then it is used to return
+    information about the alternate signal stack which was in effect prior to
+    the call to <b>sigaltstack</b>(). The <i>old_ss.ss_sp</i> and
+    <i>old_ss.ss_size</i> fields return the starting address and size of that
+    stack. The <i>old_ss.ss_flags</i> may return either of the following
+  values:</p>
+<dl class="Bl-tag">
+  <dt id="SS_ONSTACK"><a class="permalink" href="#SS_ONSTACK"><b>SS_ONSTACK</b></a></dt>
+  <dd>The thread is currently executing on the alternate signal stack. (Note
+      that it is not possible to change the alternate signal stack if the thread
+      is currently executing on it.)</dd>
+  <dt id="SS_DISABLE"><a class="permalink" href="#SS_DISABLE"><b>SS_DISABLE</b></a></dt>
+  <dd>The alternate signal stack is currently disabled.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Alternatively, this value is returned if the thread is currently executing
+      on an alternate signal stack that was established using the
+      <b>SS_AUTODISARM</b> flag. In this case, it is safe to switch away from
+      the signal handler with <b>swapcontext</b>(3). It is also possible to set
+      up a different alternative signal stack using a further call to
+      <b>sigaltstack</b>().</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="SS_AUTODISARM~2"><a class="permalink" href="#SS_AUTODISARM~2"><b>SS_AUTODISARM</b></a></dt>
+  <dd>The alternate signal stack has been marked to be autodisarmed as described
+      above.</dd>
+</dl>
+<p class="Pp">By specifying <i>ss</i> as NULL, and <i>old_ss</i> as a non-NULL
+    value, one can obtain the current settings for the alternate signal stack
+    without changing them.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp"><b>sigaltstack</b>() returns 0 on success, or -1 on failure with
+    <i>errno</i> set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>Either <i>ss</i> or <i>old_ss</i> is not NULL and points to an area
+      outside of the process's address space.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>ss</i> is not NULL and the <i>ss_flags</i> field contains an invalid
+      flag.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>The specified size of the new alternate signal stack <i>ss.ss_size</i> was
+      less than <b>MINSIGSTKSZ</b>.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>An attempt was made to change the alternate signal stack while it was
+      active (i.e., the thread was already executing on the current alternate
+      signal stack).</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>sigaltstack ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, SUSv2, SVr4.</p>
+<p class="Pp">The <b>SS_AUTODISARM</b> flag is a Linux extension.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The most common usage of an alternate signal stack is to handle
+    the <b>SIGSEGV</b> signal that is generated if the space available for the
+    standard stack is exhausted: in this case, a signal handler for
+    <b>SIGSEGV</b> cannot be invoked on the standard stack; if we wish to handle
+    it, we must use an alternate signal stack.</p>
+<p class="Pp">Establishing an alternate signal stack is useful if a thread
+    expects that it may exhaust its standard stack. This may occur, for example,
+    because the stack grows so large that it encounters the upwardly growing
+    heap, or it reaches a limit established by a call to
+    <b>setrlimit(RLIMIT_STACK, &amp;rlim)</b>. If the standard stack is
+    exhausted, the kernel sends the thread a <b>SIGSEGV</b> signal. In these
+    circumstances the only way to catch this signal is on an alternate signal
+    stack.</p>
+<p class="Pp">On most hardware architectures supported by Linux, stacks grow
+    downward. <b>sigaltstack</b>() automatically takes account of the direction
+    of stack growth.</p>
+<p class="Pp">Functions called from a signal handler executing on an alternate
+    signal stack will also use the alternate signal stack. (This also applies to
+    any handlers invoked for other signals while the thread is executing on the
+    alternate signal stack.) Unlike the standard stack, the system does not
+    automatically extend the alternate signal stack. Exceeding the allocated
+    size of the alternate signal stack will lead to unpredictable results.</p>
+<p class="Pp">A successful call to <b>execve</b>(2) removes any existing
+    alternate signal stack. A child process created via <b>fork</b>(2) inherits
+    a copy of its parent's alternate signal stack settings. The same is also
+    true for a child process created using <b>clone</b>(2), unless the clone
+    flags include <b>CLONE_VM</b> and do not include <b>CLONE_VFORK</b>, in
+    which case any alternate signal stack that was established in the parent is
+    disabled in the child process.</p>
+<p class="Pp"><b>sigaltstack</b>() supersedes the older <b>sigstack</b>() call.
+    For backward compatibility, glibc also provides <b>sigstack</b>(). All new
+    applications should be written using <b>sigaltstack</b>().</p>
+<section class="Ss">
+<h2 class="Ss" id="History"><a class="permalink" href="#History">History</a></h2>
+<p class="Pp">4.2BSD had a <b>sigstack</b>() system call. It used a slightly
+    different struct, and had the major disadvantage that the caller had to know
+    the direction of stack growth.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">In Linux 2.2 and earlier, the only flag that could be specified in
+    <i>ss.sa_flags</i> was <b>SS_DISABLE</b>. In the lead up to the release of
+    the Linux 2.4 kernel, a change was made to allow <b>sigaltstack</b>() to
+    allow <i>ss.ss_flags==SS_ONSTACK</i> with the same meaning as
+    <i>ss.ss_flags==0</i> (i.e., the inclusion of <b>SS_ONSTACK</b> in
+    <i>ss.ss_flags</i> is a no-op). On other implementations, and according to
+    POSIX.1, <b>SS_ONSTACK</b> appears only as a reported flag in
+    <i>old_ss.ss_flags</i>. On Linux, there is no need ever to specify
+    <b>SS_ONSTACK</b> in <i>ss.ss_flags</i>, and indeed doing so should be
+    avoided on portability grounds: various other systems give an error if
+    <b>SS_ONSTACK</b> is specified in <i>ss.ss_flags</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The following code segment demonstrates the use of
+    <b>sigaltstack</b>() (and <b>sigaction</b>(2)) to install an alternate
+    signal stack that is employed by a handler for the <b>SIGSEGV</b>
+  signal:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>stack_t ss;
+ss.ss_sp = malloc(SIGSTKSZ);
+if (ss.ss_sp == NULL) {
+<br>
+    perror("malloc");
+<br>
+    exit(EXIT_FAILURE);
+}
+ss.ss_size = SIGSTKSZ;
+ss.ss_flags = 0;
+if (sigaltstack(&amp;ss, NULL) == -1) {
+<br>
+    perror("sigaltstack");
+<br>
+    exit(EXIT_FAILURE);
+}
+sa.sa_flags = SA_ONSTACK;
+sa.sa_handler = handler();      /* Address of a signal handler */
+sigemptyset(&amp;sa.sa_mask);
+if (sigaction(SIGSEGV, &amp;sa, NULL) == -1) {
+<br>
+    perror("sigaction");
+<br>
+    exit(EXIT_FAILURE);
+}
+</pre>
+<br>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>execve</b>(2), <b>setrlimit</b>(2), <b>sigaction</b>(2),
+    <b>siglongjmp</b>(3), <b>sigsetjmp</b>(3), <b>signal</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

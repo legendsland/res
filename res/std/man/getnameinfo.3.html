@@ -1,0 +1,289 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   %%%LICENSE_START(PUBLIC_DOMAIN)
+   This page is in the public domain.
+   %%%LICENSE_END
+  
+   Almost all details are from RFC 2553.
+  
+   2004-12-14, mtk, Added EAI_OVERFLOW error
+   2004-12-14 Fixed description of error return
+   --><head>
+<meta name="dc.identifier" content="res/9ab9785cb5c1ac8ea94bbe0febc86db9be8c6b46">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>getnameinfo(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">getnameinfo(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">getnameinfo(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getnameinfo - address-to-name translation in protocol-independent
+    manner</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/socket.h&gt;</b>
+<b>#include &lt;netdb.h&gt;</b></pre>
+<pre><b>int getnameinfo(const struct sockaddr *restrict </b><i>addr</i><b>, socklen_t </b><i>addrlen</i><b>,</b>
+<b>                char </b><i>host</i><b>[_Nullable restrict .</b><i>hostlen</i><b>],</b>
+<b>                socklen_t </b><i>hostlen</i><b>,</b>
+<b>                char </b><i>serv</i><b>[_Nullable restrict .</b><i>servlen</i><b>],</b>
+<b>                socklen_t </b><i>servlen</i><b>,</b>
+<b>                int </b><i>flags</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>getnameinfo</b>():</p>
+<pre><br>
+    Since glibc 2.22:
+<br>
+        _POSIX_C_SOURCE &gt;= 200112L
+<br>
+    glibc 2.21 and earlier:
+<br>
+        _POSIX_C_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>getnameinfo</b>() function is the inverse of
+    <b>getaddrinfo</b>(3): it converts a socket address to a corresponding host
+    and service, in a protocol-independent manner. It combines the functionality
+    of <b>gethostbyaddr</b>(3) and <b>getservbyport</b>(3), but unlike those
+    functions, <b>getnameinfo</b>() is reentrant and allows programs to
+    eliminate IPv4-versus-IPv6 dependencies.</p>
+<p class="Pp">The <i>addr</i> argument is a pointer to a generic socket address
+    structure (of type <i>sockaddr_in</i> or <i>sockaddr_in6</i>) of size
+    <i>addrlen</i> that holds the input IP address and port number. The
+    arguments <i>host</i> and <i>serv</i> are pointers to caller-allocated
+    buffers (of size <i>hostlen</i> and <i>servlen</i> respectively) into which
+    <b>getnameinfo</b>() places null-terminated strings containing the host and
+    service names respectively.</p>
+<p class="Pp">The caller can specify that no hostname (or no service name) is
+    required by providing a NULL <i>host</i> (or <i>serv</i>) argument or a zero
+    <i>hostlen</i> (or <i>servlen</i>) argument. However, at least one of
+    hostname or service name must be requested.</p>
+<p class="Pp">The <i>flags</i> argument modifies the behavior of
+    <b>getnameinfo</b>() as follows:</p>
+<dl class="Bl-tag">
+  <dt id="NI_NAMEREQD"><a class="permalink" href="#NI_NAMEREQD"><b>NI_NAMEREQD</b></a></dt>
+  <dd>If set, then an error is returned if the hostname cannot be
+    determined.</dd>
+  <dt id="NI_DGRAM"><a class="permalink" href="#NI_DGRAM"><b>NI_DGRAM</b></a></dt>
+  <dd>If set, then the service is datagram (UDP) based rather than stream (TCP)
+      based. This is required for the few ports (512–514) that have
+      different services for UDP and TCP.</dd>
+  <dt id="NI_NOFQDN"><a class="permalink" href="#NI_NOFQDN"><b>NI_NOFQDN</b></a></dt>
+  <dd>If set, return only the hostname part of the fully qualified domain name
+      for local hosts.</dd>
+  <dt id="NI_NUMERICHOST"><a class="permalink" href="#NI_NUMERICHOST"><b>NI_NUMERICHOST</b></a></dt>
+  <dd>If set, then the numeric form of the hostname is returned. (When not set,
+      this will still happen in case the node's name cannot be determined.)</dd>
+  <dt id="NI_NUMERICSERV"><a class="permalink" href="#NI_NUMERICSERV"><b>NI_NUMERICSERV</b></a></dt>
+  <dd>If set, then the numeric form of the service address is returned. (When
+      not set, this will still happen in case the service's name cannot be
+      determined.)</dd>
+</dl>
+<section class="Ss">
+<h2 class="Ss" id="Extensions_to_getnameinfo()_for_Internationalized_Domain_Names"><a class="permalink" href="#Extensions_to_getnameinfo()_for_Internationalized_Domain_Names">Extensions
+  to getnameinfo() for Internationalized Domain Names</a></h2>
+<p class="Pp">Starting with glibc 2.3.4, <b>getnameinfo</b>() has been extended
+    to selectively allow hostnames to be transparently converted to and from the
+    Internationalized Domain Name (IDN) format (see RFC 3490,
+    <i>Internationalizing Domain Names in Applications (IDNA)</i>). Three new
+    flags are defined:</p>
+<dl class="Bl-tag">
+  <dt id="NI_IDN"><a class="permalink" href="#NI_IDN"><b>NI_IDN</b></a></dt>
+  <dd>If this flag is used, then the name found in the lookup process is
+      converted from IDN format to the locale's encoding if necessary.
+      ASCII-only names are not affected by the conversion, which makes this flag
+      usable in existing programs and environments.</dd>
+  <dt id="NI_IDN_ALLOW_UNASSIGNED"><a class="permalink" href="#NI_IDN_ALLOW_UNASSIGNED"><b>NI_IDN_ALLOW_UNASSIGNED</b>,
+    <b>NI_IDN_USE_STD3_ASCII_RULES</b></a></dt>
+  <dd>Setting these flags will enable the IDNA_ALLOW_UNASSIGNED (allow
+      unassigned Unicode code points) and IDNA_USE_STD3_ASCII_RULES (check
+      output to make sure it is a STD3 conforming hostname) flags respectively
+      to be used in the IDNA handling.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, 0 is returned, and node and service names, if
+    requested, are filled with null-terminated strings, possibly truncated to
+    fit the specified buffer lengths. On error, one of the following nonzero
+    error codes is returned:</p>
+<dl class="Bl-tag">
+  <dt id="EAI_AGAIN"><a class="permalink" href="#EAI_AGAIN"><b>EAI_AGAIN</b></a></dt>
+  <dd>The name could not be resolved at this time. Try again later.</dd>
+  <dt id="EAI_BADFLAGS"><a class="permalink" href="#EAI_BADFLAGS"><b>EAI_BADFLAGS</b></a></dt>
+  <dd>The <i>flags</i> argument has an invalid value.</dd>
+  <dt id="EAI_FAIL"><a class="permalink" href="#EAI_FAIL"><b>EAI_FAIL</b></a></dt>
+  <dd>A nonrecoverable error occurred.</dd>
+  <dt id="EAI_FAMILY"><a class="permalink" href="#EAI_FAMILY"><b>EAI_FAMILY</b></a></dt>
+  <dd>The address family was not recognized, or the address length was invalid
+      for the specified family.</dd>
+  <dt id="EAI_MEMORY"><a class="permalink" href="#EAI_MEMORY"><b>EAI_MEMORY</b></a></dt>
+  <dd>Out of memory.</dd>
+  <dt id="EAI_NONAME"><a class="permalink" href="#EAI_NONAME"><b>EAI_NONAME</b></a></dt>
+  <dd>The name does not resolve for the supplied arguments. <b>NI_NAMEREQD</b>
+      is set and the host's name cannot be located, or neither hostname nor
+      service name were requested.</dd>
+  <dt id="EAI_OVERFLOW"><a class="permalink" href="#EAI_OVERFLOW"><b>EAI_OVERFLOW</b></a></dt>
+  <dd>The buffer pointed to by <i>host</i> or <i>serv</i> was too small.</dd>
+  <dt id="EAI_SYSTEM"><a class="permalink" href="#EAI_SYSTEM"><b>EAI_SYSTEM</b></a></dt>
+  <dd>A system error occurred. The error code can be found in <i>errno</i>.</dd>
+</dl>
+<p class="Pp">The <b>gai_strerror</b>(3) function translates these error codes
+    to a human readable string, suitable for error reporting.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FILES"><a class="permalink" href="#FILES">FILES</a></h1>
+<p class="Pp"><i>/etc/hosts</i>
+  <br>
+  <i>/etc/nsswitch.conf</i>
+  <br>
+  <i>/etc/resolv.conf</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>getnameinfo ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe env locale</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>getnameinfo</b>() is provided since glibc 2.1.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, RFC&nbsp;2553.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">In order to assist the programmer in choosing reasonable sizes for
+    the supplied buffers, <i>&lt;netdb.h&gt;</i> defines the constants</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>#define NI_MAXHOST      1025
+#define NI_MAXSERV      32
+</pre>
+<br>
+<p class="Pp">Since glibc 2.8, these definitions are exposed only if suitable
+    feature test macros are defined, namely: <b>_GNU_SOURCE</b>,
+    <b>_DEFAULT_SOURCE</b> (since glibc 2.19), or (in glibc versions up to and
+    including 2.19) <b>_BSD_SOURCE</b> or <b>_SVID_SOURCE</b>.</p>
+<p class="Pp">The former is the constant <b>MAXDNAME</b> in recent versions of
+    BIND's <i>&lt;arpa/nameser.h&gt;</i> header file. The latter is a guess
+    based on the services listed in the current Assigned Numbers RFC.</p>
+<p class="Pp">Before glibc 2.2, the <i>hostlen</i> and <i>servlen</i> arguments
+    were typed as <i>size_t</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The following code tries to get the numeric hostname and service
+    name, for a given socket address. Note that there is no hardcoded reference
+    to a particular address family.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct sockaddr *addr;     /* input */
+socklen_t addrlen;         /* input */
+char hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
+if (getnameinfo(addr, addrlen, hbuf, sizeof(hbuf), sbuf,
+<br>
+            sizeof(sbuf), NI_NUMERICHOST | NI_NUMERICSERV) == 0)
+<br>
+    printf("host=%s, serv=%s\n", hbuf, sbuf);
+</pre>
+<br>
+<p class="Pp">The following version checks if the socket address has a reverse
+    address mapping.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct sockaddr *addr;     /* input */
+socklen_t addrlen;         /* input */
+char hbuf[NI_MAXHOST];
+if (getnameinfo(addr, addrlen, hbuf, sizeof(hbuf),
+<br>
+            NULL, 0, NI_NAMEREQD))
+<br>
+    printf("could not resolve hostname");
+else
+<br>
+    printf("host=%s\n", hbuf);
+</pre>
+<br>
+<p class="Pp">An example program using <b>getnameinfo</b>() can be found in
+    <b>getaddrinfo</b>(3).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>accept</b>(2), <b>getpeername</b>(2), <b>getsockname</b>(2),
+    <b>recvfrom</b>(2), <b>socket</b>(2), <b>getaddrinfo</b>(3),
+    <b>gethostbyaddr</b>(3), <b>getservbyname</b>(3), <b>getservbyport</b>(3),
+    <b>inet_ntop</b>(3), <b>hosts</b>(5), <b>services</b>(5),
+    <b>hostname</b>(7), <b>named</b>(8)</p>
+<p class="Pp">R. Gilligan, S. Thomson, J. Bound and W. Stevens, <i>Basic Socket
+    Interface Extensions for IPv6</i>, RFC&nbsp;2553, March 1999.</p>
+<p class="Pp">Tatsuya Jinmei and Atsushi Onoe, <i>An Extension of Format for
+    IPv6 Scoped Addresses</i>, internet draft, work in progress
+    <a class="Lk" href="ftp://ftp.ietf.org/internet-drafts/draft-ietf-ipngwg-scopedaddr-format-02.txt">ftp://ftp.ietf.org/internet-drafts/draft-ietf-ipngwg-scopedaddr-format-02.txt</a>.</p>
+<p class="Pp">Craig Metz, <i>Protocol Independence Using the Sockets API</i>,
+    Proceedings of the freenix track: 2000 USENIX annual technical conference,
+    June 2000
+    <a class="Lk" href="http://www.usenix.org/publications/library/proceedings/usenix2000/freenix/metzprotocol.html">http://www.usenix.org/publications/library/proceedings/usenix2000/freenix/metzprotocol.html</a>.</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

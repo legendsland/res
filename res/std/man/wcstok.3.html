@@ -1,0 +1,142 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) Bruno Haible <haible@clisp.cons.org>
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+  
+   References consulted:
+     GNU glibc-2 source code and manual
+     Dinkumware C library reference http://www.dinkumware.com/
+     OpenGroup's Single UNIX specification http://www.UNIX-systems.org/online.html
+     ISO/IEC 9899:1999
+   --><head>
+<meta name="dc.identifier" content="res/03d61f6791b2f40a6a9e5436a586aecc1bd0632b">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>wcstok(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">wcstok(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">wcstok(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">wcstok - split wide-character string into tokens</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;wchar.h&gt;</b></pre>
+<pre><b>wchar_t *wcstok(wchar_t *restrict </b><i>wcs</i><b>, const wchar_t *restrict </b><i>delim</i><b>,</b>
+<b>                wchar_t **restrict </b><i>ptr</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>wcstok</b>() function is the wide-character equivalent of
+    the <b>strtok</b>(3) function, with an added argument to make it
+    multithread-safe. It can be used to split a wide-character string <i>wcs</i>
+    into tokens, where a token is defined as a substring not containing any
+    wide-characters from <i>delim</i>.</p>
+<p class="Pp">The search starts at <i>wcs</i>, if <i>wcs</i> is not NULL, or at
+    <i>*ptr</i>, if <i>wcs</i> is NULL. First, any delimiter wide-characters are
+    skipped, that is, the pointer is advanced beyond any wide-characters which
+    occur in <i>delim</i>. If the end of the wide-character string is now
+    reached, <b>wcstok</b>() returns NULL, to indicate that no tokens were
+    found, and stores an appropriate value in <i>*ptr</i>, so that subsequent
+    calls to <b>wcstok</b>() will continue to return NULL. Otherwise, the
+    <b>wcstok</b>() function recognizes the beginning of a token and returns a
+    pointer to it, but before doing that, it zero-terminates the token by
+    replacing the next wide-character which occurs in <i>delim</i> with a null
+    wide character (L'\0'), and it updates <i>*ptr</i> so that subsequent calls
+    will continue searching after the end of recognized token.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <b>wcstok</b>() function returns a pointer to the next token,
+    or NULL if no further token was found.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>wcstok ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, C99.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The original <i>wcs</i> wide-character string is destructively
+    modified during the operation.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The following code loops over the tokens contained in a
+    wide-character string.</p>
+<p class="Pp"></p>
+<pre>wchar_t *wcs = ...;
+wchar_t *token;
+wchar_t *state;
+for (token = wcstok(wcs, L" \t\n", &amp;state);
+<br>
+    token != NULL;
+<br>
+    token = wcstok(NULL, L" \t\n", &amp;state)) {
+<br>
+    ...
+}
+</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>strtok</b>(3), <b>wcschr</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,399 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/a207979c65ebb7f443a9c0c7e5c6ca8aa2834808">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>PTHREAD_CLEANUP_POP(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">PTHREAD_CLEANUP_POP(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">PTHREAD_CLEANUP_POP(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pthread_cleanup_pop, pthread_cleanup_push — establish
+    cancellation handlers</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;pthread.h&gt;</pre>
+<pre>void pthread_cleanup_pop(int <i>execute</i>);
+void pthread_cleanup_push(void (*<i>routine</i>)(void*), void *<i>arg</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>pthread_cleanup_pop</i>() function shall remove the routine
+    at the top of the calling thread's cancellation cleanup stack and optionally
+    invoke it (if <i>execute</i> is non-zero).</p>
+<p class="Pp">The <i>pthread_cleanup_push</i>() function shall push the
+    specified cancellation cleanup handler <i>routine</i> onto the calling
+    thread's cancellation cleanup stack. The cancellation cleanup handler shall
+    be popped from the cancellation cleanup stack and invoked with the argument
+    <i>arg</i> when:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>The thread exits (that is, calls <i>pthread_exit</i>()).</dd>
+  <dt> *</dt>
+  <dd>The thread acts upon a cancellation request.</dd>
+  <dt> *</dt>
+  <dd>The thread calls <i>pthread_cleanup_pop</i>() with a non-zero
+      <i>execute</i> argument.</dd>
+</dl>
+<p class="Pp">It is unspecified whether <i>pthread_cleanup_push</i>() and
+    <i>pthread_cleanup_pop</i>() are macros or functions. If a macro definition
+    is suppressed in order to access an actual function, or a program defines an
+    external identifier with any of these names, the behavior is undefined. The
+    application shall ensure that they appear as statements, and in pairs within
+    the same lexical scope (that is, the <i>pthread_cleanup_push</i>() macro may
+    be thought to expand to a token list whose first token is <b>'{'</b> with
+    <i>pthread_cleanup_pop</i>() expanding to a token list whose last token is
+    the corresponding <b>'}'</b>).</p>
+<p class="Pp">The effect of calling <i>longjmp</i>() or <i>siglongjmp</i>() is
+    undefined if there have been any calls to <i>pthread_cleanup_push</i>() or
+    <i>pthread_cleanup_pop</i>() made without the matching call since the jump
+    buffer was filled. The effect of calling <i>longjmp</i>() or
+    <i>siglongjmp</i>() from inside a cancellation cleanup handler is also
+    undefined unless the jump buffer was also filled in the cancellation cleanup
+    handler.</p>
+<p class="Pp">The effect of the use of <b>return</b>, <b>break</b>,
+    <b>continue</b>, and <b>goto</b> to prematurely leave a code block described
+    by a pair of <i>pthread_cleanup_push</i>() and <i>pthread_cleanup_pop</i>()
+    functions calls is undefined.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <i>pthread_cleanup_push</i>() and <i>pthread_cleanup_pop</i>()
+    functions shall not return a value.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">No errors are defined.</p>
+<p class="Pp">These functions shall not return an error code of
+  <b>[EINTR]</b>.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The following is an example using thread primitives to implement a
+    cancelable, writers-priority read-write lock:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>typedef struct {
+<br>
+    pthread_mutex_t lock;
+<br>
+    pthread_cond_t rcond,
+<br>
+        wcond;
+<br>
+    int lock_count; /* &lt; 0 .. Held by writer. */
+<br>
+                    /* &gt; 0 .. Held by lock_count readers. */
+<br>
+                    /* = 0 .. Held by nobody. */
+<br>
+    int waiting_writers; /* Count of waiting writers. */
+} rwlock;</pre>
+<pre>void
+waiting_reader_cleanup(void *arg)
+{
+<br>
+    rwlock *l;</pre>
+<pre><br>
+    l = (rwlock *) arg;
+<br>
+    pthread_mutex_unlock(&amp;l-&gt;lock);
+}</pre>
+<pre>void
+lock_for_read(rwlock *l)
+{
+<br>
+    pthread_mutex_lock(&amp;l-&gt;lock);
+<br>
+    pthread_cleanup_push(waiting_reader_cleanup, l);
+<br>
+    while ((l-&gt;lock_count &lt; 0) || (l-&gt;waiting_writers != 0))
+<br>
+        pthread_cond_wait(&amp;l-&gt;rcond, &amp;l-&gt;lock);
+<br>
+    l-&gt;lock_count++;
+<br>
+   /*
+<br>
+    * Note the pthread_cleanup_pop executes
+<br>
+    * waiting_reader_cleanup.
+<br>
+    */
+<br>
+    pthread_cleanup_pop(1);
+}</pre>
+<pre>void
+release_read_lock(rwlock *l)
+{
+<br>
+    pthread_mutex_lock(&amp;l-&gt;lock);
+<br>
+    if (--l-&gt;lock_count == 0)
+<br>
+        pthread_cond_signal(&amp;l-&gt;wcond);
+<br>
+    pthread_mutex_unlock(&amp;l-&gt;lock);
+}</pre>
+<pre>void
+waiting_writer_cleanup(void *arg)
+{
+<br>
+    rwlock *l;</pre>
+<pre><br>
+    l = (rwlock *) arg;
+<br>
+    if ((--l-&gt;waiting_writers == 0) &amp;&amp; (l-&gt;lock_count &gt;= 0)) {
+<br>
+       /*
+<br>
+        * This only happens if we have been canceled. If the
+<br>
+        * lock is not held by a writer, there may be readers who
+<br>
+        * were blocked because waiting_writers was positive; they
+<br>
+        * can now be unblocked.
+<br>
+        */
+<br>
+        pthread_cond_broadcast(&amp;l-&gt;rcond);
+<br>
+    }
+<br>
+    pthread_mutex_unlock(&amp;l-&gt;lock);
+}</pre>
+<pre>void
+lock_for_write(rwlock *l)
+{
+<br>
+    pthread_mutex_lock(&amp;l-&gt;lock);
+<br>
+    l-&gt;waiting_writers++;
+<br>
+    pthread_cleanup_push(waiting_writer_cleanup, l);
+<br>
+    while (l-&gt;lock_count != 0)
+<br>
+        pthread_cond_wait(&amp;l-&gt;wcond, &amp;l-&gt;lock);
+<br>
+    l-&gt;lock_count = -1;
+<br>
+   /*
+<br>
+    * Note the pthread_cleanup_pop executes
+<br>
+    * waiting_writer_cleanup.
+<br>
+    */
+<br>
+    pthread_cleanup_pop(1);
+}</pre>
+<pre>void
+release_write_lock(rwlock *l)
+{
+<br>
+    pthread_mutex_lock(&amp;l-&gt;lock);
+<br>
+    l-&gt;lock_count = 0;
+<br>
+    if (l-&gt;waiting_writers == 0)
+<br>
+        pthread_cond_broadcast(&amp;l-&gt;rcond);
+<br>
+    else
+<br>
+        pthread_cond_signal(&amp;l-&gt;wcond);
+<br>
+    pthread_mutex_unlock(&amp;l-&gt;lock);
+}</pre>
+<pre>/*
+<br>
+ * This function is called to initialize the read/write lock.
+<br>
+ */
+void
+initialize_rwlock(rwlock *l)
+{
+<br>
+    pthread_mutex_init(&amp;l-&gt;lock, pthread_mutexattr_default);
+<br>
+    pthread_cond_init(&amp;l-&gt;wcond, pthread_condattr_default);
+<br>
+    pthread_cond_init(&amp;l-&gt;rcond, pthread_condattr_default);
+<br>
+    l-&gt;lock_count = 0;
+<br>
+    l-&gt;waiting_writers = 0;
+}</pre>
+<pre>reader_thread()
+{
+<br>
+    lock_for_read(&amp;lock);
+<br>
+    pthread_cleanup_push(release_read_lock, &amp;lock);
+<br>
+   /*
+<br>
+    * Thread has read lock.
+<br>
+    */
+<br>
+    pthread_cleanup_pop(1);
+}</pre>
+<pre>writer_thread()
+{
+<br>
+    lock_for_write(&amp;lock);
+<br>
+    pthread_cleanup_push(release_write_lock, &amp;lock);
+<br>
+   /*
+<br>
+    * Thread has write lock.
+<br>
+    */
+pthread_cleanup_pop(1);
+}</pre>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The two routines that push and pop cancellation cleanup handlers,
+    <i>pthread_cleanup_push</i>() and <i>pthread_cleanup_pop</i>(), can be
+    thought of as left and right-parentheses. They always need to be
+  matched.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The restriction that the two routines that push and pop
+    cancellation cleanup handlers, <i>pthread_cleanup_push</i>() and
+    <i>pthread_cleanup_pop</i>(), have to appear in the same lexical scope
+    allows for efficient macro or compiler implementations and efficient storage
+    management. A sample implementation of these routines as macros might look
+    like this:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#define pthread_cleanup_push(rtn,arg) { \
+<br>
+    struct _pthread_handler_rec __cleanup_handler, **__head; \
+<br>
+    __cleanup_handler.rtn = rtn; \
+<br>
+    __cleanup_handler.arg = arg; \
+<br>
+    (void) pthread_getspecific(_pthread_handler_key, &amp;__head); \
+<br>
+    __cleanup_handler.next = *__head; \
+<br>
+    *__head = &amp;__cleanup_handler;</pre>
+<pre>#define pthread_cleanup_pop(ex) \
+<br>
+    *__head = __cleanup_handler.next; \
+<br>
+    if (ex) (*__cleanup_handler.rtn)(__cleanup_handler.arg); \
+}</pre>
+</div>
+<p class="Pp">A more ambitious implementation of these routines might do even
+    better by allowing the compiler to note that the cancellation cleanup
+    handler is a constant and can be expanded inline.</p>
+<p class="Pp">This volume of POSIX.1‐2017 currently leaves unspecified
+    the effect of calling <i>longjmp</i>() from a signal handler executing in a
+    POSIX System Interfaces function. If an implementation wants to allow this
+    and give the programmer reasonable behavior, the <i>longjmp</i>() function
+    has to call all cancellation cleanup handlers that have been pushed but not
+    popped since the time <i>setjmp</i>() was called.</p>
+<p class="Pp">Consider a multi-threaded function called by a thread that uses
+    signals. If a signal were delivered to a signal handler during the operation
+    of <i>qsort</i>() and that handler were to call <i>longjmp</i>() (which, in
+    turn, did <i>not</i> call the cancellation cleanup handlers) the helper
+    threads created by the <i>qsort</i>() function would not be canceled.
+    Instead, they would continue to execute and write into the argument array
+    even though the array might have been popped off the stack.</p>
+<p class="Pp">Note that the specified cleanup handling mechanism is especially
+    tied to the C language and, while the requirement for a uniform mechanism
+    for expressing cleanup is language-independent, the mechanism used in other
+    languages may be quite different. In addition, this mechanism is really only
+    necessary due to the lack of a real exception mechanism in the C language,
+    which would be the ideal solution.</p>
+<p class="Pp">There is no notion of a cancellation cleanup-safe function. If an
+    application has no cancellation points in its signal handlers, blocks any
+    signal whose handler may have cancellation points while calling async-unsafe
+    functions, or disables cancellation while calling async-unsafe functions,
+    all functions may be safely called from cancellation cleanup routines.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>pthread_cancel</i>()</i>,
+    <i><i>pthread_setcancelstate</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;pthread.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

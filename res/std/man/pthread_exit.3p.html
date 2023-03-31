@@ -1,0 +1,157 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/e6678692033123dc33d5fb58783ee60c0535a2e9">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>PTHREAD_EXIT(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">PTHREAD_EXIT(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">PTHREAD_EXIT(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pthread_exit — thread termination</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;pthread.h&gt;</pre>
+<pre>void pthread_exit(void *<i>value_ptr</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>pthread_exit</i>() function shall terminate the calling
+    thread and make the value <i>value_ptr</i> available to any successful join
+    with the terminating thread. Any cancellation cleanup handlers that have
+    been pushed and not yet popped shall be popped in the reverse order that
+    they were pushed and then executed. After all cancellation cleanup handlers
+    have been executed, if the thread has any thread-specific data, appropriate
+    destructor functions shall be called in an unspecified order. Thread
+    termination does not release any application visible process resources,
+    including, but not limited to, mutexes and file descriptors, nor does it
+    perform any process-level cleanup actions, including, but not limited to,
+    calling any <i>atexit</i>() routines that may exist.</p>
+<p class="Pp">An implicit call to <i>pthread_exit</i>() is made when a thread
+    other than the thread in which <i>main</i>() was first invoked returns from
+    the start routine that was used to create it. The function's return value
+    shall serve as the thread's exit status.</p>
+<p class="Pp">The behavior of <i>pthread_exit</i>() is undefined if called from
+    a cancellation cleanup handler or destructor function that was invoked as a
+    result of either an implicit or explicit call to <i>pthread_exit</i>().</p>
+<p class="Pp">After a thread has terminated, the result of access to local
+    (auto) variables of the thread is undefined. Thus, references to local
+    variables of the exiting thread should not be used for the
+    <i>pthread_exit</i>() <i>value_ptr</i> parameter value.</p>
+<p class="Pp">The process shall exit with an exit status of 0 after the last
+    thread has been terminated. The behavior shall be as if the implementation
+    called <i>exit</i>() with a zero argument at thread termination time.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <i>pthread_exit</i>() function cannot return to its
+  caller.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">No errors are defined.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The normal mechanism by which a thread terminates is to return
+    from the routine that was specified in the <i>pthread_create</i>() call that
+    started it. The <i>pthread_exit</i>() function provides the capability for a
+    thread to terminate without requiring a return from the start routine of
+    that thread, thereby providing a function analogous to <i>exit</i>().</p>
+<p class="Pp">Regardless of the method of thread termination, any cancellation
+    cleanup handlers that have been pushed and not yet popped are executed, and
+    the destructors for any existing thread-specific data are executed. This
+    volume of POSIX.1‐2017 requires that cancellation cleanup handlers be
+    popped and called in order. After all cancellation cleanup handlers have
+    been executed, thread-specific data destructors are called, in an
+    unspecified order, for each item of thread-specific data that exists in the
+    thread. This ordering is necessary because cancellation cleanup handlers may
+    rely on thread-specific data.</p>
+<p class="Pp">As the meaning of the status is determined by the application
+    (except when the thread has been canceled, in which case it is
+    PTHREAD_CANCELED), the implementation has no idea what an illegal status
+    value is, which is why no address error checking is done.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>exit</i>()</i>, <i><i>pthread_create</i>()</i>,
+    <i><i>pthread_join</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;pthread.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

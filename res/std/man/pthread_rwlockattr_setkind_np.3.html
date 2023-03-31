@@ -1,0 +1,132 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+  Copyright (c) 2010 Novell Inc., written by Robert Schweikert
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/7ff3ce8fc0a5a8f5e074cbb602764b3d44f866ab">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>pthread_rwlockattr_setkind_np(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">pthread_rwlockattr_setkind_np(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">pthread_rwlockattr_setkind_np(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pthread_rwlockattr_setkind_np, pthread_rwlockattr_getkind_np -
+    set/get the read-write lock kind of the thread read-write lock attribute
+    object</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">POSIX threads library (<i>libpthread</i>, <i>-lpthread</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;pthread.h&gt;</b></pre>
+<pre><b>int pthread_rwlockattr_setkind_np(pthread_rwlockattr_t *</b><i>attr</i><b>,</b>
+<b>                       int </b><i>pref</i><b>);</b>
+<b>int pthread_rwlockattr_getkind_np(</b>
+<b>                       const pthread_rwlockattr_t *restrict </b><i>attr</i><b>,</b>
+<b>                       int *restrict </b><i>pref</i><b>);</b></pre>
+<pre></pre>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>pthread_rwlockattr_setkind_np</b>(),
+    <b>pthread_rwlockattr_getkind_np</b>():</p>
+<pre><br>
+    _XOPEN_SOURCE &gt;= 500 || _POSIX_C_SOURCE &gt;= 200809L</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>pthread_rwlockattr_setkind_np</b>() function sets the
+    "lock kind" attribute of the read-write lock attribute object
+    referred to by <i>attr</i> to the value specified in <i>pref</i>. The
+    argument <i>pref</i> may be set to one of the following:</p>
+<dl class="Bl-tag">
+  <dt id="PTHREAD_RWLOCK_PREFER_READER_NP"><a class="permalink" href="#PTHREAD_RWLOCK_PREFER_READER_NP"><b>PTHREAD_RWLOCK_PREFER_READER_NP</b></a></dt>
+  <dd>This is the default. A thread may hold multiple read locks; that is, read
+      locks are recursive. According to The Single Unix Specification, the
+      behavior is unspecified when a reader tries to place a lock, and there is
+      no write lock but writers are waiting. Giving preference to the reader, as
+      is set by <b>PTHREAD_RWLOCK_PREFER_READER_NP</b>, implies that the reader
+      will receive the requested lock, even if a writer is waiting. As long as
+      there are readers, the writer will be starved.</dd>
+  <dt id="PTHREAD_RWLOCK_PREFER_WRITER_NP"><a class="permalink" href="#PTHREAD_RWLOCK_PREFER_WRITER_NP"><b>PTHREAD_RWLOCK_PREFER_WRITER_NP</b></a></dt>
+  <dd>This is intended as the write lock analog of
+      <b>PTHREAD_RWLOCK_PREFER_READER_NP</b>. This is ignored by glibc because
+      the POSIX requirement to support recursive read locks would cause this
+      option to create trivial deadlocks; instead use
+      <b>PTHREAD_RWLOCK_PREFER_WRITER_NONRECURSIVE_NP</b> which ensures the
+      application developer will not take recursive read locks thus avoiding
+      deadlocks.</dd>
+  <dt id="PTHREAD_RWLOCK_PREFER_WRITER_NONRECURSIVE_NP"><a class="permalink" href="#PTHREAD_RWLOCK_PREFER_WRITER_NONRECURSIVE_NP"><b>PTHREAD_RWLOCK_PREFER_WRITER_NONRECURSIVE_NP</b></a></dt>
+  <dd>Setting the lock kind to this avoids writer starvation as long as any read
+      locking is not done in a recursive fashion.</dd>
+</dl>
+<p class="Pp">The <b>pthread_rwlockattr_getkind_np</b>() function returns the
+    value of the lock kind attribute of the read-write lock attribute object
+    referred to by <i>attr</i> in the pointer <i>pref</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, these functions return 0. Given valid pointer
+    arguments, <b>pthread_rwlockattr_getkind_np</b>() always succeeds. On error,
+    <b>pthread_rwlockattr_setkind_np</b>() returns a nonzero error number.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>pref</i> specifies an unsupported value.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>pthread_rwlockattr_getkind_np</b>() and
+    <b>pthread_rwlockattr_setkind_np</b>() functions first appeared in glibc
+    2.1.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These functions are non-standard GNU extensions; hence the suffix
+    "_np" (nonportable) in the names.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>pthreads</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

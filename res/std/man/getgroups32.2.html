@@ -1,0 +1,185 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/ec13a26945c6692834f75a3e0da19b15cebbcd18">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>getgroups(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">getgroups(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">getgroups(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getgroups, setgroups - get/set list of supplementary group IDs</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int getgroups(int </b><i>size</i><b>, gid_t </b><i>list</i><b>[]);</b></pre>
+<pre><b>#include &lt;grp.h&gt;</b></pre>
+<pre><b>int setgroups(size_t </b><i>size</i><b>, const gid_t *_Nullable </b><i>list</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>setgroups</b>():</p>
+<pre><br>
+    Since glibc 2.19:
+<br>
+        _DEFAULT_SOURCE
+<br>
+    glibc 2.19 and earlier:
+<br>
+        _BSD_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>getgroups</b>() returns the supplementary group IDs of the
+    calling process in <i>list</i>. The argument <i>size</i> should be set to
+    the maximum number of items that can be stored in the buffer pointed to by
+    <i>list</i>. If the calling process is a member of more than <i>size</i>
+    supplementary groups, then an error results.</p>
+<p class="Pp">It is unspecified whether the effective group ID of the calling
+    process is included in the returned list. (Thus, an application should also
+    call <b>getegid</b>(2) and add or remove the resulting value.)</p>
+<p class="Pp">If <i>size</i> is zero, <i>list</i> is not modified, but the total
+    number of supplementary group IDs for the process is returned. This allows
+    the caller to determine the size of a dynamically allocated <i>list</i> to
+    be used in a further call to <b>getgroups</b>().</p>
+<p class="Pp"><b>setgroups</b>() sets the supplementary group IDs for the
+    calling process. Appropriate privileges are required (see the description of
+    the <b>EPERM</b> error, below). The <i>size</i> argument specifies the
+    number of supplementary group IDs in the buffer pointed to by <i>list</i>. A
+    process can drop all of its supplementary groups with the call:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>setgroups(0, NULL);
+</pre>
+<br>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>getgroups</b>() returns the number of supplementary
+    group IDs. On error, -1 is returned, and <i>errno</i> is set to indicate the
+    error.</p>
+<p class="Pp">On success, <b>setgroups</b>() returns 0. On error, -1 is
+    returned, and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>list</i> has an invalid address.</dd>
+</dl>
+<p class="Pp"><b>getgroups</b>() can additionally fail with the following
+  error:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>size</i> is less than the number of supplementary group IDs, but is not
+      zero.</dd>
+</dl>
+<p class="Pp"><b>setgroups</b>() can additionally fail with the following
+    errors:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd><i>size</i> is greater than <b>NGROUPS_MAX</b> (32 before Linux 2.6.4;
+      65536 since Linux 2.6.4).</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Out of memory.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The calling process has insufficient privilege (the caller does not have
+      the <b>CAP_SETGID</b> capability in the user namespace in which it
+      resides).</dd>
+  <dt id="EPERM~2"><a class="permalink" href="#EPERM~2"><b>EPERM</b> (since
+    Linux 3.19)</a></dt>
+  <dd>The use of <b>setgroups</b>() is denied in this user namespace. See the
+      description of <i>/proc/</i>pid<i>/setgroups</i> in
+      <b>user_namespaces</b>(7).</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>getgroups</b>(): SVr4, 4.3BSD, POSIX.1-2001, POSIX.1-2008.</p>
+<p class="Pp"><b>setgroups</b>(): SVr4, 4.3BSD. Since <b>setgroups</b>()
+    requires privilege, it is not covered by POSIX.1.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">A process can have up to <b>NGROUPS_MAX</b> supplementary group
+    IDs in addition to the effective group ID. The constant <b>NGROUPS_MAX</b>
+    is defined in <i>&lt;limits.h&gt;</i>. The set of supplementary group IDs is
+    inherited from the parent process, and preserved across an
+  <b>execve</b>(2).</p>
+<p class="Pp">The maximum number of supplementary group IDs can be found at run
+    time using <b>sysconf</b>(3):</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>long ngroups_max;
+ngroups_max = sysconf(_SC_NGROUPS_MAX);
+</pre>
+<br>
+<p class="Pp">The maximum return value of <b>getgroups</b>() cannot be larger
+    than one more than this value. Since Linux 2.6.4, the maximum number of
+    supplementary group IDs is also exposed via the Linux-specific read-only
+    file, <i>/proc/sys/kernel/ngroups_max</i>.</p>
+<p class="Pp">The original Linux <b>getgroups</b>() system call supported only
+    16-bit group IDs. Subsequently, Linux 2.4 added <b>getgroups32</b>(),
+    supporting 32-bit IDs. The glibc <b>getgroups</b>() wrapper function
+    transparently deals with the variation across kernel versions.</p>
+<section class="Ss">
+<h2 class="Ss" id="C_library/kernel_differences"><a class="permalink" href="#C_library/kernel_differences">C
+  library/kernel differences</a></h2>
+<p class="Pp">At the kernel level, user IDs and group IDs are a per-thread
+    attribute. However, POSIX requires that all threads in a process share the
+    same credentials. The NPTL threading implementation handles the POSIX
+    requirements by providing wrapper functions for the various system calls
+    that change process UIDs and GIDs. These wrapper functions (including the
+    one for <b>setgroups</b>()) employ a signal-based technique to ensure that
+    when one thread changes credentials, all of the other threads in the process
+    also change their credentials. For details, see <b>nptl</b>(7).</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>getgid</b>(2), <b>setgid</b>(2), <b>getgrouplist</b>(3),
+    <b>group_member</b>(3), <b>initgroups</b>(3), <b>capabilities</b>(7),
+    <b>credentials</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

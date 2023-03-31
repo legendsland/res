@@ -1,0 +1,777 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 1980, 1991, 1993
+  	The Regents of the University of California.  All rights reserved.
+  
+   SPDX-License-Identifier: BSD-4-Clause-UC
+  
+       @(#)syscall.2	8.1 (Berkeley) 6/16/93
+  
+   2002-03-20  Christoph Hellwig <hch@infradead.org>
+  	- adopted for Linux
+   2015-01-17, Kees Cook <keescook@chromium.org>
+  	Added mips and arm64.
+   --><head>
+<meta name="dc.identifier" content="res/d1f280702685aed5d715a405d9c8b80217d0cecb">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>syscall(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">syscall(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">syscall(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">syscall - indirect system call</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/syscall.h&gt;</b>      /* Definition of <b>SYS_*</b> constants */
+<b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>long syscall(long </b><i>number</i><b>, ...);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>syscall</b>():</p>
+<pre><br>
+    Since glibc 2.19:
+<br>
+        _DEFAULT_SOURCE
+<br>
+    Before glibc 2.19:
+<br>
+        _BSD_SOURCE || _SVID_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>syscall</b>() is a small library function that invokes the
+    system call whose assembly language interface has the specified
+    <i>number</i> with the specified arguments. Employing <b>syscall</b>() is
+    useful, for example, when invoking a system call that has no wrapper
+    function in the C library.</p>
+<p class="Pp"><b>syscall</b>() saves CPU registers before making the system
+    call, restores the registers upon return from the system call, and stores
+    any error returned by the system call in <b>errno</b>(3).</p>
+<p class="Pp">Symbolic constants for system call numbers can be found in the
+    header file <i>&lt;sys/syscall.h&gt;</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The return value is defined by the system call being invoked. In
+    general, a 0 return value indicates success. A -1 return value indicates an
+    error, and an error number is stored in <i>errno</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp"><b>syscall</b>() first appeared in 4BSD.</p>
+<section class="Ss">
+<h2 class="Ss" id="Architecture-specific_requirements"><a class="permalink" href="#Architecture-specific_requirements">Architecture-specific
+  requirements</a></h2>
+<p class="Pp">Each architecture ABI has its own requirements on how system call
+    arguments are passed to the kernel. For system calls that have a glibc
+    wrapper (e.g., most system calls), glibc handles the details of copying
+    arguments to the right registers in a manner suitable for the architecture.
+    However, when using <b>syscall</b>() to make a system call, the caller might
+    need to handle architecture-dependent details; this requirement is most
+    commonly encountered on certain 32-bit architectures.</p>
+<p class="Pp">For example, on the ARM architecture Embedded ABI (EABI), a 64-bit
+    value (e.g., <i>long long</i>) must be aligned to an even register pair.
+    Thus, using <b>syscall</b>() instead of the wrapper provided by glibc, the
+    <b>readahead</b>(2) system call would be invoked as follows on the ARM
+    architecture with the EABI in little endian mode:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>syscall(SYS_readahead, fd, 0,
+<br>
+        (unsigned int) (offset &amp; 0xFFFFFFFF),
+<br>
+        (unsigned int) (offset &gt;&gt; 32),
+<br>
+        count);
+</pre>
+<br>
+<p class="Pp">Since the offset argument is 64 bits, and the first argument
+    (<i>fd</i>) is passed in <i>r0</i>, the caller must manually split and align
+    the 64-bit value so that it is passed in the <i>r2</i>/<i>r3</i> register
+    pair. That means inserting a dummy value into <i>r1</i> (the second argument
+    of 0). Care also must be taken so that the split follows endian conventions
+    (according to the C ABI for the platform).</p>
+<p class="Pp">Similar issues can occur on MIPS with the O32 ABI, on PowerPC and
+    parisc with the 32-bit ABI, and on Xtensa.</p>
+<p class="Pp">Note that while the parisc C ABI also uses aligned register pairs,
+    it uses a shim layer to hide the issue from user space.</p>
+<p class="Pp">The affected system calls are <b>fadvise64_64</b>(2),
+    <b>ftruncate64</b>(2), <b>posix_fadvise</b>(2), <b>pread64</b>(2),
+    <b>pwrite64</b>(2), <b>readahead</b>(2), <b>sync_file_range</b>(2), and
+    <b>truncate64</b>(2).</p>
+<p class="Pp">This does not affect syscalls that manually split and assemble
+    64-bit values such as <b>_llseek</b>(2), <b>preadv</b>(2),
+    <b>preadv2</b>(2), <b>pwritev</b>(2), and <b>pwritev2</b>(2). Welcome to the
+    wonderful world of historical baggage.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Architecture_calling_conventions"><a class="permalink" href="#Architecture_calling_conventions">Architecture
+  calling conventions</a></h2>
+<p class="Pp">Every architecture has its own way of invoking and passing
+    arguments to the kernel. The details for various architectures are listed in
+    the two tables below.</p>
+<p class="Pp">The first table lists the instruction used to transition to kernel
+    mode (which might not be the fastest or best way to transition to the
+    kernel, so you might have to refer to <b>vdso</b>(7)), the register used to
+    indicate the system call number, the register(s) used to return the system
+    call result, and the register used to signal an error.</p>
+<table class="tbl">
+  <tbody><tr>
+    <td>Arch/ABI</td>
+    <td>Instruction</td>
+    <td>System</td>
+    <td>Ret</td>
+    <td>Ret</td>
+    <td>Error</td>
+    <td>Notes</td>
+  </tr>
+  <tr style="border-bottom-style: solid;">
+    <td></td>
+    <td></td>
+    <td>call #</td>
+    <td>val</td>
+    <td>val2</td>
+  </tr>
+  <tr>
+    <td>alpha</td>
+    <td>callsys</td>
+    <td>v0</td>
+    <td>v0</td>
+    <td>a4</td>
+    <td>a3</td>
+    <td>1, 6</td>
+  </tr>
+  <tr>
+    <td>arc</td>
+    <td>trap0</td>
+    <td>r8</td>
+    <td>r0</td>
+    <td>-</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>arm/OABI</td>
+    <td>swi NR</td>
+    <td>-</td>
+    <td>r0</td>
+    <td>-</td>
+    <td>-</td>
+    <td>2</td>
+  </tr>
+  <tr>
+    <td>arm/EABI</td>
+    <td>swi 0x0</td>
+    <td>r7</td>
+    <td>r0</td>
+    <td>r1</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>arm64</td>
+    <td>svc #0</td>
+    <td>w8</td>
+    <td>x0</td>
+    <td>x1</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>blackfin</td>
+    <td>excpt 0x0</td>
+    <td>P0</td>
+    <td>R0</td>
+    <td>-</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>i386</td>
+    <td>int $0x80</td>
+    <td>eax</td>
+    <td>eax</td>
+    <td>edx</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>ia64</td>
+    <td>break 0x100000</td>
+    <td>r15</td>
+    <td>r8</td>
+    <td>r9</td>
+    <td>r10</td>
+    <td>1, 6</td>
+  </tr>
+  <tr>
+    <td>loongarch</td>
+    <td>syscall 0</td>
+    <td>a7</td>
+    <td>a0</td>
+    <td>-</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>m68k</td>
+    <td>trap #0</td>
+    <td>d0</td>
+    <td>d0</td>
+    <td>-</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>microblaze</td>
+    <td>brki r14,8</td>
+    <td>r12</td>
+    <td>r3</td>
+    <td>-</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>mips</td>
+    <td>syscall</td>
+    <td>v0</td>
+    <td>v0</td>
+    <td>v1</td>
+    <td>a3</td>
+    <td>1, 6</td>
+  </tr>
+  <tr>
+    <td>nios2</td>
+    <td>trap</td>
+    <td>r2</td>
+    <td>r2</td>
+    <td>-</td>
+    <td>r7</td>
+  </tr>
+  <tr>
+    <td>parisc</td>
+    <td>ble 0x100(%sr2, %r0)</td>
+    <td>r20</td>
+    <td>r28</td>
+    <td>-</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>powerpc</td>
+    <td>sc</td>
+    <td>r0</td>
+    <td>r3</td>
+    <td>-</td>
+    <td>r0</td>
+    <td>1</td>
+  </tr>
+  <tr>
+    <td>powerpc64</td>
+    <td>sc</td>
+    <td>r0</td>
+    <td>r3</td>
+    <td>-</td>
+    <td>cr0.SO</td>
+    <td>1</td>
+  </tr>
+  <tr>
+    <td>riscv</td>
+    <td>ecall</td>
+    <td>a7</td>
+    <td>a0</td>
+    <td>a1</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>s390</td>
+    <td>svc 0</td>
+    <td>r1</td>
+    <td>r2</td>
+    <td>r3</td>
+    <td>-</td>
+    <td>3</td>
+  </tr>
+  <tr>
+    <td>s390x</td>
+    <td>svc 0</td>
+    <td>r1</td>
+    <td>r2</td>
+    <td>r3</td>
+    <td>-</td>
+    <td>3</td>
+  </tr>
+  <tr>
+    <td>superh</td>
+    <td>trapa #31</td>
+    <td>r3</td>
+    <td>r0</td>
+    <td>r1</td>
+    <td>-</td>
+    <td>4, 6</td>
+  </tr>
+  <tr>
+    <td>sparc/32</td>
+    <td>t 0x10</td>
+    <td>g1</td>
+    <td>o0</td>
+    <td>o1</td>
+    <td>psr/csr</td>
+    <td>1, 6</td>
+  </tr>
+  <tr>
+    <td>sparc/64</td>
+    <td>t 0x6d</td>
+    <td>g1</td>
+    <td>o0</td>
+    <td>o1</td>
+    <td>psr/csr</td>
+    <td>1, 6</td>
+  </tr>
+  <tr>
+    <td>tile</td>
+    <td>swint1</td>
+    <td>R10</td>
+    <td>R00</td>
+    <td>-</td>
+    <td>R01</td>
+    <td>1</td>
+  </tr>
+  <tr>
+    <td>x86-64</td>
+    <td>syscall</td>
+    <td>rax</td>
+    <td>rax</td>
+    <td>rdx</td>
+    <td>-</td>
+    <td>5</td>
+  </tr>
+  <tr>
+    <td>x32</td>
+    <td>syscall</td>
+    <td>rax</td>
+    <td>rax</td>
+    <td>rdx</td>
+    <td>-</td>
+    <td>5</td>
+  </tr>
+  <tr>
+    <td>xtensa</td>
+    <td>syscall</td>
+    <td>a2</td>
+    <td>a2</td>
+    <td>-</td>
+    <td>-</td>
+  </tr>
+</tbody></table>
+<p class="Pp">Notes:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>On a few architectures, a register is used as a boolean (0 indicating no
+      error, and -1 indicating an error) to signal that the system call failed.
+      The actual error value is still contained in the return register. On
+      sparc, the carry bit (<i>csr</i>) in the processor status register
+      (<i>psr</i>) is used instead of a full register. On powerpc64, the summary
+      overflow bit (<i>SO</i>) in field 0 of the condition register (<i>cr0</i>)
+      is used.</dd>
+  <dt>•</dt>
+  <dd><i>NR</i> is the system call number.</dd>
+  <dt>•</dt>
+  <dd>For s390 and s390x, <i>NR</i> (the system call number) may be passed
+      directly with <i>svc&nbsp;NR</i> if it is less than 256.</dd>
+  <dt>•</dt>
+  <dd>On SuperH additional trap numbers are supported for historic reasons, but
+      <b>trapa</b>#31 is the recommended "unified" ABI.</dd>
+  <dt>•</dt>
+  <dd>The x32 ABI shares syscall table with x86-64 ABI, but there are some
+      nuances:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>In order to indicate that a system call is called under the x32 ABI, an
+      additional bit, <b>__X32_SYSCALL_BIT</b>, is bitwise-ORed with the system
+      call number. The ABI used by a process affects some process behaviors,
+      including signal handling or system call restarting.</dd>
+  <dt>•</dt>
+  <dd>Since x32 has different sizes for <i>long</i> and pointer types, layouts
+      of some (but not all; <i>struct timeval</i> or <i>struct rlimit</i> are
+      64-bit, for example) structures are different. In order to handle this,
+      additional system calls are added to the system call table, starting from
+      number 512 (without the <b>__X32_SYSCALL_BIT</b>). For example,
+      <b>__NR_readv</b> is defined as 19 for the x86-64 ABI and as
+      <i>__X32_SYSCALL_BIT</i> | <i><b>515</b></i> for the x32 ABI. Most of
+      these additional system calls are actually identical to the system calls
+      used for providing i386 compat. There are some notable exceptions,
+      however, such as <b>preadv2</b>(2), which uses <i>struct iovec</i>
+      entities with 4-byte pointers and sizes ("compat_iovec" in
+      kernel terms), but passes an 8-byte <i>pos</i> argument in a single
+      register and not two, as is done in every other ABI.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Some architectures (namely, Alpha, IA-64, MIPS, SuperH, sparc/32, and
+      sparc/64) use an additional register ("Retval2" in the above
+      table) to pass back a second return value from the <b>pipe</b>(2) system
+      call; Alpha uses this technique in the architecture-specific
+      <b>getxpid</b>(2), <b>getxuid</b>(2), and <b>getxgid</b>(2) system calls
+      as well. Other architectures do not use the second return value register
+      in the system call interface, even if it is defined in the System V
+    ABI.</dd>
+</dl>
+<p class="Pp">The second table shows the registers used to pass the system call
+    arguments.</p>
+<table class="tbl">
+  <tbody><tr style="border-bottom-style: solid;">
+    <td>Arch/ABI</td>
+    <td>arg1</td>
+    <td>arg2</td>
+    <td>arg3</td>
+    <td>arg4</td>
+    <td>arg5</td>
+    <td>arg6</td>
+    <td>arg7</td>
+    <td>Notes</td>
+  </tr>
+  <tr>
+    <td>alpha</td>
+    <td>a0</td>
+    <td>a1</td>
+    <td>a2</td>
+    <td>a3</td>
+    <td>a4</td>
+    <td>a5</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>arc</td>
+    <td>r0</td>
+    <td>r1</td>
+    <td>r2</td>
+    <td>r3</td>
+    <td>r4</td>
+    <td>r5</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>arm/OABI</td>
+    <td>r0</td>
+    <td>r1</td>
+    <td>r2</td>
+    <td>r3</td>
+    <td>r4</td>
+    <td>r5</td>
+    <td>r6</td>
+  </tr>
+  <tr>
+    <td>arm/EABI</td>
+    <td>r0</td>
+    <td>r1</td>
+    <td>r2</td>
+    <td>r3</td>
+    <td>r4</td>
+    <td>r5</td>
+    <td>r6</td>
+  </tr>
+  <tr>
+    <td>arm64</td>
+    <td>x0</td>
+    <td>x1</td>
+    <td>x2</td>
+    <td>x3</td>
+    <td>x4</td>
+    <td>x5</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>blackfin</td>
+    <td>R0</td>
+    <td>R1</td>
+    <td>R2</td>
+    <td>R3</td>
+    <td>R4</td>
+    <td>R5</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>i386</td>
+    <td>ebx</td>
+    <td>ecx</td>
+    <td>edx</td>
+    <td>esi</td>
+    <td>edi</td>
+    <td>ebp</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>ia64</td>
+    <td>out0</td>
+    <td>out1</td>
+    <td>out2</td>
+    <td>out3</td>
+    <td>out4</td>
+    <td>out5</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>loongarch</td>
+    <td>a0</td>
+    <td>a1</td>
+    <td>a2</td>
+    <td>a3</td>
+    <td>a4</td>
+    <td>a5</td>
+    <td>a6</td>
+  </tr>
+  <tr>
+    <td>m68k</td>
+    <td>d1</td>
+    <td>d2</td>
+    <td>d3</td>
+    <td>d4</td>
+    <td>d5</td>
+    <td>a0</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>microblaze</td>
+    <td>r5</td>
+    <td>r6</td>
+    <td>r7</td>
+    <td>r8</td>
+    <td>r9</td>
+    <td>r10</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>mips/o32</td>
+    <td>a0</td>
+    <td>a1</td>
+    <td>a2</td>
+    <td>a3</td>
+    <td>-</td>
+    <td>-</td>
+    <td>-</td>
+    <td>1</td>
+  </tr>
+  <tr>
+    <td>mips/n32,64</td>
+    <td>a0</td>
+    <td>a1</td>
+    <td>a2</td>
+    <td>a3</td>
+    <td>a4</td>
+    <td>a5</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>nios2</td>
+    <td>r4</td>
+    <td>r5</td>
+    <td>r6</td>
+    <td>r7</td>
+    <td>r8</td>
+    <td>r9</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>parisc</td>
+    <td>r26</td>
+    <td>r25</td>
+    <td>r24</td>
+    <td>r23</td>
+    <td>r22</td>
+    <td>r21</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>powerpc</td>
+    <td>r3</td>
+    <td>r4</td>
+    <td>r5</td>
+    <td>r6</td>
+    <td>r7</td>
+    <td>r8</td>
+    <td>r9</td>
+  </tr>
+  <tr>
+    <td>powerpc64</td>
+    <td>r3</td>
+    <td>r4</td>
+    <td>r5</td>
+    <td>r6</td>
+    <td>r7</td>
+    <td>r8</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>riscv</td>
+    <td>a0</td>
+    <td>a1</td>
+    <td>a2</td>
+    <td>a3</td>
+    <td>a4</td>
+    <td>a5</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>s390</td>
+    <td>r2</td>
+    <td>r3</td>
+    <td>r4</td>
+    <td>r5</td>
+    <td>r6</td>
+    <td>r7</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>s390x</td>
+    <td>r2</td>
+    <td>r3</td>
+    <td>r4</td>
+    <td>r5</td>
+    <td>r6</td>
+    <td>r7</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>superh</td>
+    <td>r4</td>
+    <td>r5</td>
+    <td>r6</td>
+    <td>r7</td>
+    <td>r0</td>
+    <td>r1</td>
+    <td>r2</td>
+  </tr>
+  <tr>
+    <td>sparc/32</td>
+    <td>o0</td>
+    <td>o1</td>
+    <td>o2</td>
+    <td>o3</td>
+    <td>o4</td>
+    <td>o5</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>sparc/64</td>
+    <td>o0</td>
+    <td>o1</td>
+    <td>o2</td>
+    <td>o3</td>
+    <td>o4</td>
+    <td>o5</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>tile</td>
+    <td>R00</td>
+    <td>R01</td>
+    <td>R02</td>
+    <td>R03</td>
+    <td>R04</td>
+    <td>R05</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>x86-64</td>
+    <td>rdi</td>
+    <td>rsi</td>
+    <td>rdx</td>
+    <td>r10</td>
+    <td>r8</td>
+    <td>r9</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>x32</td>
+    <td>rdi</td>
+    <td>rsi</td>
+    <td>rdx</td>
+    <td>r10</td>
+    <td>r8</td>
+    <td>r9</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td>xtensa</td>
+    <td>a6</td>
+    <td>a3</td>
+    <td>a4</td>
+    <td>a5</td>
+    <td>a8</td>
+    <td>a9</td>
+    <td>-</td>
+  </tr>
+</tbody></table>
+<p class="Pp">Notes:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>The mips/o32 system call convention passes arguments 5 through 8 on the
+      user stack.</dd>
+</dl>
+<p class="Pp">Note that these tables don't cover the entire calling
+    convention—some architectures may indiscriminately clobber other
+    registers not listed here.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<pre>#define _GNU_SOURCE
+#include &lt;signal.h&gt;
+#include &lt;sys/syscall.h&gt;
+#include &lt;unistd.h&gt;
+int
+main(void)
+{
+<br>
+    pid_t tid;
+<br>
+    tid = syscall(SYS_gettid);
+<br>
+    syscall(SYS_tgkill, getpid(), tid, SIGHUP);
+}
+</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>_syscall</b>(2), <b>intro</b>(2), <b>syscalls</b>(2),
+    <b>errno</b>(3), <b>vdso</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

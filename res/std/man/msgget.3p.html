@@ -1,0 +1,179 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/4097f92e908d5a781322c7e85e0e073cb83b561d">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>MSGGET(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">MSGGET(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">MSGGET(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">msgget — get the XSI message queue identifier</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;sys/msg.h&gt;</pre>
+<pre>int msgget(key_t <i>key</i>, int <i>msgflg</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>msgget</i>() function operates on XSI message queues (see
+    the Base Definitions volume of POSIX.1‐2017, <i>Section 3.226</i>,
+    <i>Message Queue</i>). It is unspecified whether this function interoperates
+    with the realtime interprocess communication facilities defined in
+    <i>Section 2.8</i>, <i>Realtime</i>.</p>
+<p class="Pp">The <i>msgget</i>() function shall return the message queue
+    identifier associated with the argument <i>key</i>.</p>
+<p class="Pp">A message queue identifier, associated message queue, and data
+    structure (see <i>&lt;sys/msg.h&gt;</i>), shall be created for the argument
+    <i>key</i> if one of the following is true:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>The argument <i>key</i> is equal to IPC_PRIVATE.</dd>
+  <dt> *</dt>
+  <dd>The argument <i>key</i> does not already have a message queue identifier
+      associated with it, and (<i>msgflg</i> &amp; IPC_CREAT) is non-zero.</dd>
+</dl>
+<p class="Pp">Upon creation, the data structure associated with the new message
+    queue identifier shall be initialized as follows:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd><b>msg_perm.cuid</b>, <b>msg_perm.uid</b>, <b>msg_perm.cgid</b>, and
+      <b>msg_perm.gid</b> shall be set to the effective user ID and effective
+      group ID, respectively, of the calling process.</dd>
+  <dt> *</dt>
+  <dd>The low-order 9 bits of <b>msg_perm.mode</b> shall be set to the low-order
+      9 bits of <i>msgflg</i>.</dd>
+  <dt> *</dt>
+  <dd><b>msg_qnum</b>, <b>msg_lspid</b>, <b>msg_lrpid</b>, <b>msg_stime</b>, and
+      <b>msg_rtime</b> shall be set to 0.</dd>
+  <dt> *</dt>
+  <dd><b>msg_ctime</b> shall be set to the current time, as described in
+      <i>Section 2.7.1</i>, <i>IPC General Description</i>.</dd>
+  <dt> *</dt>
+  <dd><b>msg_qbytes</b> shall be set to the system limit.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>msgget</i>() shall return a
+    non-negative integer, namely a message queue identifier. Otherwise, it shall
+    return -1 and set <i>errno</i> to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>msgget</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>A message queue identifier exists for the argument <i>key</i>, but
+      operation permission as specified by the low-order 9 bits of <i>msgflg</i>
+      would not be granted; see <i>Section 2.7</i>, <i>XSI Interprocess
+      Communication</i>.</dd>
+  <dt id="EEXIST"><a class="permalink" href="#EEXIST"><b>EEXIST</b></a></dt>
+  <dd>A message queue identifier exists for the argument <i>key</i> but
+      ((<i>msgflg</i> &amp; IPC_CREAT) &amp;&amp; (<i>msgflg</i> &amp;
+      IPC_EXCL)) is non-zero.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>A message queue identifier does not exist for the argument <i>key</i> and
+      (<i>msgflg</i> &amp; IPC_CREAT) is 0.</dd>
+  <dt id="ENOSPC"><a class="permalink" href="#ENOSPC"><b>ENOSPC</b></a></dt>
+  <dd>A message queue identifier is to be created but the system-imposed limit
+      on the maximum number of allowed message queue identifiers system-wide
+      would be exceeded.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The POSIX Realtime Extension defines alternative interfaces for
+    interprocess communication (IPC). Application developers who need to use IPC
+    should design their applications so that modules using the IPC routines
+    described in <i>Section 2.7</i>, <i>XSI Interprocess Communication</i> can
+    be easily modified to use the alternative interfaces.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i>Section 2.7</i>, <i>XSI Interprocess Communication</i>,
+    <i>Section 2.8</i>, <i>Realtime</i>, <i><i>ftok</i>()</i>,
+    <i><i>mq_close</i>()</i>, <i><i>mq_getattr</i>()</i>,
+    <i><i>mq_notify</i>()</i>, <i><i>mq_open</i>()</i>,
+    <i><i>mq_receive</i>()</i>, <i><i>mq_send</i>()</i>,
+    <i><i>mq_setattr</i>()</i>, <i><i>mq_unlink</i>()</i>,
+    <i><i>msgctl</i>()</i>, <i><i>msgrcv</i>()</i>, <i><i>msgsnd</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Section
+    3.226</i>, <i>Message Queue</i>, <i><b>&lt;sys_msg.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

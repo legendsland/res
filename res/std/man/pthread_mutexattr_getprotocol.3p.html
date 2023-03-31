@@ -1,0 +1,207 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/cbc53605f6b46055c753830c5701a72b7dabae40">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>PTHREAD_MUTEXATTR_GETPROTOCOL(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">PTHREAD_MUTEXATTR_GETPROTOCOL(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">PTHREAD_MUTEXATTR_GETPROTOCOL(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pthread_mutexattr_getprotocol, pthread_mutexattr_setprotocol
+    — get and set the protocol attribute of the mutex attributes object
+    (<b>REALTIME THREADS</b>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;pthread.h&gt;</pre>
+<pre>int pthread_mutexattr_getprotocol(const pthread_mutexattr_t
+<br>
+    *restrict <i>attr</i>, int *restrict <i>protocol</i>);
+int pthread_mutexattr_setprotocol(pthread_mutexattr_t *<i>attr</i>,
+<br>
+    int <i>protocol</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>pthread_mutexattr_getprotocol</i>() and
+    <i>pthread_mutexattr_setprotocol</i>() functions, respectively, shall get
+    and set the protocol attribute of a mutex attributes object pointed to by
+    <i>attr</i> which was previously created by the function
+    <i>pthread_mutexattr_init</i>().</p>
+<p class="Pp">The <i>protocol</i> attribute defines the protocol to be followed
+    in utilizing mutexes. The value of <i>protocol</i> may be one of:</p>
+<p class="Pp"></p>
+<pre>PTHREAD_PRIO_INHERIT
+PTHREAD_PRIO_NONE
+PTHREAD_PRIO_PROTECT</pre>
+<p class="Pp">which are defined in the <i>&lt;pthread.h&gt;</i> header. The
+    default value of the attribute shall be PTHREAD_PRIO_NONE.</p>
+<p class="Pp">When a thread owns a mutex with the PTHREAD_PRIO_NONE
+    <i>protocol</i> attribute, its priority and scheduling shall not be affected
+    by its mutex ownership.</p>
+<p class="Pp">When a thread is blocking higher priority threads because of
+    owning one or more robust mutexes with the PTHREAD_PRIO_INHERIT
+    <i>protocol</i> attribute, it shall execute at the higher of its priority or
+    the priority of the highest priority thread waiting on any of the robust
+    mutexes owned by this thread and initialized with this protocol.</p>
+<p class="Pp">When a thread is blocking higher priority threads because of
+    owning one or more non-robust mutexes with the PTHREAD_PRIO_INHERIT
+    <i>protocol</i> attribute, it shall execute at the higher of its priority or
+    the priority of the highest priority thread waiting on any of the non-robust
+    mutexes owned by this thread and initialized with this protocol.</p>
+<p class="Pp">When a thread owns one or more robust mutexes initialized with the
+    PTHREAD_PRIO_PROTECT protocol, it shall execute at the higher of its
+    priority or the highest of the priority ceilings of all the robust mutexes
+    owned by this thread and initialized with this attribute, regardless of
+    whether other threads are blocked on any of these robust mutexes or not.</p>
+<p class="Pp">When a thread owns one or more non-robust mutexes initialized with
+    the PTHREAD_PRIO_PROTECT protocol, it shall execute at the higher of its
+    priority or the highest of the priority ceilings of all the non-robust
+    mutexes owned by this thread and initialized with this attribute, regardless
+    of whether other threads are blocked on any of these non-robust mutexes or
+    not.</p>
+<p class="Pp">While a thread is holding a mutex which has been initialized with
+    the PTHREAD_PRIO_INHERIT or PTHREAD_PRIO_PROTECT protocol attributes, it
+    shall not be subject to being moved to the tail of the scheduling queue at
+    its priority in the event that its original priority is changed, such as by
+    a call to <i>sched_setparam</i>(). Likewise, when a thread unlocks a mutex
+    that has been initialized with the PTHREAD_PRIO_INHERIT or
+    PTHREAD_PRIO_PROTECT protocol attributes, it shall not be subject to being
+    moved to the tail of the scheduling queue at its priority in the event that
+    its original priority is changed.</p>
+<p class="Pp">If a thread simultaneously owns several mutexes initialized with
+    different protocols, it shall execute at the highest of the priorities that
+    it would have obtained by each of these protocols.</p>
+<p class="Pp">When a thread makes a call to <i>pthread_mutex_lock</i>(), the
+    mutex was initialized with the protocol attribute having the value
+    PTHREAD_PRIO_INHERIT, when the calling thread is blocked because the mutex
+    is owned by another thread, that owner thread shall inherit the priority
+    level of the calling thread as long as it continues to own the mutex. The
+    implementation shall update its execution priority to the maximum of its
+    assigned priority and all its inherited priorities. Furthermore, if this
+    owner thread itself becomes blocked on another mutex with the
+    <i>protocol</i> attribute having the value PTHREAD_PRIO_INHERIT, the same
+    priority inheritance effect shall be propagated to this other owner thread,
+    in a recursive manner.</p>
+<p class="Pp">The behavior is undefined if the value specified by the
+    <i>attr</i> argument to <i>pthread_mutexattr_getprotocol</i>() or
+    <i>pthread_mutexattr_setprotocol</i>() does not refer to an initialized
+    mutex attributes object.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, the
+    <i>pthread_mutexattr_getprotocol</i>() and
+    <i>pthread_mutexattr_setprotocol</i>() functions shall return zero;
+    otherwise, an error number shall be returned to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>pthread_mutexattr_setprotocol</i>() function shall fail
+  if:</p>
+<dl class="Bl-tag">
+  <dt id="ENOTSUP"><a class="permalink" href="#ENOTSUP"><b>ENOTSUP</b></a></dt>
+  <dd>The value specified by <i>protocol</i> is an unsupported value.</dd>
+</dl>
+<p class="Pp">The <i>pthread_mutexattr_getprotocol</i>() and
+    <i>pthread_mutexattr_setprotocol</i>() functions may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The value specified by <i>protocol</i> is invalid.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The caller does not have the privilege to perform the operation.</dd>
+</dl>
+<p class="Pp">These functions shall not return an error code of
+  <b>[EINTR]</b>.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">If an implementation detects that the value specified by the
+    <i>attr</i> argument to <i>pthread_mutexattr_getprotocol</i>() or
+    <i>pthread_mutexattr_setprotocol</i>() does not refer to an initialized
+    mutex attributes object, it is recommended that the function should fail and
+    report an <b>[EINVAL]</b> error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>pthread_cond_destroy</i>()</i>,
+    <i><i>pthread_create</i>()</i>, <i><i>pthread_mutex_destroy</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;pthread.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

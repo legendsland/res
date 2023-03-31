@@ -1,0 +1,168 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 2006 by Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/c1fe297ad14399a92225f4c15503a3cfea36e83f">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>adjtime(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">adjtime(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">adjtime(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">adjtime - correct the time to synchronize the system clock</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/time.h&gt;</b></pre>
+<pre><b>int adjtime(const struct timeval *</b><i>delta</i><b>, struct timeval *</b><i>olddelta</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>adjtime</b>():</p>
+<pre><br>
+    Since glibc 2.19:
+<br>
+        _DEFAULT_SOURCE
+<br>
+    glibc 2.19 and earlier:
+<br>
+        _BSD_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>adjtime</b>() function gradually adjusts the system clock
+    (as returned by <b>gettimeofday</b>(2)). The amount of time by which the
+    clock is to be adjusted is specified in the structure pointed to by
+    <i>delta</i>. This structure has the following form:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct timeval {
+<br>
+    time_t      tv_sec;     /* seconds */
+<br>
+    suseconds_t tv_usec;    /* microseconds */
+};
+</pre>
+<br>
+<p class="Pp">If the adjustment in <i>delta</i> is positive, then the system
+    clock is speeded up by some small percentage (i.e., by adding a small amount
+    of time to the clock value in each second) until the adjustment has been
+    completed. If the adjustment in <i>delta</i> is negative, then the clock is
+    slowed down in a similar fashion.</p>
+<p class="Pp">If a clock adjustment from an earlier <b>adjtime</b>() call is
+    already in progress at the time of a later <b>adjtime</b>() call, and
+    <i>delta</i> is not NULL for the later call, then the earlier adjustment is
+    stopped, but any already completed part of that adjustment is not
+  undone.</p>
+<p class="Pp">If <i>olddelta</i> is not NULL, then the buffer that it points to
+    is used to return the amount of time remaining from any previous adjustment
+    that has not yet been completed.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>adjtime</b>() returns 0. On failure, -1 is
+    returned, and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The adjustment in <i>delta</i> is outside the permitted range.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The caller does not have sufficient privilege to adjust the time. Under
+      Linux, the <b>CAP_SYS_TIME</b> capability is required.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>adjtime ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">4.3BSD, System V.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The adjustment that <b>adjtime</b>() makes to the clock is carried
+    out in such a manner that the clock is always monotonically increasing.
+    Using <b>adjtime</b>() to adjust the time prevents the problems that can be
+    caused for certain applications (e.g., <b>make</b>(1)) by abrupt positive or
+    negative jumps in the system time.</p>
+<p class="Pp"><b>adjtime</b>() is intended to be used to make small adjustments
+    to the system time. Most systems impose a limit on the adjustment that can
+    be specified in <i>delta</i>. In the glibc implementation, <i>delta</i> must
+    be less than or equal to (INT_MAX / 1000000 - 2) and greater than or equal
+    to (INT_MIN / 1000000 + 2) (respectively 2145 and -2145 seconds on
+  i386).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">A longstanding bug meant that if <i>delta</i> was specified as
+    NULL, no valid information about the outstanding clock adjustment was
+    returned in <i>olddelta</i>. (In this circumstance, <b>adjtime</b>() should
+    return the outstanding clock adjustment, without changing it.) This bug is
+    fixed on systems with glibc 2.8 or later and Linux kernel 2.6.26 or
+  later.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>adjtimex</b>(2), <b>gettimeofday</b>(2), <b>time</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

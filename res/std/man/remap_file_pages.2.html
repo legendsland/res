@@ -1,0 +1,146 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2003, Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   2003-12-10 Initial creation, Michael Kerrisk <mtk.manpages@gmail.com>
+   2004-10-28 aeb, corrected prototype, prot must be 0
+   --><head>
+<meta name="dc.identifier" content="res/8bd389ba3b8fa95be244e499b419b59ed019b7e9">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>remap_file_pages(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">remap_file_pages(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">remap_file_pages(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">remap_file_pages - create a nonlinear file mapping</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#define _GNU_SOURCE</b>         /* See feature_test_macros(7) */
+<b>#include &lt;sys/mman.h&gt;</b></pre>
+<pre><b>[[deprecated]] int remap_file_pages(void </b><i>addr</i><b>[.</b><i>size</i><b>], size_t </b><i>size</i><b>,</b>
+<b>                                    int </b><i>prot</i><b>, size_t </b><i>pgoff</i><b>, int </b><i>flags</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>Note</b>: this system call was marked as deprecated starting
+    with Linux 3.16. In Linux 4.0, the implementation was replaced by a slower
+    in-kernel emulation. Those few applications that use this system call should
+    consider migrating to alternatives. This change was made because the kernel
+    code for this system call was complex, and it is believed to be little used
+    or perhaps even completely unused. While it had some use cases in database
+    applications on 32-bit systems, those use cases don't exist on 64-bit
+    systems.</p>
+<p class="Pp">The <b>remap_file_pages</b>() system call is used to create a
+    nonlinear mapping, that is, a mapping in which the pages of the file are
+    mapped into a nonsequential order in memory. The advantage of using
+    <b>remap_file_pages</b>() over using repeated calls to <b>mmap</b>(2) is
+    that the former approach does not require the kernel to create additional
+    VMA (Virtual Memory Area) data structures.</p>
+<p class="Pp">To create a nonlinear mapping we perform the following steps:</p>
+<dl class="Bl-tag">
+  <dt>1.</dt>
+  <dd>Use <b>mmap</b>(2) to create a mapping (which is initially linear). This
+      mapping must be created with the <b>MAP_SHARED</b> flag.</dd>
+  <dt>2.</dt>
+  <dd>Use one or more calls to <b>remap_file_pages</b>() to rearrange the
+      correspondence between the pages of the mapping and the pages of the file.
+      It is possible to map the same page of a file into multiple locations
+      within the mapped region.</dd>
+</dl>
+<p class="Pp">The <i>pgoff</i> and <i>size</i> arguments specify the region of
+    the file that is to be relocated within the mapping: <i>pgoff</i> is a file
+    offset in units of the system page size; <i>size</i> is the length of the
+    region in bytes.</p>
+<p class="Pp">The <i>addr</i> argument serves two purposes. First, it identifies
+    the mapping whose pages we want to rearrange. Thus, <i>addr</i> must be an
+    address that falls within a region previously mapped by a call to
+    <b>mmap</b>(2). Second, <i>addr</i> specifies the address at which the file
+    pages identified by <i>pgoff</i> and <i>size</i> will be placed.</p>
+<p class="Pp">The values specified in <i>addr</i> and <i>size</i> should be
+    multiples of the system page size. If they are not, then the kernel rounds
+    <i>both</i> values <i>down</i> to the nearest multiple of the page size.</p>
+<p class="Pp">The <i>prot</i> argument must be specified as 0.</p>
+<p class="Pp">The <i>flags</i> argument has the same meaning as for
+    <b>mmap</b>(2), but all flags other than <b>MAP_NONBLOCK</b> are
+  ignored.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>remap_file_pages</b>() returns 0. On error, -1 is
+    returned, and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>addr</i> does not refer to a valid mapping created with the
+      <b>MAP_SHARED</b> flag.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd><i>addr</i>, <i>size</i>, <i>prot</i>, or <i>pgoff</i> is invalid.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>remap_file_pages</b>() system call appeared in Linux
+    2.5.46; glibc support was added in glibc 2.3.3.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">The <b>remap_file_pages</b>() system call is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Since Linux 2.6.23, <b>remap_file_pages</b>() creates non-linear
+    mappings only on in-memory filesystems such as <b>tmpfs</b>(5), hugetlbfs or
+    ramfs. On filesystems with a backing store, <b>remap_file_pages</b>() is not
+    much more efficient than using <b>mmap</b>(2) to adjust which parts of the
+    file are mapped to which addresses.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>getpagesize</b>(2), <b>mmap</b>(2), <b>mmap2</b>(2),
+    <b>mprotect</b>(2), <b>mremap</b>(2), <b>msync</b>(2)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

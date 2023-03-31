@@ -1,0 +1,183 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2001 Andreas Dilger (adilger@turbolinux.com)
+   and Copyright (c) 2017 Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/d3625b8f92295917419698e775512aa60140c0d8">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>slabinfo(5)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">slabinfo(5)</td>
+    <td class="head-vol">File Formats Manual</td>
+    <td class="head-rtitle">slabinfo(5)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">slabinfo - kernel slab allocator statistics</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>cat /proc/slabinfo</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">Frequently used objects in the Linux kernel (buffer heads, inodes,
+    dentries, etc.) have their own cache. The file <i>/proc/slabinfo</i> gives
+    statistics on these caches. The following (edited) output shows an example
+    of the contents of this file:</p>
+<p class="Pp"></p>
+<pre>$ <b>sudo cat /proc/slabinfo</b>
+slabinfo - version: 2.1
+# name    &lt;active_objs&gt; &lt;num_objs&gt; &lt;objsize&gt; &lt;objperslab&gt; &lt;pagesperslab&gt; ...
+sigqueue      100  100  160   25  1 : tunables  0  0  0 : slabdata   4   4  0
+sighand_cache 355   405 2112  15  8 : tunables  0  0  0 : slabdata  27  27  0
+kmalloc-8192   96   96  8192   4  8 : tunables  0  0  0 : slabdata  24  24  0
+...
+</pre>
+<p class="Pp">The first line of output includes a version number, which allows
+    an application that is reading the file to handle changes in the file
+    format. (See VERSIONS, below.) The next line lists the names of the columns
+    in the remaining lines.</p>
+<p class="Pp">Each of the remaining lines displays information about a specified
+    cache. Following the cache name, the output shown in each line shows three
+    components for each cache:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>statistics</dd>
+  <dt>•</dt>
+  <dd>tunables</dd>
+  <dt>•</dt>
+  <dd>slabdata</dd>
+</dl>
+<p class="Pp">The statistics are as follows:</p>
+<dl class="Bl-tag">
+  <dt id="active_objs"><a class="permalink" href="#active_objs"><i>active_objs</i></a></dt>
+  <dd>The number of objects that are currently active (i.e., in use).</dd>
+  <dt id="num_objs"><a class="permalink" href="#num_objs"><i>num_objs</i></a></dt>
+  <dd>The total number of allocated objects (i.e., objects that are both in use
+      and not in use).</dd>
+  <dt id="objsize"><a class="permalink" href="#objsize"><i>objsize</i></a></dt>
+  <dd>The size of objects in this slab, in bytes.</dd>
+  <dt id="objperslab"><a class="permalink" href="#objperslab"><i>objperslab</i></a></dt>
+  <dd>The number of objects stored in each slab.</dd>
+  <dt id="pagesperslab"><a class="permalink" href="#pagesperslab"><i>pagesperslab</i></a></dt>
+  <dd>The number of pages allocated for each slab.</dd>
+</dl>
+<p class="Pp">The <i>tunables</i> entries in each line show tunable parameters
+    for the corresponding cache. When using the default SLUB allocator, there
+    are no tunables, the <i>/proc/slabinfo</i> file is not writable, and the
+    value 0 is shown in these fields. When using the older SLAB allocator, the
+    tunables for a particular cache can be set by writing lines of the following
+    form to <i>/proc/slabinfo</i>:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre># <b>echo 'name limit batchcount sharedfactor' &gt; /proc/slabinfo</b>
+</pre>
+<br>
+<p class="Pp">Here, <i>name</i> is the cache name, and <i>limit</i>,
+    <i>batchcount</i>, and <i>sharedfactor</i> are integers defining new values
+    for the corresponding tunables. The <i>limit</i> value should be a positive
+    value, <i>batchcount</i> should be a positive value that is less than or
+    equal to <i>limit</i>, and <i>sharedfactor</i> should be nonnegative. If any
+    of the specified values is invalid, the cache settings are left
+  unchanged.</p>
+<p class="Pp">The <i>tunables</i> entries in each line contain the following
+    fields:</p>
+<dl class="Bl-tag">
+  <dt id="limit"><a class="permalink" href="#limit"><i>limit</i></a></dt>
+  <dd>The maximum number of objects that will be cached.</dd>
+  <dt id="batchcount"><a class="permalink" href="#batchcount"><i>batchcount</i></a></dt>
+  <dd>On SMP systems, this specifies the number of objects to transfer at one
+      time when refilling the available object list.</dd>
+  <dt id="sharedfactor"><a class="permalink" href="#sharedfactor"><i>sharedfactor</i></a></dt>
+  <dd>[To be documented]</dd>
+</dl>
+<p class="Pp">The <i>slabdata</i> entries in each line contain the following
+    fields:</p>
+<dl class="Bl-tag">
+  <dt id="active_slabs"><a class="permalink" href="#active_slabs"><i>active_slabs</i></a></dt>
+  <dd>The number of active slabs.</dd>
+  <dt id="nums_slabs"><a class="permalink" href="#nums_slabs"><i>nums_slabs</i></a></dt>
+  <dd>The total number of slabs.</dd>
+  <dt id="sharedavail"><a class="permalink" href="#sharedavail"><i>sharedavail</i></a></dt>
+  <dd>[To be documented]</dd>
+</dl>
+<p class="Pp">Note that because of object alignment and slab cache overhead,
+    objects are not normally packed tightly into pages. Pages with even one
+    in-use object are considered in-use and cannot be freed.</p>
+<p class="Pp">Kernels configured with <b>CONFIG_DEBUG_SLAB</b> will also have
+    additional statistics fields in each line, and the first line of the file
+    will contain the string "(statistics)". The statistics field
+    include : the high water mark of active objects; the number of times objects
+    have been allocated; the number of times the cache has grown (new pages
+    added to this cache); the number of times the cache has been reaped (unused
+    pages removed from this cache); and the number of times there was an error
+    allocating new pages to this cache.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <i>/proc/slabinfo</i> file first appeared in Linux 2.1.23. The
+    file is versioned, and over time there have been a number of versions with
+    different layouts:</p>
+<dl class="Bl-tag">
+  <dt>1.0</dt>
+  <dd>Present throughout the Linux 2.2.x kernel series.</dd>
+  <dt>1.1</dt>
+  <dd>Present in the Linux 2.4.x kernel series.</dd>
+  <dt>1.2</dt>
+  <dd>A format that was briefly present in the Linux 2.5 development
+    series.</dd>
+  <dt>2.0</dt>
+  <dd>Present in Linux 2.6.x kernels up to and including Linux 2.6.9.</dd>
+  <dt>2.1</dt>
+  <dd>The current format, which first appeared in Linux 2.6.10.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Only root can read and (if the kernel was configured with
+    <b>CONFIG_SLAB</b>) write the <i>/proc/slabinfo</i> file.</p>
+<p class="Pp">The total amount of memory allocated to the SLAB/SLUB cache is
+    shown in the <i>Slab</i> field of <i>/proc/meminfo</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>slabtop</b>(1)</p>
+<p class="Pp">The kernel source file <i>Documentation/vm/slub.txt</i> and
+    <i>tools/vm/slabinfo.c</i>.</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

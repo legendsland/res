@@ -1,0 +1,123 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2003 Free Software Foundation, Inc.
+  
+   SPDX-License-Identifier: GPL-1.0-or-later
+   --><head>
+<meta name="dc.identifier" content="res/b0c3e1be0bab3c17de692817c24c1555427f84d3">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>io_cancel(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">io_cancel(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">io_cancel(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">io_cancel - cancel an outstanding asynchronous I/O operation</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+<p class="Pp">Alternatively, Asynchronous I/O library (<i>libaio</i>,
+    <i>-laio</i>); see NOTES.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;linux/aio_abi.h&gt;</b>    /* Definition of needed types */
+<b>#include &lt;sys/syscall.h&gt;</b>      /* Definition of <b>SYS_*</b> constants */
+<b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int syscall(SYS_io_cancel, aio_context_t </b><i>ctx_id</i><b>, struct iocb *</b><i>iocb</i><b>,</b>
+<b>            struct io_event *</b><i>result</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><i>Note</i>: this page describes the raw Linux system call
+    interface. The wrapper function provided by <i>libaio</i> uses a different
+    type for the <i>ctx_id</i> argument. See NOTES.</p>
+<p class="Pp">The <b>io_cancel</b>() system call attempts to cancel an
+    asynchronous I/O operation previously submitted with <b>io_submit</b>(2).
+    The <i>iocb</i> argument describes the operation to be canceled and the
+    <i>ctx_id</i> argument is the AIO context to which the operation was
+    submitted. If the operation is successfully canceled, the event will be
+    copied into the memory pointed to by <i>result</i> without being placed into
+    the completion queue.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>io_cancel</b>() returns 0. For the failure return,
+    see NOTES.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>The <i>iocb</i> specified was not canceled.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>One of the data structures points to invalid data.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The AIO context specified by <i>ctx_id</i> is invalid.</dd>
+  <dt id="ENOSYS"><a class="permalink" href="#ENOSYS"><b>ENOSYS</b></a></dt>
+  <dd><b>io_cancel</b>() is not implemented on this architecture.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The asynchronous I/O system calls first appeared in Linux 2.5.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>io_cancel</b>() is Linux-specific and should not be used in
+    programs that are intended to be portable.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">You probably want to use the <b>io_cancel</b>() wrapper function
+    provided by <i>libaio</i>.</p>
+<p class="Pp">Note that the <i>libaio</i> wrapper function uses a different type
+    (<i>io_context_t</i>) for the <i>ctx_id</i> argument. Note also that the
+    <i>libaio</i> wrapper does not follow the usual C library conventions for
+    indicating errors: on error it returns a negated error number (the negative
+    of one of the values listed in ERRORS). If the system call is invoked via
+    <b>syscall</b>(2), then the return value follows the usual conventions for
+    indicating an error: -1, with <i>errno</i> set to a (positive) value that
+    indicates the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>io_destroy</b>(2), <b>io_getevents</b>(2), <b>io_setup</b>(2),
+    <b>io_submit</b>(2), <b>aio</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

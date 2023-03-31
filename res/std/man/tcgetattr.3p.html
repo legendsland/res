@@ -1,0 +1,163 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/0401e514792f463d1a287f2af686a03a19f7a4d3">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>TCGETATTR(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">TCGETATTR(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">TCGETATTR(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">tcgetattr — get the parameters associated with the
+  terminal</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;termios.h&gt;</pre>
+<pre>int tcgetattr(int <i>fildes</i>, struct termios *<i>termios_p</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>tcgetattr</i>() function shall get the parameters
+    associated with the terminal referred to by <i>fildes</i> and store them in
+    the <b>termios</b> structure referenced by <i>termios_p</i>. The
+    <i>fildes</i> argument is an open file descriptor associated with a
+    terminal.</p>
+<p class="Pp">The <i>termios_p</i> argument is a pointer to a <b>termios</b>
+    structure.</p>
+<p class="Pp">The <i>tcgetattr</i>() operation is allowed from any process.</p>
+<p class="Pp">If the terminal device supports different input and output baud
+    rates, the baud rates stored in the <b>termios</b> structure returned by
+    <i>tcgetattr</i>() shall reflect the actual baud rates, even if they are
+    equal. If differing baud rates are not supported, the rate returned as the
+    output baud rate shall be the actual baud rate. If the terminal device does
+    not support split baud rates, the input baud rate stored in the
+    <b>termios</b> structure shall be the output rate (as one of the symbolic
+    values).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, 0 shall be returned. Otherwise, -1
+    shall be returned and <i>errno</i> set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>tcgetattr</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The <i>fildes</i> argument is not a valid file descriptor.</dd>
+  <dt id="ENOTTY"><a class="permalink" href="#ENOTTY"><b>ENOTTY</b></a></dt>
+  <dd>The file associated with <i>fildes</i> is not a terminal.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">Care must be taken when changing the terminal attributes.
+    Applications should always do a <i>tcgetattr</i>(), save the <b>termios</b>
+    structure values returned, and then do a <i>tcsetattr</i>(), changing only
+    the necessary fields. The application should use the values saved from the
+    <i>tcgetattr</i>() to reset the terminal state whenever it is done with the
+    terminal. This is necessary because terminal attributes apply to the
+    underlying port and not to each individual open instance; that is, all
+    processes that have used the terminal see the latest attribute changes.</p>
+<p class="Pp">A program that uses these functions should be written to catch all
+    signals and take other appropriate actions to ensure that when the program
+    terminates, whether planned or not, the terminal device's state is restored
+    to its original state.</p>
+<p class="Pp">Existing practice dealing with error returns when only part of a
+    request can be honored is based on calls to the <i>ioctl</i>() function. In
+    historical BSD and System V implementations, the corresponding
+    <i>ioctl</i>() returns zero if the requested actions were semantically
+    correct, even if some of the requested changes could not be made. Many
+    existing applications assume this behavior and would no longer work
+    correctly if the return value were changed from zero to -1 in this case.</p>
+<p class="Pp">Note that either specification has a problem. When zero is
+    returned, it implies everything succeeded even if some of the changes were
+    not made. When -1 is returned, it implies everything failed even though some
+    of the changes were made.</p>
+<p class="Pp">Applications that need all of the requested changes made to work
+    properly should follow <i>tcsetattr</i>() with a call to <i>tcgetattr</i>()
+    and compare the appropriate field values.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>tcsetattr</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Chapter
+    11</i>, <i>General Terminal Interface</i>,
+  <i><b>&lt;termios.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

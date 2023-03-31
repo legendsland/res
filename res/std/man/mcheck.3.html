@@ -1,0 +1,207 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 2012 by Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/e214d9fbec750f5e9b77a394a66e3f3258899231">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>mcheck(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">mcheck(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">mcheck(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">mcheck, mcheck_check_all, mcheck_pedantic, mprobe - heap
+    consistency checking</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;mcheck.h&gt;</b></pre>
+<pre><b>int mcheck(void (*</b><i>abortfunc</i><b>)(enum mcheck_status </b><i>mstatus</i><b>));</b>
+<b>int mcheck_pedantic(void (*</b><i>abortfunc</i><b>)(enum mcheck_status </b><i>mstatus</i><b>));</b>
+<b>void mcheck_check_all(void);</b></pre>
+<pre><b>enum mcheck_status mprobe(void *</b><i>ptr</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>mcheck</b>() function installs a set of debugging hooks for
+    the <b>malloc</b>(3) family of memory-allocation functions. These hooks
+    cause certain consistency checks to be performed on the state of the heap.
+    The checks can detect application errors such as freeing a block of memory
+    more than once or corrupting the bookkeeping data structures that
+    immediately precede a block of allocated memory.</p>
+<p class="Pp">To be effective, the <b>mcheck</b>() function must be called
+    before the first call to <b>malloc</b>(3) or a related function. In cases
+    where this is difficult to ensure, linking the program with <i>-lmcheck</i>
+    inserts an implicit call to <b>mcheck</b>() (with a NULL argument) before
+    the first call to a memory-allocation function.</p>
+<p class="Pp">The <b>mcheck_pedantic</b>() function is similar to
+    <b>mcheck</b>(), but performs checks on all allocated blocks whenever one of
+    the memory-allocation functions is called. This can be very slow!</p>
+<p class="Pp">The <b>mcheck_check_all</b>() function causes an immediate check
+    on all allocated blocks. This call is effective only if <b>mcheck</b>() is
+    called beforehand.</p>
+<p class="Pp">If the system detects an inconsistency in the heap, the
+    caller-supplied function pointed to by <i>abortfunc</i> is invoked with a
+    single argument, <i>mstatus</i>, that indicates what type of inconsistency
+    was detected. If <i>abortfunc</i> is NULL, a default function prints an
+    error message on <i>stderr</i> and calls <b>abort</b>(3).</p>
+<p class="Pp">The <b>mprobe</b>() function performs a consistency check on the
+    block of allocated memory pointed to by <i>ptr</i>. The <b>mcheck</b>()
+    function should be called beforehand (otherwise <b>mprobe</b>() returns
+    <b>MCHECK_DISABLED</b>).</p>
+<p class="Pp">The following list describes the values returned by
+    <b>mprobe</b>() or passed as the <i>mstatus</i> argument when
+    <i>abortfunc</i> is invoked:</p>
+<dl class="Bl-tag">
+  <dt id="MCHECK_DISABLED"><a class="permalink" href="#MCHECK_DISABLED"><b>MCHECK_DISABLED</b>
+    (<b>mprobe</b>() only)</a></dt>
+  <dd><b>mcheck</b>() was not called before the first memory allocation function
+      was called. Consistency checking is not possible.</dd>
+  <dt id="MCHECK_OK"><a class="permalink" href="#MCHECK_OK"><b>MCHECK_OK</b>
+    (<b>mprobe</b>() only)</a></dt>
+  <dd>No inconsistency detected.</dd>
+  <dt id="MCHECK_HEAD"><a class="permalink" href="#MCHECK_HEAD"><b>MCHECK_HEAD</b></a></dt>
+  <dd>Memory preceding an allocated block was clobbered.</dd>
+  <dt id="MCHECK_TAIL"><a class="permalink" href="#MCHECK_TAIL"><b>MCHECK_TAIL</b></a></dt>
+  <dd>Memory following an allocated block was clobbered.</dd>
+  <dt id="MCHECK_FREE"><a class="permalink" href="#MCHECK_FREE"><b>MCHECK_FREE</b></a></dt>
+  <dd>A block of memory was freed twice.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp"><b>mcheck</b>() and <b>mcheck_pedantic</b>() return 0 on success,
+    or -1 on error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>mcheck (), mcheck_pedantic (), mcheck_check_all (), mprobe ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race:mcheck const:malloc_hooks</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>mcheck_pedantic</b>() and <b>mcheck_check_all</b>()
+    functions are available since glibc 2.2. The <b>mcheck</b>() and
+    <b>mprobe</b>() functions are present since at least glibc 2.0</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These functions are GNU extensions.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Linking a program with <i>-lmcheck</i> and using the
+    <b>MALLOC_CHECK_</b> environment variable (described in <b>mallopt</b>(3))
+    cause the same kinds of errors to be detected. But, using
+    <b>MALLOC_CHECK_</b> does not require the application to be relinked.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below calls <b>mcheck</b>() with a NULL argument and
+    then frees the same block of memory twice. The following shell session
+    demonstrates what happens when running the program:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$<b> ./a.out</b>
+About to free
+About to free a second time
+block freed twice
+Aborted (core dumped)
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#include &lt;mcheck.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+int
+main(void)
+{
+<br>
+    char *p;
+<br>
+    if (mcheck(NULL) != 0) {
+<br>
+        fprintf(stderr, "mcheck() failed\n");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    p = malloc(1000);
+<br>
+    fprintf(stderr, "About to free\n");
+<br>
+    free(p);
+<br>
+    fprintf(stderr, "\nAbout to free a second time\n");
+<br>
+    free(p);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>malloc</b>(3), <b>mallopt</b>(3), <b>mtrace</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

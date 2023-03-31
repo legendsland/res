@@ -1,0 +1,244 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/61756a2c966889e765ab83058dd1d6d39cc22678">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>DLOPEN(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">DLOPEN(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">DLOPEN(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">dlopen — open a symbol table handle</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;dlfcn.h&gt;</pre>
+<pre>void *dlopen(const char *<i>file</i>, int <i>mode</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>dlopen</i>() function shall make the symbols (function
+    identifiers and data object identifiers) in the executable object file
+    specified by <i>file</i> available to the calling program.</p>
+<p class="Pp">The class of executable object files eligible for this operation
+    and the manner of their construction are implementation-defined, though
+    typically such files are shared libraries or programs.</p>
+<p class="Pp">Implementations may permit the construction of embedded
+    dependencies in executable object files. In such cases, a <i>dlopen</i>()
+    operation shall load those dependencies in addition to the executable object
+    file specified by <i>file</i>. Implementations may also impose specific
+    constraints on the construction of programs that can employ <i>dlopen</i>()
+    and its related services.</p>
+<p class="Pp">A successful <i>dlopen</i>() shall return a symbol table handle
+    which the caller may use on subsequent calls to <i>dlsym</i>() and
+    <i>dlclose</i>().</p>
+<p class="Pp">The value of this symbol table handle should not be interpreted in
+    any way by the caller.</p>
+<p class="Pp">The <i>file</i> argument is used to construct a pathname to the
+    executable object file. If <i>file</i> contains a &lt;slash&gt; character,
+    the <i>file</i> argument is used as the pathname for the file. Otherwise,
+    <i>file</i> is used in an implementation-defined manner to yield a
+  pathname.</p>
+<p class="Pp">If <i>file</i> is a null pointer, <i>dlopen</i>() shall return a
+    global symbol table handle for the currently running process image. This
+    symbol table handle shall provide access to the symbols from an ordered set
+    of executable object files consisting of the original program image file,
+    any executable object files loaded at program start-up as specified by that
+    process file (for example, shared libraries), and the set of executable
+    object files loaded using <i>dlopen</i>() operations with the RTLD_GLOBAL
+    flag. As the latter set of executable object files can change during
+    execution, the set of symbols made available by this symbol table handle can
+    also change dynamically.</p>
+<p class="Pp">Only a single copy of an executable object file shall be brought
+    into the address space, even if <i>dlopen</i>() is invoked multiple times in
+    reference to the executable object file, and even if different pathnames are
+    used to reference the executable object file.</p>
+<p class="Pp">The <i>mode</i> parameter describes how <i>dlopen</i>() shall
+    operate upon <i>file</i> with respect to the processing of relocations and
+    the scope of visibility of the symbols provided within <i>file</i>. When an
+    executable object file is brought into the address space of a process, it
+    may contain references to symbols whose addresses are not known until the
+    executable object file is loaded.</p>
+<p class="Pp">These references shall be relocated before the symbols can be
+    accessed. The <i>mode</i> parameter governs when these relocations take
+    place and may have the following values:</p>
+<dl class="Bl-tag">
+  <dt id="RTLD_LAZY"><a class="permalink" href="#RTLD_LAZY">RTLD_LAZY</a></dt>
+  <dd>Relocations shall be performed at an implementation-defined time, ranging
+      from the time of the <i>dlopen</i>() call until the first reference to a
+      given symbol occurs. Specifying RTLD_LAZY should improve performance on
+      implementations supporting dynamic symbol binding since a process might
+      not reference all of the symbols in an executable object file. And, for
+      systems supporting dynamic symbol resolution for normal process execution,
+      this behavior mimics the normal handling of process execution.</dd>
+  <dt id="RTLD_NOW"><a class="permalink" href="#RTLD_NOW">RTLD_NOW</a></dt>
+  <dd>All necessary relocations shall be performed when the executable object
+      file is first loaded. This may waste some processing if relocations are
+      performed for symbols that are never referenced. This behavior may be
+      useful for applications that need to know that all symbols referenced
+      during execution will be available before <i>dlopen</i>() returns.</dd>
+</dl>
+<p class="Pp">Any executable object file loaded by <i>dlopen</i>() that requires
+    relocations against global symbols can reference the symbols in the original
+    process image file, any executable object files loaded at program start-up,
+    from the initial process image itself, from any other executable object file
+    included in the same <i>dlopen</i>() invocation, and any executable object
+    files that were loaded in any <i>dlopen</i>() invocation and which specified
+    the RTLD_GLOBAL flag. To determine the scope of visibility for the symbols
+    loaded with a <i>dlopen</i>() invocation, the <i>mode</i> parameter should
+    be a bitwise-inclusive OR with one of the following values:</p>
+<dl class="Bl-tag">
+  <dt id="RTLD_GLOBAL"><a class="permalink" href="#RTLD_GLOBAL">RTLD_GLOBAL</a></dt>
+  <dd>The executable object file's symbols shall be made available for
+      relocation processing of any other executable object file. In addition,
+      symbol lookup using <i>dlopen</i>(NULL,<i>mode</i>) and an associated
+      <i>dlsym</i>() allows executable object files loaded with this mode to be
+      searched.</dd>
+  <dt id="RTLD_LOCAL"><a class="permalink" href="#RTLD_LOCAL">RTLD_LOCAL</a></dt>
+  <dd>The executable object file's symbols shall not be made available for
+      relocation processing of any other executable object file.</dd>
+</dl>
+<p class="Pp">If neither RTLD_GLOBAL nor RTLD_LOCAL is specified, the default
+    behavior is unspecified.</p>
+<p class="Pp">If an executable object file is specified in multiple
+    <i>dlopen</i>() invocations, <i>mode</i> is interpreted at each
+  invocation.</p>
+<p class="Pp">If RTLD_NOW has been specified, all relocations shall have been
+    completed rendering further RTLD_NOW operations redundant and any further
+    RTLD_LAZY operations irrelevant.</p>
+<p class="Pp">If RTLD_GLOBAL has been specified, the executable object file
+    shall maintain the RTLD_GLOBAL status regardless of any previous or future
+    specification of RTLD_LOCAL, as long as the executable object file remains
+    in the address space (see <i><i>dlclose</i>()</i>).</p>
+<p class="Pp">Symbols introduced into the process image through calls to
+    <i>dlopen</i>() may be used in relocation activities. Symbols so introduced
+    may duplicate symbols already defined by the program or previous
+    <i>dlopen</i>() operations. To resolve the ambiguities such a situation
+    might present, the resolution of a symbol reference to symbol definition is
+    based on a symbol resolution order. Two such resolution orders are defined:
+    load order and dependency order. Load order establishes an ordering among
+    symbol definitions, such that the first definition loaded (including
+    definitions from the process image file and any dependent executable object
+    files loaded with it) has priority over executable object files added later
+    (by <i>dlopen</i>()). Load ordering is used in relocation processing.
+    Dependency ordering uses a breadth-first order starting with a given
+    executable object file, then all of its dependencies, then any dependents of
+    those, iterating until all dependencies are satisfied. With the exception of
+    the global symbol table handle obtained via a <i>dlopen</i>() operation with
+    a null pointer as the <i>file</i> argument, dependency ordering is used by
+    the <i>dlsym</i>() function. Load ordering is used in <i>dlsym</i>()
+    operations upon the global symbol table handle.</p>
+<p class="Pp">When an executable object file is first made accessible via
+    <i>dlopen</i>(), it and its dependent executable object files are added in
+    dependency order. Once all the executable object files are added,
+    relocations are performed using load order. Note that if an executable
+    object file or its dependencies had been previously loaded, the load and
+    dependency orders may yield different resolutions.</p>
+<p class="Pp">The symbols introduced by <i>dlopen</i>() operations and available
+    through <i>dlsym</i>() are at a minimum those which are exported as
+    identifiers of global scope by the executable object file. Typically, such
+    identifiers shall be those that were specified in (for example) C source
+    code as having <b>extern</b> linkage. The precise manner in which an
+    implementation constructs the set of exported symbols for an executable
+    object file is implementation-defined.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>dlopen</i>() shall return a symbol
+    table handle. If <i>file</i> cannot be found, cannot be opened for reading,
+    is not of an appropriate executable object file format for processing by
+    <i>dlopen</i>(), or if an error occurs during the process of loading
+    <i>file</i> or relocating its symbolic references, <i>dlopen</i>() shall
+    return a null pointer. More detailed diagnostic information shall be
+    available through <i>dlerror</i>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">No errors are defined.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">Refer to <i><i>dlsym</i>()</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>dlclose</i>()</i>, <i><i>dlerror</i>()</i>,
+    <i><i>dlsym</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;dlfcn.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

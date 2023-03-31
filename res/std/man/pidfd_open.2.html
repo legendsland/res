@@ -1,0 +1,274 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2019 by Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/3fdeafb5e71592d18e4a3b1034b8ab3963c83f25">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>pidfd_open(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">pidfd_open(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">pidfd_open(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pidfd_open - obtain a file descriptor that refers to a process</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/syscall.h&gt;</b>      /* Definition of <b>SYS_*</b> constants */
+<b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int syscall(SYS_pidfd_open, pid_t </b><i>pid</i><b>, unsigned int </b><i>flags</i><b>);</b></pre>
+<p class="Pp"><i>Note</i>: glibc provides no wrapper for <b>pidfd_open</b>(),
+    necessitating the use of <b>syscall</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>pidfd_open</b>() system call creates a file descriptor that
+    refers to the process whose PID is specified in <i>pid</i>. The file
+    descriptor is returned as the function result; the close-on-exec flag is set
+    on the file descriptor.</p>
+<p class="Pp">The <i>flags</i> argument either has the value 0, or contains the
+    following flag:</p>
+<dl class="Bl-tag">
+  <dt id="PIDFD_NONBLOCK"><a class="permalink" href="#PIDFD_NONBLOCK"><b>PIDFD_NONBLOCK</b>
+    (since Linux 5.10)</a></dt>
+  <dd>Return a nonblocking file descriptor. If the process referred to by the
+      file descriptor has not yet terminated, then an attempt to wait on the
+      file descriptor using <b>waitid</b>(2) will immediately return the error
+      <b>EAGAIN</b> rather than blocking.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>pidfd_open</b>() returns a file descriptor (a
+    nonnegative integer). On error, -1 is returned and <i>errno</i> is set to
+    indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>flags</i> is not valid.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd><i>pid</i> is not valid.</dd>
+  <dt id="EMFILE"><a class="permalink" href="#EMFILE"><b>EMFILE</b></a></dt>
+  <dd>The per-process limit on the number of open file descriptors has been
+      reached (see the description of <b>RLIMIT_NOFILE</b> in
+      <b>getrlimit</b>(2)).</dd>
+  <dt id="ENFILE"><a class="permalink" href="#ENFILE"><b>ENFILE</b></a></dt>
+  <dd>The system-wide limit on the total number of open files has been
+    reached.</dd>
+  <dt id="ENODEV"><a class="permalink" href="#ENODEV"><b>ENODEV</b></a></dt>
+  <dd>The anonymous inode filesystem is not available in this kernel.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient kernel memory was available.</dd>
+  <dt id="ESRCH"><a class="permalink" href="#ESRCH"><b>ESRCH</b></a></dt>
+  <dd>The process specified by <i>pid</i> does not exist.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>pidfd_open</b>() first appeared in Linux 5.3.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>pidfd_open</b>() is Linux specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The following code sequence can be used to obtain a file
+    descriptor for the child of <b>fork</b>(2):</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>pid = fork();
+if (pid &gt; 0) {     /* If parent */
+<br>
+    pidfd = pidfd_open(pid, 0);
+<br>
+    ...
+}
+</pre>
+<br>
+<p class="Pp">Even if the child has already terminated by the time of the
+    <b>pidfd_open</b>() call, its PID will not have been recycled and the
+    returned file descriptor will refer to the resulting zombie process. Note,
+    however, that this is guaranteed only if the following conditions hold
+  true:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>the disposition of <b>SIGCHLD</b> has not been explicitly set to
+      <b>SIG_IGN</b> (see <b>sigaction</b>(2));</dd>
+  <dt>•</dt>
+  <dd>the <b>SA_NOCLDWAIT</b> flag was not specified while establishing a
+      handler for <b>SIGCHLD</b> or while setting the disposition of that signal
+      to <b>SIG_DFL</b> (see <b>sigaction</b>(2)); and</dd>
+  <dt>•</dt>
+  <dd>the zombie process was not reaped elsewhere in the program (e.g., either
+      by an asynchronously executed signal handler or by <b>wait</b>(2) or
+      similar in another thread).</dd>
+</dl>
+<p class="Pp">If any of these conditions does not hold, then the child process
+    (along with a PID file descriptor that refers to it) should instead be
+    created using <b>clone</b>(2) with the <b>CLONE_PIDFD</b> flag.</p>
+<section class="Ss">
+<h2 class="Ss" id="Use_cases_for_PID_file_descriptors"><a class="permalink" href="#Use_cases_for_PID_file_descriptors">Use
+  cases for PID file descriptors</a></h2>
+<p class="Pp">A PID file descriptor returned by <b>pidfd_open</b>() (or by
+    <b>clone</b>(2) with the <b>CLONE_PID</b> flag) can be used for the
+    following purposes:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>The <b>pidfd_send_signal</b>(2) system call can be used to send a signal
+      to the process referred to by a PID file descriptor.</dd>
+  <dt>•</dt>
+  <dd>A PID file descriptor can be monitored using <b>poll</b>(2),
+      <b>select</b>(2), and <b>epoll</b>(7). When the process that it refers to
+      terminates, these interfaces indicate the file descriptor as readable.
+      Note, however, that in the current implementation, nothing can be read
+      from the file descriptor (<b>read</b>(2) on the file descriptor fails with
+      the error <b>EINVAL</b>).</dd>
+  <dt>•</dt>
+  <dd>If the PID file descriptor refers to a child of the calling process, then
+      it can be waited on using <b>waitid</b>(2).</dd>
+  <dt>•</dt>
+  <dd>The <b>pidfd_getfd</b>(2) system call can be used to obtain a duplicate of
+      a file descriptor of another process referred to by a PID file
+    descriptor.</dd>
+  <dt>•</dt>
+  <dd>A PID file descriptor can be used as the argument of <b>setns</b>(2) in
+      order to move into one or more of the same namespaces as the process
+      referred to by the file descriptor.</dd>
+  <dt>•</dt>
+  <dd>A PID file descriptor can be used as the argument of
+      <b>process_madvise</b>(2) in order to provide advice on the memory usage
+      patterns of the process referred to by the file descriptor.</dd>
+</dl>
+<p class="Pp">The <b>pidfd_open</b>() system call is the preferred way of
+    obtaining a PID file descriptor for an already existing process. The
+    alternative is to obtain a file descriptor by opening a <i>/proc/[pid]</i>
+    directory. However, the latter technique is possible only if the
+    <b>proc</b>(5) filesystem is mounted; furthermore, the file descriptor
+    obtained in this way is <i>not</i> pollable and can't be waited on with
+    <b>waitid</b>(2).</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below opens a PID file descriptor for the process
+    whose PID is specified as its command-line argument. It then uses
+    <b>poll</b>(2) to monitor the file descriptor for process exit, as indicated
+    by an <b>EPOLLIN</b> event.</p>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#define _GNU_SOURCE
+#include &lt;poll.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;sys/syscall.h&gt;
+#include &lt;unistd.h&gt;
+static int
+pidfd_open(pid_t pid, unsigned int flags)
+{
+<br>
+    return syscall(SYS_pidfd_open, pid, flags);
+}
+int
+main(int argc, char *argv[])
+{
+<br>
+    int            pidfd, ready;
+<br>
+    struct pollfd  pollfd;
+<br>
+    if (argc != 2) {
+<br>
+        fprintf(stderr, "Usage: %s &lt;pid&gt;\n", argv[0]);
+<br>
+        exit(EXIT_SUCCESS);
+<br>
+    }
+<br>
+    pidfd = pidfd_open(atoi(argv[1]), 0);
+<br>
+    if (pidfd == -1) {
+<br>
+        perror("pidfd_open");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    pollfd.fd = pidfd;
+<br>
+    pollfd.events = POLLIN;
+<br>
+    ready = poll(&amp;pollfd, 1, -1);
+<br>
+    if (ready == -1) {
+<br>
+        perror("poll");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    printf("Events (%#x): POLLIN is %sset\n", pollfd.revents,
+<br>
+           (pollfd.revents &amp; POLLIN) ? "" : "not ");
+<br>
+    close(pidfd);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>clone</b>(2), <b>kill</b>(2), <b>pidfd_getfd</b>(2),
+    <b>pidfd_send_signal</b>(2), <b>poll</b>(2), <b>process_madvise</b>(2),
+    <b>select</b>(2), <b>setns</b>(2), <b>waitid</b>(2), <b>epoll</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

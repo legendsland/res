@@ -1,0 +1,541 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/48414c15531a86836a422e07fece6b7e4731523e">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>PATCH(1P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">PATCH(1P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">PATCH(1P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">patch — apply changes to files</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>patch <b>[</b>-blNR<b>] [</b>-c|-e|-n|-u<b>] [</b>-d <i>dir</i><b>] [</b>-D <i>define</i><b>] [</b>-i <i>patchfile</i><b>]</b>
+<br>
+<b>    [</b>-o <i>outfile</i><b>] [</b>-p <i>num</i><b>] [</b>-r <i>rejectfile</i><b>] [</b><i>file</i><b>]</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>patch</i> utility shall read a source (patch) file
+    containing any of four forms of difference (diff) listings produced by the
+    <i>diff</i> utility (normal, copied context, unified context, or in the
+    style of <i>ed</i>) and apply those differences to a file. By default,
+    <i>patch</i> shall read from the standard input.</p>
+<p class="Pp">The <i>patch</i> utility shall attempt to determine the type of
+    the <i>diff</i> listing, unless overruled by a <b>-c</b>, <b>-e</b>,
+    <b>-n</b>, or <b>-u</b> option.</p>
+<p class="Pp">If the patch file contains more than one patch, <i>patch</i> shall
+    attempt to apply each of them as if they came from separate patch files. (In
+    this case, the application shall ensure that the name of the patch file is
+    determinable for each <i>diff</i> listing.)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OPTIONS"><a class="permalink" href="#OPTIONS">OPTIONS</a></h1>
+<p class="Pp">The <i>patch</i> utility shall conform to the Base Definitions
+    volume of POSIX.1‐2017, <i>Section 12.2</i>, <i>Utility Syntax
+    Guidelines</i>.</p>
+<p class="Pp">The following options shall be supported:</p>
+<dl class="Bl-tag">
+  <dt id="b"><a class="permalink" href="#b"><b>-b</b></a></dt>
+  <dd>Save a copy of the original contents of each modified file, before the
+      differences are applied, in a file of the same name with the suffix
+      <b>.orig</b> appended to it. If the file already exists, it shall be
+      overwritten; if multiple patches are applied to the same file, the
+      <b>.orig</b> file shall be written only for the first patch. When the
+      <b>-o</b> <i>outfile</i> option is also specified, <i>file</i><b>.orig</b>
+      shall not be created but, if <i>outfile</i> already exists,
+      <i>outfile</i><b>.orig</b> shall be created.</dd>
+  <dt id="c"><a class="permalink" href="#c"><b>-c</b></a></dt>
+  <dd>Interpret the patch file as a copied context difference (the output of the
+      utility <i>diff</i> when the <b>-c</b> or <b>-C</b> options are
+      specified).</dd>
+  <dt id="d"><a class="permalink" href="#d"><b>-d&nbsp;</b><i>dir</i></a></dt>
+  <dd>Change the current directory to <i>dir</i> before processing as described
+      in the EXTENDED DESCRIPTION section.</dd>
+  <dt id="D"><a class="permalink" href="#D"><b>-D&nbsp;</b><i>define</i></a></dt>
+  <dd>Mark changes with one of the following C preprocessor constructs:</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#ifdef define
+...
+#endif</pre>
+<pre>#ifndef define
+...
+#endif</pre>
+</div>
+<p class="Pp">optionally combined with the C preprocessor construct
+    <b>#else</b>. If the patched file is processed with the C preprocessor,
+    where the macro <i>define</i> is defined, the output shall contain the
+    changes from the patch file; otherwise, the output shall not contain the
+    patches specified in the patch file.</p>
+</div>
+<dl class="Bl-tag">
+  <dt id="e"><a class="permalink" href="#e"><b>-e</b></a></dt>
+  <dd>Interpret the patch file as an <i>ed</i> script, rather than a <i>diff</i>
+      script.</dd>
+  <dt id="i"><a class="permalink" href="#i"><b>-i&nbsp;</b><i>patchfile</i></a></dt>
+  <dd>Read the patch information from the file named by the pathname
+      <i>patchfile</i>, rather than the standard input.</dd>
+  <dt id="l"><a class="permalink" href="#l"><b>-l</b></a></dt>
+  <dd>(The letter ell.) Cause any sequence of &lt;blank&gt; characters in the
+      difference script to match any sequence of &lt;blank&gt; characters in the
+      input file. Other characters shall be matched exactly.</dd>
+  <dt id="n"><a class="permalink" href="#n"><b>-n</b></a></dt>
+  <dd>Interpret the script as a normal difference.</dd>
+  <dt id="N"><a class="permalink" href="#N"><b>-N</b></a></dt>
+  <dd>Ignore patches where the differences have already been applied to the
+      file; by default, already-applied patches shall be rejected.</dd>
+  <dt id="o"><a class="permalink" href="#o"><b>-o&nbsp;</b><i>outfile</i></a></dt>
+  <dd>Instead of modifying the files (specified by the <i>file</i> operand or
+      the difference listings) directly, write a copy of the file referenced by
+      each patch, with the appropriate differences applied, to <i>outfile</i>.
+      Multiple patches for a single file shall be applied to the intermediate
+      versions of the file created by any previous patches, and shall result in
+      multiple, concatenated versions of the file being written to
+      <i>outfile</i>.</dd>
+  <dt id="p"><a class="permalink" href="#p"><b>-p&nbsp;</b><i>num</i></a></dt>
+  <dd>For all pathnames in the patch file that indicate the names of files to be
+      patched, delete <i>num</i> pathname components from the beginning of each
+      pathname. If the pathname in the patch file is absolute, any leading
+      &lt;slash&gt; characters shall be considered the first component (that is,
+      <b>-p&nbsp;1</b> shall remove the leading &lt;slash&gt; characters).
+      Specifying <b>-p&nbsp;0</b> shall cause the full pathname to be used. If
+      <b>-p</b> is not specified, only the basename (the final pathname
+      component) shall be used.</dd>
+  <dt id="R"><a class="permalink" href="#R"><b>-R</b></a></dt>
+  <dd>Reverse the sense of the patch script; that is, assume that the difference
+      script was created from the new version to the old version. The <b>-R</b>
+      option cannot be used with <i>ed</i> scripts. The <i>patch</i> utility
+      shall attempt to reverse each portion of the script before applying it.
+      Rejected differences shall be saved in swapped format. If this option is
+      not specified, and until a portion of the patch file is successfully
+      applied, <i>patch</i> attempts to apply each portion in its reversed sense
+      as well as in its normal sense. If the attempt is successful, the user
+      shall be prompted to determine whether the <b>-R</b> option should be
+    set.</dd>
+  <dt id="r"><a class="permalink" href="#r"><b>-r&nbsp;</b><i>rejectfile</i></a></dt>
+  <dd>Override the default reject filename. In the default case, the reject file
+      shall have the same name as the output file, with the suffix <b>.rej</b>
+      appended to it; see <i>Patch Application</i>.</dd>
+  <dt id="u"><a class="permalink" href="#u"><b>-u</b></a></dt>
+  <dd>Interpret the patch file as a unified context difference (the output of
+      the <i>diff</i> utility when the <b>-u</b> or <b>-U</b> options are
+      specified).</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OPERANDS"><a class="permalink" href="#OPERANDS">OPERANDS</a></h1>
+<p class="Pp">The following operand shall be supported:</p>
+<dl class="Bl-tag">
+  <dt id="file"><a class="permalink" href="#file"><i>file</i></a></dt>
+  <dd>A pathname of a file to patch.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDIN"><a class="permalink" href="#STDIN">STDIN</a></h1>
+<p class="Pp">See the INPUT FILES section.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="INPUT_FILES"><a class="permalink" href="#INPUT_FILES">INPUT
+  FILES</a></h1>
+<p class="Pp">Input files shall be text files.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ENVIRONMENT_VARIABLES"><a class="permalink" href="#ENVIRONMENT_VARIABLES">ENVIRONMENT
+  VARIABLES</a></h1>
+<p class="Pp">The following environment variables shall affect the execution of
+    <i>patch</i>:</p>
+<dl class="Bl-tag">
+  <dt id="LANG"><a class="permalink" href="#LANG"><i>LANG</i></a></dt>
+  <dd>Provide a default value for the internationalization variables that are
+      unset or null. (See the Base Definitions volume of POSIX.1‐2017,
+      <i>Section 8.2</i>, <i>Internationalization Variables</i> the precedence
+      of internationalization variables used to determine the values of locale
+      categories.)</dd>
+  <dt id="LC_ALL"><a class="permalink" href="#LC_ALL"><i>LC_ALL</i></a></dt>
+  <dd>If set to a non-empty string value, override the values of all the other
+      internationalization variables.</dd>
+  <dt id="LC_COLLATE"><a class="permalink" href="#LC_COLLATE"><i>LC_COLLATE</i></a></dt>
+  <dd>
+    <br>
+    Determine the locale for the behavior of ranges, equivalence classes, and
+      multi-character collating elements used in the extended regular expression
+      defined for the <b>yesexpr</b> locale keyword in the <i>LC_MESSAGES</i>
+      category.</dd>
+  <dt id="LC_CTYPE"><a class="permalink" href="#LC_CTYPE"><i>LC_CTYPE</i></a></dt>
+  <dd>Determine the locale for the interpretation of sequences of bytes of text
+      data as characters (for example, single-byte as opposed to multi-byte
+      characters in arguments and input files), and the behavior of character
+      classes used in the extended regular expression defined for the
+      <b>yesexpr</b> locale keyword in the <i>LC_MESSAGES</i> category.</dd>
+  <dt id="LC_MESSAGES"><a class="permalink" href="#LC_MESSAGES"><i>LC_MESSAGES</i></a></dt>
+  <dd>
+    <br>
+    Determine the locale used to process affirmative responses, and the locale
+      used to affect the format and contents of diagnostic messages and prompts
+      written to standard error.</dd>
+  <dt id="NLSPATH"><a class="permalink" href="#NLSPATH"><i>NLSPATH</i></a></dt>
+  <dd>Determine the location of message catalogs for the processing of
+      <i>LC_MESSAGES</i>.</dd>
+  <dt id="LC_TIME"><a class="permalink" href="#LC_TIME"><i>LC_TIME</i></a></dt>
+  <dd>Determine the locale for recognizing the format of file timestamps written
+      by the <i>diff</i> utility in a context-difference input file.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ASYNCHRONOUS_EVENTS"><a class="permalink" href="#ASYNCHRONOUS_EVENTS">ASYNCHRONOUS
+  EVENTS</a></h1>
+<p class="Pp">Default.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDOUT"><a class="permalink" href="#STDOUT">STDOUT</a></h1>
+<p class="Pp">Not used.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDERR"><a class="permalink" href="#STDERR">STDERR</a></h1>
+<p class="Pp">The standard error shall be used for diagnostic and informational
+    messages.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OUTPUT_FILES"><a class="permalink" href="#OUTPUT_FILES">OUTPUT
+  FILES</a></h1>
+<p class="Pp">The output of the <i>patch</i> utility, the save files
+    (<b>.orig</b> suffixes), and the reject files (<b>.rej</b> suffixes) shall
+    be text files.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXTENDED_DESCRIPTION"><a class="permalink" href="#EXTENDED_DESCRIPTION">EXTENDED
+  DESCRIPTION</a></h1>
+<p class="Pp">A patch file may contain patching instructions for more than one
+    file; filenames shall be determined as specified in <i>Filename
+    Determination</i>. When the <b>-b</b> option is specified, for each patched
+    file, the original shall be saved in a file of the same name with the suffix
+    <b>.orig</b> appended to it.</p>
+<p class="Pp">For each patched file, a reject file may also be created as noted
+    in <i>Patch Application</i>. In the absence of a <b>-r</b> option, the name
+    of this file shall be formed by appending the suffix <b>.rej</b> to the
+    original filename.</p>
+<section class="Ss">
+<h2 class="Ss" id="Patch_File_Format"><a class="permalink" href="#Patch_File_Format">Patch
+  File Format</a></h2>
+<p class="Pp">The patch file shall contain zero or more lines of header
+    information followed by one or more patches. Each patch shall contain zero
+    or more lines of filename identification in the format produced by the
+    <b>-c</b>, <b>-C</b>, <b>-u</b>, or <b>-U</b> options of the <i>diff</i>
+    utility, and one or more sets of <i>diff</i> output, which are customarily
+    called <i>hunks</i>.</p>
+<p class="Pp">The <i>patch</i> utility shall recognize the following expression
+    in the header information:</p>
+<dl class="Bl-tag">
+  <dt id="Index:"><a class="permalink" href="#Index:"><b>Index:&nbsp;</b><i>pathname</i></a></dt>
+  <dd>
+    <br>
+    The file to be patched is named <i>pathname</i>.</dd>
+</dl>
+<p class="Pp">If all lines (including headers) within a patch begin with the
+    same leading sequence of &lt;blank&gt; characters, the <i>patch</i> utility
+    shall remove this sequence before proceeding. Within each patch, if the type
+    of difference is common context, the <i>patch</i> utility shall recognize
+    the following expressions:</p>
+<dl class="Bl-tag">
+  <dt>***&nbsp;<i>filename&nbsp;timestamp</i></dt>
+  <dd>
+    <br>
+    The patches arose from <i>filename</i>.</dd>
+  <dt>---&nbsp;<i>filename&nbsp;timestamp</i></dt>
+  <dd>
+    <br>
+    The patches should be applied to <i>filename</i>.</dd>
+</dl>
+<p class="Pp">If the type of difference is unified context, the <i>patch</i>
+    utility shall recognize the following expressions:</p>
+<dl class="Bl-tag">
+  <dt>---&nbsp;<i>filename&nbsp;timestamp</i></dt>
+  <dd>
+    <br>
+    The patches arose from <i>filename</i>.</dd>
+  <dt>+++&nbsp;<i>filename&nbsp;timestamp</i></dt>
+  <dd>
+    <br>
+    The patches should be applied to <i>filename</i>.</dd>
+</dl>
+<p class="Pp">Each hunk within a patch shall be the <i>diff</i> output to change
+    a line range within the original file. The line numbers for successive hunks
+    within a patch shall occur in ascending order.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Filename_Determination"><a class="permalink" href="#Filename_Determination">Filename
+  Determination</a></h2>
+<p class="Pp">If no <i>file</i> operand is specified, <i>patch</i> shall perform
+    the following steps to determine the filename to use:</p>
+<dl class="Bl-tag">
+  <dt> 1.</dt>
+  <dd>If the type of <i>diff</i> is context, the <i>patch</i> utility shall
+      delete pathname components (as specified by the <b>-p</b> option) from the
+      filename on the line beginning with <b>"***"</b> (if copied
+      context) or <b>"---"</b> (if unified context), then test for the
+      existence of this file relative to the current directory (or the directory
+      specified with the <b>-d</b> option). If the file exists, the <i>patch</i>
+      utility shall use this filename.</dd>
+  <dt> 2.</dt>
+  <dd>If the type of <i>diff</i> is context, the <i>patch</i> utility shall
+      delete the pathname components (as specified by the <b>-p</b> option) from
+      the filename on the line beginning with <b>"---"</b> (if copied
+      context) or <b>"+++"</b> (if unified context), then test for the
+      existence of this file relative to the current directory (or the directory
+      specified with the <b>-d</b> option). If the file exists, the <i>patch</i>
+      utility shall use this filename.</dd>
+  <dt> 3.</dt>
+  <dd>If the header information contains a line beginning with the string
+      <b>Index:</b>, the <i>patch</i> utility shall delete pathname components
+      (as specified by the <b>-p</b> option) from this line, then test for the
+      existence of this file relative to the current directory (or the directory
+      specified with the <b>-d</b> option). If the file exists, the <i>patch</i>
+      utility shall use this filename.</dd>
+  <dt> 4.</dt>
+  <dd>If an <b>SCCS</b> directory exists in the current directory, <i>patch</i>
+      shall attempt to perform a <i>get</i> <b>-e</b>
+      <b>SCCS/s.</b><i>filename</i> command to retrieve an editable version of
+      the file. If the file exists, the <i>patch</i> utility shall use this
+      filename.</dd>
+  <dt> 5.</dt>
+  <dd>The <i>patch</i> utility shall write a prompt to standard output and
+      request a filename interactively from the controlling terminal (for
+      example, <b>/dev/tty</b>).</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Patch_Application"><a class="permalink" href="#Patch_Application">Patch
+  Application</a></h2>
+<p class="Pp">If the <b>-c</b>, <b>-e</b>, <b>-n</b>, or <b>-u</b> option is
+    present, the <i>patch</i> utility shall interpret information within each
+    hunk as a copied context difference, an <i>ed</i> difference, a normal
+    difference, or a unified context difference, respectively. In the absence of
+    any of these options, the <i>patch</i> utility shall determine the type of
+    difference based on the format of information within the hunk.</p>
+<p class="Pp">For each hunk, the <i>patch</i> utility shall begin to search for
+    the place to apply the patch at the line number at the beginning of the
+    hunk, plus or minus any offset used in applying the previous hunk. If lines
+    matching the hunk context are not found, <i>patch</i> shall scan both
+    forwards and backwards at least 1000 bytes for a set of lines that match the
+    hunk context.</p>
+<p class="Pp">If no such place is found and it is a context difference, then
+    another scan shall take place, ignoring the first and last line of context.
+    If that fails, the first two and last two lines of context shall be ignored
+    and another scan shall be made. Implementations may search more extensively
+    for installation locations.</p>
+<p class="Pp">If no location can be found, the <i>patch</i> utility shall append
+    the hunk to the reject file. A rejected hunk that is a copied context
+    difference, an <i>ed</i> difference, or a normal difference shall be written
+    in copied-context-difference format regardless of the format of the patch
+    file. It is implementation-defined whether a rejected hunk that is a unified
+    context difference is written in copied-context-difference format or in
+    unified-context-difference format. If the input was a normal or
+    <i>ed</i>-style difference, the reject file may contain differences with
+    zero lines of context. The line numbers on the hunks in the reject file may
+    be different from the line numbers in the patch file since they shall
+    reflect the approximate locations for the failed hunks in the new file
+    rather than the old one.</p>
+<p class="Pp">If the type of patch is an <i>ed</i> diff, the implementation may
+    accomplish the patching by invoking the <i>ed</i> utility.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXIT_STATUS"><a class="permalink" href="#EXIT_STATUS">EXIT
+  STATUS</a></h1>
+<p class="Pp">The following exit values shall be returned:</p>
+<dl class="Bl-tag">
+  <dt>&nbsp;0</dt>
+  <dd>Successful completion.</dd>
+  <dt>&nbsp;1</dt>
+  <dd>One or more lines were written to a reject file.</dd>
+  <dt>&gt;1</dt>
+  <dd>An error occurred.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="CONSEQUENCES_OF_ERRORS"><a class="permalink" href="#CONSEQUENCES_OF_ERRORS">CONSEQUENCES
+  OF ERRORS</a></h1>
+<p class="Pp">Patches that cannot be correctly placed in the file shall be
+    written to a reject file.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The <b>-R</b> option does not work with <i>ed</i> scripts because
+    there is too little information to reconstruct the reverse operation.</p>
+<p class="Pp">The <b>-p</b> option makes it possible to customize a patch file
+    to local user directory structures without manually editing the patch file.
+    For example, if the filename in the patch file was:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>/curds/whey/src/blurfl/blurfl.c</pre>
+</div>
+<p class="Pp">Setting <b>-p&nbsp;0</b> gives the entire pathname unmodified;
+    <b>-p&nbsp;1</b> gives:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>curds/whey/src/blurfl/blurfl.c</pre>
+</div>
+<p class="Pp">without the leading &lt;slash&gt;, <b>-p&nbsp;4</b> gives:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>blurfl/blurfl.c</pre>
+</div>
+<p class="Pp">and not specifying <b>-p</b> at all gives:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>blurfl.c .</pre>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">Some of the functionality in historical <i>patch</i>
+    implementations was not specified. The following documents those features
+    present in historical implementations that have not been specified.</p>
+<p class="Pp">A deleted piece of functionality was the <b>'+'</b> pseudo-option
+    allowing an additional set of options and a patch file operand to be given.
+    This was seen as being insufficiently useful to standardize.</p>
+<p class="Pp">In historical implementations, if the string
+    <b>"Prereq:"</b> appeared in the header, the <i>patch</i> utility
+    would search for the corresponding version information (the string specified
+    in the header, delimited by &lt;blank&gt; characters or the beginning or end
+    of a line or the file) anywhere in the original file. This was deleted as
+    too simplistic and insufficiently trustworthy a mechanism to standardize.
+    For example, if:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>Prereq: 1.2</pre>
+</div>
+<p class="Pp">were in the header, the presence of a delimited 1.2 anywhere in
+    the file would satisfy the prerequisite.</p>
+<p class="Pp">The following options were dropped from historical implementations
+    of <i>patch</i> as insufficiently useful to standardize:</p>
+<dl class="Bl-tag">
+  <dt id="b~2"><a class="permalink" href="#b~2"><b>-b</b></a></dt>
+  <dd>The <b>-b</b> option historically provided a method for changing the name
+      extension of the backup file from the default <b>.orig</b>. This option
+      has been modified and retained in this volume of POSIX.1‐2017.</dd>
+  <dt id="F"><a class="permalink" href="#F"><b>-F</b></a></dt>
+  <dd>The <b>-F</b> option specified the number of lines of a context diff to
+      ignore when searching for a place to install a patch.</dd>
+  <dt id="f"><a class="permalink" href="#f"><b>-f</b></a></dt>
+  <dd>The <b>-f</b> option historically caused <i>patch</i> not to request
+      additional information from the user.</dd>
+  <dt id="r~2"><a class="permalink" href="#r~2"><b>-r</b></a></dt>
+  <dd>The <b>-r</b> option historically provided a method of overriding the
+      extension of the reject file from the default <b>.rej</b>.</dd>
+  <dt id="s"><a class="permalink" href="#s"><b>-s</b></a></dt>
+  <dd>The <b>-s</b> option historically caused <i>patch</i> to work silently
+      unless an error occurred.</dd>
+  <dt id="x"><a class="permalink" href="#x"><b>-x</b></a></dt>
+  <dd>The <b>-x</b> option historically set internal debugging flags.</dd>
+</dl>
+<p class="Pp">In some file system implementations, the saving of a <b>.orig</b>
+    file may produce unwanted results. In the case of 12, 13, or 14-character
+    filenames (on file systems supporting 14-character maximum filenames), the
+    <b>.orig</b> file overwrites the new file. The reject file may also exceed
+    this filename limit. It was suggested, due to some historical practice, that
+    a &lt;tilde&gt; (<b>'~'</b>) suffix be used instead of <b>.orig</b> and some
+    other character instead of the <b>.rej</b> suffix. This was rejected because
+    it is not obvious to the user which file is which. The suffixes <b>.orig</b>
+    and <b>.rej</b> are clearer and more understandable.</p>
+<p class="Pp">The <b>-b</b> option has the opposite sense in some historical
+    implementations—do not save the <b>.orig</b> file. The default case
+    here is not to save the files, making <i>patch</i> behave more consistently
+    with the other standard utilities.</p>
+<p class="Pp">The <b>-w</b> option in early proposals was changed to <b>-l</b>
+    to match historical practice.</p>
+<p class="Pp">The <b>-N</b> option was included because without it, a
+    non-interactive application cannot reject previously applied patches. For
+    example, if a user is piping the output of <i>diff</i> into the <i>patch</i>
+    utility, and the user only wants to patch a file to a newer version
+    non-interactively, the <b>-N</b> option is required.</p>
+<p class="Pp">Changes to the <b>-l</b> option description were proposed to allow
+    matching across &lt;newline&gt; characters in addition to just &lt;blank&gt;
+    characters. Since this is not historical practice, and since some
+    ambiguities could result, it is suggested that future developments in this
+    area utilize another option letter, such as <b>-L</b>.</p>
+<p class="Pp">The <b>-u</b> option of GNU <i>patch</i> has been added, along
+    with support for unified context formats.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>diff</i></i>, <i><i>ed</i></i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Chapter
+    8</i>, <i>Environment Variables</i>, <i>Section 12.2</i>, <i>Utility Syntax
+    Guidelines</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

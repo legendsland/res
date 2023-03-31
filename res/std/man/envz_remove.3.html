@@ -1,0 +1,161 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/65d44ea4b76aee837326f1b81433e62d8ca84a10">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>envz_add(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">envz_add(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">envz_add(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">envz_add, envz_entry, envz_get, envz_merge, envz_remove,
+    envz_strip - environment string support</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;envz.h&gt;</b></pre>
+<pre><b>error_t envz_add(char **restrict </b><i>envz</i><b>, size_t *restrict </b><i>envz_len</i><b>,</b>
+<b>               const char *restrict </b><i>name</i><b>, const char *restrict </b><i>value</i><b>);</b></pre>
+<pre><b>char *envz_entry(const char *restrict </b><i>envz</i><b>, size_t </b><i>envz_len</i><b>,</b>
+<b>               const char *restrict </b><i>name</i><b>);</b></pre>
+<pre><b>char *envz_get(const char *restrict </b><i>envz</i><b>, size_t </b><i>envz_len</i><b>,</b>
+<b>               const char *restrict </b><i>name</i><b>);</b></pre>
+<pre><b>error_t envz_merge(char **restrict </b><i>envz</i><b>, size_t *restrict </b><i>envz_len</i><b>,</b>
+<b>               const char *restrict </b><i>envz2</i><b>, size_t </b><i>envz2_len</i><b>,</b>
+<b>               int </b><i>override</i><b>);</b></pre>
+<pre><b>void envz_remove(char **restrict </b><i>envz</i><b>, size_t *restrict </b><i>envz_len</i><b>,</b>
+<b>               const char *restrict </b><i>name</i><b>);</b></pre>
+<pre><b>void envz_strip(char **restrict </b><i>envz</i><b>, size_t *restrict </b><i>envz_len</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">These functions are glibc-specific.</p>
+<p class="Pp">An argz vector is a pointer to a character buffer together with a
+    length, see <b>argz_add</b>(3). An envz vector is a special argz vector,
+    namely one where the strings have the form "name=value".
+    Everything after the first '=' is considered to be the value. If there is no
+    '=', the value is taken to be NULL. (While the value in case of a trailing
+    '=' is the empty string "".)</p>
+<p class="Pp">These functions are for handling envz vectors.</p>
+<p class="Pp"><b>envz_add</b>() adds the string
+    "<i>name</i>=<i>value</i>" (in case <i>value</i> is non-NULL) or
+    "<i>name</i>" (in case <i>value</i> is NULL) to the envz vector
+    (<i>*envz</i>,&nbsp;<i>*envz_len</i>) and updates <i>*envz</i> and
+    <i>*envz_len</i>. If an entry with the same <i>name</i> existed, it is
+    removed.</p>
+<p class="Pp"><b>envz_entry</b>() looks for <i>name</i> in the envz vector
+    (<i>envz</i>,&nbsp;<i>envz_len</i>) and returns the entry if found, or
+    NULL if not.</p>
+<p class="Pp"><b>envz_get</b>() looks for <i>name</i> in the envz vector
+    (<i>envz</i>,&nbsp;<i>envz_len</i>) and returns the value if found, or
+    NULL if not. (Note that the value can also be NULL, namely when there is an
+    entry for <i>name</i> without '=' sign.)</p>
+<p class="Pp"><b>envz_merge</b>() adds each entry in <i>envz2</i> to
+    <i>*envz</i>, as if with <b>envz_add</b>(). If <i>override</i> is true, then
+    values in <i>envz2</i> will supersede those with the same name in
+    <i>*envz</i>, otherwise not.</p>
+<p class="Pp"><b>envz_remove</b>() removes the entry for <i>name</i> from
+    (<i>*envz</i>,&nbsp;<i>*envz_len</i>) if there was one.</p>
+<p class="Pp"><b>envz_strip</b>() removes all entries with value NULL.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">All envz functions that do memory allocation have a return type of
+    <i>error_t</i> (an integer type), and return 0 for success, and
+    <b>ENOMEM</b> if an allocation error occurs.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>envz_add (), envz_entry (), envz_get (), envz_merge (), envz_remove (),
+      envz_strip ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These functions are a GNU extension.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<pre>#include &lt;envz.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+int
+main(int argc, char *argv[], char *envp[])
+{
+<br>
+    char    *str;
+<br>
+    size_t  e_len = 0;
+<br>
+    for (size_t i = 0; envp[i] != NULL; i++)
+<br>
+        e_len += strlen(envp[i]) + 1;
+<br>
+    str = envz_entry(*envp, e_len, "HOME");
+<br>
+    printf("%s\n", str);
+<br>
+    str = envz_get(*envp, e_len, "HOME");
+<br>
+    printf("%s\n", str);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>argz_add</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 2009 Linux Foundation, written by Michael Kerrisk
+       <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/8873f655365bb3606525c7cddceb346835ec8558">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>pthread_sigmask(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">pthread_sigmask(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">pthread_sigmask(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pthread_sigmask - examine and change mask of blocked signals</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">POSIX threads library (<i>libpthread</i>, <i>-lpthread</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;signal.h&gt;</b></pre>
+<pre><b>int pthread_sigmask(int </b><i>how</i><b>, const sigset_t *</b><i>set</i><b>, sigset_t *</b><i>oldset</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>pthread_sigmask</b>():</p>
+<pre><br>
+    _POSIX_C_SOURCE &gt;= 199506L || _XOPEN_SOURCE &gt;= 500</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>pthread_sigmask</b>() function is just like
+    <b>sigprocmask</b>(2), with the difference that its use in multithreaded
+    programs is explicitly specified by POSIX.1. Other differences are noted in
+    this page.</p>
+<p class="Pp">For a description of the arguments and operation of this function,
+    see <b>sigprocmask</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>pthread_sigmask</b>() returns 0; on error, it
+    returns an error number.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">See <b>sigprocmask</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>pthread_sigmask ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">A new thread inherits a copy of its creator's signal mask.</p>
+<p class="Pp">The glibc <b>pthread_sigmask</b>() function silently ignores
+    attempts to block the two real-time signals that are used internally by the
+    NPTL threading implementation. See <b>nptl</b>(7) for details.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below blocks some signals in the main thread, and then
+    creates a dedicated thread to fetch those signals via <b>sigwait</b>(3). The
+    following shell session demonstrates its use:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$<b> ./a.out &amp;</b>
+[1] 5423
+$<b> kill -QUIT %1</b>
+Signal handling thread got signal 3
+$<b> kill -USR1 %1</b>
+Signal handling thread got signal 10
+$<b> kill -TERM %1</b>
+[1]+  Terminated              ./a.out
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#include &lt;errno.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;signal.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+/* Simple error handling functions */
+#define handle_error_en(en, msg) \
+<br>
+        do { errno = en; perror(msg); exit(EXIT_FAILURE); } while (0)
+static void *
+sig_thread(void *arg)
+{
+<br>
+    sigset_t *set = arg;
+<br>
+    int s, sig;
+<br>
+    for (;;) {
+<br>
+        s = sigwait(set, &amp;sig);
+<br>
+        if (s != 0)
+<br>
+            handle_error_en(s, "sigwait");
+<br>
+        printf("Signal handling thread got signal %d\n", sig);
+<br>
+    }
+}
+int
+main(void)
+{
+<br>
+    pthread_t thread;
+<br>
+    sigset_t set;
+<br>
+    int s;
+<br>
+    /* Block SIGQUIT and SIGUSR1; other threads created by main()
+<br>
+       will inherit a copy of the signal mask. */
+<br>
+    sigemptyset(&amp;set);
+<br>
+    sigaddset(&amp;set, SIGQUIT);
+<br>
+    sigaddset(&amp;set, SIGUSR1);
+<br>
+    s = pthread_sigmask(SIG_BLOCK, &amp;set, NULL);
+<br>
+    if (s != 0)
+<br>
+        handle_error_en(s, "pthread_sigmask");
+<br>
+    s = pthread_create(&amp;thread, NULL, &amp;sig_thread, &amp;set);
+<br>
+    if (s != 0)
+<br>
+        handle_error_en(s, "pthread_create");
+<br>
+    /* Main thread carries on to create other threads and/or do
+<br>
+       other work. */
+<br>
+    pause();            /* Dummy pause so we can test program */
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>sigaction</b>(2), <b>sigpending</b>(2), <b>sigprocmask</b>(2),
+    <b>pthread_attr_setsigmask_np</b>(3), <b>pthread_create</b>(3),
+    <b>pthread_kill</b>(3), <b>sigsetops</b>(3), <b>pthreads</b>(7),
+    <b>signal</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

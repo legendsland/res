@@ -1,0 +1,282 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 1993
+      The Regents of the University of California.  All rights reserved.
+   and Copyright (c) 2020 by Alejandro Colomar <alx@kernel.org>
+  
+   SPDX-License-Identifier: BSD-3-Clause
+   --><head>
+<meta name="dc.identifier" content="res/8b619b8e9e2f1178d93ba052c57cee30b3eefb86">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>TAILQ(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">TAILQ(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">TAILQ(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">TAILQ_CONCAT, TAILQ_EMPTY, TAILQ_ENTRY, TAILQ_FIRST,
+    TAILQ_FOREACH, TAILQ_FOREACH_REVERSE, TAILQ_HEAD, TAILQ_HEAD_INITIALIZER,
+    TAILQ_INIT, TAILQ_INSERT_AFTER, TAILQ_INSERT_BEFORE, TAILQ_INSERT_HEAD,
+    TAILQ_INSERT_TAIL, TAILQ_LAST, TAILQ_NEXT, TAILQ_PREV, TAILQ_REMOVE -
+    implementation of a doubly linked tail queue</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/queue.h&gt;</b></pre>
+<pre><b>TAILQ_ENTRY(TYPE);</b></pre>
+<pre><b>TAILQ_HEAD(HEADNAME, TYPE);</b>
+<b>TAILQ_HEAD TAILQ_HEAD_INITIALIZER(TAILQ_HEAD </b><i>head</i><b>);</b>
+<b>void TAILQ_INIT(TAILQ_HEAD *</b><i>head</i><b>);</b></pre>
+<pre><b>int TAILQ_EMPTY(TAILQ_HEAD *</b><i>head</i><b>);</b></pre>
+<pre><b>void TAILQ_INSERT_HEAD(TAILQ_HEAD *</b><i>head</i><b>,</b>
+<b>                         struct TYPE *</b><i>elm</i><b>, TAILQ_ENTRY </b><i>NAME</i><b>);</b>
+<b>void TAILQ_INSERT_TAIL(TAILQ_HEAD *</b><i>head</i><b>,</b>
+<b>                         struct TYPE *</b><i>elm</i><b>, TAILQ_ENTRY </b><i>NAME</i><b>);</b>
+<b>void TAILQ_INSERT_BEFORE(struct TYPE *</b><i>listelm</i><b>,</b>
+<b>                         struct TYPE *</b><i>elm</i><b>, TAILQ_ENTRY </b><i>NAME</i><b>);</b>
+<b>void TAILQ_INSERT_AFTER(TAILQ_HEAD *</b><i>head</i><b>, struct TYPE *</b><i>listelm</i><b>,</b>
+<b>                         struct TYPE *</b><i>elm</i><b>, TAILQ_ENTRY </b><i>NAME</i><b>);</b></pre>
+<pre><b>struct TYPE *TAILQ_FIRST(TAILQ_HEAD *</b><i>head</i><b>);</b>
+<b>struct TYPE *TAILQ_LAST(TAILQ_HEAD *</b><i>head</i><b>, HEADNAME);</b>
+<b>struct TYPE *TAILQ_PREV(struct TYPE *</b><i>elm</i><b>, HEADNAME, TAILQ_ENTRY </b><i>NAME</i><b>);</b>
+<b>struct TYPE *TAILQ_NEXT(struct TYPE *</b><i>elm</i><b>, TAILQ_ENTRY </b><i>NAME</i><b>);</b></pre>
+<pre><b>TAILQ_FOREACH(struct TYPE *</b><i>var</i><b>, TAILQ_HEAD *</b><i>head</i><b>,</b>
+<b>                         TAILQ_ENTRY </b><i>NAME</i><b>);</b>
+<b>TAILQ_FOREACH_REVERSE(struct TYPE *</b><i>var</i><b>, TAILQ_HEAD *</b><i>head</i><b>, HEADNAME,</b>
+<b>                         TAILQ_ENTRY </b><i>NAME</i><b>);</b></pre>
+<pre><b>void TAILQ_REMOVE(TAILQ_HEAD *</b><i>head</i><b>, struct TYPE *</b><i>elm</i><b>,</b>
+<b>                         TAILQ_ENTRY </b><i>NAME</i><b>);</b></pre>
+<pre><b>void TAILQ_CONCAT(TAILQ_HEAD *</b><i>head1</i><b>, TAILQ_HEAD *</b><i>head2</i><b>,</b>
+<b>                         TAILQ_ENTRY </b><i>NAME</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">These macros define and operate on doubly linked tail queues.</p>
+<p class="Pp">In the macro definitions, <i>TYPE</i> is the name of a user
+    defined structure, that must contain a field of type <i>TAILQ_ENTRY</i>,
+    named <i>NAME</i>. The argument <i>HEADNAME</i> is the name of a user
+    defined structure that must be declared using the macro
+  <b>TAILQ_HEAD</b>().</p>
+<section class="Ss">
+<h2 class="Ss" id="Creation"><a class="permalink" href="#Creation">Creation</a></h2>
+<p class="Pp">A tail queue is headed by a structure defined by the
+    <b>TAILQ_HEAD</b>() macro. This structure contains a pair of pointers, one
+    to the first element in the queue and the other to the last element in the
+    queue. The elements are doubly linked so that an arbitrary element can be
+    removed without traversing the queue. New elements can be added to the queue
+    after an existing element, before an existing element, at the head of the
+    queue, or at the end of the queue. A <i>TAILQ_HEAD</i> structure is declared
+    as follows:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>TAILQ_HEAD(HEADNAME, TYPE) head;
+</pre>
+<br>
+<p class="Pp">where <i>struct HEADNAME</i> is the structure to be defined, and
+    <i>struct TYPE</i> is the type of the elements to be linked into the queue.
+    A pointer to the head of the queue can later be declared as:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct HEADNAME *headp;
+</pre>
+<br>
+<p class="Pp">(The names <i>head</i> and <i>headp</i> are user selectable.)</p>
+<p class="Pp"><b>TAILQ_ENTRY</b>() declares a structure that connects the
+    elements in the queue.</p>
+<p class="Pp"><b>TAILQ_HEAD_INITIALIZER</b>() evaluates to an initializer for
+    the queue <i>head</i>.</p>
+<p class="Pp"><b>TAILQ_INIT</b>() initializes the queue referenced by</p>
+<p class="Pp"><b>TAILQ_EMPTY</b>() evaluates to true if there are no items on
+    the queue. <i>head</i>.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Insertion"><a class="permalink" href="#Insertion">Insertion</a></h2>
+<p class="Pp"><b>TAILQ_INSERT_HEAD</b>() inserts the new element <i>elm</i> at
+    the head of the queue.</p>
+<p class="Pp"><b>TAILQ_INSERT_TAIL</b>() inserts the new element <i>elm</i> at
+    the end of the queue.</p>
+<p class="Pp"><b>TAILQ_INSERT_BEFORE</b>() inserts the new element <i>elm</i>
+    before the element <i>listelm</i>.</p>
+<p class="Pp"><b>TAILQ_INSERT_AFTER</b>() inserts the new element <i>elm</i>
+    after the element <i>listelm</i>.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Traversal"><a class="permalink" href="#Traversal">Traversal</a></h2>
+<p class="Pp"><b>TAILQ_FIRST</b>() returns the first item on the queue, or NULL
+    if the queue is empty.</p>
+<p class="Pp"><b>TAILQ_LAST</b>() returns the last item on the queue. If the
+    queue is empty the return value is NULL.</p>
+<p class="Pp"><b>TAILQ_PREV</b>() returns the previous item on the queue, or
+    NULL if this item is the first.</p>
+<p class="Pp"><b>TAILQ_NEXT</b>() returns the next item on the queue, or NULL if
+    this item is the last.</p>
+<p class="Pp"><b>TAILQ_FOREACH</b>() traverses the queue referenced by
+    <i>head</i> in the forward direction, assigning each element in turn to
+    <i>var</i>. <i>var</i> is set to NULL if the loop completes normally, or if
+    there were no elements.</p>
+<p class="Pp"><b>TAILQ_FOREACH_REVERSE</b>() traverses the queue referenced by
+    <i>head</i> in the reverse direction, assigning each element in turn to
+    <i>var</i>.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Removal"><a class="permalink" href="#Removal">Removal</a></h2>
+<p class="Pp"><b>TAILQ_REMOVE</b>() removes the element <i>elm</i> from the
+    queue.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Other_features"><a class="permalink" href="#Other_features">Other
+  features</a></h2>
+<p class="Pp"><b>TAILQ_CONCAT</b>() concatenates the queue headed by
+    <i>head2</i> onto the end of the one headed by <i>head1</i> removing all
+    entries from the former.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp"><b>TAILQ_EMPTY</b>() returns nonzero if the queue is empty, and
+    zero if the queue contains at least one entry.</p>
+<p class="Pp"><b>TAILQ_FIRST</b>(), <b>TAILQ_LAST</b>(), <b>TAILQ_PREV</b>(),
+    and <b>TAILQ_NEXT</b>() return a pointer to the first, last, previous, or
+    next <i>TYPE</i> structure, respectively.</p>
+<p class="Pp"><b>TAILQ_HEAD_INITIALIZER</b>() returns an initializer that can be
+    assigned to the queue <i>head</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">Not in POSIX.1, POSIX.1-2001, or POSIX.1-2008. Present on the
+    BSDs. (TAILQ functions first appeared in 4.4BSD).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp"><b>TAILQ_FOREACH</b>() and <b>TAILQ_FOREACH_REVERSE</b>() don't
+    allow <i>var</i> to be removed or freed within the loop, as it would
+    interfere with the traversal. <b>TAILQ_FOREACH_SAFE</b>() and
+    <b>TAILQ_FOREACH_REVERSE_SAFE</b>(), which are present on the BSDs but are
+    not present in glibc, fix this limitation by allowing <i>var</i> to safely
+    be removed from the list and freed from within the loop without interfering
+    with the traversal.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<pre>#include &lt;stddef.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;sys/queue.h&gt;
+struct entry {
+<br>
+    int data;
+<br>
+    TAILQ_ENTRY(entry) entries;             /* Tail queue */
+};
+TAILQ_HEAD(tailhead, entry);
+int
+main(void)
+{
+<br>
+    struct entry *n1, *n2, *n3, *np;
+<br>
+    struct tailhead head;                   /* Tail queue head */
+<br>
+    int i;
+<br>
+    TAILQ_INIT(&amp;head);                      /* Initialize the queue */
+<br>
+    n1 = malloc(sizeof(struct entry));      /* Insert at the head */
+<br>
+    TAILQ_INSERT_HEAD(&amp;head, n1, entries);
+<br>
+    n1 = malloc(sizeof(struct entry));      /* Insert at the tail */
+<br>
+    TAILQ_INSERT_TAIL(&amp;head, n1, entries);
+<br>
+    n2 = malloc(sizeof(struct entry));      /* Insert after */
+<br>
+    TAILQ_INSERT_AFTER(&amp;head, n1, n2, entries);
+<br>
+    n3 = malloc(sizeof(struct entry));      /* Insert before */
+<br>
+    TAILQ_INSERT_BEFORE(n2, n3, entries);
+<br>
+    TAILQ_REMOVE(&amp;head, n2, entries);       /* Deletion */
+<br>
+    free(n2);
+<br>
+                                            /* Forward traversal */
+<br>
+    i = 0;
+<br>
+    TAILQ_FOREACH(np, &amp;head, entries)
+<br>
+        np-&gt;data = i++;
+<br>
+                                            /* Reverse traversal */
+<br>
+    TAILQ_FOREACH_REVERSE(np, &amp;head, tailhead, entries)
+<br>
+        printf("%i\n", np-&gt;data);
+<br>
+                                            /* TailQ deletion */
+<br>
+    n1 = TAILQ_FIRST(&amp;head);
+<br>
+    while (n1 != NULL) {
+<br>
+        n2 = TAILQ_NEXT(n1, entries);
+<br>
+        free(n1);
+<br>
+        n1 = n2;
+<br>
+    }
+<br>
+    TAILQ_INIT(&amp;head);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>insque</b>(3), <b>queue</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

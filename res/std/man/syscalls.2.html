@@ -1,0 +1,2335 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (C) 2007 Michael Kerrisk <mtk.manpages@gmail.com>
+   with some input from Stepan Kasal <kasal@ucw.cz>
+  
+   Some content retained from an earlier version of this page:
+   Copyright (C) 1998 Andries Brouwer (aeb@cwi.nl)
+   Modifications for 2.2 and 2.4 Copyright (C) 2002 Ian Redfern
+   <redferni@logica.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/e99534f4438d8d780f01a41d187d4369e9c980f4">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>syscalls(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">syscalls(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">syscalls(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">syscalls - Linux system calls</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>Linux system calls.</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The system call is the fundamental interface between an
+    application and the Linux kernel.</p>
+<section class="Ss">
+<h2 class="Ss" id="System_calls_and_library_wrapper_functions"><a class="permalink" href="#System_calls_and_library_wrapper_functions">System
+  calls and library wrapper functions</a></h2>
+<p class="Pp">System calls are generally not invoked directly, but rather via
+    wrapper functions in glibc (or perhaps some other library). For details of
+    direct invocation of a system call, see <b>intro</b>(2). Often, but not
+    always, the name of the wrapper function is the same as the name of the
+    system call that it invokes. For example, glibc contains a function
+    <b>chdir</b>() which invokes the underlying "chdir" system
+  call.</p>
+<p class="Pp">Often the glibc wrapper function is quite thin, doing little work
+    other than copying arguments to the right registers before invoking the
+    system call, and then setting <i>errno</i> appropriately after the system
+    call has returned. (These are the same steps that are performed by
+    <b>syscall</b>(2), which can be used to invoke system calls for which no
+    wrapper function is provided.) Note: system calls indicate a failure by
+    returning a negative error number to the caller on architectures without a
+    separate error register/flag, as noted in <b>syscall</b>(2); when this
+    happens, the wrapper function negates the returned error number (to make it
+    positive), copies it to <i>errno</i>, and returns -1 to the caller of the
+    wrapper.</p>
+<p class="Pp">Sometimes, however, the wrapper function does some extra work
+    before invoking the system call. For example, nowadays there are (for
+    reasons described below) two related system calls, <b>truncate</b>(2) and
+    <b>truncate64</b>(2), and the glibc <b>truncate</b>() wrapper function
+    checks which of those system calls are provided by the kernel and determines
+    which should be employed.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="System_call_list"><a class="permalink" href="#System_call_list">System
+  call list</a></h2>
+<p class="Pp">Below is a list of the Linux system calls. In the list, the
+    <i>Kernel</i> column indicates the kernel version for those system calls
+    that were new in Linux 2.2, or have appeared since that kernel version. Note
+    the following points:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Where no kernel version is indicated, the system call appeared in Linux
+      1.0 or earlier.</dd>
+  <dt>•</dt>
+  <dd>Where a system call is marked "1.2" this means the system call
+      probably appeared in a Linux 1.1.x kernel version, and first appeared in a
+      stable kernel with 1.2. (Development of the 1.2 kernel was initiated from
+      a branch of kernel 1.0.6 via the 1.1.x unstable kernel series.)</dd>
+  <dt>•</dt>
+  <dd>Where a system call is marked "2.0" this means the system call
+      probably appeared in a Linux 1.3.x kernel version, and first appeared in a
+      stable kernel with Linux 2.0. (Development of the Linux 2.0 kernel was
+      initiated from a branch of Linux 1.2.x, somewhere around Linux 1.2.10, via
+      the Linux 1.3.x unstable kernel series.)</dd>
+  <dt>•</dt>
+  <dd>Where a system call is marked "2.2" this means the system call
+      probably appeared in a Linux 2.1.x kernel version, and first appeared in a
+      stable kernel with Linux 2.2.0. (Development of the Linux 2.2 kernel was
+      initiated from a branch of kernel Linux 2.0.21 via the Linux 2.1.x
+      unstable kernel series.)</dd>
+  <dt>•</dt>
+  <dd>Where a system call is marked "2.4" this means the system call
+      probably appeared in a Linux 2.3.x kernel version, and first appeared in a
+      stable kernel with Linux 2.4.0. (Development of the Linux 2.4 kernel was
+      initiated from a branch of Linux 2.2.8 via the Linux 2.3.x unstable kernel
+      series.)</dd>
+  <dt>•</dt>
+  <dd>Where a system call is marked "2.6" this means the system call
+      probably appeared in a Linux 2.5.x kernel version, and first appeared in a
+      stable kernel with Linux 2.6.0. (Development of Linux 2.6 was initiated
+      from a branch of Linux 2.4.15 via the Linux 2.5.x unstable kernel
+    series.)</dd>
+  <dt>•</dt>
+  <dd>Starting with Linux 2.6.0, the development model changed, and new system
+      calls may appear in each Linux 2.6.x release. In this case, the exact
+      version number where the system call appeared is shown. This convention
+      continues with the Linux 3.x kernel series, which followed on from Linux
+      2.6.39; and the Linux 4.x kernel series, which followed on from Linux
+      3.19; and the Linux 5.x kernel series, which followed on from Linux
+    4.20.</dd>
+  <dt>•</dt>
+  <dd>In some cases, a system call was added to a stable kernel series after it
+      branched from the previous stable kernel series, and then backported into
+      the earlier stable kernel series. For example some system calls that
+      appeared in Linux 2.6.x were also backported into a Linux 2.4.x release
+      after Linux 2.4.15. When this is so, the version where the system call
+      appeared in both of the major kernel series is listed.</dd>
+</dl>
+<p class="Pp">The list of system calls that are available as at Linux 5.14 (or
+    in a few cases only on older kernels) is as follows:</p>
+<table class="tbl">
+  <tbody><tr>
+    <td><b>System call</b></td>
+    <td><b>Kernel</b></td>
+    <td><b>Notes</b></td>
+  </tr>
+  <tr>
+  </tr>
+  <tr>
+  </tr>
+  <tr>
+    <td><b>_llseek</b>(2)</td>
+    <td>1.2</td>
+  </tr>
+  <tr>
+    <td><b>_newselect</b>(2)</td>
+    <td>2.0</td>
+  </tr>
+  <tr>
+    <td><b>_sysctl</b>(2)</td>
+    <td>2.0</td>
+    <td>Removed in 5.5</td>
+  </tr>
+  <tr>
+    <td><b>accept</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>socketcall</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>accept4</b>(2)</td>
+    <td>2.6.28</td>
+  </tr>
+  <tr>
+    <td><b>access</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>acct</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>add_key</b>(2)</td>
+    <td>2.6.10</td>
+  </tr>
+  <tr>
+    <td><b>adjtimex</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>alarm</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>alloc_hugepages</b>(2)</td>
+    <td>2.5.36</td>
+    <td>Removed in 2.5.44</td>
+  </tr>
+  <tr>
+    <td><b>arc_gettls</b>(2)</td>
+    <td>3.9</td>
+    <td>ARC only</td>
+  </tr>
+  <tr>
+    <td><b>arc_settls</b>(2)</td>
+    <td>3.9</td>
+    <td>ARC only</td>
+  </tr>
+  <tr>
+    <td><b>arc_usr_cmpxchg</b>(2)</td>
+    <td>4.9</td>
+    <td>ARC only</td>
+  </tr>
+  <tr>
+    <td><b>arch_prctl</b>(2)</td>
+    <td>2.6</td>
+    <td>x86_64, x86 since 4.12</td>
+  </tr>
+  <tr>
+    <td><b>atomic_barrier</b>(2)</td>
+    <td>2.6.34</td>
+    <td>m68k only</td>
+  </tr>
+  <tr>
+    <td><b>atomic_cmpxchg_32</b>(2)</td>
+    <td>2.6.34</td>
+    <td>m68k only</td>
+  </tr>
+  <tr>
+    <td><b>bdflush</b>(2)</td>
+    <td>1.2</td>
+    <td>Deprecated (does nothing) since 2.6</td>
+  </tr>
+  <tr>
+    <td><b>bind</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>socketcall</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>bpf</b>(2)</td>
+    <td>3.18</td>
+  </tr>
+  <tr>
+    <td><b>brk</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>breakpoint</b>(2)</td>
+    <td>2.2</td>
+    <td>ARM OABI only, defined with <b>__ARM_NR</b> prefix</td>
+  </tr>
+  <tr>
+    <td><b>cacheflush</b>(2)</td>
+    <td>1.2</td>
+    <td>Not on x86</td>
+  </tr>
+  <tr>
+    <td><b>capget</b>(2)</td>
+    <td>2.2</td>
+  </tr>
+  <tr>
+    <td><b>capset</b>(2)</td>
+    <td>2.2</td>
+  </tr>
+  <tr>
+    <td><b>chdir</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>chmod</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>chown</b>(2)</td>
+    <td>2.2</td>
+    <td>See <b>chown</b>(2) for version details</td>
+  </tr>
+  <tr>
+    <td><b>chown32</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>chroot</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>clock_adjtime</b>(2)</td>
+    <td>2.6.39</td>
+  </tr>
+  <tr>
+    <td><b>clock_getres</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>clock_gettime</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>clock_nanosleep</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>clock_settime</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>clone2</b>(2)</td>
+    <td>2.4</td>
+    <td>IA-64 only</td>
+  </tr>
+  <tr>
+    <td><b>clone</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>clone3</b>(2)</td>
+    <td>5.3</td>
+  </tr>
+  <tr>
+    <td><b>close</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>close_range</b>(2)</td>
+    <td>5.9</td>
+  </tr>
+  <tr>
+    <td><b>connect</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>socketcall</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>copy_file_range</b>(2)</td>
+    <td>4.5</td>
+  </tr>
+  <tr>
+    <td><b>creat</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>create_module</b>(2)</td>
+    <td>1.0</td>
+    <td>Removed in 2.6</td>
+  </tr>
+  <tr>
+    <td><b>delete_module</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>dup</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>dup2</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>dup3</b>(2)</td>
+    <td>2.6.27</td>
+  </tr>
+  <tr>
+    <td><b>epoll_create</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>epoll_create1</b>(2)</td>
+    <td>2.6.27</td>
+  </tr>
+  <tr>
+    <td><b>epoll_ctl</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>epoll_pwait</b>(2)</td>
+    <td>2.6.19</td>
+  </tr>
+  <tr>
+    <td><b>epoll_pwait2</b>(2)</td>
+    <td>5.11</td>
+  </tr>
+  <tr>
+    <td><b>epoll_wait</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>eventfd</b>(2)</td>
+    <td>2.6.22</td>
+  </tr>
+  <tr>
+    <td><b>eventfd2</b>(2)</td>
+    <td>2.6.27</td>
+  </tr>
+  <tr>
+    <td><b>execv</b>(2)</td>
+    <td>2.0</td>
+    <td>SPARC/SPARC64 only, for compatibility with SunOS</td>
+  </tr>
+  <tr>
+    <td><b>execve</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>execveat</b>(2)</td>
+    <td>3.19</td>
+  </tr>
+  <tr>
+    <td><b>exit</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>exit_group</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>faccessat</b>(2)</td>
+    <td>2.6.16</td>
+  </tr>
+  <tr>
+    <td><b>faccessat2</b>(2)</td>
+    <td>5.8</td>
+  </tr>
+  <tr>
+    <td><b>fadvise64</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>fadvise64_64</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>fallocate</b>(2)</td>
+    <td>2.6.23</td>
+  </tr>
+  <tr>
+    <td><b>fanotify_init</b>(2)</td>
+    <td>2.6.37</td>
+  </tr>
+  <tr>
+    <td><b>fanotify_mark</b>(2)</td>
+    <td>2.6.37</td>
+  </tr>
+  <tr>
+    <td><b>fchdir</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>fchmod</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>fchmodat</b>(2)</td>
+    <td>2.6.16</td>
+  </tr>
+  <tr>
+    <td><b>fchown</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>fchown32</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>fchownat</b>(2)</td>
+    <td>2.6.16</td>
+  </tr>
+  <tr>
+    <td><b>fcntl</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>fcntl64</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>fdatasync</b>(2)</td>
+    <td>2.0</td>
+  </tr>
+  <tr>
+    <td><b>fgetxattr</b>(2)</td>
+    <td>2.6; 2.4.18</td>
+  </tr>
+  <tr>
+    <td><b>finit_module</b>(2)</td>
+    <td>3.8</td>
+  </tr>
+  <tr>
+    <td><b>flistxattr</b>(2)</td>
+    <td>2.6; 2.4.18</td>
+  </tr>
+  <tr>
+    <td><b>flock</b>(2)</td>
+    <td>2.0</td>
+  </tr>
+  <tr>
+    <td><b>fork</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>free_hugepages</b>(2)</td>
+    <td>2.5.36</td>
+    <td>Removed in 2.5.44</td>
+  </tr>
+  <tr>
+    <td><b>fremovexattr</b>(2)</td>
+    <td>2.6; 2.4.18</td>
+  </tr>
+  <tr>
+    <td><b>fsconfig</b>(2)</td>
+    <td>5.2</td>
+  </tr>
+  <tr>
+    <td><b>fsetxattr</b>(2)</td>
+    <td>2.6; 2.4.18</td>
+  </tr>
+  <tr>
+    <td><b>fsmount</b>(2)</td>
+    <td>5.2</td>
+  </tr>
+  <tr>
+    <td><b>fsopen</b>(2)</td>
+    <td>5.2</td>
+  </tr>
+  <tr>
+    <td><b>fspick</b>(2)</td>
+    <td>5.2</td>
+  </tr>
+  <tr>
+    <td><b>fstat</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>fstat64</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>fstatat64</b>(2)</td>
+    <td>2.6.16</td>
+  </tr>
+  <tr>
+    <td><b>fstatfs</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>fstatfs64</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>fsync</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>ftruncate</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>ftruncate64</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>futex</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>futimesat</b>(2)</td>
+    <td>2.6.16</td>
+  </tr>
+  <tr>
+    <td><b>get_kernel_syms</b>(2)</td>
+    <td>1.0</td>
+    <td>Removed in 2.6</td>
+  </tr>
+  <tr>
+    <td><b>get_mempolicy</b>(2)</td>
+    <td>2.6.6</td>
+  </tr>
+  <tr>
+    <td><b>get_robust_list</b>(2)</td>
+    <td>2.6.17</td>
+  </tr>
+  <tr>
+    <td><b>get_thread_area</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>get_tls</b>(2)</td>
+    <td>4.15</td>
+    <td>ARM OABI only, has <b>__ARM_NR</b> prefix</td>
+  </tr>
+  <tr>
+    <td><b>getcpu</b>(2)</td>
+    <td>2.6.19</td>
+  </tr>
+  <tr>
+    <td><b>getcwd</b>(2)</td>
+    <td>2.2</td>
+  </tr>
+  <tr>
+    <td><b>getdents</b>(2)</td>
+    <td>2.0</td>
+  </tr>
+  <tr>
+    <td><b>getdents64</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>getdomainname</b>(2)</td>
+    <td>2.2</td>
+    <td>SPARC, SPARC64; available as <b>osf_getdomainname</b>(2) on Alpha since
+      Linux 2.0</td>
+  </tr>
+  <tr>
+    <td><b>getdtablesize</b>(2)</td>
+    <td>2.0</td>
+    <td>SPARC (removed in 2.6.26), available on Alpha as
+      <b>osf_getdtablesize</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>getegid</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>getegid32</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>geteuid</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>geteuid32</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>getgid</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>getgid32</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>getgroups</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>getgroups32</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>gethostname</b>(2)</td>
+    <td>2.0</td>
+    <td>Alpha, was available on SPARC up to Linux 2.6.26</td>
+  </tr>
+  <tr>
+    <td><b>getitimer</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>getpeername</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>socketcall</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>getpagesize</b>(2)</td>
+    <td>2.0</td>
+    <td>Not on x86</td>
+  </tr>
+  <tr>
+    <td><b>getpgid</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>getpgrp</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>getpid</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>getppid</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>getpriority</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>getrandom</b>(2)</td>
+    <td>3.17</td>
+  </tr>
+  <tr>
+    <td><b>getresgid</b>(2)</td>
+    <td>2.2</td>
+  </tr>
+  <tr>
+    <td><b>getresgid32</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>getresuid</b>(2)</td>
+    <td>2.2</td>
+  </tr>
+  <tr>
+    <td><b>getresuid32</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>getrlimit</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>getrusage</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>getsid</b>(2)</td>
+    <td>2.0</td>
+  </tr>
+  <tr>
+    <td><b>getsockname</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>socketcall</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>getsockopt</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>socketcall</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>gettid</b>(2)</td>
+    <td>2.4.11</td>
+  </tr>
+  <tr>
+    <td><b>gettimeofday</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>getuid</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>getuid32</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>getunwind</b>(2)</td>
+    <td>2.4.8</td>
+    <td>IA-64 only; deprecated</td>
+  </tr>
+  <tr>
+    <td><b>getxattr</b>(2)</td>
+    <td>2.6; 2.4.18</td>
+  </tr>
+  <tr>
+    <td><b>getxgid</b>(2)</td>
+    <td>2.0</td>
+    <td>Alpha only; see NOTES</td>
+  </tr>
+  <tr>
+    <td><b>getxpid</b>(2)</td>
+    <td>2.0</td>
+    <td>Alpha only; see NOTES</td>
+  </tr>
+  <tr>
+    <td><b>getxuid</b>(2)</td>
+    <td>2.0</td>
+    <td>Alpha only; see NOTES</td>
+  </tr>
+  <tr>
+    <td><b>init_module</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>inotify_add_watch</b>(2)</td>
+    <td>2.6.13</td>
+  </tr>
+  <tr>
+    <td><b>inotify_init</b>(2)</td>
+    <td>2.6.13</td>
+  </tr>
+  <tr>
+    <td><b>inotify_init1</b>(2)</td>
+    <td>2.6.27</td>
+  </tr>
+  <tr>
+    <td><b>inotify_rm_watch</b>(2)</td>
+    <td>2.6.13</td>
+  </tr>
+  <tr>
+    <td><b>io_cancel</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>io_destroy</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>io_getevents</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>io_pgetevents</b>(2)</td>
+    <td>4.18</td>
+  </tr>
+  <tr>
+    <td><b>io_setup</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>io_submit</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>io_uring_enter</b>(2)</td>
+    <td>5.1</td>
+  </tr>
+  <tr>
+    <td><b>io_uring_register</b>(2)</td>
+    <td>5.1</td>
+  </tr>
+  <tr>
+    <td><b>io_uring_setup</b>(2)</td>
+    <td>5.1</td>
+  </tr>
+  <tr>
+    <td><b>ioctl</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>ioperm</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>iopl</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>ioprio_get</b>(2)</td>
+    <td>2.6.13</td>
+  </tr>
+  <tr>
+    <td><b>ioprio_set</b>(2)</td>
+    <td>2.6.13</td>
+  </tr>
+  <tr>
+    <td><b>ipc</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>kcmp</b>(2)</td>
+    <td>3.5</td>
+  </tr>
+  <tr>
+    <td><b>kern_features</b>(2)</td>
+    <td>3.7</td>
+    <td>SPARC64 only</td>
+  </tr>
+  <tr>
+    <td><b>kexec_file_load</b>(2)</td>
+    <td>3.17</td>
+  </tr>
+  <tr>
+    <td><b>kexec_load</b>(2)</td>
+    <td>2.6.13</td>
+  </tr>
+  <tr>
+    <td><b>keyctl</b>(2)</td>
+    <td>2.6.10</td>
+  </tr>
+  <tr>
+    <td><b>kill</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>landlock_add_rule</b>(2)</td>
+    <td>5.13</td>
+  </tr>
+  <tr>
+    <td><b>landlock_create_ruleset</b>(2)</td>
+    <td>5.13</td>
+  </tr>
+  <tr>
+    <td><b>landlock_restrict_self</b>(2)</td>
+    <td>5.13</td>
+  </tr>
+  <tr>
+    <td><b>lchown</b>(2)</td>
+    <td>1.0</td>
+    <td>See <b>chown</b>(2) for version details</td>
+  </tr>
+  <tr>
+    <td><b>lchown32</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>lgetxattr</b>(2)</td>
+    <td>2.6; 2.4.18</td>
+  </tr>
+  <tr>
+    <td><b>link</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>linkat</b>(2)</td>
+    <td>2.6.16</td>
+  </tr>
+  <tr>
+    <td><b>listen</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>socketcall</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>listxattr</b>(2)</td>
+    <td>2.6; 2.4.18</td>
+  </tr>
+  <tr>
+    <td><b>llistxattr</b>(2)</td>
+    <td>2.6; 2.4.18</td>
+  </tr>
+  <tr>
+    <td><b>lookup_dcookie</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>lremovexattr</b>(2)</td>
+    <td>2.6; 2.4.18</td>
+  </tr>
+  <tr>
+    <td><b>lseek</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>lsetxattr</b>(2)</td>
+    <td>2.6; 2.4.18</td>
+  </tr>
+  <tr>
+    <td><b>lstat</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>lstat64</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>madvise</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>mbind</b>(2)</td>
+    <td>2.6.6</td>
+  </tr>
+  <tr>
+    <td><b>memory_ordering</b>(2)</td>
+    <td>2.2</td>
+    <td>SPARC64 only</td>
+  </tr>
+  <tr>
+    <td><b>membarrier</b>(2)</td>
+    <td>3.17</td>
+  </tr>
+  <tr>
+    <td><b>memfd_create</b>(2)</td>
+    <td>3.17</td>
+  </tr>
+  <tr>
+    <td><b>memfd_secret</b>(2)</td>
+    <td>5.14</td>
+  </tr>
+  <tr>
+    <td><b>migrate_pages</b>(2)</td>
+    <td>2.6.16</td>
+  </tr>
+  <tr>
+    <td><b>mincore</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>mkdir</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>mkdirat</b>(2)</td>
+    <td>2.6.16</td>
+  </tr>
+  <tr>
+    <td><b>mknod</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>mknodat</b>(2)</td>
+    <td>2.6.16</td>
+  </tr>
+  <tr>
+    <td><b>mlock</b>(2)</td>
+    <td>2.0</td>
+  </tr>
+  <tr>
+    <td><b>mlock2</b>(2)</td>
+    <td>4.4</td>
+  </tr>
+  <tr>
+    <td><b>mlockall</b>(2)</td>
+    <td>2.0</td>
+  </tr>
+  <tr>
+    <td><b>mmap</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>mmap2</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>modify_ldt</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>mount</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>move_mount</b>(2)</td>
+    <td>5.2</td>
+  </tr>
+  <tr>
+    <td><b>move_pages</b>(2)</td>
+    <td>2.6.18</td>
+  </tr>
+  <tr>
+    <td><b>mprotect</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>mq_getsetattr</b>(2)</td>
+    <td>2.6.6</td>
+  </tr>
+  <tr>
+    <td><b>mq_notify</b>(2)</td>
+    <td>2.6.6</td>
+  </tr>
+  <tr>
+    <td><b>mq_open</b>(2)</td>
+    <td>2.6.6</td>
+  </tr>
+  <tr>
+    <td><b>mq_timedreceive</b>(2)</td>
+    <td>2.6.6</td>
+  </tr>
+  <tr>
+    <td><b>mq_timedsend</b>(2)</td>
+    <td>2.6.6</td>
+  </tr>
+  <tr>
+    <td><b>mq_unlink</b>(2)</td>
+    <td>2.6.6</td>
+  </tr>
+  <tr>
+    <td><b>mremap</b>(2)</td>
+    <td>2.0</td>
+  </tr>
+  <tr>
+    <td><b>msgctl</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>ipc</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>msgget</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>ipc</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>msgrcv</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>ipc</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>msgsnd</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>ipc</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>msync</b>(2)</td>
+    <td>2.0</td>
+  </tr>
+  <tr>
+    <td><b>munlock</b>(2)</td>
+    <td>2.0</td>
+  </tr>
+  <tr>
+    <td><b>munlockall</b>(2)</td>
+    <td>2.0</td>
+  </tr>
+  <tr>
+    <td><b>munmap</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>name_to_handle_at</b>(2)</td>
+    <td>2.6.39</td>
+  </tr>
+  <tr>
+    <td><b>nanosleep</b>(2)</td>
+    <td>2.0</td>
+  </tr>
+  <tr>
+    <td><b>newfstatat</b>(2)</td>
+    <td>2.6.16</td>
+    <td>See <b>stat</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>nfsservctl</b>(2)</td>
+    <td>2.2</td>
+    <td>Removed in 3.1</td>
+  </tr>
+  <tr>
+    <td><b>nice</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>old_adjtimex</b>(2)</td>
+    <td>2.0</td>
+    <td>Alpha only; see NOTES</td>
+  </tr>
+  <tr>
+    <td><b>old_getrlimit</b>(2)</td>
+    <td>2.4</td>
+    <td>Old variant of <b>getrlimit</b>(2) that used a different value for
+      <b>RLIM_INFINITY</b></td>
+  </tr>
+  <tr>
+    <td><b>oldfstat</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>oldlstat</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>oldolduname</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>oldstat</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>oldumount</b>(2)</td>
+    <td>2.4.116</td>
+    <td>Name of the old <b>umount</b>(2) syscall on Alpha</td>
+  </tr>
+  <tr>
+    <td><b>olduname</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>open</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>open_by_handle_at</b>(2)</td>
+    <td>2.6.39</td>
+  </tr>
+  <tr>
+    <td><b>open_tree</b>(2)</td>
+    <td>5.2</td>
+  </tr>
+  <tr>
+    <td><b>openat</b>(2)</td>
+    <td>2.6.16</td>
+  </tr>
+  <tr>
+    <td><b>openat2</b>(2)</td>
+    <td>5.6</td>
+  </tr>
+  <tr>
+    <td><b>or1k_atomic</b>(2)</td>
+    <td>3.1</td>
+    <td>OpenRISC 1000 only</td>
+  </tr>
+  <tr>
+    <td><b>pause</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>pciconfig_iobase</b>(2)</td>
+    <td>2.2.15; 2.4</td>
+    <td>Not on x86</td>
+  </tr>
+  <tr>
+    <td><b>pciconfig_read</b>(2)</td>
+    <td>2.0.26; 2.2</td>
+    <td>Not on x86</td>
+  </tr>
+  <tr>
+    <td><b>pciconfig_write</b>(2)</td>
+    <td>2.0.26; 2.2</td>
+    <td>Not on x86</td>
+  </tr>
+  <tr>
+    <td><b>perf_event_open</b>(2)</td>
+    <td>2.6.31</td>
+    <td>Was perf_counter_open() in 2.6.31; renamed in 2.6.32</td>
+  </tr>
+  <tr>
+    <td><b>personality</b>(2)</td>
+    <td>1.2</td>
+  </tr>
+  <tr>
+    <td><b>perfctr</b>(2)</td>
+    <td>2.2</td>
+    <td>SPARC only; removed in 2.6.34</td>
+  </tr>
+  <tr>
+    <td><b>perfmonctl</b>(2)</td>
+    <td>2.4</td>
+    <td>IA-64 only; removed in 5.10</td>
+  </tr>
+  <tr>
+    <td><b>pidfd_getfd</b>(2)</td>
+    <td>5.6</td>
+  </tr>
+  <tr>
+    <td><b>pidfd_send_signal</b>(2)</td>
+    <td>5.1</td>
+  </tr>
+  <tr>
+    <td><b>pidfd_open</b>(2)</td>
+    <td>5.3</td>
+  </tr>
+  <tr>
+    <td><b>pipe</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>pipe2</b>(2)</td>
+    <td>2.6.27</td>
+  </tr>
+  <tr>
+    <td><b>pivot_root</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>pkey_alloc</b>(2)</td>
+    <td>4.8</td>
+  </tr>
+  <tr>
+    <td><b>pkey_free</b>(2)</td>
+    <td>4.8</td>
+  </tr>
+  <tr>
+    <td><b>pkey_mprotect</b>(2)</td>
+    <td>4.8</td>
+  </tr>
+  <tr>
+    <td><b>poll</b>(2)</td>
+    <td>2.0.36; 2.2</td>
+  </tr>
+  <tr>
+    <td><b>ppoll</b>(2)</td>
+    <td>2.6.16</td>
+  </tr>
+  <tr>
+    <td><b>prctl</b>(2)</td>
+    <td>2.2</td>
+  </tr>
+  <tr>
+    <td><b>pread64</b>(2)</td>
+    <td></td>
+    <td>Added as "pread" in 2.2; renamed "pread64" in
+      2.6</td>
+  </tr>
+  <tr>
+    <td><b>preadv</b>(2)</td>
+    <td>2.6.30</td>
+  </tr>
+  <tr>
+    <td><b>preadv2</b>(2)</td>
+    <td>4.6</td>
+  </tr>
+  <tr>
+    <td><b>prlimit64</b>(2)</td>
+    <td>2.6.36</td>
+  </tr>
+  <tr>
+    <td><b>process_madvise</b>(2)</td>
+    <td>5.10</td>
+  </tr>
+  <tr>
+    <td><b>process_vm_readv</b>(2)</td>
+    <td>3.2</td>
+  </tr>
+  <tr>
+    <td><b>process_vm_writev</b>(2)</td>
+    <td>3.2</td>
+  </tr>
+  <tr>
+    <td><b>pselect6</b>(2)</td>
+    <td>2.6.16</td>
+  </tr>
+  <tr>
+    <td><b>ptrace</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>pwrite64</b>(2)</td>
+    <td></td>
+    <td>Added as "pwrite" in 2.2; renamed "pwrite64" in
+      2.6</td>
+  </tr>
+  <tr>
+    <td><b>pwritev</b>(2)</td>
+    <td>2.6.30</td>
+  </tr>
+  <tr>
+    <td><b>pwritev2</b>(2)</td>
+    <td>4.6</td>
+  </tr>
+  <tr>
+    <td><b>query_module</b>(2)</td>
+    <td>2.2</td>
+    <td>Removed in 2.6</td>
+  </tr>
+  <tr>
+    <td><b>quotactl</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>quotactl_fd</b>(2)</td>
+    <td>5.14</td>
+  </tr>
+  <tr>
+    <td><b>read</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>readahead</b>(2)</td>
+    <td>2.4.13</td>
+  </tr>
+  <tr>
+    <td><b>readdir</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>readlink</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>readlinkat</b>(2)</td>
+    <td>2.6.16</td>
+  </tr>
+  <tr>
+    <td><b>readv</b>(2)</td>
+    <td>2.0</td>
+  </tr>
+  <tr>
+    <td><b>reboot</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>recv</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>socketcall</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>recvfrom</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>socketcall</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>recvmsg</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>socketcall</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>recvmmsg</b>(2)</td>
+    <td>2.6.33</td>
+  </tr>
+  <tr>
+    <td><b>remap_file_pages</b>(2)</td>
+    <td>2.6</td>
+    <td>Deprecated since 3.16</td>
+  </tr>
+  <tr>
+    <td><b>removexattr</b>(2)</td>
+    <td>2.6; 2.4.18</td>
+  </tr>
+  <tr>
+    <td><b>rename</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>renameat</b>(2)</td>
+    <td>2.6.16</td>
+  </tr>
+  <tr>
+    <td><b>renameat2</b>(2)</td>
+    <td>3.15</td>
+  </tr>
+  <tr>
+    <td><b>request_key</b>(2)</td>
+    <td>2.6.10</td>
+  </tr>
+  <tr>
+    <td><b>restart_syscall</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>riscv_flush_icache</b>(2)</td>
+    <td>4.15</td>
+    <td>RISC-V only</td>
+  </tr>
+  <tr>
+    <td><b>rmdir</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>rseq</b>(2)</td>
+    <td>4.18</td>
+  </tr>
+  <tr>
+    <td><b>rt_sigaction</b>(2)</td>
+    <td>2.2</td>
+  </tr>
+  <tr>
+    <td><b>rt_sigpending</b>(2)</td>
+    <td>2.2</td>
+  </tr>
+  <tr>
+    <td><b>rt_sigprocmask</b>(2)</td>
+    <td>2.2</td>
+  </tr>
+  <tr>
+    <td><b>rt_sigqueueinfo</b>(2)</td>
+    <td>2.2</td>
+  </tr>
+  <tr>
+    <td><b>rt_sigreturn</b>(2)</td>
+    <td>2.2</td>
+  </tr>
+  <tr>
+    <td><b>rt_sigsuspend</b>(2)</td>
+    <td>2.2</td>
+  </tr>
+  <tr>
+    <td><b>rt_sigtimedwait</b>(2)</td>
+    <td>2.2</td>
+  </tr>
+  <tr>
+    <td><b>rt_tgsigqueueinfo</b>(2)</td>
+    <td>2.6.31</td>
+  </tr>
+  <tr>
+    <td><b>rtas</b>(2)</td>
+    <td>2.6.2</td>
+    <td>PowerPC/PowerPC64 only</td>
+  </tr>
+  <tr>
+    <td><b>s390_runtime_instr</b>(2)</td>
+    <td>3.7</td>
+    <td>s390 only</td>
+  </tr>
+  <tr>
+    <td><b>s390_pci_mmio_read</b>(2)</td>
+    <td>3.19</td>
+    <td>s390 only</td>
+  </tr>
+  <tr>
+    <td><b>s390_pci_mmio_write</b>(2)</td>
+    <td>3.19</td>
+    <td>s390 only</td>
+  </tr>
+  <tr>
+    <td><b>s390_sthyi</b>(2)</td>
+    <td>4.15</td>
+    <td>s390 only</td>
+  </tr>
+  <tr>
+    <td><b>s390_guarded_storage</b>(2)</td>
+    <td>4.12</td>
+    <td>s390 only</td>
+  </tr>
+  <tr>
+    <td><b>sched_get_affinity</b>(2)</td>
+    <td>2.6</td>
+    <td>Name of <b>sched_getaffinity</b>(2) on SPARC and SPARC64</td>
+  </tr>
+  <tr>
+    <td><b>sched_get_priority_max</b>(2)</td>
+    <td>2.0</td>
+  </tr>
+  <tr>
+    <td><b>sched_get_priority_min</b>(2)</td>
+    <td>2.0</td>
+  </tr>
+  <tr>
+    <td><b>sched_getaffinity</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>sched_getattr</b>(2)</td>
+    <td>3.14</td>
+  </tr>
+  <tr>
+    <td><b>sched_getparam</b>(2)</td>
+    <td>2.0</td>
+  </tr>
+  <tr>
+    <td><b>sched_getscheduler</b>(2)</td>
+    <td>2.0</td>
+  </tr>
+  <tr>
+    <td><b>sched_rr_get_interval</b>(2)</td>
+    <td>2.0</td>
+  </tr>
+  <tr>
+    <td><b>sched_set_affinity</b>(2)</td>
+    <td>2.6</td>
+    <td>Name of <b>sched_setaffinity</b>(2) on SPARC and SPARC64</td>
+  </tr>
+  <tr>
+    <td><b>sched_setaffinity</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>sched_setattr</b>(2)</td>
+    <td>3.14</td>
+  </tr>
+  <tr>
+    <td><b>sched_setparam</b>(2)</td>
+    <td>2.0</td>
+  </tr>
+  <tr>
+    <td><b>sched_setscheduler</b>(2)</td>
+    <td>2.0</td>
+  </tr>
+  <tr>
+    <td><b>sched_yield</b>(2)</td>
+    <td>2.0</td>
+  </tr>
+  <tr>
+    <td><b>seccomp</b>(2)</td>
+    <td>3.17</td>
+  </tr>
+  <tr>
+    <td><b>select</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>semctl</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>ipc</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>semget</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>ipc</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>semop</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>ipc</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>semtimedop</b>(2)</td>
+    <td>2.6; 2.4.22</td>
+  </tr>
+  <tr>
+    <td><b>send</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>socketcall</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>sendfile</b>(2)</td>
+    <td>2.2</td>
+  </tr>
+  <tr>
+    <td><b>sendfile64</b>(2)</td>
+    <td>2.6; 2.4.19</td>
+  </tr>
+  <tr>
+    <td><b>sendmmsg</b>(2)</td>
+    <td>3.0</td>
+  </tr>
+  <tr>
+    <td><b>sendmsg</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>socketcall</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>sendto</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>socketcall</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>set_mempolicy</b>(2)</td>
+    <td>2.6.6</td>
+  </tr>
+  <tr>
+    <td><b>set_robust_list</b>(2)</td>
+    <td>2.6.17</td>
+  </tr>
+  <tr>
+    <td><b>set_thread_area</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>set_tid_address</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>set_tls</b>(2)</td>
+    <td>2.6.11</td>
+    <td>ARM OABI/EABI only (constant has <b>__ARM_NR</b> prefix)</td>
+  </tr>
+  <tr>
+    <td><b>setdomainname</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>setfsgid</b>(2)</td>
+    <td>1.2</td>
+  </tr>
+  <tr>
+    <td><b>setfsgid32</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>setfsuid</b>(2)</td>
+    <td>1.2</td>
+  </tr>
+  <tr>
+    <td><b>setfsuid32</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>setgid</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>setgid32</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>setgroups</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>setgroups32</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>sethae</b>(2)</td>
+    <td>2.0</td>
+    <td>Alpha only; see NOTES</td>
+  </tr>
+  <tr>
+    <td><b>sethostname</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>setitimer</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>setns</b>(2)</td>
+    <td>3.0</td>
+  </tr>
+  <tr>
+    <td><b>setpgid</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>setpgrp</b>(2)</td>
+    <td>2.0</td>
+    <td>Alternative name for <b>setpgid</b>(2) on Alpha</td>
+  </tr>
+  <tr>
+    <td><b>setpriority</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>setregid</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>setregid32</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>setresgid</b>(2)</td>
+    <td>2.2</td>
+  </tr>
+  <tr>
+    <td><b>setresgid32</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>setresuid</b>(2)</td>
+    <td>2.2</td>
+  </tr>
+  <tr>
+    <td><b>setresuid32</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>setreuid</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>setreuid32</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>setrlimit</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>setsid</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>setsockopt</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>socketcall</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>settimeofday</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>setuid</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>setuid32</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>setup</b>(2)</td>
+    <td>1.0</td>
+    <td>Removed in 2.2</td>
+  </tr>
+  <tr>
+    <td><b>setxattr</b>(2)</td>
+    <td>2.6; 2.4.18</td>
+  </tr>
+  <tr>
+    <td><b>sgetmask</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>shmat</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>ipc</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>shmctl</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>ipc</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>shmdt</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>ipc</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>shmget</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>ipc</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>shutdown</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>socketcall</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>sigaction</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>sigaltstack</b>(2)</td>
+    <td>2.2</td>
+  </tr>
+  <tr>
+    <td><b>signal</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>signalfd</b>(2)</td>
+    <td>2.6.22</td>
+  </tr>
+  <tr>
+    <td><b>signalfd4</b>(2)</td>
+    <td>2.6.27</td>
+  </tr>
+  <tr>
+    <td><b>sigpending</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>sigprocmask</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>sigreturn</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>sigsuspend</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>socket</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>socketcall</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>socketcall</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>socketpair</b>(2)</td>
+    <td>2.0</td>
+    <td>See notes on <b>socketcall</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>spill</b>(2)</td>
+    <td>2.6.13</td>
+    <td>Xtensa only</td>
+  </tr>
+  <tr>
+    <td><b>splice</b>(2)</td>
+    <td>2.6.17</td>
+  </tr>
+  <tr>
+    <td><b>spu_create</b>(2)</td>
+    <td>2.6.16</td>
+    <td>PowerPC/PowerPC64 only</td>
+  </tr>
+  <tr>
+    <td><b>spu_run</b>(2)</td>
+    <td>2.6.16</td>
+    <td>PowerPC/PowerPC64 only</td>
+  </tr>
+  <tr>
+    <td><b>ssetmask</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>stat</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>stat64</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>statfs</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>statfs64</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>statx</b>(2)</td>
+    <td>4.11</td>
+  </tr>
+  <tr>
+    <td><b>stime</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>subpage_prot</b>(2)</td>
+    <td>2.6.25</td>
+    <td>PowerPC/PowerPC64 only</td>
+  </tr>
+  <tr>
+    <td><b>swapcontext</b>(2)</td>
+    <td>2.6.3</td>
+    <td>PowerPC/PowerPC64 only</td>
+  </tr>
+  <tr>
+    <td><b>switch_endian</b>(2)</td>
+    <td>4.1</td>
+    <td>PowerPC64 only</td>
+  </tr>
+  <tr>
+    <td><b>swapoff</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>swapon</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>symlink</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>symlinkat</b>(2)</td>
+    <td>2.6.16</td>
+  </tr>
+  <tr>
+    <td><b>sync</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>sync_file_range</b>(2)</td>
+    <td>2.6.17</td>
+  </tr>
+  <tr>
+    <td><b>sync_file_range2</b>(2)</td>
+    <td>2.6.22</td>
+  </tr>
+  <tr>
+    <td><b>syncfs</b>(2)</td>
+    <td>2.6.39</td>
+  </tr>
+  <tr>
+    <td><b>sys_debug_setcontext</b>(2)</td>
+    <td>2.6.11</td>
+    <td>PowerPC only</td>
+  </tr>
+  <tr>
+    <td><b>syscall</b>(2)</td>
+    <td>1.0</td>
+    <td>Still available on ARM OABI and MIPS O32 ABI</td>
+  </tr>
+  <tr>
+    <td><b>sysfs</b>(2)</td>
+    <td>1.2</td>
+  </tr>
+  <tr>
+    <td><b>sysinfo</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>syslog</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>sysmips</b>(2)</td>
+    <td>2.6.0</td>
+    <td>MIPS only</td>
+  </tr>
+  <tr>
+    <td><b>tee</b>(2)</td>
+    <td>2.6.17</td>
+  </tr>
+  <tr>
+    <td><b>tgkill</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>time</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>timer_create</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>timer_delete</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>timer_getoverrun</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>timer_gettime</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>timer_settime</b>(2)</td>
+    <td>2.6</td>
+  </tr>
+  <tr>
+    <td><b>timerfd_create</b>(2)</td>
+    <td>2.6.25</td>
+  </tr>
+  <tr>
+    <td><b>timerfd_gettime</b>(2)</td>
+    <td>2.6.25</td>
+  </tr>
+  <tr>
+    <td><b>timerfd_settime</b>(2)</td>
+    <td>2.6.25</td>
+  </tr>
+  <tr>
+    <td><b>times</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>tkill</b>(2)</td>
+    <td>2.6; 2.4.22</td>
+  </tr>
+  <tr>
+    <td><b>truncate</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>truncate64</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>ugetrlimit</b>(2)</td>
+    <td>2.4</td>
+  </tr>
+  <tr>
+    <td><b>umask</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>umount</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>umount2</b>(2)</td>
+    <td>2.2</td>
+  </tr>
+  <tr>
+    <td><b>uname</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>unlink</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>unlinkat</b>(2)</td>
+    <td>2.6.16</td>
+  </tr>
+  <tr>
+    <td><b>unshare</b>(2)</td>
+    <td>2.6.16</td>
+  </tr>
+  <tr>
+    <td><b>uselib</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>ustat</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>userfaultfd</b>(2)</td>
+    <td>4.3</td>
+  </tr>
+  <tr>
+    <td><b>usr26</b>(2)</td>
+    <td>2.4.8.1</td>
+    <td>ARM OABI only</td>
+  </tr>
+  <tr>
+    <td><b>usr32</b>(2)</td>
+    <td>2.4.8.1</td>
+    <td>ARM OABI only</td>
+  </tr>
+  <tr>
+    <td><b>utime</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>utimensat</b>(2)</td>
+    <td>2.6.22</td>
+  </tr>
+  <tr>
+    <td><b>utimes</b>(2)</td>
+    <td>2.2</td>
+  </tr>
+  <tr>
+    <td><b>utrap_install</b>(2)</td>
+    <td>2.2</td>
+    <td>SPARC64 only</td>
+  </tr>
+  <tr>
+    <td><b>vfork</b>(2)</td>
+    <td>2.2</td>
+  </tr>
+  <tr>
+    <td><b>vhangup</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>vm86old</b>(2)</td>
+    <td>1.0</td>
+    <td>Was "vm86"; renamed in 2.0.28/2.2</td>
+  </tr>
+  <tr>
+    <td><b>vm86</b>(2)</td>
+    <td>2.0.28; 2.2</td>
+  </tr>
+  <tr>
+    <td><b>vmsplice</b>(2)</td>
+    <td>2.6.17</td>
+  </tr>
+  <tr>
+    <td><b>wait4</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>waitid</b>(2)</td>
+    <td>2.6.10</td>
+  </tr>
+  <tr>
+    <td><b>waitpid</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>write</b>(2)</td>
+    <td>1.0</td>
+  </tr>
+  <tr>
+    <td><b>writev</b>(2)</td>
+    <td>2.0</td>
+  </tr>
+  <tr>
+    <td><b>xtensa</b>(2)</td>
+    <td>2.6.13</td>
+    <td>Xtensa only</td>
+  </tr>
+</tbody></table>
+<p class="Pp">On many platforms, including x86-32, socket calls are all
+    multiplexed (via glibc wrapper functions) through <b>socketcall</b>(2) and
+    similarly System&nbsp;V IPC calls are multiplexed through
+  <b>ipc</b>(2).</p>
+<p class="Pp">Although slots are reserved for them in the system call table, the
+    following system calls are not implemented in the standard kernel:
+    <b>afs_syscall</b>(2), <b>break</b>(2), <b>ftime</b>(2), <b>getpmsg</b>(2),
+    <b>gtty</b>(2), <b>idle</b>(2), <b>lock</b>(2), <b>madvise1</b>(2),
+    <b>mpx</b>(2), <b>phys</b>(2), <b>prof</b>(2), <b>profil</b>(2),
+    <b>putpmsg</b>(2), <b>security</b>(2), <b>stty</b>(2), <b>tuxcall</b>(2),
+    <b>ulimit</b>(2), and <b>vserver</b>(2) (see also <b>unimplemented</b>(2)).
+    However, <b>ftime</b>(3), <b>profil</b>(3), and <b>ulimit</b>(3) exist as
+    library routines. The slot for <b>phys</b>(2) is in use since Linux 2.1.116
+    for <b>umount</b>(2); <b>phys</b>(2) will never be implemented. The
+    <b>getpmsg</b>(2) and <b>putpmsg</b>(2) calls are for kernels patched to
+    support STREAMS, and may never be in the standard kernel.</p>
+<p class="Pp">There was briefly <b>set_zone_reclaim</b>(2), added in Linux
+    2.6.13, and removed in Linux 2.6.16; this system call was never available to
+    user space.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="System_calls_on_removed_ports"><a class="permalink" href="#System_calls_on_removed_ports">System
+  calls on removed ports</a></h2>
+<p class="Pp">Some system calls only ever existed on Linux architectures that
+    have since been removed from the kernel:</p>
+<dl class="Bl-tag">
+  <dt id="AVR32"><a class="permalink" href="#AVR32">AVR32 (port removed in Linux
+    4.12)</a></dt>
+  <dd></dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><b>pread</b>(2)</dd>
+  <dt>•</dt>
+  <dd><b>pwrite</b>(2)</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="Blackfin"><a class="permalink" href="#Blackfin">Blackfin (port removed
+    in Linux 4.17)</a></dt>
+  <dd></dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><b>bfin_spinlock</b>(2) (added in Linux 2.6.22)</dd>
+  <dt>•</dt>
+  <dd><b>dma_memcpy</b>(2) (added in Linux 2.6.22)</dd>
+  <dt>•</dt>
+  <dd><b>pread</b>(2) (added in Linux 2.6.22)</dd>
+  <dt>•</dt>
+  <dd><b>pwrite</b>(2) (added in Linux 2.6.22)</dd>
+  <dt>•</dt>
+  <dd><b>sram_alloc</b>(2) (added in Linux 2.6.22)</dd>
+  <dt>•</dt>
+  <dd><b>sram_free</b>(2) (added in Linux 2.6.22)</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="Metag"><a class="permalink" href="#Metag">Metag (port removed in Linux
+    4.17)</a></dt>
+  <dd></dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><b>metag_get_tls</b>(2) (add in Linux 3.9)</dd>
+  <dt>•</dt>
+  <dd><b>metag_set_fpu_flags</b>(2) (add in Linux 3.9)</dd>
+  <dt>•</dt>
+  <dd><b>metag_set_tls</b>(2) (add in Linux 3.9)</dd>
+  <dt>•</dt>
+  <dd><b>metag_setglobalbit</b>(2) (add in Linux 3.9)</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="Tile"><a class="permalink" href="#Tile">Tile (port removed in Linux
+    4.17)</a></dt>
+  <dd></dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><b>cmpxchg_badaddr</b>(2) (added in Linux 2.6.36)</dd>
+</dl>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Roughly speaking, the code belonging to the system call with
+    number __NR_xxx defined in <i>/usr/include/asm/unistd.h</i> can be found in
+    the Linux kernel source in the routine <i>sys_xxx</i>(). There are many
+    exceptions, however, mostly because older system calls were superseded by
+    newer ones, and this has been treated somewhat unsystematically. On
+    platforms with proprietary operating-system emulation, such as sparc,
+    sparc64, and alpha, there are many additional system calls; mips64 also
+    contains a full set of 32-bit system calls.</p>
+<p class="Pp">Over time, changes to the interfaces of some system calls have
+    been necessary. One reason for such changes was the need to increase the
+    size of structures or scalar values passed to the system call. Because of
+    these changes, certain architectures (notably, longstanding 32-bit
+    architectures such as i386) now have various groups of related system calls
+    (e.g., <b>truncate</b>(2) and <b>truncate64</b>(2)) which perform similar
+    tasks, but which vary in details such as the size of their arguments. (As
+    noted earlier, applications are generally unaware of this: the glibc wrapper
+    functions do some work to ensure that the right system call is invoked, and
+    that ABI compatibility is preserved for old binaries.) Examples of systems
+    calls that exist in multiple versions are the following:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>By now there are three different versions of <b>stat</b>(2):
+      <i>sys_stat</i>() (slot <i>__NR_oldstat</i>), <i>sys_newstat</i>() (slot
+      <i>__NR_stat</i>), and <i>sys_stat64</i>() (slot <i>__NR_stat64</i>), with
+      the last being the most current. A similar story applies for
+      <b>lstat</b>(2) and <b>fstat</b>(2).</dd>
+  <dt>•</dt>
+  <dd>Similarly, the defines <i>__NR_oldolduname</i>, <i>__NR_olduname</i>, and
+      <i>__NR_uname</i> refer to the routines <i>sys_olduname</i>(),
+      <i>sys_uname</i>(), and <i>sys_newuname</i>().</dd>
+  <dt>•</dt>
+  <dd>In Linux 2.0, a new version of <b>vm86</b>(2) appeared, with the old and
+      the new kernel routines being named <i>sys_vm86old</i>() and
+      <i>sys_vm86</i>().</dd>
+  <dt>•</dt>
+  <dd>In Linux 2.4, a new version of <b>getrlimit</b>(2) appeared, with the old
+      and the new kernel routines being named <i>sys_old_getrlimit</i>() (slot
+      <i>__NR_getrlimit</i>) and <i>sys_getrlimit</i>() (slot
+      <i>__NR_ugetrlimit</i>).</dd>
+  <dt>•</dt>
+  <dd>Linux 2.4 increased the size of user and group IDs from 16 to 32 bits. To
+      support this change, a range of system calls were added (e.g.,
+      <b>chown32</b>(2), <b>getuid32</b>(2), <b>getgroups32</b>(2),
+      <b>setresuid32</b>(2)), superseding earlier calls of the same name without
+      the "32" suffix.</dd>
+  <dt>•</dt>
+  <dd>Linux 2.4 added support for applications on 32-bit architectures to access
+      large files (i.e., files for which the sizes and file offsets can't be
+      represented in 32 bits.) To support this change, replacements were
+      required for system calls that deal with file offsets and sizes. Thus the
+      following system calls were added: <b>fcntl64</b>(2),
+      <b>getdents64</b>(2), <b>stat64</b>(2), <b>statfs64</b>(2),
+      <b>truncate64</b>(2), and their analogs that work with file descriptors or
+      symbolic links. These system calls supersede the older system calls which,
+      except in the case of the "stat" calls, have the same name
+      without the "64" suffix.</dd>
+  <dt></dt>
+  <dd>On newer platforms that only have 64-bit file access and 32-bit UIDs/GIDs
+      (e.g., alpha, ia64, s390x, x86-64), there is just a single version of the
+      UID/GID and file access system calls. On platforms (typically, 32-bit
+      platforms) where the *64 and *32 calls exist, the other versions are
+      obsolete.</dd>
+  <dt>•</dt>
+  <dd>The <i>rt_sig*</i> calls were added in Linux 2.2 to support the addition
+      of real-time signals (see <b>signal</b>(7)). These system calls supersede
+      the older system calls of the same name without the "rt_"
+      prefix.</dd>
+  <dt>•</dt>
+  <dd>The <b>select</b>(2) and <b>mmap</b>(2) system calls use five or more
+      arguments, which caused problems in the way argument passing on the i386
+      used to be set up. Thus, while other architectures have
+      <i>sys_select</i>() and <i>sys_mmap</i>() corresponding to
+      <i>__NR_select</i> and <i>__NR_mmap</i>, on i386 one finds
+      <i>old_select</i>() and <i>old_mmap</i>() (routines that use a pointer to
+      an argument block) instead. These days passing five arguments is not a
+      problem any more, and there is a <i>__NR__newselect</i> that corresponds
+      directly to <i>sys_select</i>() and similarly <i>__NR_mmap2</i>. s390x is
+      the only 64-bit architecture that has <i>old_mmap</i>().</dd>
+</dl>
+<section class="Ss">
+<h2 class="Ss" id="Architecture-specific_details:_Alpha"><a class="permalink" href="#Architecture-specific_details:_Alpha">Architecture-specific
+  details: Alpha</a></h2>
+<dl class="Bl-tag">
+  <dt id="getxgid"><a class="permalink" href="#getxgid"><b>getxgid</b>(2)</a></dt>
+  <dd>returns a pair of GID and effective GID via registers <b>r0</b> and
+      <b>r20</b>; it is provided instead of <b>getgid</b>(2) and
+      <b>getegid</b>(2).</dd>
+  <dt id="getxpid"><a class="permalink" href="#getxpid"><b>getxpid</b>(2)</a></dt>
+  <dd>returns a pair of PID and parent PID via registers <b>r0</b> and
+      <b>r20</b>; it is provided instead of <b>getpid</b>(2) and
+      <b>getppid</b>(2).</dd>
+  <dt id="old_adjtimex"><a class="permalink" href="#old_adjtimex"><b>old_adjtimex</b>(2)</a></dt>
+  <dd>is a variant of <b>adjtimex</b>(2) that uses <i>struct timeval32</i>, for
+      compatibility with OSF/1.</dd>
+  <dt id="getxuid"><a class="permalink" href="#getxuid"><b>getxuid</b>(2)</a></dt>
+  <dd>returns a pair of GID and effective GID via registers <b>r0</b> and
+      <b>r20</b>; it is provided instead of <b>getuid</b>(2) and
+      <b>geteuid</b>(2).</dd>
+  <dt id="sethae"><a class="permalink" href="#sethae"><b>sethae</b>(2)</a></dt>
+  <dd>is used for configuring the Host Address Extension register on low-cost
+      Alphas in order to access address space beyond first 27 bits.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>ausyscall</b>(1), <b>intro</b>(2), <b>syscall</b>(2),
+    <b>unimplemented</b>(2), <b>errno</b>(3), <b>libc</b>(7), <b>vdso</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

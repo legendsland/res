@@ -1,0 +1,169 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/d62f56c32b6ff925f1a177b703c9f3df14912975">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>SCHED_SETPARAM(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">SCHED_SETPARAM(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">SCHED_SETPARAM(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">sched_setparam — set scheduling parameters
+    (<b>REALTIME</b>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;sched.h&gt;</pre>
+<pre>int sched_setparam(pid_t <i>pid</i>, const struct sched_param *<i>param</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>sched_setparam</i>() function shall set the scheduling
+    parameters of the process specified by <i>pid</i> to the values specified by
+    the <b>sched_param</b> structure pointed to by <i>param</i>. The value of
+    the <i>sched_priority</i> member in the <b>sched_param</b> structure shall
+    be any integer within the inclusive priority range for the current
+    scheduling policy of the process specified by <i>pid</i>. Higher numerical
+    values for the priority represent higher priorities. If the value of
+    <i>pid</i> is negative, the behavior of the <i>sched_setparam</i>() function
+    is unspecified.</p>
+<p class="Pp">If a process specified by <i>pid</i> exists, and if the calling
+    process has permission, the scheduling parameters shall be set for the
+    process whose process ID is equal to <i>pid</i>.</p>
+<p class="Pp">If <i>pid</i> is zero, the scheduling parameters shall be set for
+    the calling process.</p>
+<p class="Pp">The conditions under which one process has permission to change
+    the scheduling parameters of another process are implementation-defined.</p>
+<p class="Pp">Implementations may require the requesting process to have
+    appropriate privileges to set its own scheduling parameters or those of
+    another process.</p>
+<p class="Pp">See <i>Scheduling Policies</i> for a description on how this
+    function affects the scheduling of the threads within the target
+  process.</p>
+<p class="Pp">If the current scheduling policy for the target process is not
+    SCHED_FIFO, SCHED_RR, or SCHED_SPORADIC, the result is
+    implementation-defined; this case includes the SCHED_OTHER policy.</p>
+<p class="Pp">The specified <i>sched_ss_repl_period</i> shall be greater than or
+    equal to the specified <i>sched_ss_init_budget</i> for the function to
+    succeed; if it is not, then the function shall fail.</p>
+<p class="Pp">The value of <i>sched_ss_max_repl</i> shall be within the
+    inclusive range [1,{SS_REPL_MAX}] for the function to succeed; if not, the
+    function shall fail. It is unspecified whether the
+    <i>sched_ss_repl_period</i> and <i>sched_ss_init_budget</i> values are
+    stored as provided by this function or are rounded to align with the
+    resolution of the clock being used.</p>
+<p class="Pp">This function is not atomic with respect to other threads in the
+    process. Threads may continue to execute while this function call is in the
+    process of changing the scheduling policy for the underlying
+    kernel-scheduled entities used by the process contention scope threads.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">If successful, the <i>sched_setparam</i>() function shall return
+    zero.</p>
+<p class="Pp">If the call to <i>sched_setparam</i>() is unsuccessful, the
+    priority shall remain unchanged, and the function shall return a value of -1
+    and set <i>errno</i> to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>sched_setparam</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>One or more of the requested scheduling parameters is outside the range
+      defined for the scheduling policy of the specified <i>pid</i>.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The requesting process does not have permission to set the scheduling
+      parameters for the specified process, or does not have appropriate
+      privileges to invoke <i>sched_setparam</i>().</dd>
+  <dt id="ESRCH"><a class="permalink" href="#ESRCH"><b>ESRCH</b></a></dt>
+  <dd>No process can be found corresponding to that specified by
+    <i>pid</i>.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i>Scheduling Policies</i>, <i><i>sched_getparam</i>()</i>,
+    <i><i>sched_getscheduler</i>()</i>, <i><i>sched_setscheduler</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;sched.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

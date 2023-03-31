@@ -1,0 +1,216 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/d9d5b80007a2be62a94ca4d6e62bf91435c2a234">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>STRTOK(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">STRTOK(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">STRTOK(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">strtok, strtok_r — split string into tokens</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;string.h&gt;</pre>
+<pre>char *strtok(char *restrict <i>s</i>, const char *restrict <i>sep</i>);
+char *strtok_r(char *restrict <i>s</i>, const char *restrict <i>sep</i>,
+<br>
+    char **restrict <i>state</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">For <i>strtok</i>(): The functionality described on this reference
+    page is aligned with the ISO&nbsp;C standard. Any conflict between the
+    requirements described here and the ISO&nbsp;C standard is unintentional.
+    This volume of POSIX.1‐2017 defers to the ISO&nbsp;C standard.</p>
+<p class="Pp">A sequence of calls to <i>strtok</i>() breaks the string pointed
+    to by <i>s</i> into a sequence of tokens, each of which is delimited by a
+    byte from the string pointed to by <i>sep</i>. The first call in the
+    sequence has <i>s</i> as its first argument, and is followed by calls with a
+    null pointer as their first argument. The separator string pointed to by
+    <i>sep</i> may be different from call to call.</p>
+<p class="Pp">The first call in the sequence searches the string pointed to by
+    <i>s</i> for the first byte that is <i>not</i> contained in the current
+    separator string pointed to by <i>sep</i>. If no such byte is found, then
+    there are no tokens in the string pointed to by <i>s</i> and <i>strtok</i>()
+    shall return a null pointer. If such a byte is found, it is the start of the
+    first token.</p>
+<p class="Pp">The <i>strtok</i>() function then searches from there for a byte
+    that <i>is</i> contained in the current separator string. If no such byte is
+    found, the current token extends to the end of the string pointed to by
+    <i>s</i>, and subsequent searches for a token shall return a null pointer.
+    If such a byte is found, it is overwritten by a NUL character, which
+    terminates the current token. The <i>strtok</i>() function saves a pointer
+    to the following byte, from which the next search for a token shall
+  start.</p>
+<p class="Pp">Each subsequent call, with a null pointer as the value of the
+    first argument, starts searching from the saved pointer and behaves as
+    described above.</p>
+<p class="Pp">The implementation shall behave as if no function defined in this
+    volume of POSIX.1‐2017 calls <i>strtok</i>().</p>
+<p class="Pp">The <i>strtok</i>() function need not be thread-safe.</p>
+<p class="Pp">The <i>strtok_r</i>() function shall be equivalent to
+    <i>strtok</i>(), except that <i>strtok_r</i>() shall be thread-safe and the
+    argument <i>state</i> points to a user-provided pointer that allows
+    <i>strtok_r</i>() to maintain state between calls which scan the same
+    string. The application shall ensure that the pointer pointed to by
+    <i>state</i> is unique for each string (<i>s</i>) being processed
+    concurrently by <i>strtok_r</i>() calls. The application need not initialize
+    the pointer pointed to by <i>state</i> to any particular value. The
+    implementation shall not update the pointer pointed to by <i>state</i> to
+    point (directly or indirectly) to resources, other than within the string
+    <i>s</i>, that need to be freed or released by the caller.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>strtok</i>() shall return a pointer
+    to the first byte of a token. Otherwise, if there is no token,
+    <i>strtok</i>() shall return a null pointer.</p>
+<p class="Pp">The <i>strtok_r</i>() function shall return a pointer to the token
+    found, or a null pointer when no token is found.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">No errors are defined.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Searching_for_Word_Separators"><a class="permalink" href="#Searching_for_Word_Separators">Searching
+  for Word Separators</a></h2>
+<p class="Pp">The following example searches for tokens separated by
+    &lt;space&gt; characters.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;string.h&gt;
+...
+char *token;
+char line[] = "LINE TO BE SEPARATED";
+char *search = " ";</pre>
+<pre>/* Token will point to "LINE". */
+token = strtok(line, search);</pre>
+<pre>/* Token will point to "TO". */
+token = strtok(NULL, search);</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Find_First_two_Fields_in_a_Buffer"><a class="permalink" href="#Find_First_two_Fields_in_a_Buffer">Find
+  First two Fields in a Buffer</a></h2>
+<p class="Pp">The following example uses <i>strtok</i>() to find two character
+    strings (a key and data associated with that key) separated by any
+    combination of &lt;space&gt;, &lt;tab&gt;, or &lt;newline&gt; characters at
+    the start of the array of characters pointed to by <i>buffer</i>.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;string.h&gt;
+...
+char    *buffer;
+...
+struct element {
+<br>
+    char *key;
+<br>
+    char *data;
+} e;
+...
+// Load the buffer...
+...
+// Get the key and its data...
+e.key = strtok(buffer, " \t\n");
+e.data = strtok(NULL, " \t\n");
+// Process the rest of the contents of the buffer...
+...</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">Note that if <i>sep</i> is the empty string, <i>strtok</i>() and
+    <i>strtok_r</i>() return a pointer to the remainder of the string being
+    tokenized.</p>
+<p class="Pp">The <i>strtok_r</i>() function is thread-safe and stores its state
+    in a user-supplied buffer instead of possibly using a static data area that
+    may be overwritten by an unrelated call from another thread.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The <i>strtok</i>() function searches for a separator string
+    within a larger string. It returns a pointer to the last substring between
+    separator strings. This function uses static storage to keep track of the
+    current string position between calls. The new function, <i>strtok_r</i>(),
+    takes an additional argument, <i>state</i>, to keep track of the current
+    position in the string.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;string.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

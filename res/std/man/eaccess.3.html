@@ -1,0 +1,127 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/43abc52532f1f747bd225593ecd1b9015cab6e11">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>euidaccess(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">euidaccess(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">euidaccess(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">euidaccess, eaccess - check effective user's permissions for a
+    file</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#define _GNU_SOURCE</b>             /* See feature_test_macros(7) */
+<b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int euidaccess(const char *</b><i>pathname</i><b>, int </b><i>mode</i><b>);</b>
+<b>int eaccess(const char *</b><i>pathname</i><b>, int </b><i>mode</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">Like <b>access</b>(2), <b>euidaccess</b>() checks permissions and
+    existence of the file identified by its argument <i>pathname</i>. However,
+    whereas <b>access</b>(2) performs checks using the real user and group
+    identifiers of the process, <b>euidaccess</b>() uses the effective
+    identifiers.</p>
+<p class="Pp"><i>mode</i> is a mask consisting of one or more of <b>R_OK</b>,
+    <b>W_OK</b>, <b>X_OK</b>, and <b>F_OK</b>, with the same meanings as for
+    <b>access</b>(2).</p>
+<p class="Pp"><b>eaccess</b>() is a synonym for <b>euidaccess</b>(), provided
+    for compatibility with some other systems.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success (all requested permissions granted), zero is returned.
+    On error (at least one bit in <i>mode</i> asked for a permission that is
+    denied, or some other error occurred), -1 is returned, and <i>errno</i> is
+    set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">As for <b>access</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>euidaccess (), eaccess ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>eaccess</b>() function was added in glibc 2.4.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These functions are nonstandard. Some other systems have an
+    <b>eaccess</b>() function.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp"><i>Warning</i>: Using this function to check a process's
+    permissions on a file before performing some operation based on that
+    information leads to race conditions: the file permissions may change
+    between the two steps. Generally, it is safer just to attempt the desired
+    operation and handle any permission error that occurs.</p>
+<p class="Pp">This function always dereferences symbolic links. If you need to
+    check the permissions on a symbolic link, use <b>faccessat</b>(2) with the
+    flags <b>AT_EACCESS</b> and <b>AT_SYMLINK_NOFOLLOW</b>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>access</b>(2), <b>chmod</b>(2), <b>chown</b>(2),
+    <b>faccessat</b>(2), <b>open</b>(2), <b>setgid</b>(2), <b>setuid</b>(2),
+    <b>stat</b>(2), <b>credentials</b>(7), <b>path_resolution</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,646 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/6a2443ffca821cf0ef72ce0ba6037314d94f5eaa">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>open_by_handle_at(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">open_by_handle_at(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">open_by_handle_at(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">name_to_handle_at, open_by_handle_at - obtain handle for a
+    pathname and open file via a handle</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#define _GNU_SOURCE</b>         /* See feature_test_macros(7) */
+<b>#include &lt;fcntl.h&gt;</b></pre>
+<pre><b>int name_to_handle_at(int </b><i>dirfd</i><b>, const char *</b><i>pathname</i><b>,</b>
+<b>                      struct file_handle *</b><i>handle</i><b>,</b>
+<b>                      int *</b><i>mount_id</i><b>, int </b><i>flags</i><b>);</b>
+<b>int open_by_handle_at(int </b><i>mount_fd</i><b>, struct file_handle *</b><i>handle</i><b>,</b>
+<b>                      int </b><i>flags</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>name_to_handle_at</b>() and <b>open_by_handle_at</b>()
+    system calls split the functionality of <b>openat</b>(2) into two parts:
+    <b>name_to_handle_at</b>() returns an opaque handle that corresponds to a
+    specified file; <b>open_by_handle_at</b>() opens the file corresponding to a
+    handle returned by a previous call to <b>name_to_handle_at</b>() and returns
+    an open file descriptor.</p>
+<section class="Ss">
+<h2 class="Ss" id="name_to_handle_at()"><a class="permalink" href="#name_to_handle_at()">name_to_handle_at()</a></h2>
+<p class="Pp">The <b>name_to_handle_at</b>() system call returns a file handle
+    and a mount ID corresponding to the file specified by the <i>dirfd</i> and
+    <i>pathname</i> arguments. The file handle is returned via the argument
+    <i>handle</i>, which is a pointer to a structure of the following form:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct file_handle {
+<br>
+    unsigned int  handle_bytes;   /* Size of f_handle [in, out] */
+<br>
+    int           handle_type;    /* Handle type [out] */
+<br>
+    unsigned char f_handle[0];    /* File identifier (sized by
+<br>
+                                     caller) [out] */
+};
+</pre>
+<br>
+<p class="Pp">It is the caller's responsibility to allocate the structure with a
+    size large enough to hold the handle returned in <i>f_handle</i>. Before the
+    call, the <i>handle_bytes</i> field should be initialized to contain the
+    allocated size for <i>f_handle</i>. (The constant <b>MAX_HANDLE_SZ</b>,
+    defined in <i>&lt;fcntl.h&gt;</i>, specifies the maximum expected size for a
+    file handle. It is not a guaranteed upper limit as future filesystems may
+    require more space.) Upon successful return, the <i>handle_bytes</i> field
+    is updated to contain the number of bytes actually written to
+    <i>f_handle</i>.</p>
+<p class="Pp">The caller can discover the required size for the
+    <i>file_handle</i> structure by making a call in which
+    <i>handle-&gt;handle_bytes</i> is zero; in this case, the call fails with
+    the error <b>EOVERFLOW</b> and <i>handle-&gt;handle_bytes</i> is set to
+    indicate the required size; the caller can then use this information to
+    allocate a structure of the correct size (see EXAMPLES below). Some care is
+    needed here as <b>EOVERFLOW</b> can also indicate that no file handle is
+    available for this particular name in a filesystem which does normally
+    support file-handle lookup. This case can be detected when the
+    <b>EOVERFLOW</b> error is returned without <i>handle_bytes</i> being
+    increased.</p>
+<p class="Pp">Other than the use of the <i>handle_bytes</i> field, the caller
+    should treat the <i>file_handle</i> structure as an opaque data type: the
+    <i>handle_type</i> and <i>f_handle</i> fields are needed only by a
+    subsequent call to <b>open_by_handle_at</b>().</p>
+<p class="Pp">The <i>flags</i> argument is a bit mask constructed by ORing
+    together zero or more of <b>AT_EMPTY_PATH</b> and <b>AT_SYMLINK_FOLLOW</b>,
+    described below.</p>
+<p class="Pp">Together, the <i>pathname</i> and <i>dirfd</i> arguments identify
+    the file for which a handle is to be obtained. There are four distinct
+    cases:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>If <i>pathname</i> is a nonempty string containing an absolute pathname,
+      then a handle is returned for the file referred to by that pathname. In
+      this case, <i>dirfd</i> is ignored.</dd>
+  <dt>•</dt>
+  <dd>If <i>pathname</i> is a nonempty string containing a relative pathname and
+      <i>dirfd</i> has the special value <b>AT_FDCWD</b>, then <i>pathname</i>
+      is interpreted relative to the current working directory of the caller,
+      and a handle is returned for the file to which it refers.</dd>
+  <dt>•</dt>
+  <dd>If <i>pathname</i> is a nonempty string containing a relative pathname and
+      <i>dirfd</i> is a file descriptor referring to a directory, then
+      <i>pathname</i> is interpreted relative to the directory referred to by
+      <i>dirfd</i>, and a handle is returned for the file to which it refers.
+      (See <b>openat</b>(2) for an explanation of why "directory file
+      descriptors" are useful.)</dd>
+  <dt>•</dt>
+  <dd>If <i>pathname</i> is an empty string and <i>flags</i> specifies the value
+      <b>AT_EMPTY_PATH</b>, then <i>dirfd</i> can be an open file descriptor
+      referring to any type of file, or <b>AT_FDCWD</b>, meaning the current
+      working directory, and a handle is returned for the file to which it
+      refers.</dd>
+</dl>
+<p class="Pp">The <i>mount_id</i> argument returns an identifier for the
+    filesystem mount that corresponds to <i>pathname</i>. This corresponds to
+    the first field in one of the records in <i>/proc/self/mountinfo</i>.
+    Opening the pathname in the fifth field of that record yields a file
+    descriptor for the mount point; that file descriptor can be used in a
+    subsequent call to <b>open_by_handle_at</b>(). <i>mount_id</i> is returned
+    both for a successful call and for a call that results in the error
+    <b>EOVERFLOW</b>.</p>
+<p class="Pp">By default, <b>name_to_handle_at</b>() does not dereference
+    <i>pathname</i> if it is a symbolic link, and thus returns a handle for the
+    link itself. If <b>AT_SYMLINK_FOLLOW</b> is specified in <i>flags</i>,
+    <i>pathname</i> is dereferenced if it is a symbolic link (so that the call
+    returns a handle for the file referred to by the link).</p>
+<p class="Pp"><b>name_to_handle_at</b>() does not trigger a mount when the final
+    component of the pathname is an automount point. When a filesystem supports
+    both file handles and automount points, a <b>name_to_handle_at</b>() call on
+    an automount point will return with error <b>EOVERFLOW</b> without having
+    increased <i>handle_bytes</i>. This can happen since Linux 4.13 with NFS
+    when accessing a directory which is on a separate filesystem on the server.
+    In this case, the automount can be triggered by adding a "/" to
+    the end of the pathname.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="open_by_handle_at()"><a class="permalink" href="#open_by_handle_at()">open_by_handle_at()</a></h2>
+<p class="Pp">The <b>open_by_handle_at</b>() system call opens the file referred
+    to by <i>handle</i>, a file handle returned by a previous call to
+    <b>name_to_handle_at</b>().</p>
+<p class="Pp">The <i>mount_fd</i> argument is a file descriptor for any object
+    (file, directory, etc.) in the mounted filesystem with respect to which
+    <i>handle</i> should be interpreted. The special value <b>AT_FDCWD</b> can
+    be specified, meaning the current working directory of the caller.</p>
+<p class="Pp">The <i>flags</i> argument is as for <b>open</b>(2). If
+    <i>handle</i> refers to a symbolic link, the caller must specify the
+    <b>O_PATH</b> flag, and the symbolic link is not dereferenced; the
+    <b>O_NOFOLLOW</b> flag, if specified, is ignored.</p>
+<p class="Pp">The caller must have the <b>CAP_DAC_READ_SEARCH</b> capability to
+    invoke <b>open_by_handle_at</b>().</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>name_to_handle_at</b>() returns 0, and
+    <b>open_by_handle_at</b>() returns a file descriptor (a nonnegative
+    integer).</p>
+<p class="Pp">In the event of an error, both system calls return -1 and set
+    <i>errno</i> to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp"><b>name_to_handle_at</b>() and <b>open_by_handle_at</b>() can fail
+    for the same errors as <b>openat</b>(2). In addition, they can fail with the
+    errors noted below.</p>
+<p class="Pp"><b>name_to_handle_at</b>() can fail with the following errors:</p>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>pathname</i>, <i>mount_id</i>, or <i>handle</i> points outside your
+      accessible address space.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>flags</i> includes an invalid bit value.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd><i>handle-&gt;handle_bytes</i> is greater than <b>MAX_HANDLE_SZ</b>.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd><i>pathname</i> is an empty string, but <b>AT_EMPTY_PATH</b> was not
+      specified in <i>flags</i>.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>The file descriptor supplied in <i>dirfd</i> does not refer to a
+      directory, and it is not the case that both <i>flags</i> includes
+      <b>AT_EMPTY_PATH</b> and <i>pathname</i> is an empty string.</dd>
+  <dt id="EOPNOTSUPP"><a class="permalink" href="#EOPNOTSUPP"><b>EOPNOTSUPP</b></a></dt>
+  <dd>The filesystem does not support decoding of a pathname to a file
+    handle.</dd>
+  <dt id="EOVERFLOW"><a class="permalink" href="#EOVERFLOW"><b>EOVERFLOW</b></a></dt>
+  <dd>The <i>handle-&gt;handle_bytes</i> value passed into the call was too
+      small. When this error occurs, <i>handle-&gt;handle_bytes</i> is updated
+      to indicate the required size for the handle.</dd>
+</dl>
+<p class="Pp"><b>open_by_handle_at</b>() can fail with the following errors:</p>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd><i>mount_fd</i> is not an open file descriptor.</dd>
+  <dt id="EBADF~2"><a class="permalink" href="#EBADF~2"><b>EBADF</b></a></dt>
+  <dd><i>pathname</i> is relative but <i>dirfd</i> is neither <b>AT_FDCWD</b>
+      nor a valid file descriptor.</dd>
+  <dt id="EFAULT~2"><a class="permalink" href="#EFAULT~2"><b>EFAULT</b></a></dt>
+  <dd><i>handle</i> points outside your accessible address space.</dd>
+  <dt id="EINVAL~3"><a class="permalink" href="#EINVAL~3"><b>EINVAL</b></a></dt>
+  <dd><i>handle-&gt;handle_bytes</i> is greater than <b>MAX_HANDLE_SZ</b> or is
+      equal to zero.</dd>
+  <dt id="ELOOP"><a class="permalink" href="#ELOOP"><b>ELOOP</b></a></dt>
+  <dd><i>handle</i> refers to a symbolic link, but <b>O_PATH</b> was not
+      specified in <i>flags</i>.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The caller does not have the <b>CAP_DAC_READ_SEARCH</b> capability.</dd>
+  <dt id="ESTALE"><a class="permalink" href="#ESTALE"><b>ESTALE</b></a></dt>
+  <dd>The specified <i>handle</i> is not valid. This error will occur if, for
+      example, the file has been deleted.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">These system calls first appeared in Linux 2.6.39. Library support
+    is provided since glibc 2.14.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These system calls are nonstandard Linux extensions.</p>
+<p class="Pp">FreeBSD has a broadly similar pair of system calls in the form of
+    <b>getfh</b>() and <b>openfh</b>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">A file handle can be generated in one process using
+    <b>name_to_handle_at</b>() and later used in a different process that calls
+    <b>open_by_handle_at</b>().</p>
+<p class="Pp">Some filesystem don't support the translation of pathnames to file
+    handles, for example, <i>/proc</i>, <i>/sys</i>, and various network
+    filesystems.</p>
+<p class="Pp">A file handle may become invalid ("stale") if a file is
+    deleted, or for other filesystem-specific reasons. Invalid handles are
+    notified by an <b>ESTALE</b> error from <b>open_by_handle_at</b>().</p>
+<p class="Pp">These system calls are designed for use by user-space file
+    servers. For example, a user-space NFS server might generate a file handle
+    and pass it to an NFS client. Later, when the client wants to open the file,
+    it could pass the handle back to the server. This sort of functionality
+    allows a user-space file server to operate in a stateless fashion with
+    respect to the files it serves.</p>
+<p class="Pp">If <i>pathname</i> refers to a symbolic link and <i>flags</i> does
+    not specify <b>AT_SYMLINK_FOLLOW</b>, then <b>name_to_handle_at</b>()
+    returns a handle for the link (rather than the file to which it refers). The
+    process receiving the handle can later perform operations on the symbolic
+    link by converting the handle to a file descriptor using
+    <b>open_by_handle_at</b>() with the <b>O_PATH</b> flag, and then passing the
+    file descriptor as the <i>dirfd</i> argument in system calls such as
+    <b>readlinkat</b>(2) and <b>fchownat</b>(2).</p>
+<section class="Ss">
+<h2 class="Ss" id="Obtaining_a_persistent_filesystem_ID"><a class="permalink" href="#Obtaining_a_persistent_filesystem_ID">Obtaining
+  a persistent filesystem ID</a></h2>
+<p class="Pp">The mount IDs in <i>/proc/self/mountinfo</i> can be reused as
+    filesystems are unmounted and mounted. Therefore, the mount ID returned by
+    <b>name_to_handle_at</b>() (in <i>*mount_id</i>) should not be treated as a
+    persistent identifier for the corresponding mounted filesystem. However, an
+    application can use the information in the <i>mountinfo</i> record that
+    corresponds to the mount ID to derive a persistent identifier.</p>
+<p class="Pp">For example, one can use the device name in the fifth field of the
+    <i>mountinfo</i> record to search for the corresponding device UUID via the
+    symbolic links in <i>/dev/disks/by-uuid</i>. (A more comfortable way of
+    obtaining the UUID is to use the <b>libblkid</b>(3) library.) That process
+    can then be reversed, using the UUID to look up the device name, and then
+    obtaining the corresponding mount point, in order to produce the
+    <i>mount_fd</i> argument used by <b>open_by_handle_at</b>().</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The two programs below demonstrate the use of
+    <b>name_to_handle_at</b>() and <b>open_by_handle_at</b>(). The first program
+    (<i>t_name_to_handle_at.c</i>) uses <b>name_to_handle_at</b>() to obtain the
+    file handle and mount ID for the file specified in its command-line
+    argument; the handle and mount ID are written to standard output.</p>
+<p class="Pp">The second program (<i>t_open_by_handle_at.c</i>) reads a mount ID
+    and file handle from standard input. The program then employs
+    <b>open_by_handle_at</b>() to open the file using that handle. If an
+    optional command-line argument is supplied, then the <i>mount_fd</i>
+    argument for <b>open_by_handle_at</b>() is obtained by opening the directory
+    named in that argument. Otherwise, <i>mount_fd</i> is obtained by scanning
+    <i>/proc/self/mountinfo</i> to find a record whose mount ID matches the
+    mount ID read from standard input, and the mount directory specified in that
+    record is opened. (These programs do not deal with the fact that mount IDs
+    are not persistent.)</p>
+<p class="Pp">The following shell session demonstrates the use of these two
+    programs:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>echo 'Can you please think about it?' &gt; cecilia.txt</b>
+$ <b>./t_name_to_handle_at cecilia.txt &gt; fh</b>
+$ <b>./t_open_by_handle_at &lt; fh</b>
+open_by_handle_at: Operation not permitted
+$ <b>sudo ./t_open_by_handle_at &lt; fh</b>      # Need CAP_SYS_ADMIN
+Read 31 bytes
+$ <b>rm cecilia.txt</b>
+</pre>
+<br>
+<p class="Pp">Now we delete and (quickly) re-create the file so that it has the
+    same content and (by chance) the same inode. Nevertheless,
+    <b>open_by_handle_at</b>() recognizes that the original file referred to by
+    the file handle no longer exists.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>stat --printf="%i\n" cecilia.txt</b>     # Display inode number
+4072121
+$ <b>rm cecilia.txt</b>
+$ <b>echo 'Can you please think about it?' &gt; cecilia.txt</b>
+$ <b>stat --printf="%i\n" cecilia.txt</b>     # Check inode number
+4072121
+$ <b>sudo ./t_open_by_handle_at &lt; fh</b>
+open_by_handle_at: Stale NFS file handle
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source:_t_name_to_handle_at.c"><a class="permalink" href="#Program_source:_t_name_to_handle_at.c">Program
+  source: t_name_to_handle_at.c</a></h2>
+<p class="Pp"></p>
+<pre>#define _GNU_SOURCE
+#include &lt;err.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+int
+main(int argc, char *argv[])
+{
+<br>
+    int                 mount_id, fhsize, flags, dirfd;
+<br>
+    char                *pathname;
+<br>
+    struct file_handle  *fhp;
+<br>
+    if (argc != 2) {
+<br>
+        fprintf(stderr, "Usage: %s pathname\n", argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    pathname = argv[1];
+<br>
+    /* Allocate file_handle structure. */
+<br>
+    fhsize = sizeof(*fhp);
+<br>
+    fhp = malloc(fhsize);
+<br>
+    if (fhp == NULL)
+<br>
+        err(EXIT_FAILURE, "malloc");
+<br>
+    /* Make an initial call to name_to_handle_at() to discover
+<br>
+       the size required for file handle. */
+<br>
+    dirfd = AT_FDCWD;           /* For name_to_handle_at() calls */
+<br>
+    flags = 0;                  /* For name_to_handle_at() calls */
+<br>
+    fhp-&gt;handle_bytes = 0;
+<br>
+    if (name_to_handle_at(dirfd, pathname, fhp,
+<br>
+                          &amp;mount_id, flags) != -1
+<br>
+        || errno != EOVERFLOW)
+<br>
+    {
+<br>
+        fprintf(stderr, "Unexpected result from name_to_handle_at()\n");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    /* Reallocate file_handle structure with correct size. */
+<br>
+    fhsize = sizeof(*fhp) + fhp-&gt;handle_bytes;
+<br>
+    fhp = realloc(fhp, fhsize);         /* Copies fhp-&gt;handle_bytes */
+<br>
+    if (fhp == NULL)
+<br>
+        err(EXIT_FAILURE, "realloc");
+<br>
+    /* Get file handle from pathname supplied on command line. */
+<br>
+    if (name_to_handle_at(dirfd, pathname, fhp, &amp;mount_id, flags) == -1)
+<br>
+        err(EXIT_FAILURE, "name_to_handle_at");
+<br>
+    /* Write mount ID, file handle size, and file handle to stdout,
+<br>
+       for later reuse by t_open_by_handle_at.c. */
+<br>
+    printf("%d\n", mount_id);
+<br>
+    printf("%u %d   ", fhp-&gt;handle_bytes, fhp-&gt;handle_type);
+<br>
+    for (size_t j = 0; j &lt; fhp-&gt;handle_bytes; j++)
+<br>
+        printf(" %02x", fhp-&gt;f_handle[j]);
+<br>
+    printf("\n");
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Program_source:_t_open_by_handle_at.c"><a class="permalink" href="#Program_source:_t_open_by_handle_at.c">Program
+  source: t_open_by_handle_at.c</a></h2>
+<p class="Pp"></p>
+<pre>#define _GNU_SOURCE
+#include &lt;err.h&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;limits.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+/* Scan /proc/self/mountinfo to find the line whose mount ID matches
+<br>
+   'mount_id'. (An easier way to do this is to install and use the
+<br>
+   'libmount' library provided by the 'util-linux' project.)
+<br>
+   Open the corresponding mount path and return the resulting file
+<br>
+   descriptor. */
+static int
+open_mount_path_by_id(int mount_id)
+{
+<br>
+    int      mi_mount_id, found;
+<br>
+    char     mount_path[PATH_MAX];
+<br>
+    char     *linep;
+<br>
+    FILE     *fp;
+<br>
+    size_t   lsize;
+<br>
+    ssize_t  nread;
+<br>
+    fp = fopen("/proc/self/mountinfo", "r");
+<br>
+    if (fp == NULL)
+<br>
+        err(EXIT_FAILURE, "fopen");
+<br>
+    found = 0;
+<br>
+    linep = NULL;
+<br>
+    while (!found) {
+<br>
+        nread = getline(&amp;linep, &amp;lsize, fp);
+<br>
+        if (nread == -1)
+<br>
+            break;
+<br>
+        nread = sscanf(linep, "%d %*d %*s %*s %s",
+<br>
+                       &amp;mi_mount_id, mount_path);
+<br>
+        if (nread != 2) {
+<br>
+            fprintf(stderr, "Bad sscanf()\n");
+<br>
+            exit(EXIT_FAILURE);
+<br>
+        }
+<br>
+        if (mi_mount_id == mount_id)
+<br>
+            found = 1;
+<br>
+    }
+<br>
+    free(linep);
+<br>
+    fclose(fp);
+<br>
+    if (!found) {
+<br>
+        fprintf(stderr, "Could not find mount point\n");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    return open(mount_path, O_RDONLY);
+}
+int
+main(int argc, char *argv[])
+{
+<br>
+    int                 mount_id, fd, mount_fd, handle_bytes;
+<br>
+    char                buf[1000];
+#define LINE_SIZE 100
+<br>
+    char                line1[LINE_SIZE], line2[LINE_SIZE];
+<br>
+    char                *nextp;
+<br>
+    ssize_t             nread;
+<br>
+    struct file_handle  *fhp;
+<br>
+    if ((argc &gt; 1 &amp;&amp; strcmp(argv[1], "--help") == 0) || argc &gt; 2) {
+<br>
+        fprintf(stderr, "Usage: %s [mount-path]\n", argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    /* Standard input contains mount ID and file handle information:
+<br>
+         Line 1: &lt;mount_id&gt;
+<br>
+         Line 2: &lt;handle_bytes&gt; &lt;handle_type&gt;   &lt;bytes of handle in hex&gt;
+<br>
+    */
+<br>
+    if (fgets(line1, sizeof(line1), stdin) == NULL ||
+<br>
+        fgets(line2, sizeof(line2), stdin) == NULL)
+<br>
+    {
+<br>
+        fprintf(stderr, "Missing mount_id / file handle\n");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    mount_id = atoi(line1);
+<br>
+    handle_bytes = strtoul(line2, &amp;nextp, 0);
+<br>
+    /* Given handle_bytes, we can now allocate file_handle structure. */
+<br>
+    fhp = malloc(sizeof(*fhp) + handle_bytes);
+<br>
+    if (fhp == NULL)
+<br>
+        err(EXIT_FAILURE, "malloc");
+<br>
+    fhp-&gt;handle_bytes = handle_bytes;
+<br>
+    fhp-&gt;handle_type = strtoul(nextp, &amp;nextp, 0);
+<br>
+    for (size_t j = 0; j &lt; fhp-&gt;handle_bytes; j++)
+<br>
+        fhp-&gt;f_handle[j] = strtoul(nextp, &amp;nextp, 16);
+<br>
+    /* Obtain file descriptor for mount point, either by opening
+<br>
+       the pathname specified on the command line, or by scanning
+<br>
+       /proc/self/mounts to find a mount that matches the 'mount_id'
+<br>
+       that we received from stdin. */
+<br>
+    if (argc &gt; 1)
+<br>
+        mount_fd = open(argv[1], O_RDONLY);
+<br>
+    else
+<br>
+        mount_fd = open_mount_path_by_id(mount_id);
+<br>
+    if (mount_fd == -1)
+<br>
+        err(EXIT_FAILURE, "opening mount fd");
+<br>
+    /* Open file using handle and mount point. */
+<br>
+    fd = open_by_handle_at(mount_fd, fhp, O_RDONLY);
+<br>
+    if (fd == -1)
+<br>
+        err(EXIT_FAILURE, "open_by_handle_at");
+<br>
+    /* Try reading a few bytes from the file. */
+<br>
+    nread = read(fd, buf, sizeof(buf));
+<br>
+    if (nread == -1)
+<br>
+        err(EXIT_FAILURE, "read");
+<br>
+    printf("Read %zd bytes\n", nread);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>open</b>(2), <b>libblkid</b>(3), <b>blkid</b>(8),
+    <b>findfs</b>(8), <b>mount</b>(8)</p>
+<p class="Pp">The <i>libblkid</i> and <i>libmount</i> documentation in the
+    latest <i>util-linux</i> release at
+    <a class="Lk" href="https://www.kernel.org/pub/linux/utils/util-linux/">https://www.kernel.org/pub/linux/utils/util-linux/</a></p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

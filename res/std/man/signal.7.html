@@ -1,0 +1,1218 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 1993 by Thomas Koenig (ig25@rz.uni-karlsruhe.de)
+   and Copyright (c) 2002, 2006, 2020 by Michael Kerrisk <mtk.manpages@gmail.com>
+   and Copyright (c) 2008 Linux Foundation, written by Michael Kerrisk
+       <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Modified Sat Jul 24 17:34:08 1993 by Rik Faith (faith@cs.unc.edu)
+   Modified Sun Jan  7 01:41:27 1996 by Andries Brouwer (aeb@cwi.nl)
+   Modified Sun Apr 14 12:02:29 1996 by Andries Brouwer (aeb@cwi.nl)
+   Modified Sat Nov 13 16:28:23 1999 by Andries Brouwer (aeb@cwi.nl)
+   Modified 10 Apr 2002, by Michael Kerrisk <mtk.manpages@gmail.com>
+   Modified  7 Jun 2002, by Michael Kerrisk <mtk.manpages@gmail.com>
+  	Added information on real-time signals
+   Modified 13 Jun 2002, by Michael Kerrisk <mtk.manpages@gmail.com>
+  	Noted that SIGSTKFLT is in fact unused
+   2004-12-03, Modified mtk, added notes on RLIMIT_SIGPENDING
+   2006-04-24, mtk, Added text on changing signal dispositions,
+  		signal mask, and pending signals.
+   2008-07-04, mtk:
+       Added section on system call restarting (SA_RESTART)
+       Added section on stop/cont signals interrupting syscalls.
+   2008-10-05, mtk: various additions
+   --><head>
+<meta name="dc.identifier" content="res/4891af7fa1ce00fcf98416c6e4443d9aa3657f16">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>signal(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">signal(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">signal(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">signal - overview of signals</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">Linux supports both POSIX reliable signals (hereinafter
+    "standard signals") and POSIX real-time signals.</p>
+<section class="Ss">
+<h2 class="Ss" id="Signal_dispositions"><a class="permalink" href="#Signal_dispositions">Signal
+  dispositions</a></h2>
+<p class="Pp">Each signal has a current <i>disposition</i>, which determines how
+    the process behaves when it is delivered the signal.</p>
+<p class="Pp">The entries in the "Action" column of the table below
+    specify the default disposition for each signal, as follows:</p>
+<dl class="Bl-tag">
+  <dt id="Term"><a class="permalink" href="#Term">Term</a></dt>
+  <dd>Default action is to terminate the process.</dd>
+  <dt id="Ign"><a class="permalink" href="#Ign">Ign</a></dt>
+  <dd>Default action is to ignore the signal.</dd>
+  <dt id="Core"><a class="permalink" href="#Core">Core</a></dt>
+  <dd>Default action is to terminate the process and dump core (see
+      <b>core</b>(5)).</dd>
+  <dt id="Stop"><a class="permalink" href="#Stop">Stop</a></dt>
+  <dd>Default action is to stop the process.</dd>
+  <dt id="Cont"><a class="permalink" href="#Cont">Cont</a></dt>
+  <dd>Default action is to continue the process if it is currently stopped.</dd>
+</dl>
+<p class="Pp">A process can change the disposition of a signal using
+    <b>sigaction</b>(2) or <b>signal</b>(2). (The latter is less portable when
+    establishing a signal handler; see <b>signal</b>(2) for details.) Using
+    these system calls, a process can elect one of the following behaviors to
+    occur on delivery of the signal: perform the default action; ignore the
+    signal; or catch the signal with a <i>signal handler</i>, a
+    programmer-defined function that is automatically invoked when the signal is
+    delivered.</p>
+<p class="Pp">By default, a signal handler is invoked on the normal process
+    stack. It is possible to arrange that the signal handler uses an alternate
+    stack; see <b>sigaltstack</b>(2) for a discussion of how to do this and when
+    it might be useful.</p>
+<p class="Pp">The signal disposition is a per-process attribute: in a
+    multithreaded application, the disposition of a particular signal is the
+    same for all threads.</p>
+<p class="Pp">A child created via <b>fork</b>(2) inherits a copy of its parent's
+    signal dispositions. During an <b>execve</b>(2), the dispositions of handled
+    signals are reset to the default; the dispositions of ignored signals are
+    left unchanged.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Sending_a_signal"><a class="permalink" href="#Sending_a_signal">Sending
+  a signal</a></h2>
+<p class="Pp">The following system calls and library functions allow the caller
+    to send a signal:</p>
+<dl class="Bl-tag">
+  <dt id="raise"><a class="permalink" href="#raise"><b>raise</b>(3)</a></dt>
+  <dd>Sends a signal to the calling thread.</dd>
+  <dt id="kill"><a class="permalink" href="#kill"><b>kill</b>(2)</a></dt>
+  <dd>Sends a signal to a specified process, to all members of a specified
+      process group, or to all processes on the system.</dd>
+  <dt id="pidfd_send_signal"><a class="permalink" href="#pidfd_send_signal"><b>pidfd_send_signal</b>(2)</a></dt>
+  <dd>Sends a signal to a process identified by a PID file descriptor.</dd>
+  <dt id="killpg"><a class="permalink" href="#killpg"><b>killpg</b>(3)</a></dt>
+  <dd>Sends a signal to all of the members of a specified process group.</dd>
+  <dt id="pthread_kill"><a class="permalink" href="#pthread_kill"><b>pthread_kill</b>(3)</a></dt>
+  <dd>Sends a signal to a specified POSIX thread in the same process as the
+      caller.</dd>
+  <dt id="tgkill"><a class="permalink" href="#tgkill"><b>tgkill</b>(2)</a></dt>
+  <dd>Sends a signal to a specified thread within a specific process. (This is
+      the system call used to implement <b>pthread_kill</b>(3).)</dd>
+  <dt id="sigqueue"><a class="permalink" href="#sigqueue"><b>sigqueue</b>(3)</a></dt>
+  <dd>Sends a real-time signal with accompanying data to a specified
+    process.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Waiting_for_a_signal_to_be_caught"><a class="permalink" href="#Waiting_for_a_signal_to_be_caught">Waiting
+  for a signal to be caught</a></h2>
+<p class="Pp">The following system calls suspend execution of the calling thread
+    until a signal is caught (or an unhandled signal terminates the
+  process):</p>
+<dl class="Bl-tag">
+  <dt id="pause"><a class="permalink" href="#pause"><b>pause</b>(2)</a></dt>
+  <dd>Suspends execution until any signal is caught.</dd>
+  <dt id="sigsuspend"><a class="permalink" href="#sigsuspend"><b>sigsuspend</b>(2)</a></dt>
+  <dd>Temporarily changes the signal mask (see below) and suspends execution
+      until one of the unmasked signals is caught.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Synchronously_accepting_a_signal"><a class="permalink" href="#Synchronously_accepting_a_signal">Synchronously
+  accepting a signal</a></h2>
+<p class="Pp">Rather than asynchronously catching a signal via a signal handler,
+    it is possible to synchronously accept the signal, that is, to block
+    execution until the signal is delivered, at which point the kernel returns
+    information about the signal to the caller. There are two general ways to do
+    this:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><b>sigwaitinfo</b>(2), <b>sigtimedwait</b>(2), and <b>sigwait</b>(3)
+      suspend execution until one of the signals in a specified set is
+      delivered. Each of these calls returns information about the delivered
+      signal.</dd>
+  <dt>•</dt>
+  <dd><b>signalfd</b>(2) returns a file descriptor that can be used to read
+      information about signals that are delivered to the caller. Each
+      <b>read</b>(2) from this file descriptor blocks until one of the signals
+      in the set specified in the <b>signalfd</b>(2) call is delivered to the
+      caller. The buffer returned by <b>read</b>(2) contains a structure
+      describing the signal.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Signal_mask_and_pending_signals"><a class="permalink" href="#Signal_mask_and_pending_signals">Signal
+  mask and pending signals</a></h2>
+<p class="Pp">A signal may be <i>blocked</i>, which means that it will not be
+    delivered until it is later unblocked. Between the time when it is generated
+    and when it is delivered a signal is said to be <i>pending</i>.</p>
+<p class="Pp">Each thread in a process has an independent <i>signal mask</i>,
+    which indicates the set of signals that the thread is currently blocking. A
+    thread can manipulate its signal mask using <b>pthread_sigmask</b>(3). In a
+    traditional single-threaded application, <b>sigprocmask</b>(2) can be used
+    to manipulate the signal mask.</p>
+<p class="Pp">A child created via <b>fork</b>(2) inherits a copy of its parent's
+    signal mask; the signal mask is preserved across <b>execve</b>(2).</p>
+<p class="Pp">A signal may be process-directed or thread-directed. A
+    process-directed signal is one that is targeted at (and thus pending for)
+    the process as a whole. A signal may be process-directed because it was
+    generated by the kernel for reasons other than a hardware exception, or
+    because it was sent using <b>kill</b>(2) or <b>sigqueue</b>(3). A
+    thread-directed signal is one that is targeted at a specific thread. A
+    signal may be thread-directed because it was generated as a consequence of
+    executing a specific machine-language instruction that triggered a hardware
+    exception (e.g., <b>SIGSEGV</b> for an invalid memory access, or
+    <b>SIGFPE</b> for a math error), or because it was targeted at a specific
+    thread using interfaces such as <b>tgkill</b>(2) or
+  <b>pthread_kill</b>(3).</p>
+<p class="Pp">A process-directed signal may be delivered to any one of the
+    threads that does not currently have the signal blocked. If more than one of
+    the threads has the signal unblocked, then the kernel chooses an arbitrary
+    thread to which to deliver the signal.</p>
+<p class="Pp">A thread can obtain the set of signals that it currently has
+    pending using <b>sigpending</b>(2). This set will consist of the union of
+    the set of pending process-directed signals and the set of signals pending
+    for the calling thread.</p>
+<p class="Pp">A child created via <b>fork</b>(2) initially has an empty pending
+    signal set; the pending signal set is preserved across an
+  <b>execve</b>(2).</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Execution_of_signal_handlers"><a class="permalink" href="#Execution_of_signal_handlers">Execution
+  of signal handlers</a></h2>
+<p class="Pp">Whenever there is a transition from kernel-mode to user-mode
+    execution (e.g., on return from a system call or scheduling of a thread onto
+    the CPU), the kernel checks whether there is a pending unblocked signal for
+    which the process has established a signal handler. If there is such a
+    pending signal, the following steps occur:</p>
+<dl class="Bl-tag">
+  <dt>(1)</dt>
+  <dd>The kernel performs the necessary preparatory steps for execution of the
+      signal handler:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>(1.1)</dt>
+  <dd>The signal is removed from the set of pending signals.</dd>
+  <dt>(1.2)</dt>
+  <dd>If the signal handler was installed by a call to <b>sigaction</b>(2) that
+      specified the <b>SA_ONSTACK</b> flag and the thread has defined an
+      alternate signal stack (using <b>sigaltstack</b>(2)), then that stack is
+      installed.</dd>
+  <dt>(1.3)</dt>
+  <dd>Various pieces of signal-related context are saved into a special frame
+      that is created on the stack. The saved information includes:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>the program counter register (i.e., the address of the next instruction in
+      the main program that should be executed when the signal handler
+    returns);</dd>
+  <dt>•</dt>
+  <dd>architecture-specific register state required for resuming the interrupted
+      program;</dd>
+  <dt>•</dt>
+  <dd>the thread's current signal mask;</dd>
+  <dt>•</dt>
+  <dd>the thread's alternate signal stack settings.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>(If the signal handler was installed using the <b>sigaction</b>(2)
+      <b>SA_SIGINFO</b> flag, then the above information is accessible via the
+      <i>ucontext_t</i> object that is pointed to by the third argument of the
+      signal handler.)</dd>
+  <dt>(1.4)</dt>
+  <dd>Any signals specified in <i>act-&gt;sa_mask</i> when registering the
+      handler with <b>sigprocmask</b>(2) are added to the thread's signal mask.
+      The signal being delivered is also added to the signal mask, unless
+      <b>SA_NODEFER</b> was specified when registering the handler. These
+      signals are thus blocked while the handler executes.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt>(2)</dt>
+  <dd>The kernel constructs a frame for the signal handler on the stack. The
+      kernel sets the program counter for the thread to point to the first
+      instruction of the signal handler function, and configures the return
+      address for that function to point to a piece of user-space code known as
+      the signal trampoline (described in <b>sigreturn</b>(2)).</dd>
+  <dt>(3)</dt>
+  <dd>The kernel passes control back to user-space, where execution commences at
+      the start of the signal handler function.</dd>
+  <dt>(4)</dt>
+  <dd>When the signal handler returns, control passes to the signal trampoline
+      code.</dd>
+  <dt>(5)</dt>
+  <dd>The signal trampoline calls <b>sigreturn</b>(2), a system call that uses
+      the information in the stack frame created in step 1 to restore the thread
+      to its state before the signal handler was called. The thread's signal
+      mask and alternate signal stack settings are restored as part of this
+      procedure. Upon completion of the call to <b>sigreturn</b>(2), the kernel
+      transfers control back to user space, and the thread recommences execution
+      at the point where it was interrupted by the signal handler.</dd>
+</dl>
+<p class="Pp">Note that if the signal handler does not return (e.g., control is
+    transferred out of the handler using <b>siglongjmp</b>(3), or the handler
+    executes a new program with <b>execve</b>(2)), then the final step is not
+    performed. In particular, in such scenarios it is the programmer's
+    responsibility to restore the state of the signal mask (using
+    <b>sigprocmask</b>(2)), if it is desired to unblock the signals that were
+    blocked on entry to the signal handler. (Note that <b>siglongjmp</b>(3) may
+    or may not restore the signal mask, depending on the <i>savesigs</i> value
+    that was specified in the corresponding call to <b>sigsetjmp</b>(3).)</p>
+<p class="Pp">From the kernel's point of view, execution of the signal handler
+    code is exactly the same as the execution of any other user-space code. That
+    is to say, the kernel does not record any special state information
+    indicating that the thread is currently executing inside a signal handler.
+    All necessary state information is maintained in user-space registers and
+    the user-space stack. The depth to which nested signal handlers may be
+    invoked is thus limited only by the user-space stack (and sensible software
+    design!).</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Standard_signals"><a class="permalink" href="#Standard_signals">Standard
+  signals</a></h2>
+<p class="Pp">Linux supports the standard signals listed below. The second
+    column of the table indicates which standard (if any) specified the signal:
+    "P1990" indicates that the signal is described in the original
+    POSIX.1-1990 standard; "P2001" indicates that the signal was added
+    in SUSv2 and POSIX.1-2001.</p>
+<table class="tbl">
+  <tbody><tr>
+    <td>Signal</td>
+    <td style="text-align: center;">Standard</td>
+    <td style="text-align: center;">Action</td>
+    <td>Comment</td>
+  </tr>
+  <tr>
+  </tr>
+  <tr>
+    <td><b>SIGABRT</b></td>
+    <td style="text-align: center;">P1990</td>
+    <td style="text-align: center;">Core</td>
+    <td>Abort signal from <b>abort</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>SIGALRM</b></td>
+    <td style="text-align: center;">P1990</td>
+    <td style="text-align: center;">Term</td>
+    <td>Timer signal from <b>alarm</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>SIGBUS</b></td>
+    <td style="text-align: center;">P2001</td>
+    <td style="text-align: center;">Core</td>
+    <td>Bus error (bad memory access)</td>
+  </tr>
+  <tr>
+    <td><b>SIGCHLD</b></td>
+    <td style="text-align: center;">P1990</td>
+    <td style="text-align: center;">Ign</td>
+    <td>Child stopped or terminated</td>
+  </tr>
+  <tr>
+    <td><b>SIGCLD</b></td>
+    <td style="text-align: center;">-</td>
+    <td style="text-align: center;">Ign</td>
+    <td>A synonym for <b>SIGCHLD</b></td>
+  </tr>
+  <tr>
+    <td><b>SIGCONT</b></td>
+    <td style="text-align: center;">P1990</td>
+    <td style="text-align: center;">Cont</td>
+    <td>Continue if stopped</td>
+  </tr>
+  <tr>
+    <td><b>SIGEMT</b></td>
+    <td style="text-align: center;">-</td>
+    <td style="text-align: center;">Term</td>
+    <td>Emulator trap</td>
+  </tr>
+  <tr>
+    <td><b>SIGFPE</b></td>
+    <td style="text-align: center;">P1990</td>
+    <td style="text-align: center;">Core</td>
+    <td>Floating-point exception</td>
+  </tr>
+  <tr>
+    <td><b>SIGHUP</b></td>
+    <td style="text-align: center;">P1990</td>
+    <td style="text-align: center;">Term</td>
+    <td>Hangup detected on controlling terminal</td>
+  </tr>
+  <tr>
+    <td><b></b></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td>or death of controlling process</td>
+  </tr>
+  <tr>
+    <td><b>SIGILL</b></td>
+    <td style="text-align: center;">P1990</td>
+    <td style="text-align: center;">Core</td>
+    <td>Illegal Instruction</td>
+  </tr>
+  <tr>
+    <td><b>SIGINFO</b></td>
+    <td style="text-align: center;">-</td>
+    <td style="text-align: center;"></td>
+    <td>A synonym for <b>SIGPWR</b></td>
+  </tr>
+  <tr>
+    <td><b>SIGINT</b></td>
+    <td style="text-align: center;">P1990</td>
+    <td style="text-align: center;">Term</td>
+    <td>Interrupt from keyboard</td>
+  </tr>
+  <tr>
+    <td><b>SIGIO</b></td>
+    <td style="text-align: center;">-</td>
+    <td style="text-align: center;">Term</td>
+    <td>I/O now possible (4.2BSD)</td>
+  </tr>
+  <tr>
+    <td><b>SIGIOT</b></td>
+    <td style="text-align: center;">-</td>
+    <td style="text-align: center;">Core</td>
+    <td>IOT trap. A synonym for <b>SIGABRT</b></td>
+  </tr>
+  <tr>
+    <td><b>SIGKILL</b></td>
+    <td style="text-align: center;">P1990</td>
+    <td style="text-align: center;">Term</td>
+    <td>Kill signal</td>
+  </tr>
+  <tr>
+    <td><b>SIGLOST</b></td>
+    <td style="text-align: center;">-</td>
+    <td style="text-align: center;">Term</td>
+    <td>File lock lost (unused)</td>
+  </tr>
+  <tr>
+    <td><b>SIGPIPE</b></td>
+    <td style="text-align: center;">P1990</td>
+    <td style="text-align: center;">Term</td>
+    <td>Broken pipe: write to pipe with no</td>
+  </tr>
+  <tr>
+    <td><b></b></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td>readers; see <b>pipe</b>(7)</td>
+  </tr>
+  <tr>
+    <td><b>SIGPOLL</b></td>
+    <td style="text-align: center;">P2001</td>
+    <td style="text-align: center;">Term</td>
+    <td>Pollable event (Sys V);</td>
+  </tr>
+  <tr>
+    <td><b></b></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td>synonym for <b>SIGIO</b></td>
+  </tr>
+  <tr>
+    <td><b>SIGPROF</b></td>
+    <td style="text-align: center;">P2001</td>
+    <td style="text-align: center;">Term</td>
+    <td>Profiling timer expired</td>
+  </tr>
+  <tr>
+    <td><b>SIGPWR</b></td>
+    <td style="text-align: center;">-</td>
+    <td style="text-align: center;">Term</td>
+    <td>Power failure (System V)</td>
+  </tr>
+  <tr>
+    <td><b>SIGQUIT</b></td>
+    <td style="text-align: center;">P1990</td>
+    <td style="text-align: center;">Core</td>
+    <td>Quit from keyboard</td>
+  </tr>
+  <tr>
+    <td><b>SIGSEGV</b></td>
+    <td style="text-align: center;">P1990</td>
+    <td style="text-align: center;">Core</td>
+    <td>Invalid memory reference</td>
+  </tr>
+  <tr>
+    <td><b>SIGSTKFLT</b></td>
+    <td style="text-align: center;">-</td>
+    <td style="text-align: center;">Term</td>
+    <td>Stack fault on coprocessor (unused)</td>
+  </tr>
+  <tr>
+    <td><b>SIGSTOP</b></td>
+    <td style="text-align: center;">P1990</td>
+    <td style="text-align: center;">Stop</td>
+    <td>Stop process</td>
+  </tr>
+  <tr>
+    <td><b>SIGTSTP</b></td>
+    <td style="text-align: center;">P1990</td>
+    <td style="text-align: center;">Stop</td>
+    <td>Stop typed at terminal</td>
+  </tr>
+  <tr>
+    <td><b>SIGSYS</b></td>
+    <td style="text-align: center;">P2001</td>
+    <td style="text-align: center;">Core</td>
+    <td>Bad system call (SVr4);</td>
+  </tr>
+  <tr>
+    <td><b></b></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td>see also <b>seccomp</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>SIGTERM</b></td>
+    <td style="text-align: center;">P1990</td>
+    <td style="text-align: center;">Term</td>
+    <td>Termination signal</td>
+  </tr>
+  <tr>
+    <td><b>SIGTRAP</b></td>
+    <td style="text-align: center;">P2001</td>
+    <td style="text-align: center;">Core</td>
+    <td>Trace/breakpoint trap</td>
+  </tr>
+  <tr>
+    <td><b>SIGTTIN</b></td>
+    <td style="text-align: center;">P1990</td>
+    <td style="text-align: center;">Stop</td>
+    <td>Terminal input for background process</td>
+  </tr>
+  <tr>
+    <td><b>SIGTTOU</b></td>
+    <td style="text-align: center;">P1990</td>
+    <td style="text-align: center;">Stop</td>
+    <td>Terminal output for background process</td>
+  </tr>
+  <tr>
+    <td><b>SIGUNUSED</b></td>
+    <td style="text-align: center;">-</td>
+    <td style="text-align: center;">Core</td>
+    <td>Synonymous with <b>SIGSYS</b></td>
+  </tr>
+  <tr>
+    <td><b>SIGURG</b></td>
+    <td style="text-align: center;">P2001</td>
+    <td style="text-align: center;">Ign</td>
+    <td>Urgent condition on socket (4.2BSD)</td>
+  </tr>
+  <tr>
+    <td><b>SIGUSR1</b></td>
+    <td style="text-align: center;">P1990</td>
+    <td style="text-align: center;">Term</td>
+    <td>User-defined signal 1</td>
+  </tr>
+  <tr>
+    <td><b>SIGUSR2</b></td>
+    <td style="text-align: center;">P1990</td>
+    <td style="text-align: center;">Term</td>
+    <td>User-defined signal 2</td>
+  </tr>
+  <tr>
+    <td><b>SIGVTALRM</b></td>
+    <td style="text-align: center;">P2001</td>
+    <td style="text-align: center;">Term</td>
+    <td>Virtual alarm clock (4.2BSD)</td>
+  </tr>
+  <tr>
+    <td><b>SIGXCPU</b></td>
+    <td style="text-align: center;">P2001</td>
+    <td style="text-align: center;">Core</td>
+    <td>CPU time limit exceeded (4.2BSD);</td>
+  </tr>
+  <tr>
+    <td><b></b></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td>see <b>setrlimit</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>SIGXFSZ</b></td>
+    <td style="text-align: center;">P2001</td>
+    <td style="text-align: center;">Core</td>
+    <td>File size limit exceeded (4.2BSD);</td>
+  </tr>
+  <tr>
+    <td><b></b></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td>see <b>setrlimit</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>SIGWINCH</b></td>
+    <td style="text-align: center;">-</td>
+    <td style="text-align: center;">Ign</td>
+    <td>Window resize signal (4.3BSD, Sun)</td>
+  </tr>
+</tbody></table>
+<p class="Pp">The signals <b>SIGKILL</b> and <b>SIGSTOP</b> cannot be caught,
+    blocked, or ignored.</p>
+<p class="Pp">Up to and including Linux 2.2, the default behavior for
+    <b>SIGSYS</b>, <b>SIGXCPU</b>, <b>SIGXFSZ</b>, and (on architectures other
+    than SPARC and MIPS) <b>SIGBUS</b> was to terminate the process (without a
+    core dump). (On some other UNIX systems the default action for
+    <b>SIGXCPU</b> and <b>SIGXFSZ</b> is to terminate the process without a core
+    dump.) Linux 2.4 conforms to the POSIX.1-2001 requirements for these
+    signals, terminating the process with a core dump.</p>
+<p class="Pp"><b>SIGEMT</b> is not specified in POSIX.1-2001, but nevertheless
+    appears on most other UNIX systems, where its default action is typically to
+    terminate the process with a core dump.</p>
+<p class="Pp"><b>SIGPWR</b> (which is not specified in POSIX.1-2001) is
+    typically ignored by default on those other UNIX systems where it
+  appears.</p>
+<p class="Pp"><b>SIGIO</b> (which is not specified in POSIX.1-2001) is ignored
+    by default on several other UNIX systems.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Queueing_and_delivery_semantics_for_standard_signals"><a class="permalink" href="#Queueing_and_delivery_semantics_for_standard_signals">Queueing
+  and delivery semantics for standard signals</a></h2>
+<p class="Pp">If multiple standard signals are pending for a process, the order
+    in which the signals are delivered is unspecified.</p>
+<p class="Pp">Standard signals do not queue. If multiple instances of a standard
+    signal are generated while that signal is blocked, then only one instance of
+    the signal is marked as pending (and the signal will be delivered just once
+    when it is unblocked). In the case where a standard signal is already
+    pending, the <i>siginfo_t</i> structure (see <b>sigaction</b>(2)) associated
+    with that signal is not overwritten on arrival of subsequent instances of
+    the same signal. Thus, the process will receive the information associated
+    with the first instance of the signal.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Signal_numbering_for_standard_signals"><a class="permalink" href="#Signal_numbering_for_standard_signals">Signal
+  numbering for standard signals</a></h2>
+<p class="Pp">The numeric value for each signal is given in the table below. As
+    shown in the table, many signals have different numeric values on different
+    architectures. The first numeric value in each table row shows the signal
+    number on x86, ARM, and most other architectures; the second value is for
+    Alpha and SPARC; the third is for MIPS; and the last is for PARISC. A dash
+    (-) denotes that a signal is absent on the corresponding architecture.</p>
+<table class="tbl">
+  <tbody><tr>
+    <td>Signal</td>
+    <td style="text-align: center;">x86/ARM</td>
+    <td style="text-align: center;">Alpha/</td>
+    <td style="text-align: center;">MIPS</td>
+    <td style="text-align: center;">PARISC</td>
+    <td>Notes</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td style="text-align: center;">most others</td>
+    <td style="text-align: center;">SPARC</td>
+  </tr>
+  <tr>
+  </tr>
+  <tr>
+    <td><b>SIGHUP</b></td>
+    <td style="text-align: center;">&nbsp;1</td>
+    <td style="text-align: center;">&nbsp;1</td>
+    <td style="text-align: center;">&nbsp;1</td>
+    <td style="text-align: center;">&nbsp;1</td>
+  </tr>
+  <tr>
+    <td><b>SIGINT</b></td>
+    <td style="text-align: center;">&nbsp;2</td>
+    <td style="text-align: center;">&nbsp;2</td>
+    <td style="text-align: center;">&nbsp;2</td>
+    <td style="text-align: center;">&nbsp;2</td>
+  </tr>
+  <tr>
+    <td><b>SIGQUIT</b></td>
+    <td style="text-align: center;">&nbsp;3</td>
+    <td style="text-align: center;">&nbsp;3</td>
+    <td style="text-align: center;">&nbsp;3</td>
+    <td style="text-align: center;">&nbsp;3</td>
+  </tr>
+  <tr>
+    <td><b>SIGILL</b></td>
+    <td style="text-align: center;">&nbsp;4</td>
+    <td style="text-align: center;">&nbsp;4</td>
+    <td style="text-align: center;">&nbsp;4</td>
+    <td style="text-align: center;">&nbsp;4</td>
+  </tr>
+  <tr>
+    <td><b>SIGTRAP</b></td>
+    <td style="text-align: center;">&nbsp;5</td>
+    <td style="text-align: center;">&nbsp;5</td>
+    <td style="text-align: center;">&nbsp;5</td>
+    <td style="text-align: center;">&nbsp;5</td>
+  </tr>
+  <tr>
+    <td><b>SIGABRT</b></td>
+    <td style="text-align: center;">&nbsp;6</td>
+    <td style="text-align: center;">&nbsp;6</td>
+    <td style="text-align: center;">&nbsp;6</td>
+    <td style="text-align: center;">&nbsp;6</td>
+  </tr>
+  <tr>
+    <td><b>SIGIOT</b></td>
+    <td style="text-align: center;">&nbsp;6</td>
+    <td style="text-align: center;">&nbsp;6</td>
+    <td style="text-align: center;">&nbsp;6</td>
+    <td style="text-align: center;">&nbsp;6</td>
+  </tr>
+  <tr>
+    <td><b>SIGBUS</b></td>
+    <td style="text-align: center;">&nbsp;7</td>
+    <td style="text-align: center;">10</td>
+    <td style="text-align: center;">10</td>
+    <td style="text-align: center;">10</td>
+  </tr>
+  <tr>
+    <td><b>SIGEMT</b></td>
+    <td style="text-align: center;">-</td>
+    <td style="text-align: center;">&nbsp;7</td>
+    <td style="text-align: center;">&nbsp;7</td>
+    <td style="text-align: center;">-</td>
+  </tr>
+  <tr>
+    <td><b>SIGFPE</b></td>
+    <td style="text-align: center;">&nbsp;8</td>
+    <td style="text-align: center;">&nbsp;8</td>
+    <td style="text-align: center;">&nbsp;8</td>
+    <td style="text-align: center;">&nbsp;8</td>
+  </tr>
+  <tr>
+    <td><b>SIGKILL</b></td>
+    <td style="text-align: center;">&nbsp;9</td>
+    <td style="text-align: center;">&nbsp;9</td>
+    <td style="text-align: center;">&nbsp;9</td>
+    <td style="text-align: center;">&nbsp;9</td>
+  </tr>
+  <tr>
+    <td><b>SIGUSR1</b></td>
+    <td style="text-align: center;">10</td>
+    <td style="text-align: center;">30</td>
+    <td style="text-align: center;">16</td>
+    <td style="text-align: center;">16</td>
+  </tr>
+  <tr>
+    <td><b>SIGSEGV</b></td>
+    <td style="text-align: center;">11</td>
+    <td style="text-align: center;">11</td>
+    <td style="text-align: center;">11</td>
+    <td style="text-align: center;">11</td>
+  </tr>
+  <tr>
+    <td><b>SIGUSR2</b></td>
+    <td style="text-align: center;">12</td>
+    <td style="text-align: center;">31</td>
+    <td style="text-align: center;">17</td>
+    <td style="text-align: center;">17</td>
+  </tr>
+  <tr>
+    <td><b>SIGPIPE</b></td>
+    <td style="text-align: center;">13</td>
+    <td style="text-align: center;">13</td>
+    <td style="text-align: center;">13</td>
+    <td style="text-align: center;">13</td>
+  </tr>
+  <tr>
+    <td><b>SIGALRM</b></td>
+    <td style="text-align: center;">14</td>
+    <td style="text-align: center;">14</td>
+    <td style="text-align: center;">14</td>
+    <td style="text-align: center;">14</td>
+  </tr>
+  <tr>
+    <td><b>SIGTERM</b></td>
+    <td style="text-align: center;">15</td>
+    <td style="text-align: center;">15</td>
+    <td style="text-align: center;">15</td>
+    <td style="text-align: center;">15</td>
+  </tr>
+  <tr>
+    <td><b>SIGSTKFLT</b></td>
+    <td style="text-align: center;">16</td>
+    <td style="text-align: center;">-</td>
+    <td style="text-align: center;">-</td>
+    <td style="text-align: center;">&nbsp;7</td>
+  </tr>
+  <tr>
+    <td><b>SIGCHLD</b></td>
+    <td style="text-align: center;">17</td>
+    <td style="text-align: center;">20</td>
+    <td style="text-align: center;">18</td>
+    <td style="text-align: center;">18</td>
+  </tr>
+  <tr>
+    <td><b>SIGCLD</b></td>
+    <td style="text-align: center;">-</td>
+    <td style="text-align: center;">-</td>
+    <td style="text-align: center;">18</td>
+    <td style="text-align: center;">-</td>
+  </tr>
+  <tr>
+    <td><b>SIGCONT</b></td>
+    <td style="text-align: center;">18</td>
+    <td style="text-align: center;">19</td>
+    <td style="text-align: center;">25</td>
+    <td style="text-align: center;">26</td>
+  </tr>
+  <tr>
+    <td><b>SIGSTOP</b></td>
+    <td style="text-align: center;">19</td>
+    <td style="text-align: center;">17</td>
+    <td style="text-align: center;">23</td>
+    <td style="text-align: center;">24</td>
+  </tr>
+  <tr>
+    <td><b>SIGTSTP</b></td>
+    <td style="text-align: center;">20</td>
+    <td style="text-align: center;">18</td>
+    <td style="text-align: center;">24</td>
+    <td style="text-align: center;">25</td>
+  </tr>
+  <tr>
+    <td><b>SIGTTIN</b></td>
+    <td style="text-align: center;">21</td>
+    <td style="text-align: center;">21</td>
+    <td style="text-align: center;">26</td>
+    <td style="text-align: center;">27</td>
+  </tr>
+  <tr>
+    <td><b>SIGTTOU</b></td>
+    <td style="text-align: center;">22</td>
+    <td style="text-align: center;">22</td>
+    <td style="text-align: center;">27</td>
+    <td style="text-align: center;">28</td>
+  </tr>
+  <tr>
+    <td><b>SIGURG</b></td>
+    <td style="text-align: center;">23</td>
+    <td style="text-align: center;">16</td>
+    <td style="text-align: center;">21</td>
+    <td style="text-align: center;">29</td>
+  </tr>
+  <tr>
+    <td><b>SIGXCPU</b></td>
+    <td style="text-align: center;">24</td>
+    <td style="text-align: center;">24</td>
+    <td style="text-align: center;">30</td>
+    <td style="text-align: center;">12</td>
+  </tr>
+  <tr>
+    <td><b>SIGXFSZ</b></td>
+    <td style="text-align: center;">25</td>
+    <td style="text-align: center;">25</td>
+    <td style="text-align: center;">31</td>
+    <td style="text-align: center;">30</td>
+  </tr>
+  <tr>
+    <td><b>SIGVTALRM</b></td>
+    <td style="text-align: center;">26</td>
+    <td style="text-align: center;">26</td>
+    <td style="text-align: center;">28</td>
+    <td style="text-align: center;">20</td>
+  </tr>
+  <tr>
+    <td><b>SIGPROF</b></td>
+    <td style="text-align: center;">27</td>
+    <td style="text-align: center;">27</td>
+    <td style="text-align: center;">29</td>
+    <td style="text-align: center;">21</td>
+  </tr>
+  <tr>
+    <td><b>SIGWINCH</b></td>
+    <td style="text-align: center;">28</td>
+    <td style="text-align: center;">28</td>
+    <td style="text-align: center;">20</td>
+    <td style="text-align: center;">23</td>
+  </tr>
+  <tr>
+    <td><b>SIGIO</b></td>
+    <td style="text-align: center;">29</td>
+    <td style="text-align: center;">23</td>
+    <td style="text-align: center;">22</td>
+    <td style="text-align: center;">22</td>
+  </tr>
+  <tr>
+    <td><b>SIGPOLL</b></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td style="text-align: center;"></td>
+    <td>Same as SIGIO</td>
+  </tr>
+  <tr>
+    <td><b>SIGPWR</b></td>
+    <td style="text-align: center;">30</td>
+    <td style="text-align: center;">29/-</td>
+    <td style="text-align: center;">19</td>
+    <td style="text-align: center;">19</td>
+  </tr>
+  <tr>
+    <td><b>SIGINFO</b></td>
+    <td style="text-align: center;">-</td>
+    <td style="text-align: center;">29/-</td>
+    <td style="text-align: center;">-</td>
+    <td style="text-align: center;">-</td>
+  </tr>
+  <tr>
+    <td><b>SIGLOST</b></td>
+    <td style="text-align: center;">-</td>
+    <td style="text-align: center;">-/29</td>
+    <td style="text-align: center;">-</td>
+    <td style="text-align: center;">-</td>
+  </tr>
+  <tr>
+    <td><b>SIGSYS</b></td>
+    <td style="text-align: center;">31</td>
+    <td style="text-align: center;">12</td>
+    <td style="text-align: center;">12</td>
+    <td style="text-align: center;">31</td>
+  </tr>
+  <tr>
+    <td><b>SIGUNUSED</b></td>
+    <td style="text-align: center;">31</td>
+    <td style="text-align: center;">-</td>
+    <td style="text-align: center;">-</td>
+    <td style="text-align: center;">31</td>
+  </tr>
+</tbody></table>
+<p class="Pp">Note the following:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Where defined, <b>SIGUNUSED</b> is synonymous with <b>SIGSYS</b>. Since
+      glibc 2.26, <b>SIGUNUSED</b> is no longer defined on any
+    architecture.</dd>
+  <dt>•</dt>
+  <dd>Signal 29 is <b>SIGINFO</b>/<b>SIGPWR</b> (synonyms for the same value) on
+      Alpha but <b>SIGLOST</b> on SPARC.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Real-time_signals"><a class="permalink" href="#Real-time_signals">Real-time
+  signals</a></h2>
+<p class="Pp">Starting with Linux 2.2, Linux supports real-time signals as
+    originally defined in the POSIX.1b real-time extensions (and now included in
+    POSIX.1-2001). The range of supported real-time signals is defined by the
+    macros <b>SIGRTMIN</b> and <b>SIGRTMAX</b>. POSIX.1-2001 requires that an
+    implementation support at least <b>_POSIX_RTSIG_MAX</b> (8) real-time
+    signals.</p>
+<p class="Pp">The Linux kernel supports a range of 33 different real-time
+    signals, numbered 32 to 64. However, the glibc POSIX threads implementation
+    internally uses two (for NPTL) or three (for LinuxThreads) real-time signals
+    (see <b>pthreads</b>(7)), and adjusts the value of <b>SIGRTMIN</b> suitably
+    (to 34 or 35). Because the range of available real-time signals varies
+    according to the glibc threading implementation (and this variation can
+    occur at run time according to the available kernel and glibc), and indeed
+    the range of real-time signals varies across UNIX systems, programs should
+    <i>never refer to real-time signals using hard-coded numbers</i>, but
+    instead should always refer to real-time signals using the notation
+    <b>SIGRTMIN</b>+n, and include suitable (run-time) checks that
+    <b>SIGRTMIN</b>+n does not exceed <b>SIGRTMAX</b>.</p>
+<p class="Pp">Unlike standard signals, real-time signals have no predefined
+    meanings: the entire set of real-time signals can be used for
+    application-defined purposes.</p>
+<p class="Pp">The default action for an unhandled real-time signal is to
+    terminate the receiving process.</p>
+<p class="Pp">Real-time signals are distinguished by the following:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Multiple instances of real-time signals can be queued. By contrast, if
+      multiple instances of a standard signal are delivered while that signal is
+      currently blocked, then only one instance is queued.</dd>
+  <dt>•</dt>
+  <dd>If the signal is sent using <b>sigqueue</b>(3), an accompanying value
+      (either an integer or a pointer) can be sent with the signal. If the
+      receiving process establishes a handler for this signal using the
+      <b>SA_SIGINFO</b> flag to <b>sigaction</b>(2), then it can obtain this
+      data via the <i>si_value</i> field of the <i>siginfo_t</i> structure
+      passed as the second argument to the handler. Furthermore, the
+      <i>si_pid</i> and <i>si_uid</i> fields of this structure can be used to
+      obtain the PID and real user ID of the process sending the signal.</dd>
+  <dt>•</dt>
+  <dd>Real-time signals are delivered in a guaranteed order. Multiple real-time
+      signals of the same type are delivered in the order they were sent. If
+      different real-time signals are sent to a process, they are delivered
+      starting with the lowest-numbered signal. (I.e., low-numbered signals have
+      highest priority.) By contrast, if multiple standard signals are pending
+      for a process, the order in which they are delivered is unspecified.</dd>
+</dl>
+<p class="Pp">If both standard and real-time signals are pending for a process,
+    POSIX leaves it unspecified which is delivered first. Linux, like many other
+    implementations, gives priority to standard signals in this case.</p>
+<p class="Pp">According to POSIX, an implementation should permit at least
+    <b>_POSIX_SIGQUEUE_MAX</b> (32) real-time signals to be queued to a process.
+    However, Linux does things differently. Up to and including Linux 2.6.7,
+    Linux imposes a system-wide limit on the number of queued real-time signals
+    for all processes. This limit can be viewed and (with privilege) changed via
+    the <i>/proc/sys/kernel/rtsig-max</i> file. A related file,
+    <i>/proc/sys/kernel/rtsig-nr</i>, can be used to find out how many real-time
+    signals are currently queued. In Linux 2.6.8, these <i>/proc</i> interfaces
+    were replaced by the <b>RLIMIT_SIGPENDING</b> resource limit, which
+    specifies a per-user limit for queued signals; see <b>setrlimit</b>(2) for
+    further details.</p>
+<p class="Pp">The addition of real-time signals required the widening of the
+    signal set structure (<i>sigset_t</i>) from 32 to 64 bits. Consequently,
+    various system calls were superseded by new system calls that supported the
+    larger signal sets. The old and new system calls are as follows:</p>
+<table class="tbl">
+  <tbody><tr>
+    <td><b>Linux 2.0 and earlier</b></td>
+    <td><b>Linux 2.2 and later</b></td>
+  </tr>
+  <tr>
+    <td><b>sigaction</b>(2)</td>
+    <td><b>rt_sigaction</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>sigpending</b>(2)</td>
+    <td><b>rt_sigpending</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>sigprocmask</b>(2)</td>
+    <td><b>rt_sigprocmask</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>sigreturn</b>(2)</td>
+    <td><b>rt_sigreturn</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>sigsuspend</b>(2)</td>
+    <td><b>rt_sigsuspend</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>sigtimedwait</b>(2)</td>
+    <td><b>rt_sigtimedwait</b>(2)</td>
+  </tr>
+</tbody></table>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Interruption_of_system_calls_and_library_functions_by_signal_handlers"><a class="permalink" href="#Interruption_of_system_calls_and_library_functions_by_signal_handlers">Interruption
+  of system calls and library functions by signal handlers</a></h2>
+<p class="Pp">If a signal handler is invoked while a system call or library
+    function call is blocked, then either:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>the call is automatically restarted after the signal handler returns;
+    or</dd>
+  <dt>•</dt>
+  <dd>the call fails with the error <b>EINTR</b>.</dd>
+</dl>
+<p class="Pp">Which of these two behaviors occurs depends on the interface and
+    whether or not the signal handler was established using the
+    <b>SA_RESTART</b> flag (see <b>sigaction</b>(2)). The details vary across
+    UNIX systems; below, the details for Linux.</p>
+<p class="Pp">If a blocked call to one of the following interfaces is
+    interrupted by a signal handler, then the call is automatically restarted
+    after the signal handler returns if the <b>SA_RESTART</b> flag was used;
+    otherwise the call fails with the error <b>EINTR</b>:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><b>read</b>(2), <b>readv</b>(2), <b>write</b>(2), <b>writev</b>(2), and
+      <b>ioctl</b>(2) calls on "slow" devices. A "slow"
+      device is one where the I/O call may block for an indefinite time, for
+      example, a terminal, pipe, or socket. If an I/O call on a slow device has
+      already transferred some data by the time it is interrupted by a signal
+      handler, then the call will return a success status (normally, the number
+      of bytes transferred). Note that a (local) disk is not a slow device
+      according to this definition; I/O operations on disk devices are not
+      interrupted by signals.</dd>
+  <dt>•</dt>
+  <dd><b>open</b>(2), if it can block (e.g., when opening a FIFO; see
+      <b>fifo</b>(7)).</dd>
+  <dt>•</dt>
+  <dd><b>wait</b>(2), <b>wait3</b>(2), <b>wait4</b>(2), <b>waitid</b>(2), and
+      <b>waitpid</b>(2).</dd>
+  <dt>•</dt>
+  <dd>Socket interfaces: <b>accept</b>(2), <b>connect</b>(2), <b>recv</b>(2),
+      <b>recvfrom</b>(2), <b>recvmmsg</b>(2), <b>recvmsg</b>(2), <b>send</b>(2),
+      <b>sendto</b>(2), and <b>sendmsg</b>(2), unless a timeout has been set on
+      the socket (see below).</dd>
+  <dt>•</dt>
+  <dd>File locking interfaces: <b>flock</b>(2) and the <b>F_SETLKW</b> and
+      <b>F_OFD_SETLKW</b> operations of <b>fcntl</b>(2)</dd>
+  <dt>•</dt>
+  <dd>POSIX message queue interfaces: <b>mq_receive</b>(3),
+      <b>mq_timedreceive</b>(3), <b>mq_send</b>(3), and
+    <b>mq_timedsend</b>(3).</dd>
+  <dt>•</dt>
+  <dd><b>futex</b>(2) <b>FUTEX_WAIT</b> (since Linux 2.6.22; beforehand, always
+      failed with <b>EINTR</b>).</dd>
+  <dt>•</dt>
+  <dd><b>getrandom</b>(2).</dd>
+  <dt>•</dt>
+  <dd><b>pthread_mutex_lock</b>(3), <b>pthread_cond_wait</b>(3), and related
+      APIs.</dd>
+  <dt>•</dt>
+  <dd><b>futex</b>(2) <b>FUTEX_WAIT_BITSET</b>.</dd>
+  <dt>•</dt>
+  <dd>POSIX semaphore interfaces: <b>sem_wait</b>(3) and <b>sem_timedwait</b>(3)
+      (since Linux 2.6.22; beforehand, always failed with <b>EINTR</b>).</dd>
+  <dt>•</dt>
+  <dd><b>read</b>(2) from an <b>inotify</b>(7) file descriptor (since Linux 3.8;
+      beforehand, always failed with <b>EINTR</b>).</dd>
+</dl>
+<p class="Pp">The following interfaces are never restarted after being
+    interrupted by a signal handler, regardless of the use of <b>SA_RESTART</b>;
+    they always fail with the error <b>EINTR</b> when interrupted by a signal
+    handler:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>"Input" socket interfaces, when a timeout (<b>SO_RCVTIMEO</b>)
+      has been set on the socket using <b>setsockopt</b>(2): <b>accept</b>(2),
+      <b>recv</b>(2), <b>recvfrom</b>(2), <b>recvmmsg</b>(2) (also with a
+      non-NULL <i>timeout</i> argument), and <b>recvmsg</b>(2).</dd>
+  <dt>•</dt>
+  <dd>"Output" socket interfaces, when a timeout (<b>SO_RCVTIMEO</b>)
+      has been set on the socket using <b>setsockopt</b>(2): <b>connect</b>(2),
+      <b>send</b>(2), <b>sendto</b>(2), and <b>sendmsg</b>(2).</dd>
+  <dt>•</dt>
+  <dd>Interfaces used to wait for signals: <b>pause</b>(2),
+      <b>sigsuspend</b>(2), <b>sigtimedwait</b>(2), and
+    <b>sigwaitinfo</b>(2).</dd>
+  <dt>•</dt>
+  <dd>File descriptor multiplexing interfaces: <b>epoll_wait</b>(2),
+      <b>epoll_pwait</b>(2), <b>poll</b>(2), <b>ppoll</b>(2), <b>select</b>(2),
+      and <b>pselect</b>(2).</dd>
+  <dt>•</dt>
+  <dd>System V IPC interfaces: <b>msgrcv</b>(2), <b>msgsnd</b>(2),
+      <b>semop</b>(2), and <b>semtimedop</b>(2).</dd>
+  <dt>•</dt>
+  <dd>Sleep interfaces: <b>clock_nanosleep</b>(2), <b>nanosleep</b>(2), and
+      <b>usleep</b>(3).</dd>
+  <dt>•</dt>
+  <dd><b>io_getevents</b>(2).</dd>
+</dl>
+<p class="Pp">The <b>sleep</b>(3) function is also never restarted if
+    interrupted by a handler, but gives a success return: the number of seconds
+    remaining to sleep.</p>
+<p class="Pp">In certain circumstances, the <b>seccomp</b>(2) user-space
+    notification feature can lead to restarting of system calls that would
+    otherwise never be restarted by <b>SA_RESTART</b>; for details, see
+    <b>seccomp_unotify</b>(2).</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Interruption_of_system_calls_and_library_functions_by_stop_signals"><a class="permalink" href="#Interruption_of_system_calls_and_library_functions_by_stop_signals">Interruption
+  of system calls and library functions by stop signals</a></h2>
+<p class="Pp">On Linux, even in the absence of signal handlers, certain blocking
+    interfaces can fail with the error <b>EINTR</b> after the process is stopped
+    by one of the stop signals and then resumed via <b>SIGCONT</b>. This
+    behavior is not sanctioned by POSIX.1, and doesn't occur on other
+  systems.</p>
+<p class="Pp">The Linux interfaces that display this behavior are:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>"Input" socket interfaces, when a timeout (<b>SO_RCVTIMEO</b>)
+      has been set on the socket using <b>setsockopt</b>(2): <b>accept</b>(2),
+      <b>recv</b>(2), <b>recvfrom</b>(2), <b>recvmmsg</b>(2) (also with a
+      non-NULL <i>timeout</i> argument), and <b>recvmsg</b>(2).</dd>
+  <dt>•</dt>
+  <dd>"Output" socket interfaces, when a timeout (<b>SO_RCVTIMEO</b>)
+      has been set on the socket using <b>setsockopt</b>(2): <b>connect</b>(2),
+      <b>send</b>(2), <b>sendto</b>(2), and <b>sendmsg</b>(2), if a send timeout
+      (<b>SO_SNDTIMEO</b>) has been set.</dd>
+  <dt>•</dt>
+  <dd><b>epoll_wait</b>(2), <b>epoll_pwait</b>(2).</dd>
+  <dt>•</dt>
+  <dd><b>semop</b>(2), <b>semtimedop</b>(2).</dd>
+  <dt>•</dt>
+  <dd><b>sigtimedwait</b>(2), <b>sigwaitinfo</b>(2).</dd>
+  <dt>•</dt>
+  <dd>Linux 3.7 and earlier: <b>read</b>(2) from an <b>inotify</b>(7) file
+      descriptor</dd>
+  <dt>•</dt>
+  <dd>Linux 2.6.21 and earlier: <b>futex</b>(2) <b>FUTEX_WAIT</b>,
+      <b>sem_timedwait</b>(3), <b>sem_wait</b>(3).</dd>
+  <dt>•</dt>
+  <dd>Linux 2.6.8 and earlier: <b>msgrcv</b>(2), <b>msgsnd</b>(2).</dd>
+  <dt>•</dt>
+  <dd>Linux 2.4 and earlier: <b>nanosleep</b>(2).</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1, except as noted.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">For a discussion of async-signal-safe functions, see
+    <b>signal-safety</b>(7).</p>
+<p class="Pp">The <i>/proc/[pid]/task/[tid]/status</i> file contains various
+    fields that show the signals that a thread is blocking (<i>SigBlk</i>),
+    catching (<i>SigCgt</i>), or ignoring (<i>SigIgn</i>). (The set of signals
+    that are caught or ignored will be the same across all threads in a
+    process.) Other fields show the set of pending signals that are directed to
+    the thread (<i>SigPnd</i>) as well as the set of pending signals that are
+    directed to the process as a whole (<i>ShdPnd</i>). The corresponding fields
+    in <i>/proc/[pid]/status</i> show the information for the main thread. See
+    <b>proc</b>(5) for further details.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">There are six signals that can be delivered as a consequence of a
+    hardware exception: <b>SIGBUS</b>, <b>SIGEMT</b>, <b>SIGFPE</b>,
+    <b>SIGILL</b>, <b>SIGSEGV</b>, and <b>SIGTRAP</b>. Which of these signals is
+    delivered, for any given hardware exception, is not documented and does not
+    always make sense.</p>
+<p class="Pp">For example, an invalid memory access that causes delivery of
+    <b>SIGSEGV</b> on one CPU architecture may cause delivery of <b>SIGBUS</b>
+    on another architecture, or vice versa.</p>
+<p class="Pp">For another example, using the x86 <i>int</i> instruction with a
+    forbidden argument (any number other than 3 or 128) causes delivery of
+    <b>SIGSEGV</b>, even though <b>SIGILL</b> would make more sense, because of
+    how the CPU reports the forbidden operation to the kernel.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>kill</b>(1), <b>clone</b>(2), <b>getrlimit</b>(2),
+    <b>kill</b>(2), <b>pidfd_send_signal</b>(2), <b>restart_syscall</b>(2),
+    <b>rt_sigqueueinfo</b>(2), <b>setitimer</b>(2), <b>setrlimit</b>(2),
+    <b>sgetmask</b>(2), <b>sigaction</b>(2), <b>sigaltstack</b>(2),
+    <b>signal</b>(2), <b>signalfd</b>(2), <b>sigpending</b>(2),
+    <b>sigprocmask</b>(2), <b>sigreturn</b>(2), <b>sigsuspend</b>(2),
+    <b>sigwaitinfo</b>(2), <b>abort</b>(3), <b>bsd_signal</b>(3),
+    <b>killpg</b>(3), <b>longjmp</b>(3), <b>pthread_sigqueue</b>(3),
+    <b>raise</b>(3), <b>sigqueue</b>(3), <b>sigset</b>(3), <b>sigsetops</b>(3),
+    <b>sigvec</b>(3), <b>sigwait</b>(3), <b>strsignal</b>(3),
+    <b>swapcontext</b>(3), <b>sysv_signal</b>(3), <b>core</b>(5),
+    <b>proc</b>(5), <b>nptl</b>(7), <b>pthreads</b>(7), <b>sigevent</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

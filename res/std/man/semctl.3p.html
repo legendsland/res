@@ -1,0 +1,268 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/68fbdbf10d40d0396487cd3004d2e442401278fe">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>SEMCTL(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">SEMCTL(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">SEMCTL(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">semctl — XSI semaphore control operations</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include&nbsp;&lt;sys/sem.h&gt;</pre>
+<pre>int semctl(int <i>semid</i>, int <i>semnum</i>, int <i>cmd</i>, ...);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>semctl</i>() function operates on XSI semaphores (see the
+    Base Definitions volume of POSIX.1‐2017, <i>Section 4.17</i>,
+    <i>Semaphore</i>). It is unspecified whether this function interoperates
+    with the realtime interprocess communication facilities defined in
+    <i>Section 2.8</i>, <i>Realtime</i>.</p>
+<p class="Pp">The <i>semctl</i>() function provides a variety of semaphore
+    control operations as specified by <i>cmd</i>. The fourth argument is
+    optional and depends upon the operation requested. If required, it is of
+    type <b>union semun</b>, which the application shall explicitly declare:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>union semun {
+<br>
+    int val;
+<br>
+    struct semid_ds *buf;
+<br>
+    unsigned short  *array;
+} arg;</pre>
+</div>
+<p class="Pp">Each operation shall be performed atomically.</p>
+<p class="Pp">The following semaphore control operations as specified by
+    <i>cmd</i> are executed with respect to the semaphore specified by
+    <i>semid</i> and <i>semnum</i>. The level of permission required for each
+    operation is shown with each command; see <i>Section 2.7</i>, <i>XSI
+    Interprocess Communication</i>. The symbolic names for the values of
+    <i>cmd</i> are defined in the <i>&lt;sys/sem.h&gt;</i> header:</p>
+<dl class="Bl-tag">
+  <dt id="GETVAL"><a class="permalink" href="#GETVAL">GETVAL</a></dt>
+  <dd>Return the value of <i>semval</i>; see <i>&lt;sys/sem.h&gt;</i>. Requires
+      read permission.</dd>
+  <dt id="SETVAL"><a class="permalink" href="#SETVAL">SETVAL</a></dt>
+  <dd>Set the value of <i>semval</i> to <i>arg.val</i>, where <i>arg</i> is the
+      value of the fourth argument to <i>semctl</i>(). When this command is
+      successfully executed, the <i>semadj</i> value corresponding to the
+      specified semaphore in all processes is cleared. Also, the
+      <i>sem_ctime</i> timestamp shall be set to the current time, as described
+      in <i>Section 2.7.1</i>, <i>IPC General Description</i>. Requires alter
+      permission; see <i>Section 2.7</i>, <i>XSI Interprocess
+    Communication</i>.</dd>
+  <dt id="GETPID"><a class="permalink" href="#GETPID">GETPID</a></dt>
+  <dd>Return the value of <i>sempid</i>. Requires read permission.</dd>
+  <dt id="GETNCNT"><a class="permalink" href="#GETNCNT">GETNCNT</a></dt>
+  <dd>Return the value of <i>semncnt</i>. Requires read permission.</dd>
+  <dt id="GETZCNT"><a class="permalink" href="#GETZCNT">GETZCNT</a></dt>
+  <dd>Return the value of <i>semzcnt</i>. Requires read permission.</dd>
+</dl>
+<p class="Pp">The following values of <i>cmd</i> operate on each <i>semval</i>
+    in the set of semaphores:</p>
+<dl class="Bl-tag">
+  <dt id="GETALL"><a class="permalink" href="#GETALL">GETALL</a></dt>
+  <dd>Return the value of <i>semval</i> for each semaphore in the semaphore set
+      and place into the array pointed to by <i>arg.array</i>, where <i>arg</i>
+      is the fourth argument to <i>semctl</i>(). Requires read permission.</dd>
+  <dt id="SETALL"><a class="permalink" href="#SETALL">SETALL</a></dt>
+  <dd>Set the value of <i>semval</i> for each semaphore in the semaphore set
+      according to the array pointed to by <i>arg.array</i>, where <i>arg</i> is
+      the fourth argument to <i>semctl</i>(). When this command is successfully
+      executed, the <i>semadj</i> values corresponding to each specified
+      semaphore in all processes are cleared. Also, the <i>sem_ctime</i>
+      timestamp shall be set to the current time, as described in <i>Section
+      2.7.1</i>, <i>IPC General Description</i>. Requires alter permission.
+    <br>
+  </dd>
+</dl>
+<p class="Pp">The following values of <i>cmd</i> are also available:</p>
+<dl class="Bl-tag">
+  <dt id="IPC_STAT"><a class="permalink" href="#IPC_STAT">IPC_STAT</a></dt>
+  <dd>Place the current value of each member of the <b>semid_ds</b> data
+      structure associated with <i>semid</i> into the structure pointed to by
+      <i>arg.buf</i>, where <i>arg</i> is the fourth argument to
+      <i>semctl</i>(). The contents of this structure are defined in
+      <i>&lt;sys/sem.h&gt;</i>. Requires read permission.</dd>
+  <dt id="IPC_SET"><a class="permalink" href="#IPC_SET">IPC_SET</a></dt>
+  <dd>Set the value of the following members of the <b>semid_ds</b> data
+      structure associated with <i>semid</i> to the corresponding value found in
+      the structure pointed to by <i>arg.buf</i>, where <i>arg</i> is the fourth
+      argument to <i>semctl</i>():</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>sem_perm.uid
+sem_perm.gid
+sem_perm.mode</pre>
+</div>
+<p class="Pp">The mode bits specified in <i>Section 2.7.1</i>, <i>IPC General
+    Description</i> are copied into the corresponding bits of the
+    <i>sem_perm.mode</i> associated with <i>semid</i>. The stored values of any
+    other bits are unspecified. The <i>sem_ctime</i> timestamp shall be set to
+    the current time, as described in <i>Section 2.7.1</i>, <i>IPC General
+    Description</i>.</p>
+<p class="Pp">This command can only be executed by a process that has an
+    effective user ID equal to either that of a process with appropriate
+    privileges or to the value of <i>sem_perm.cuid</i> or <i>sem_perm.uid</i> in
+    the <b>semid_ds</b> data structure associated with <i>semid</i>.</p>
+</div>
+<dl class="Bl-tag">
+  <dt id="IPC_RMID"><a class="permalink" href="#IPC_RMID">IPC_RMID</a></dt>
+  <dd>Remove the semaphore identifier specified by <i>semid</i> from the system
+      and destroy the set of semaphores and <b>semid_ds</b> data structure
+      associated with it. This command can only be executed by a process that
+      has an effective user ID equal to either that of a process with
+      appropriate privileges or to the value of <i>sem_perm.cuid</i> or
+      <i>sem_perm.uid</i> in the <b>semid_ds</b> data structure associated with
+      <i>semid</i>.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">If successful, the value returned by <i>semctl</i>() depends on
+    <i>cmd</i> as follows:</p>
+<dl class="Bl-tag">
+  <dt id="GETVAL~2"><a class="permalink" href="#GETVAL~2">GETVAL</a></dt>
+  <dd>The value of <i>semval</i>.</dd>
+  <dt id="GETPID~2"><a class="permalink" href="#GETPID~2">GETPID</a></dt>
+  <dd>The value of <i>sempid</i>.</dd>
+  <dt id="GETNCNT~2"><a class="permalink" href="#GETNCNT~2">GETNCNT</a></dt>
+  <dd>The value of <i>semncnt</i>.</dd>
+  <dt id="GETZCNT~2"><a class="permalink" href="#GETZCNT~2">GETZCNT</a></dt>
+  <dd>The value of <i>semzcnt</i>.</dd>
+  <dt id="All"><a class="permalink" href="#All">All others</a></dt>
+  <dd>0.</dd>
+</dl>
+<p class="Pp">Otherwise, <i>semctl</i>() shall return -1 and set <i>errno</i> to
+    indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>semctl</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>Operation permission is denied to the calling process; see <i>Section
+      2.7</i>, <i>XSI Interprocess Communication</i>.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The value of <i>semid</i> is not a valid semaphore identifier, or the
+      value of <i>semnum</i> is less than 0 or greater than or equal to
+      <i>sem_nsems</i>, or the value of <i>cmd</i> is not a valid command.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The argument <i>cmd</i> is equal to IPC_RMID or IPC_SET and the effective
+      user ID of the calling process is not equal to that of a process with
+      appropriate privileges and it is not equal to the value of
+      <i>sem_perm.cuid</i> or <i>sem_perm.uid</i> in the data structure
+      associated with <i>semid</i>.</dd>
+  <dt id="ERANGE"><a class="permalink" href="#ERANGE"><b>ERANGE</b></a></dt>
+  <dd>The argument <i>cmd</i> is equal to SETVAL or SETALL and the value to
+      which <i>semval</i> is to be set is greater than the system-imposed
+      maximum.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">Refer to <i><i>semop</i>()</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The fourth parameter in the SYNOPSIS section is now specified as
+    <b>"..."</b> in order to avoid a clash with the ISO&nbsp;C
+    standard when referring to the union <i>semun</i> (as defined in Issue 3)
+    and for backwards-compatibility.</p>
+<p class="Pp">The POSIX Realtime Extension defines alternative interfaces for
+    interprocess communication. Application developers who need to use IPC
+    should design their applications so that modules using the IPC routines
+    described in <i>Section 2.7</i>, <i>XSI Interprocess Communication</i> can
+    be easily modified to use the alternative interfaces.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i>Section 2.7</i>, <i>XSI Interprocess Communication</i>,
+    <i>Section 2.8</i>, <i>Realtime</i>, <i><i>semget</i>()</i>,
+    <i><i>semop</i>()</i>, <i><i>sem_close</i>()</i>,
+    <i><i>sem_destroy</i>()</i>, <i><i>sem_getvalue</i>()</i>,
+    <i><i>sem_init</i>()</i>, <i><i>sem_open</i>()</i>,
+    <i><i>sem_post</i>()</i>, <i><i>sem_trywait</i>()</i>,
+    <i><i>sem_unlink</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Section
+    4.17</i>, <i>Semaphore</i>, <i><b>&lt;sys_sem.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

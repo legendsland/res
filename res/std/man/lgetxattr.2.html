@@ -1,0 +1,138 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/c8da88fb00e83b14c0a1fc919e0e3cc95d282149">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>getxattr(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">getxattr(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">getxattr(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getxattr, lgetxattr, fgetxattr - retrieve an extended attribute
+    value</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/xattr.h&gt;</b></pre>
+<pre><b>ssize_t getxattr(const char *</b><i>path</i><b>, const char *</b><i>name</i><b>,</b>
+<b>                 void </b><i>value</i><b>[.</b><i>size</i><b>], size_t </b><i>size</i><b>);</b>
+<b>ssize_t lgetxattr(const char *</b><i>path</i><b>, const char *</b><i>name</i><b>,</b>
+<b>                 void </b><i>value</i><b>[.</b><i>size</i><b>], size_t </b><i>size</i><b>);</b>
+<b>ssize_t fgetxattr(int </b><i>fd</i><b>, const char *</b><i>name</i><b>,</b>
+<b>                 void </b><i>value</i><b>[.</b><i>size</i><b>], size_t </b><i>size</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">Extended attributes are <i>name</i>:<i>value</i> pairs associated
+    with inodes (files, directories, symbolic links, etc.). They are extensions
+    to the normal attributes which are associated with all inodes in the system
+    (i.e., the <b>stat</b>(2) data). A complete overview of extended attributes
+    concepts can be found in <b>xattr</b>(7).</p>
+<p class="Pp"><b>getxattr</b>() retrieves the value of the extended attribute
+    identified by <i>name</i> and associated with the given <i>path</i> in the
+    filesystem. The attribute value is placed in the buffer pointed to by
+    <i>value</i>; <i>size</i> specifies the size of that buffer. The return
+    value of the call is the number of bytes placed in <i>value</i>.</p>
+<p class="Pp"><b>lgetxattr</b>() is identical to <b>getxattr</b>(), except in
+    the case of a symbolic link, where the link itself is interrogated, not the
+    file that it refers to.</p>
+<p class="Pp"><b>fgetxattr</b>() is identical to <b>getxattr</b>(), only the
+    open file referred to by <i>fd</i> (as returned by <b>open</b>(2)) is
+    interrogated in place of <i>path</i>.</p>
+<p class="Pp">An extended attribute <i>name</i> is a null-terminated string. The
+    name includes a namespace prefix; there may be several, disjoint namespaces
+    associated with an individual inode. The value of an extended attribute is a
+    chunk of arbitrary textual or binary data that was assigned using
+    <b>setxattr</b>(2).</p>
+<p class="Pp">If <i>size</i> is specified as zero, these calls return the
+    current size of the named extended attribute (and leave <i>value</i>
+    unchanged). This can be used to determine the size of the buffer that should
+    be supplied in a subsequent call. (But, bear in mind that there is a
+    possibility that the attribute value may change between the two calls, so
+    that it is still necessary to check the return status from the second
+  call.)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, these calls return a nonnegative value which is the
+    size (in bytes) of the extended attribute value. On failure, -1 is returned
+    and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="E2BIG"><a class="permalink" href="#E2BIG"><b>E2BIG</b></a></dt>
+  <dd>The size of the attribute value is larger than the maximum size allowed;
+      the attribute cannot be retrieved. This can happen on filesystems that
+      support very large attribute values such as NFSv4, for example.</dd>
+  <dt id="ENODATA"><a class="permalink" href="#ENODATA"><b>ENODATA</b></a></dt>
+  <dd>The named attribute does not exist, or the process has no access to this
+      attribute.</dd>
+  <dt id="ENOTSUP"><a class="permalink" href="#ENOTSUP"><b>ENOTSUP</b></a></dt>
+  <dd>Extended attributes are not supported by the filesystem, or are
+    disabled.</dd>
+  <dt id="ERANGE"><a class="permalink" href="#ERANGE"><b>ERANGE</b></a></dt>
+  <dd>The <i>size</i> of the <i>value</i> buffer is too small to hold the
+      result.</dd>
+</dl>
+<p class="Pp">In addition, the errors documented in <b>stat</b>(2) can also
+    occur.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">These system calls have been available since Linux 2.4; glibc
+    support is provided since glibc 2.3.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These system calls are Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">See <b>listxattr</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>getfattr</b>(1), <b>setfattr</b>(1), <b>listxattr</b>(2),
+    <b>open</b>(2), <b>removexattr</b>(2), <b>setxattr</b>(2), <b>stat</b>(2),
+    <b>symlink</b>(7), <b>xattr</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

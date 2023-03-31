@@ -1,0 +1,138 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   This manpage is Copyright (C) 2006 Jens Axboe
+   and Copyright (C) 2006 Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/905a9416fdb8112324e7c171dcee83da6eab4b73">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>vmsplice(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">vmsplice(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">vmsplice(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">vmsplice - splice user pages to/from a pipe</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#define _GNU_SOURCE</b>         /* See feature_test_macros(7) */
+<b>#include &lt;fcntl.h&gt;</b></pre>
+<pre><b>ssize_t vmsplice(int </b><i>fd</i><b>, const struct iovec *</b><i>iov</i><b>,</b>
+<b>                 size_t </b><i>nr_segs</i><b>, unsigned int </b><i>flags</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">If <i>fd</i> is opened for writing, the <b>vmsplice</b>() system
+    call maps <i>nr_segs</i> ranges of user memory described by <i>iov</i> into
+    a pipe. If <i>fd</i> is opened for reading, the <b>vmsplice</b>() system
+    call fills <i>nr_segs</i> ranges of user memory described by <i>iov</i> from
+    a pipe. The file descriptor <i>fd</i> must refer to a pipe.</p>
+<p class="Pp">The pointer <i>iov</i> points to an array of <i>iovec</i>
+    structures as described in <b>iovec</b>(3type).</p>
+<p class="Pp">The <i>flags</i> argument is a bit mask that is composed by ORing
+    together zero or more of the following values:</p>
+<dl class="Bl-tag">
+  <dt id="SPLICE_F_MOVE"><a class="permalink" href="#SPLICE_F_MOVE"><b>SPLICE_F_MOVE</b></a></dt>
+  <dd>Unused for <b>vmsplice</b>(); see <b>splice</b>(2).</dd>
+  <dt id="SPLICE_F_NONBLOCK"><a class="permalink" href="#SPLICE_F_NONBLOCK"><b>SPLICE_F_NONBLOCK</b></a></dt>
+  <dd>Do not block on I/O; see <b>splice</b>(2) for further details.</dd>
+  <dt id="SPLICE_F_MORE"><a class="permalink" href="#SPLICE_F_MORE"><b>SPLICE_F_MORE</b></a></dt>
+  <dd>Currently has no effect for <b>vmsplice</b>(), but may be implemented in
+      the future; see <b>splice</b>(2).</dd>
+  <dt id="SPLICE_F_GIFT"><a class="permalink" href="#SPLICE_F_GIFT"><b>SPLICE_F_GIFT</b></a></dt>
+  <dd>The user pages are a gift to the kernel. The application may not modify
+      this memory ever, otherwise the page cache and on-disk data may differ.
+      Gifting pages to the kernel means that a subsequent <b>splice</b>(2)
+      <b>SPLICE_F_MOVE</b> can successfully move the pages; if this flag is not
+      specified, then a subsequent <b>splice</b>(2) <b>SPLICE_F_MOVE</b> must
+      copy the pages. Data must also be properly page aligned, both in memory
+      and length.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <b>vmsplice</b>() returns the number
+    of bytes transferred to the pipe. On error, <b>vmsplice</b>() returns -1 and
+    <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd><b>SPLICE_F_NONBLOCK</b> was specified in <i>flags</i>, and the operation
+      would block.</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd><i>fd</i> either not valid, or doesn't refer to a pipe.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>nr_segs</i> is greater than <b>IOV_MAX</b>; or memory not aligned if
+      <b>SPLICE_F_GIFT</b> set.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Out of memory.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>vmsplice</b>() system call first appeared in Linux 2.6.17;
+    library support was added in glibc 2.5.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This system call is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp"><b>vmsplice</b>() follows the other vectorized read/write type
+    functions when it comes to limitations on the number of segments being
+    passed in. This limit is <b>IOV_MAX</b> as defined in
+    <i>&lt;limits.h&gt;</i>. Currently, this limit is 1024.</p>
+<p class="Pp"><b>vmsplice</b>() really supports true splicing only from user
+    memory to a pipe. In the opposite direction, it actually just copies the
+    data to user space. But this makes the interface nice and symmetric and
+    enables people to build on <b>vmsplice</b>() with room for future
+    improvement in performance.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>splice</b>(2), <b>tee</b>(2), <b>pipe</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

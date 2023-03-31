@@ -1,0 +1,164 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/136db1499f2894436c529d3da06ee90c7ac7bdaa">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>GETGROUPS(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">GETGROUPS(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">GETGROUPS(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getgroups — get supplementary group IDs</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;unistd.h&gt;</pre>
+<pre>int getgroups(int <i>gidsetsize</i>, gid_t <i>grouplist</i>[]);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>getgroups</i>() function shall fill in the array
+    <i>grouplist</i> with the current supplementary group IDs of the calling
+    process. It is implementation-defined whether <i>getgroups</i>() also
+    returns the effective group ID in the <i>grouplist</i> array.</p>
+<p class="Pp">The <i>gidsetsize</i> argument specifies the number of elements in
+    the array <i>grouplist</i>. The actual number of group IDs stored in the
+    array shall be returned. The values of array entries with indices greater
+    than or equal to the value returned are undefined.</p>
+<p class="Pp">If <i>gidsetsize</i> is 0, <i>getgroups</i>() shall return the
+    number of group IDs that it would otherwise return without modifying the
+    array pointed to by <i>grouplist</i>.</p>
+<p class="Pp">If the effective group ID of the process is returned with the
+    supplementary group IDs, the value returned shall always be greater than or
+    equal to one and less than or equal to the value of {NGROUPS_MAX}+1.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, the number of supplementary group IDs
+    shall be returned. A return value of -1 indicates failure and <i>errno</i>
+    shall be set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>getgroups</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The <i>gidsetsize</i> argument is non-zero and less than the number of
+      group IDs that would have been returned.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Getting_the_Supplementary_Group_IDs_of_the_Calling_Process"><a class="permalink" href="#Getting_the_Supplementary_Group_IDs_of_the_Calling_Process">Getting
+  the Supplementary Group IDs of the Calling Process</a></h2>
+<p class="Pp">The following example places the current supplementary group IDs
+    of the calling process into the <i>group</i> array.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;sys/types.h&gt;
+#include &lt;unistd.h&gt;
+...
+gid_t *group;
+int nogroups;
+long ngroups_max;</pre>
+<pre>ngroups_max = sysconf(_SC_NGROUPS_MAX) + 1;
+group = (gid_t *)malloc(ngroups_max *sizeof(gid_t));</pre>
+<pre>ngroups = getgroups(ngroups_max, group);</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The related function <i>setgroups</i>() is a privileged operation
+    and therefore is not covered by this volume of POSIX.1‐2017.</p>
+<p class="Pp">As implied by the definition of supplementary groups, the
+    effective group ID may appear in the array returned by <i>getgroups</i>() or
+    it may be returned only by <i>getegid</i>(). Duplication may exist, but the
+    application needs to call <i>getegid</i>() to be sure of getting all of the
+    information. Various implementation variations and administrative sequences
+    cause the set of groups appearing in the result of <i>getgroups</i>() to
+    vary in order and as to whether the effective group ID is included, even
+    when the set of groups is the same (in the mathematical sense of ``set'').
+    (The history of a process and its parents could affect the details of the
+    result.)</p>
+<p class="Pp">Application developers should note that {NGROUPS_MAX} is not
+    necessarily a constant on all implementations.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>getegid</i>()</i>, <i><i>setgid</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;sys_types.h&gt;</b></i>, <i><b>&lt;unistd.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

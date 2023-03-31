@@ -1,0 +1,210 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/19be23a0ce635fc22deaf081fe0b6cb249851d90">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>strfromd(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">strfromd(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">strfromd(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">strfromd, strfromf, strfroml - convert a floating-point value into
+    a string</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;stdlib.h&gt;</b></pre>
+<pre><b>int strfromd(char </b><i>str</i><b>[restrict .</b><i>n</i><b>], size_t </b><i>n</i><b>,</b>
+<b>             const char *restrict </b><i>format</i><b>, double </b><i>fp</i><b>);</b>
+<b>int strfromf(char </b><i>str</i><b>[restrict .</b><i>n</i><b>], size_t </b><i>n</i><b>,</b>
+<b>             const char *restrict </b><i>format</i><b>, float </b><i>fp</i><b>);</b>
+<b>int strfroml(char </b><i>str</i><b>[restrict .</b><i>n</i><b>], size_t </b><i>n</i><b>,</b>
+<b>             const char *restrict </b><i>format</i><b>, long double </b><i>fp</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>strfromd</b>(), <b>strfromf</b>(), <b>strfroml</b>():</p>
+<pre><br>
+    __STDC_WANT_IEC_60559_BFP_EXT__</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">These functions convert a floating-point value, <i>fp</i>, into a
+    string of characters, <i>str</i>, with a configurable <i>format</i> string.
+    At most <i>n</i> characters are stored into <i>str</i>.</p>
+<p class="Pp">The terminating null byte ('\0') is written if and only if
+    <i>n</i> is sufficiently large, otherwise the written string is truncated at
+    <i>n</i> characters.</p>
+<p class="Pp">The <b>strfromd</b>(), <b>strfromf</b>(), and <b>strfroml</b>()
+    functions are equivalent to</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>snprintf(str, n, format, fp);
+</pre>
+<br>
+<p class="Pp">except for the <i>format</i> string.</p>
+<section class="Ss">
+<h2 class="Ss" id="Format_of_the_format_string"><a class="permalink" href="#Format_of_the_format_string">Format
+  of the format string</a></h2>
+<p class="Pp">The <i>format</i> string must start with the character '%'. This
+    is followed by an optional precision which starts with the period character
+    (.), followed by an optional decimal integer. If no integer is specified
+    after the period character, a precision of zero is used. Finally, the format
+    string should have one of the conversion specifiers <b>a</b>, <b>A</b>,
+    <b>e</b>, <b>E</b>, <b>f</b>, <b>F</b>, <b>g</b>, or <b>G</b>.</p>
+<p class="Pp">The conversion specifier is applied based on the floating-point
+    type indicated by the function suffix. Therefore, unlike <b>snprintf</b>(),
+    the format string does not have a length modifier character. See
+    <b>snprintf</b>(3) for a detailed description of these conversion
+    specifiers.</p>
+<p class="Pp">The implementation conforms to the C99 standard on conversion of
+    NaN and infinity values:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">If <i>fp</i> is a NaN, +NaN, or -NaN, and <b>f</b> (or
+  <b>a</b>, <b>e</b>, <b>g</b>) is the conversion specifier, the conversion is
+  to "nan", "nan", or "-nan", respectively. If
+  <b>F</b> (or <b>A</b>, <b>E</b>, <b>G</b>) is the conversion specifier, the
+  conversion is to "NAN" or "-NAN".
+<p class="Pp">Likewise if <i>fp</i> is infinity, it is converted to [-]inf or
+    [-]INF.</p>
+</div>
+<p class="Pp">A malformed <i>format</i> string results in undefined
+  behavior.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <b>strfromd</b>(), <b>strfromf</b>(), and <b>strfroml</b>()
+    functions return the number of characters that would have been written in
+    <i>str</i> if <i>n</i> had enough space, not counting the terminating null
+    byte. Thus, a return value of <i>n</i> or greater means that the output was
+    truncated.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7) and the <b>POSIX Safety Concepts</b> section in GNU C
+    Library manual.</p>
+<p class="Pp"></p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td rowspan="3">strfromd (), strfromf (), strfroml ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe locale</td>
+  </tr>
+  <tr>
+    <td>Async-signal safety</td>
+    <td>AS-Unsafe heap</td>
+  </tr>
+  <tr>
+    <td>Async-cancel safety</td>
+    <td>AC-Unsafe mem</td>
+  </tr>
+</tbody></table>
+<p class="Pp">Note: these attributes are preliminary.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>strfromd</b>(), <b>strfromf</b>(), and <b>strfroml</b>()
+    functions are available since glibc 2.25.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">C99, ISO/IEC TS 18661-1.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The <b>strfromd</b>(), <b>strfromf</b>(), and <b>strfroml</b>()
+    functions take account of the <b>LC_NUMERIC</b> category of the current
+    locale.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">To convert the value 12.1 as a float type to a string using
+    decimal notation, resulting in "12.100000":</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>#define __STDC_WANT_IEC_60559_BFP_EXT__
+#include &lt;stdlib.h&gt;
+int ssize = 10;
+char s[ssize];
+strfromf(s, ssize, "%f", 12.1);
+</pre>
+<br>
+<p class="Pp">To convert the value 12.3456 as a float type to a string using
+    decimal notation with two digits of precision, resulting in
+    "12.35":</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>#define __STDC_WANT_IEC_60559_BFP_EXT__
+#include &lt;stdlib.h&gt;
+int ssize = 10;
+char s[ssize];
+strfromf(s, ssize, "%.2f", 12.3456);
+</pre>
+<br>
+<p class="Pp">To convert the value 12.345e19 as a double type to a string using
+    scientific notation with zero digits of precision, resulting in
+    "1E+20":</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>#define __STDC_WANT_IEC_60559_BFP_EXT__
+#include &lt;stdlib.h&gt;
+int ssize = 10;
+char s[ssize];
+strfromd(s, ssize, "%.E", 12.345e19);
+</pre>
+<br>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>atof</b>(3), <b>snprintf</b>(3), <b>strtod</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

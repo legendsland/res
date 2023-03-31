@@ -1,0 +1,204 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   This manpage is Copyright (C) 1992 Drew Eckhardt;
+   and Copyright (C) 1993 Michael Haardt, Ian Jackson.
+   and Copyright (C) 2016 Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Modified Wed Jul 21 22:40:25 1993 by Rik Faith <faith@cs.unc.edu>
+   Modified Sat Feb 18 15:27:48 1995 by Michael Haardt
+   Modified Sun Apr 14 11:40:50 1996 by Andries Brouwer <aeb@cwi.nl>:
+     corrected description of effect on locks (thanks to
+     Tigran Aivazian <tigran@sco.com>).
+   Modified Fri Jan 31 16:21:46 1997 by Eric S. Raymond <esr@thyrsus.com>
+   Modified 2000-07-22 by Nicol\[u00E1]s Lichtmaier <nick@debian.org>
+     added note about close(2) not guaranteeing that data is safe on close.
+   --><head>
+<meta name="dc.identifier" content="res/e9ccb7e1d94f855ec67f85addf64a0133c13100b">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>close(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">close(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">close(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">close - close a file descriptor</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int close(int </b><i>fd</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>close</b>() closes a file descriptor, so that it no longer
+    refers to any file and may be reused. Any record locks (see <b>fcntl</b>(2))
+    held on the file it was associated with, and owned by the process, are
+    removed (regardless of the file descriptor that was used to obtain the
+    lock).</p>
+<p class="Pp">If <i>fd</i> is the last file descriptor referring to the
+    underlying open file description (see <b>open</b>(2)), the resources
+    associated with the open file description are freed; if the file descriptor
+    was the last reference to a file which has been removed using
+    <b>unlink</b>(2), the file is deleted.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp"><b>close</b>() returns zero on success. On error, -1 is returned,
+    and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd><i>fd</i> isn't a valid open file descriptor.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The <b>close</b>() call was interrupted by a signal; see
+    <b>signal</b>(7).</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>An I/O error occurred.</dd>
+  <dt id="ENOSPC"><a class="permalink" href="#ENOSPC"><b>ENOSPC</b>,
+    <b>EDQUOT</b></a></dt>
+  <dd>On NFS, these errors are not normally reported against the first write
+      which exceeds the available storage space, but instead against a
+      subsequent <b>write</b>(2), <b>fsync</b>(2), or <b>close</b>().</dd>
+</dl>
+<p class="Pp">See NOTES for a discussion of why <b>close</b>() should not be
+    retried after an error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, SVr4, 4.3BSD.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">A successful close does not guarantee that the data has been
+    successfully saved to disk, as the kernel uses the buffer cache to defer
+    writes. Typically, filesystems do not flush buffers when a file is closed.
+    If you need to be sure that the data is physically stored on the underlying
+    disk, use <b>fsync</b>(2). (It will depend on the disk hardware at this
+    point.)</p>
+<p class="Pp">The close-on-exec file descriptor flag can be used to ensure that
+    a file descriptor is automatically closed upon a successful
+    <b>execve</b>(2); see <b>fcntl</b>(2) for details.</p>
+<section class="Ss">
+<h2 class="Ss" id="Multithreaded_processes_and_close()"><a class="permalink" href="#Multithreaded_processes_and_close()">Multithreaded
+  processes and close()</a></h2>
+<p class="Pp">It is probably unwise to close file descriptors while they may be
+    in use by system calls in other threads in the same process. Since a file
+    descriptor may be reused, there are some obscure race conditions that may
+    cause unintended side effects.</p>
+<p class="Pp">Furthermore, consider the following scenario where two threads are
+    performing operations on the same file descriptor:</p>
+<dl class="Bl-tag">
+  <dt>(1)</dt>
+  <dd>One thread is blocked in an I/O system call on the file descriptor. For
+      example, it is trying to <b>write</b>(2) to a pipe that is already full,
+      or trying to <b>read</b>(2) from a stream socket which currently has no
+      available data.</dd>
+  <dt>(2)</dt>
+  <dd>Another thread closes the file descriptor.</dd>
+</dl>
+<p class="Pp">The behavior in this situation varies across systems. On some
+    systems, when the file descriptor is closed, the blocking system call
+    returns immediately with an error.</p>
+<p class="Pp">On Linux (and possibly some other systems), the behavior is
+    different: the blocking I/O system call holds a reference to the underlying
+    open file description, and this reference keeps the description open until
+    the I/O system call completes. (See <b>open</b>(2) for a discussion of open
+    file descriptions.) Thus, the blocking system call in the first thread may
+    successfully complete after the <b>close</b>() in the second thread.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Dealing_with_error_returns_from_close()"><a class="permalink" href="#Dealing_with_error_returns_from_close()">Dealing
+  with error returns from close()</a></h2>
+<p class="Pp">A careful programmer will check the return value of
+    <b>close</b>(), since it is quite possible that errors on a previous
+    <b>write</b>(2) operation are reported only on the final <b>close</b>() that
+    releases the open file description. Failing to check the return value when
+    closing a file may lead to <i>silent</i> loss of data. This can especially
+    be observed with NFS and with disk quota.</p>
+<p class="Pp">Note, however, that a failure return should be used only for
+    diagnostic purposes (i.e., a warning to the application that there may still
+    be I/O pending or there may have been failed I/O) or remedial purposes
+    (e.g., writing the file once more or creating a backup).</p>
+<p class="Pp">Retrying the <b>close</b>() after a failure return is the wrong
+    thing to do, since this may cause a reused file descriptor from another
+    thread to be closed. This can occur because the Linux kernel <i>always</i>
+    releases the file descriptor early in the close operation, freeing it for
+    reuse; the steps that may return an error, such as flushing data to the
+    filesystem or device, occur only later in the close operation.</p>
+<p class="Pp">Many other implementations similarly always close the file
+    descriptor (except in the case of <b>EBADF</b>, meaning that the file
+    descriptor was invalid) even if they subsequently report an error on return
+    from <b>close</b>(). POSIX.1 is currently silent on this point, but there
+    are plans to mandate this behavior in the next major release of the
+    standard.</p>
+<p class="Pp">A careful programmer who wants to know about I/O errors may
+    precede <b>close</b>() with a call to <b>fsync</b>(2).</p>
+<p class="Pp">The <b>EINTR</b> error is a somewhat special case. Regarding the
+    <b>EINTR</b> error, POSIX.1-2008 says:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">If <b>close</b>() is interrupted by a signal that is to
+  be caught, it shall return -1 with <i>errno</i> set to <b>EINTR</b> and the
+  state of <i>fildes</i> is unspecified.</div>
+<p class="Pp">This permits the behavior that occurs on Linux and many other
+    implementations, where, as with other errors that may be reported by
+    <b>close</b>(), the file descriptor is guaranteed to be closed. However, it
+    also permits another possibility: that the implementation returns an
+    <b>EINTR</b> error and keeps the file descriptor open. (According to its
+    documentation, HP-UX's <b>close</b>() does this.) The caller must then once
+    more use <b>close</b>() to close the file descriptor, to avoid file
+    descriptor leaks. This divergence in implementation behaviors provides a
+    difficult hurdle for portable applications, since on many implementations,
+    <b>close</b>() must not be called again after an <b>EINTR</b> error, and on
+    at least one, <b>close</b>() must be called again. There are plans to
+    address this conundrum for the next major release of the POSIX.1
+  standard.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>close_range</b>(2), <b>fcntl</b>(2), <b>fsync</b>(2),
+    <b>open</b>(2), <b>shutdown</b>(2), <b>unlink</b>(2), <b>fclose</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

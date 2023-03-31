@@ -1,0 +1,215 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/321c07c5695d70a2b6b65727b22170ebcafbbfbd">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>GETPRIORITY(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">GETPRIORITY(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">GETPRIORITY(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getpriority, setpriority — get and set the nice value</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;sys/resource.h&gt;</pre>
+<pre>int getpriority(int <i>which</i>, id_t <i>who</i>);
+int setpriority(int <i>which</i>, id_t <i>who</i>, int <i>value</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>getpriority</i>() function shall obtain the nice value of a
+    process, process group, or user. The <i>setpriority</i>() function shall set
+    the nice value of a process, process group, or user to
+  <i>value</i>+{NZERO}.</p>
+<p class="Pp">Target processes are specified by the values of the <i>which</i>
+    and <i>who</i> arguments. The <i>which</i> argument may be one of the
+    following values: PRIO_PROCESS, PRIO_PGRP, or PRIO_USER, indicating that the
+    <i>who</i> argument is to be interpreted as a process ID, a process group
+    ID, or an effective user ID, respectively. A 0 value for the <i>who</i>
+    argument specifies the current process, process group, or user.</p>
+<p class="Pp">The nice value set with <i>setpriority</i>() shall be applied to
+    the process. If the process is multi-threaded, the nice value shall affect
+    all system scope threads in the process.</p>
+<p class="Pp">If more than one process is specified, <i>getpriority</i>() shall
+    return value {NZERO} less than the lowest nice value pertaining to any of
+    the specified processes, and <i>setpriority</i>() shall set the nice values
+    of all of the specified processes to <i>value</i>+{NZERO}.</p>
+<p class="Pp">The default nice value is {NZERO}; lower nice values shall cause
+    more favorable scheduling. While the range of valid nice values is
+    [0,{NZERO}*2-1], implementations may enforce more restrictive limits. If
+    <i>value</i>+{NZERO} is less than the system's lowest supported nice value,
+    <i>setpriority</i>() shall set the nice value to the lowest supported value;
+    if <i>value</i>+{NZERO} is greater than the system's highest supported nice
+    value, <i>setpriority</i>() shall set the nice value to the highest
+    supported value.</p>
+<p class="Pp">Only a process with appropriate privileges can lower its nice
+    value.</p>
+<p class="Pp">Any processes or threads using SCHED_FIFO or SCHED_RR shall be
+    unaffected by a call to <i>setpriority</i>(). This is not considered an
+    error. A process which subsequently reverts to SCHED_OTHER need not have its
+    priority affected by such a <i>setpriority</i>() call.</p>
+<p class="Pp">The effect of changing the nice value may vary depending on the
+    process-scheduling algorithm in effect.</p>
+<p class="Pp">Since <i>getpriority</i>() can return the value -1 upon successful
+    completion, it is necessary to set <i>errno</i> to 0 prior to a call to
+    <i>getpriority</i>(). If <i>getpriority</i>() returns the value -1, then
+    <i>errno</i> can be checked to see if an error occurred or if the value is a
+    legitimate nice value.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>getpriority</i>() shall return an
+    integer in the range -{NZERO} to {NZERO}-1. Otherwise, -1 shall be returned
+    and <i>errno</i> set to indicate the error.</p>
+<p class="Pp">Upon successful completion, <i>setpriority</i>() shall return 0;
+    otherwise, -1 shall be returned and <i>errno</i> set to indicate the error.
+  <br>
+</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>getpriority</i>() and <i>setpriority</i>() functions shall
+    fail if:</p>
+<dl class="Bl-tag">
+  <dt id="ESRCH"><a class="permalink" href="#ESRCH"><b>ESRCH</b></a></dt>
+  <dd>No process could be located using the <i>which</i> and <i>who</i> argument
+      values specified.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The value of the <i>which</i> argument was not recognized, or the value of
+      the <i>who</i> argument is not a valid process ID, process group ID, or
+      user ID.</dd>
+</dl>
+<p class="Pp">In addition, <i>setpriority</i>() may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>A process was located, but neither the real nor effective user ID of the
+      executing process match the effective user ID of the process whose nice
+      value is being changed.</dd>
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>A request was made to change the nice value to a lower numeric value and
+      the current process does not have appropriate privileges.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Using_getpriority("><a class="permalink" href="#Using_getpriority(">Using
+  getpriority()</a></h2>
+<p class="Pp">The following example returns the current scheduling priority for
+    the process ID returned by the call to <i>getpid</i>().</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;sys/resource.h&gt;
+...
+int which = PRIO_PROCESS;
+id_t pid;
+int ret;</pre>
+<pre>pid = getpid();
+ret = getpriority(which, pid);</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Using_setpriority("><a class="permalink" href="#Using_setpriority(">Using
+  setpriority()</a></h2>
+<p class="Pp">The following example sets the priority for the current process ID
+    to -20.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;sys/resource.h&gt;
+...
+int which = PRIO_PROCESS;
+id_t pid;
+int priority = -20;
+int ret;</pre>
+<pre>pid = getpid();
+ret = setpriority(which, pid, priority);</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The <i>getpriority</i>() and <i>setpriority</i>() functions work
+    with an offset nice value (nice value -{NZERO}). The nice value is in the
+    range [0,2*{NZERO} -1], while the return value for <i>getpriority</i>() and
+    the third parameter for <i>setpriority</i>() are in the range
+    [-{NZERO},{NZERO} -1].</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>nice</i>()</i>, <i><i>sched_get_priority_max</i>()</i>,
+    <i><i>sched_setscheduler</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;sys_resource.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

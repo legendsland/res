@@ -1,0 +1,160 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 1990, 1993
+  	The Regents of the University of California.  All rights reserved.
+  
+   SPDX-License-Identifier: BSD-4-Clause-UC
+  
+  	@(#)hash.3	8.6 (Berkeley) 8/18/94
+   --><head>
+<meta name="dc.identifier" content="res/958546e6f633a4c2fde409d3b7a37b18654351aa">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>hash(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">hash(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">hash(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">hash - hash database access method</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/types.h&gt;</b>
+<b>#include &lt;db.h&gt;</b>
+</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><i>Note well</i>: This page documents interfaces provided up until
+    glibc 2.1. Since glibc 2.2, glibc no longer provides these interfaces.
+    Probably, you are looking for the APIs provided by the <i>libdb</i> library
+    instead.</p>
+<p class="Pp">The routine <b>dbopen</b>(3) is the library interface to database
+    files. One of the supported file formats is hash files. The general
+    description of the database access methods is in <b>dbopen</b>(3), this
+    manual page describes only the hash-specific information.</p>
+<p class="Pp">The hash data structure is an extensible, dynamic hashing
+  scheme.</p>
+<p class="Pp">The access-method-specific data structure provided to
+    <b>dbopen</b>(3) is defined in the <i>&lt;db.h&gt;</i> include file as
+    follows:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>typedef struct {
+<br>
+    unsigned int       bsize;
+<br>
+    unsigned int       ffactor;
+<br>
+    unsigned int       nelem;
+<br>
+    unsigned int       cachesize;
+<br>
+    uint32_t         (*hash)(const void *, size_t);
+<br>
+    int         lorder;
+} HASHINFO;
+</pre>
+<br>
+<p class="Pp">The elements of this structure are as follows:</p>
+<dl class="Bl-tag">
+  <dt id="bsize"><a class="permalink" href="#bsize"><i>bsize</i></a></dt>
+  <dd>defines the hash table bucket size, and is, by default, 256 bytes. It may
+      be preferable to increase the page size for disk-resident tables and
+      tables with large data items.</dd>
+  <dt id="ffactor"><a class="permalink" href="#ffactor"><i>ffactor</i></a></dt>
+  <dd>indicates a desired density within the hash table. It is an approximation
+      of the number of keys allowed to accumulate in any one bucket, determining
+      when the hash table grows or shrinks. The default value is 8.</dd>
+  <dt id="nelem"><a class="permalink" href="#nelem"><i>nelem</i></a></dt>
+  <dd>is an estimate of the final size of the hash table. If not set or set too
+      low, hash tables will expand gracefully as keys are entered, although a
+      slight performance degradation may be noticed. The default value is
+    1.</dd>
+  <dt id="cachesize"><a class="permalink" href="#cachesize"><i>cachesize</i></a></dt>
+  <dd>is the suggested maximum size, in bytes, of the memory cache. This value
+      is <i>only advisory</i>, and the access method will allocate more memory
+      rather than fail.</dd>
+  <dt id="hash"><a class="permalink" href="#hash"><i>hash</i></a></dt>
+  <dd>is a user-defined hash function. Since no hash function performs equally
+      well on all possible data, the user may find that the built-in hash
+      function does poorly on a particular data set. A user-specified hash
+      functions must take two arguments (a pointer to a byte string and a
+      length) and return a 32-bit quantity to be used as the hash value.</dd>
+  <dt id="lorder"><a class="permalink" href="#lorder"><i>lorder</i></a></dt>
+  <dd>is the byte order for integers in the stored database metadata. The number
+      should represent the order as an integer; for example, big endian order
+      would be the number 4,321. If <i>lorder</i> is 0 (no order is specified),
+      the current host order is used. If the file already exists, the specified
+      value is ignored and the value specified when the tree was created is
+      used.</dd>
+</dl>
+<p class="Pp">If the file already exists (and the <b>O_TRUNC</b> flag is not
+    specified), the values specified for <i>bsize</i>, <i>ffactor</i>,
+    <i>lorder</i>, and <i>nelem</i> are ignored and the values specified when
+    the tree was created are used.</p>
+<p class="Pp">If a hash function is specified, <i>hash_open</i> attempts to
+    determine if the hash function specified is the same as the one with which
+    the database was created, and fails if it is not.</p>
+<p class="Pp">Backward-compatible interfaces to the routines described in
+    <b>dbm</b>(3), and <b>ndbm</b>(3) are provided, however these interfaces are
+    not compatible with previous file formats.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>hash</i> access method routines may fail and set
+    <i>errno</i> for any of the errors specified for the library routine
+    <b>dbopen</b>(3).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">Only big and little endian byte order are supported.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>btree</b>(3), <b>dbopen</b>(3), <b>mpool</b>(3),
+    <b>recno</b>(3)</p>
+<p class="Pp"><i>Dynamic Hash Tables</i>, Per-Ake Larson, Communications of the
+    ACM, April 1988.</p>
+<p class="Pp"><i>A New Hash Package for UNIX</i>, Margo Seltzer, USENIX
+    Proceedings, Winter 1991.</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">4.4 Berkeley Distribution</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

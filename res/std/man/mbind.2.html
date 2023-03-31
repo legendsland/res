@@ -1,0 +1,303 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright 2003,2004 Andi Kleen, SuSE Labs.
+   and Copyright 2007 Lee Schermerhorn, Hewlett Packard
+  
+   %%%LICENSE_START(VERBATIM_PROF)
+   Permission is granted to make and distribute verbatim copies of this
+   manual provided the copyright notice and this permission notice are
+   preserved on all copies.
+  
+   Permission is granted to copy and distribute modified versions of this
+   manual under the conditions for verbatim copying, provided that the
+   entire resulting derived work is distributed under the terms of a
+   permission notice identical to this one.
+  
+   Since the Linux kernel and libraries are constantly changing, this
+   manual page may be incorrect or out-of-date.  The author(s) assume no
+   responsibility for errors or omissions, or for damages resulting from
+   the use of the information contained herein.
+  
+   Formatted or processed versions of this manual, if unaccompanied by
+   the source, must acknowledge the copyright and authors of this work.
+   %%%LICENSE_END
+  
+   2006-02-03, mtk, substantial wording changes and other improvements
+   2007-08-27, Lee Schermerhorn <Lee.Schermerhorn@hp.com>
+  	more precise specification of behavior.
+  
+   FIXME
+   Linux 3.8 added MPOL_MF_LAZY, which needs to be documented.
+   Does it also apply for move_pages()?
+  
+                  commit b24f53a0bea38b266d219ee651b22dba727c44ae
+                  Author: Lee Schermerhorn <lee.schermerhorn@hp.com>
+                  Date:   Thu Oct 25 14:16:32 2012 +0200
+   --><head>
+<meta name="dc.identifier" content="res/4ba77659bd27b4aa67681cfdcab84e224c50fe42">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>mbind(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">mbind(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">mbind(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">mbind - set memory policy for a memory range</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">NUMA (Non-Uniform Memory Access) policy library (<i>libnuma</i>,
+    <i>-lnuma</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;numaif.h&gt;</b></pre>
+<pre><b>long mbind(void </b><i>addr</i><b>[.</b><i>len</i><b>], unsigned long </b><i>len</i><b>, int </b><i>mode</i><b>,</b>
+<b>           const unsigned long </b><i>nodemask</i><b>[(.</b><i>maxnode</i><b> + ULONG_WIDTH - 1)</b>
+<b>                                        / ULONG_WIDTH],</b>
+<b>           unsigned long </b><i>maxnode</i><b>, unsigned int </b><i>flags</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>mbind</b>() sets the NUMA memory policy, which consists of a
+    policy mode and zero or more nodes, for the memory range starting with
+    <i>addr</i> and continuing for <i>len</i> bytes. The memory policy defines
+    from which node memory is allocated.</p>
+<p class="Pp">If the memory range specified by the <i>addr</i> and <i>len</i>
+    arguments includes an "anonymous" region of memory—that is
+    a region of memory created using the <b>mmap</b>(2) system call with the
+    <b>MAP_ANONYMOUS</b>—or a memory-mapped file, mapped using the
+    <b>mmap</b>(2) system call with the <b>MAP_PRIVATE</b> flag, pages will be
+    allocated only according to the specified policy when the application writes
+    (stores) to the page. For anonymous regions, an initial read access will use
+    a shared page in the kernel containing all zeros. For a file mapped with
+    <b>MAP_PRIVATE</b>, an initial read access will allocate pages according to
+    the memory policy of the thread that causes the page to be allocated. This
+    may not be the thread that called <b>mbind</b>().</p>
+<p class="Pp">The specified policy will be ignored for any <b>MAP_SHARED</b>
+    mappings in the specified memory range. Rather the pages will be allocated
+    according to the memory policy of the thread that caused the page to be
+    allocated. Again, this may not be the thread that called <b>mbind</b>().</p>
+<p class="Pp">If the specified memory range includes a shared memory region
+    created using the <b>shmget</b>(2) system call and attached using the
+    <b>shmat</b>(2) system call, pages allocated for the anonymous or shared
+    memory region will be allocated according to the policy specified,
+    regardless of which process attached to the shared memory segment causes the
+    allocation. If, however, the shared memory region was created with the
+    <b>SHM_HUGETLB</b> flag, the huge pages will be allocated according to the
+    policy specified only if the page allocation is caused by the process that
+    calls <b>mbind</b>() for that region.</p>
+<p class="Pp">By default, <b>mbind</b>() has an effect only for new allocations;
+    if the pages inside the range have been already touched before setting the
+    policy, then the policy has no effect. This default behavior may be
+    overridden by the <b>MPOL_MF_MOVE</b> and <b>MPOL_MF_MOVE_ALL</b> flags
+    described below.</p>
+<p class="Pp">The <i>mode</i> argument must specify one of <b>MPOL_DEFAULT</b>,
+    <b>MPOL_BIND</b>, <b>MPOL_INTERLEAVE</b>, <b>MPOL_PREFERRED</b>, or
+    <b>MPOL_LOCAL</b> (which are described in detail below). All policy modes
+    except <b>MPOL_DEFAULT</b> require the caller to specify the node or nodes
+    to which the mode applies, via the <i>nodemask</i> argument.</p>
+<p class="Pp">The <i>mode</i> argument may also include an optional <i>mode
+    flag</i>. The supported <i>mode flags</i> are:</p>
+<dl class="Bl-tag">
+  <dt id="MPOL_F_STATIC_NODES"><a class="permalink" href="#MPOL_F_STATIC_NODES"><b>MPOL_F_STATIC_NODES</b>
+    (since Linux-2.6.26)</a></dt>
+  <dd>A nonempty <i>nodemask</i> specifies physical node IDs. Linux does not
+      remap the <i>nodemask</i> when the thread moves to a different cpuset
+      context, nor when the set of nodes allowed by the thread's current cpuset
+      context changes.</dd>
+  <dt id="MPOL_F_RELATIVE_NODES"><a class="permalink" href="#MPOL_F_RELATIVE_NODES"><b>MPOL_F_RELATIVE_NODES</b>
+    (since Linux-2.6.26)</a></dt>
+  <dd>A nonempty <i>nodemask</i> specifies node IDs that are relative to the set
+      of node IDs allowed by the thread's current cpuset.</dd>
+</dl>
+<p class="Pp"><i>nodemask</i> points to a bit mask of nodes containing up to
+    <i>maxnode</i> bits. The bit mask size is rounded to the next multiple of
+    <i>sizeof(unsigned long)</i>, but the kernel will use bits only up to
+    <i>maxnode</i>. A NULL value of <i>nodemask</i> or a <i>maxnode</i> value of
+    zero specifies the empty set of nodes. If the value of <i>maxnode</i> is
+    zero, the <i>nodemask</i> argument is ignored. Where a <i>nodemask</i> is
+    required, it must contain at least one node that is on-line, allowed by the
+    thread's current cpuset context (unless the <b>MPOL_F_STATIC_NODES</b> mode
+    flag is specified), and contains memory.</p>
+<p class="Pp">The <i>mode</i> argument must include one of the following
+  values:</p>
+<dl class="Bl-tag">
+  <dt id="MPOL_DEFAULT"><a class="permalink" href="#MPOL_DEFAULT"><b>MPOL_DEFAULT</b></a></dt>
+  <dd>This mode requests that any nondefault policy be removed, restoring
+      default behavior. When applied to a range of memory via <b>mbind</b>(),
+      this means to use the thread memory policy, which may have been set with
+      <b>set_mempolicy</b>(2). If the mode of the thread memory policy is also
+      <b>MPOL_DEFAULT</b>, the system-wide default policy will be used. The
+      system-wide default policy allocates pages on the node of the CPU that
+      triggers the allocation. For <b>MPOL_DEFAULT</b>, the <i>nodemask</i> and
+      <i>maxnode</i> arguments must be specify the empty set of nodes.</dd>
+  <dt id="MPOL_BIND"><a class="permalink" href="#MPOL_BIND"><b>MPOL_BIND</b></a></dt>
+  <dd>This mode specifies a strict policy that restricts memory allocation to
+      the nodes specified in <i>nodemask</i>. If <i>nodemask</i> specifies more
+      than one node, page allocations will come from the node with sufficient
+      free memory that is closest to the node where the allocation takes place.
+      Pages will not be allocated from any node not specified in the IR nodemask
+      . (Before Linux 2.6.26, page allocations came from the node with the
+      lowest numeric node ID first, until that node contained no free memory.
+      Allocations then came from the node with the next highest node ID
+      specified in <i>nodemask</i> and so forth, until none of the specified
+      nodes contained free memory.)</dd>
+  <dt id="MPOL_INTERLEAVE"><a class="permalink" href="#MPOL_INTERLEAVE"><b>MPOL_INTERLEAVE</b></a></dt>
+  <dd>This mode specifies that page allocations be interleaved across the set of
+      nodes specified in <i>nodemask</i>. This optimizes for bandwidth instead
+      of latency by spreading out pages and memory accesses to those pages
+      across multiple nodes. To be effective the memory area should be fairly
+      large, at least 1&nbsp;MB or bigger with a fairly uniform access
+      pattern. Accesses to a single page of the area will still be limited to
+      the memory bandwidth of a single node.</dd>
+  <dt id="MPOL_PREFERRED"><a class="permalink" href="#MPOL_PREFERRED"><b>MPOL_PREFERRED</b></a></dt>
+  <dd>This mode sets the preferred node for allocation. The kernel will try to
+      allocate pages from this node first and fall back to other nodes if the
+      preferred nodes is low on free memory. If <i>nodemask</i> specifies more
+      than one node ID, the first node in the mask will be selected as the
+      preferred node. If the <i>nodemask</i> and <i>maxnode</i> arguments
+      specify the empty set, then the memory is allocated on the node of the CPU
+      that triggered the allocation.</dd>
+  <dt id="MPOL_LOCAL"><a class="permalink" href="#MPOL_LOCAL"><b>MPOL_LOCAL</b>
+    (since Linux 3.8)</a></dt>
+  <dd>This mode specifies "local allocation"; the memory is allocated
+      on the node of the CPU that triggered the allocation (the "local
+      node"). The <i>nodemask</i> and <i>maxnode</i> arguments must specify
+      the empty set. If the "local node" is low on free memory, the
+      kernel will try to allocate memory from other nodes. The kernel will
+      allocate memory from the "local node" whenever memory for this
+      node is available. If the "local node" is not allowed by the
+      thread's current cpuset context, the kernel will try to allocate memory
+      from other nodes. The kernel will allocate memory from the "local
+      node" whenever it becomes allowed by the thread's current cpuset
+      context. By contrast, <b>MPOL_DEFAULT</b> reverts to the memory policy of
+      the thread (which may be set via <b>set_mempolicy</b>(2)); that policy may
+      be something other than "local allocation".</dd>
+</dl>
+<p class="Pp">If <b>MPOL_MF_STRICT</b> is passed in <i>flags</i> and <i>mode</i>
+    is not <b>MPOL_DEFAULT</b>, then the call fails with the error <b>EIO</b> if
+    the existing pages in the memory range don't follow the policy.</p>
+<p class="Pp">If <b>MPOL_MF_MOVE</b> is specified in <i>flags</i>, then the
+    kernel will attempt to move all the existing pages in the memory range so
+    that they follow the policy. Pages that are shared with other processes will
+    not be moved. If <b>MPOL_MF_STRICT</b> is also specified, then the call
+    fails with the error <b>EIO</b> if some pages could not be moved.</p>
+<p class="Pp">If <b>MPOL_MF_MOVE_ALL</b> is passed in <i>flags</i>, then the
+    kernel will attempt to move all existing pages in the memory range
+    regardless of whether other processes use the pages. The calling thread must
+    be privileged (<b>CAP_SYS_NICE</b>) to use this flag. If
+    <b>MPOL_MF_STRICT</b> is also specified, then the call fails with the error
+    <b>EIO</b> if some pages could not be moved.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>mbind</b>() returns 0; on error, -1 is returned and
+    <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>Part or all of the memory range specified by <i>nodemask</i> and
+      <i>maxnode</i> points outside your accessible address space. Or, there was
+      an unmapped hole in the specified memory range specified by <i>addr</i>
+      and <i>len</i>.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>An invalid value was specified for <i>flags</i> or <i>mode</i>; or <i>addr
+      + len</i> was less than <i>addr</i>; or <i>addr</i> is not a multiple of
+      the system page size. Or, <i>mode</i> is <b>MPOL_DEFAULT</b> and
+      <i>nodemask</i> specified a nonempty set; or <i>mode</i> is
+      <b>MPOL_BIND</b> or <b>MPOL_INTERLEAVE</b> and <i>nodemask</i> is empty.
+      Or, <i>maxnode</i> exceeds a kernel-imposed limit. Or, <i>nodemask</i>
+      specifies one or more node IDs that are greater than the maximum supported
+      node ID. Or, none of the node IDs specified by <i>nodemask</i> are on-line
+      and allowed by the thread's current cpuset context, or none of the
+      specified nodes contain memory. Or, the <i>mode</i> argument specified
+      both <b>MPOL_F_STATIC_NODES</b> and <b>MPOL_F_RELATIVE_NODES</b>.</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd><b>MPOL_MF_STRICT</b> was specified and an existing page was already on a
+      node that does not follow the policy; or <b>MPOL_MF_MOVE</b> or
+      <b>MPOL_MF_MOVE_ALL</b> was specified and the kernel was unable to move
+      all existing pages in the range.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient kernel memory was available.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The <i>flags</i> argument included the <b>MPOL_MF_MOVE_ALL</b> flag and
+      the caller does not have the <b>CAP_SYS_NICE</b> privilege.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>mbind</b>() system call was added in Linux 2.6.7.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This system call is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">For information on library support, see <b>numa</b>(7).</p>
+<p class="Pp">NUMA policy is not supported on a memory-mapped file range that
+    was mapped with the <b>MAP_SHARED</b> flag.</p>
+<p class="Pp">The <b>MPOL_DEFAULT</b> mode can have different effects for
+    <b>mbind</b>() and <b>set_mempolicy</b>(2). When <b>MPOL_DEFAULT</b> is
+    specified for <b>set_mempolicy</b>(2), the thread's memory policy reverts to
+    the system default policy or local allocation. When <b>MPOL_DEFAULT</b> is
+    specified for a range of memory using <b>mbind</b>(), any pages subsequently
+    allocated for that range will use the thread's memory policy, as set by
+    <b>set_mempolicy</b>(2). This effectively removes the explicit policy from
+    the specified range, "falling back" to a possibly nondefault
+    policy. To select explicit "local allocation" for a memory range,
+    specify a <i>mode</i> of <b>MPOL_LOCAL</b> or <b>MPOL_PREFERRED</b> with an
+    empty set of nodes. This method will work for <b>set_mempolicy</b>(2), as
+    well.</p>
+<p class="Pp">Support for huge page policy was added with Linux 2.6.16. For
+    interleave policy to be effective on huge page mappings the policied memory
+    needs to be tens of megabytes or larger.</p>
+<p class="Pp">Before Linux 5.7. <b>MPOL_MF_STRICT</b> was ignored on huge page
+    mappings.</p>
+<p class="Pp"><b>MPOL_MF_MOVE</b> and <b>MPOL_MF_MOVE_ALL</b> are available only
+    on Linux 2.6.16 and later.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>get_mempolicy</b>(2), <b>getcpu</b>(2), <b>mmap</b>(2),
+    <b>set_mempolicy</b>(2), <b>shmat</b>(2), <b>shmget</b>(2), <b>numa</b>(3),
+    <b>cpuset</b>(7), <b>numa</b>(7), <b>numactl</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

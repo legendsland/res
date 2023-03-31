@@ -1,0 +1,209 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 1980, 1991 Regents of the University of California.
+   All rights reserved.
+  
+   This code is derived from software contributed to Berkeley by
+   the American National Standards Committee X3, on Information
+   Processing Systems.
+  
+   SPDX-License-Identifier: BSD-4-Clause-UC
+  
+       @(#)setbuf.3	6.10 (Berkeley) 6/29/91
+  
+   Converted for Linux, Mon Nov 29 14:55:24 1993, faith@cs.unc.edu
+   Added section to BUGS, Sun Mar 12 22:28:33 MET 1995,
+                     Thomas.Koenig@ciw.uni-karlsruhe.de
+   Correction,  Sun, 11 Apr 1999 15:55:18,
+       Martin Vicente <martin@netadmin.dgac.fr>
+   Correction,  2000-03-03, Andreas Jaeger <aj@suse.de>
+   Added return value for setvbuf, aeb,
+   --><head>
+<meta name="dc.identifier" content="res/22fc813aad7557a9a34bddefd24ab50a0cf71215">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>setbuf(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">setbuf(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">setbuf(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">setbuf, setbuffer, setlinebuf, setvbuf - stream buffering
+    operations</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;stdio.h&gt;</b></pre>
+<pre><b>int setvbuf(FILE *restrict </b><i>stream</i><b>, char </b><i>buf</i><b>[restrict .</b><i>size</i><b>],</b>
+<b>            int </b><i>mode</i><b>, size_t </b><i>size</i><b>);</b></pre>
+<pre><b>void setbuf(FILE *restrict </b><i>stream</i><b>, char *restrict </b><i>buf</i><b>);</b>
+<b>void setbuffer(FILE *restrict </b><i>stream</i><b>, char </b><i>buf</i><b>[restrict .</b><i>size</i><b>],</b>
+<b>            size_t </b><i>size</i><b>);</b>
+<b>void setlinebuf(FILE *</b><i>stream</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>setbuffer</b>(), <b>setlinebuf</b>():</p>
+<pre><br>
+    Since glibc 2.19:
+<br>
+        _DEFAULT_SOURCE
+<br>
+    glibc 2.19 and earlier:
+<br>
+        _BSD_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The three types of buffering available are unbuffered, block
+    buffered, and line buffered. When an output stream is unbuffered,
+    information appears on the destination file or terminal as soon as written;
+    when it is block buffered, many characters are saved up and written as a
+    block; when it is line buffered, characters are saved up until a newline is
+    output or input is read from any stream attached to a terminal device
+    (typically <i>stdin</i>). The function <b>fflush</b>(3) may be used to force
+    the block out early. (See <b>fclose</b>(3).)</p>
+<p class="Pp">Normally all files are block buffered. If a stream refers to a
+    terminal (as <i>stdout</i> normally does), it is line buffered. The standard
+    error stream <i>stderr</i> is always unbuffered by default.</p>
+<p class="Pp">The <b>setvbuf</b>() function may be used on any open stream to
+    change its buffer. The <i>mode</i> argument must be one of the following
+    three macros:</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt><b>_IONBF</b></dt>
+  <dd>unbuffered</dd>
+  <dt><b>_IOLBF</b></dt>
+  <dd>line buffered</dd>
+  <dt><b>_IOFBF</b></dt>
+  <dd>fully buffered</dd>
+</dl>
+</div>
+<p class="Pp">Except for unbuffered files, the <i>buf</i> argument should point
+    to a buffer at least <i>size</i> bytes long; this buffer will be used
+    instead of the current buffer. If the argument <i>buf</i> is NULL, only the
+    mode is affected; a new buffer will be allocated on the next read or write
+    operation. The <b>setvbuf</b>() function may be used only after opening a
+    stream and before any other operations have been performed on it.</p>
+<p class="Pp">The other three calls are, in effect, simply aliases for calls to
+    <b>setvbuf</b>(). The <b>setbuf</b>() function is exactly equivalent to the
+    call</p>
+<p class="Pp">
+  <br>
+  setvbuf(stream, buf, buf ? _IOFBF : _IONBF, BUFSIZ);
+  <br>
+</p>
+<p class="Pp">The <b>setbuffer</b>() function is the same, except that the size
+    of the buffer is up to the caller, rather than being determined by the
+    default <b>BUFSIZ</b>. The <b>setlinebuf</b>() function is exactly
+    equivalent to the call:</p>
+<p class="Pp">
+  <br>
+  setvbuf(stream, NULL, _IOLBF, 0);
+  <br>
+</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The function <b>setvbuf</b>() returns 0 on success. It returns
+    nonzero on failure (<i>mode</i> is invalid or the request cannot be
+    honored). It may set <i>errno</i> on failure.</p>
+<p class="Pp">The other functions do not return a value.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>setbuf (), setbuffer (), setlinebuf (), setvbuf ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">The <b>setbuf</b>() and <b>setvbuf</b>() functions conform to C89
+    and C99.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">POSIX notes that the value of <i>errno</i> is unspecified after a
+    call to <b>setbuf</b>() and further notes that, since the value of
+    <i>errno</i> is not required to be unchanged after a successful call to
+    <b>setbuf</b>(), applications should instead use <b>setvbuf</b>() in order
+    to detect errors.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">You must make sure that the space that <i>buf</i> points to still
+    exists by the time <i>stream</i> is closed, which also happens at program
+    termination. For example, the following is invalid:</p>
+<p class="Pp"></p>
+<pre>#include &lt;stdio.h&gt;
+int
+main(void)
+{
+<br>
+    char buf[BUFSIZ];
+<br>
+    setbuf(stdout, buf);
+<br>
+    printf("Hello, world!\n");
+<br>
+    return 0;
+}
+</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>stdbuf</b>(1), <b>fclose</b>(3), <b>fflush</b>(3),
+    <b>fopen</b>(3), <b>fread</b>(3), <b>malloc</b>(3), <b>printf</b>(3),
+    <b>puts</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

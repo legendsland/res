@@ -1,0 +1,139 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 2009 Michael Kerrisk, <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/44b66754ef0f37be902d3cfc68d9030d345614ef">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>pthread_setconcurrency(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">pthread_setconcurrency(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">pthread_setconcurrency(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pthread_setconcurrency, pthread_getconcurrency - set/get the
+    concurrency level</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">POSIX threads library (<i>libpthread</i>, <i>-lpthread</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;pthread.h&gt;</b></pre>
+<pre><b>int pthread_setconcurrency(int </b><i>new_level</i><b>);</b>
+<b>int pthread_getconcurrency(</b><i>void</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>pthread_setconcurrency</b>() function informs the
+    implementation of the application's desired concurrency level, specified in
+    <i>new_level</i>. The implementation takes this only as a hint: POSIX.1 does
+    not specify the level of concurrency that should be provided as a result of
+    calling <b>pthread_setconcurrency</b>().</p>
+<p class="Pp">Specifying <i>new_level</i> as 0 instructs the implementation to
+    manage the concurrency level as it deems appropriate.</p>
+<p class="Pp"><b>pthread_getconcurrency</b>() returns the current value of the
+    concurrency level for this process.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>pthread_setconcurrency</b>() returns 0; on error,
+    it returns a nonzero error number.</p>
+<p class="Pp"><b>pthread_getconcurrency</b>() always succeeds, returning the
+    concurrency level set by a previous call to <b>pthread_setconcurrency</b>(),
+    or 0, if <b>pthread_setconcurrency</b>() has not previously been called.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp"><b>pthread_setconcurrency</b>() can fail with the following
+  error:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>new_level</i> is negative.</dd>
+</dl>
+<p class="Pp">POSIX.1 also documents an <b>EAGAIN</b> error ("the value
+    specified by <i>new_level</i> would cause a system resource to be
+    exceeded").</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>pthread_setconcurrency (), pthread_getconcurrency ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">These functions are available since glibc 2.1.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The default concurrency level is 0.</p>
+<p class="Pp">Concurrency levels are meaningful only for M:N threading
+    implementations, where at any moment a subset of a process's set of
+    user-level threads may be bound to a smaller number of kernel-scheduling
+    entities. Setting the concurrency level allows the application to give the
+    system a hint as to the number of kernel-scheduling entities that should be
+    provided for efficient execution of the application.</p>
+<p class="Pp">Both LinuxThreads and NPTL are 1:1 threading implementations, so
+    setting the concurrency level has no meaning. In other words, on Linux these
+    functions merely exist for compatibility with other systems, and they have
+    no effect on the execution of a program.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>pthread_attr_setscope</b>(3), <b>pthreads</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

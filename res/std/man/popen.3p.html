@@ -1,0 +1,243 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/ee846d04913475f8476368be0a5d3bb23a574056">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>POPEN(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">POPEN(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">POPEN(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">popen — initiate pipe streams to or from a process</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;stdio.h&gt;</pre>
+<pre>FILE *popen(const char *<i>command</i>, const char *<i>mode</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>popen</i>() function shall execute the command specified by
+    the string <i>command</i>. It shall create a pipe between the calling
+    program and the executed command, and shall return a pointer to a stream
+    that can be used to either read from or write to the pipe.</p>
+<p class="Pp">The environment of the executed command shall be as if a child
+    process were created within the <i>popen</i>() call using the <i>fork</i>()
+    function, and the child invoked the <i>sh</i> utility using the call:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>execl(<i>shell path</i>, "sh", "-c", <i>command</i>, (char *)0);</pre>
+</div>
+<p class="Pp">where <i>shell path</i> is an unspecified pathname for the
+    <i>sh</i> utility.</p>
+<p class="Pp">The <i>popen</i>() function shall ensure that any streams from
+    previous <i>popen</i>() calls that remain open in the parent process are
+    closed in the new child process.</p>
+<p class="Pp">The <i>mode</i> argument to <i>popen</i>() is a string that
+    specifies I/O mode:</p>
+<dl class="Bl-tag">
+  <dt> 1.</dt>
+  <dd>If <i>mode</i> is <i>r</i>, when the child process is started, its file
+      descriptor STDOUT_FILENO shall be the writable end of the pipe, and the
+      file descriptor <i>fileno</i>(<i>stream</i>) in the calling process, where
+      <i>stream</i> is the stream pointer returned by <i>popen</i>(), shall be
+      the readable end of the pipe.</dd>
+  <dt> 2.</dt>
+  <dd>If <i>mode</i> is <i>w</i>, when the child process is started its file
+      descriptor STDIN_FILENO shall be the readable end of the pipe, and the
+      file descriptor <i>fileno</i>(<i>stream</i>) in the calling process, where
+      <i>stream</i> is the stream pointer returned by <i>popen</i>(), shall be
+      the writable end of the pipe.</dd>
+  <dt> 3.</dt>
+  <dd>If <i>mode</i> is any other value, the result is unspecified.</dd>
+</dl>
+<p class="Pp">After <i>popen</i>(), both the parent and the child process shall
+    be capable of executing independently before either terminates.</p>
+<p class="Pp">Pipe streams are byte-oriented.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>popen</i>() shall return a pointer
+    to an open stream that can be used to read or write to the pipe. Otherwise,
+    it shall return a null pointer and may set <i>errno</i> to indicate the
+    error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>popen</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EMFILE"><a class="permalink" href="#EMFILE"><b>EMFILE</b></a></dt>
+  <dd>{STREAM_MAX} streams are currently open in the calling process.</dd>
+</dl>
+<p class="Pp">The <i>popen</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EMFILE~2"><a class="permalink" href="#EMFILE~2"><b>EMFILE</b></a></dt>
+  <dd>{FOPEN_MAX} streams are currently open in the calling process.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The <i>mode</i> argument is invalid.</dd>
+</dl>
+<p class="Pp">The <i>popen</i>() function may also set <i>errno</i> values as
+    described by <i><i>fork</i>()</i> or <i><i>pipe</i>()</i>.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Using_popen("><a class="permalink" href="#Using_popen(">Using
+  popen() to Obtain a List of Files from the ls Utility</a></h2>
+<p class="Pp">The following example demonstrates the use of <i>popen</i>() and
+    <i>pclose</i>() to execute the command <i>ls</i>* in order to obtain a list
+    of files in the current directory:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;stdio.h&gt;
+...</pre>
+<pre>FILE *fp;
+int status;
+char path[PATH_MAX];</pre>
+<pre>fp = popen("ls *", "r");
+if (fp == NULL)
+<br>
+    /* Handle error */;</pre>
+<pre>while (fgets(path, PATH_MAX, fp) != NULL)
+<br>
+    printf("%s", path);</pre>
+<pre>status = pclose(fp);
+if (status == -1) {
+<br>
+    /* Error reported by pclose() */
+<br>
+    ...
+} else {
+<br>
+    /* Use macros described under wait() to inspect `status' in order
+<br>
+       to determine success/failure of command executed by popen() */
+<br>
+    ...
+}</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">Since open files are shared, a mode <i>r</i> command can be used
+    as an input filter and a mode <i>w</i> command as an output filter.</p>
+<p class="Pp">Buffered reading before opening an input filter may leave the
+    standard input of that filter mispositioned. Similar problems with an output
+    filter may be prevented by careful buffer flushing; for example, with
+    <i><i>fflush</i>()</i>.</p>
+<p class="Pp">A stream opened by <i>popen</i>() should be closed by
+    <i>pclose</i>().</p>
+<p class="Pp">The behavior of <i>popen</i>() is specified for values of
+    <i>mode</i> of <i>r</i> and <i>w</i>. Other modes such as <i>rb</i> and
+    <i>wb</i> might be supported by specific implementations, but these would
+    not be portable features. Note that historical implementations of
+    <i>popen</i>() only check to see if the first character of <i>mode</i> is
+    <i>r</i>. Thus, a <i>mode</i> of <i>robert the robot</i> would be treated as
+    <i>mode</i> <i>r</i>, and a <i>mode</i> of <i>anything else</i> would be
+    treated as <i>mode</i> <i>w</i>.</p>
+<p class="Pp">If the application calls <i>waitpid</i>() or <i>waitid</i>() with
+    a <i>pid</i> argument greater than 0, and it still has a stream that was
+    called with <i>popen</i>() open, it must ensure that <i>pid</i> does not
+    refer to the process started by <i>popen</i>().</p>
+<p class="Pp">To determine whether or not the environment specified in the Shell
+    and Utilities volume of POSIX.1‐2017 is present, use the function
+    call:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>sysconf(_SC_2_VERSION)</pre>
+</div>
+<p class="Pp">(See <i><i>sysconf</i>()</i>).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The <i>popen</i>() function should not be used by programs that
+    have set user (or group) ID privileges. The <i>fork</i>() and <i>exec</i>
+    family of functions (except <i>execlp</i>() and <i>execvp</i>()), should be
+    used instead. This prevents any unforeseen manipulation of the environment
+    of the user that could cause execution of commands not anticipated by the
+    calling program.</p>
+<p class="Pp">If the original and <i>popen</i>()ed processes both intend to read
+    or write or read and write a common file, and either will be using FILE-type
+    C functions (<i>fread</i>(), <i>fwrite</i>(), and so on), the rules for
+    sharing file handles must be observed (see <i>Section 2.5.1</i>,
+    <i>Interaction of File Descriptors and Standard I/O Streams</i>).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i>Section 2.5</i>, <i>Standard I/O Streams</i>,
+    <i><i>fork</i>()</i>, <i><i>pclose</i>()</i>, <i><i>pipe</i>()</i>,
+    <i><i>sysconf</i>()</i>, <i><i>system</i>()</i>, <i><i>wait</i>()</i>,
+    <i><i>waitid</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;stdio.h&gt;</b></i></p>
+<p class="Pp">The Shell and Utilities volume of POSIX.1‐2017,
+    <i><i>sh</i></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

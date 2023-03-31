@@ -1,0 +1,125 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/2ca0de777bb5c6cb153804167078cbaa9606a1bb">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>sigpending(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">sigpending(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">sigpending(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">sigpending, rt_sigpending - examine pending signals</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;signal.h&gt;</b></pre>
+<pre><b>int sigpending(sigset_t *</b><i>set</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>sigpending</b>():</p>
+<pre><br>
+    _POSIX_C_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>sigpending</b>() returns the set of signals that are pending
+    for delivery to the calling thread (i.e., the signals which have been raised
+    while blocked). The mask of pending signals is returned in <i>set</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp"><b>sigpending</b>() returns 0 on success. On failure, -1 is
+    returned and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>set</i> points to memory which is not a valid part of the process
+      address space.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">See <b>sigsetops</b>(3) for details on manipulating signal
+  sets.</p>
+<p class="Pp">If a signal is both blocked and has a disposition of
+    "ignored", it is <i>not</i> added to the mask of pending signals
+    when generated.</p>
+<p class="Pp">The set of signals that is pending for a thread is the union of
+    the set of signals that is pending for that thread and the set of signals
+    that is pending for the process as a whole; see <b>signal</b>(7).</p>
+<p class="Pp">A child created via <b>fork</b>(2) initially has an empty pending
+    signal set; the pending signal set is preserved across an
+  <b>execve</b>(2).</p>
+<section class="Ss">
+<h2 class="Ss" id="C_library/kernel_differences"><a class="permalink" href="#C_library/kernel_differences">C
+  library/kernel differences</a></h2>
+<p class="Pp">The original Linux system call was named <b>sigpending</b>().
+    However, with the addition of real-time signals in Linux 2.2, the
+    fixed-size, 32-bit <i>sigset_t</i> argument supported by that system call
+    was no longer fit for purpose. Consequently, a new system call,
+    <b>rt_sigpending</b>(), was added to support an enlarged <i>sigset_t</i>
+    type. The new system call takes a second argument, <i>size_t sigsetsize</i>,
+    which specifies the size in bytes of the signal set in <i>set</i>. The glibc
+    <b>sigpending</b>() wrapper function hides these details from us,
+    transparently calling <b>rt_sigpending</b>() when the kernel provides
+  it.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">Up to and including glibc 2.2.1, there is a bug in the wrapper
+    function for <b>sigpending</b>() which means that information about pending
+    real-time signals is not correctly returned.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>kill</b>(2), <b>sigaction</b>(2), <b>signal</b>(2),
+    <b>sigprocmask</b>(2), <b>sigsuspend</b>(2), <b>sigsetops</b>(3),
+    <b>signal</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

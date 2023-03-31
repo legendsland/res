@@ -1,0 +1,182 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 1990, 1991 The Regents of the University of California.
+   All rights reserved.
+  
+   This code is derived from software contributed to Berkeley by
+   the American National Standards Committee X3, on Information
+   Processing Systems.
+  
+   SPDX-License-Identifier: BSD-4-Clause-UC
+  
+       @(#)strtod.3	5.3 (Berkeley) 6/29/91
+  
+   Modified Sun Aug 21 17:16:22 1994 by Rik Faith (faith@cs.unc.edu)
+   Modified Sat May 04 19:34:31 MET DST 1996 by Michael Haardt
+     (michael@cantor.informatik.rwth-aachen.de)
+   Added strof, strtold, aeb, 2001-06-07
+   --><head>
+<meta name="dc.identifier" content="res/425aca1984ce2f9bc01eec54a8ef8d47f0dce616">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>strtod(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">strtod(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">strtod(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">strtod, strtof, strtold - convert ASCII string to floating-point
+    number</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;stdlib.h&gt;</b></pre>
+<pre><b>double strtod(const char *restrict </b><i>nptr</i><b>, char **restrict </b><i>endptr</i><b>);</b>
+<b>float strtof(const char *restrict </b><i>nptr</i><b>, char **restrict </b><i>endptr</i><b>);</b>
+<b>long double strtold(const char *restrict </b><i>nptr</i><b>, char **restrict </b><i>endptr</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>strtof</b>(), <b>strtold</b>():</p>
+<pre><br>
+    _ISOC99_SOURCE || _POSIX_C_SOURCE &gt;= 200112L</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>strtod</b>(), <b>strtof</b>(), and <b>strtold</b>()
+    functions convert the initial portion of the string pointed to by
+    <i>nptr</i> to <i>double</i>, <i>float</i>, and <i>long double</i>
+    representation, respectively.</p>
+<p class="Pp">The expected form of the (initial portion of the) string is
+    optional leading white space as recognized by <b>isspace</b>(3), an optional
+    plus ('+') or minus sign ('-') and then either (i) a decimal number, or (ii)
+    a hexadecimal number, or (iii) an infinity, or (iv) a NAN
+  (not-a-number).</p>
+<p class="Pp">A <i>decimal number</i> consists of a nonempty sequence of decimal
+    digits possibly containing a radix character (decimal point,
+    locale-dependent, usually '.'), optionally followed by a decimal exponent. A
+    decimal exponent consists of an 'E' or 'e', followed by an optional plus or
+    minus sign, followed by a nonempty sequence of decimal digits, and indicates
+    multiplication by a power of 10.</p>
+<p class="Pp">A <i>hexadecimal number</i> consists of a "0x" or
+    "0X" followed by a nonempty sequence of hexadecimal digits
+    possibly containing a radix character, optionally followed by a binary
+    exponent. A binary exponent consists of a 'P' or 'p', followed by an
+    optional plus or minus sign, followed by a nonempty sequence of decimal
+    digits, and indicates multiplication by a power of 2. At least one of radix
+    character and binary exponent must be present.</p>
+<p class="Pp">An <i>infinity</i> is either "INF" or
+    "INFINITY", disregarding case.</p>
+<p class="Pp">A <i>NAN</i> is "NAN" (disregarding case) optionally
+    followed by a string, <i>(n-char-sequence)</i>, where <i>n-char-sequence</i>
+    specifies in an implementation-dependent way the type of NAN (see
+  NOTES).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">These functions return the converted value, if any.</p>
+<p class="Pp">If <i>endptr</i> is not NULL, a pointer to the character after the
+    last character used in the conversion is stored in the location referenced
+    by <i>endptr</i>.</p>
+<p class="Pp">If no conversion is performed, zero is returned and (unless
+    <i>endptr</i> is null) the value of <i>nptr</i> is stored in the location
+    referenced by <i>endptr</i>.</p>
+<p class="Pp">If the correct value would cause overflow, plus or minus
+    <b>HUGE_VAL</b>, <b>HUGE_VALF</b>, or <b>HUGE_VALL</b> is returned
+    (according to the return type and sign of the value), and <b>ERANGE</b> is
+    stored in <i>errno</i>.</p>
+<p class="Pp">If the correct value would cause underflow, a value with magnitude
+    no larger than <b>DBL_MIN</b>, <b>FLT_MIN</b>, or <b>LDBL_MIN</b> is
+    returned and <b>ERANGE</b> is stored in <i>errno</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="ERANGE"><a class="permalink" href="#ERANGE"><b>ERANGE</b></a></dt>
+  <dd>Overflow or underflow occurred.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>strtod (), strtof (), strtold ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe locale</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, C99.</p>
+<p class="Pp"><b>strtod</b>() was also described in C89.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Since 0 can legitimately be returned on both success and failure,
+    the calling program should set <i>errno</i> to 0 before the call, and then
+    determine if an error occurred by checking whether <i>errno</i> has a
+    nonzero value after the call.</p>
+<p class="Pp">In the glibc implementation, the <i>n-char-sequence</i> that
+    optionally follows "NAN" is interpreted as an integer number (with
+    an optional '0' or '0x' prefix to select base 8 or 16) that is to be placed
+    in the mantissa component of the returned value.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">See the example on the <b>strtol</b>(3) manual page; the use of
+    the functions described in this manual page is similar.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>atof</b>(3), <b>atoi</b>(3), <b>atol</b>(3), <b>nan</b>(3),
+    <b>nanf</b>(3), <b>nanl</b>(3), <b>strfromd</b>(3), <b>strtol</b>(3),
+    <b>strtoul</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

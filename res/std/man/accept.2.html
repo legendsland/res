@@ -1,0 +1,245 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 1983, 1990, 1991 The Regents of the University of California.
+   All rights reserved.
+  
+   SPDX-License-Identifier: BSD-4-Clause-UC
+  
+   Modified 1993-07-24 by Rik Faith <faith@cs.unc.edu>
+   Modified 1996-10-21 by Eric S. Raymond <esr@thyrsus.com>
+   Modified 1998-2000 by Andi Kleen to match Linux 2.2 reality
+   Modified 2002-04-23 by Roger Luethi <rl@hellgate.ch>
+   Modified 2004-06-17 by Michael Kerrisk <mtk.manpages@gmail.com>
+   2008-12-04, mtk, Add documentation of accept4()
+   --><head>
+<meta name="dc.identifier" content="res/6b165b313b83440683bc6c8411b09955c3fa13ab">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>accept(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">accept(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">accept(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">accept, accept4 - accept a connection on a socket</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/socket.h&gt;</b></pre>
+<pre><b>int accept(int </b><i>sockfd</i><b>, struct sockaddr *_Nullable restrict </b><i>addr</i><b>,</b>
+<b>           socklen_t *_Nullable restrict </b><i>addrlen</i><b>);</b></pre>
+<pre><b>#define _GNU_SOURCE</b>             /* See feature_test_macros(7) */
+<b>#include &lt;sys/socket.h&gt;</b></pre>
+<pre><b>int accept4(int </b><i>sockfd</i><b>, struct sockaddr *_Nullable restrict </b><i>addr</i><b>,</b>
+<b>           socklen_t *_Nullable restrict </b><i>addrlen</i><b>, int </b><i>flags</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>accept</b>() system call is used with connection-based
+    socket types (<b>SOCK_STREAM</b>, <b>SOCK_SEQPACKET</b>). It extracts the
+    first connection request on the queue of pending connections for the
+    listening socket, <i>sockfd</i>, creates a new connected socket, and returns
+    a new file descriptor referring to that socket. The newly created socket is
+    not in the listening state. The original socket <i>sockfd</i> is unaffected
+    by this call.</p>
+<p class="Pp">The argument <i>sockfd</i> is a socket that has been created with
+    <b>socket</b>(2), bound to a local address with <b>bind</b>(2), and is
+    listening for connections after a <b>listen</b>(2).</p>
+<p class="Pp">The argument <i>addr</i> is a pointer to a <i>sockaddr</i>
+    structure. This structure is filled in with the address of the peer socket,
+    as known to the communications layer. The exact format of the address
+    returned <i>addr</i> is determined by the socket's address family (see
+    <b>socket</b>(2) and the respective protocol man pages). When <i>addr</i> is
+    NULL, nothing is filled in; in this case, <i>addrlen</i> is not used, and
+    should also be NULL.</p>
+<p class="Pp">The <i>addrlen</i> argument is a value-result argument: the caller
+    must initialize it to contain the size (in bytes) of the structure pointed
+    to by <i>addr</i>; on return it will contain the actual size of the peer
+    address.</p>
+<p class="Pp">The returned address is truncated if the buffer provided is too
+    small; in this case, <i>addrlen</i> will return a value greater than was
+    supplied to the call.</p>
+<p class="Pp">If no pending connections are present on the queue, and the socket
+    is not marked as nonblocking, <b>accept</b>() blocks the caller until a
+    connection is present. If the socket is marked nonblocking and no pending
+    connections are present on the queue, <b>accept</b>() fails with the error
+    <b>EAGAIN</b> or <b>EWOULDBLOCK</b>.</p>
+<p class="Pp">In order to be notified of incoming connections on a socket, you
+    can use <b>select</b>(2), <b>poll</b>(2), or <b>epoll</b>(7). A readable
+    event will be delivered when a new connection is attempted and you may then
+    call <b>accept</b>() to get a socket for that connection. Alternatively, you
+    can set the socket to deliver <b>SIGIO</b> when activity occurs on a socket;
+    see <b>socket</b>(7) for details.</p>
+<p class="Pp">If <i>flags</i> is 0, then <b>accept4</b>() is the same as
+    <b>accept</b>(). The following values can be bitwise ORed in <i>flags</i> to
+    obtain different behavior:</p>
+<dl class="Bl-tag">
+  <dt id="SOCK_NONBLOCK"><a class="permalink" href="#SOCK_NONBLOCK"><b>SOCK_NONBLOCK</b></a></dt>
+  <dd>Set the <b>O_NONBLOCK</b> file status flag on the open file description
+      (see <b>open</b>(2)) referred to by the new file descriptor. Using this
+      flag saves extra calls to <b>fcntl</b>(2) to achieve the same result.</dd>
+  <dt id="SOCK_CLOEXEC"><a class="permalink" href="#SOCK_CLOEXEC"><b>SOCK_CLOEXEC</b></a></dt>
+  <dd>Set the close-on-exec (<b>FD_CLOEXEC</b>) flag on the new file descriptor.
+      See the description of the <b>O_CLOEXEC</b> flag in <b>open</b>(2) for
+      reasons why this may be useful.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, these system calls return a file descriptor for the
+    accepted socket (a nonnegative integer). On error, -1 is returned,
+    <i>errno</i> is set to indicate the error, and <i>addrlen</i> is left
+    unchanged.</p>
+<section class="Ss">
+<h2 class="Ss" id="Error_handling"><a class="permalink" href="#Error_handling">Error
+  handling</a></h2>
+<p class="Pp">Linux <b>accept</b>() (and <b>accept4</b>()) passes
+    already-pending network errors on the new socket as an error code from
+    <b>accept</b>(). This behavior differs from other BSD socket
+    implementations. For reliable operation the application should detect the
+    network errors defined for the protocol after <b>accept</b>() and treat them
+    like <b>EAGAIN</b> by retrying. In the case of TCP/IP, these are
+    <b>ENETDOWN</b>, <b>EPROTO</b>, <b>ENOPROTOOPT</b>, <b>EHOSTDOWN</b>,
+    <b>ENONET</b>, <b>EHOSTUNREACH</b>, <b>EOPNOTSUPP</b>, and
+    <b>ENETUNREACH</b>.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b> or
+    <b>EWOULDBLOCK</b></a></dt>
+  <dd>The socket is marked nonblocking and no connections are present to be
+      accepted. POSIX.1-2001 and POSIX.1-2008 allow either error to be returned
+      for this case, and do not require these constants to have the same value,
+      so a portable application should check for both possibilities.</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd><i>sockfd</i> is not an open file descriptor.</dd>
+  <dt id="ECONNABORTED"><a class="permalink" href="#ECONNABORTED"><b>ECONNABORTED</b></a></dt>
+  <dd>A connection has been aborted.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>The <i>addr</i> argument is not in a writable part of the user address
+      space.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The system call was interrupted by a signal that was caught before a valid
+      connection arrived; see <b>signal</b>(7).</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>Socket is not listening for connections, or <i>addrlen</i> is invalid
+      (e.g., is negative).</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>(<b>accept4</b>()) invalid value in <i>flags</i>.</dd>
+  <dt id="EMFILE"><a class="permalink" href="#EMFILE"><b>EMFILE</b></a></dt>
+  <dd>The per-process limit on the number of open file descriptors has been
+      reached.</dd>
+  <dt id="ENFILE"><a class="permalink" href="#ENFILE"><b>ENFILE</b></a></dt>
+  <dd>The system-wide limit on the total number of open files has been
+    reached.</dd>
+  <dt id="ENOBUFS"><a class="permalink" href="#ENOBUFS"><b>ENOBUFS</b>,
+    <b>ENOMEM</b></a></dt>
+  <dd>Not enough free memory. This often means that the memory allocation is
+      limited by the socket buffer limits, not by the system memory.</dd>
+  <dt id="ENOTSOCK"><a class="permalink" href="#ENOTSOCK"><b>ENOTSOCK</b></a></dt>
+  <dd>The file descriptor <i>sockfd</i> does not refer to a socket.</dd>
+  <dt id="EOPNOTSUPP"><a class="permalink" href="#EOPNOTSUPP"><b>EOPNOTSUPP</b></a></dt>
+  <dd>The referenced socket is not of type <b>SOCK_STREAM</b>.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>Firewall rules forbid connection.</dd>
+  <dt id="EPROTO"><a class="permalink" href="#EPROTO"><b>EPROTO</b></a></dt>
+  <dd>Protocol error.</dd>
+</dl>
+<p class="Pp">In addition, network errors for the new socket and as defined for
+    the protocol may be returned. Various Linux kernels can return other errors
+    such as <b>ENOSR</b>, <b>ESOCKTNOSUPPORT</b>, <b>EPROTONOSUPPORT</b>,
+    <b>ETIMEDOUT</b>. The value <b>ERESTARTSYS</b> may be seen during a
+  trace.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>accept4</b>() system call is available starting with Linux
+    2.6.28; support in glibc is available starting with glibc 2.10.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>accept</b>(): POSIX.1-2001, POSIX.1-2008, SVr4, 4.4BSD
+    (<b>accept</b>() first appeared in 4.2BSD).</p>
+<p class="Pp"><b>accept4</b>() is a nonstandard Linux extension.</p>
+<p class="Pp">On Linux, the new socket returned by <b>accept</b>() does
+    <i>not</i> inherit file status flags such as <b>O_NONBLOCK</b> and
+    <b>O_ASYNC</b> from the listening socket. This behavior differs from the
+    canonical BSD sockets implementation. Portable programs should not rely on
+    inheritance or noninheritance of file status flags and always explicitly set
+    all required flags on the socket returned from <b>accept</b>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">There may not always be a connection waiting after a <b>SIGIO</b>
+    is delivered or <b>select</b>(2), <b>poll</b>(2), or <b>epoll</b>(7) return
+    a readability event because the connection might have been removed by an
+    asynchronous network error or another thread before <b>accept</b>() is
+    called. If this happens, then the call will block waiting for the next
+    connection to arrive. To ensure that <b>accept</b>() never blocks, the
+    passed socket <i>sockfd</i> needs to have the <b>O_NONBLOCK</b> flag set
+    (see <b>socket</b>(7)).</p>
+<p class="Pp">For certain protocols which require an explicit confirmation, such
+    as DECnet, <b>accept</b>() can be thought of as merely dequeuing the next
+    connection request and not implying confirmation. Confirmation can be
+    implied by a normal read or write on the new file descriptor, and rejection
+    can be implied by closing the new socket. Currently, only DECnet has these
+    semantics on Linux.</p>
+<section class="Ss">
+<h2 class="Ss" id="The_socklen_t_type"><a class="permalink" href="#The_socklen_t_type">The
+  socklen_t type</a></h2>
+<p class="Pp">In the original BSD sockets implementation (and on other older
+    systems) the third argument of <b>accept</b>() was declared as an
+    <i>int&nbsp;*</i>. A POSIX.1g draft standard wanted to change it into a
+    <i>size_t&nbsp;*</i>C; later POSIX standards and glibc 2.x have
+    <i>socklen_t&nbsp;* </i>.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">See <b>bind</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>bind</b>(2), <b>connect</b>(2), <b>listen</b>(2),
+    <b>select</b>(2), <b>socket</b>(2), <b>socket</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

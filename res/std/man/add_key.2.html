@@ -1,0 +1,267 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2006 Red Hat, Inc. All Rights Reserved.
+       Written by David Howells (dhowells@redhat.com)
+   and Copyright (C) 2016 Michael Kerrisk <mtk.man-pages@gmail.com>
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+   --><head>
+<meta name="dc.identifier" content="res/662b895fb88e839bcf0b3fe20435247097bd68ca">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>add_key(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">add_key(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">add_key(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">add_key - add a key to the kernel's key management facility</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;keyutils.h&gt;</b></pre>
+<pre><b>key_serial_t add_key(const char *</b><i>type</i><b>, const char *</b><i>description</i><b>,</b>
+<b>                     const void </b><i>payload</i><b>[.</b><i>plen</i><b>], size_t </b><i>plen</i><b>,</b>
+<b>                     key_serial_t </b><i>keyring</i><b>);</b></pre>
+<p class="Pp"><i>Note</i>: There is no glibc wrapper for this system call; see
+    NOTES.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>add_key</b>() creates or updates a key of the given <i>type</i>
+    and <i>description</i>, instantiates it with the <i>payload</i> of length
+    <i>plen</i>, attaches it to the nominated <i>keyring</i>, and returns the
+    key's serial number.</p>
+<p class="Pp">The key may be rejected if the provided data is in the wrong
+    format or it is invalid in some other way.</p>
+<p class="Pp">If the destination <i>keyring</i> already contains a key that
+    matches the specified <i>type</i> and <i>description</i>, then, if the key
+    type supports it, that key will be updated rather than a new key being
+    created; if not, a new key (with a different ID) will be created and it will
+    displace the link to the extant key from the keyring.</p>
+<p class="Pp">The destination <i>keyring</i> serial number may be that of a
+    valid keyring for which the caller has <i>write</i> permission.
+    Alternatively, it may be one of the following special keyring IDs:</p>
+<dl class="Bl-tag">
+  <dt id="KEY_SPEC_THREAD_KEYRING"><a class="permalink" href="#KEY_SPEC_THREAD_KEYRING"><b>KEY_SPEC_THREAD_KEYRING</b></a></dt>
+  <dd>This specifies the caller's thread-specific keyring
+      (<b>thread-keyring</b>(7)).</dd>
+  <dt id="KEY_SPEC_PROCESS_KEYRING"><a class="permalink" href="#KEY_SPEC_PROCESS_KEYRING"><b>KEY_SPEC_PROCESS_KEYRING</b></a></dt>
+  <dd>This specifies the caller's process-specific keyring
+      (<b>process-keyring</b>(7)).</dd>
+  <dt id="KEY_SPEC_SESSION_KEYRING"><a class="permalink" href="#KEY_SPEC_SESSION_KEYRING"><b>KEY_SPEC_SESSION_KEYRING</b></a></dt>
+  <dd>This specifies the caller's session-specific keyring
+      (<b>session-keyring</b>(7)).</dd>
+  <dt id="KEY_SPEC_USER_KEYRING"><a class="permalink" href="#KEY_SPEC_USER_KEYRING"><b>KEY_SPEC_USER_KEYRING</b></a></dt>
+  <dd>This specifies the caller's UID-specific keyring
+    (<b>user-keyring</b>(7)).</dd>
+  <dt id="KEY_SPEC_USER_SESSION_KEYRING"><a class="permalink" href="#KEY_SPEC_USER_SESSION_KEYRING"><b>KEY_SPEC_USER_SESSION_KEYRING</b></a></dt>
+  <dd>This specifies the caller's UID-session keyring
+      (<b>user-session-keyring</b>(7)).</dd>
+</dl>
+<section class="Ss">
+<h2 class="Ss" id="Key_types"><a class="permalink" href="#Key_types">Key
+  types</a></h2>
+<p class="Pp">The key <i>type</i> is a string that specifies the key's type.
+    Internally, the kernel defines a number of key types that are available in
+    the core key management code. Among the types that are available for
+    user-space use and can be specified as the <i>type</i> argument to
+    <b>add_key</b>() are the following:</p>
+<dl class="Bl-tag">
+  <dt><i>"keyring"</i></dt>
+  <dd>Keyrings are special key types that may contain links to sequences of
+      other keys of any type. If this interface is used to create a keyring,
+      then <i>payload</i> should be NULL and <i>plen</i> should be zero.</dd>
+  <dt><i>"user"</i></dt>
+  <dd>This is a general purpose key type whose payload may be read and updated
+      by user-space applications. The key is kept entirely within kernel memory.
+      The payload for keys of this type is a blob of arbitrary data of up to
+      32,767 bytes.</dd>
+  <dt><i>"logon"</i> (since Linux 3.3)</dt>
+  <dd>This key type is essentially the same as <i>"user"</i>, but it
+      does not permit the key to read. This is suitable for storing payloads
+      that you do not want to be readable from user space.</dd>
+</dl>
+<p class="Pp">This key type vets the <i>description</i> to ensure that it is
+    qualified by a "service" prefix, by checking to ensure that the
+    <i>description</i> contains a ':' that is preceded by other characters.</p>
+<dl class="Bl-tag">
+  <dt><i>"big_key"</i> (since Linux 3.13)</dt>
+  <dd>This key type is similar to <i>"user"</i>, but may hold a
+      payload of up to 1&nbsp;MiB. If the key payload is large enough, then it
+      may be stored encrypted in tmpfs (which can be swapped out) rather than
+      kernel memory.</dd>
+</dl>
+<p class="Pp">For further details on these key types, see
+  <b>keyrings</b>(7).</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>add_key</b>() returns the serial number of the key
+    it created or updated. On error, -1 is returned and <i>errno</i> is set to
+    indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>The keyring wasn't available for modification by the user.</dd>
+  <dt id="EDQUOT"><a class="permalink" href="#EDQUOT"><b>EDQUOT</b></a></dt>
+  <dd>The key quota for this user would be exceeded by creating this key or
+      linking it to the keyring.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>One or more of <i>type</i>, <i>description</i>, and <i>payload</i> points
+      outside process's accessible address space.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The size of the string (including the terminating null byte) specified in
+      <i>type</i> or <i>description</i> exceeded the limit (32 bytes and 4096
+      bytes respectively).</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>The payload data was invalid.</dd>
+  <dt id="EINVAL~3"><a class="permalink" href="#EINVAL~3"><b>EINVAL</b></a></dt>
+  <dd><i>type</i> was <i>"logon"</i> and the <i>description</i> was
+      not qualified with a prefix string of the form
+      <i>"service:"</i>.</dd>
+  <dt id="EKEYEXPIRED"><a class="permalink" href="#EKEYEXPIRED"><b>EKEYEXPIRED</b></a></dt>
+  <dd>The keyring has expired.</dd>
+  <dt id="EKEYREVOKED"><a class="permalink" href="#EKEYREVOKED"><b>EKEYREVOKED</b></a></dt>
+  <dd>The keyring has been revoked.</dd>
+  <dt id="ENOKEY"><a class="permalink" href="#ENOKEY"><b>ENOKEY</b></a></dt>
+  <dd>The keyring doesn't exist.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient memory to create a key.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The <i>type</i> started with a period ('.'). Key types that begin with a
+      period are reserved to the implementation.</dd>
+  <dt id="EPERM~2"><a class="permalink" href="#EPERM~2"><b>EPERM</b></a></dt>
+  <dd><i>type</i> was <i>"keyring"</i> and the <i>description</i>
+      started with a period ('.'). Keyrings with descriptions (names) that begin
+      with a period are reserved to the implementation.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">This system call first appeared in Linux 2.6.10.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This system call is a nonstandard Linux extension.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">glibc does not provide a wrapper for this system call. A wrapper
+    is provided in the <i>libkeyutils</i> library. (The accompanying package
+    provides the <i>&lt;keyutils.h&gt;</i> header file.) When employing the
+    wrapper in that library, link with <i>-lkeyutils</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below creates a key with the type, description, and
+    payload specified in its command-line arguments, and links that key into the
+    session keyring. The following shell session demonstrates the use of the
+    program:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>./a.out user mykey "Some payload"</b>
+Key ID is 64a4dca
+$ <b>grep '64a4dca' /proc/keys</b>
+064a4dca I--Q---    1 perm 3f010000  1000  1000 user    mykey: 12
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#include &lt;keyutils.h&gt;
+#include &lt;stdint.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+int
+main(int argc, char *argv[])
+{
+<br>
+    key_serial_t key;
+<br>
+    if (argc != 4) {
+<br>
+        fprintf(stderr, "Usage: %s type description payload\n",
+<br>
+                argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    key = add_key(argv[1], argv[2], argv[3], strlen(argv[3]),
+<br>
+                  KEY_SPEC_SESSION_KEYRING);
+<br>
+    if (key == -1) {
+<br>
+        perror("add_key");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    printf("Key ID is %jx\n", (uintmax_t) key);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>keyctl</b>(1), <b>keyctl</b>(2), <b>request_key</b>(2),
+    <b>keyctl</b>(3), <b>keyrings</b>(7), <b>keyutils</b>(7),
+    <b>persistent-keyring</b>(7), <b>process-keyring</b>(7),
+    <b>session-keyring</b>(7), <b>thread-keyring</b>(7), <b>user-keyring</b>(7),
+    <b>user-session-keyring</b>(7)</p>
+<p class="Pp">The kernel source files
+    <i>Documentation/security/keys/core.rst</i> and
+    <i>Documentation/keys/request-key.rst</i> (or, before Linux 4.13, in the
+    files <i>Documentation/security/keys.txt</i> and
+    <i>Documentation/security/keys-request-key.txt</i>).</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

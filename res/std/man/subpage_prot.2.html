@@ -1,0 +1,144 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2010 Michael Kerrisk <mtk.manpages@gmail.com>
+   based on a proposal from Stephan Mueller <smueller@atsec.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Various pieces of text taken from the kernel source and the commentary
+   in Linux commit fa28237cfcc5827553044cbd6ee52e33692b0faa
+   both written by Paul Mackerras <paulus@samba.org>
+   --><head>
+<meta name="dc.identifier" content="res/4e8a815f38a799d3ddbb699eb2ac3995f079be99">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>subpage_prot(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">subpage_prot(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">subpage_prot(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">subpage_prot - define a subpage protection for an address
+  range</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/syscall.h&gt;</b>      /* Definition of <b>SYS_*</b> constants */
+<b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int syscall(SYS_subpage_prot, unsigned long </b><i>addr</i><b>, unsigned long </b><i>len</i><b>,</b>
+<b>            uint32_t *</b><i>map</i><b>);</b></pre>
+<p class="Pp"><i>Note</i>: glibc provides no wrapper for <b>subpage_prot</b>(),
+    necessitating the use of <b>syscall</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The PowerPC-specific <b>subpage_prot</b>() system call provides
+    the facility to control the access permissions on individual 4&nbsp;kB
+    subpages on systems configured with a page size of 64&nbsp;kB.</p>
+<p class="Pp">The protection map is applied to the memory pages in the region
+    starting at <i>addr</i> and continuing for <i>len</i> bytes. Both of these
+    arguments must be aligned to a 64-kB boundary.</p>
+<p class="Pp">The protection map is specified in the buffer pointed to by
+    <i>map</i>. The map has 2 bits per 4&nbsp;kB subpage; thus each 32-bit
+    word specifies the protections of 16 4&nbsp;kB subpages inside a
+    64&nbsp;kB page (so, the number of 32-bit words pointed to by <i>map</i>
+    should equate to the number of 64-kB pages specified by <i>len</i>). Each
+    2-bit field in the protection map is either 0 to allow any access, 1 to
+    prevent writes, or 2 or 3 to prevent all accesses.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>subpage_prot</b>() returns 0. Otherwise, one of the
+    error codes specified below is returned.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>The buffer referred to by <i>map</i> is not accessible.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The <i>addr</i> or <i>len</i> arguments are incorrect. Both of these
+      arguments must be aligned to a multiple of the system page size, and they
+      must not refer to a region outside of the address space of the process or
+      to a region that consists of huge pages.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Out of memory.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">This system call is provided on the PowerPC architecture since
+    Linux 2.6.25. The system call is provided only if the kernel is configured
+    with <b>CONFIG_PPC_64K_PAGES</b>. No library support is provided.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This system call is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Normal page protections (at the 64-kB page level) also apply; the
+    subpage protection mechanism is an additional constraint, so putting 0 in a
+    2-bit field won't allow writes to a page that is otherwise
+  write-protected.</p>
+<section class="Ss">
+<h2 class="Ss" id="Rationale"><a class="permalink" href="#Rationale">Rationale</a></h2>
+<p class="Pp">This system call is provided to assist writing emulators that
+    operate using 64-kB pages on PowerPC systems. When emulating systems such as
+    x86, which uses a smaller page size, the emulator can no longer use the
+    memory-management unit (MMU) and normal system calls for controlling page
+    protections. (The emulator could emulate the MMU by checking and possibly
+    remapping the address for each memory access in software, but that is slow.)
+    The idea is that the emulator supplies an array of protection masks to apply
+    to a specified range of virtual addresses. These masks are applied at the
+    level where hardware page-table entries (PTEs) are inserted into the
+    hardware page table based on the Linux PTEs, so the Linux PTEs are not
+    affected. Implicit in this is that the regions of the address space that are
+    protected are switched to use 4-kB hardware pages rather than 64-kB hardware
+    pages (on machines with hardware 64-kB page support).</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>mprotect</b>(2), <b>syscall</b>(2)</p>
+<p class="Pp"><i>Documentation/admin-guide/mm/hugetlbpage.rst</i> in the Linux
+    kernel source tree</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

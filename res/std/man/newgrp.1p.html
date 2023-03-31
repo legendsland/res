@@ -1,0 +1,331 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/0f9ef92d95aade0e435659430d9e22cce5398cfb">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>NEWGRP(1P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">NEWGRP(1P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">NEWGRP(1P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">newgrp — change to a new group</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>newgrp <b>[</b>-l<b>] [</b><i>group</i><b>]</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>newgrp</i> utility shall create a new shell execution
+    environment with a new real and effective group identification. Of the
+    attributes listed in <i>Section 2.12</i>, <i>Shell Execution
+    Environment</i>, the new shell execution environment shall retain the
+    working directory, file creation mask, and exported variables from the
+    previous environment (that is, open files, traps, unexported variables,
+    alias definitions, shell functions, and <i>set</i> options may be lost). All
+    other aspects of the process environment that are preserved by the
+    <i>exec</i> family of functions defined in the System Interfaces volume of
+    POSIX.1‐2017 shall also be preserved by <i>newgrp</i>; whether other
+    aspects are preserved is unspecified.</p>
+<p class="Pp">A failure to assign the new group identifications (for example,
+    for security or password-related reasons) shall not prevent the new shell
+    execution environment from being created.</p>
+<p class="Pp">The <i>newgrp</i> utility shall affect the supplemental groups for
+    the process as follows:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>On systems where the effective group ID is normally in the supplementary
+      group list (or whenever the old effective group ID actually is in the
+      supplementary group list):</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>--</dt>
+  <dd>If the new effective group ID is also in the supplementary group list,
+      <i>newgrp</i> shall change the effective group ID.</dd>
+  <dt>--</dt>
+  <dd>If the new effective group ID is not in the supplementary group list,
+      <i>newgrp</i> shall add the new effective group ID to the list, if there
+      is room to add it.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>On systems where the effective group ID is not normally in the
+      supplementary group list (or whenever the old effective group ID is not in
+      the supplementary group list):</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>--</dt>
+  <dd>If the new effective group ID is in the supplementary group list,
+      <i>newgrp</i> shall delete it.</dd>
+  <dt>--</dt>
+  <dd>If the old effective group ID is not in the supplementary list,
+      <i>newgrp</i> shall add it if there is room.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="Note:"><a class="permalink" href="#Note:"><b>Note:</b></a></dt>
+  <dd>The System Interfaces volume of POSIX.1‐2017 does not specify
+      whether the effective group ID of a process is included in its
+      supplementary group list.</dd>
+</dl>
+<p class="Pp">With no operands, <i>newgrp</i> shall change the effective group
+    back to the groups identified in the user's user entry, and shall set the
+    list of supplementary groups to that set in the user's group database
+    entries.</p>
+<p class="Pp">If the first argument is <b>'-'</b>, the results are
+  unspecified.</p>
+<p class="Pp">If a password is required for the specified group, and the user is
+    not listed as a member of that group in the group database, the user shall
+    be prompted to enter the correct password for that group. If the user is
+    listed as a member of that group, no password shall be requested. If no
+    password is required for the specified group, it is implementation-defined
+    whether users not listed as members of that group can change to that group.
+    Whether or not a password is required, implementation-defined system
+    accounting or security mechanisms may impose additional authorization
+    restrictions that may cause <i>newgrp</i> to write a diagnostic message and
+    suppress the changing of the group identification.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OPTIONS"><a class="permalink" href="#OPTIONS">OPTIONS</a></h1>
+<p class="Pp">The <i>newgrp</i> utility shall conform to the Base Definitions
+    volume of POSIX.1‐2017, <i>Section 12.2</i>, <i>Utility Syntax
+    Guidelines</i>, except for the unspecified usage of <b>'-'</b>.</p>
+<p class="Pp">The following option shall be supported:</p>
+<dl class="Bl-tag">
+  <dt id="l"><a class="permalink" href="#l"><b>-l</b></a></dt>
+  <dd>(The letter ell.) Change the environment to what would be expected if the
+      user actually logged in again.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OPERANDS"><a class="permalink" href="#OPERANDS">OPERANDS</a></h1>
+<p class="Pp">The following operand shall be supported:</p>
+<dl class="Bl-tag">
+  <dt id="group"><a class="permalink" href="#group"><i>group</i></a></dt>
+  <dd>A group name from the group database or a non-negative numeric group ID.
+      Specifies the group ID to which the real and effective group IDs shall be
+      set. If <i>group</i> is a non-negative numeric string and exists in the
+      group database as a group name (see <i>getgrnam</i>()), the numeric group
+      ID associated with that group name shall be used as the group ID.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDIN"><a class="permalink" href="#STDIN">STDIN</a></h1>
+<p class="Pp">Not used.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="INPUT_FILES"><a class="permalink" href="#INPUT_FILES">INPUT
+  FILES</a></h1>
+<p class="Pp">The file <b>/dev/tty</b> shall be used to read a single line of
+    text for password checking, when one is required.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ENVIRONMENT_VARIABLES"><a class="permalink" href="#ENVIRONMENT_VARIABLES">ENVIRONMENT
+  VARIABLES</a></h1>
+<p class="Pp">The following environment variables shall affect the execution of
+    <i>newgrp</i>:</p>
+<dl class="Bl-tag">
+  <dt id="LANG"><a class="permalink" href="#LANG"><i>LANG</i></a></dt>
+  <dd>Provide a default value for the internationalization variables that are
+      unset or null. (See the Base Definitions volume of POSIX.1‐2017,
+      <i>Section 8.2</i>, <i>Internationalization Variables</i> for the
+      precedence of internationalization variables used to determine the values
+      of locale categories.)</dd>
+  <dt id="LC_ALL"><a class="permalink" href="#LC_ALL"><i>LC_ALL</i></a></dt>
+  <dd>If set to a non-empty string value, override the values of all the other
+      internationalization variables.</dd>
+  <dt id="LC_CTYPE"><a class="permalink" href="#LC_CTYPE"><i>LC_CTYPE</i></a></dt>
+  <dd>Determine the locale for the interpretation of sequences of bytes of text
+      data as characters (for example, single-byte as opposed to multi-byte
+      characters in arguments).</dd>
+  <dt id="LC_MESSAGES"><a class="permalink" href="#LC_MESSAGES"><i>LC_MESSAGES</i></a></dt>
+  <dd>
+    <br>
+    Determine the locale that should be used to affect the format and contents
+      of diagnostic messages written to standard error.</dd>
+  <dt id="NLSPATH"><a class="permalink" href="#NLSPATH"><i>NLSPATH</i></a></dt>
+  <dd>Determine the location of message catalogs for the processing of
+      <i>LC_MESSAGES</i>.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ASYNCHRONOUS_EVENTS"><a class="permalink" href="#ASYNCHRONOUS_EVENTS">ASYNCHRONOUS
+  EVENTS</a></h1>
+<p class="Pp">Default.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDOUT"><a class="permalink" href="#STDOUT">STDOUT</a></h1>
+<p class="Pp">Not used.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDERR"><a class="permalink" href="#STDERR">STDERR</a></h1>
+<p class="Pp">The standard error shall be used for diagnostic messages and a
+    prompt string for a password, if one is required. Diagnostic messages may be
+    written in cases where the exit status is not available. See the EXIT STATUS
+    section.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OUTPUT_FILES"><a class="permalink" href="#OUTPUT_FILES">OUTPUT
+  FILES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXTENDED_DESCRIPTION"><a class="permalink" href="#EXTENDED_DESCRIPTION">EXTENDED
+  DESCRIPTION</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXIT_STATUS"><a class="permalink" href="#EXIT_STATUS">EXIT
+  STATUS</a></h1>
+<p class="Pp">If <i>newgrp</i> succeeds in creating a new shell execution
+    environment, whether or not the group identification was changed
+    successfully, the exit status shall be the exit status of the shell.
+    Otherwise, the following exit value shall be returned:</p>
+<dl class="Bl-tag">
+  <dt>&gt;0</dt>
+  <dd>An error occurred.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="CONSEQUENCES_OF_ERRORS"><a class="permalink" href="#CONSEQUENCES_OF_ERRORS">CONSEQUENCES
+  OF ERRORS</a></h1>
+<p class="Pp">The invoking shell may terminate.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">There is no convenient way to enter a password into the group
+    database. Use of group passwords is not encouraged, because by their very
+    nature they encourage poor security practices. Group passwords may disappear
+    in the future.</p>
+<p class="Pp">A common implementation of <i>newgrp</i> is that the current shell
+    uses <i>exec</i> to overlay itself with <i>newgrp</i>, which in turn
+    overlays itself with a new shell after changing group. On some
+    implementations, however, this may not occur and <i>newgrp</i> may be
+    invoked as a subprocess.</p>
+<p class="Pp">The <i>newgrp</i> command is intended only for use from an
+    interactive terminal. It does not offer a useful interface for the support
+    of applications.</p>
+<p class="Pp">The exit status of <i>newgrp</i> is generally inapplicable. If
+    <i>newgrp</i> is used in a script, in most cases it successfully invokes a
+    new shell and the rest of the original shell script is bypassed when the new
+    shell exits. Used interactively, <i>newgrp</i> displays diagnostic messages
+    to indicate problems. But usage such as:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>newgrp foo
+echo $?</pre>
+</div>
+<p class="Pp">is not useful because the new shell might not have access to any
+    status <i>newgrp</i> may have generated (and most historical systems do not
+    provide this status). A zero status echoed here does not necessarily
+    indicate that the user has changed to the new group successfully. Following
+    <i>newgrp</i> with the <i>id</i> command provides a portable means of
+    determining whether the group change was successful or not.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">Most historical implementations use one of the <i>exec</i>
+    functions to implement the behavior of <i>newgrp</i>. Errors detected before
+    the <i>exec</i> leave the environment unchanged, while errors detected after
+    the <i>exec</i> leave the user in a changed environment. While it would be
+    useful to have <i>newgrp</i> issue a diagnostic message to tell the user
+    that the environment changed, it would be inappropriate to require this
+    change to some historical implementations.</p>
+<p class="Pp">The password mechanism is allowed in the group database, but how
+    this would be implemented is not specified.</p>
+<p class="Pp">The <i>newgrp</i> utility was retained in this volume of
+    POSIX.1‐2017, even given the existence of the multiple group
+    permissions feature in the System Interfaces volume of POSIX.1‐2017,
+    for several reasons. First, in some implementations, the group ownership of
+    a newly created file is determined by the group of the directory in which
+    the file is created, as allowed by the System Interfaces volume of
+    POSIX.1‐2017; on other implementations, the group ownership of a
+    newly created file is determined by the effective group ID. On
+    implementations of the latter type, <i>newgrp</i> allows files to be created
+    with a specific group ownership. Finally, many implementations use the real
+    group ID in accounting, and on such systems, <i>newgrp</i> allows the
+    accounting identity of the user to be changed.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i>Chapter 2</i>, <i>Shell Command Language</i>,
+  <i><i>sh</i></i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Chapter
+    8</i>, <i>Environment Variables</i>, <i>Section 12.2</i>, <i>Utility Syntax
+    Guidelines</i></p>
+<p class="Pp">The System Interfaces volume of POSIX.1‐2017,
+    <i><i>exec</i></i>, <i><i>getgrnam</i>()</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 1992 Drew Eckhardt (drew@cs.colorado.edu), March 28, 1992
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Modified by Michael Haardt (michael@moria.de)
+   Modified Sat Jul 24 14:29:17 1993 by Rik Faith (faith@cs.unc.edu)
+   Modified 961203 and 001211 and 010326 by aeb@cwi.nl
+   Modified 001213 by Michael Haardt (michael@moria.de)
+   Modified 13 Jun 02, Michael Kerrisk <mtk.manpages@gmail.com>
+  	Added note on nonstandard behavior when SIGCHLD is ignored.
+   Modified 2004-11-16, mtk, Noted that the nonconformance when
+  	SIGCHLD is being ignored is fixed in Linux 2.6.9; other minor changes
+   Modified 2004-12-08, mtk, in Linux 2.6 times() return value changed
+   2005-04-13, mtk
+  	Added notes on nonstandard behavior: Linux allows 'buf' to
+  	be NULL, but POSIX.1 doesn't specify this and it's nonportable.
+   --><head>
+<meta name="dc.identifier" content="res/97d4a051bde7bdae701852ae71db52237a81d702">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>times(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">times(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">times(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">times - get process times</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/times.h&gt;</b></pre>
+<pre><b>clock_t times(struct tms *</b><i>buf</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>times</b>() stores the current process times in the <i>struct
+    tms</i> that <i>buf</i> points to. The <i>struct tms</i> is as defined in
+    <i>&lt;sys/times.h&gt;</i>:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct tms {
+<br>
+    clock_t tms_utime;  /* user time */
+<br>
+    clock_t tms_stime;  /* system time */
+<br>
+    clock_t tms_cutime; /* user time of children */
+<br>
+    clock_t tms_cstime; /* system time of children */
+};
+</pre>
+<br>
+<p class="Pp">The <i>tms_utime</i> field contains the CPU time spent executing
+    instructions of the calling process. The <i>tms_stime</i> field contains the
+    CPU time spent executing inside the kernel while performing tasks on behalf
+    of the calling process.</p>
+<p class="Pp">The <i>tms_cutime</i> field contains the sum of the
+    <i>tms_utime</i> and <i>tms_cutime</i> values for all waited-for terminated
+    children. The <i>tms_cstime</i> field contains the sum of the
+    <i>tms_stime</i> and <i>tms_cstime</i> values for all waited-for terminated
+    children.</p>
+<p class="Pp">Times for terminated children (and their descendants) are added in
+    at the moment <b>wait</b>(2) or <b>waitpid</b>(2) returns their process ID.
+    In particular, times of grandchildren that the children did not wait for are
+    never seen.</p>
+<p class="Pp">All times reported are in clock ticks.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp"><b>times</b>() returns the number of clock ticks that have elapsed
+    since an arbitrary point in the past. The return value may overflow the
+    possible range of type <i>clock_t</i>. On error, <i>(clock_t)&nbsp;-1</i>
+    is returned, and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>tms</i> points outside the process's address space.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, SVr4, 4.3BSD.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The number of clock ticks per second can be obtained using:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>sysconf(_SC_CLK_TCK);
+</pre>
+<br>
+<p class="Pp">In POSIX.1-1996 the symbol <b>CLK_TCK</b> (defined in
+    <i>&lt;time.h&gt;</i>) is mentioned as obsolescent. It is obsolete now.</p>
+<p class="Pp">Before Linux 2.6.9, if the disposition of <b>SIGCHLD</b> is set to
+    <b>SIG_IGN</b>, then the times of terminated children are automatically
+    included in the <i>tms_cstime</i> and <i>tms_cutime</i> fields, although
+    POSIX.1-2001 says that this should happen only if the calling process
+    <b>wait</b>(2)s on its children. This nonconformance is rectified in Linux
+    2.6.9 and later.</p>
+<p class="Pp">On Linux, the <i>buf</i> argument can be specified as NULL, with
+    the result that <b>times</b>() just returns a function result. However,
+    POSIX does not specify this behavior, and most other UNIX implementations
+    require a non-NULL value for <i>buf</i>.</p>
+<p class="Pp">Note that <b>clock</b>(3) also returns a value of type
+    <i>clock_t</i>, but this value is measured in units of
+    <b>CLOCKS_PER_SEC</b>, not the clock ticks used by <b>times</b>().</p>
+<p class="Pp">On Linux, the “arbitrary point in the past” from
+    which the return value of <b>times</b>() is measured has varied across
+    kernel versions. On Linux 2.4 and earlier, this point is the moment the
+    system was booted. Since Linux 2.6, this point is <i>(2^32/HZ) - 300</i>
+    seconds before system boot time. This variability across kernel versions
+    (and across UNIX implementations), combined with the fact that the returned
+    value may overflow the range of <i>clock_t</i>, means that a portable
+    application would be wise to avoid using this value. To measure changes in
+    elapsed time, use <b>clock_gettime</b>(2) instead.</p>
+<section class="Ss">
+<h2 class="Ss" id="Historical"><a class="permalink" href="#Historical">Historical</a></h2>
+<p class="Pp">SVr1-3 returns <i>long</i> and the struct members are of type
+    <i>time_t</i> although they store clock ticks, not seconds since the Epoch.
+    V7 used <i>long</i> for the struct members, because it had no type
+    <i>time_t</i> yet.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">A limitation of the Linux system call conventions on some
+    architectures (notably i386) means that on Linux 2.6 there is a small time
+    window (41 seconds) soon after boot when <b>times</b>() can return -1,
+    falsely indicating that an error occurred. The same problem can occur when
+    the return value wraps past the maximum value that can be stored in
+    <b>clock_t</b>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>time</b>(1), <b>getrusage</b>(2), <b>wait</b>(2),
+    <b>clock</b>(3), <b>sysconf</b>(3), <b>time</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

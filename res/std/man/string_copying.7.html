@@ -1,0 +1,732 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright 2022 Alejandro Colomar <alx@kernel.org>
+  
+   SPDX-License-Identifier: BSD-3-Clause
+   --><head>
+<meta name="dc.identifier" content="res/a7c34f2e0e46756ca294bda2f537f0d5ee3c6e10">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>string_copying(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">string_copying(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">string_copying(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">stpcpy, strcpy, strcat, stpecpy, strlcpy, strlcat, stpncpy,
+    strncpy, zustr2ustp, zustr2stp, strncat, ustpcpy, ustr2stp - copying strings
+    and character sequences</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Strings"><a class="permalink" href="#Strings">Strings</a></h2>
+<pre>// Chain-copy a string.
+<b>char *stpcpy(char *restrict </b><i>dst</i><b>, const char *restrict </b><i>src</i><b>);</b></pre>
+<pre>// Copy/catenate a string.
+<b>char *strcpy(char *restrict </b><i>dst</i><b>, const char *restrict </b><i>src</i><b>);</b>
+<b>char *strcat(char *restrict </b><i>dst</i><b>, const char *restrict </b><i>src</i><b>);</b></pre>
+<pre>// Chain-copy a string with truncation.
+<b>char *stpecpy(char *</b><i>dst</i><b>, char </b><i>end</i><b>[0], const char *restrict </b><i>src</i><b>);</b></pre>
+<pre>// Copy/catenate a string with truncation.
+<b>size_t strlcpy(char </b><i>dst</i><b>[restrict .</b><i>sz</i><b>], const char *restrict </b><i>src</i><b>,</b>
+<b>               size_t </b><i>sz</i><b>);</b>
+<b>size_t strlcat(char </b><i>dst</i><b>[restrict .</b><i>sz</i><b>], const char *restrict </b><i>src</i><b>,</b>
+<b>               size_t </b><i>sz</i><b>);</b></pre>
+</section>
+<section class="Ss">
+<h2 class="Ss">Null-padded character sequences</h2>
+<pre>// Zero a fixed-width buffer, and
+// copy a string into a character sequence with truncation.
+<b>char *stpncpy(char </b><i>dst</i><b>[restrict .</b><i>sz</i><b>], const char *restrict </b><i>src</i><b>,</b>
+<b>               size_t </b><i>sz</i><b>);</b></pre>
+<pre>// Zero a fixed-width buffer, and
+// copy a string into a character sequence with truncation.
+<b>char *strncpy(char </b><i>dest</i><b>[restrict .</b><i>sz</i><b>], const char *restrict </b><i>src</i><b>,</b>
+<b>               size_t </b><i>sz</i><b>);</b></pre>
+<pre>// Chain-copy a null-padded character sequence into a character sequence.
+<b>char *zustr2ustp(char *restrict </b><i>dst</i><b>, const char </b><i>src</i><b>[restrict .</b><i>sz</i><b>],</b>
+<b>               size_t </b><i>sz</i><b>);</b></pre>
+<pre>// Chain-copy a null-padded character sequence into a string.
+<b>char *zustr2stp(char *restrict </b><i>dst</i><b>, const char </b><i>src</i><b>[restrict .</b><i>sz</i><b>],</b>
+<b>               size_t </b><i>sz</i><b>);</b></pre>
+<pre>// Catenate a null-padded character sequence into a string.
+<b>char *strncat(char *restrict </b><i>dst</i><b>, const char </b><i>src</i><b>[restrict .</b><i>sz</i><b>],</b>
+<b>               size_t </b><i>sz</i><b>);</b></pre>
+</section>
+<section class="Ss">
+<h2 class="Ss">Measured character sequences</h2>
+<pre>// Chain-copy a measured character sequence.
+<b>char *ustpcpy(char *restrict </b><i>dst</i><b>, const char </b><i>src</i><b>[restrict .</b><i>len</i><b>],</b>
+<b>               size_t </b><i>len</i><b>);</b></pre>
+<pre>// Chain-copy a measured character sequence into a string.
+<b>char *ustr2stp(char *restrict </b><i>dst</i><b>, const char </b><i>src</i><b>[restrict .</b><i>len</i><b>],</b>
+<b>               size_t </b><i>len</i><b>);</b></pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Terms_(and_abbreviations)"><a class="permalink" href="#Terms_(and_abbreviations)">Terms
+  (and abbreviations)</a></h2>
+<dl class="Bl-tag">
+  <dt id="string"><a class="permalink" href="#string"><i>string
+    </i>(<i>str</i>)</a></dt>
+  <dd>is a sequence of zero or more non-null characters followed by a null
+    byte.</dd>
+  <dt id="character"><a class="permalink" href="#character"><i>character
+    sequence</i></a></dt>
+  <dd>is a sequence of zero or more non-null characters. A program should never
+      use a character sequence where a string is required. However, with
+      appropriate care, a string can be used in the place of a character
+      sequence.</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="null-padded"><a class="permalink" href="#null-padded"><i>null-padded
+    character sequence </i>(<i>zustr</i>)</a></dt>
+  <dd>Character sequences can be contained in fixed-width buffers, which contain
+      padding null bytes after the character sequence, to fill the rest of the
+      buffer without affecting the character sequence; however, those padding
+      null bytes are not part of the character sequence.</dd>
+  <dt id="measured"><a class="permalink" href="#measured"><i>measured character
+    sequence </i>(<i>ustr</i>)</a></dt>
+  <dd>Character sequence delimited by its length. It may be a slice of a larger
+      character sequence, or even of a string.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="length"><a class="permalink" href="#length"><i>length
+    </i>(<i>len</i>)</a></dt>
+  <dd>is the number of non-null characters in a string or character sequence. It
+      is the return value of <i>strlen(str)</i> and of <i>strnlen(ustr,
+    sz)</i>.</dd>
+  <dt id="size"><a class="permalink" href="#size"><i>size
+    </i>(<i>sz</i>)</a></dt>
+  <dd>refers to the entire buffer where the string or character sequence is
+      contained.</dd>
+  <dt id="end"><a class="permalink" href="#end"><i>end</i></a></dt>
+  <dd>is the name of a pointer to one past the last element of a buffer. It is
+      equivalent to <i>&amp;str[sz]</i>. It is used as a sentinel value, to be
+      able to truncate strings or character sequences instead of overrunning the
+      containing buffer.</dd>
+  <dt id="copy"><a class="permalink" href="#copy"><i>copy</i></a></dt>
+  <dd>This term is used when the writing starts at the first element pointed to
+      by <i>dst</i>.</dd>
+  <dt id="catenate"><a class="permalink" href="#catenate"><i>catenate</i></a></dt>
+  <dd>This term is used when a function first finds the terminating null byte in
+      <i>dst</i>, and then starts writing at that position.</dd>
+  <dt id="chain"><a class="permalink" href="#chain"><i>chain</i></a></dt>
+  <dd>This term is used when it's the programmer who provides a pointer to the
+      terminating null byte in the string <i>dst</i> (or one after the last
+      character in a character sequence), and the function starts writing at
+      that location. The function returns a pointer to the new location of the
+      terminating null byte (or one after the last character in a character
+      sequence) after the call, so that the programmer can use it to chain such
+      calls.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Copy,_catenate,_and_chain-copy"><a class="permalink" href="#Copy,_catenate,_and_chain-copy">Copy,
+  catenate, and chain-copy</a></h2>
+<p class="Pp">Originally, there was a distinction between functions that copy
+    and those that catenate. However, newer functions that copy while allowing
+    chaining cover both use cases with a single API. They are also
+    algorithmically faster, since they don't need to search for the terminating
+    null byte of the existing string. However, functions that catenate have a
+    much simpler use, so if performance is not important, it can make sense to
+    use them for improving readability.</p>
+<p class="Pp">The pointer returned by functions that allow chaining is a
+    byproduct of the copy operation, so it has no performance costs. Functions
+    that return such a pointer, and thus can be chained, have names of the form
+    *<b>stp</b>*(), since it's common to name the pointer just <i>p</i>.</p>
+<p class="Pp">Chain-copying functions that truncate should accept a pointer to
+    the end of the destination buffer, and have names of the form
+    *<b>stpe</b>*(). This allows not having to recalculate the remaining size
+    after each call.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Truncate_or_not?"><a class="permalink" href="#Truncate_or_not?">Truncate
+  or not?</a></h2>
+<p class="Pp">The first thing to note is that programmers should be careful with
+    buffers, so they always have the correct size, and truncation is not
+    necessary.</p>
+<p class="Pp">In most cases, truncation is not desired, and it is simpler to
+    just do the copy. Simpler code is safer code. Programming against
+    programming mistakes by adding more code just adds more points where
+    mistakes can be made.</p>
+<p class="Pp">Nowadays, compilers can detect most programmer errors with
+    features like compiler warnings, static analyzers, and
+    <b>_FORTIFY_SOURCE</b> (see <b>ftm</b>(7)). Keeping the code simple helps
+    these overflow-detection features be more precise.</p>
+<p class="Pp">When validating user input, however, it makes sense to truncate.
+    Remember to check the return value of such function calls.</p>
+<p class="Pp">Functions that truncate:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><b>stpecpy</b>(3) is the most efficient string copy function that performs
+      truncation. It only requires to check for truncation once after all
+      chained calls.</dd>
+  <dt>•</dt>
+  <dd><b>strlcpy</b>(3bsd) and <b>strlcat</b>(3bsd) are designed to crash if the
+      input string is invalid (doesn't contain a terminating null byte).</dd>
+  <dt>•</dt>
+  <dd><b>stpncpy</b>(3) and <b>strncpy</b>(3) also truncate, but they don't
+      write strings, but rather null-padded character sequences.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss">Null-padded character sequences</h2>
+<p class="Pp">For historic reasons, some standard APIs, such as <b>utmpx</b>(5),
+    use null-padded character sequences in fixed-width buffers. To interface
+    with them, specialized functions need to be used.</p>
+<p class="Pp">To copy strings into them, use <b>stpncpy</b>(3).</p>
+<p class="Pp">To copy from an unterminated string within a fixed-width buffer
+    into a string, ignoring any trailing null bytes in the source fixed-width
+    buffer, you should use <b>zustr2stp</b>(3) or <b>strncat</b>(3).</p>
+<p class="Pp">To copy from an unterminated string within a fixed-width buffer
+    into a character sequence, ignoring any trailing null bytes in the source
+    fixed-width buffer, you should use <b>zustr2ustp</b>(3).</p>
+</section>
+<section class="Ss">
+<h2 class="Ss">Measured character sequences</h2>
+<p class="Pp">The simplest character sequence copying function is
+    <b>mempcpy</b>(3). It requires always knowing the length of your character
+    sequences, for which structures can be used. It makes the code much faster,
+    since you always know the length of your character sequences, and can do the
+    minimal copies and length measurements. <b>mempcpy</b>(3) copies character
+    sequences, so you need to explicitly set the terminating null byte if you
+    need a string.</p>
+<p class="Pp">However, for keeping type safety, it's good to add a wrapper that
+    uses <i>char&nbsp;*</i> instead of <i>void&nbsp;*</i>:
+    <b>ustpcpy</b>(3).</p>
+<p class="Pp">In programs that make considerable use of strings or character
+    sequences, and need the best performance, using overlapping character
+    sequences can make a big difference. It allows holding subsequences of a
+    larger character sequence. while not duplicating memory nor using time to do
+    a copy.</p>
+<p class="Pp">However, this is delicate, since it requires using character
+    sequences. C library APIs use strings, so programs that use character
+    sequences will have to take care of differentiating strings from character
+    sequences.</p>
+<p class="Pp">To copy a measured character sequence, use <b>ustpcpy</b>(3).</p>
+<p class="Pp">To copy a measured character sequence into a string, use
+    <b>ustr2stp</b>(3).</p>
+<p class="Pp">Because these functions ask for the length, and a string is by
+    nature composed of a character sequence of the same length plus a
+    terminating null byte, a string is also accepted as input.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="String_vs_character_sequence"><a class="permalink" href="#String_vs_character_sequence">String
+  vs character sequence</a></h2>
+<p class="Pp">Some functions only operate on strings. Those require that the
+    input <i>src</i> is a string, and guarantee an output string (even when
+    truncation occurs). Functions that catenate also require that <i>dst</i>
+    holds a string before the call. List of functions:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><b>stpcpy</b>(3)</dd>
+  <dt>•</dt>
+  <dd><b>strcpy</b>(3), <b>strcat</b>(3)</dd>
+  <dt>•</dt>
+  <dd><b>stpecpy</b>(3)</dd>
+  <dt>•</dt>
+  <dd><b>strlcpy</b>(3bsd), <b>strlcat</b>(3bsd)</dd>
+</dl>
+<p class="Pp">Other functions require an input string, but create a character
+    sequence as output. These functions have confusing names, and have a long
+    history of misuse. List of functions:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><b>stpncpy</b>(3)</dd>
+  <dt>•</dt>
+  <dd><b>strncpy</b>(3)</dd>
+</dl>
+<p class="Pp">Other functions operate on an input character sequence, and create
+    an output string. Functions that catenate also require that <i>dst</i> holds
+    a string before the call. <b>strncat</b>(3) has an even more misleading name
+    than the functions above. List of functions:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><b>zustr2stp</b>(3)</dd>
+  <dt>•</dt>
+  <dd><b>strncat</b>(3)</dd>
+  <dt>•</dt>
+  <dd><b>ustr2stp</b>(3)</dd>
+</dl>
+<p class="Pp">Other functions operate on an input character sequence to create
+    an output character sequence. List of functions:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><b>ustpcpy</b>(3)</dd>
+  <dt>•</dt>
+  <dd><b>zustr2stp</b>(3)</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Functions"><a class="permalink" href="#Functions">Functions</a></h2>
+<dl class="Bl-tag">
+  <dt id="stpcpy"><a class="permalink" href="#stpcpy"><b>stpcpy</b>(3)</a></dt>
+  <dd>This function copies the input string into a destination string. The
+      programmer is responsible for allocating a buffer large enough. It returns
+      a pointer suitable for chaining.</dd>
+  <dt id="strcpy"><a class="permalink" href="#strcpy"><b>strcpy</b>(3)</a></dt>
+  <dd></dd>
+  <dt id="strcat"><a class="permalink" href="#strcat"><b>strcat</b>(3)</a></dt>
+  <dd>These functions copy and catenate the input string into a destination
+      string. The programmer is responsible for allocating a buffer large
+      enough. The return value is useless.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd><b>stpcpy</b>(3) is a faster alternative to these functions.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="stpecpy"><a class="permalink" href="#stpecpy"><b>stpecpy</b>(3)</a></dt>
+  <dd>This function copies the input string into a destination string. If the
+      destination buffer, limited by a pointer to its end, isn't large enough to
+      hold the copy, the resulting string is truncated (but it is guaranteed to
+      be null-terminated). It returns a pointer suitable for chaining.
+      Truncation needs to be detected only once after the last chained
+    call.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>This function is not provided by any library; See EXAMPLES for a reference
+      implementation.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="strlcpy"><a class="permalink" href="#strlcpy"><b>strlcpy</b>(3bsd)</a></dt>
+  <dd></dd>
+  <dt id="strlcat"><a class="permalink" href="#strlcat"><b>strlcat</b>(3bsd)</a></dt>
+  <dd>These functions copy and catenate the input string into a destination
+      string. If the destination buffer, limited by its size, isn't large enough
+      to hold the copy, the resulting string is truncated (but it is guaranteed
+      to be null-terminated). They return the length of the total string they
+      tried to create. These functions force a SIGSEGV if the <i>src</i> pointer
+      is not a string.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd><b>stpecpy</b>(3) is a simpler alternative to these functions.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="stpncpy"><a class="permalink" href="#stpncpy"><b>stpncpy</b>(3)</a></dt>
+  <dd>This function copies the input string into a destination null-padded
+      character sequence in a fixed-width buffer. If the destination buffer,
+      limited by its size, isn't large enough to hold the copy, the resulting
+      character sequence is truncated. Since it creates a character sequence, it
+      doesn't need to write a terminating null byte. It's impossible to
+      distinguish truncation by the result of the call, from a character
+      sequence that just fits the destination buffer; truncation should be
+      detected by comparing the length of the input string with the size of the
+      destination buffer.</dd>
+  <dt id="strncpy"><a class="permalink" href="#strncpy"><b>strncpy</b>(3)</a></dt>
+  <dd>This function is identical to <b>stpncpy</b>(3) except for the useless
+      return value.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd><b>stpncpy</b>(3) is a more useful alternative to this function.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="zustr2ustp"><a class="permalink" href="#zustr2ustp"><b>zustr2ustp</b>(3)</a></dt>
+  <dd>This function copies the input character sequence contained in a
+      null-padded wixed-width buffer, into a destination character sequence. The
+      programmer is responsible for allocating a buffer large enough. It returns
+      a pointer suitable for chaining.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>A truncating version of this function doesn't exist, since the size of the
+      original character sequence is always known, so it wouldn't be very
+      useful.</dd>
+  <dt></dt>
+  <dd>This function is not provided by any library; See EXAMPLES for a reference
+      implementation.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="zustr2stp"><a class="permalink" href="#zustr2stp"><b>zustr2stp</b>(3)</a></dt>
+  <dd>This function copies the input character sequence contained in a
+      null-padded wixed-width buffer, into a destination string. The programmer
+      is responsible for allocating a buffer large enough. It returns a pointer
+      suitable for chaining.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>A truncating version of this function doesn't exist, since the size of the
+      original character sequence is always known, so it wouldn't be very
+      useful.</dd>
+  <dt></dt>
+  <dd>This function is not provided by any library; See EXAMPLES for a reference
+      implementation.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="strncat"><a class="permalink" href="#strncat"><b>strncat</b>(3)</a></dt>
+  <dd>Do not confuse this function with <b>strncpy</b>(3); they are not related
+      at all.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>This function catenates the input character sequence contained in a
+      null-padded wixed-width buffer, into a destination string. The programmer
+      is responsible for allocating a buffer large enough. The return value is
+      useless.</dd>
+  <dt></dt>
+  <dd><b>zustr2stp</b>(3) is a faster alternative to this function.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="ustpcpy"><a class="permalink" href="#ustpcpy"><b>ustpcpy</b>(3)</a></dt>
+  <dd>This function copies the input character sequence, limited by its length,
+      into a destination character sequence. The programmer is responsible for
+      allocating a buffer large enough. It returns a pointer suitable for
+      chaining.</dd>
+  <dt id="ustr2stp"><a class="permalink" href="#ustr2stp"><b>ustr2stp</b>(3)</a></dt>
+  <dd>This function copies the input character sequence, limited by its length,
+      into a destination string. The programmer is responsible for allocating a
+      buffer large enough. It returns a pointer suitable for chaining.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The following functions return a pointer to the terminating null
+    byte in the destination string.</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><b>stpcpy</b>(3)</dd>
+  <dt>•</dt>
+  <dd><b>ustr2stp</b>(3)</dd>
+  <dt>•</dt>
+  <dd><b>zustr2stp</b>(3)</dd>
+</dl>
+<p class="Pp">The following function returns a pointer to the terminating null
+    byte in the destination string, except when truncation occurs; if truncation
+    occurs, it returns a pointer to the end of the destination buffer.</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><b>stpecpy</b>(3)</dd>
+</dl>
+<p class="Pp">The following function returns a pointer to one after the last
+    character in the destination character sequence; if truncation occurs, that
+    pointer is equivalent to a pointer to the end of the destination buffer.</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><b>stpncpy</b>(3)</dd>
+</dl>
+<p class="Pp">The following functions return a pointer to one after the last
+    character in the destination character sequence.</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><b>zustr2ustp</b>(3)</dd>
+  <dt>•</dt>
+  <dd><b>ustpcpy</b>(3)</dd>
+</dl>
+<p class="Pp">The following functions return the length of the total string that
+    they tried to create (as if truncation didn't occur).</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><b>strlcpy</b>(3bsd), <b>strlcat</b>(3bsd)</dd>
+</dl>
+<p class="Pp">The following functions return the <i>dst</i> pointer, which is
+    useless.</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><b>strcpy</b>(3), <b>strcat</b>(3)</dd>
+  <dt>•</dt>
+  <dd><b>strncpy</b>(3)</dd>
+  <dt>•</dt>
+  <dd><b>strncat</b>(3)</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The Linux kernel has an internal function for copying strings,
+    which is similar to <b>stpecpy</b>(3), except that it can't be chained:</p>
+<dl class="Bl-tag">
+  <dt id="strscpy"><a class="permalink" href="#strscpy"><b>strscpy</b>(9)</a></dt>
+  <dd>This function copies the input string into a destination string. If the
+      destination buffer, limited by its size, isn't large enough to hold the
+      copy, the resulting string is truncated (but it is guaranteed to be
+      null-terminated). It returns the length of the destination string, or
+      <b>-E2BIG</b> on truncation.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd><b>stpecpy</b>(3) is a simpler and faster alternative to this
+    function.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="CAVEATS"><a class="permalink" href="#CAVEATS">CAVEATS</a></h1>
+<p class="Pp">Don't mix chain calls to truncating and non-truncating functions.
+    It is conceptually wrong unless you know that the first part of a copy will
+    always fit. Anyway, the performance difference will probably be negligible,
+    so it will probably be more clear if you use consistent semantics: either
+    truncating or non-truncating. Calling a non-truncating function after a
+    truncating one is necessarily wrong.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">All catenation functions share the same performance problem:
+    <a class="Lk" href="https://www.joelonsoftware.com/2001/12/11/back-to-basics/">Shlemiel
+    the&nbsp;painter</a>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The following are examples of correct use of each of these
+    functions.</p>
+<dl class="Bl-tag">
+  <dt id="stpcpy~2"><a class="permalink" href="#stpcpy~2"><b>stpcpy</b>(3)</a></dt>
+  <dd>
+    <pre>p = buf;
+p = stpcpy(p, "Hello ");
+p = stpcpy(p, "world");
+p = stpcpy(p, "!");
+len = p - buf;
+puts(buf);
+    </pre>
+  </dd>
+  <dt id="strcpy~2"><a class="permalink" href="#strcpy~2"><b>strcpy</b>(3)</a></dt>
+  <dd></dd>
+  <dt id="strcat~2"><a class="permalink" href="#strcat~2"><b>strcat</b>(3)</a></dt>
+  <dd>
+    <pre>strcpy(buf, "Hello ");
+strcat(buf, "world");
+strcat(buf, "!");
+len = strlen(buf);
+puts(buf);
+    </pre>
+  </dd>
+  <dt id="stpecpy~2"><a class="permalink" href="#stpecpy~2"><b>stpecpy</b>(3)</a></dt>
+  <dd>
+    <pre>end = buf + sizeof(buf);
+p = buf;
+p = stpecpy(p, end, "Hello ");
+p = stpecpy(p, end, "world");
+p = stpecpy(p, end, "!");
+if (p == end) {
+<br>
+    p--;
+<br>
+    goto toolong;
+}
+len = p - buf;
+puts(buf);
+    </pre>
+  </dd>
+  <dt id="strlcpy~2"><a class="permalink" href="#strlcpy~2"><b>strlcpy</b>(3bsd)</a></dt>
+  <dd></dd>
+  <dt id="strlcat~2"><a class="permalink" href="#strlcat~2"><b>strlcat</b>(3bsd)</a></dt>
+  <dd>
+    <pre>if (strlcpy(buf, "Hello ", sizeof(buf)) &gt;= sizeof(buf))
+<br>
+    goto toolong;
+if (strlcat(buf, "world", sizeof(buf)) &gt;= sizeof(buf))
+<br>
+    goto toolong;
+len = strlcat(buf, "!", sizeof(buf));
+if (len &gt;= sizeof(buf))
+<br>
+    goto toolong;
+puts(buf);
+    </pre>
+  </dd>
+  <dt id="strscpy~2"><a class="permalink" href="#strscpy~2"><b>strscpy</b>(9)</a></dt>
+  <dd>
+    <pre>len = strscpy(buf, "Hello world!", sizeof(buf));
+if (len == -E2BIG)
+<br>
+    goto toolong;
+puts(buf);
+    </pre>
+  </dd>
+  <dt id="stpncpy~2"><a class="permalink" href="#stpncpy~2"><b>stpncpy</b>(3)</a></dt>
+  <dd>
+    <pre>p = stpncpy(buf, "Hello world!", sizeof(buf));
+if (sizeof(buf) &lt; strlen("Hello world!"))
+<br>
+    goto toolong;
+len = p - buf;
+for (size_t i = 0; i &lt; sizeof(buf); i++)
+<br>
+    putchar(buf[i]);
+    </pre>
+  </dd>
+  <dt id="strncpy~2"><a class="permalink" href="#strncpy~2"><b>strncpy</b>(3)</a></dt>
+  <dd>
+    <pre>strncpy(buf, "Hello world!", sizeof(buf));
+if (sizeof(buf) &lt; strlen("Hello world!"))
+<br>
+    goto toolong;
+len = strnlen(buf, sizeof(buf));
+for (size_t i = 0; i &lt; sizeof(buf); i++)
+<br>
+    putchar(buf[i]);
+    </pre>
+  </dd>
+  <dt id="zustr2ustp~2"><a class="permalink" href="#zustr2ustp~2"><b>zustr2ustp</b>(3)</a></dt>
+  <dd>
+    <pre>p = buf;
+p = zustr2ustp(p, "Hello ", 6);
+p = zustr2ustp(p, "world", 42);  // Padding null bytes ignored.
+p = zustr2ustp(p, "!", 1);
+len = p - buf;
+printf("%.*s\n", (int) len, buf);
+    </pre>
+  </dd>
+  <dt id="zustr2stp~2"><a class="permalink" href="#zustr2stp~2"><b>zustr2stp</b>(3)</a></dt>
+  <dd>
+    <pre>p = buf;
+p = zustr2stp(p, "Hello ", 6);
+p = zustr2stp(p, "world", 42);  // Padding null bytes ignored.
+p = zustr2stp(p, "!", 1);
+len = p - buf;
+puts(buf);
+    </pre>
+  </dd>
+  <dt id="strncat~2"><a class="permalink" href="#strncat~2"><b>strncat</b>(3)</a></dt>
+  <dd>
+    <pre>buf[0] = '\0';  // There's no 'cpy' function to this 'cat'.
+strncat(buf, "Hello ", 6);
+strncat(buf, "world", 42);  // Padding null bytes ignored.
+strncat(buf, "!", 1);
+len = strlen(buf);
+puts(buf);
+    </pre>
+  </dd>
+  <dt id="ustpcpy~2"><a class="permalink" href="#ustpcpy~2"><b>ustpcpy</b>(3)</a></dt>
+  <dd>
+    <pre>p = buf;
+p = ustpcpy(p, "Hello ", 6);
+p = ustpcpy(p, "world", 5);
+p = ustpcpy(p, "!", 1);
+len = p - buf;
+printf("%.*s\n", (int) len, buf);
+    </pre>
+  </dd>
+  <dt id="ustr2stp~2"><a class="permalink" href="#ustr2stp~2"><b>ustr2stp</b>(3)</a></dt>
+  <dd>
+    <pre>p = buf;
+p = ustr2stp(p, "Hello ", 6);
+p = ustr2stp(p, "world", 5);
+p = ustr2stp(p, "!", 1);
+len = p - buf;
+puts(buf);
+    </pre>
+  </dd>
+</dl>
+<section class="Ss">
+<h2 class="Ss" id="Implementations"><a class="permalink" href="#Implementations">Implementations</a></h2>
+<p class="Pp">Here are reference implementations for functions not provided by
+    libc.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>/* This code is in the public domain. */
+char *
+<i>stpecpy</i>(char *dst, char end[0], const char *restrict src)
+{
+<br>
+    char *p;
+<br>
+    if (dst == NULL)
+<br>
+        return NULL;
+<br>
+    if (dst == end)
+<br>
+        return end;
+<br>
+    p = memccpy(dst, src, '\0', end - dst);
+<br>
+    if (p != NULL)
+<br>
+        return p - 1;
+<br>
+    /* truncation detected */
+<br>
+    end[-1] = '\0';
+<br>
+    return end;
+}
+char *
+<i>zustr2ustp</i>(char *restrict dst, const char *restrict src, size_t sz)
+{
+<br>
+    return ustpcpy(dst, src, strnlen(src, sz));
+}
+char *
+<i>zustr2stp</i>(char *restrict dst, const char *restrict src, size_t sz)
+{
+<br>
+    char  *p;
+<br>
+    p = zustr2ustp(dst, src, sz);
+<br>
+    *p = '\0';
+<br>
+    return p;
+}
+char *
+<i>ustpcpy</i>(char *restrict dst, const char *restrict src, size_t len)
+{
+<br>
+    return mempcpy(dst, src, len);
+}
+char *
+<i>ustr2stp</i>(char *restrict dst, const char *restrict src, size_t len)
+{
+<br>
+    char  *p;
+<br>
+    p = ustpcpy(dst, src, len);
+<br>
+    *p = '\0';
+<br>
+    return p;
+}
+</pre>
+<br>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>bzero</b>(3), <b>memcpy</b>(3), <b>memccpy</b>(3),
+    <b>mempcpy</b>(3), <b>stpcpy</b>(3), <b>strlcpy</b>(3bsd),
+    <b>strncat</b>(3), <b>stpncpy</b>(3), <b>string</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

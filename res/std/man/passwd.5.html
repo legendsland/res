@@ -1,0 +1,155 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 1993 Michael Haardt (michael@moria.de),
+       Fri Apr  2 11:32:09 MET DST 1993
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+  
+   Modified Sun Jul 25 10:46:28 1993 by Rik Faith (faith@cs.unc.edu)
+   Modified Sun Aug 21 18:12:27 1994 by Rik Faith (faith@cs.unc.edu)
+   Modified Sun Jun 18 01:53:57 1995 by Andries Brouwer (aeb@cwi.nl)
+   Modified Mon Jan  5 20:24:40 MET 1998 by Michael Haardt
+    (michael@cantor.informatik.rwth-aachen.de)
+ --><head>
+<meta name="dc.identifier" content="res/e405b5b8da23645ad74528725e6d5677d3076f70">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>passwd(5)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">passwd(5)</td>
+    <td class="head-vol">File Formats Manual</td>
+    <td class="head-rtitle">passwd(5)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">passwd - password file</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>/etc/passwd</i> file is a text file that describes user
+    login accounts for the system. It should have read permission allowed for
+    all users (many utilities, like <b>ls</b>(1) use it to map user IDs to
+    usernames), but write access only for the superuser.</p>
+<p class="Pp">In the good old days there was no great problem with this general
+    read permission. Everybody could read the encrypted passwords, but the
+    hardware was too slow to crack a well-chosen password, and moreover the
+    basic assumption used to be that of a friendly user-community. These days
+    many people run some version of the shadow password suite, where
+    <i>/etc/passwd</i> has an 'x' character in the password field, and the
+    encrypted passwords are in <i>/etc/shadow</i>, which is readable by the
+    superuser only.</p>
+<p class="Pp">If the encrypted password, whether in <i>/etc/passwd</i> or in
+    <i>/etc/shadow</i>, is an empty string, login is allowed without even asking
+    for a password. Note that this functionality may be intentionally disabled
+    in applications, or configurable (for example using the
+    "<b>nullok</b>" or "<b>nonull</b>" arguments to
+    <b>pam_unix</b>(8)).</p>
+<p class="Pp">If the encrypted password in <i>/etc/passwd</i> is
+    "<i>*NP*</i>" (without the quotes), the shadow record should be
+    obtained from an NIS+ server.</p>
+<p class="Pp">Regardless of whether shadow passwords are used, many system
+    administrators use an asterisk (*) in the encrypted password field to make
+    sure that this user can not authenticate themself using a password. (But see
+    NOTES below.)</p>
+<p class="Pp">If you create a new login, first put an asterisk (*) in the
+    password field, then use <b>passwd</b>(1) to set it.</p>
+<p class="Pp">Each line of the file describes a single user, and contains seven
+    colon-separated fields:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>name:password:UID:GID:GECOS:directory:shell
+</pre>
+<br>
+<p class="Pp">The field are as follows:</p>
+<dl class="Bl-tag">
+  <dt id="name"><a class="permalink" href="#name"><i>name</i></a></dt>
+  <dd>This is the user's login name. It should not contain capital letters.</dd>
+  <dt id="password"><a class="permalink" href="#password"><i>password</i></a></dt>
+  <dd>This is either the encrypted user password, an asterisk (*), or the letter
+      'x'. (See <b>pwconv</b>(8) for an explanation of 'x'.)</dd>
+  <dt id="UID"><a class="permalink" href="#UID"><i>UID</i></a></dt>
+  <dd>The privileged <i>root</i> login account (superuser) has the user ID
+    0.</dd>
+  <dt id="GID"><a class="permalink" href="#GID"><i>GID</i></a></dt>
+  <dd>This is the numeric primary group ID for this user. (Additional groups for
+      the user are defined in the system group file; see <b>group</b>(5)).</dd>
+  <dt id="GECOS"><a class="permalink" href="#GECOS"><i>GECOS</i></a></dt>
+  <dd>This field (sometimes called the "comment field") is optional
+      and used only for informational purposes. Usually, it contains the full
+      username. Some programs (for example, <b>finger</b>(1)) display
+      information from this field.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>GECOS stands for "General Electric Comprehensive Operating
+      System", which was renamed to GCOS when GE's large systems division
+      was sold to Honeywell. Dennis Ritchie has reported: "Sometimes we
+      sent printer output or batch jobs to the GCOS machine. The gcos field in
+      the password file was a place to stash the information for the $IDENTcard.
+      Not elegant."</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="directory"><a class="permalink" href="#directory"><i>directory</i></a></dt>
+  <dd>This is the user's home directory: the initial directory where the user is
+      placed after logging in. The value in this field is used to set the
+      <b>HOME</b> environment variable.</dd>
+  <dt id="shell"><a class="permalink" href="#shell"><i>shell</i></a></dt>
+  <dd>This is the program to run at login (if empty, use <i>/bin/sh</i>). If set
+      to a nonexistent executable, the user will be unable to login through
+      <b>login</b>(1). The value in this field is used to set the <b>SHELL</b>
+      environment variable.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FILES"><a class="permalink" href="#FILES">FILES</a></h1>
+<p class="Pp"><i>/etc/passwd</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">If you want to create user groups, there must be an entry in
+    <i>/etc/group</i>, or no group will exist.</p>
+<p class="Pp">If the encrypted password is set to an asterisk (*), the user will
+    be unable to login using <b>login</b>(1), but may still login using
+    <b>rlogin</b>(1), run existing processes and initiate new ones through
+    <b>rsh</b>(1), <b>cron</b>(8), <b>at</b>(1), or mail filters, etc. Trying to
+    lock an account by simply changing the shell field yields the same result
+    and additionally allows the use of <b>su</b>(1).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>chfn</b>(1), <b>chsh</b>(1), <b>login</b>(1), <b>passwd</b>(1),
+    <b>su</b>(1), <b>crypt</b>(3), <b>getpwent</b>(3), <b>getpwnam</b>(3),
+    <b>group</b>(5), <b>shadow</b>(5), <b>vipw</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

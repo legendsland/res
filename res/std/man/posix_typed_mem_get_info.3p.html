@@ -1,0 +1,163 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/dced9eebc16d3f6a7f2d141ca2375ba2db06ac18">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>POSIX_TYPED_MEM_GET_INFO(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">POSIX_TYPED_MEM_GET_INFO(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">POSIX_TYPED_MEM_GET_INFO(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">posix_typed_mem_get_info — query typed memory information
+    (<b>ADVANCED REALTIME</b>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;sys/mman.h&gt;</pre>
+<pre>int posix_typed_mem_get_info(int <i>fildes</i>,
+<br>
+    struct posix_typed_mem_info *<i>info</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>posix_typed_mem_get_info</i>() function shall return, in
+    the <i>posix_tmi_length</i> field of the <b>posix_typed_mem_info</b>
+    structure pointed to by <i>info</i>, the maximum length which may be
+    successfully allocated by the typed memory object designated by
+    <i>fildes</i>. This maximum length shall take into account the flag
+    POSIX_TYPED_MEM_ALLOCATE or POSIX_TYPED_MEM_ALLOCATE_CONTIG specified when
+    the typed memory object represented by <i>fildes</i> was opened. The maximum
+    length is dynamic; therefore, the value returned is valid only while the
+    current mapping of the corresponding typed memory pool remains
+  unchanged.</p>
+<p class="Pp">If <i>fildes</i> represents a typed memory object opened with
+    neither the POSIX_TYPED_MEM_ALLOCATE flag nor the
+    POSIX_TYPED_MEM_ALLOCATE_CONTIG flag specified, the returned value of
+    <i>info</i>-&gt;<i>posix_tmi_length</i> is unspecified.</p>
+<p class="Pp">The <i>posix_typed_mem_get_info</i>() function may return
+    additional implementation-defined information in other fields of the
+    <b>posix_typed_mem_info</b> structure pointed to by <i>info</i>.</p>
+<p class="Pp">If the memory object specified by <i>fildes</i> is not a typed
+    memory object, then the behavior of this function is undefined.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, the <i>posix_typed_mem_get_info</i>()
+    function shall return zero; otherwise, the corresponding error status value
+    shall be returned.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>posix_typed_mem_get_info</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The <i>fildes</i> argument is not a valid open file descriptor.</dd>
+  <dt id="ENODEV"><a class="permalink" href="#ENODEV"><b>ENODEV</b></a></dt>
+  <dd>The <i>fildes</i> argument is not connected to a memory object supported
+      by this function.</dd>
+</dl>
+<p class="Pp">This function shall not return an error code of
+  <b>[EINTR]</b>.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">An application that needs to allocate a block of typed memory with
+    length dependent upon the amount of memory currently available must either
+    query the typed memory object to obtain the amount available, or repeatedly
+    invoke <i>mmap</i>() attempting to guess an appropriate length. While the
+    latter method is existing practice with <i>malloc</i>(), it is awkward and
+    imprecise. The <i>posix_typed_mem_get_info</i>() function allows an
+    application to immediately determine available memory. This is particularly
+    important for typed memory objects that may in some cases be scarce
+    resources. Note that when a typed memory pool is a shared resource, some
+    form of mutual-exclusion or synchronization may be required while typed
+    memory is being queried and allocated to prevent race conditions.</p>
+<p class="Pp">The existing <i>fstat</i>() function is not suitable for this
+    purpose. We realize that implementations may wish to provide other
+    attributes of typed memory objects (for example, alignment requirements,
+    page size, and so on). The <i>fstat</i>() function returns a structure which
+    is not extensible and, furthermore, contains substantial information that is
+    inappropriate for typed memory objects.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>fstat</i>()</i>, <i><i>mmap</i>()</i>,
+    <i><i>posix_typed_mem_open</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;sys_mman.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,283 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/e65601e34a18fc6d924776c15e9bee9870a6c047">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>QRLS(1P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">QRLS(1P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">QRLS(1P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">qrls — release batch jobs</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>qrls <b>[</b>-h <i>hold_list</i><b>] </b><i>job_identifier</i>...</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">A batch job might have one or more holds, which prevent the batch
+    job from executing. A batch job from which all the holds have been removed
+    becomes eligible for execution and is said to have been released. A batch
+    job hold is removed by sending a request to the batch server that manages
+    the batch job. The <i>qrls</i> utility is a user-accessible client of batch
+    services that requests holds be removed from one or more batch jobs.</p>
+<p class="Pp">The <i>qrls</i> utility shall remove one or more holds from those
+    batch jobs for which a batch <i>job_identifier</i> is presented to the
+    utility.</p>
+<p class="Pp">The <i>qrls</i> utility shall remove holds from batch jobs in the
+    order in which their batch <i>job_identifier</i>s are presented to the
+    utility.</p>
+<p class="Pp">If the <i>qrls</i> utility fails to process a batch
+    <i>job_identifier</i> successfully, the utility shall proceed to process the
+    remaining batch <i>job_identifier</i>s, if any.</p>
+<p class="Pp">The <i>qrls</i> utility shall remove holds on each batch job by
+    sending a <i>Release Job Request</i> to the batch server that manages the
+    batch job.</p>
+<p class="Pp">The <i>qrls</i> utility shall not exit until the holds have been
+    removed from the batch job corresponding to each successfully processed
+    batch <i>job_identifier</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OPTIONS"><a class="permalink" href="#OPTIONS">OPTIONS</a></h1>
+<p class="Pp">The <i>qrls</i> utility shall conform to the Base Definitions
+    volume of POSIX.1‐2017, <i>Section 12.2</i>, <i>Utility Syntax
+    Guidelines</i>.</p>
+<p class="Pp">The following option shall be supported by the implementation:</p>
+<dl class="Bl-tag">
+  <dt id="h"><a class="permalink" href="#h"><b>-h&nbsp;</b><i>hold_list</i></a></dt>
+  <dd>Define the types of holds to be removed from the batch job.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">The <i>qrls</i> <b>-h</b> option shall accept a value for the
+    <i>hold_list</i> option-argument that is a string of alphanumeric characters
+    in the portable character set (see the Base Definitions volume of
+    POSIX.1‐2017, <i>Section 6.1</i>, <i>Portable Character Set</i>).</p>
+<p class="Pp">The <i>qrls</i> utility shall accept a value for the
+    <i>hold_list</i> option-argument that is a string of one or more of the
+    characters <b>'u'</b>, <b>'s'</b>, or <b>'o'</b>, or the single character
+    <b>'n'</b>.</p>
+<p class="Pp">For each unique character in the <i>hold_list</i> option-argument,
+    the <i>qrls</i> utility shall add a value to the <i>Hold_Types</i> attribute
+    of the batch job as follows, each representing a different hold type:</p>
+<dl class="Bl-tag">
+  <dt id="u"><a class="permalink" href="#u">u</a></dt>
+  <dd>USER</dd>
+  <dt id="s"><a class="permalink" href="#s">s</a></dt>
+  <dd>SYSTEM</dd>
+  <dt id="o"><a class="permalink" href="#o">o</a></dt>
+  <dd>OPERATOR</dd>
+</dl>
+<p class="Pp">If any of these characters are duplicated in the <i>hold_list</i>
+    option-argument, the duplicates shall be ignored.</p>
+<p class="Pp">An existing <i>Hold_Types</i> attribute can be cleared by the
+    following hold type:</p>
+<dl class="Bl-tag">
+  <dt id="n"><a class="permalink" href="#n">n</a></dt>
+  <dd>NO_HOLD</dd>
+</dl>
+<p class="Pp">The <i>qrls</i> utility shall consider it an error if any hold
+    type other than <b>'n'</b> is combined with hold type <b>'n'</b>.</p>
+<p class="Pp">Strictly conforming applications shall not repeat any of the
+    characters <b>'u'</b>, <b>'s'</b>, <b>'o'</b>, or <b>'n'</b> within the
+    <i>hold_list</i> option-argument. The <i>qrls</i> utility shall permit the
+    repetition of characters, but shall not assign additional meaning to the
+    repeated characters.</p>
+<p class="Pp">An implementation may define other hold types. The conformance
+    document for an implementation shall describe any additional hold types, how
+    they are specified, their internal behavior, and how they affect the
+    behavior of the utility.</p>
+<p class="Pp">If the <b>-h</b> option is not presented to the <i>qrls</i>
+    utility, the implementation shall remove the USER hold in the
+    <i>Hold_Types</i> attribute.</p>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OPERANDS"><a class="permalink" href="#OPERANDS">OPERANDS</a></h1>
+<p class="Pp">The <i>qrls</i> utility shall accept one or more operands that
+    conform to the syntax for a batch <i>job_identifier</i> (see <i>Section
+    3.3.1</i>, <i>Batch Job Identifier</i>).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDIN"><a class="permalink" href="#STDIN">STDIN</a></h1>
+<p class="Pp">Not used.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="INPUT_FILES"><a class="permalink" href="#INPUT_FILES">INPUT
+  FILES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ENVIRONMENT_VARIABLES"><a class="permalink" href="#ENVIRONMENT_VARIABLES">ENVIRONMENT
+  VARIABLES</a></h1>
+<p class="Pp">The following environment variables shall affect the execution of
+    <i>qrls</i>:</p>
+<dl class="Bl-tag">
+  <dt id="LANG"><a class="permalink" href="#LANG"><i>LANG</i></a></dt>
+  <dd>Provide a default value for the internationalization variables that are
+      unset or null. (See the Base Definitions volume of POSIX.1‐2017,
+      <i>Section 8.2</i>, <i>Internationalization Variables</i> the precedence
+      of internationalization variables used to determine the values of locale
+      categories.)</dd>
+  <dt id="LC_ALL"><a class="permalink" href="#LC_ALL"><i>LC_ALL</i></a></dt>
+  <dd>If set to a non-empty string value, override the values of all the other
+      internationalization variables.</dd>
+  <dt id="LC_CTYPE"><a class="permalink" href="#LC_CTYPE"><i>LC_CTYPE</i></a></dt>
+  <dd>Determine the locale for the interpretation of sequences of bytes of text
+      data as characters (for example, single-byte as opposed to multi-byte
+      characters in arguments).</dd>
+  <dt id="LC_MESSAGES"><a class="permalink" href="#LC_MESSAGES"><i>LC_MESSAGES</i></a></dt>
+  <dd>
+    <br>
+    Determine the locale that should be used to affect the format and contents
+      of diagnostic messages written to standard error.</dd>
+  <dt id="LOGNAME"><a class="permalink" href="#LOGNAME"><i>LOGNAME</i></a></dt>
+  <dd>Determine the login name of the user.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ASYNCHRONOUS_EVENTS"><a class="permalink" href="#ASYNCHRONOUS_EVENTS">ASYNCHRONOUS
+  EVENTS</a></h1>
+<p class="Pp">Default.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDOUT"><a class="permalink" href="#STDOUT">STDOUT</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDERR"><a class="permalink" href="#STDERR">STDERR</a></h1>
+<p class="Pp">The standard error shall be used only for diagnostic messages.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OUTPUT_FILES"><a class="permalink" href="#OUTPUT_FILES">OUTPUT
+  FILES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXTENDED_DESCRIPTION"><a class="permalink" href="#EXTENDED_DESCRIPTION">EXTENDED
+  DESCRIPTION</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXIT_STATUS"><a class="permalink" href="#EXIT_STATUS">EXIT
+  STATUS</a></h1>
+<p class="Pp">The following exit values shall be returned:</p>
+<dl class="Bl-tag">
+  <dt>&nbsp;0</dt>
+  <dd>Successful completion.</dd>
+  <dt>&gt;0</dt>
+  <dd>An error occurred.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="CONSEQUENCES_OF_ERRORS"><a class="permalink" href="#CONSEQUENCES_OF_ERRORS">CONSEQUENCES
+  OF ERRORS</a></h1>
+<p class="Pp">In addition to the default behavior, the <i>qrls</i> utility shall
+    not be required to write a diagnostic message to standard error when the
+    error reply received from a batch server indicates that the batch
+    <i>job_identifier</i> does not exist on the server. Whether or not the
+    <i>qrls</i> utility waits to output the diagnostic message while attempting
+    to locate the job on other servers is implementation-defined.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The <i>qrls</i> utility allows users, operators, and
+    administrators to remove holds from jobs.</p>
+<p class="Pp">The <i>qrls</i> utility does not support any job selection options
+    or wildcard arguments. Users may acquire a list of jobs selected by
+    attributes using the <i>qselect</i> utility. For example, a user could
+    select all of their held jobs.</p>
+<p class="Pp">The <b>-h</b> option allows the user to specify the type of hold
+    that is to be removed. This option allows for USER, SYSTEM, OPERATOR, and
+    implementation-defined hold types. The batch server that manages the batch
+    job will verify whether the user is authorized to remove the specified hold
+    for the batch job. If more than one type of hold has been placed on the
+    batch job, a user may wish to remove only some of them.</p>
+<p class="Pp">Mail is not required on release because the administrator has the
+    tools and libraries to build this option if required.</p>
+<p class="Pp">The <i>qrls</i> utility is a new utility <i>vis-a-vis</i> existing
+    practice; it has been defined in this volume of POSIX.1‐2017 as the
+    natural complement to the <i>qhold</i> utility.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">The <i>qrls</i> utility may be removed in a future version.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i>Chapter 3</i>, <i>Batch Environment Services</i>,
+    <i><i>qhold</i></i>, <i><i>qselect</i></i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Section
+    6.1</i>, <i>Portable Character Set</i>, <i>Chapter 8</i>, <i>Environment
+    Variables</i>, <i>Section 12.2</i>, <i>Utility Syntax Guidelines</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

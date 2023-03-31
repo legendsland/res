@@ -1,0 +1,506 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/9d90167980cd50a293617d79b181b93e98ce35e8">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>TOUCH(1P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">TOUCH(1P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">TOUCH(1P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">touch — change file access and modification times</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>touch <b>[</b>-acm<b>] [</b>-r <i>ref_file</i>|-t <i>time</i>|-d <i>date_time</i><b>] </b><i>file</i>...</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>touch</i> utility shall change the last data modification
+    timestamps, the last data access timestamps, or both.</p>
+<p class="Pp">The time used can be specified by the <b>-t</b> <i>time</i>
+    option-argument, the corresponding <i>time</i> fields of the file referenced
+    by the <b>-r</b> <i>ref_file</i> option-argument, or the <b>-d</b>
+    <i>date_time</i> option-argument, as specified in the following sections. If
+    none of these are specified, <i>touch</i> shall use the current time.</p>
+<p class="Pp">For each <i>file</i> operand, <i>touch</i> shall perform actions
+    equivalent to the following functions defined in the System Interfaces
+    volume of POSIX.1‐2017:</p>
+<dl class="Bl-tag">
+  <dt> 1.</dt>
+  <dd>If <i>file</i> does not exist:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="a."><a class="permalink" href="#a."> a.</a></dt>
+  <dd>The <i>creat</i>() function is called with the following arguments:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>--</dt>
+  <dd>The <i>file</i> operand is used as the <i>path</i> argument.</dd>
+  <dt>--</dt>
+  <dd>The value of the bitwise-inclusive OR of S_IRUSR, S_IWUSR, S_IRGRP,
+      S_IWGRP, S_IROTH, and S_IWOTH is used as the <i>mode</i> argument.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="b."><a class="permalink" href="#b."> b.</a></dt>
+  <dd>The <i>futimens</i>() function is called with the following
+    arguments:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>--</dt>
+  <dd>The file descriptor opened in step 1a.</dd>
+  <dt>--</dt>
+  <dd>The access time and the modification time, set as described in the OPTIONS
+      section, are used as the first and second elements of the <i>times</i>
+      array argument, respectively.</dd>
+</dl>
+</div>
+</div>
+<dl class="Bl-tag">
+  <dt> 2.</dt>
+  <dd>If <i>file</i> exists, the <i>utimensat</i>() function is called with the
+      following arguments:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="a.~2"><a class="permalink" href="#a.~2"> a.</a></dt>
+  <dd>The AT_FDCWD special value is used as the <i>fd</i> argument.</dd>
+  <dt id="b.~2"><a class="permalink" href="#b.~2"> b.</a></dt>
+  <dd>The <i>file</i> operand is used as the <i>path</i> argument.</dd>
+  <dt id="c."><a class="permalink" href="#c."> c.</a></dt>
+  <dd>The access time and the modification time, set as described in the OPTIONS
+      section, are used as the first and second elements of the <i>times</i>
+      array argument, respectively.</dd>
+  <dt id="d."><a class="permalink" href="#d."> d.</a></dt>
+  <dd>The <i>flag</i> argument is set to zero.</dd>
+</dl>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OPTIONS"><a class="permalink" href="#OPTIONS">OPTIONS</a></h1>
+<p class="Pp">The <i>touch</i> utility shall conform to the Base Definitions
+    volume of POSIX.1‐2017, <i>Section 12.2</i>, <i>Utility Syntax
+    Guidelines</i>.</p>
+<p class="Pp">The following options shall be supported:</p>
+<dl class="Bl-tag">
+  <dt id="a"><a class="permalink" href="#a"><b>-a</b></a></dt>
+  <dd>Change the access time of <i>file</i>. Do not change the modification time
+      unless <b>-m</b> is also specified.</dd>
+  <dt id="c"><a class="permalink" href="#c"><b>-c</b></a></dt>
+  <dd>Do not create a specified <i>file</i> if it does not exist. Do not write
+      any diagnostic messages concerning this condition.</dd>
+  <dt id="d"><a class="permalink" href="#d"><b>-d&nbsp;</b><i>date_time</i></a></dt>
+  <dd>Use the specified <i>date_time</i> instead of the current time. The
+      option-argument shall be a string of the form:</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre><i>YYYY</i>-<i>MM</i>-<i>DD</i>T<i>hh</i>:<i>mm</i>:<i>SS</i><b>[</b>.<i>frac</i><b>][</b><i>tz</i><b>]</b></pre>
+</div>
+<p class="Pp">or:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre><i>YYYY</i>-<i>MM</i>-<i>DD</i>T<i>hh</i>:<i>mm</i>:<i>SS</i><b>[</b>,<i>frac</i><b>][</b><i>tz</i><b>]</b></pre>
+</div>
+<p class="Pp">where:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd><i>YYYY</i> are at least four decimal digits giving the year.</dd>
+  <dt> *</dt>
+  <dd><i>MM</i>, <i>DD</i>, <i>hh</i>, <i>mm</i>, and <i>SS</i> are as with
+      <b>-t</b> <i>time</i>.</dd>
+  <dt> *</dt>
+  <dd>T is the time designator, and can be replaced by a single
+    &lt;space&gt;.</dd>
+  <dt> *</dt>
+  <dd>[.<i>frac</i>] and [,<i>frac</i>] are either empty, or a &lt;period&gt;
+      (<b>'.'</b>) or a &lt;comma&gt; (<b>','</b>) respectively, followed by one
+      or more decimal digits, specifying a fractional second.</dd>
+  <dt> *</dt>
+  <dd>[<i>tz</i>] is either empty, signifying local time, or the letter
+      <b>'Z'</b>, signifying UTC. If [<i>tz</i>] is empty, the resulting time
+      shall be affected by the value of the <i>TZ</i> environment variable.</dd>
+</dl>
+<p class="Pp">If the resulting time precedes the Epoch, the behavior is
+    implementation-defined. If the time cannot be represented as the file's
+    timestamp, <i>touch</i> shall exit immediately with an error status.</p>
+</div>
+<dl class="Bl-tag">
+  <dt id="m"><a class="permalink" href="#m"><b>-m</b></a></dt>
+  <dd>Change the modification time of <i>file</i>. Do not change the access time
+      unless <b>-a</b> is also specified.</dd>
+  <dt id="r"><a class="permalink" href="#r"><b>-r&nbsp;</b><i>ref_file</i></a></dt>
+  <dd>Use the corresponding time of the file named by the pathname
+      <i>ref_file</i> instead of the current time.</dd>
+  <dt id="t"><a class="permalink" href="#t"><b>-t&nbsp;</b><i>time</i></a></dt>
+  <dd>Use the specified <i>time</i> instead of the current time. The
+      option-argument shall be a decimal number of the form:</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre><b>[[</b><i>CC</i><b>]</b><i>YY</i><b>]</b><i>MMDDhhmm</i><b>[</b>.<i>SS</i><b>]</b></pre>
+</div>
+<p class="Pp">where each two digits represents the following:</p>
+<dl class="Bl-tag">
+  <dt id="MM"><a class="permalink" href="#MM"><i>MM</i></a></dt>
+  <dd>The month of the year [01,12].</dd>
+  <dt id="DD"><a class="permalink" href="#DD"><i>DD</i></a></dt>
+  <dd>The day of the month [01,31].</dd>
+  <dt id="hh"><a class="permalink" href="#hh"><i>hh</i></a></dt>
+  <dd>The hour of the day [00,23].</dd>
+  <dt id="mm"><a class="permalink" href="#mm"><i>mm</i></a></dt>
+  <dd>The minute of the hour [00,59].</dd>
+  <dt id="CC"><a class="permalink" href="#CC"><i>CC</i></a></dt>
+  <dd>The first two digits of the year (the century).</dd>
+  <dt id="YY"><a class="permalink" href="#YY"><i>YY</i></a></dt>
+  <dd>The second two digits of the year.</dd>
+  <dt id="SS"><a class="permalink" href="#SS"><i>SS</i></a></dt>
+  <dd>The second of the minute [00,60].</dd>
+</dl>
+<p class="Pp">Both <i>CC</i> and <i>YY</i> shall be optional. If neither is
+    given, the current year shall be assumed. If <i>YY</i> is specified, but
+    <i>CC</i> is not, <i>CC</i> shall be derived as follows:</p>
+<table class="tbl" style="border-style: solid;">
+  <tbody><tr style="border-bottom-style: solid;">
+    <td style="text-align: center; border-right-style: solid;"><b>If
+      </b><i>YY</i><b> is:</b></td>
+    <td style="text-align: center;"><b></b><i>CC</i><b> becomes:</b></td>
+  </tr>
+  <tr>
+    <td style="text-align: center; border-right-style: solid;">[69,99]</td>
+    <td style="text-align: right;">19</td>
+  </tr>
+  <tr>
+    <td style="text-align: center; border-right-style: solid;">[00,68]</td>
+    <td style="text-align: right;">20</td>
+  </tr>
+</tbody></table>
+<dl class="Bl-tag">
+  <dt id="Note:"><a class="permalink" href="#Note:"><b>Note:</b></a></dt>
+  <dd>It is expected that in a future version of this standard the default
+      century inferred from a 2-digit year will change. (This would apply to all
+      commands accepting a 2-digit year as input.)</dd>
+</dl>
+<p class="Pp">The resulting time shall be affected by the value of the <i>TZ</i>
+    environment variable. If the resulting time value precedes the Epoch, the
+    behavior is implementation-defined. If the time is out of range for the
+    file's timestamp, <i>touch</i> shall exit immediately with an error status.
+    The range of valid times past the Epoch is implementation-defined, but it
+    shall extend to at least the time 0 hours, 0 minutes, 0 seconds, January 1,
+    2038, Coordinated Universal Time. Some implementations may not be able to
+    represent dates beyond January 18, 2038, because they use <b>signed int</b>
+    as a time holder.</p>
+<p class="Pp">The range for <i>SS</i> is [00,60] rather than [00,59] because of
+    leap seconds. If <i>SS</i> is 60, and the resulting time, as affected by the
+    <i>TZ</i> environment variable, does not refer to a leap second, the
+    resulting time shall be one second after a time where <i>SS</i> is 59. If
+    <i>SS</i> is not given a value, it is assumed to be zero.</p>
+</div>
+<p class="Pp">If neither the <b>-a</b> nor <b>-m</b> options were specified,
+    <i>touch</i> shall behave as if both the <b>-a</b> and <b>-m</b> options
+    were specified.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OPERANDS"><a class="permalink" href="#OPERANDS">OPERANDS</a></h1>
+<p class="Pp">The following operands shall be supported:</p>
+<dl class="Bl-tag">
+  <dt id="file"><a class="permalink" href="#file"><i>file</i></a></dt>
+  <dd>A pathname of a file whose times shall be modified.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDIN"><a class="permalink" href="#STDIN">STDIN</a></h1>
+<p class="Pp">Not used.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="INPUT_FILES"><a class="permalink" href="#INPUT_FILES">INPUT
+  FILES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ENVIRONMENT_VARIABLES"><a class="permalink" href="#ENVIRONMENT_VARIABLES">ENVIRONMENT
+  VARIABLES</a></h1>
+<p class="Pp">The following environment variables shall affect the execution of
+    <i>touch</i>:</p>
+<dl class="Bl-tag">
+  <dt id="LANG"><a class="permalink" href="#LANG"><i>LANG</i></a></dt>
+  <dd>Provide a default value for the internationalization variables that are
+      unset or null. (See the Base Definitions volume of POSIX.1‐2017,
+      <i>Section 8.2</i>, <i>Internationalization Variables</i> for the
+      precedence of internationalization variables used to determine the values
+      of locale categories.)</dd>
+  <dt id="LC_ALL"><a class="permalink" href="#LC_ALL"><i>LC_ALL</i></a></dt>
+  <dd>If set to a non-empty string value, override the values of all the other
+      internationalization variables.</dd>
+  <dt id="LC_CTYPE"><a class="permalink" href="#LC_CTYPE"><i>LC_CTYPE</i></a></dt>
+  <dd>Determine the locale for the interpretation of sequences of bytes of text
+      data as characters (for example, single-byte as opposed to multi-byte
+      characters in arguments).</dd>
+  <dt id="LC_MESSAGES"><a class="permalink" href="#LC_MESSAGES"><i>LC_MESSAGES</i></a></dt>
+  <dd>
+    <br>
+    Determine the locale that should be used to affect the format and contents
+      of diagnostic messages written to standard error.</dd>
+  <dt id="NLSPATH"><a class="permalink" href="#NLSPATH"><i>NLSPATH</i></a></dt>
+  <dd>Determine the location of message catalogs for the processing of
+      <i>LC_MESSAGES</i>.</dd>
+  <dt id="TZ"><a class="permalink" href="#TZ"><i>TZ</i></a></dt>
+  <dd>Determine the timezone to be used for interpreting the <i>time</i>
+      option-argument. If <i>TZ</i> is unset or null, an unspecified default
+      timezone shall be used.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ASYNCHRONOUS_EVENTS"><a class="permalink" href="#ASYNCHRONOUS_EVENTS">ASYNCHRONOUS
+  EVENTS</a></h1>
+<p class="Pp">Default.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDOUT"><a class="permalink" href="#STDOUT">STDOUT</a></h1>
+<p class="Pp">Not used.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDERR"><a class="permalink" href="#STDERR">STDERR</a></h1>
+<p class="Pp">The standard error shall be used only for diagnostic messages.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OUTPUT_FILES"><a class="permalink" href="#OUTPUT_FILES">OUTPUT
+  FILES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXTENDED_DESCRIPTION"><a class="permalink" href="#EXTENDED_DESCRIPTION">EXTENDED
+  DESCRIPTION</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXIT_STATUS"><a class="permalink" href="#EXIT_STATUS">EXIT
+  STATUS</a></h1>
+<p class="Pp">The following exit values shall be returned:</p>
+<dl class="Bl-tag">
+  <dt>&nbsp;0</dt>
+  <dd>The utility executed successfully and all requested changes were
+    made.</dd>
+  <dt>&gt;0</dt>
+  <dd>An error occurred.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="CONSEQUENCES_OF_ERRORS"><a class="permalink" href="#CONSEQUENCES_OF_ERRORS">CONSEQUENCES
+  OF ERRORS</a></h1>
+<p class="Pp">Default.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The interpretation of time is taken to be <i>seconds since the
+    Epoch</i> (see the Base Definitions volume of POSIX.1‐2017,
+    <i>Section 4.16</i>, <i>Seconds Since the Epoch</i>). It should be noted
+    that implementations conforming to the System Interfaces volume of
+    POSIX.1‐2017 do not take leap seconds into account when computing
+    seconds since the Epoch. When <i>SS</i>=60 is used, the resulting time
+    always refers to 1 plus <i>seconds since the Epoch</i> for a time when
+    <i>SS</i>=59.</p>
+<p class="Pp">Although the <b>-t</b> <i>time</i> option-argument specifies
+    values in 1969, the access time and modification time fields are defined in
+    terms of seconds since the Epoch (00:00:00 on 1 January 1970 UTC).
+    Therefore, depending on the value of <i>TZ</i> when <i>touch</i> is run,
+    there is never more than a few valid hours in 1969 and there need not be any
+    valid times in 1969.</p>
+<p class="Pp">If the <i>T</i> time designator is replaced by a &lt;space&gt; for
+    the <b>-d</b> <i>date_time</i> option-argument, the &lt;space&gt; must be
+    quoted to prevent the shell from splitting the argument.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">Create or update a file called <b>dwc</b>; the resulting file has
+    both the last data modification and last data access timestamps set to
+    November 12, 2007 at 10:15:30 local time:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>touch -d 2007-11-12T10:15:30 dwc</pre>
+</div>
+<p class="Pp">Create or update a file called <b>nick</b>; the resulting file has
+    both the last data modification and last data access timestamps set to
+    November 12, 2007 at 10:15:30 UTC:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>touch -d 2007-11-12T10:15:30Z nick</pre>
+</div>
+<p class="Pp">Create or update a file called <b>gwc</b>; the resulting file has
+    both the last data modification and last data access timestamps set to
+    November 12, 2007 at 10:15:30 local time with a fractional second timestamp
+    of .002 seconds:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>touch -d 2007-11-12T10:15:30,002 gwc</pre>
+</div>
+<p class="Pp">Create or update a file called <b>ajosey</b>; the resulting file
+    has both the last data modification and last data access timestamps set to
+    November 12, 2007 at 10:15:30 UTC with a fractional second timestamp of .002
+    seconds:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>touch -d "2007-11-12 10:15:30.002Z" ajosey</pre>
+</div>
+<p class="Pp">Create or update a file called <b>cathy</b>; the resulting file
+    has both the last data modification and last data access timestamps set to
+    November 12, 2007 at 10:15:00 local time:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>touch -t 200711121015 cathy</pre>
+</div>
+<p class="Pp">Create or update a file called <b>drepper</b>; the resulting file
+    has both the last data modification and last data access timestamps set to
+    November 12, 2007 at 10:15:30 local time:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>touch -t 200711121015.30 drepper</pre>
+</div>
+<p class="Pp">Create or update a file called <b>ebb9</b>; the resulting file has
+    both the last data modification and last data access timestamps set to
+    November 12, 2007 at 10:15:30 local time:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>touch -t 0711121015.30 ebb9</pre>
+</div>
+<p class="Pp">Create or update a file called <b>eggert</b>; the resulting file
+    has the last data access timestamp set to the corresponding time of the file
+    named <b>mark</b> instead of the current time. If the file exists, the last
+    data modification time is not changed:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>touch -a -r mark eggert</pre>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The functionality of <i>touch</i> is described almost entirely
+    through references to functions in the System Interfaces volume of
+    POSIX.1‐2017. In this way, there is no duplication of effort required
+    for describing such side-effects as the relationship of user IDs to the user
+    database, permissions, and so on.</p>
+<p class="Pp">There are some significant differences between the <i>touch</i>
+    utility in this volume of POSIX.1‐2017 and those in System V and BSD
+    systems. They are upwards-compatible for historical applications from both
+    implementations:</p>
+<dl class="Bl-tag">
+  <dt> 1.</dt>
+  <dd>In System V, an ambiguity exists when a pathname that is a decimal number
+      leads the operands; it is treated as a time value. In BSD, no <i>time</i>
+      value is allowed; files may only be <i>touch</i>ed to the current time.
+      The <b>-t</b> <i>time</i> construct solves these problems for future
+      conforming applications (note that the <b>-t</b> option is not historical
+      practice).</dd>
+  <dt> 2.</dt>
+  <dd>The inclusion of the century digits, <i>CC</i>, is also new. Note that a
+      ten-digit <i>time</i> value is treated as if <i>YY</i>, and not <i>CC</i>,
+      were specified. The caveat about the range of dates following the Epoch
+      was included as recognition that some implementations are not able to
+      represent dates beyond 18 January 2038 because they use <b>signed int</b>
+      as a time holder.</dd>
+</dl>
+<p class="Pp">The <b>-r</b> option was added because several comments requested
+    this capability. This option was named <b>-f</b> in an early proposal, but
+    was changed because the <b>-f</b> option is used in the BSD version of
+    <i>touch</i> with a different meaning.</p>
+<p class="Pp">At least one historical implementation of <i>touch</i> incremented
+    the exit code if <b>-c</b> was specified and the file did not exist. This
+    volume of POSIX.1‐2017 requires exit status zero if no errors
+  occur.</p>
+<p class="Pp">In previous version of the standard, if at least two operands are
+    specified, and the first operand is an eight or ten-digit decimal integer,
+    the first operand was assumed to be a <i>date_time</i> operand. This usage
+    was removed in this version of the standard since it had been marked
+    obsolescent previously.</p>
+<p class="Pp">The <b>-d</b> <i>date_time</i> format is an ISO&nbsp;8601:2004
+    standard complete representation of date and time extended format with an
+    optional decimal point or &lt;comma&gt; followed by a string of digits
+    following the seconds portion to specify fractions of a second. It is not
+    necessary to recognize <b>"[+/-]hh:mm"</b> and
+    <b>"[+/-]hh"</b> to specify timezones other than local time and
+    UTC. The <i>T</i> time designator in the ISO&nbsp;8601:2004 standard
+    extended format may be replaced by &lt;space&gt;.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>date</i></i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Section
+    4.16</i>, <i>Seconds Since the Epoch</i>, <i>Chapter 8</i>, <i>Environment
+    Variables</i>, <i>Section 12.2</i>, <i>Utility Syntax Guidelines</i>,
+    <i><b>&lt;sys_stat.h&gt;</b></i></p>
+<p class="Pp">The System Interfaces volume of POSIX.1‐2017,
+    <i><i>creat</i>()</i>, <i><i>futimens</i>()</i>, <i><i>time</i>()</i>,
+    <i><i>utime</i>()</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

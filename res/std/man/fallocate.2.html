@@ -1,0 +1,303 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2007 Silicon Graphics, Inc. All Rights Reserved
+   Written by Dave Chinner <dgc@sgi.com>
+  
+   SPDX-License-Identifier: GPL-2.0-only
+  
+   2011-09-19: Added FALLOC_FL_PUNCH_HOLE
+   2011-09-19: Substantial restructuring of the page
+   --><head>
+<meta name="dc.identifier" content="res/f8f20532b53d1ee9972a15b4d9e1970ace0df878">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>fallocate(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">fallocate(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">fallocate(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">fallocate - manipulate file space</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#define _GNU_SOURCE</b>             /* See feature_test_macros(7) */
+<b>#include &lt;fcntl.h&gt;</b></pre>
+<pre><b>int fallocate(int </b><i>fd</i><b>, int </b><i>mode</i><b>, off_t </b><i>offset</i><b>, off_t </b><i>len</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">This is a nonportable, Linux-specific system call. For the
+    portable, POSIX.1-specified method of ensuring that space is allocated for a
+    file, see <b>posix_fallocate</b>(3).</p>
+<p class="Pp"><b>fallocate</b>() allows the caller to directly manipulate the
+    allocated disk space for the file referred to by <i>fd</i> for the byte
+    range starting at <i>offset</i> and continuing for <i>len</i> bytes.</p>
+<p class="Pp">The <i>mode</i> argument determines the operation to be performed
+    on the given range. Details of the supported operations are given in the
+    subsections below.</p>
+<section class="Ss">
+<h2 class="Ss" id="Allocating_disk_space"><a class="permalink" href="#Allocating_disk_space">Allocating
+  disk space</a></h2>
+<p class="Pp">The default operation (i.e., <i>mode</i> is zero) of
+    <b>fallocate</b>() allocates the disk space within the range specified by
+    <i>offset</i> and <i>len</i>. The file size (as reported by <b>stat</b>(2))
+    will be changed if <i>offset</i>+<i>len</i> is greater than the file size.
+    Any subregion within the range specified by <i>offset</i> and <i>len</i>
+    that did not contain data before the call will be initialized to zero. This
+    default behavior closely resembles the behavior of the
+    <b>posix_fallocate</b>(3) library function, and is intended as a method of
+    optimally implementing that function.</p>
+<p class="Pp">After a successful call, subsequent writes into the range
+    specified by <i>offset</i> and <i>len</i> are guaranteed not to fail because
+    of lack of disk space.</p>
+<p class="Pp">If the <b>FALLOC_FL_KEEP_SIZE</b> flag is specified in
+    <i>mode</i>, the behavior of the call is similar, but the file size will not
+    be changed even if <i>offset</i>+<i>len</i> is greater than the file size.
+    Preallocating zeroed blocks beyond the end of the file in this manner is
+    useful for optimizing append workloads.</p>
+<p class="Pp">If the <b>FALLOC_FL_UNSHARE_RANGE</b> flag is specified in
+    <i>mode</i>, shared file data extents will be made private to the file to
+    guarantee that a subsequent write will not fail due to lack of space.
+    Typically, this will be done by performing a copy-on-write operation on all
+    shared data in the file. This flag may not be supported by all
+  filesystems.</p>
+<p class="Pp">Because allocation is done in block size chunks,
+    <b>fallocate</b>() may allocate a larger range of disk space than was
+    specified.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Deallocating_file_space"><a class="permalink" href="#Deallocating_file_space">Deallocating
+  file space</a></h2>
+<p class="Pp">Specifying the <b>FALLOC_FL_PUNCH_HOLE</b> flag (available since
+    Linux 2.6.38) in <i>mode</i> deallocates space (i.e., creates a hole) in the
+    byte range starting at <i>offset</i> and continuing for <i>len</i> bytes.
+    Within the specified range, partial filesystem blocks are zeroed, and whole
+    filesystem blocks are removed from the file. After a successful call,
+    subsequent reads from this range will return zeros.</p>
+<p class="Pp">The <b>FALLOC_FL_PUNCH_HOLE</b> flag must be ORed with
+    <b>FALLOC_FL_KEEP_SIZE</b> in <i>mode</i>; in other words, even when
+    punching off the end of the file, the file size (as reported by
+    <b>stat</b>(2)) does not change.</p>
+<p class="Pp">Not all filesystems support <b>FALLOC_FL_PUNCH_HOLE</b>; if a
+    filesystem doesn't support the operation, an error is returned. The
+    operation is supported on at least the following filesystems:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>XFS (since Linux 2.6.38)</dd>
+  <dt>•</dt>
+  <dd>ext4 (since Linux 3.0)</dd>
+  <dt>•</dt>
+  <dd>Btrfs (since Linux 3.7)</dd>
+  <dt>•</dt>
+  <dd><b>tmpfs</b>(5) (since Linux 3.5)</dd>
+  <dt>•</dt>
+  <dd><b>gfs2</b>(5) (since Linux 4.16)</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Collapsing_file_space"><a class="permalink" href="#Collapsing_file_space">Collapsing
+  file space</a></h2>
+<p class="Pp">Specifying the <b>FALLOC_FL_COLLAPSE_RANGE</b> flag (available
+    since Linux 3.15) in <i>mode</i> removes a byte range from a file, without
+    leaving a hole. The byte range to be collapsed starts at <i>offset</i> and
+    continues for <i>len</i> bytes. At the completion of the operation, the
+    contents of the file starting at the location <i>offset+len</i> will be
+    appended at the location <i>offset</i>, and the file will be <i>len</i>
+    bytes smaller.</p>
+<p class="Pp">A filesystem may place limitations on the granularity of the
+    operation, in order to ensure efficient implementation. Typically,
+    <i>offset</i> and <i>len</i> must be a multiple of the filesystem logical
+    block size, which varies according to the filesystem type and configuration.
+    If a filesystem has such a requirement, <b>fallocate</b>() fails with the
+    error <b>EINVAL</b> if this requirement is violated.</p>
+<p class="Pp">If the region specified by <i>offset</i> plus <i>len</i> reaches
+    or passes the end of file, an error is returned; instead, use
+    <b>ftruncate</b>(2) to truncate a file.</p>
+<p class="Pp">No other flags may be specified in <i>mode</i> in conjunction with
+    <b>FALLOC_FL_COLLAPSE_RANGE</b>.</p>
+<p class="Pp">As at Linux 3.15, <b>FALLOC_FL_COLLAPSE_RANGE</b> is supported by
+    ext4 (only for extent-based files) and XFS.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Zeroing_file_space"><a class="permalink" href="#Zeroing_file_space">Zeroing
+  file space</a></h2>
+<p class="Pp">Specifying the <b>FALLOC_FL_ZERO_RANGE</b> flag (available since
+    Linux 3.15) in <i>mode</i> zeros space in the byte range starting at
+    <i>offset</i> and continuing for <i>len</i> bytes. Within the specified
+    range, blocks are preallocated for the regions that span the holes in the
+    file. After a successful call, subsequent reads from this range will return
+    zeros.</p>
+<p class="Pp">Zeroing is done within the filesystem preferably by converting the
+    range into unwritten extents. This approach means that the specified range
+    will not be physically zeroed out on the device (except for partial blocks
+    at the either end of the range), and I/O is (otherwise) required only to
+    update metadata.</p>
+<p class="Pp">If the <b>FALLOC_FL_KEEP_SIZE</b> flag is additionally specified
+    in <i>mode</i>, the behavior of the call is similar, but the file size will
+    not be changed even if <i>offset</i>+<i>len</i> is greater than the file
+    size. This behavior is the same as when preallocating space with
+    <b>FALLOC_FL_KEEP_SIZE</b> specified.</p>
+<p class="Pp">Not all filesystems support <b>FALLOC_FL_ZERO_RANGE</b>; if a
+    filesystem doesn't support the operation, an error is returned. The
+    operation is supported on at least the following filesystems:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>XFS (since Linux 3.15)</dd>
+  <dt>•</dt>
+  <dd>ext4, for extent-based files (since Linux 3.15)</dd>
+  <dt>•</dt>
+  <dd>SMB3 (since Linux 3.17)</dd>
+  <dt>•</dt>
+  <dd>Btrfs (since Linux 4.16)</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Increasing_file_space"><a class="permalink" href="#Increasing_file_space">Increasing
+  file space</a></h2>
+<p class="Pp">Specifying the <b>FALLOC_FL_INSERT_RANGE</b> flag (available since
+    Linux 4.1) in <i>mode</i> increases the file space by inserting a hole
+    within the file size without overwriting any existing data. The hole will
+    start at <i>offset</i> and continue for <i>len</i> bytes. When inserting the
+    hole inside file, the contents of the file starting at <i>offset</i> will be
+    shifted upward (i.e., to a higher file offset) by <i>len</i> bytes.
+    Inserting a hole inside a file increases the file size by <i>len</i>
+  bytes.</p>
+<p class="Pp">This mode has the same limitations as
+    <b>FALLOC_FL_COLLAPSE_RANGE</b> regarding the granularity of the operation.
+    If the granularity requirements are not met, <b>fallocate</b>() fails with
+    the error <b>EINVAL</b>. If the <i>offset</i> is equal to or greater than
+    the end of file, an error is returned. For such operations (i.e., inserting
+    a hole at the end of file), <b>ftruncate</b>(2) should be used.</p>
+<p class="Pp">No other flags may be specified in <i>mode</i> in conjunction with
+    <b>FALLOC_FL_INSERT_RANGE</b>.</p>
+<p class="Pp"><b>FALLOC_FL_INSERT_RANGE</b> requires filesystem support.
+    Filesystems that support this operation include XFS (since Linux 4.1) and
+    ext4 (since Linux 4.2).</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>fallocate</b>() returns zero. On error, -1 is
+    returned and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd><i>fd</i> is not a valid file descriptor, or is not opened for
+    writing.</dd>
+  <dt id="EFBIG"><a class="permalink" href="#EFBIG"><b>EFBIG</b></a></dt>
+  <dd><i>offset</i>+<i>len</i> exceeds the maximum file size.</dd>
+  <dt id="EFBIG~2"><a class="permalink" href="#EFBIG~2"><b>EFBIG</b></a></dt>
+  <dd><i>mode</i> is <b>FALLOC_FL_INSERT_RANGE</b>, and the current file
+      size+<i>len</i> exceeds the maximum file size.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>A signal was caught during execution; see <b>signal</b>(7).</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>offset</i> was less than 0, or <i>len</i> was less than or equal to
+    0.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd><i>mode</i> is <b>FALLOC_FL_COLLAPSE_RANGE</b> and the range specified by
+      <i>offset</i> plus <i>len</i> reaches or passes the end of the file.</dd>
+  <dt id="EINVAL~3"><a class="permalink" href="#EINVAL~3"><b>EINVAL</b></a></dt>
+  <dd><i>mode</i> is <b>FALLOC_FL_INSERT_RANGE</b> and the range specified by
+      <i>offset</i> reaches or passes the end of the file.</dd>
+  <dt id="EINVAL~4"><a class="permalink" href="#EINVAL~4"><b>EINVAL</b></a></dt>
+  <dd><i>mode</i> is <b>FALLOC_FL_COLLAPSE_RANGE</b> or
+      <b>FALLOC_FL_INSERT_RANGE</b>, but either <i>offset</i> or <i>len</i> is
+      not a multiple of the filesystem block size.</dd>
+  <dt id="EINVAL~5"><a class="permalink" href="#EINVAL~5"><b>EINVAL</b></a></dt>
+  <dd><i>mode</i> contains one of <b>FALLOC_FL_COLLAPSE_RANGE</b> or
+      <b>FALLOC_FL_INSERT_RANGE</b> and also other flags; no other flags are
+      permitted with <b>FALLOC_FL_COLLAPSE_RANGE</b> or
+      <b>FALLOC_FL_INSERT_RANGE</b>.</dd>
+  <dt id="EINVAL~6"><a class="permalink" href="#EINVAL~6"><b>EINVAL</b></a></dt>
+  <dd><i>mode</i> is <b>FALLOC_FL_COLLAPSE_RANGE</b>,
+      <b>FALLOC_FL_ZERO_RANGE</b>, or <b>FALLOC_FL_INSERT_RANGE</b>, but the
+      file referred to by <i>fd</i> is not a regular file.</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>An I/O error occurred while reading from or writing to a filesystem.</dd>
+  <dt id="ENODEV"><a class="permalink" href="#ENODEV"><b>ENODEV</b></a></dt>
+  <dd><i>fd</i> does not refer to a regular file or a directory. (If <i>fd</i>
+      is a pipe or FIFO, a different error results.)</dd>
+  <dt id="ENOSPC"><a class="permalink" href="#ENOSPC"><b>ENOSPC</b></a></dt>
+  <dd>There is not enough space left on the device containing the file referred
+      to by <i>fd</i>.</dd>
+  <dt id="ENOSYS"><a class="permalink" href="#ENOSYS"><b>ENOSYS</b></a></dt>
+  <dd>This kernel does not implement <b>fallocate</b>().</dd>
+  <dt id="EOPNOTSUPP"><a class="permalink" href="#EOPNOTSUPP"><b>EOPNOTSUPP</b></a></dt>
+  <dd>The filesystem containing the file referred to by <i>fd</i> does not
+      support this operation; or the <i>mode</i> is not supported by the
+      filesystem containing the file referred to by <i>fd</i>.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The file referred to by <i>fd</i> is marked immutable (see
+      <b>chattr</b>(1)).</dd>
+  <dt id="EPERM~2"><a class="permalink" href="#EPERM~2"><b>EPERM</b></a></dt>
+  <dd><i>mode</i> specifies <b>FALLOC_FL_PUNCH_HOLE</b>,
+      <b>FALLOC_FL_COLLAPSE_RANGE</b>, or <b>FALLOC_FL_INSERT_RANGE</b> and the
+      file referred to by <i>fd</i> is marked append-only (see
+      <b>chattr</b>(1)).</dd>
+  <dt id="EPERM~3"><a class="permalink" href="#EPERM~3"><b>EPERM</b></a></dt>
+  <dd>The operation was prevented by a file seal; see <b>fcntl</b>(2).</dd>
+  <dt id="ESPIPE"><a class="permalink" href="#ESPIPE"><b>ESPIPE</b></a></dt>
+  <dd><i>fd</i> refers to a pipe or FIFO.</dd>
+  <dt id="ETXTBSY"><a class="permalink" href="#ETXTBSY"><b>ETXTBSY</b></a></dt>
+  <dd><i>mode</i> specifies <b>FALLOC_FL_COLLAPSE_RANGE</b> or
+      <b>FALLOC_FL_INSERT_RANGE</b>, but the file referred to by <i>fd</i> is
+      currently being executed.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>fallocate</b>() is available since Linux 2.6.23. Support is
+    provided since glibc 2.10. The <b>FALLOC_FL_*</b> flags are defined in glibc
+    headers only since glibc 2.18.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>fallocate</b>() is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>fallocate</b>(1), <b>ftruncate</b>(2), <b>posix_fadvise</b>(3),
+    <b>posix_fallocate</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

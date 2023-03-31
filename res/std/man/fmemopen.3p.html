@@ -1,0 +1,257 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/c3abacb2ca41c2ea6710ad8d82ab0fd6b0283559">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>FMEMOPEN(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">FMEMOPEN(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">FMEMOPEN(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">fmemopen — open a memory buffer stream</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;stdio.h&gt;</pre>
+<pre>FILE *fmemopen(void *restrict <i>buf</i>, size_t <i>size</i>,
+<br>
+    const char *restrict <i>mode</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>fmemopen</i>() function shall associate the buffer given by
+    the <i>buf</i> and <i>size</i> arguments with a stream. The <i>buf</i>
+    argument shall be either a null pointer or point to a buffer that is at
+    least <i>size</i> bytes long.</p>
+<p class="Pp">The <i>mode</i> argument points to a string. If the string is one
+    of the following, the stream shall be opened in the indicated mode.
+    Otherwise, the behavior is undefined.</p>
+<dl class="Bl-tag">
+  <dt id="r"><a class="permalink" href="#r"><i>r</i></a></dt>
+  <dd>Open the stream for reading.</dd>
+  <dt id="w"><a class="permalink" href="#w"><i>w</i></a></dt>
+  <dd>Open the stream for writing.</dd>
+  <dt id="a"><a class="permalink" href="#a"><i>a</i></a></dt>
+  <dd>Append; open the stream for writing at the first null byte.</dd>
+  <dt id="r~2"><a class="permalink" href="#r~2"><i>r</i>+</a></dt>
+  <dd>Open the stream for update (reading and writing).</dd>
+  <dt id="w~2"><a class="permalink" href="#w~2"><i>w</i>+</a></dt>
+  <dd>Open the stream for update (reading and writing). Truncate the buffer
+      contents.</dd>
+  <dt id="a~2"><a class="permalink" href="#a~2"><i>a</i>+</a></dt>
+  <dd>Append; open the stream for update (reading and writing); the initial
+      position is at the first null byte.</dd>
+</dl>
+<p class="Pp">Implementations shall accept all mode strings allowed by
+    <i>fopen</i>(), but the use of the character <b>'b'</b> shall produce
+    implementation-defined results, where the resulting <b>FILE *</b> need not
+    behave the same as if <b>'b'</b> were omitted.</p>
+<p class="Pp">If a null pointer is specified as the <i>buf</i> argument,
+    <i>fmemopen</i>() shall allocate <i>size</i> bytes of memory as if by a call
+    to <i>malloc</i>(). This buffer shall be automatically freed when the stream
+    is closed. Because this feature is only useful when the stream is opened for
+    updating (because there is no way to get a pointer to the buffer) the
+    <i>fmemopen</i>() call may fail if the <i>mode</i> argument does not include
+    a <b>'+'</b>.</p>
+<p class="Pp">The stream shall maintain a current position in the buffer. This
+    position shall be initially set to either the beginning of the buffer (for
+    <i>r</i> and <i>w</i> modes) or to the first null byte in the buffer (for
+    <i>a</i> modes). If no null byte is found in append mode, the initial
+    position shall be set to one byte after the end of the buffer.</p>
+<p class="Pp">If <i>buf</i> is a null pointer, the initial position shall always
+    be set to the beginning of the buffer.</p>
+<p class="Pp">The stream shall also maintain the size of the current buffer
+    contents; use of <i>fseek</i>() or <i>fseeko</i>() on the stream with
+    SEEK_END shall seek relative to this size. For modes <i>r</i> and <i>r+</i>
+    the size shall be set to the value given by the <i>size</i> argument. For
+    modes <i>w</i> and <i>w+</i> the initial size shall be zero and for modes
+    <i>a</i> and <i>a+</i> the initial size shall be:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>Zero, if <i>buf</i> is a null pointer</dd>
+  <dt> *</dt>
+  <dd>The position of the first null byte in the buffer, if one is found</dd>
+  <dt> *</dt>
+  <dd>The value of the <i>size</i> argument, if <i>buf</i> is not a null pointer
+      and no null byte is found</dd>
+</dl>
+<p class="Pp">A read operation on the stream shall not advance the current
+    buffer position beyond the current buffer size. Reaching the buffer size in
+    a read operation shall count as ``end-of-file''. Null bytes in the buffer
+    shall have no special meaning for reads. The read operation shall start at
+    the current buffer position of the stream.</p>
+<p class="Pp">A write operation shall start either at the current position of
+    the stream (if <i>mode</i> has not specified <b>'a'</b> as the first
+    character) or at the current size of the stream (if <i>mode</i> had
+    <b>'a'</b> as the first character). If the current position at the end of
+    the write is larger than the current buffer size, the current buffer size
+    shall be set to the current position. A write operation on the stream shall
+    not advance the current buffer size beyond the size given in the <i>size</i>
+    argument.</p>
+<p class="Pp">When a stream open for writing is flushed or closed, a null byte
+    shall be written at the current position or at the end of the buffer,
+    depending on the size of the contents. If a stream open for update is
+    flushed or closed and the last write has advanced the current buffer size, a
+    null byte shall be written at the end of the buffer if it fits.</p>
+<p class="Pp">An attempt to seek a memory buffer stream to a negative position
+    or to a position larger than the buffer size given in the <i>size</i>
+    argument shall fail.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>fmemopen</i>() shall return a
+    pointer to the object controlling the stream. Otherwise, a null pointer
+    shall be returned, and <i>errno</i> shall be set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>fmemopen</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EMFILE"><a class="permalink" href="#EMFILE"><b>EMFILE</b></a></dt>
+  <dd>{STREAM_MAX} streams are currently open in the calling process.</dd>
+</dl>
+<p class="Pp">The <i>fmemopen</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The value of the <i>mode</i> argument is not valid.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>The <i>buf</i> argument is a null pointer and the <i>mode</i> argument
+      does not include a <b>'+'</b> character.</dd>
+  <dt id="EINVAL~3"><a class="permalink" href="#EINVAL~3"><b>EINVAL</b></a></dt>
+  <dd>The <i>size</i> argument specifies a buffer size of zero and the
+      implementation does not support this.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>The <i>buf</i> argument is a null pointer and the allocation of a buffer
+      of length <i>size</i> has failed.</dd>
+  <dt id="EMFILE~2"><a class="permalink" href="#EMFILE~2"><b>EMFILE</b></a></dt>
+  <dd>{FOPEN_MAX} streams are currently open in the calling process.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<div class="Bd-indent">
+<pre>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;</pre>
+<pre>static char buffer[] = "foobar";</pre>
+<pre>int
+main (void)
+{
+<br>
+    int ch;
+<br>
+    FILE *stream;</pre>
+<pre><br>
+    stream = fmemopen(buffer, strlen (buffer), "r");
+<br>
+    if (stream == NULL)
+<br>
+        /* handle error */;</pre>
+<pre><br>
+    while ((ch = fgetc(stream)) != EOF)
+<br>
+        printf("Got %c\n", ch);</pre>
+<pre><br>
+    fclose(stream);
+<br>
+    return (0);
+}</pre>
+</div>
+<p class="Pp">This program produces the following output:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>Got f
+Got o
+Got o
+Got b
+Got a
+Got r</pre>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">This interface has been introduced to eliminate many of the errors
+    encountered in the construction of strings, notably overflowing of strings.
+    This interface prevents overflow.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">A future version of this standard may mandate specific behavior
+    when the <i>mode</i> argument includes <b>'b'</b>.</p>
+<p class="Pp">A future version of this standard may require support of
+    zero-length buffer streams explicitly.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>fdopen</i>()</i>, <i><i>fopen</i>()</i>,
+    <i><i>freopen</i>()</i>, <i><i>fseek</i>()</i>, <i><i>malloc</i>()</i>,
+    <i><i>open_memstream</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;stdio.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

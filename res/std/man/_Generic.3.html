@@ -1,0 +1,108 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2022 Alejandro Colomar <alx@kernel.org>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/108e1f23b12b5d8e088b2e3029f03d26e008980f">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>_Generic(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">_Generic(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">_Generic(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">_Generic - type-generic selection</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>_Generic(</b><i>expression</i><b>, type1: </b>e1<b>, </b>... /*<b>, default: </b>e */<b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>_Generic</b>() evaluates the path of code under the type
+    selector that is compatible with the type of the controlling
+    <i>expression</i>, or <b>default:</b> if no type is compatible.</p>
+<p class="Pp"><i>expression</i> is not evaluated.</p>
+<p class="Pp">This is especially useful for writing type-generic macros, that
+    will behave differently depending on the type of the argument.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">C11 and later.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The following program demonstrates how to write a replacement for
+    the standard <b>imaxabs</b>(3) function, which being a function can't really
+    provide what it promises: seamlessly upgrading to the widest available
+  type.</p>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <pre>#include &lt;stdint.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#define my_imaxabs  _Generic(INTMAX_C(0),  \
+<br>
+    long:           labs,                  \
+<br>
+    long long:      llabs                  \
+<br>
+ /* long long long: lllabs */              \
+)
+int
+main(void)
+{
+<br>
+    off_t  a;
+<br>
+    a = -42;
+<br>
+    printf("imaxabs(%jd) == %jd\n", (intmax_t) a, my_imaxabs(a));
+<br>
+    printf("&amp;imaxabs == %p\n", &amp;my_imaxabs);
+<br>
+    printf("&amp;labs    == %p\n", &amp;labs);
+<br>
+    printf("&amp;llabs   == %p\n", &amp;llabs);
+<br>
+    exit(EXIT_SUCCESS);
+}
+    </pre>
+  </dd>
+</dl>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

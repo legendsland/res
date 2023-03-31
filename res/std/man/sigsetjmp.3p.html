@@ -1,0 +1,155 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/abde3aa2551355f1f7809b73f34bd15444b541f3">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>SIGSETJMP(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">SIGSETJMP(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">SIGSETJMP(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">sigsetjmp — set jump point for a non-local goto</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;setjmp.h&gt;</pre>
+<pre>int sigsetjmp(sigjmp_buf <i>env</i>, int <i>savemask</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>sigsetjmp</i>() function shall be equivalent to the
+    <i>setjmp</i>() function, except as follows:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>References to <i>setjmp</i>() are equivalent to <i>sigsetjmp</i>().</dd>
+  <dt> *</dt>
+  <dd>References to <i>longjmp</i>() are equivalent to <i>siglongjmp</i>().</dd>
+  <dt> *</dt>
+  <dd>If the value of the <i>savemask</i> argument is not 0, <i>sigsetjmp</i>()
+      shall also save the current signal mask of the calling thread as part of
+      the calling environment.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">If the return is from a successful direct invocation,
+    <i>sigsetjmp</i>() shall return 0. If the return is from a call to
+    <i>siglongjmp</i>(), <i>sigsetjmp</i>() shall return a non-zero value.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">No errors are defined.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The distinction between <i>setjmp</i>()/<i>longjmp</i>() and
+    <i>sigsetjmp</i>()/<i>siglongjmp</i>() is only significant for programs
+    which use <i>sigaction</i>(), <i>sigprocmask</i>(), or
+  <i>sigsuspend</i>().</p>
+<p class="Pp">Note that since this function is defined in terms of
+    <i>setjmp</i>(), if <i>savemask</i> is zero, it is unspecified whether the
+    signal mask is saved.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The ISO&nbsp;C standard specifies various restrictions on the
+    usage of the <i>setjmp</i>() macro in order to permit implementors to
+    recognize the name in the compiler and not implement an actual function.
+    These same restrictions apply to the <i>sigsetjmp</i>() macro.</p>
+<p class="Pp">There are processors that cannot easily support these calls, but
+    this was not considered a sufficient reason to exclude them.</p>
+<p class="Pp">4.2 BSD, 4.3 BSD, and XSI-conformant systems provide functions
+    named <i>_setjmp</i>() and <i>_longjmp</i>() that, together with
+    <i>setjmp</i>() and <i>longjmp</i>(), provide the same functionality as
+    <i>sigsetjmp</i>() and <i>siglongjmp</i>(). On those systems,
+    <i>setjmp</i>() and <i>longjmp</i>() save and restore signal masks, while
+    <i>_setjmp</i>() and <i>_longjmp</i>() do not. On System V Release 3 and in
+    corresponding issues of the SVID, <i>setjmp</i>() and <i>longjmp</i>() are
+    explicitly defined not to save and restore signal masks. In order to permit
+    existing practice in both cases, the relation of <i>setjmp</i>() and
+    <i>longjmp</i>() to signal masks is not specified, and a new set of
+    functions is defined instead.</p>
+<p class="Pp">The <i>longjmp</i>() and <i>siglongjmp</i>() functions operate as
+    in the previous issue provided the matching <i>setjmp</i>() or
+    <i>sigsetjmp</i>() has been performed in the same thread. Non-local jumps
+    into contexts saved by other threads would be at best a questionable
+    practice and were not considered worthy of standardization.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>pthread_sigmask</i>()</i>, <i><i>siglongjmp</i>()</i>,
+    <i><i>signal</i>()</i>, <i><i>sigsuspend</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;setjmp.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

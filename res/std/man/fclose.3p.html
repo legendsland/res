@@ -1,0 +1,196 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/a638252f0430ffe7d1abf210b5dda5acc1369cc4">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>FCLOSE(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">FCLOSE(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">FCLOSE(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">fclose — close a stream</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;stdio.h&gt;</pre>
+<pre>int fclose(FILE *<i>stream</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The functionality described on this reference page is aligned with
+    the ISO&nbsp;C standard. Any conflict between the requirements described
+    here and the ISO&nbsp;C standard is unintentional. This volume of
+    POSIX.1‐2017 defers to the ISO&nbsp;C standard.</p>
+<p class="Pp">The <i>fclose</i>() function shall cause the stream pointed to by
+    <i>stream</i> to be flushed and the associated file to be closed. Any
+    unwritten buffered data for the stream shall be written to the file; any
+    unread buffered data shall be discarded. Whether or not the call succeeds,
+    the stream shall be disassociated from the file and any buffer set by the
+    <i>setbuf</i>() or <i>setvbuf</i>() function shall be disassociated from the
+    stream. If the associated buffer was automatically allocated, it shall be
+    deallocated.</p>
+<p class="Pp">If the file is not already at EOF, and the file is one capable of
+    seeking, the file offset of the underlying open file description shall be
+    set to the file position of the stream if the stream is the active handle to
+    the underlying file description.</p>
+<p class="Pp">The <i>fclose</i>() function shall mark for update the last data
+    modification and last file status change timestamps of the underlying file,
+    if the stream was writable, and if buffered data remains that has not yet
+    been written to the file. The <i>fclose</i>() function shall perform the
+    equivalent of a <i>close</i>() on the file descriptor that is associated
+    with the stream pointed to by <i>stream</i>.</p>
+<p class="Pp">After the call to <i>fclose</i>(), any use of <i>stream</i>
+    results in undefined behavior.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>fclose</i>() shall return 0;
+    otherwise, it shall return EOF and set <i>errno</i> to indicate the
+  error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>fclose</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>The O_NONBLOCK flag is set for the file descriptor underlying
+      <i>stream</i> and the thread would be delayed in the write operation.</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The file descriptor underlying stream is not valid.</dd>
+  <dt id="EFBIG"><a class="permalink" href="#EFBIG"><b>EFBIG</b></a></dt>
+  <dd>An attempt was made to write a file that exceeds the maximum file
+    size.</dd>
+  <dt id="EFBIG~2"><a class="permalink" href="#EFBIG~2"><b>EFBIG</b></a></dt>
+  <dd>An attempt was made to write a file that exceeds the file size limit of
+      the process.</dd>
+  <dt id="EFBIG~3"><a class="permalink" href="#EFBIG~3"><b>EFBIG</b></a></dt>
+  <dd>The file is a regular file and an attempt was made to write at or beyond
+      the offset maximum associated with the corresponding stream.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The <i>fclose</i>() function was interrupted by a signal.</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>The process is a member of a background process group attempting to write
+      to its controlling terminal, TOSTOP is set, the calling thread is not
+      blocking SIGTTOU, the process is not ignoring SIGTTOU, and the process
+      group of the process is orphaned. This error may also be returned under
+      implementation-defined conditions.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>The underlying stream was created by <i>open_memstream</i>() or
+      <i>open_wmemstream</i>() and insufficient memory is available.</dd>
+  <dt id="ENOSPC"><a class="permalink" href="#ENOSPC"><b>ENOSPC</b></a></dt>
+  <dd>There was no free space remaining on the device containing the file or in
+      the buffer used by the <i>fmemopen</i>() function.</dd>
+  <dt id="EPIPE"><a class="permalink" href="#EPIPE"><b>EPIPE</b></a></dt>
+  <dd>An attempt is made to write to a pipe or FIFO that is not open for reading
+      by any process. A SIGPIPE signal shall also be sent to the thread.</dd>
+</dl>
+<p class="Pp">The <i>fclose</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="ENXIO"><a class="permalink" href="#ENXIO"><b>ENXIO</b></a></dt>
+  <dd>A request was made of a nonexistent device, or the request was outside the
+      capabilities of the device.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">Since after the call to <i>fclose</i>() any use of <i>stream</i>
+    results in undefined behavior, <i>fclose</i>() should not be used on
+    <i>stdin</i>, <i>stdout</i>, or <i>stderr</i> except immediately before
+    process termination (see the Base Definitions volume of POSIX.1‐2017,
+    <i>Section 3.303</i>, <i>Process Termination</i>), so as to avoid triggering
+    undefined behavior in other standard interfaces that rely on these streams.
+    If there are any <i>atexit</i>() handlers registered by the application,
+    such a call to <i>fclose</i>() should not occur until the last handler is
+    finishing. Once <i>fclose</i>() has been used to close <i>stdin</i>,
+    <i>stdout</i>, or <i>stderr</i>, there is no standard way to reopen any of
+    these streams.</p>
+<p class="Pp">Use of <i>freopen</i>() to change <i>stdin</i>, <i>stdout</i>, or
+    <i>stderr</i> instead of closing them avoids the danger of a file
+    unexpectedly being opened as one of the special file descriptors
+    STDIN_FILENO, STDOUT_FILENO, or STDERR_FILENO at a later time in the
+    application.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i>Section 2.5</i>, <i>Standard I/O Streams</i>,
+    <i><i>atexit</i>()</i>, <i><i>close</i>()</i>, <i><i>fmemopen</i>()</i>,
+    <i><i>fopen</i>()</i>, <i><i>freopen</i>()</i>, <i><i>getrlimit</i>()</i>,
+    <i><i>open_memstream</i>()</i>, <i><i>ulimit</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;stdio.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

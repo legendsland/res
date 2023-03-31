@@ -1,0 +1,148 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2017 Red Hat, Inc. All Rights Reserved.
+   Written by David Howells (dhowells@redhat.com)
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+   --><head>
+<meta name="dc.identifier" content="res/e22d01cefc7018e1f4a4131b28c8c4fd964682a5">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>kernel_lockdown(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">kernel_lockdown(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">kernel_lockdown(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">kernel_lockdown - kernel image access prevention feature</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The Kernel Lockdown feature is designed to prevent both direct and
+    indirect access to a running kernel image, attempting to protect against
+    unauthorized modification of the kernel image and to prevent access to
+    security and cryptographic data located in kernel memory, whilst still
+    permitting driver modules to be loaded.</p>
+<p class="Pp">If a prohibited or restricted feature is accessed or used, the
+    kernel will emit a message that looks like:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>Lockdown: X: Y is restricted, see man kernel_lockdown.7
+</pre>
+<br>
+<p class="Pp">where X indicates the process name and Y indicates what is
+    restricted.</p>
+<p class="Pp">On an EFI-enabled x86 or arm64 machine, lockdown will be
+    automatically enabled if the system boots in EFI Secure Boot mode.</p>
+<section class="Ss">
+<h2 class="Ss" id="Coverage"><a class="permalink" href="#Coverage">Coverage</a></h2>
+<p class="Pp">When lockdown is in effect, a number of features are disabled or
+    have their use restricted. This includes special device files and kernel
+    services that allow direct access of the kernel image:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">/dev/mem
+<br>
+/dev/kmem
+<br>
+/dev/kcore
+<br>
+/dev/ioports
+<br>
+BPF
+<br>
+kprobes</div>
+<p class="Pp">and the ability to directly configure and control devices, so as
+    to prevent the use of a device to access or modify a kernel image:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>The use of module parameters that directly specify hardware parameters to
+      drivers through the kernel command line or when loading a module.</dd>
+  <dt>•</dt>
+  <dd>The use of direct PCI BAR access.</dd>
+  <dt>•</dt>
+  <dd>The use of the ioperm and iopl instructions on x86.</dd>
+  <dt>•</dt>
+  <dd>The use of the KD*IO console ioctls.</dd>
+  <dt>•</dt>
+  <dd>The use of the TIOCSSERIAL serial ioctl.</dd>
+  <dt>•</dt>
+  <dd>The alteration of MSR registers on x86.</dd>
+  <dt>•</dt>
+  <dd>The replacement of the PCMCIA CIS.</dd>
+  <dt>•</dt>
+  <dd>The overriding of ACPI tables.</dd>
+  <dt>•</dt>
+  <dd>The use of ACPI error injection.</dd>
+  <dt>•</dt>
+  <dd>The specification of the ACPI RDSP address.</dd>
+  <dt>•</dt>
+  <dd>The use of ACPI custom methods.</dd>
+</dl>
+<p class="Pp">Certain facilities are restricted:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Only validly signed modules may be loaded (waived if the module file being
+      loaded is vouched for by IMA appraisal).</dd>
+  <dt>•</dt>
+  <dd>Only validly signed binaries may be kexec'd (waived if the binary image
+      file to be executed is vouched for by IMA appraisal).</dd>
+  <dt>•</dt>
+  <dd>Unencrypted hibernation/suspend to swap are disallowed as the kernel image
+      is saved to a medium that can then be accessed.</dd>
+  <dt>•</dt>
+  <dd>Use of debugfs is not permitted as this allows a whole range of actions
+      including direct configuration of, access to and driving of hardware.</dd>
+  <dt>•</dt>
+  <dd>IMA requires the addition of the "secure_boot" rules to the
+      policy, whether or not they are specified on the command line, for both
+      the built-in and custom policies in secure boot lockdown mode.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The Kernel Lockdown feature was added in Linux 5.4.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The Kernel Lockdown feature is enabled by
+    CONFIG_SECURITY_LOCKDOWN_LSM. The <i>lsm=lsm1,...,lsmN</i> command line
+    parameter controls the sequence of the initialization of Linux Security
+    Modules. It must contain the string <i>lockdown</i> to enable the Kernel
+    Lockdown feature. If the command line parameter is not specified, the
+    initialization falls back to the value of the deprecated <i>security=</i>
+    command line parameter and further to the value of CONFIG_LSM.</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

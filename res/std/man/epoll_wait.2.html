@@ -1,0 +1,223 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+    Copyright (C) 2003  Davide Libenzi
+    Davide Libenzi <davidel@xmailserver.org>
+   and Copyright 2007, 2012, 2014, 2018 Michael Kerrisk <tk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+  
+   2007-04-30: mtk, Added description of epoll_pwait()
+   --><head>
+<meta name="dc.identifier" content="res/3b0b6cae6d045f59a36e680686e1848e5f240a0f">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>epoll_wait(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">epoll_wait(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">epoll_wait(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">epoll_wait, epoll_pwait, epoll_pwait2 - wait for an I/O event on
+    an epoll file descriptor</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/epoll.h&gt;</b></pre>
+<pre><b>int epoll_wait(int </b><i>epfd</i><b>, struct epoll_event *</b><i>events</i><b>,</b>
+<b>               int </b><i>maxevents</i><b>, int </b><i>timeout</i><b>);</b>
+<b>int epoll_pwait(int </b><i>epfd</i><b>, struct epoll_event *</b><i>events</i><b>,</b>
+<b>               int </b><i>maxevents</i><b>, int </b><i>timeout</i><b>,</b>
+<b>               const sigset_t *_Nullable </b><i>sigmask</i><b>);</b>
+<b>int epoll_pwait2(int </b><i>epfd</i><b>, struct epoll_event *</b><i>events</i><b>,</b>
+<b>               int </b><i>maxevents</i><b>, const struct timespec *_Nullable </b><i>timeout</i><b>,</b>
+<b>               const sigset_t *_Nullable </b><i>sigmask</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>epoll_wait</b>() system call waits for events on the
+    <b>epoll</b>(7) instance referred to by the file descriptor <i>epfd</i>. The
+    buffer pointed to by <i>events</i> is used to return information from the
+    ready list about file descriptors in the interest list that have some events
+    available. Up to <i>maxevents</i> are returned by <b>epoll_wait</b>(). The
+    <i>maxevents</i> argument must be greater than zero.</p>
+<p class="Pp">The <i>timeout</i> argument specifies the number of milliseconds
+    that <b>epoll_wait</b>() will block. Time is measured against the
+    <b>CLOCK_MONOTONIC</b> clock.</p>
+<p class="Pp">A call to <b>epoll_wait</b>() will block until either:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>a file descriptor delivers an event;</dd>
+  <dt>•</dt>
+  <dd>the call is interrupted by a signal handler; or</dd>
+  <dt>•</dt>
+  <dd>the timeout expires.</dd>
+</dl>
+<p class="Pp">Note that the <i>timeout</i> interval will be rounded up to the
+    system clock granularity, and kernel scheduling delays mean that the
+    blocking interval may overrun by a small amount. Specifying a <i>timeout</i>
+    of -1 causes <b>epoll_wait</b>() to block indefinitely, while specifying a
+    <i>timeout</i> equal to zero cause <b>epoll_wait</b>() to return
+    immediately, even if no events are available.</p>
+<p class="Pp">The <i>struct epoll_event</i> is described in
+    <b>epoll_event</b>(3type).</p>
+<p class="Pp">The <i>data</i> field of each returned <i>epoll_event</i>
+    structure contains the same data as was specified in the most recent call to
+    <b>epoll_ctl</b>(2) (<b>EPOLL_CTL_ADD</b>, <b>EPOLL_CTL_MOD</b>) for the
+    corresponding open file descriptor.</p>
+<p class="Pp">The <i>events</i> field is a bit mask that indicates the events
+    that have occurred for the corresponding open file description. See
+    <b>epoll_ctl</b>(2) for a list of the bits that may appear in this mask.</p>
+<section class="Ss">
+<h2 class="Ss" id="epoll_pwait()"><a class="permalink" href="#epoll_pwait()">epoll_pwait()</a></h2>
+<p class="Pp">The relationship between <b>epoll_wait</b>() and
+    <b>epoll_pwait</b>() is analogous to the relationship between
+    <b>select</b>(2) and <b>pselect</b>(2): like <b>pselect</b>(2),
+    <b>epoll_pwait</b>() allows an application to safely wait until either a
+    file descriptor becomes ready or until a signal is caught.</p>
+<p class="Pp">The following <b>epoll_pwait</b>() call:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>ready = epoll_pwait(epfd, &amp;events, maxevents, timeout, &amp;sigmask);
+</pre>
+<br>
+<p class="Pp">is equivalent to <i>atomically</i> executing the following
+  calls:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>sigset_t origmask;
+pthread_sigmask(SIG_SETMASK, &amp;sigmask, &amp;origmask);
+ready = epoll_wait(epfd, &amp;events, maxevents, timeout);
+pthread_sigmask(SIG_SETMASK, &amp;origmask, NULL);
+</pre>
+<br>
+<p class="Pp">The <i>sigmask</i> argument may be specified as NULL, in which
+    case <b>epoll_pwait</b>() is equivalent to <b>epoll_wait</b>().</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="epoll_pwait2()"><a class="permalink" href="#epoll_pwait2()">epoll_pwait2()</a></h2>
+<p class="Pp">The <b>epoll_pwait2</b>() system call is equivalent to
+    <b>epoll_pwait</b>() except for the <i>timeout</i> argument. It takes an
+    argument of type <i>timespec</i> to be able to specify nanosecond resolution
+    timeout. This argument functions the same as in <b>pselect</b>(2) and
+    <b>ppoll</b>(2). If <i>timeout</i> is NULL, then <b>epoll_pwait2</b>() can
+    block indefinitely.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>epoll_wait</b>() returns the number of file
+    descriptors ready for the requested I/O, or zero if no file descriptor
+    became ready during the requested <i>timeout</i> milliseconds. On failure,
+    <b>epoll_wait</b>() returns -1 and <i>errno</i> is set to indicate the
+    error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd><i>epfd</i> is not a valid file descriptor.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>The memory area pointed to by <i>events</i> is not accessible with write
+      permissions.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The call was interrupted by a signal handler before either (1) any of the
+      requested events occurred or (2) the <i>timeout</i> expired; see
+      <b>signal</b>(7).</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>epfd</i> is not an <b>epoll</b> file descriptor, or <i>maxevents</i> is
+      less than or equal to zero.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>epoll_wait</b>() was added in Linux 2.6. Library support is
+    provided in glibc 2.3.2.</p>
+<p class="Pp"><b>epoll_pwait</b>() was added in Linux 2.6.19. Library support is
+    provided in glibc 2.6.</p>
+<p class="Pp"><b>epoll_pwait2</b>() was added in Linux 5.11.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>epoll_wait</b>(), <b>epoll_pwait</b>(), and
+    <b>epoll_pwait2</b>() are Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">While one thread is blocked in a call to <b>epoll_wait</b>(), it
+    is possible for another thread to add a file descriptor to the waited-upon
+    <b>epoll</b> instance. If the new file descriptor becomes ready, it will
+    cause the <b>epoll_wait</b>() call to unblock.</p>
+<p class="Pp">If more than <i>maxevents</i> file descriptors are ready when
+    <b>epoll_wait</b>() is called, then successive <b>epoll_wait</b>() calls
+    will round robin through the set of ready file descriptors. This behavior
+    helps avoid starvation scenarios, where a process fails to notice that
+    additional file descriptors are ready because it focuses on a set of file
+    descriptors that are already known to be ready.</p>
+<p class="Pp">Note that it is possible to call <b>epoll_wait</b>() on an
+    <b>epoll</b> instance whose interest list is currently empty (or whose
+    interest list becomes empty because file descriptors are closed or removed
+    from the interest in another thread). The call will block until some file
+    descriptor is later added to the interest list (in another thread) and that
+    file descriptor becomes ready.</p>
+<section class="Ss">
+<h2 class="Ss" id="C_library/kernel_differences"><a class="permalink" href="#C_library/kernel_differences">C
+  library/kernel differences</a></h2>
+<p class="Pp">The raw <b>epoll_pwait</b>() and <b>epoll_pwait2</b>() system
+    calls have a sixth argument, <i>size_t sigsetsize</i>, which specifies the
+    size in bytes of the <i>sigmask</i> argument. The glibc <b>epoll_pwait</b>()
+    wrapper function specifies this argument as a fixed value (equal to
+    <i>sizeof(sigset_t)</i>).</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">Before Linux 2.6.37, a <i>timeout</i> value larger than
+    approximately <i>LONG_MAX / HZ</i> milliseconds is treated as -1 (i.e.,
+    infinity). Thus, for example, on a system where <i>sizeof(long)</i> is 4 and
+    the kernel <i>HZ</i> value is 1000, this means that timeouts greater than
+    35.79 minutes are treated as infinity.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>epoll_create</b>(2), <b>epoll_ctl</b>(2), <b>epoll</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

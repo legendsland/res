@@ -1,0 +1,676 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/46315af0ffb721b0fb0880cd24ec9eae2e224494">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>ld.so(8)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">ld.so(8)</td>
+    <td class="head-vol">System Manager's Manual</td>
+    <td class="head-rtitle">ld.so(8)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">ld.so, ld-linux.so - dynamic linker/loader</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<p class="Pp">The dynamic linker can be run either indirectly by running some
+    dynamically linked program or shared object (in which case no command-line
+    options to the dynamic linker can be passed and, in the ELF case, the
+    dynamic linker which is stored in the <b>.interp</b> section of the program
+    is executed) or directly by running:</p>
+<p class="Pp"><i>/lib/ld-linux.so.*</i> [OPTIONS] [PROGRAM [ARGUMENTS]]</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The programs <b>ld.so</b> and <b>ld-linux.so*</b> find and load
+    the shared objects (shared libraries) needed by a program, prepare the
+    program to run, and then run it.</p>
+<p class="Pp">Linux binaries require dynamic linking (linking at run time)
+    unless the <b>-static</b> option was given to <b>ld</b>(1) during
+    compilation.</p>
+<p class="Pp">The program <b>ld.so</b> handles a.out binaries, a binary format
+    used long ago. The program <b>ld-linux.so*</b> (<i>/lib/ld-linux.so.1</i>
+    for libc5, <i>/lib/ld-linux.so.2</i> for glibc2) handles binaries that are
+    in the more modern ELF format. Both programs have the same behavior, and use
+    the same support files and programs (<b>ldd</b>(1), <b>ldconfig</b>(8), and
+    <i>/etc/ld.so.conf</i>).</p>
+<p class="Pp">When resolving shared object dependencies, the dynamic linker
+    first inspects each dependency string to see if it contains a slash (this
+    can occur if a shared object pathname containing slashes was specified at
+    link time). If a slash is found, then the dependency string is interpreted
+    as a (relative or absolute) pathname, and the shared object is loaded using
+    that pathname.</p>
+<p class="Pp">If a shared object dependency does not contain a slash, then it is
+    searched for in the following order:</p>
+<dl class="Bl-tag">
+  <dt>(1)</dt>
+  <dd>Using the directories specified in the DT_RPATH dynamic section attribute
+      of the binary if present and DT_RUNPATH attribute does not exist. Use of
+      DT_RPATH is deprecated.</dd>
+  <dt>(2)</dt>
+  <dd>Using the environment variable <b>LD_LIBRARY_PATH</b>, unless the
+      executable is being run in secure-execution mode (see below), in which
+      case this variable is ignored.</dd>
+  <dt>(3)</dt>
+  <dd>Using the directories specified in the DT_RUNPATH dynamic section
+      attribute of the binary if present. Such directories are searched only to
+      find those objects required by DT_NEEDED (direct dependencies) entries and
+      do not apply to those objects' children, which must themselves have their
+      own DT_RUNPATH entries. This is unlike DT_RPATH, which is applied to
+      searches for all children in the dependency tree.</dd>
+  <dt>(4)</dt>
+  <dd>From the cache file <i>/etc/ld.so.cache</i>, which contains a compiled
+      list of candidate shared objects previously found in the augmented library
+      path. If, however, the binary was linked with the <b>-z nodeflib</b>
+      linker option, shared objects in the default paths are skipped. Shared
+      objects installed in hardware capability directories (see below) are
+      preferred to other shared objects.</dd>
+  <dt>(5)</dt>
+  <dd>In the default path <i>/lib</i>, and then <i>/usr/lib</i>. (On some 64-bit
+      architectures, the default paths for 64-bit shared objects are
+      <i>/lib64</i>, and then <i>/usr/lib64</i>.) If the binary was linked with
+      the <b>-z nodeflib</b> linker option, this step is skipped.</dd>
+</dl>
+<section class="Ss">
+<h2 class="Ss" id="Dynamic_string_tokens"><a class="permalink" href="#Dynamic_string_tokens">Dynamic
+  string tokens</a></h2>
+<p class="Pp">In several places, the dynamic linker expands dynamic string
+    tokens:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>In the environment variables <b>LD_LIBRARY_PATH</b>, <b>LD_PRELOAD</b>,
+      and <b>LD_AUDIT</b>,</dd>
+  <dt>•</dt>
+  <dd>inside the values of the dynamic section tags <b>DT_NEEDED</b>,
+      <b>DT_RPATH</b>, <b>DT_RUNPATH</b>, <b>DT_AUDIT</b>, and
+      <b>DT_DEPAUDIT</b> of ELF binaries,</dd>
+  <dt>•</dt>
+  <dd>in the arguments to the <b>ld.so</b> command line options <b>--audit</b>,
+      <b>--library-path</b>, and <b>--preload</b> (see below), and</dd>
+  <dt>•</dt>
+  <dd>in the filename arguments to the <b>dlopen</b>(3) and <b>dlmopen</b>(3)
+      functions.</dd>
+</dl>
+<p class="Pp">The substituted tokens are as follows:</p>
+<dl class="Bl-tag">
+  <dt><i>$ORIGIN</i> (or equivalently <i>${ORIGIN}</i>)</dt>
+  <dd>This expands to the directory containing the program or shared object.
+      Thus, an application located in <i>somedir/app</i> could be compiled
+    with</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>gcc -Wl,-rpath,'$ORIGIN/../lib'
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>so that it finds an associated shared object in <i>somedir/lib</i> no
+      matter where <i>somedir</i> is located in the directory hierarchy. This
+      facilitates the creation of "turn-key" applications that do not
+      need to be installed into special directories, but can instead be unpacked
+      into any directory and still find their own shared objects.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt><i>$LIB</i> (or equivalently <i>${LIB}</i>)</dt>
+  <dd>This expands to <i>lib</i> or <i>lib64</i> depending on the architecture
+      (e.g., on x86-64, it expands to <i>lib64</i> and on x86-32, it expands to
+      <i>lib</i>).</dd>
+  <dt><i>$PLATFORM</i> (or equivalently <i>${PLATFORM}</i>)</dt>
+  <dd>This expands to a string corresponding to the processor type of the host
+      system (e.g., "x86_64"). On some architectures, the Linux kernel
+      doesn't provide a platform string to the dynamic linker. The value of this
+      string is taken from the <b>AT_PLATFORM</b> value in the auxiliary vector
+      (see <b>getauxval</b>(3)).</dd>
+</dl>
+<p class="Pp">Note that the dynamic string tokens have to be quoted properly
+    when set from a shell, to prevent their expansion as shell or environment
+    variables.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OPTIONS"><a class="permalink" href="#OPTIONS">OPTIONS</a></h1>
+<dl class="Bl-tag">
+  <dt id="argv0"><a class="permalink" href="#argv0"><b>--argv0</b> <i>string</i>
+    (since glibc 2.33)</a></dt>
+  <dd>Set <i>argv[0]</i> to the value <i>string</i> before running the
+    program.</dd>
+  <dt id="audit"><a class="permalink" href="#audit"><b>--audit</b><i>
+    list</i></a></dt>
+  <dd>Use objects named in <i>list</i> as auditors. The objects in <i>list</i>
+      are delimited by colons.</dd>
+  <dt id="inhibit"><a class="permalink" href="#inhibit"><b>--inhibit-cache</b></a></dt>
+  <dd>Do not use <i>/etc/ld.so.cache</i>.</dd>
+  <dt id="library"><a class="permalink" href="#library"><b>--library-path</b><i>
+    path</i></a></dt>
+  <dd>Use <i>path</i> instead of <b>LD_LIBRARY_PATH</b> environment variable
+      setting (see below). The names <i>ORIGIN</i>, <i>LIB</i>, and
+      <i>PLATFORM</i> are interpreted as for the <b>LD_LIBRARY_PATH</b>
+      environment variable.</dd>
+  <dt id="inhibit~2"><a class="permalink" href="#inhibit~2"><b>--inhibit-rpath</b><i>
+    list</i></a></dt>
+  <dd>Ignore RPATH and RUNPATH information in object names in <i>list</i>. This
+      option is ignored when running in secure-execution mode (see below). The
+      objects in <i>list</i> are delimited by colons or spaces.</dd>
+  <dt id="list"><a class="permalink" href="#list"><b>--list</b></a></dt>
+  <dd>List all dependencies and how they are resolved.</dd>
+  <dt><b>--list-tunables</b> (since glibc 2.33)</dt>
+  <dd>Print the names and values of all tunables, along with the minimum and
+      maximum allowed values.</dd>
+  <dt id="preload"><a class="permalink" href="#preload"><b>--preload</b>
+    <i>list</i> (since glibc 2.30)</a></dt>
+  <dd>Preload the objects specified in <i>list</i>. The objects in <i>list</i>
+      are delimited by colons or spaces. The objects are preloaded as explained
+      in the description of the <b>LD_PRELOAD</b> environment variable
+    below.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>By contrast with <b>LD_PRELOAD</b>, the <b>--preload</b> option provides a
+      way to perform preloading for a single executable without affecting
+      preloading performed in any child process that executes a new
+    program.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="verify"><a class="permalink" href="#verify"><b>--verify</b></a></dt>
+  <dd>Verify that program is dynamically linked and this dynamic linker can
+      handle it.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ENVIRONMENT"><a class="permalink" href="#ENVIRONMENT">ENVIRONMENT</a></h1>
+<p class="Pp">Various environment variables influence the operation of the
+    dynamic linker.</p>
+<section class="Ss">
+<h2 class="Ss" id="Secure-execution_mode"><a class="permalink" href="#Secure-execution_mode">Secure-execution
+  mode</a></h2>
+<p class="Pp">For security reasons, if the dynamic linker determines that a
+    binary should be run in secure-execution mode, the effects of some
+    environment variables are voided or modified, and furthermore those
+    environment variables are stripped from the environment, so that the program
+    does not even see the definitions. Some of these environment variables
+    affect the operation of the dynamic linker itself, and are described below.
+    Other environment variables treated in this way include: <b>GCONV_PATH</b>,
+    <b>GETCONF_DIR</b>, <b>HOSTALIASES</b>, <b>LOCALDOMAIN</b>, <b>LOCPATH</b>,
+    <b>MALLOC_TRACE</b>, <b>NIS_PATH</b>, <b>NLSPATH</b>,
+    <b>RESOLV_HOST_CONF</b>, <b>RES_OPTIONS</b>, <b>TMPDIR</b>, and
+    <b>TZDIR</b>.</p>
+<p class="Pp">A binary is executed in secure-execution mode if the
+    <b>AT_SECURE</b> entry in the auxiliary vector (see <b>getauxval</b>(3)) has
+    a nonzero value. This entry may have a nonzero value for various reasons,
+    including:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>The process's real and effective user IDs differ, or the real and
+      effective group IDs differ. This typically occurs as a result of executing
+      a set-user-ID or set-group-ID program.</dd>
+  <dt>•</dt>
+  <dd>A process with a non-root user ID executed a binary that conferred
+      capabilities to the process.</dd>
+  <dt>•</dt>
+  <dd>A nonzero value may have been set by a Linux Security Module.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Environment_variables"><a class="permalink" href="#Environment_variables">Environment
+  variables</a></h2>
+<p class="Pp">Among the more important environment variables are the
+  following:</p>
+<dl class="Bl-tag">
+  <dt id="LD_ASSUME_KERNEL"><a class="permalink" href="#LD_ASSUME_KERNEL"><b>LD_ASSUME_KERNEL</b>
+    (since glibc 2.2.3)</a></dt>
+  <dd>Each shared object can inform the dynamic linker of the minimum kernel ABI
+      version that it requires. (This requirement is encoded in an ELF note
+      section that is viewable via <i>readelf&nbsp;-n</i> as a section labeled
+      <b>NT_GNU_ABI_TAG</b>.) At run time, the dynamic linker determines the ABI
+      version of the running kernel and will reject loading shared objects that
+      specify minimum ABI versions that exceed that ABI version.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd><b>LD_ASSUME_KERNEL</b> can be used to cause the dynamic linker to assume
+      that it is running on a system with a different kernel ABI version. For
+      example, the following command line causes the dynamic linker to assume it
+      is running on Linux 2.2.5 when loading the shared objects required by
+      <i>myprog</i>:</dd>
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>$ <b>LD_ASSUME_KERNEL=2.2.5 ./myprog</b>
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>On systems that provide multiple versions of a shared object (in different
+      directories in the search path) that have different minimum kernel ABI
+      version requirements, <b>LD_ASSUME_KERNEL</b> can be used to select the
+      version of the object that is used (dependent on the directory search
+      order).</dd>
+  <dt></dt>
+  <dd>Historically, the most common use of the <b>LD_ASSUME_KERNEL</b> feature
+      was to manually select the older LinuxThreads POSIX threads implementation
+      on systems that provided both LinuxThreads and NPTL (which latter was
+      typically the default on such systems); see <b>pthreads</b>(7).</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="LD_BIND_NOW"><a class="permalink" href="#LD_BIND_NOW"><b>LD_BIND_NOW</b>
+    (since glibc 2.1.1)</a></dt>
+  <dd>If set to a nonempty string, causes the dynamic linker to resolve all
+      symbols at program startup instead of deferring function call resolution
+      to the point when they are first referenced. This is useful when using a
+      debugger.</dd>
+  <dt id="LD_LIBRARY_PATH"><a class="permalink" href="#LD_LIBRARY_PATH"><b>LD_LIBRARY_PATH</b></a></dt>
+  <dd>A list of directories in which to search for ELF libraries at execution
+      time. The items in the list are separated by either colons or semicolons,
+      and there is no support for escaping either separator. A zero-length
+      directory name indicates the current working directory.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>This variable is ignored in secure-execution mode.</dd>
+  <dt></dt>
+  <dd>Within the pathnames specified in <b>LD_LIBRARY_PATH</b>, the dynamic
+      linker expands the tokens <i>$ORIGIN</i>, <i>$LIB</i>, and
+      <i>$PLATFORM</i> (or the versions using curly braces around the names) as
+      described above in <i>Dynamic string tokens</i>. Thus, for example, the
+      following would cause a library to be searched for in either the
+      <i>lib</i> or <i>lib64</i> subdirectory below the directory containing the
+      program to be executed:</dd>
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>$ <b>LD_LIBRARY_PATH='$ORIGIN/$LIB' prog</b>
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>(Note the use of single quotes, which prevent expansion of <i>$ORIGIN</i>
+      and <i>$LIB</i> as shell variables!)</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="LD_PRELOAD"><a class="permalink" href="#LD_PRELOAD"><b>LD_PRELOAD</b></a></dt>
+  <dd>A list of additional, user-specified, ELF shared objects to be loaded
+      before all others. This feature can be used to selectively override
+      functions in other shared objects.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The items of the list can be separated by spaces or colons, and there is
+      no support for escaping either separator. The objects are searched for
+      using the rules given under DESCRIPTION. Objects are searched for and
+      added to the link map in the left-to-right order specified in the
+    list.</dd>
+  <dt></dt>
+  <dd>In secure-execution mode, preload pathnames containing slashes are
+      ignored. Furthermore, shared objects are preloaded only from the standard
+      search directories and only if they have set-user-ID mode bit enabled
+      (which is not typical).</dd>
+  <dt></dt>
+  <dd>Within the names specified in the <b>LD_PRELOAD</b> list, the dynamic
+      linker understands the tokens <i>$ORIGIN</i>, <i>$LIB</i>, and
+      <i>$PLATFORM</i> (or the versions using curly braces around the names) as
+      described above in <i>Dynamic string tokens</i>. (See also the discussion
+      of quoting under the description of <b>LD_LIBRARY_PATH</b>.)</dd>
+  <dt></dt>
+  <dd>There are various methods of specifying libraries to be preloaded, and
+      these are handled in the following order:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>(1)</dt>
+  <dd>The <b>LD_PRELOAD</b> environment variable.</dd>
+  <dt>(2)</dt>
+  <dd>The <b>--preload</b> command-line option when invoking the dynamic linker
+      directly.</dd>
+  <dt>(3)</dt>
+  <dd>The <i>/etc/ld.so.preload</i> file (described below).</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="LD_TRACE_LOADED_OBJECTS"><a class="permalink" href="#LD_TRACE_LOADED_OBJECTS"><b>LD_TRACE_LOADED_OBJECTS</b></a></dt>
+  <dd>If set (to any value), causes the program to list its dynamic
+      dependencies, as if run by <b>ldd</b>(1), instead of running
+    normally.</dd>
+</dl>
+<p class="Pp">Then there are lots of more or less obscure variables, many
+    obsolete or only for internal use.</p>
+<dl class="Bl-tag">
+  <dt id="LD_AUDIT"><a class="permalink" href="#LD_AUDIT"><b>LD_AUDIT</b> (since
+    glibc 2.4)</a></dt>
+  <dd>A list of user-specified, ELF shared objects to be loaded before all
+      others in a separate linker namespace (i.e., one that does not intrude
+      upon the normal symbol bindings that would occur in the process) These
+      objects can be used to audit the operation of the dynamic linker. The
+      items in the list are colon-separated, and there is no support for
+      escaping the separator.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd><b>LD_AUDIT</b> is ignored in secure-execution mode.</dd>
+  <dt></dt>
+  <dd>The dynamic linker will notify the audit shared objects at so-called
+      auditing checkpoints—for example, loading a new shared object,
+      resolving a symbol, or calling a symbol from another shared
+      object—by calling an appropriate function within the audit shared
+      object. For details, see <b>rtld-audit</b>(7). The auditing interface is
+      largely compatible with that provided on Solaris, as described in its
+      <i>Linker and Libraries Guide</i>, in the chapter <i>Runtime Linker
+      Auditing Interface</i>.</dd>
+  <dt></dt>
+  <dd>Within the names specified in the <b>LD_AUDIT</b> list, the dynamic linker
+      understands the tokens <i>$ORIGIN</i>, <i>$LIB</i>, and <i>$PLATFORM</i>
+      (or the versions using curly braces around the names) as described above
+      in <i>Dynamic string tokens</i>. (See also the discussion of quoting under
+      the description of <b>LD_LIBRARY_PATH</b>.)</dd>
+  <dt></dt>
+  <dd>Since glibc 2.13, in secure-execution mode, names in the audit list that
+      contain slashes are ignored, and only shared objects in the standard
+      search directories that have the set-user-ID mode bit enabled are
+    loaded.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="LD_BIND_NOT"><a class="permalink" href="#LD_BIND_NOT"><b>LD_BIND_NOT</b>
+    (since glibc 2.1.95)</a></dt>
+  <dd>If this environment variable is set to a nonempty string, do not update
+      the GOT (global offset table) and PLT (procedure linkage table) after
+      resolving a function symbol. By combining the use of this variable with
+      <b>LD_DEBUG</b> (with the categories <i>bindings</i> and <i>symbols</i>),
+      one can observe all run-time function bindings.</dd>
+  <dt id="LD_DEBUG"><a class="permalink" href="#LD_DEBUG"><b>LD_DEBUG</b> (since
+    glibc 2.1)</a></dt>
+  <dd>Output verbose debugging information about operation of the dynamic
+      linker. The content of this variable is one of more of the following
+      categories, separated by colons, commas, or (if the value is quoted)
+      spaces:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="help"><a class="permalink" href="#help"><i>help</i></a></dt>
+  <dd>Specifying <i>help</i> in the value of this variable does not run the
+      specified program, and displays a help message about which categories can
+      be specified in this environment variable.</dd>
+  <dt id="all"><a class="permalink" href="#all"><i>all</i></a></dt>
+  <dd>Print all debugging information (except <i>statistics</i> and
+      <i>unused</i>; see below).</dd>
+  <dt id="bindings"><a class="permalink" href="#bindings"><i>bindings</i></a></dt>
+  <dd>Display information about which definition each symbol is bound to.</dd>
+  <dt id="files"><a class="permalink" href="#files"><i>files</i></a></dt>
+  <dd>Display progress for input file.</dd>
+  <dt id="libs"><a class="permalink" href="#libs"><i>libs</i></a></dt>
+  <dd>Display library search paths.</dd>
+  <dt id="reloc"><a class="permalink" href="#reloc"><i>reloc</i></a></dt>
+  <dd>Display relocation processing.</dd>
+  <dt id="scopes"><a class="permalink" href="#scopes"><i>scopes</i></a></dt>
+  <dd>Display scope information.</dd>
+  <dt id="statistics"><a class="permalink" href="#statistics"><i>statistics</i></a></dt>
+  <dd>Display relocation statistics.</dd>
+  <dt id="symbols"><a class="permalink" href="#symbols"><i>symbols</i></a></dt>
+  <dd>Display search paths for each symbol look-up.</dd>
+  <dt id="unused"><a class="permalink" href="#unused"><i>unused</i></a></dt>
+  <dd>Determine unused DSOs.</dd>
+  <dt id="versions"><a class="permalink" href="#versions"><i>versions</i></a></dt>
+  <dd>Display version dependencies.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Since glibc 2.3.4, <b>LD_DEBUG</b> is ignored in secure-execution mode,
+      unless the file <i>/etc/suid-debug</i> exists (the content of the file is
+      irrelevant).</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="LD_DEBUG_OUTPUT"><a class="permalink" href="#LD_DEBUG_OUTPUT"><b>LD_DEBUG_OUTPUT</b>
+    (since glibc 2.1)</a></dt>
+  <dd>By default, <b>LD_DEBUG</b> output is written to standard error. If
+      <b>LD_DEBUG_OUTPUT</b> is defined, then output is written to the pathname
+      specified by its value, with the suffix "." (dot) followed by
+      the process ID appended to the pathname.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd><b>LD_DEBUG_OUTPUT</b> is ignored in secure-execution mode.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="LD_DYNAMIC_WEAK"><a class="permalink" href="#LD_DYNAMIC_WEAK"><b>LD_DYNAMIC_WEAK</b>
+    (since glibc 2.1.91)</a></dt>
+  <dd>By default, when searching shared libraries to resolve a symbol reference,
+      the dynamic linker will resolve to the first definition it finds.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Old glibc versions (before glibc 2.2), provided a different behavior: if
+      the linker found a symbol that was weak, it would remember that symbol and
+      keep searching in the remaining shared libraries. If it subsequently found
+      a strong definition of the same symbol, then it would instead use that
+      definition. (If no further symbol was found, then the dynamic linker would
+      use the weak symbol that it initially found.)</dd>
+  <dt></dt>
+  <dd>The old glibc behavior was nonstandard. (Standard practice is that the
+      distinction between weak and strong symbols should have effect only at
+      static link time.) In glibc 2.2, the dynamic linker was modified to
+      provide the current behavior (which was the behavior that was provided by
+      most other implementations at that time).</dd>
+  <dt></dt>
+  <dd>Defining the <b>LD_DYNAMIC_WEAK</b> environment variable (with any value)
+      provides the old (nonstandard) glibc behavior, whereby a weak symbol in
+      one shared library may be overridden by a strong symbol subsequently
+      discovered in another shared library. (Note that even when this variable
+      is set, a strong symbol in a shared library will not override a weak
+      definition of the same symbol in the main program.)</dd>
+  <dt></dt>
+  <dd>Since glibc 2.3.4, <b>LD_DYNAMIC_WEAK</b> is ignored in secure-execution
+      mode.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="LD_HWCAP_MASK"><a class="permalink" href="#LD_HWCAP_MASK"><b>LD_HWCAP_MASK</b>
+    (since glibc 2.1)</a></dt>
+  <dd>Mask for hardware capabilities.</dd>
+  <dt id="LD_ORIGIN_PATH"><a class="permalink" href="#LD_ORIGIN_PATH"><b>LD_ORIGIN_PATH</b>
+    (since glibc 2.1)</a></dt>
+  <dd>Path where the binary is found.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Since glibc 2.4, <b>LD_ORIGIN_PATH</b> is ignored in secure-execution
+      mode.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="LD_POINTER_GUARD"><a class="permalink" href="#LD_POINTER_GUARD"><b>LD_POINTER_GUARD</b>
+    (from glibc 2.4 to glibc 2.22)</a></dt>
+  <dd>Set to 0 to disable pointer guarding. Any other value enables pointer
+      guarding, which is also the default. Pointer guarding is a security
+      mechanism whereby some pointers to code stored in writable program memory
+      (return addresses saved by <b>setjmp</b>(3) or function pointers used by
+      various glibc internals) are mangled semi-randomly to make it more
+      difficult for an attacker to hijack the pointers for use in the event of a
+      buffer overrun or stack-smashing attack. Since glibc 2.23,
+      <b>LD_POINTER_GUARD</b> can no longer be used to disable pointer guarding,
+      which is now always enabled.</dd>
+  <dt id="LD_PROFILE"><a class="permalink" href="#LD_PROFILE"><b>LD_PROFILE</b>
+    (since glibc 2.1)</a></dt>
+  <dd>The name of a (single) shared object to be profiled, specified either as a
+      pathname or a soname. Profiling output is appended to the file whose name
+      is: "<i>$LD_PROFILE_OUTPUT</i>/<i>$LD_PROFILE</i>.profile".</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Since glibc 2.2.5, <b>LD_PROFILE</b> is ignored in secure-execution
+    mode.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="LD_PROFILE_OUTPUT"><a class="permalink" href="#LD_PROFILE_OUTPUT"><b>LD_PROFILE_OUTPUT</b>
+    (since glibc 2.1)</a></dt>
+  <dd>Directory where <b>LD_PROFILE</b> output should be written. If this
+      variable is not defined, or is defined as an empty string, then the
+      default is <i>/var/tmp</i>.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd><b>LD_PROFILE_OUTPUT</b> is ignored in secure-execution mode; instead
+      <i>/var/profile</i> is always used. (This detail is relevant only before
+      glibc 2.2.5, since in later glibc versions, <b>LD_PROFILE</b> is also
+      ignored in secure-execution mode.)</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="LD_SHOW_AUXV"><a class="permalink" href="#LD_SHOW_AUXV"><b>LD_SHOW_AUXV</b>
+    (since glibc 2.1)</a></dt>
+  <dd>If this environment variable is defined (with any value), show the
+      auxiliary array passed up from the kernel (see also
+    <b>getauxval</b>(3)).</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Since glibc 2.3.4, <b>LD_SHOW_AUXV</b> is ignored in secure-execution
+      mode.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="LD_TRACE_PRELINKING"><a class="permalink" href="#LD_TRACE_PRELINKING"><b>LD_TRACE_PRELINKING</b>
+    (since glibc 2.4)</a></dt>
+  <dd>If this environment variable is defined, trace prelinking of the object
+      whose name is assigned to this environment variable. (Use <b>ldd</b>(1) to
+      get a list of the objects that might be traced.) If the object name is not
+      recognized, then all prelinking activity is traced.</dd>
+  <dt id="LD_USE_LOAD_BIAS"><a class="permalink" href="#LD_USE_LOAD_BIAS"><b>LD_USE_LOAD_BIAS</b>
+    (since glibc 2.3.3)</a></dt>
+  <dd>By default (i.e., if this variable is not defined), executables and
+      prelinked shared objects will honor base addresses of their dependent
+      shared objects and (nonprelinked) position-independent executables (PIEs)
+      and other shared objects will not honor them. If <b>LD_USE_LOAD_BIAS</b>
+      is defined with the value 1, both executables and PIEs will honor the base
+      addresses. If <b>LD_USE_LOAD_BIAS</b> is defined with the value 0, neither
+      executables nor PIEs will honor the base addresses.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Since glibc 2.3.3, this variable is ignored in secure-execution mode.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="LD_VERBOSE"><a class="permalink" href="#LD_VERBOSE"><b>LD_VERBOSE</b>
+    (since glibc 2.1)</a></dt>
+  <dd>If set to a nonempty string, output symbol versioning information about
+      the program if the <b>LD_TRACE_LOADED_OBJECTS</b> environment variable has
+      been set.</dd>
+  <dt id="LD_WARN"><a class="permalink" href="#LD_WARN"><b>LD_WARN</b> (since
+    glibc 2.1.3)</a></dt>
+  <dd>If set to a nonempty string, warn about unresolved symbols.</dd>
+  <dt id="LD_PREFER_MAP_32BIT_EXEC"><a class="permalink" href="#LD_PREFER_MAP_32BIT_EXEC"><b>LD_PREFER_MAP_32BIT_EXEC</b>
+    (x86-64 only; since glibc 2.23)</a></dt>
+  <dd>According to the Intel Silvermont software optimization guide, for 64-bit
+      applications, branch prediction performance can be negatively impacted
+      when the target of a branch is more than 4&nbsp;GB away from the branch.
+      If this environment variable is set (to any value), the dynamic linker
+      will first try to map executable pages using the <b>mmap</b>(2)
+      <b>MAP_32BIT</b> flag, and fall back to mapping without that flag if that
+      attempt fails. NB: MAP_32BIT will map to the low 2&nbsp;GB (not
+      4&nbsp;GB) of the address space.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Because <b>MAP_32BIT</b> reduces the address range available for address
+      space layout randomization (ASLR), <b>LD_PREFER_MAP_32BIT_EXEC</b> is
+      always disabled in secure-execution mode.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FILES"><a class="permalink" href="#FILES">FILES</a></h1>
+<dl class="Bl-tag">
+  <dt><i>/lib/ld.so</i></dt>
+  <dd>a.out dynamic linker/loader</dd>
+  <dt><i>/lib/ld-linux.so.</i>{<i>1</i>,<i>2</i>}</dt>
+  <dd>ELF dynamic linker/loader</dd>
+  <dt><i>/etc/ld.so.cache</i></dt>
+  <dd>File containing a compiled list of directories in which to search for
+      shared objects and an ordered list of candidate shared objects. See
+      <b>ldconfig</b>(8).</dd>
+  <dt><i>/etc/ld.so.preload</i></dt>
+  <dd>File containing a whitespace-separated list of ELF shared objects to be
+      loaded before the program. See the discussion of <b>LD_PRELOAD</b> above.
+      If both <b>LD_PRELOAD</b> and <i>/etc/ld.so.preload</i> are employed, the
+      libraries specified by <b>LD_PRELOAD</b> are preloaded first.
+      <i>/etc/ld.so.preload</i> has a system-wide effect, causing the specified
+      libraries to be preloaded for all programs that are executed on the
+      system. (This is usually undesirable, and is typically employed only as an
+      emergency remedy, for example, as a temporary workaround to a library
+      misconfiguration issue.)</dd>
+  <dt id="lib*.so*"><a class="permalink" href="#lib*.so*"><i>lib*.so*</i></a></dt>
+  <dd>shared objects</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Hardware_capabilities"><a class="permalink" href="#Hardware_capabilities">Hardware
+  capabilities</a></h2>
+<p class="Pp">Some shared objects are compiled using hardware-specific
+    instructions which do not exist on every CPU. Such objects should be
+    installed in directories whose names define the required hardware
+    capabilities, such as <i>/usr/lib/sse2/</i>. The dynamic linker checks these
+    directories against the hardware of the machine and selects the most
+    suitable version of a given shared object. Hardware capability directories
+    can be cascaded to combine CPU features. The list of supported hardware
+    capability names depends on the CPU. The following names are currently
+    recognized:</p>
+<dl class="Bl-tag">
+  <dt id="Alpha"><a class="permalink" href="#Alpha"><b>Alpha</b></a></dt>
+  <dd>ev4, ev5, ev56, ev6, ev67</dd>
+  <dt id="MIPS"><a class="permalink" href="#MIPS"><b>MIPS</b></a></dt>
+  <dd>loongson2e, loongson2f, octeon, octeon2</dd>
+  <dt id="PowerPC"><a class="permalink" href="#PowerPC"><b>PowerPC</b></a></dt>
+  <dd>4xxmac, altivec, arch_2_05, arch_2_06, booke, cellbe, dfp, efpdouble,
+      efpsingle, fpu, ic_snoop, mmu, notb, pa6t, power4, power5, power5+,
+      power6x, ppc32, ppc601, ppc64, smt, spe, ucache, vsx</dd>
+  <dt id="SPARC"><a class="permalink" href="#SPARC"><b>SPARC</b></a></dt>
+  <dd>flush, muldiv, stbar, swap, ultra3, v9, v9v, v9v2</dd>
+  <dt id="s390"><a class="permalink" href="#s390"><b>s390</b></a></dt>
+  <dd>dfp, eimm, esan3, etf3enh, g5, highgprs, hpage, ldisp, msa, stfle, z900,
+      z990, z9-109, z10, zarch</dd>
+  <dt id="x86"><a class="permalink" href="#x86"><b>x86 (32-bit
+    only)</b></a></dt>
+  <dd>acpi, apic, clflush, cmov, cx8, dts, fxsr, ht, i386, i486, i586, i686,
+      mca, mmx, mtrr, pat, pbe, pge, pn, pse36, sep, ss, sse, sse2, tm</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>ld</b>(1), <b>ldd</b>(1), <b>pldd</b>(1), <b>sprof</b>(1),
+    <b>dlopen</b>(3), <b>getauxval</b>(3), <b>elf</b>(5),
+    <b>capabilities</b>(7), <b>rtld-audit</b>(7), <b>ldconfig</b>(8),
+    <b>sln</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

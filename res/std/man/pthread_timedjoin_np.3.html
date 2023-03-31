@@ -1,0 +1,165 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/3795d15c55393b9b3c6cebd26c060c497f8400d9">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>pthread_tryjoin_np(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">pthread_tryjoin_np(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">pthread_tryjoin_np(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pthread_tryjoin_np, pthread_timedjoin_np - try to join with a
+    terminated thread</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">POSIX threads library (<i>libpthread</i>, <i>-lpthread</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#define _GNU_SOURCE</b>             /* See feature_test_macros(7) */
+<b>#include &lt;pthread.h&gt;</b></pre>
+<pre><b>int pthread_tryjoin_np(pthread_t </b><i>thread</i><b>, void **</b><i>retval</i><b>);</b>
+<b>int pthread_timedjoin_np(pthread_t </b><i>thread</i><b>, void **</b><i>retval</i><b>,</b>
+<b>                         const struct timespec *</b><i>abstime</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">These functions operate in the same way as <b>pthread_join</b>(3),
+    except for the differences described on this page.</p>
+<p class="Pp">The <b>pthread_tryjoin_np</b>() function performs a nonblocking
+    join with the thread <i>thread</i>, returning the exit status of the thread
+    in <i>*retval</i>. If <i>thread</i> has not yet terminated, then instead of
+    blocking, as is done by <b>pthread_join</b>(3), the call returns an
+  error.</p>
+<p class="Pp">The <b>pthread_timedjoin_np</b>() function performs a
+    join-with-timeout. If <i>thread</i> has not yet terminated, then the call
+    blocks until a maximum time, specified in <i>abstime</i>, measured against
+    the <b>CLOCK_REALTIME</b> clock. If the timeout expires before <i>thread</i>
+    terminates, the call returns an error. The <i>abstime</i> argument is a
+    <b>timespec</b>(3) structure, specifying an absolute time measured since the
+    Epoch (see <b>time</b>(2)).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, these functions return 0; on error, they return an
+    error number.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">These functions can fail with the same errors as
+    <b>pthread_join</b>(3). <b>pthread_tryjoin_np</b>() can in addition fail
+    with the following error:</p>
+<dl class="Bl-tag">
+  <dt id="EBUSY"><a class="permalink" href="#EBUSY"><b>EBUSY</b></a></dt>
+  <dd><i>thread</i> had not yet terminated at the time of the call.</dd>
+</dl>
+<p class="Pp"><b>pthread_timedjoin_np</b>() can in addition fail with the
+    following errors:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>abstime</i> value is invalid (<i>tv_sec</i> is less than 0 or
+      <i>tv_nsec</i> is greater than 1e9).</dd>
+  <dt id="ETIMEDOUT"><a class="permalink" href="#ETIMEDOUT"><b>ETIMEDOUT</b></a></dt>
+  <dd>The call timed out before <i>thread</i> terminated.</dd>
+</dl>
+<p class="Pp"><b>pthread_timedjoin_np</b>() never returns the error
+    <b>EINTR</b>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>pthread_tryjoin_np (), pthread_timedjoin_np ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">These functions were added in glibc 2.3.3.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These functions are nonstandard GNU extensions; hence the suffix
+    "_np" (nonportable) in the names.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">The <b>pthread_timedjoin_np</b>() function measures time by
+    internally calculating a relative sleep interval that is then measured
+    against the <b>CLOCK_MONOTONIC</b> clock instead of the
+    <b>CLOCK_REALTIME</b> clock. Consequently, the timeout is unaffected by
+    discontinuous changes to the <b>CLOCK_REALTIME</b> clock.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The following code waits to join for up to 5 seconds:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct timespec ts;
+int s;
+...
+if (clock_gettime(CLOCK_REALTIME, &amp;ts) == -1) {
+<br>
+    /* Handle error */
+}
+ts.tv_sec += 5;
+s = pthread_timedjoin_np(thread, NULL, &amp;ts);
+if (s != 0) {
+<br>
+    /* Handle error */
+}
+</pre>
+<br>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>clock_gettime</b>(2), <b>pthread_exit</b>(3),
+    <b>pthread_join</b>(3), <b>timespec</b>(3), <b>pthreads</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

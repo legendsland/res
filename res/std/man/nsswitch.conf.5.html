@@ -1,0 +1,323 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 1998, 1999 Thorsten Kukuk (kukuk@vt.uni-paderborn.de)
+   Copyright (c) 2011, Mark R. Bannister <cambridge@users.sourceforge.net>
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+   --><head>
+<meta name="dc.identifier" content="res/6a41f9e24342dd24013aa07840fd2878aebc2f65">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>nsswitch.conf(5)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">nsswitch.conf(5)</td>
+    <td class="head-vol">File Formats Manual</td>
+    <td class="head-rtitle">nsswitch.conf(5)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">nsswitch.conf - Name Service Switch configuration file</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The Name Service Switch (NSS) configuration file,
+    <i>/etc/nsswitch.conf</i>, is used by the GNU C Library and certain other
+    applications to determine the sources from which to obtain name-service
+    information in a range of categories, and in what order. Each category of
+    information is identified by a database name.</p>
+<p class="Pp">The file is plain ASCII text, with columns separated by spaces or
+    tab characters. The first column specifies the database name. The remaining
+    columns describe the order of sources to query and a limited set of actions
+    that can be performed by lookup result.</p>
+<p class="Pp">The following databases are understood by the GNU C Library:</p>
+<dl class="Bl-tag">
+  <dt id="aliases"><a class="permalink" href="#aliases"><b>aliases</b></a></dt>
+  <dd>Mail aliases, used by <b>getaliasent</b>(3) and related functions.</dd>
+  <dt id="ethers"><a class="permalink" href="#ethers"><b>ethers</b></a></dt>
+  <dd>Ethernet numbers.</dd>
+  <dt id="group"><a class="permalink" href="#group"><b>group</b></a></dt>
+  <dd>Groups of users, used by <b>getgrent</b>(3) and related functions.</dd>
+  <dt id="hosts"><a class="permalink" href="#hosts"><b>hosts</b></a></dt>
+  <dd>Host names and numbers, used by <b>gethostbyname</b>(3) and related
+      functions.</dd>
+  <dt id="initgroups"><a class="permalink" href="#initgroups"><b>initgroups</b></a></dt>
+  <dd>Supplementary group access list, used by <b>getgrouplist</b>(3)
+    function.</dd>
+  <dt id="netgroup"><a class="permalink" href="#netgroup"><b>netgroup</b></a></dt>
+  <dd>Network-wide list of hosts and users, used for access rules. C libraries
+      before glibc 2.1 supported netgroups only over NIS.</dd>
+  <dt id="networks"><a class="permalink" href="#networks"><b>networks</b></a></dt>
+  <dd>Network names and numbers, used by <b>getnetent</b>(3) and related
+      functions.</dd>
+  <dt id="passwd"><a class="permalink" href="#passwd"><b>passwd</b></a></dt>
+  <dd>User passwords, used by <b>getpwent</b>(3) and related functions.</dd>
+  <dt id="protocols"><a class="permalink" href="#protocols"><b>protocols</b></a></dt>
+  <dd>Network protocols, used by <b>getprotoent</b>(3) and related
+    functions.</dd>
+  <dt id="publickey"><a class="permalink" href="#publickey"><b>publickey</b></a></dt>
+  <dd>Public and secret keys for Secure_RPC used by NFS and NIS+.</dd>
+  <dt id="rpc"><a class="permalink" href="#rpc"><b>rpc</b></a></dt>
+  <dd>Remote procedure call names and numbers, used by <b>getrpcbyname</b>(3)
+      and related functions.</dd>
+  <dt id="services"><a class="permalink" href="#services"><b>services</b></a></dt>
+  <dd>Network services, used by <b>getservent</b>(3) and related functions.</dd>
+  <dt id="shadow"><a class="permalink" href="#shadow"><b>shadow</b></a></dt>
+  <dd>Shadow user passwords, used by <b>getspnam</b>(3) and related
+    functions.</dd>
+</dl>
+<p class="Pp">The GNU C Library ignores databases with unknown names. Some
+    applications use this to implement special handling for their own databases.
+    For example, <b>sudo</b>(8) consults the <b>sudoers</b> database. Delegation
+    of subordinate user/group IDs can be configured using the <b>subid</b>
+    database. Refer to <b>subuid</b>(5) and <b>subgid</b>(5) for more
+  details.</p>
+<p class="Pp">Here is an example <i>/etc/nsswitch.conf</i> file:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>passwd:         compat
+group:          compat
+shadow:         compat
+hosts:          dns [!UNAVAIL=return] files
+networks:       nis [NOTFOUND=return] files
+ethers:         nis [NOTFOUND=return] files
+protocols:      nis [NOTFOUND=return] files
+rpc:            nis [NOTFOUND=return] files
+services:       nis [NOTFOUND=return] files
+</pre>
+<br>
+<p class="Pp">The first column is the database name. The remaining columns
+    specify:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>One or more service specifications, for example, "files",
+      "db", or "nis". The order of the services on the line
+      determines the order in which those services will be queried, in turn,
+      until a result is found.</dd>
+  <dt>•</dt>
+  <dd>Optional actions to perform if a particular result is obtained from the
+      preceding service, for example, "[NOTFOUND=return]".</dd>
+</dl>
+<p class="Pp">The service specifications supported on your system depend on the
+    presence of shared libraries, and are therefore extensible. Libraries called
+    <i>/lib/libnss_SERVICE.so.</i><b>X</b> will provide the named
+    <i>SERVICE</i>. On a standard installation, you can use "files",
+    "db", "nis", and "nisplus". For the
+    <b>hosts</b> database, you can additionally specify "dns". For the
+    <b>passwd</b>, <b>group</b>, and <b>shadow</b> databases, you can
+    additionally specify "compat" (see <b>Compatibility mode</b>
+    below). The version number <b>X</b> may be 1 for glibc 2.0, or 2 for glibc
+    2.1 and later. On systems with additional libraries installed, you may have
+    access to further services such as "hesiod", "ldap",
+    "winbind", and "wins".</p>
+<p class="Pp">An action may also be specified following a service specification.
+    The action modifies the behavior following a result obtained from the
+    preceding data source. Action items take the general form:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">[<i>STATUS</i>=<i>ACTION</i>]
+<br>
+[!<i>STATUS</i>=<i>ACTION</i>]</div>
+<p class="Pp">where</p>
+<p class="Pp"></p>
+<div class="Bd-indent"><i>STATUS</i> =&gt; <b>success</b> | <b>notfound</b> |
+  <b>unavail</b> | <b>tryagain</b>
+<br>
+<i>ACTION</i> =&gt; <b>return</b> | <b>continue</b> | <b>merge</b></div>
+<p class="Pp">The ! negates the test, matching all possible results except the
+    one specified. The case of the keywords is not significant.</p>
+<p class="Pp">The <i>STATUS</i> value is matched against the result of the
+    lookup function called by the preceding service specification, and can be
+    one of:</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="success"><a class="permalink" href="#success"><b>success</b></a></dt>
+  <dd>No error occurred and the requested entry is returned. The default action
+      for this condition is "return".</dd>
+  <dt id="notfound"><a class="permalink" href="#notfound"><b>notfound</b></a></dt>
+  <dd>The lookup succeeded, but the requested entry was not found. The default
+      action for this condition is "continue".</dd>
+  <dt id="unavail"><a class="permalink" href="#unavail"><b>unavail</b></a></dt>
+  <dd>The service is permanently unavailable. This can mean either that the
+      required file cannot be read, or, for network services, that the server is
+      not available or does not allow queries. The default action for this
+      condition is "continue".</dd>
+  <dt id="tryagain"><a class="permalink" href="#tryagain"><b>tryagain</b></a></dt>
+  <dd>The service is temporarily unavailable. This could mean a file is locked
+      or a server currently cannot accept more connections. The default action
+      for this condition is "continue".</dd>
+</dl>
+</div>
+<p class="Pp">The <i>ACTION</i> value can be one of:</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="return"><a class="permalink" href="#return"><b>return</b></a></dt>
+  <dd>Return a result now. Do not call any further lookup functions. However,
+      for compatibility reasons, if this is the selected action for the
+      <b>group</b> database and the <b>notfound</b> status, and the
+      configuration file does not contain the <b>initgroups</b> line, the next
+      lookup function is always called, without affecting the search
+    result.</dd>
+  <dt id="continue"><a class="permalink" href="#continue"><b>continue</b></a></dt>
+  <dd>Call the next lookup function.</dd>
+  <dt id="merge"><a class="permalink" href="#merge"><b>merge</b></a></dt>
+  <dd><i>[SUCCESS=merge]</i> is used between two database entries. When a group
+      is located in the first of the two group entries, processing will continue
+      on to the next one. If the group is also found in the next entry (and the
+      group name and GID are an exact match), the member list of the second
+      entry will be added to the group object to be returned. Available since
+      glibc 2.24. Note that merging will not be done for <b>getgrent</b>(3) nor
+      will duplicate members be pruned when they occur in both entries being
+      merged.</dd>
+</dl>
+</div>
+<section class="Ss">
+<h2 class="Ss" id="Compatibility_mode_(compat)"><a class="permalink" href="#Compatibility_mode_(compat)">Compatibility
+  mode (compat)</a></h2>
+<p class="Pp">The NSS "compat" service is similar to "files"
+    except that it additionally permits special entries in corresponding files
+    for granting users or members of netgroups access to the system. The
+    following entries are valid in this mode:</p>
+<div class="Bd-indent">
+<p class="Pp">For <b>passwd</b> and <b>shadow</b> databases:</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt><b>+</b><i>user</i></dt>
+  <dd>Include the specified <i>user</i> from the NIS passwd/shadow map.</dd>
+  <dt><b>+@</b><i>netgroup</i></dt>
+  <dd>Include all users in the given <i>netgroup</i>.</dd>
+  <dt><b>-</b><i>user</i></dt>
+  <dd>Exclude the specified <i>user</i> from the NIS passwd/shadow map.</dd>
+  <dt><b>-@</b><i>netgroup</i></dt>
+  <dd>Exclude all users in the given <i>netgroup</i>.</dd>
+  <dt><b>+</b></dt>
+  <dd>Include every user, except previously excluded ones, from the NIS
+      passwd/shadow map.</dd>
+</dl>
+</div>
+<p class="Pp">For <b>group</b> database:</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt><b>+</b><i>group</i></dt>
+  <dd>Include the specified <i>group</i> from the NIS group map.</dd>
+  <dt><b>-</b><i>group</i></dt>
+  <dd>Exclude the specified <i>group</i> from the NIS group map.</dd>
+  <dt><b>+</b></dt>
+  <dd>Include every group, except previously excluded ones, from the NIS group
+      map.</dd>
+</dl>
+</div>
+</div>
+<p class="Pp">By default, the source is "nis", but this may be
+    overridden by specifying any NSS service except "compat" itself as
+    the source for the pseudo-databases <b>passwd_compat</b>,
+    <b>group_compat</b>, and <b>shadow_compat</b>.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FILES"><a class="permalink" href="#FILES">FILES</a></h1>
+<p class="Pp">A service named <i>SERVICE</i> is implemented by a shared object
+    library named <i>libnss_SERVICE.so.</i><b>X</b> that resides in
+  <i>/lib</i>.</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt><i>/etc/nsswitch.conf</i></dt>
+  <dd>NSS configuration file.</dd>
+  <dt><i>/lib/libnss_compat.so.</i><b>X</b></dt>
+  <dd>implements "compat" source.</dd>
+  <dt><i>/lib/libnss_db.so.</i><b>X</b></dt>
+  <dd>implements "db" source.</dd>
+  <dt><i>/lib/libnss_dns.so.</i><b>X</b></dt>
+  <dd>implements "dns" source.</dd>
+  <dt><i>/lib/libnss_files.so.</i><b>X</b></dt>
+  <dd>implements "files" source.</dd>
+  <dt><i>/lib/libnss_hesiod.so.</i><b>X</b></dt>
+  <dd>implements "hesiod" source.</dd>
+  <dt><i>/lib/libnss_nis.so.</i><b>X</b></dt>
+  <dd>implements "nis" source.</dd>
+  <dt><i>/lib/libnss_nisplus.so.</i><b>X</b></dt>
+  <dd>implements "nisplus" source.</dd>
+</dl>
+</div>
+<p class="Pp">The following files are read when "files" source is
+    specified for respective databases:</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt><b>aliases</b></dt>
+  <dd><i>/etc/aliases</i></dd>
+  <dt id="ethers~2"><a class="permalink" href="#ethers~2"><b>ethers</b></a></dt>
+  <dd><i>/etc/ethers</i></dd>
+  <dt id="group~2"><a class="permalink" href="#group~2"><b>group</b></a></dt>
+  <dd><i>/etc/group</i></dd>
+  <dt id="hosts~2"><a class="permalink" href="#hosts~2"><b>hosts</b></a></dt>
+  <dd><i>/etc/hosts</i></dd>
+  <dt id="initgroups~2"><a class="permalink" href="#initgroups~2"><b>initgroups</b></a></dt>
+  <dd><i>/etc/group</i></dd>
+  <dt id="netgroup~2"><a class="permalink" href="#netgroup~2"><b>netgroup</b></a></dt>
+  <dd><i>/etc/netgroup</i></dd>
+  <dt id="networks~2"><a class="permalink" href="#networks~2"><b>networks</b></a></dt>
+  <dd><i>/etc/networks</i></dd>
+  <dt id="passwd~2"><a class="permalink" href="#passwd~2"><b>passwd</b></a></dt>
+  <dd><i>/etc/passwd</i></dd>
+  <dt id="protocols~2"><a class="permalink" href="#protocols~2"><b>protocols</b></a></dt>
+  <dd><i>/etc/protocols</i></dd>
+  <dt id="publickey~2"><a class="permalink" href="#publickey~2"><b>publickey</b></a></dt>
+  <dd><i>/etc/publickey</i></dd>
+  <dt id="rpc~2"><a class="permalink" href="#rpc~2"><b>rpc</b></a></dt>
+  <dd><i>/etc/rpc</i></dd>
+  <dt id="services~2"><a class="permalink" href="#services~2"><b>services</b></a></dt>
+  <dd><i>/etc/services</i></dd>
+  <dt id="shadow~2"><a class="permalink" href="#shadow~2"><b>shadow</b></a></dt>
+  <dd><i>/etc/shadow</i></dd>
+</dl>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Starting with glibc 2.33, <b>nsswitch.conf</b> is automatically
+    reloaded if the file is changed. In earlier versions, the entire file was
+    read only once within each process. If the file was later changed, the
+    process would continue using the old configuration.</p>
+<p class="Pp">Traditionally, there was only a single source for service
+    information, often in the form of a single configuration file (e.g.,
+    <i>/etc/passwd</i>). However, as other name services, such as the Network
+    Information Service (NIS) and the Domain Name Service (DNS), became popular,
+    a method was needed that would be more flexible than fixed search orders
+    coded into the C library. The Name Service Switch mechanism, which was based
+    on the mechanism used by Sun Microsystems in the Solaris 2 C library,
+    introduced a cleaner solution to the problem.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>getent</b>(1), <b>nss</b>(5)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

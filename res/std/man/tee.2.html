@@ -1,0 +1,238 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   This manpage is Copyright (C) 2006 Jens Axboe
+   and Copyright (C) 2006 Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/2e9c46318e3e6b8d83f10d0ea27f4830e00707d9">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>tee(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">tee(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">tee(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">tee - duplicating pipe content</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#define _GNU_SOURCE</b>         /* See feature_test_macros(7) */
+<b>#include &lt;fcntl.h&gt;</b></pre>
+<pre><b>ssize_t tee(int </b><i>fd_in</i><b>, int </b><i>fd_out</i><b>, size_t </b><i>len</i><b>, unsigned int </b><i>flags</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>tee</b>() duplicates up to <i>len</i> bytes of data from the
+    pipe referred to by the file descriptor <i>fd_in</i> to the pipe referred to
+    by the file descriptor <i>fd_out</i>. It does not consume the data that is
+    duplicated from <i>fd_in</i>; therefore, that data can be copied by a
+    subsequent <b>splice</b>(2).</p>
+<p class="Pp"><i>flags</i> is a bit mask that is composed by ORing together zero
+    or more of the following values:</p>
+<dl class="Bl-tag">
+  <dt id="SPLICE_F_MOVE"><a class="permalink" href="#SPLICE_F_MOVE"><b>SPLICE_F_MOVE</b></a></dt>
+  <dd>Currently has no effect for <b>tee</b>(); see <b>splice</b>(2).</dd>
+  <dt id="SPLICE_F_NONBLOCK"><a class="permalink" href="#SPLICE_F_NONBLOCK"><b>SPLICE_F_NONBLOCK</b></a></dt>
+  <dd>Do not block on I/O; see <b>splice</b>(2) for further details.</dd>
+  <dt id="SPLICE_F_MORE"><a class="permalink" href="#SPLICE_F_MORE"><b>SPLICE_F_MORE</b></a></dt>
+  <dd>Currently has no effect for <b>tee</b>(), but may be implemented in the
+      future; see <b>splice</b>(2).</dd>
+  <dt id="SPLICE_F_GIFT"><a class="permalink" href="#SPLICE_F_GIFT"><b>SPLICE_F_GIFT</b></a></dt>
+  <dd>Unused for <b>tee</b>(); see <b>vmsplice</b>(2).</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <b>tee</b>() returns the number of
+    bytes that were duplicated between the input and output. A return value of 0
+    means that there was no data to transfer, and it would not make sense to
+    block, because there are no writers connected to the write end of the pipe
+    referred to by <i>fd_in</i>.</p>
+<p class="Pp">On error, <b>tee</b>() returns -1 and <i>errno</i> is set to
+    indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd><b>SPLICE_F_NONBLOCK</b> was specified in <i>flags</i> or one of the file
+      descriptors had been marked as nonblocking (<b>O_NONBLOCK</b>)<b>,</b> and
+      the operation would block.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>fd_in</i> or <i>fd_out</i> does not refer to a pipe; or <i>fd_in</i>
+      and <i>fd_out</i> refer to the same pipe.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Out of memory.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>tee</b>() system call first appeared in Linux 2.6.17;
+    library support was added in glibc 2.5.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This system call is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Conceptually, <b>tee</b>() copies the data between the two pipes.
+    In reality no real data copying takes place though: under the covers,
+    <b>tee</b>() assigns data to the output by merely grabbing a reference to
+    the input.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The example below implements a basic <b>tee</b>(1) program using
+    the <b>tee</b>() system call. Here is an example of its use:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>date | ./a.out out.log | cat</b>
+Tue Oct 28 10:06:00 CET 2014
+$ <b>cat out.log</b>
+Tue Oct 28 10:06:00 CET 2014
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#define _GNU_SOURCE
+#include &lt;errno.h&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;limits.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+int
+main(int argc, char *argv[])
+{
+<br>
+    int      fd;
+<br>
+    ssize_t  len, slen;
+<br>
+    if (argc != 2) {
+<br>
+        fprintf(stderr, "Usage: %s &lt;file&gt;\n", argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    fd = open(argv[1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
+<br>
+    if (fd == -1) {
+<br>
+        perror("open");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    for (;;) {
+<br>
+        /*
+<br>
+         * tee stdin to stdout.
+<br>
+         */
+<br>
+        len = tee(STDIN_FILENO, STDOUT_FILENO,
+<br>
+                  INT_MAX, SPLICE_F_NONBLOCK);
+<br>
+        if (len &lt; 0) {
+<br>
+            if (errno == EAGAIN)
+<br>
+                continue;
+<br>
+            perror("tee");
+<br>
+            exit(EXIT_FAILURE);
+<br>
+        }
+<br>
+        if (len == 0)
+<br>
+            break;
+<br>
+        /*
+<br>
+         * Consume stdin by splicing it to a file.
+<br>
+         */
+<br>
+        while (len &gt; 0) {
+<br>
+            slen = splice(STDIN_FILENO, NULL, fd, NULL,
+<br>
+                          len, SPLICE_F_MOVE);
+<br>
+            if (slen &lt; 0) {
+<br>
+                perror("splice");
+<br>
+                exit(EXIT_FAILURE);
+<br>
+            }
+<br>
+            len -= slen;
+<br>
+        }
+<br>
+    }
+<br>
+    close(fd);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>splice</b>(2), <b>vmsplice</b>(2), <b>pipe</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

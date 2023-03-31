@@ -1,0 +1,173 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/f18b3558eb9884d81a484cf9315bb13d69d6bedf">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>PTHREAD_RWLOCK_TIMEDRDLOCK(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">PTHREAD_RWLOCK_TIMEDRDLOCK(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">PTHREAD_RWLOCK_TIMEDRDLOCK(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pthread_rwlock_timedrdlock — lock a read-write lock for
+    reading</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;pthread.h&gt;
+#include &lt;time.h&gt;</pre>
+<pre>int pthread_rwlock_timedrdlock(pthread_rwlock_t *restrict <i>rwlock</i>,
+<br>
+    const struct timespec *restrict <i>abstime</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>pthread_rwlock_timedrdlock</i>() function shall apply a
+    read lock to the read-write lock referenced by <i>rwlock</i> as in the
+    <i>pthread_rwlock_rdlock</i>() function. However, if the lock cannot be
+    acquired without waiting for other threads to unlock the lock, this wait
+    shall be terminated when the specified timeout expires. The timeout shall
+    expire when the absolute time specified by <i>abstime</i> passes, as
+    measured by the clock on which timeouts are based (that is, when the value
+    of that clock equals or exceeds <i>abstime</i>), or if the absolute time
+    specified by <i>abstime</i> has already been passed at the time of the
+  call.</p>
+<p class="Pp">The timeout shall be based on the CLOCK_REALTIME clock. The
+    resolution of the timeout shall be the resolution of the CLOCK_REALTIME
+    clock. The <b>timespec</b> data type is defined in the <i>&lt;time.h&gt;</i>
+    header. Under no circumstances shall the function fail with a timeout if the
+    lock can be acquired immediately. The validity of the <i>abstime</i>
+    parameter need not be checked if the lock can be immediately acquired.</p>
+<p class="Pp">If a signal that causes a signal handler to be executed is
+    delivered to a thread blocked on a read-write lock via a call to
+    <i>pthread_rwlock_timedrdlock</i>(), upon return from the signal handler the
+    thread shall resume waiting for the lock as if it was not interrupted.</p>
+<p class="Pp">The calling thread may deadlock if at the time the call is made it
+    holds a write lock on <i>rwlock</i>. The results are undefined if this
+    function is called with an uninitialized read-write lock.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <i>pthread_rwlock_timedrdlock</i>() function shall return zero
+    if the lock for reading on the read-write lock object referenced by
+    <i>rwlock</i> is acquired. Otherwise, an error number shall be returned to
+    indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>pthread_rwlock_timedrdlock</i>() function shall fail
+  if:</p>
+<dl class="Bl-tag">
+  <dt id="ETIMEDOUT"><a class="permalink" href="#ETIMEDOUT"><b>ETIMEDOUT</b></a></dt>
+  <dd>The lock could not be acquired before the specified timeout expired.</dd>
+</dl>
+<p class="Pp">The <i>pthread_rwlock_timedrdlock</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>The read lock could not be acquired because the maximum number of read
+      locks for lock would be exceeded.</dd>
+  <dt id="EDEADLK"><a class="permalink" href="#EDEADLK"><b>EDEADLK</b></a></dt>
+  <dd>A deadlock condition was detected or the calling thread already holds a
+      write lock on <i>rwlock</i>.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The <i>abstime</i> nanosecond value is less than zero or greater than or
+      equal to 1000 million.</dd>
+</dl>
+<p class="Pp">This function shall not return an error code of
+  <b>[EINTR]</b>.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">Applications using this function may be subject to priority
+    inversion, as discussed in the Base Definitions volume of
+    POSIX.1‐2017, <i>Section 3.291</i>, <i>Priority Inversion</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">If an implementation detects that the value specified by the
+    <i>rwlock</i> argument to <i>pthread_rwlock_timedrdlock</i>() does not refer
+    to an initialized read-write lock object, it is recommended that the
+    function should fail and report an <b>[EINVAL]</b> error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>pthread_rwlock_destroy</i>()</i>,
+    <i><i>pthread_rwlock_rdlock</i>()</i>,
+    <i><i>pthread_rwlock_timedwrlock</i>()</i>,
+    <i><i>pthread_rwlock_trywrlock</i>()</i>,
+    <i><i>pthread_rwlock_unlock</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Section
+    3.291</i>, <i>Priority Inversion</i>, <i>Section 4.12</i>, <i>Memory
+    Synchronization</i>, <i><b>&lt;pthread.h&gt;</b></i>,
+    <i><b>&lt;time.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

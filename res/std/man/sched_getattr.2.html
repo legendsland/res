@@ -1,0 +1,330 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/4413753ca55ac1f457d9ec0970b9e0cd90edc58b">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>sched_setattr(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">sched_setattr(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">sched_setattr(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">sched_setattr, sched_getattr - set and get scheduling policy and
+    attributes</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sched.h&gt;</b>            /* Definition of <b>SCHED_*</b> constants */
+<b>#include &lt;sys/syscall.h&gt;</b>      /* Definition of <b>SYS_*</b> constants */
+<b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int syscall(SYS_sched_setattr, pid_t </b><i>pid</i><b>, struct sched_attr *</b><i>attr</i><b>,</b>
+<b>            unsigned int </b><i>flags</i><b>);</b>
+<b>int syscall(SYS_sched_getattr, pid_t </b><i>pid</i><b>, struct sched_attr *</b><i>attr</i><b>,</b>
+<b>            unsigned int </b><i>size</i><b>, unsigned int </b><i>flags</i><b>);</b></pre>
+<p class="Pp"><i>Note</i>: glibc provides no wrappers for these system calls,
+    necessitating the use of <b>syscall</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="sched_setattr()"><a class="permalink" href="#sched_setattr()">sched_setattr()</a></h2>
+<p class="Pp">The <b>sched_setattr</b>() system call sets the scheduling policy
+    and associated attributes for the thread whose ID is specified in
+    <i>pid</i>. If <i>pid</i> equals zero, the scheduling policy and attributes
+    of the calling thread will be set.</p>
+<p class="Pp">Currently, Linux supports the following "normal" (i.e.,
+    non-real-time) scheduling policies as values that may be specified in
+    <i>policy</i>:</p>
+<dl class="Bl-tag">
+  <dt id="SCHED_OTHER"><a class="permalink" href="#SCHED_OTHER"><b>SCHED_OTHER</b></a></dt>
+  <dd>the standard round-robin time-sharing policy;</dd>
+  <dt id="SCHED_BATCH"><a class="permalink" href="#SCHED_BATCH"><b>SCHED_BATCH</b></a></dt>
+  <dd>for "batch" style execution of processes; and</dd>
+  <dt id="SCHED_IDLE"><a class="permalink" href="#SCHED_IDLE"><b>SCHED_IDLE</b></a></dt>
+  <dd>for running <i>very</i> low priority background jobs.</dd>
+</dl>
+<p class="Pp">Various "real-time" policies are also supported, for
+    special time-critical applications that need precise control over the way in
+    which runnable threads are selected for execution. For the rules governing
+    when a process may use these policies, see <b>sched</b>(7). The real-time
+    policies that may be specified in <i>policy</i> are:</p>
+<dl class="Bl-tag">
+  <dt id="SCHED_FIFO"><a class="permalink" href="#SCHED_FIFO"><b>SCHED_FIFO</b></a></dt>
+  <dd>a first-in, first-out policy; and</dd>
+  <dt id="SCHED_RR"><a class="permalink" href="#SCHED_RR"><b>SCHED_RR</b></a></dt>
+  <dd>a round-robin policy.</dd>
+</dl>
+<p class="Pp">Linux also provides the following policy:</p>
+<dl class="Bl-tag">
+  <dt id="SCHED_DEADLINE"><a class="permalink" href="#SCHED_DEADLINE"><b>SCHED_DEADLINE</b></a></dt>
+  <dd>a deadline scheduling policy; see <b>sched</b>(7) for details.</dd>
+</dl>
+<p class="Pp">The <i>attr</i> argument is a pointer to a structure that defines
+    the new scheduling policy and attributes for the specified thread. This
+    structure has the following form:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct sched_attr {
+<br>
+    u32 size;              /* Size of this structure */
+<br>
+    u32 sched_policy;      /* Policy (SCHED_*) */
+<br>
+    u64 sched_flags;       /* Flags */
+<br>
+    s32 sched_nice;        /* Nice value (SCHED_OTHER,
+<br>
+                              SCHED_BATCH) */
+<br>
+    u32 sched_priority;    /* Static priority (SCHED_FIFO,
+<br>
+                              SCHED_RR) */
+<br>
+    /* Remaining fields are for SCHED_DEADLINE */
+<br>
+    u64 sched_runtime;
+<br>
+    u64 sched_deadline;
+<br>
+    u64 sched_period;
+};
+</pre>
+<br>
+<p class="Pp">The fields of the <i>sched_attr</i> structure are as follows:</p>
+<dl class="Bl-tag">
+  <dt id="size"><a class="permalink" href="#size"><b>size</b></a></dt>
+  <dd>This field should be set to the size of the structure in bytes, as in
+      <i>sizeof(struct sched_attr)</i>. If the provided structure is smaller
+      than the kernel structure, any additional fields are assumed to be '0'. If
+      the provided structure is larger than the kernel structure, the kernel
+      verifies that all additional fields are 0; if they are not,
+      <b>sched_setattr</b>() fails with the error <b>E2BIG</b> and updates
+      <i>size</i> to contain the size of the kernel structure.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The above behavior when the size of the user-space <i>sched_attr</i>
+      structure does not match the size of the kernel structure allows for
+      future extensibility of the interface. Malformed applications that pass
+      oversize structures won't break in the future if the size of the kernel
+      <i>sched_attr</i> structure is increased. In the future, it could also
+      allow applications that know about a larger user-space <i>sched_attr</i>
+      structure to determine whether they are running on an older kernel that
+      does not support the larger structure.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="sched_policy"><a class="permalink" href="#sched_policy"><i>sched_policy</i></a></dt>
+  <dd>This field specifies the scheduling policy, as one of the <b>SCHED_*</b>
+      values listed above.</dd>
+  <dt id="sched_flags"><a class="permalink" href="#sched_flags"><i>sched_flags</i></a></dt>
+  <dd>This field contains zero or more of the following flags that are ORed
+      together to control scheduling behavior:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="SCHED_FLAG_RESET_ON_FORK"><a class="permalink" href="#SCHED_FLAG_RESET_ON_FORK"><b>SCHED_FLAG_RESET_ON_FORK</b></a></dt>
+  <dd>Children created by <b>fork</b>(2) do not inherit privileged scheduling
+      policies. See <b>sched</b>(7) for details.</dd>
+  <dt id="SCHED_FLAG_RECLAIM"><a class="permalink" href="#SCHED_FLAG_RECLAIM"><b>SCHED_FLAG_RECLAIM</b>
+    (since Linux 4.13)</a></dt>
+  <dd>This flag allows a <b>SCHED_DEADLINE</b> thread to reclaim bandwidth
+      unused by other real-time threads.</dd>
+  <dt id="SCHED_FLAG_DL_OVERRUN"><a class="permalink" href="#SCHED_FLAG_DL_OVERRUN"><b>SCHED_FLAG_DL_OVERRUN</b>
+    (since Linux 4.16)</a></dt>
+  <dd>This flag allows an application to get informed about run-time overruns in
+      <b>SCHED_DEADLINE</b> threads. Such overruns may be caused by (for
+      example) coarse execution time accounting or incorrect parameter
+      assignment. Notification takes the form of a <b>SIGXCPU</b> signal which
+      is generated on each overrun.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>This <b>SIGXCPU</b> signal is <i>process-directed</i> (see
+      <b>signal</b>(7)) rather than thread-directed. This is probably a bug. On
+      the one hand, <b>sched_setattr</b>() is being used to set a per-thread
+      attribute. On the other hand, if the process-directed signal is delivered
+      to a thread inside the process other than the one that had a run-time
+      overrun, the application has no way of knowing which thread overran.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="sched_nice"><a class="permalink" href="#sched_nice"><i>sched_nice</i></a></dt>
+  <dd>This field specifies the nice value to be set when specifying
+      <i>sched_policy</i> as <b>SCHED_OTHER</b> or <b>SCHED_BATCH</b>. The nice
+      value is a number in the range -20 (high priority) to +19 (low priority);
+      see <b>sched</b>(7).</dd>
+  <dt id="sched_priority"><a class="permalink" href="#sched_priority"><i>sched_priority</i></a></dt>
+  <dd>This field specifies the static priority to be set when specifying
+      <i>sched_policy</i> as <b>SCHED_FIFO</b> or <b>SCHED_RR</b>. The allowed
+      range of priorities for these policies can be determined using
+      <b>sched_get_priority_min</b>(2) and <b>sched_get_priority_max</b>(2). For
+      other policies, this field must be specified as 0.</dd>
+  <dt id="sched_runtime"><a class="permalink" href="#sched_runtime"><i>sched_runtime</i></a></dt>
+  <dd>This field specifies the "Runtime" parameter for deadline
+      scheduling. The value is expressed in nanoseconds. This field, and the
+      next two fields, are used only for <b>SCHED_DEADLINE</b> scheduling; for
+      further details, see <b>sched</b>(7).</dd>
+  <dt id="sched_deadline"><a class="permalink" href="#sched_deadline"><i>sched_deadline</i></a></dt>
+  <dd>This field specifies the "Deadline" parameter for deadline
+      scheduling. The value is expressed in nanoseconds.</dd>
+  <dt id="sched_period"><a class="permalink" href="#sched_period"><i>sched_period</i></a></dt>
+  <dd>This field specifies the "Period" parameter for deadline
+      scheduling. The value is expressed in nanoseconds.</dd>
+</dl>
+<p class="Pp">The <i>flags</i> argument is provided to allow for future
+    extensions to the interface; in the current implementation it must be
+    specified as 0.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="sched_getattr()"><a class="permalink" href="#sched_getattr()">sched_getattr()</a></h2>
+<p class="Pp">The <b>sched_getattr</b>() system call fetches the scheduling
+    policy and the associated attributes for the thread whose ID is specified in
+    <i>pid</i>. If <i>pid</i> equals zero, the scheduling policy and attributes
+    of the calling thread will be retrieved.</p>
+<p class="Pp">The <i>size</i> argument should be set to the size of the
+    <i>sched_attr</i> structure as known to user space. The value must be at
+    least as large as the size of the initially published <i>sched_attr</i>
+    structure, or the call fails with the error <b>EINVAL</b>.</p>
+<p class="Pp">The retrieved scheduling attributes are placed in the fields of
+    the <i>sched_attr</i> structure pointed to by <i>attr</i>. The kernel sets
+    <i>attr.size</i> to the size of its <i>sched_attr</i> structure.</p>
+<p class="Pp">If the caller-provided <i>attr</i> buffer is larger than the
+    kernel's <i>sched_attr</i> structure, the additional bytes in the user-space
+    structure are not touched. If the caller-provided structure is smaller than
+    the kernel <i>sched_attr</i> structure, the kernel will silently not return
+    any values which would be stored outside the provided space. As with
+    <b>sched_setattr</b>(), these semantics allow for future extensibility of
+    the interface.</p>
+<p class="Pp">The <i>flags</i> argument is provided to allow for future
+    extensions to the interface; in the current implementation it must be
+    specified as 0.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>sched_setattr</b>() and <b>sched_getattr</b>()
+    return 0. On error, -1 is returned, and <i>errno</i> is set to indicate the
+    error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp"><b>sched_getattr</b>() and <b>sched_setattr</b>() can both fail
+    for the following reasons:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>attr</i> is NULL; or <i>pid</i> is negative; or <i>flags</i> is not
+      zero.</dd>
+  <dt id="ESRCH"><a class="permalink" href="#ESRCH"><b>ESRCH</b></a></dt>
+  <dd>The thread whose ID is <i>pid</i> could not be found.</dd>
+</dl>
+<p class="Pp">In addition, <b>sched_getattr</b>() can fail for the following
+    reasons:</p>
+<dl class="Bl-tag">
+  <dt id="E2BIG"><a class="permalink" href="#E2BIG"><b>E2BIG</b></a></dt>
+  <dd>The buffer specified by <i>size</i> and <i>attr</i> is too small.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd><i>size</i> is invalid; that is, it is smaller than the initial version of
+      the <i>sched_attr</i> structure (48 bytes) or larger than the system page
+      size.</dd>
+</dl>
+<p class="Pp">In addition, <b>sched_setattr</b>() can fail for the following
+    reasons:</p>
+<dl class="Bl-tag">
+  <dt id="E2BIG~2"><a class="permalink" href="#E2BIG~2"><b>E2BIG</b></a></dt>
+  <dd>The buffer specified by <i>size</i> and <i>attr</i> is larger than the
+      kernel structure, and one or more of the excess bytes is nonzero.</dd>
+  <dt id="EBUSY"><a class="permalink" href="#EBUSY"><b>EBUSY</b></a></dt>
+  <dd><b>SCHED_DEADLINE</b> admission control failure, see <b>sched</b>(7).</dd>
+  <dt id="EINVAL~3"><a class="permalink" href="#EINVAL~3"><b>EINVAL</b></a></dt>
+  <dd><i>attr.sched_policy</i> is not one of the recognized policies;
+      <i>attr.sched_flags</i> contains a flag other than
+      <b>SCHED_FLAG_RESET_ON_FORK</b>; or <i>attr.sched_priority</i> is invalid;
+      or <i>attr.sched_policy</i> is <b>SCHED_DEADLINE</b> and the deadline
+      scheduling parameters in <i>attr</i> are invalid.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The caller does not have appropriate privileges.</dd>
+  <dt id="EPERM~2"><a class="permalink" href="#EPERM~2"><b>EPERM</b></a></dt>
+  <dd>The CPU affinity mask of the thread specified by <i>pid</i> does not
+      include all CPUs in the system (see <b>sched_setaffinity</b>(2)).</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">These system calls first appeared in Linux 3.14.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These system calls are nonstandard Linux extensions.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">glibc does not provide wrappers for these system calls; call them
+    using <b>syscall</b>(2).</p>
+<p class="Pp"><b>sched_setattr</b>() provides a superset of the functionality of
+    <b>sched_setscheduler</b>(2), <b>sched_setparam</b>(2), <b>nice</b>(2), and
+    (other than the ability to set the priority of all processes belonging to a
+    specified user or all processes in a specified group) <b>setpriority</b>(2).
+    Analogously, <b>sched_getattr</b>() provides a superset of the functionality
+    of <b>sched_getscheduler</b>(2), <b>sched_getparam</b>(2), and (partially)
+    <b>getpriority</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">In Linux versions up to 3.15, <b>sched_setattr</b>() failed with
+    the error <b>EFAULT</b> instead of <b>E2BIG</b> for the case described in
+    ERRORS.</p>
+<p class="Pp">Up to Linux 5.3, <b>sched_getattr</b>() failed with the error
+    <b>EFBIG</b> if the in-kernel <i>sched_attr</i> structure was larger than
+    the <i>size</i> passed by user space.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>chrt</b>(1), <b>nice</b>(2), <b>sched_get_priority_max</b>(2),
+    <b>sched_get_priority_min</b>(2), <b>sched_getaffinity</b>(2),
+    <b>sched_getparam</b>(2), <b>sched_getscheduler</b>(2),
+    <b>sched_rr_get_interval</b>(2), <b>sched_setaffinity</b>(2),
+    <b>sched_setparam</b>(2), <b>sched_setscheduler</b>(2),
+    <b>sched_yield</b>(2), <b>setpriority</b>(2),
+    <b>pthread_getschedparam</b>(3), <b>pthread_setschedparam</b>(3),
+    <b>pthread_setschedprio</b>(3), <b>capabilities</b>(7), <b>cpuset</b>(7),
+    <b>sched</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

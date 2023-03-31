@@ -1,0 +1,297 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/b3485241026b87312892d536ca6da5abc8eb4ea0">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>insque(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">insque(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">insque(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">insque, remque - insert/remove an item from a queue</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;search.h&gt;</b></pre>
+<pre><b>void insque(void *</b><i>elem</i><b>, void *</b><i>prev</i><b>);</b>
+<b>void remque(void *</b><i>elem</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>insque</b>(), <b>remque</b>():</p>
+<pre><br>
+    _XOPEN_SOURCE &gt;= 500
+<br>
+        || /* glibc &gt;= 2.19: */ _DEFAULT_SOURCE
+<br>
+        || /* glibc &lt;= 2.19: */ _SVID_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>insque</b>() and <b>remque</b>() functions manipulate
+    doubly linked lists. Each element in the list is a structure of which the
+    first two elements are a forward and a backward pointer. The linked list may
+    be linear (i.e., NULL forward pointer at the end of the list and NULL
+    backward pointer at the start of the list) or circular.</p>
+<p class="Pp">The <b>insque</b>() function inserts the element pointed to by
+    <i>elem</i> immediately after the element pointed to by <i>prev</i>.</p>
+<p class="Pp">If the list is linear, then the call <i>insque(elem, NULL)</i> can
+    be used to insert the initial list element, and the call sets the forward
+    and backward pointers of <i>elem</i> to NULL.</p>
+<p class="Pp">If the list is circular, the caller should ensure that the forward
+    and backward pointers of the first element are initialized to point to that
+    element, and the <i>prev</i> argument of the <b>insque</b>() call should
+    also point to the element.</p>
+<p class="Pp">The <b>remque</b>() function removes the element pointed to by
+    <i>elem</i> from the doubly linked list.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>insque (), remque ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">On ancient systems, the arguments of these functions were of type
+    <i>struct qelem *</i>, defined as:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct qelem {
+<br>
+    struct qelem *q_forw;
+<br>
+    struct qelem *q_back;
+<br>
+    char          q_data[1];
+};
+</pre>
+<br>
+<p class="Pp">This is still what you will get if <b>_GNU_SOURCE</b> is defined
+    before including <i>&lt;search.h&gt;</i>.</p>
+<p class="Pp">The location of the prototypes for these functions differs among
+    several versions of UNIX. The above is the POSIX version. Some systems place
+    them in <i>&lt;string.h&gt;</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">In glibc 2.4 and earlier, it was not possible to specify
+    <i>prev</i> as NULL. Consequently, to build a linear list, the caller had to
+    build a list using an initial call that contained the first two elements of
+    the list, with the forward and backward pointers in each element suitably
+    initialized.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below demonstrates the use of <b>insque</b>(). Here is
+    an example run of the program:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>./a.out -c a b c</b>
+Traversing completed list:
+<br>
+    a
+<br>
+    b
+<br>
+    c
+That was a circular list
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#include &lt;search.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+struct element {
+<br>
+    struct element *forward;
+<br>
+    struct element *backward;
+<br>
+    char *name;
+};
+static struct element *
+new_element(void)
+{
+<br>
+    struct element *e;
+<br>
+    e = malloc(sizeof(*e));
+<br>
+    if (e == NULL) {
+<br>
+        fprintf(stderr, "malloc() failed\n");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    return e;
+}
+int
+main(int argc, char *argv[])
+{
+<br>
+    struct element *first, *elem, *prev;
+<br>
+    int circular, opt, errfnd;
+<br>
+    /* The "-c" command-line option can be used to specify that the
+<br>
+       list is circular. */
+<br>
+    errfnd = 0;
+<br>
+    circular = 0;
+<br>
+    while ((opt = getopt(argc, argv, "c")) != -1) {
+<br>
+        switch (opt) {
+<br>
+        case 'c':
+<br>
+            circular = 1;
+<br>
+            break;
+<br>
+        default:
+<br>
+            errfnd = 1;
+<br>
+            break;
+<br>
+        }
+<br>
+    }
+<br>
+    if (errfnd || optind &gt;= argc) {
+<br>
+        fprintf(stderr,  "Usage: %s [-c] string...\n", argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    /* Create first element and place it in the linked list. */
+<br>
+    elem = new_element();
+<br>
+    first = elem;
+<br>
+    elem-&gt;name = argv[optind];
+<br>
+    if (circular) {
+<br>
+        elem-&gt;forward = elem;
+<br>
+        elem-&gt;backward = elem;
+<br>
+        insque(elem, elem);
+<br>
+    } else {
+<br>
+        insque(elem, NULL);
+<br>
+    }
+<br>
+    /* Add remaining command-line arguments as list elements. */
+<br>
+    while (++optind &lt; argc) {
+<br>
+        prev = elem;
+<br>
+        elem = new_element();
+<br>
+        elem-&gt;name = argv[optind];
+<br>
+        insque(elem, prev);
+<br>
+    }
+<br>
+    /* Traverse the list from the start, printing element names. */
+<br>
+    printf("Traversing completed list:\n");
+<br>
+    elem = first;
+<br>
+    do {
+<br>
+        printf("    %s\n", elem-&gt;name);
+<br>
+        elem = elem-&gt;forward;
+<br>
+    } while (elem != NULL &amp;&amp; elem != first);
+<br>
+    if (elem == first)
+<br>
+        printf("That was a circular list\n");
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>queue</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

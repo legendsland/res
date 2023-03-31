@@ -1,0 +1,264 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (C) 2001 Andries Brouwer (aeb@cwi.nl)
+   and Copyright (C) 2006 Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   2006-08-02, mtk, Added example program
+   --><head>
+<meta name="dc.identifier" content="res/575c98956e3b45316abf65c3797e597e725ae3ad">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>makecontext(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">makecontext(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">makecontext(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">makecontext, swapcontext - manipulate user context</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;ucontext.h&gt;</b></pre>
+<pre><b>void makecontext(ucontext_t *</b><i>ucp</i><b>, void (*</b><i>func</i><b>)(), int </b><i>argc</i><b>, ...);</b>
+<b>int swapcontext(ucontext_t *restrict </b><i>oucp</i><b>,</b>
+<b>                const ucontext_t *restrict </b><i>ucp</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">In a System V-like environment, one has the type <i>ucontext_t</i>
+    (defined in <i>&lt;ucontext.h&gt;</i> and described in <b>getcontext</b>(3))
+    and the four functions <b>getcontext</b>(3), <b>setcontext</b>(3),
+    <b>makecontext</b>(), and <b>swapcontext</b>() that allow user-level context
+    switching between multiple threads of control within a process.</p>
+<p class="Pp">The <b>makecontext</b>() function modifies the context pointed to
+    by <i>ucp</i> (which was obtained from a call to <b>getcontext</b>(3)).
+    Before invoking <b>makecontext</b>(), the caller must allocate a new stack
+    for this context and assign its address to <i>ucp-&gt;uc_stack</i>, and
+    define a successor context and assign its address to
+  <i>ucp-&gt;uc_link</i>.</p>
+<p class="Pp">When this context is later activated (using <b>setcontext</b>(3)
+    or <b>swapcontext</b>()) the function <i>func</i> is called, and passed the
+    series of integer (<i>int</i>) arguments that follow <i>argc</i>; the caller
+    must specify the number of these arguments in <i>argc</i>. When this
+    function returns, the successor context is activated. If the successor
+    context pointer is NULL, the thread exits.</p>
+<p class="Pp">The <b>swapcontext</b>() function saves the current context in the
+    structure pointed to by <i>oucp</i>, and then activates the context pointed
+    to by <i>ucp</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">When successful, <b>swapcontext</b>() does not return. (But we may
+    return later, in case <i>oucp</i> is activated, in which case it looks like
+    <b>swapcontext</b>() returns 0.) On error, <b>swapcontext</b>() returns -1
+    and sets <i>errno</i> to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient stack space left.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>makecontext ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe race:ucp</td>
+  </tr>
+  <tr>
+    <td>swapcontext ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe race:oucp race:ucp</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>makecontext</b>() and <b>swapcontext</b>() are provided since
+    glibc 2.1.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">SUSv2, POSIX.1-2001. POSIX.1-2008 removes the specifications of
+    <b>makecontext</b>() and <b>swapcontext</b>(), citing portability issues,
+    and recommending that applications be rewritten to use POSIX threads
+    instead.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The interpretation of <i>ucp-&gt;uc_stack</i> is just as in
+    <b>sigaltstack</b>(2), namely, this struct contains the start and length of
+    a memory area to be used as the stack, regardless of the direction of growth
+    of the stack. Thus, it is not necessary for the user program to worry about
+    this direction.</p>
+<p class="Pp">On architectures where <i>int</i> and pointer types are the same
+    size (e.g., x86-32, where both types are 32 bits), you may be able to get
+    away with passing pointers as arguments to <b>makecontext</b>() following
+    <i>argc</i>. However, doing this is not guaranteed to be portable, is
+    undefined according to the standards, and won't work on architectures where
+    pointers are larger than <i>int</i>s. Nevertheless, starting with glibc 2.8,
+    glibc makes some changes to <b>makecontext</b>(), to permit this on some
+    64-bit architectures (e.g., x86-64).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The example program below demonstrates the use of
+    <b>getcontext</b>(3), <b>makecontext</b>(), and <b>swapcontext</b>().
+    Running the program produces the following output:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$<b> ./a.out</b>
+main: swapcontext(&amp;uctx_main, &amp;uctx_func2)
+func2: started
+func2: swapcontext(&amp;uctx_func2, &amp;uctx_func1)
+func1: started
+func1: swapcontext(&amp;uctx_func1, &amp;uctx_func2)
+func2: returning
+func1: returning
+main: exiting
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;ucontext.h&gt;
+static ucontext_t uctx_main, uctx_func1, uctx_func2;
+#define handle_error(msg) \
+<br>
+    do { perror(msg); exit(EXIT_FAILURE); } while (0)
+static void
+func1(void)
+{
+<br>
+    printf("%s: started\n", __func__);
+<br>
+    printf("%s: swapcontext(&amp;uctx_func1, &amp;uctx_func2)\n", __func__);
+<br>
+    if (swapcontext(&amp;uctx_func1, &amp;uctx_func2) == -1)
+<br>
+        handle_error("swapcontext");
+<br>
+    printf("%s: returning\n", __func__);
+}
+static void
+func2(void)
+{
+<br>
+    printf("%s: started\n", __func__);
+<br>
+    printf("%s: swapcontext(&amp;uctx_func2, &amp;uctx_func1)\n", __func__);
+<br>
+    if (swapcontext(&amp;uctx_func2, &amp;uctx_func1) == -1)
+<br>
+        handle_error("swapcontext");
+<br>
+    printf("%s: returning\n", __func__);
+}
+int
+main(int argc, char *argv[])
+{
+<br>
+    char func1_stack[16384];
+<br>
+    char func2_stack[16384];
+<br>
+    if (getcontext(&amp;uctx_func1) == -1)
+<br>
+        handle_error("getcontext");
+<br>
+    uctx_func1.uc_stack.ss_sp = func1_stack;
+<br>
+    uctx_func1.uc_stack.ss_size = sizeof(func1_stack);
+<br>
+    uctx_func1.uc_link = &amp;uctx_main;
+<br>
+    makecontext(&amp;uctx_func1, func1, 0);
+<br>
+    if (getcontext(&amp;uctx_func2) == -1)
+<br>
+        handle_error("getcontext");
+<br>
+    uctx_func2.uc_stack.ss_sp = func2_stack;
+<br>
+    uctx_func2.uc_stack.ss_size = sizeof(func2_stack);
+<br>
+    /* Successor context is f1(), unless argc &gt; 1 */
+<br>
+    uctx_func2.uc_link = (argc &gt; 1) ? NULL : &amp;uctx_func1;
+<br>
+    makecontext(&amp;uctx_func2, func2, 0);
+<br>
+    printf("%s: swapcontext(&amp;uctx_main, &amp;uctx_func2)\n", __func__);
+<br>
+    if (swapcontext(&amp;uctx_main, &amp;uctx_func2) == -1)
+<br>
+        handle_error("swapcontext");
+<br>
+    printf("%s: exiting\n", __func__);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>sigaction</b>(2), <b>sigaltstack</b>(2), <b>sigprocmask</b>(2),
+    <b>getcontext</b>(3), <b>sigsetjmp</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

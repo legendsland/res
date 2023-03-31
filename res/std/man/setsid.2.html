@@ -1,0 +1,126 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright Michael Haardt (michael@cantor.informatik.rwth-aachen.de)
+       Sat Aug 27 20:43:50 MET DST 1994
+   and Copyright (C) 2014, Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+  
+   Modified Sun Sep 11 19:19:05 1994 <faith@cs.unc.edu>
+   Modified Mon Mar 25 10:19:00 1996 <aeb@cwi.nl> (merged a few
+  	tiny changes from a man page by Charles Livingston).
+   Modified Sun Jul 21 14:45:46 1996 <aeb@cwi.nl>
+   --><head>
+<meta name="dc.identifier" content="res/c88a108add258c9d566e1cbdc16e6b42cf85df8d">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>setsid(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">setsid(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">setsid(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">setsid - creates a session and sets the process group ID</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>pid_t setsid(void);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>setsid</b>() creates a new session if the calling process is
+    not a process group leader. The calling process is the leader of the new
+    session (i.e., its session ID is made the same as its process ID). The
+    calling process also becomes the process group leader of a new process group
+    in the session (i.e., its process group ID is made the same as its process
+    ID).</p>
+<p class="Pp">The calling process will be the only process in the new process
+    group and in the new session.</p>
+<p class="Pp">Initially, the new session has no controlling terminal. For
+    details of how a session acquires a controlling terminal, see
+    <b>credentials</b>(7).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, the (new) session ID of the calling process is
+    returned. On error, <i>(pid_t)&nbsp;-1</i> is returned, and <i>errno</i>
+    is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The process group ID of any process equals the PID of the calling process.
+      Thus, in particular, <b>setsid</b>() fails if the calling process is
+      already a process group leader.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, SVr4.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">A child created via <b>fork</b>(2) inherits its parent's session
+    ID. The session ID is preserved across an <b>execve</b>(2).</p>
+<p class="Pp">A process group leader is a process whose process group ID equals
+    its PID. Disallowing a process group leader from calling <b>setsid</b>()
+    prevents the possibility that a process group leader places itself in a new
+    session while other processes in the process group remain in the original
+    session; such a scenario would break the strict two-level hierarchy of
+    sessions and process groups. In order to be sure that <b>setsid</b>() will
+    succeed, call <b>fork</b>(2) and have the parent <b>_exit</b>(2), while the
+    child (which by definition can't be a process group leader) calls
+    <b>setsid</b>().</p>
+<p class="Pp">If a session has a controlling terminal, and the <b>CLOCAL</b>
+    flag for that terminal is not set, and a terminal hangup occurs, then the
+    session leader is sent a <b>SIGHUP</b> signal.</p>
+<p class="Pp">If a process that is a session leader terminates, then a
+    <b>SIGHUP</b> signal is sent to each process in the foreground process group
+    of the controlling terminal.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>setsid</b>(1), <b>getsid</b>(2), <b>setpgid</b>(2),
+    <b>setpgrp</b>(2), <b>tcgetsid</b>(3), <b>credentials</b>(7),
+    <b>sched</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

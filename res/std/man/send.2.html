@@ -1,0 +1,352 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 1983, 1991 The Regents of the University of California.
+   All rights reserved.
+  
+   SPDX-License-Identifier: BSD-4-Clause-UC
+  
+   Modified 1993-07-24 by Rik Faith <faith@cs.unc.edu>
+   Modified 1996-10-22 by Eric S. Raymond <esr@thyrsus.com>
+   Modified Oct 1998 by Andi Kleen
+   Modified Oct 2003 by aeb
+   Modified 2004-07-01 by mtk
+   --><head>
+<meta name="dc.identifier" content="res/5ab34bb33e5cdea8446f81a8d4afffa19221a689">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>send(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">send(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">send(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">send, sendto, sendmsg - send a message on a socket</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/socket.h&gt;</b></pre>
+<pre><b>ssize_t send(int </b><i>sockfd</i><b>, const void </b><i>buf</i><b>[.</b><i>len</i><b>], size_t </b><i>len</i><b>, int </b><i>flags</i><b>);</b>
+<b>ssize_t sendto(int </b><i>sockfd</i><b>, const void </b><i>buf</i><b>[.</b><i>len</i><b>], size_t </b><i>len</i><b>, int </b><i>flags</i><b>,</b>
+<b>               const struct sockaddr *</b><i>dest_addr</i><b>, socklen_t </b><i>addrlen</i><b>);</b>
+<b>ssize_t sendmsg(int </b><i>sockfd</i><b>, const struct msghdr *</b><i>msg</i><b>, int </b><i>flags</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The system calls <b>send</b>(), <b>sendto</b>(), and
+    <b>sendmsg</b>() are used to transmit a message to another socket.</p>
+<p class="Pp">The <b>send</b>() call may be used only when the socket is in a
+    <i>connected</i> state (so that the intended recipient is known). The only
+    difference between <b>send</b>() and <b>write</b>(2) is the presence of
+    <i>flags</i>. With a zero <i>flags</i> argument, <b>send</b>() is equivalent
+    to <b>write</b>(2). Also, the following call</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>send(sockfd, buf, len, flags);
+</pre>
+<br>
+<p class="Pp">is equivalent to</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>sendto(sockfd, buf, len, flags, NULL, 0);
+</pre>
+<br>
+<p class="Pp">The argument <i>sockfd</i> is the file descriptor of the sending
+    socket.</p>
+<p class="Pp">If <b>sendto</b>() is used on a connection-mode
+    (<b>SOCK_STREAM</b>, <b>SOCK_SEQPACKET</b>) socket, the arguments
+    <i>dest_addr</i> and <i>addrlen</i> are ignored (and the error
+    <b>EISCONN</b> may be returned when they are not NULL and 0), and the error
+    <b>ENOTCONN</b> is returned when the socket was not actually connected.
+    Otherwise, the address of the target is given by <i>dest_addr</i> with
+    <i>addrlen</i> specifying its size. For <b>sendmsg</b>(), the address of the
+    target is given by <i>msg.msg_name</i>, with <i>msg.msg_namelen</i>
+    specifying its size.</p>
+<p class="Pp">For <b>send</b>() and <b>sendto</b>(), the message is found in
+    <i>buf</i> and has length <i>len</i>. For <b>sendmsg</b>(), the message is
+    pointed to by the elements of the array <i>msg.msg_iov</i>. The
+    <b>sendmsg</b>() call also allows sending ancillary data (also known as
+    control information).</p>
+<p class="Pp">If the message is too long to pass atomically through the
+    underlying protocol, the error <b>EMSGSIZE</b> is returned, and the message
+    is not transmitted.</p>
+<p class="Pp">No indication of failure to deliver is implicit in a
+    <b>send</b>(). Locally detected errors are indicated by a return value of
+    -1.</p>
+<p class="Pp">When the message does not fit into the send buffer of the socket,
+    <b>send</b>() normally blocks, unless the socket has been placed in
+    nonblocking I/O mode. In nonblocking mode it would fail with the error
+    <b>EAGAIN</b> or <b>EWOULDBLOCK</b> in this case. The <b>select</b>(2) call
+    may be used to determine when it is possible to send more data.</p>
+<section class="Ss">
+<h2 class="Ss" id="The_flags_argument"><a class="permalink" href="#The_flags_argument">The
+  flags argument</a></h2>
+<p class="Pp">The <i>flags</i> argument is the bitwise OR of zero or more of the
+    following flags.</p>
+<dl class="Bl-tag">
+  <dt id="MSG_CONFIRM"><a class="permalink" href="#MSG_CONFIRM"><b>MSG_CONFIRM</b>
+    (since Linux 2.3.15)</a></dt>
+  <dd>Tell the link layer that forward progress happened: you got a successful
+      reply from the other side. If the link layer doesn't get this it will
+      regularly reprobe the neighbor (e.g., via a unicast ARP). Valid only on
+      <b>SOCK_DGRAM</b> and <b>SOCK_RAW</b> sockets and currently implemented
+      only for IPv4 and IPv6. See <b>arp</b>(7) for details.</dd>
+  <dt id="MSG_DONTROUTE"><a class="permalink" href="#MSG_DONTROUTE"><b>MSG_DONTROUTE</b></a></dt>
+  <dd>Don't use a gateway to send out the packet, send to hosts only on directly
+      connected networks. This is usually used only by diagnostic or routing
+      programs. This is defined only for protocol families that route; packet
+      sockets don't.</dd>
+  <dt id="MSG_DONTWAIT"><a class="permalink" href="#MSG_DONTWAIT"><b>MSG_DONTWAIT</b>
+    (since Linux 2.2)</a></dt>
+  <dd>Enables nonblocking operation; if the operation would block, <b>EAGAIN</b>
+      or <b>EWOULDBLOCK</b> is returned. This provides similar behavior to
+      setting the <b>O_NONBLOCK</b> flag (via the <b>fcntl</b>(2) <b>F_SETFL</b>
+      operation), but differs in that <b>MSG_DONTWAIT</b> is a per-call option,
+      whereas <b>O_NONBLOCK</b> is a setting on the open file description (see
+      <b>open</b>(2)), which will affect all threads in the calling process and
+      as well as other processes that hold file descriptors referring to the
+      same open file description.</dd>
+  <dt id="MSG_EOR"><a class="permalink" href="#MSG_EOR"><b>MSG_EOR</b> (since
+    Linux 2.2)</a></dt>
+  <dd>Terminates a record (when this notion is supported, as for sockets of type
+      <b>SOCK_SEQPACKET</b>).</dd>
+  <dt id="MSG_MORE"><a class="permalink" href="#MSG_MORE"><b>MSG_MORE</b> (since
+    Linux 2.4.4)</a></dt>
+  <dd>The caller has more data to send. This flag is used with TCP sockets to
+      obtain the same effect as the <b>TCP_CORK</b> socket option (see
+      <b>tcp</b>(7)), with the difference that this flag can be set on a
+      per-call basis.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Since Linux 2.6, this flag is also supported for UDP sockets, and informs
+      the kernel to package all of the data sent in calls with this flag set
+      into a single datagram which is transmitted only when a call is performed
+      that does not specify this flag. (See also the <b>UDP_CORK</b> socket
+      option described in <b>udp</b>(7).)</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="MSG_NOSIGNAL"><a class="permalink" href="#MSG_NOSIGNAL"><b>MSG_NOSIGNAL</b>
+    (since Linux 2.2)</a></dt>
+  <dd>Don't generate a <b>SIGPIPE</b> signal if the peer on a stream-oriented
+      socket has closed the connection. The <b>EPIPE</b> error is still
+      returned. This provides similar behavior to using <b>sigaction</b>(2) to
+      ignore <b>SIGPIPE</b>, but, whereas <b>MSG_NOSIGNAL</b> is a per-call
+      feature, ignoring <b>SIGPIPE</b> sets a process attribute that affects all
+      threads in the process.</dd>
+  <dt id="MSG_OOB"><a class="permalink" href="#MSG_OOB"><b>MSG_OOB</b></a></dt>
+  <dd>Sends <i>out-of-band</i> data on sockets that support this notion (e.g.,
+      of type <b>SOCK_STREAM</b>); the underlying protocol must also support
+      <i>out-of-band</i> data.</dd>
+  <dt id="MSG_FASTOPEN"><a class="permalink" href="#MSG_FASTOPEN"><b>MSG_FASTOPEN</b>
+    (since Linux 3.7)</a></dt>
+  <dd>Attempts TCP Fast Open (RFC7413) and sends data in the SYN like a
+      combination of <b>connect</b>(2) and <b>write</b>(2), by performing an
+      implicit <b>connect</b>(2) operation. It blocks until the data is buffered
+      and the handshake has completed. For a non-blocking socket, it returns the
+      number of bytes buffered and sent in the SYN packet. If the cookie is not
+      available locally, it returns <b>EINPROGRESS</b>, and sends a SYN with a
+      Fast Open cookie request automatically. The caller needs to write the data
+      again when the socket is connected. On errors, it sets the same
+      <i>errno</i> as <b>connect</b>(2) if the handshake fails. This flag
+      requires enabling TCP Fast Open client support on sysctl
+      <i>net.ipv4.tcp_fastopen</i>.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Refer to <b>TCP_FASTOPEN_CONNECT</b> socket option in <b>tcp</b>(7) for an
+      alternative approach.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="sendmsg()"><a class="permalink" href="#sendmsg()">sendmsg()</a></h2>
+<p class="Pp">The definition of the <i>msghdr</i> structure employed by
+    <b>sendmsg</b>() is as follows:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct msghdr {
+<br>
+    void         *msg_name;       /* Optional address */
+<br>
+    socklen_t     msg_namelen;    /* Size of address */
+<br>
+    struct iovec *msg_iov;        /* Scatter/gather array */
+<br>
+    size_t        msg_iovlen;     /* # elements in msg_iov */
+<br>
+    void         *msg_control;    /* Ancillary data, see below */
+<br>
+    size_t        msg_controllen; /* Ancillary data buffer len */
+<br>
+    int           msg_flags;      /* Flags (unused) */
+};
+</pre>
+<br>
+<p class="Pp">The <i>msg_name</i> field is used on an unconnected socket to
+    specify the target address for a datagram. It points to a buffer containing
+    the address; the <i>msg_namelen</i> field should be set to the size of the
+    address. For a connected socket, these fields should be specified as NULL
+    and 0, respectively.</p>
+<p class="Pp">The <i>msg_iov</i> and <i>msg_iovlen</i> fields specify
+    scatter-gather locations, as for <b>writev</b>(2).</p>
+<p class="Pp">You may send control information (ancillary data) using the
+    <i>msg_control</i> and <i>msg_controllen</i> members. The maximum control
+    buffer length the kernel can process is limited per socket by the value in
+    <i>/proc/sys/net/core/optmem_max</i>; see <b>socket</b>(7). For further
+    information on the use of ancillary data in various socket domains, see
+    <b>unix</b>(7) and <b>ip</b>(7).</p>
+<p class="Pp">The <i>msg_flags</i> field is ignored.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, these calls return the number of bytes sent. On error,
+    -1 is returned, and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">These are some standard errors generated by the socket layer.
+    Additional errors may be generated and returned from the underlying protocol
+    modules; see their respective manual pages.</p>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>(For UNIX domain sockets, which are identified by pathname) Write
+      permission is denied on the destination socket file, or search permission
+      is denied for one of the directories the path prefix. (See
+      <b>path_resolution</b>(7).)</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>(For UDP sockets) An attempt was made to send to a network/broadcast
+      address as though it was a unicast address.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b> or
+    <b>EWOULDBLOCK</b></a></dt>
+  <dd>The socket is marked nonblocking and the requested operation would block.
+      POSIX.1-2001 allows either error to be returned for this case, and does
+      not require these constants to have the same value, so a portable
+      application should check for both possibilities.</dd>
+  <dt id="EAGAIN~2"><a class="permalink" href="#EAGAIN~2"><b>EAGAIN</b></a></dt>
+  <dd>(Internet domain datagram sockets) The socket referred to by <i>sockfd</i>
+      had not previously been bound to an address and, upon attempting to bind
+      it to an ephemeral port, it was determined that all port numbers in the
+      ephemeral port range are currently in use. See the discussion of
+      <i>/proc/sys/net/ipv4/ip_local_port_range</i> in <b>ip</b>(7).</dd>
+  <dt id="EALREADY"><a class="permalink" href="#EALREADY"><b>EALREADY</b></a></dt>
+  <dd>Another Fast Open is in progress.</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd><i>sockfd</i> is not a valid open file descriptor.</dd>
+  <dt id="ECONNRESET"><a class="permalink" href="#ECONNRESET"><b>ECONNRESET</b></a></dt>
+  <dd>Connection reset by peer.</dd>
+  <dt id="EDESTADDRREQ"><a class="permalink" href="#EDESTADDRREQ"><b>EDESTADDRREQ</b></a></dt>
+  <dd>The socket is not connection-mode, and no peer address is set.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>An invalid user space address was specified for an argument.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>A signal occurred before any data was transmitted; see
+    <b>signal</b>(7).</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>Invalid argument passed.</dd>
+  <dt id="EISCONN"><a class="permalink" href="#EISCONN"><b>EISCONN</b></a></dt>
+  <dd>The connection-mode socket was connected already but a recipient was
+      specified. (Now either this error is returned, or the recipient
+      specification is ignored.)</dd>
+  <dt id="EMSGSIZE"><a class="permalink" href="#EMSGSIZE"><b>EMSGSIZE</b></a></dt>
+  <dd>The socket type requires that message be sent atomically, and the size of
+      the message to be sent made this impossible.</dd>
+  <dt id="ENOBUFS"><a class="permalink" href="#ENOBUFS"><b>ENOBUFS</b></a></dt>
+  <dd>The output queue for a network interface was full. This generally
+      indicates that the interface has stopped sending, but may be caused by
+      transient congestion. (Normally, this does not occur in Linux. Packets are
+      just silently dropped when a device queue overflows.)</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>No memory available.</dd>
+  <dt id="ENOTCONN"><a class="permalink" href="#ENOTCONN"><b>ENOTCONN</b></a></dt>
+  <dd>The socket is not connected, and no target has been given.</dd>
+  <dt id="ENOTSOCK"><a class="permalink" href="#ENOTSOCK"><b>ENOTSOCK</b></a></dt>
+  <dd>The file descriptor <i>sockfd</i> does not refer to a socket.</dd>
+  <dt id="EOPNOTSUPP"><a class="permalink" href="#EOPNOTSUPP"><b>EOPNOTSUPP</b></a></dt>
+  <dd>Some bit in the <i>flags</i> argument is inappropriate for the socket
+      type.</dd>
+  <dt id="EPIPE"><a class="permalink" href="#EPIPE"><b>EPIPE</b></a></dt>
+  <dd>The local end has been shut down on a connection oriented socket. In this
+      case, the process will also receive a <b>SIGPIPE</b> unless
+      <b>MSG_NOSIGNAL</b> is set.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">4.4BSD, SVr4, POSIX.1-2001. These interfaces first appeared in
+    4.2BSD.</p>
+<p class="Pp">POSIX.1-2001 describes only the <b>MSG_OOB</b> and <b>MSG_EOR</b>
+    flags. POSIX.1-2008 adds a specification of <b>MSG_NOSIGNAL</b>. The
+    <b>MSG_CONFIRM</b> flag is a Linux extension.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">According to POSIX.1-2001, the <i>msg_controllen</i> field of the
+    <i>msghdr</i> structure should be typed as <i>socklen_t</i>, and the
+    <i>msg_iovlen</i> field should be typed as <i>int</i>, but glibc currently
+    types both as <i>size_t</i>.</p>
+<p class="Pp">See <b>sendmmsg</b>(2) for information about a Linux-specific
+    system call that can be used to transmit multiple datagrams in a single
+    call.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">Linux may return <b>EPIPE</b> instead of <b>ENOTCONN</b>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">An example of the use of <b>sendto</b>() is shown in
+    <b>getaddrinfo</b>(3).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>fcntl</b>(2), <b>getsockopt</b>(2), <b>recv</b>(2),
+    <b>select</b>(2), <b>sendfile</b>(2), <b>sendmmsg</b>(2),
+    <b>shutdown</b>(2), <b>socket</b>(2), <b>write</b>(2), <b>cmsg</b>(3),
+    <b>ip</b>(7), <b>ipv6</b>(7), <b>socket</b>(7), <b>tcp</b>(7),
+    <b>udp</b>(7), <b>unix</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

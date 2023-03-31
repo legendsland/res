@@ -1,0 +1,220 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/db32f498623f7a0d0e3d79f0d983adffb6308aa5">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>PTHREAD_ATTR_GETGUARDSIZE(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">PTHREAD_ATTR_GETGUARDSIZE(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">PTHREAD_ATTR_GETGUARDSIZE(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pthread_attr_getguardsize, pthread_attr_setguardsize — get
+    and set the thread guardsize attribute</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;pthread.h&gt;</pre>
+<pre>int pthread_attr_getguardsize(const pthread_attr_t *restrict <i>attr</i>,
+<br>
+    size_t *restrict <i>guardsize</i>);
+int pthread_attr_setguardsize(pthread_attr_t *<i>attr</i>,
+<br>
+    size_t <i>guardsize</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>pthread_attr_getguardsize</i>() function shall get the
+    <i>guardsize</i> attribute in the <i>attr</i> object. This attribute shall
+    be returned in the <i>guardsize</i> parameter.</p>
+<p class="Pp">The <i>pthread_attr_setguardsize</i>() function shall set the
+    <i>guardsize</i> attribute in the <i>attr</i> object. The new value of this
+    attribute shall be obtained from the <i>guardsize</i> parameter. If
+    <i>guardsize</i> is zero, a guard area shall not be provided for threads
+    created with <i>attr</i>. If <i>guardsize</i> is greater than zero, a guard
+    area of at least size <i>guardsize</i> bytes shall be provided for each
+    thread created with <i>attr</i>.</p>
+<p class="Pp">The <i>guardsize</i> attribute controls the size of the guard area
+    for the created thread's stack. The <i>guardsize</i> attribute provides
+    protection against overflow of the stack pointer. If a thread's stack is
+    created with guard protection, the implementation allocates extra memory at
+    the overflow end of the stack as a buffer against stack overflow of the
+    stack pointer. If an application overflows into this buffer an error shall
+    result (possibly in a SIGSEGV signal being delivered to the thread).</p>
+<p class="Pp">A conforming implementation may round up the value contained in
+    <i>guardsize</i> to a multiple of the configurable system variable
+    {PAGESIZE} (see <i>&lt;sys/mman.h&gt;</i>). If an implementation rounds up
+    the value of <i>guardsize</i> to a multiple of {PAGESIZE}, a call to
+    <i>pthread_attr_getguardsize</i>() specifying <i>attr</i> shall store in the
+    <i>guardsize</i> parameter the guard size specified by the previous
+    <i>pthread_attr_setguardsize</i>() function call.</p>
+<p class="Pp">The default value of the <i>guardsize</i> attribute is
+    implementation-defined.</p>
+<p class="Pp">If the <i>stackaddr</i> attribute has been set (that is, the
+    caller is allocating and managing its own thread stacks), the
+    <i>guardsize</i> attribute shall be ignored and no protection shall be
+    provided by the implementation. It is the responsibility of the application
+    to manage stack overflow along with stack allocation and management in this
+    case.</p>
+<p class="Pp">The behavior is undefined if the value specified by the
+    <i>attr</i> argument to <i>pthread_attr_getguardsize</i>() or
+    <i>pthread_attr_setguardsize</i>() does not refer to an initialized thread
+    attributes object.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">If successful, the <i>pthread_attr_getguardsize</i>() and
+    <i>pthread_attr_setguardsize</i>() functions shall return zero; otherwise,
+    an error number shall be returned to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">These functions shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The parameter <i>guardsize</i> is invalid.</dd>
+</dl>
+<p class="Pp">These functions shall not return an error code of
+  <b>[EINTR]</b>.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Retrieving_the_guardsize_Attribute"><a class="permalink" href="#Retrieving_the_guardsize_Attribute">Retrieving
+  the guardsize Attribute</a></h2>
+<p class="Pp">This example shows how to obtain the <i>guardsize</i> attribute of
+    a thread attribute object.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;pthread.h&gt;</pre>
+<pre>pthread_attr_t thread_attr;
+size_t  guardsize;
+int     rc;</pre>
+<pre>/* code initializing thread_attr */
+...</pre>
+<pre>rc = pthread_attr_getguardsize (&amp;thread_attr, &amp;guardsize);
+if (rc != 0)  {
+<br>
+    /* handle error */
+<br>
+    ...
+}
+else {
+<br>
+    if (guardsize &gt; 0) {
+<br>
+    /* a guard area of at least guardsize bytes is provided */
+<br>
+    ...
+<br>
+    }
+<br>
+    else {
+<br>
+    /* no guard area provided */
+<br>
+    ...
+<br>
+    }
+}</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The <i>guardsize</i> attribute is provided to the application for
+    two reasons:</p>
+<dl class="Bl-tag">
+  <dt> 1.</dt>
+  <dd>Overflow protection can potentially result in wasted system resources. An
+      application that creates a large number of threads, and which knows its
+      threads never overflow their stack, can save system resources by turning
+      off guard areas.</dd>
+  <dt> 2.</dt>
+  <dd>When threads allocate large data structures on the stack, large guard
+      areas may be needed to detect stack overflow.</dd>
+</dl>
+<p class="Pp">The default size of the guard area is left implementation-defined
+    since on systems supporting very large page sizes, the overhead might be
+    substantial if at least one guard page is required by default.</p>
+<p class="Pp">If an implementation detects that the value specified by the
+    <i>attr</i> argument to <i>pthread_attr_getguardsize</i>() or
+    <i>pthread_attr_setguardsize</i>() does not refer to an initialized thread
+    attributes object, it is recommended that the function should fail and
+    report an <b>[EINVAL]</b> error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;pthread.h&gt;</b></i>, <i><b>&lt;sys_mman.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

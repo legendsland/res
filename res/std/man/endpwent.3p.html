@@ -1,0 +1,207 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/7daa58016a0aa3cf8f9d264a1ea533157646244b">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>ENDPWENT(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">ENDPWENT(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">ENDPWENT(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">endpwent, getpwent, setpwent — user database functions</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;pwd.h&gt;</pre>
+<pre>void endpwent(void);
+struct passwd *getpwent(void);
+void setpwent(void);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">These functions shall retrieve information about users.</p>
+<p class="Pp">The <i>getpwent</i>() function shall return a pointer to a
+    structure containing the broken-out fields of an entry in the user database.
+    Each entry in the user database contains a <b>passwd</b> structure. If the
+    user database is not already open, <i>getpwent</i>() shall open it and
+    return a pointer to a <b>passwd</b> structure containing the first entry in
+    the database. Thereafter, it shall return a pointer to a <b>passwd</b>
+    structure containing the next entry in the user database. Successive calls
+    can be used to search the entire user database.</p>
+<p class="Pp">If an end-of-file or an error is encountered on reading,
+    <i>getpwent</i>() shall return a null pointer.</p>
+<p class="Pp">An implementation that provides extended security controls may
+    impose further implementation-defined restrictions on accessing the user
+    database. In particular, the system may deny the existence of some or all of
+    the user database entries associated with users other than the caller.</p>
+<p class="Pp">The <i>setpwent</i>() function shall rewind the user database so
+    that the next <i>getpwent</i>() call returns the first entry, allowing
+    repeated searches.</p>
+<p class="Pp">The <i>endpwent</i>() function shall close the user database.</p>
+<p class="Pp">The <i>setpwent</i>() and <i>endpwent</i>() functions shall not
+    change the setting of <i>errno</i> if successful.</p>
+<p class="Pp">On error, the <i>setpwent</i>() and <i>endpwent</i>() functions
+    shall set <i>errno</i> to indicate the error.</p>
+<p class="Pp">Since no value is returned by the <i>setpwent</i>() and
+    <i>endpwent</i>() functions, an application wishing to check for error
+    situations should set <i>errno</i> to 0, then call the function, then check
+    <i>errno</i>.</p>
+<p class="Pp">These functions need not be thread-safe.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On successful completion, <i>getpwent</i>() shall return a pointer
+    to a <b>passwd</b> structure. On end-of-file, <i>getpwent</i>() shall return
+    a null pointer and shall not change the setting of <i>errno</i>. On error,
+    <i>getpwent</i>() shall return a null pointer and <i>errno</i> shall be set
+    to indicate the error.</p>
+<p class="Pp">The application shall not modify the structure to which the return
+    value points, nor any storage areas pointed to by pointers within the
+    structure. The returned pointer, and pointers within the structure, might be
+    invalidated or the structure or the storage areas might be overwritten by a
+    subsequent call to <i>getpwuid</i>(), <i>getpwnam</i>(), or
+    <i>getpwent</i>(). The returned pointer, and pointers within the structure,
+    might also be invalidated if the calling thread is terminated.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">These functions may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>A signal was caught during the operation.</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>An I/O error has occurred.</dd>
+</dl>
+<p class="Pp">In addition, <i>getpwent</i>() and <i>setpwent</i>() may fail
+  if:</p>
+<dl class="Bl-tag">
+  <dt id="EMFILE"><a class="permalink" href="#EMFILE"><b>EMFILE</b></a></dt>
+  <dd>All file descriptors available to the process are currently open.</dd>
+  <dt id="ENFILE"><a class="permalink" href="#ENFILE"><b>ENFILE</b></a></dt>
+  <dd>The maximum allowable number of files is currently open in the
+    system.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Searching_the_User_Database"><a class="permalink" href="#Searching_the_User_Database">Searching
+  the User Database</a></h2>
+<p class="Pp">The following example uses the <i>getpwent</i>() function to get
+    successive entries in the user database, returning a pointer to a
+    <b>passwd</b> structure that contains information about each user. The call
+    to <i>endpwent</i>() closes the user database and cleans up.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;pwd.h&gt;
+#include &lt;stdio.h&gt;</pre>
+<pre>void printname(uid_t uid)
+{
+<br>
+    struct passwd *pwd;</pre>
+<pre><br>
+    setpwent();
+<br>
+    while((pwd = getpwent()) != NULL) {
+<br>
+        if (pwd-&gt;pw_uid == uid) {
+<br>
+            printf("name=%s\n",pwd-&gt;pw_name);
+<br>
+            break;
+<br>
+        }
+<br>
+    }
+<br>
+    endpwent();
+}</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">These functions are provided due to their historical usage.
+    Applications should avoid dependencies on fields in the password database,
+    whether the database is a single file, or where in the file system name
+    space the database resides. Applications should use <i>getpwuid</i>()
+    whenever possible because it avoids these dependencies.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>endgrent</i>()</i>, <i><i>getlogin</i>()</i>,
+    <i><i>getpwnam</i>()</i>, <i><i>getpwuid</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;pwd.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

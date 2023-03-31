@@ -1,0 +1,604 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2016, IBM Corporation.
+   Written by Mike Rapoport <rppt@linux.vnet.ibm.com>
+   and Copyright (C) 2016 Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/b5b750fd8e10f731d6abf9f94d4ab5781833cc2f">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>ioctl_userfaultfd(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">ioctl_userfaultfd(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">ioctl_userfaultfd(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">ioctl_userfaultfd - create a file descriptor for handling page
+    faults in user space</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;linux/userfaultfd.h&gt;</b>  /* Definition of <b>UFFD*</b> constants */
+<b>#include &lt;sys/ioctl.h&gt;</b></pre>
+<pre><b>int ioctl(int </b><i>fd</i><b>, int </b><i>cmd</i><b>, ...);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">Various <b>ioctl</b>(2) operations can be performed on a
+    userfaultfd object (created by a call to <b>userfaultfd</b>(2)) using calls
+    of the form:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>ioctl(fd, cmd, argp);
+</pre>
+<br>
+In the above, <i>fd</i> is a file descriptor referring to a userfaultfd object,
+  <i>cmd</i> is one of the commands listed below, and <i>argp</i> is a pointer
+  to a data structure that is specific to <i>cmd</i>.
+<p class="Pp">The various <b>ioctl</b>(2) operations are described below. The
+    <b>UFFDIO_API</b>, <b>UFFDIO_REGISTER</b>, and <b>UFFDIO_UNREGISTER</b>
+    operations are used to <i>configure</i> userfaultfd behavior. These
+    operations allow the caller to choose what features will be enabled and what
+    kinds of events will be delivered to the application. The remaining
+    operations are <i>range</i> operations. These operations enable the calling
+    application to resolve page-fault events.</p>
+<section class="Ss">
+<h2 class="Ss" id="UFFDIO_API"><a class="permalink" href="#UFFDIO_API">UFFDIO_API</a></h2>
+<p class="Pp">(Since Linux 4.3.) Enable operation of the userfaultfd and perform
+    API handshake.</p>
+<p class="Pp">The <i>argp</i> argument is a pointer to a <i>uffdio_api</i>
+    structure, defined as:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct uffdio_api {
+<br>
+    __u64 api;        /* Requested API version (input) */
+<br>
+    __u64 features;   /* Requested features (input/output) */
+<br>
+    __u64 ioctls;     /* Available ioctl() operations (output) */
+};
+</pre>
+<br>
+<p class="Pp">The <i>api</i> field denotes the API version requested by the
+    application.</p>
+<p class="Pp">The kernel verifies that it can support the requested API version,
+    and sets the <i>features</i> and <i>ioctls</i> fields to bit masks
+    representing all the available features and the generic <b>ioctl</b>(2)
+    operations available.</p>
+<p class="Pp">Before Linux 4.11, the <i>features</i> field must be initialized
+    to zero before the call to <b>UFFDIO_API</b>, and zero (i.e., no feature
+    bits) is placed in the <i>features</i> field by the kernel upon return from
+    <b>ioctl</b>(2).</p>
+<p class="Pp">Starting from Linux 4.11, the <i>features</i> field can be used to
+    ask whether particular features are supported and explicitly enable
+    userfaultfd features that are disabled by default. The kernel always reports
+    all the available features in the <i>features</i> field.</p>
+<p class="Pp">To enable userfaultfd features the application should set a bit
+    corresponding to each feature it wants to enable in the <i>features</i>
+    field. If the kernel supports all the requested features it will enable
+    them. Otherwise it will zero out the returned <i>uffdio_api</i> structure
+    and return <b>EINVAL</b>.</p>
+<p class="Pp">The following feature bits may be set:</p>
+<dl class="Bl-tag">
+  <dt id="UFFD_FEATURE_EVENT_FORK"><a class="permalink" href="#UFFD_FEATURE_EVENT_FORK"><b>UFFD_FEATURE_EVENT_FORK</b>
+    (since Linux 4.11)</a></dt>
+  <dd>When this feature is enabled, the userfaultfd objects associated with a
+      parent process are duplicated into the child process during <b>fork</b>(2)
+      and a <b>UFFD_EVENT_FORK</b> event is delivered to the userfaultfd
+    monitor</dd>
+  <dt id="UFFD_FEATURE_EVENT_REMAP"><a class="permalink" href="#UFFD_FEATURE_EVENT_REMAP"><b>UFFD_FEATURE_EVENT_REMAP</b>
+    (since Linux 4.11)</a></dt>
+  <dd>If this feature is enabled, when the faulting process invokes
+      <b>mremap</b>(2), the userfaultfd monitor will receive an event of type
+      <b>UFFD_EVENT_REMAP</b>.</dd>
+  <dt id="UFFD_FEATURE_EVENT_REMOVE"><a class="permalink" href="#UFFD_FEATURE_EVENT_REMOVE"><b>UFFD_FEATURE_EVENT_REMOVE</b>
+    (since Linux 4.11)</a></dt>
+  <dd>If this feature is enabled, when the faulting process calls
+      <b>madvise</b>(2) with the <b>MADV_DONTNEED</b> or <b>MADV_REMOVE</b>
+      advice value to free a virtual memory area the userfaultfd monitor will
+      receive an event of type <b>UFFD_EVENT_REMOVE</b>.</dd>
+  <dt id="UFFD_FEATURE_EVENT_UNMAP"><a class="permalink" href="#UFFD_FEATURE_EVENT_UNMAP"><b>UFFD_FEATURE_EVENT_UNMAP</b>
+    (since Linux 4.11)</a></dt>
+  <dd>If this feature is enabled, when the faulting process unmaps virtual
+      memory either explicitly with <b>munmap</b>(2), or implicitly during
+      either <b>mmap</b>(2) or <b>mremap</b>(2), the userfaultfd monitor will
+      receive an event of type <b>UFFD_EVENT_UNMAP</b>.</dd>
+  <dt id="UFFD_FEATURE_MISSING_HUGETLBFS"><a class="permalink" href="#UFFD_FEATURE_MISSING_HUGETLBFS"><b>UFFD_FEATURE_MISSING_HUGETLBFS</b>
+    (since Linux 4.11)</a></dt>
+  <dd>If this feature bit is set, the kernel supports registering userfaultfd
+      ranges on hugetlbfs virtual memory areas</dd>
+  <dt id="UFFD_FEATURE_MISSING_SHMEM"><a class="permalink" href="#UFFD_FEATURE_MISSING_SHMEM"><b>UFFD_FEATURE_MISSING_SHMEM</b>
+    (since Linux 4.11)</a></dt>
+  <dd>If this feature bit is set, the kernel supports registering userfaultfd
+      ranges on shared memory areas. This includes all kernel shared memory
+      APIs: System V shared memory, <b>tmpfs</b>(5), shared mappings of
+      <i>/dev/zero</i>, <b>mmap</b>(2) with the <b>MAP_SHARED</b> flag set,
+      <b>memfd_create</b>(2), and so on.</dd>
+  <dt id="UFFD_FEATURE_SIGBUS"><a class="permalink" href="#UFFD_FEATURE_SIGBUS"><b>UFFD_FEATURE_SIGBUS</b>
+    (since Linux 4.14)</a></dt>
+  <dd>If this feature bit is set, no page-fault events
+      (<b>UFFD_EVENT_PAGEFAULT</b>) will be delivered. Instead, a <b>SIGBUS</b>
+      signal will be sent to the faulting process. Applications using this
+      feature will not require the use of a userfaultfd monitor for processing
+      memory accesses to the regions registered with userfaultfd.</dd>
+  <dt id="UFFD_FEATURE_THREAD_ID"><a class="permalink" href="#UFFD_FEATURE_THREAD_ID"><b>UFFD_FEATURE_THREAD_ID</b>
+    (since Linux 4.14)</a></dt>
+  <dd>If this feature bit is set, <i>uffd_msg.pagefault.feat.ptid</i> will be
+      set to the faulted thread ID for each page-fault message.</dd>
+  <dt id="UFFD_FEATURE_MINOR_HUGETLBFS"><a class="permalink" href="#UFFD_FEATURE_MINOR_HUGETLBFS"><b>UFFD_FEATURE_MINOR_HUGETLBFS</b>
+    (since Linux 5.13)</a></dt>
+  <dd>If this feature bit is set, the kernel supports registering userfaultfd
+      ranges in minor mode on hugetlbfs-backed memory areas.</dd>
+  <dt id="UFFD_FEATURE_MINOR_SHMEM"><a class="permalink" href="#UFFD_FEATURE_MINOR_SHMEM"><b>UFFD_FEATURE_MINOR_SHMEM</b>
+    (since Linux 5.14)</a></dt>
+  <dd>If this feature bit is set, the kernel supports registering userfaultfd
+      ranges in minor mode on shmem-backed memory areas.</dd>
+</dl>
+<p class="Pp">The returned <i>ioctls</i> field can contain the following
+  bits:</p>
+<dl class="Bl-tag">
+  <dt><b>1 &lt;&lt; _UFFDIO_API</b></dt>
+  <dd>The <b>UFFDIO_API</b> operation is supported.</dd>
+  <dt><b>1 &lt;&lt; _UFFDIO_REGISTER</b></dt>
+  <dd>The <b>UFFDIO_REGISTER</b> operation is supported.</dd>
+  <dt><b>1 &lt;&lt; _UFFDIO_UNREGISTER</b></dt>
+  <dd>The <b>UFFDIO_UNREGISTER</b> operation is supported.</dd>
+</dl>
+<p class="Pp">This <b>ioctl</b>(2) operation returns 0 on success. On error, -1
+    is returned and <i>errno</i> is set to indicate the error. Possible errors
+    include:</p>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>argp</i> refers to an address that is outside the calling process's
+      accessible address space.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The userfaultfd has already been enabled by a previous <b>UFFDIO_API</b>
+      operation.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>The API version requested in the <i>api</i> field is not supported by this
+      kernel, or the <i>features</i> field passed to the kernel includes feature
+      bits that are not supported by the current kernel version.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="UFFDIO_REGISTER"><a class="permalink" href="#UFFDIO_REGISTER">UFFDIO_REGISTER</a></h2>
+<p class="Pp">(Since Linux 4.3.) Register a memory address range with the
+    userfaultfd object. The pages in the range must be "compatible".
+    Please refer to the list of register modes below for the compatible memory
+    backends for each mode.</p>
+<p class="Pp">The <i>argp</i> argument is a pointer to a <i>uffdio_register</i>
+    structure, defined as:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct uffdio_range {
+<br>
+    __u64 start;    /* Start of range */
+<br>
+    __u64 len;      /* Length of range (bytes) */
+};
+struct uffdio_register {
+<br>
+    struct uffdio_range range;
+<br>
+    __u64 mode;     /* Desired mode of operation (input) */
+<br>
+    __u64 ioctls;   /* Available ioctl() operations (output) */
+};
+</pre>
+<br>
+<p class="Pp">The <i>range</i> field defines a memory range starting at
+    <i>start</i> and continuing for <i>len</i> bytes that should be handled by
+    the userfaultfd.</p>
+<p class="Pp">The <i>mode</i> field defines the mode of operation desired for
+    this memory region. The following values may be bitwise ORed to set the
+    userfaultfd mode for the specified range:</p>
+<dl class="Bl-tag">
+  <dt id="UFFDIO_REGISTER_MODE_MISSING"><a class="permalink" href="#UFFDIO_REGISTER_MODE_MISSING"><b>UFFDIO_REGISTER_MODE_MISSING</b></a></dt>
+  <dd>Track page faults on missing pages. Since Linux 4.3, only private
+      anonymous ranges are compatible. Since Linux 4.11, hugetlbfs and shared
+      memory ranges are also compatible.</dd>
+  <dt id="UFFDIO_REGISTER_MODE_WP"><a class="permalink" href="#UFFDIO_REGISTER_MODE_WP"><b>UFFDIO_REGISTER_MODE_WP</b></a></dt>
+  <dd>Track page faults on write-protected pages. Since Linux 5.7, only private
+      anonymous ranges are compatible.</dd>
+  <dt id="UFFDIO_REGISTER_MODE_MINOR"><a class="permalink" href="#UFFDIO_REGISTER_MODE_MINOR"><b>UFFDIO_REGISTER_MODE_MINOR</b></a></dt>
+  <dd>Track minor page faults. Since Linux 5.13, only hugetlbfs ranges are
+      compatible. Since Linux 5.14, compatibility with shmem ranges was
+    added.</dd>
+</dl>
+<p class="Pp">If the operation is successful, the kernel modifies the
+    <i>ioctls</i> bit-mask field to indicate which <b>ioctl</b>(2) operations
+    are available for the specified range. This returned bit mask can contain
+    the following bits:</p>
+<dl class="Bl-tag">
+  <dt><b>1 &lt;&lt; _UFFDIO_COPY</b></dt>
+  <dd>The <b>UFFDIO_COPY</b> operation is supported.</dd>
+  <dt><b>1 &lt;&lt; _UFFDIO_WAKE</b></dt>
+  <dd>The <b>UFFDIO_WAKE</b> operation is supported.</dd>
+  <dt><b>1 &lt;&lt; _UFFDIO_WRITEPROTECT</b></dt>
+  <dd>The <b>UFFDIO_WRITEPROTECT</b></dd>
+  <dt><b>1 &lt;&lt; _UFFDIO_ZEROPAGE</b></dt>
+  <dd>The <b>UFFDIO_ZEROPAGE</b> operation is supported.</dd>
+  <dt><b>1 &lt;&lt; _UFFDIO_CONTINUE</b></dt>
+  <dd>The <b>UFFDIO_CONTINUE</b> operation is supported.</dd>
+</dl>
+<p class="Pp">This <b>ioctl</b>(2) operation returns 0 on success. On error, -1
+    is returned and <i>errno</i> is set to indicate the error. Possible errors
+    include:</p>
+<dl class="Bl-tag">
+  <dt id="EBUSY"><a class="permalink" href="#EBUSY"><b>EBUSY</b></a></dt>
+  <dd>A mapping in the specified range is registered with another userfaultfd
+      object.</dd>
+  <dt id="EFAULT~2"><a class="permalink" href="#EFAULT~2"><b>EFAULT</b></a></dt>
+  <dd><i>argp</i> refers to an address that is outside the calling process's
+      accessible address space.</dd>
+  <dt id="EINVAL~3"><a class="permalink" href="#EINVAL~3"><b>EINVAL</b></a></dt>
+  <dd>An invalid or unsupported bit was specified in the <i>mode</i> field; or
+      the <i>mode</i> field was zero.</dd>
+  <dt id="EINVAL~4"><a class="permalink" href="#EINVAL~4"><b>EINVAL</b></a></dt>
+  <dd>There is no mapping in the specified address range.</dd>
+  <dt id="EINVAL~5"><a class="permalink" href="#EINVAL~5"><b>EINVAL</b></a></dt>
+  <dd><i>range.start</i> or <i>range.len</i> is not a multiple of the system
+      page size; or, <i>range.len</i> is zero; or these fields are otherwise
+      invalid.</dd>
+  <dt id="EINVAL~6"><a class="permalink" href="#EINVAL~6"><b>EINVAL</b></a></dt>
+  <dd>There as an incompatible mapping in the specified address range.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="UFFDIO_UNREGISTER"><a class="permalink" href="#UFFDIO_UNREGISTER">UFFDIO_UNREGISTER</a></h2>
+<p class="Pp">(Since Linux 4.3.) Unregister a memory address range from
+    userfaultfd. The pages in the range must be "compatible" (see the
+    description of <b>UFFDIO_REGISTER</b>.)</p>
+<p class="Pp">The address range to unregister is specified in the
+    <i>uffdio_range</i> structure pointed to by <i>argp</i>.</p>
+<p class="Pp">This <b>ioctl</b>(2) operation returns 0 on success. On error, -1
+    is returned and <i>errno</i> is set to indicate the error. Possible errors
+    include:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~7"><a class="permalink" href="#EINVAL~7"><b>EINVAL</b></a></dt>
+  <dd>Either the <i>start</i> or the <i>len</i> field of the <i>ufdio_range</i>
+      structure was not a multiple of the system page size; or the <i>len</i>
+      field was zero; or these fields were otherwise invalid.</dd>
+  <dt id="EINVAL~8"><a class="permalink" href="#EINVAL~8"><b>EINVAL</b></a></dt>
+  <dd>There as an incompatible mapping in the specified address range.</dd>
+  <dt id="EINVAL~9"><a class="permalink" href="#EINVAL~9"><b>EINVAL</b></a></dt>
+  <dd>There was no mapping in the specified address range.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="UFFDIO_COPY"><a class="permalink" href="#UFFDIO_COPY">UFFDIO_COPY</a></h2>
+<p class="Pp">(Since Linux 4.3.) Atomically copy a continuous memory chunk into
+    the userfault registered range and optionally wake up the blocked thread.
+    The source and destination addresses and the number of bytes to copy are
+    specified by the <i>src</i>, <i>dst</i>, and <i>len</i> fields of the
+    <i>uffdio_copy</i> structure pointed to by <i>argp</i>:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct uffdio_copy {
+<br>
+    __u64 dst;    /* Destination of copy */
+<br>
+    __u64 src;    /* Source of copy */
+<br>
+    __u64 len;    /* Number of bytes to copy */
+<br>
+    __u64 mode;   /* Flags controlling behavior of copy */
+<br>
+    __s64 copy;   /* Number of bytes copied, or negated error */
+};
+</pre>
+<br>
+<p class="Pp">The following value may be bitwise ORed in <i>mode</i> to change
+    the behavior of the <b>UFFDIO_COPY</b> operation:</p>
+<dl class="Bl-tag">
+  <dt id="UFFDIO_COPY_MODE_DONTWAKE"><a class="permalink" href="#UFFDIO_COPY_MODE_DONTWAKE"><b>UFFDIO_COPY_MODE_DONTWAKE</b></a></dt>
+  <dd>Do not wake up the thread that waits for page-fault resolution</dd>
+  <dt id="UFFDIO_COPY_MODE_WP"><a class="permalink" href="#UFFDIO_COPY_MODE_WP"><b>UFFDIO_COPY_MODE_WP</b></a></dt>
+  <dd>Copy the page with read-only permission. This allows the user to trap the
+      next write to the page, which will block and generate another
+      write-protect userfault message. This is used only when both
+      <b>UFFDIO_REGISTER_MODE_MISSING</b> and <b>UFFDIO_REGISTER_MODE_WP</b>
+      modes are enabled for the registered range.</dd>
+</dl>
+<p class="Pp">The <i>copy</i> field is used by the kernel to return the number
+    of bytes that was actually copied, or an error (a negated <i>errno</i>-style
+    value). If the value returned in <i>copy</i> doesn't match the value that
+    was specified in <i>len</i>, the operation fails with the error
+    <b>EAGAIN</b>. The <i>copy</i> field is output-only; it is not read by the
+    <b>UFFDIO_COPY</b> operation.</p>
+<p class="Pp">This <b>ioctl</b>(2) operation returns 0 on success. In this case,
+    the entire area was copied. On error, -1 is returned and <i>errno</i> is set
+    to indicate the error. Possible errors include:</p>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>The number of bytes copied (i.e., the value returned in the <i>copy</i>
+      field) does not equal the value that was specified in the <i>len</i>
+      field.</dd>
+  <dt id="EINVAL~10"><a class="permalink" href="#EINVAL~10"><b>EINVAL</b></a></dt>
+  <dd>Either <i>dst</i> or <i>len</i> was not a multiple of the system page
+      size, or the range specified by <i>src</i> and <i>len</i> or <i>dst</i>
+      and <i>len</i> was invalid.</dd>
+  <dt id="EINVAL~11"><a class="permalink" href="#EINVAL~11"><b>EINVAL</b></a></dt>
+  <dd>An invalid bit was specified in the <i>mode</i> field.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b> (since Linux
+    4.11)</a></dt>
+  <dd>The faulting process has changed its virtual memory layout simultaneously
+      with an outstanding <b>UFFDIO_COPY</b> operation.</dd>
+  <dt id="ENOSPC"><a class="permalink" href="#ENOSPC"><b>ENOSPC</b> (from Linux
+    4.11 until Linux 4.13)</a></dt>
+  <dd>The faulting process has exited at the time of a <b>UFFDIO_COPY</b>
+      operation.</dd>
+  <dt id="ESRCH"><a class="permalink" href="#ESRCH"><b>ESRCH</b> (since Linux
+    4.13)</a></dt>
+  <dd>The faulting process has exited at the time of a <b>UFFDIO_COPY</b>
+      operation.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="UFFDIO_ZEROPAGE"><a class="permalink" href="#UFFDIO_ZEROPAGE">UFFDIO_ZEROPAGE</a></h2>
+<p class="Pp">(Since Linux 4.3.) Zero out a memory range registered with
+    userfaultfd.</p>
+<p class="Pp">The requested range is specified by the <i>range</i> field of the
+    <i>uffdio_zeropage</i> structure pointed to by <i>argp</i>:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct uffdio_zeropage {
+<br>
+    struct uffdio_range range;
+<br>
+    __u64 mode;     /* Flags controlling behavior of copy */
+<br>
+    __s64 zeropage; /* Number of bytes zeroed, or negated error */
+};
+</pre>
+<br>
+<p class="Pp">The following value may be bitwise ORed in <i>mode</i> to change
+    the behavior of the <b>UFFDIO_ZEROPAGE</b> operation:</p>
+<dl class="Bl-tag">
+  <dt id="UFFDIO_ZEROPAGE_MODE_DONTWAKE"><a class="permalink" href="#UFFDIO_ZEROPAGE_MODE_DONTWAKE"><b>UFFDIO_ZEROPAGE_MODE_DONTWAKE</b></a></dt>
+  <dd>Do not wake up the thread that waits for page-fault resolution.</dd>
+</dl>
+<p class="Pp">The <i>zeropage</i> field is used by the kernel to return the
+    number of bytes that was actually zeroed, or an error in the same manner as
+    <b>UFFDIO_COPY</b>. If the value returned in the <i>zeropage</i> field
+    doesn't match the value that was specified in <i>range.len</i>, the
+    operation fails with the error <b>EAGAIN</b>. The <i>zeropage</i> field is
+    output-only; it is not read by the <b>UFFDIO_ZEROPAGE</b> operation.</p>
+<p class="Pp">This <b>ioctl</b>(2) operation returns 0 on success. In this case,
+    the entire area was zeroed. On error, -1 is returned and <i>errno</i> is set
+    to indicate the error. Possible errors include:</p>
+<dl class="Bl-tag">
+  <dt id="EAGAIN~2"><a class="permalink" href="#EAGAIN~2"><b>EAGAIN</b></a></dt>
+  <dd>The number of bytes zeroed (i.e., the value returned in the
+      <i>zeropage</i> field) does not equal the value that was specified in the
+      <i>range.len</i> field.</dd>
+  <dt id="EINVAL~12"><a class="permalink" href="#EINVAL~12"><b>EINVAL</b></a></dt>
+  <dd>Either <i>range.start</i> or <i>range.len</i> was not a multiple of the
+      system page size; or <i>range.len</i> was zero; or the range specified was
+      invalid.</dd>
+  <dt id="EINVAL~13"><a class="permalink" href="#EINVAL~13"><b>EINVAL</b></a></dt>
+  <dd>An invalid bit was specified in the <i>mode</i> field.</dd>
+  <dt id="ESRCH~2"><a class="permalink" href="#ESRCH~2"><b>ESRCH</b> (since
+    Linux 4.13)</a></dt>
+  <dd>The faulting process has exited at the time of a <b>UFFDIO_ZEROPAGE</b>
+      operation.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="UFFDIO_WAKE"><a class="permalink" href="#UFFDIO_WAKE">UFFDIO_WAKE</a></h2>
+<p class="Pp">(Since Linux 4.3.) Wake up the thread waiting for page-fault
+    resolution on a specified memory address range.</p>
+<p class="Pp">The <b>UFFDIO_WAKE</b> operation is used in conjunction with
+    <b>UFFDIO_COPY</b> and <b>UFFDIO_ZEROPAGE</b> operations that have the
+    <b>UFFDIO_COPY_MODE_DONTWAKE</b> or <b>UFFDIO_ZEROPAGE_MODE_DONTWAKE</b> bit
+    set in the <i>mode</i> field. The userfault monitor can perform several
+    <b>UFFDIO_COPY</b> and <b>UFFDIO_ZEROPAGE</b> operations in a batch and then
+    explicitly wake up the faulting thread using <b>UFFDIO_WAKE</b>.</p>
+<p class="Pp">The <i>argp</i> argument is a pointer to a <i>uffdio_range</i>
+    structure (shown above) that specifies the address range.</p>
+<p class="Pp">This <b>ioctl</b>(2) operation returns 0 on success. On error, -1
+    is returned and <i>errno</i> is set to indicate the error. Possible errors
+    include:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~14"><a class="permalink" href="#EINVAL~14"><b>EINVAL</b></a></dt>
+  <dd>The <i>start</i> or the <i>len</i> field of the <i>ufdio_range</i>
+      structure was not a multiple of the system page size; or <i>len</i> was
+      zero; or the specified range was otherwise invalid.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="UFFDIO_WRITEPROTECT_(Since_Linux_5.7)"><a class="permalink" href="#UFFDIO_WRITEPROTECT_(Since_Linux_5.7)">UFFDIO_WRITEPROTECT
+  (Since Linux 5.7)</a></h2>
+<p class="Pp">Write-protect or write-unprotect a userfaultfd-registered memory
+    range registered with mode <b>UFFDIO_REGISTER_MODE_WP</b>.</p>
+<p class="Pp">The <i>argp</i> argument is a pointer to a <i>uffdio_range</i>
+    structure as shown below:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct uffdio_writeprotect {
+<br>
+    struct uffdio_range range; /* Range to change write permission*/
+<br>
+    __u64 mode;                /* Mode to change write permission */
+};
+</pre>
+<br>
+<p class="Pp">There are two mode bits that are supported in this structure:</p>
+<dl class="Bl-tag">
+  <dt id="UFFDIO_WRITEPROTECT_MODE_WP"><a class="permalink" href="#UFFDIO_WRITEPROTECT_MODE_WP"><b>UFFDIO_WRITEPROTECT_MODE_WP</b></a></dt>
+  <dd>When this mode bit is set, the ioctl will be a write-protect operation
+      upon the memory range specified by <i>range</i>. Otherwise it will be a
+      write-unprotect operation upon the specified range, which can be used to
+      resolve a userfaultfd write-protect page fault.</dd>
+  <dt id="UFFDIO_WRITEPROTECT_MODE_DONTWAKE"><a class="permalink" href="#UFFDIO_WRITEPROTECT_MODE_DONTWAKE"><b>UFFDIO_WRITEPROTECT_MODE_DONTWAKE</b></a></dt>
+  <dd>When this mode bit is set, do not wake up any thread that waits for
+      page-fault resolution after the operation. This can be specified only if
+      <b>UFFDIO_WRITEPROTECT_MODE_WP</b> is not specified.</dd>
+</dl>
+<p class="Pp">This <b>ioctl</b>(2) operation returns 0 on success. On error, -1
+    is returned and <i>errno</i> is set to indicate the error. Possible errors
+    include:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~15"><a class="permalink" href="#EINVAL~15"><b>EINVAL</b></a></dt>
+  <dd>The <i>start</i> or the <i>len</i> field of the <i>ufdio_range</i>
+      structure was not a multiple of the system page size; or <i>len</i> was
+      zero; or the specified range was otherwise invalid.</dd>
+  <dt id="EAGAIN~3"><a class="permalink" href="#EAGAIN~3"><b>EAGAIN</b></a></dt>
+  <dd>The process was interrupted; retry this call.</dd>
+  <dt id="ENOENT~2"><a class="permalink" href="#ENOENT~2"><b>ENOENT</b></a></dt>
+  <dd>The range specified in <i>range</i> is not valid. For example, the virtual
+      address does not exist, or not registered with userfaultfd write-protect
+      mode.</dd>
+  <dt id="EFAULT~3"><a class="permalink" href="#EFAULT~3"><b>EFAULT</b></a></dt>
+  <dd>Encountered a generic fault during processing.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="UFFDIO_CONTINUE"><a class="permalink" href="#UFFDIO_CONTINUE">UFFDIO_CONTINUE</a></h2>
+<p class="Pp">(Since Linux 5.13.) Resolve a minor page fault by installing page
+    table entries for existing pages in the page cache.</p>
+<p class="Pp">The <i>argp</i> argument is a pointer to a <i>uffdio_continue</i>
+    structure as shown below:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct uffdio_continue {
+<br>
+    struct uffdio_range range;
+<br>
+                   /* Range to install PTEs for and continue */
+<br>
+    __u64 mode;    /* Flags controlling the behavior of continue */
+<br>
+    __s64 mapped;  /* Number of bytes mapped, or negated error */
+};
+</pre>
+<br>
+<p class="Pp">The following value may be bitwise ORed in <i>mode</i> to change
+    the behavior of the <b>UFFDIO_CONTINUE</b> operation:</p>
+<dl class="Bl-tag">
+  <dt id="UFFDIO_CONTINUE_MODE_DONTWAKE"><a class="permalink" href="#UFFDIO_CONTINUE_MODE_DONTWAKE"><b>UFFDIO_CONTINUE_MODE_DONTWAKE</b></a></dt>
+  <dd>Do not wake up the thread that waits for page-fault resolution.</dd>
+</dl>
+<p class="Pp">The <i>mapped</i> field is used by the kernel to return the number
+    of bytes that were actually mapped, or an error in the same manner as
+    <b>UFFDIO_COPY</b>. If the value returned in the <i>mapped</i> field doesn't
+    match the value that was specified in <i>range.len</i>, the operation fails
+    with the error <b>EAGAIN</b>. The <i>mapped</i> field is output-only; it is
+    not read by the <b>UFFDIO_CONTINUE</b> operation.</p>
+<p class="Pp">This <b>ioctl</b>(2) operation returns 0 on success. In this case,
+    the entire area was mapped. On error, -1 is returned and <i>errno</i> is set
+    to indicate the error. Possible errors include:</p>
+<dl class="Bl-tag">
+  <dt id="EAGAIN~4"><a class="permalink" href="#EAGAIN~4"><b>EAGAIN</b></a></dt>
+  <dd>The number of bytes mapped (i.e., the value returned in the <i>mapped</i>
+      field) does not equal the value that was specified in the <i>range.len</i>
+      field.</dd>
+  <dt id="EINVAL~16"><a class="permalink" href="#EINVAL~16"><b>EINVAL</b></a></dt>
+  <dd>Either <i>range.start</i> or <i>range.len</i> was not a multiple of the
+      system page size; or <i>range.len</i> was zero; or the range specified was
+      invalid.</dd>
+  <dt id="EINVAL~17"><a class="permalink" href="#EINVAL~17"><b>EINVAL</b></a></dt>
+  <dd>An invalid bit was specified in the <i>mode</i> field.</dd>
+  <dt id="EEXIST"><a class="permalink" href="#EEXIST"><b>EEXIST</b></a></dt>
+  <dd>One or more pages were already mapped in the given range.</dd>
+  <dt id="ENOENT~3"><a class="permalink" href="#ENOENT~3"><b>ENOENT</b></a></dt>
+  <dd>The faulting process has changed its virtual memory layout simultaneously
+      with an outstanding <b>UFFDIO_CONTINUE</b> operation.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Allocating memory needed to setup the page table mappings failed.</dd>
+  <dt id="EFAULT~4"><a class="permalink" href="#EFAULT~4"><b>EFAULT</b></a></dt>
+  <dd>No existing page could be found in the page cache for the given
+    range.</dd>
+  <dt id="ESRCH~3"><a class="permalink" href="#ESRCH~3"><b>ESRCH</b></a></dt>
+  <dd>The faulting process has exited at the time of a <b>UFFDIO_CONTINUE</b>
+      operation.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">See descriptions of the individual operations, above.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">See descriptions of the individual operations, above. In addition,
+    the following general errors can occur for all of the operations described
+    above:</p>
+<dl class="Bl-tag">
+  <dt id="EFAULT~5"><a class="permalink" href="#EFAULT~5"><b>EFAULT</b></a></dt>
+  <dd><i>argp</i> does not point to a valid memory address.</dd>
+  <dt id="EINVAL~18"><a class="permalink" href="#EINVAL~18"><b>EINVAL</b></a></dt>
+  <dd>(For all operations except <b>UFFDIO_API</b>.) The userfaultfd object has
+      not yet been enabled (via the <b>UFFDIO_API</b> operation).</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These <b>ioctl</b>(2) operations are Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">In order to detect available userfault features and enable some
+    subset of those features the userfaultfd file descriptor must be closed
+    after the first <b>UFFDIO_API</b> operation that queries features
+    availability and reopened before the second <b>UFFDIO_API</b> operation that
+    actually enables the desired features.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">See <b>userfaultfd</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>ioctl</b>(2), <b>mmap</b>(2), <b>userfaultfd</b>(2)</p>
+<p class="Pp"><i>Documentation/admin-guide/mm/userfaultfd.rst</i> in the Linux
+    kernel source tree</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

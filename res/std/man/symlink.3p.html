@@ -1,0 +1,238 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/54cc86bb0d0934b6ee673057e5e4f88f023743da">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>SYMLINK(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">SYMLINK(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">SYMLINK(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">symlink, symlinkat — make a symbolic link</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;unistd.h&gt;</pre>
+<pre>int symlink(const char *<i>path1</i>, const char *<i>path2</i>);</pre>
+<pre>#include &lt;fcntl.h&gt;</pre>
+<pre>int symlinkat(const char *<i>path1</i>, int <i>fd</i>, const char *<i>path2</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>symlink</i>() function shall create a symbolic link called
+    <i>path2</i> that contains the string pointed to by <i>path1</i>
+    (<i>path2</i> is the name of the symbolic link created, <i>path1</i> is the
+    string contained in the symbolic link).</p>
+<p class="Pp">The string pointed to by <i>path1</i> shall be treated only as a
+    string and shall not be validated as a pathname.</p>
+<p class="Pp">If the <i>symlink</i>() function fails for any reason other than
+    <b>[EIO]</b>, any file named by <i>path2</i> shall be unaffected.</p>
+<p class="Pp">If <i>path2</i> names a symbolic link, <i>symlink</i>() shall fail
+    and set <i>errno</i> to <b>[EEXIST]</b>.</p>
+<p class="Pp">The symbolic link's user ID shall be set to the process' effective
+    user ID. The symbolic link's group ID shall be set to the group ID of the
+    parent directory or to the effective group ID of the process.
+    Implementations shall provide a way to initialize the symbolic link's group
+    ID to the group ID of the parent directory. Implementations may, but need
+    not, provide an implementation-defined way to initialize the symbolic link's
+    group ID to the effective group ID of the calling process.</p>
+<p class="Pp">The values of the file mode bits for the created symbolic link are
+    unspecified. All interfaces specified by POSIX.1‐2008 shall behave as
+    if the contents of symbolic links can always be read, except that the value
+    of the file mode bits returned in the <i>st_mode</i> field of the
+    <b>stat</b> structure is unspecified.</p>
+<p class="Pp">Upon successful completion, <i>symlink</i>() shall mark for update
+    the last data access, last data modification, and last file status change
+    timestamps of the symbolic link. Also, the last data modification and last
+    file status change timestamps of the directory that contains the new entry
+    shall be marked for update.</p>
+<p class="Pp">The <i>symlinkat</i>() function shall be equivalent to the
+    <i>symlink</i>() function except in the case where <i>path2</i> specifies a
+    relative path. In this case the symbolic link is created relative to the
+    directory associated with the file descriptor <i>fd</i> instead of the
+    current working directory. If the access mode of the open file description
+    associated with the file descriptor is not O_SEARCH, the function shall
+    check whether directory searches are permitted using the current permissions
+    of the directory underlying the file descriptor. If the access mode is
+    O_SEARCH, the function shall not perform the check.</p>
+<p class="Pp">If <i>symlinkat</i>() is passed the special value AT_FDCWD in the
+    <i>fd</i> parameter, the current working directory shall be used and the
+    behavior shall be identical to a call to <i>symlink</i>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, these functions shall return 0.
+    Otherwise, these functions shall return -1 and set <i>errno</i> to indicate
+    the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">These functions shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>Write permission is denied in the directory where the symbolic link is
+      being created, or search permission is denied for a component of the path
+      prefix of <i>path2</i>.</dd>
+  <dt id="EEXIST"><a class="permalink" href="#EEXIST"><b>EEXIST</b></a></dt>
+  <dd>The <i>path2</i> argument names an existing file.</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>An I/O error occurs while reading from or writing to the file system.</dd>
+  <dt id="ELOOP"><a class="permalink" href="#ELOOP"><b>ELOOP</b></a></dt>
+  <dd>A loop exists in symbolic links encountered during resolution of the
+      <i>path2</i> argument.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of a component of the pathname specified by the <i>path2</i>
+      argument is longer than {NAME_MAX} or the length of the <i>path1</i>
+      argument is longer than {SYMLINK_MAX}.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>A component of the path prefix of <i>path2</i> does not name an existing
+      file or <i>path2</i> is an empty string.</dd>
+  <dt id="ENOENT~2"><a class="permalink" href="#ENOENT~2"><b>ENOENT</b> or
+    <b>ENOTDIR</b></a></dt>
+  <dd>
+    <br>
+    The <i>path2</i> argument contains at least one non-&lt;slash&gt; character
+      and ends with one or more trailing &lt;slash&gt; characters. If
+      <i>path2</i> without the trailing &lt;slash&gt; characters would name an
+      existing file, an <b>[ENOENT]</b> error shall not occur.</dd>
+  <dt id="ENOSPC"><a class="permalink" href="#ENOSPC"><b>ENOSPC</b></a></dt>
+  <dd>The directory in which the entry for the new symbolic link is being placed
+      cannot be extended because no space is left on the file system containing
+      the directory, or the new symbolic link cannot be created because no space
+      is left on the file system which shall contain the link, or the file
+      system is out of file-allocation resources.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>A component of the path prefix of <i>path2</i> names an existing file that
+      is neither a directory nor a symbolic link to a directory.</dd>
+  <dt id="EROFS"><a class="permalink" href="#EROFS"><b>EROFS</b></a></dt>
+  <dd>The new symbolic link would reside on a read-only file system.</dd>
+</dl>
+<p class="Pp">The <i>symlinkat</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES~2"><a class="permalink" href="#EACCES~2"><b>EACCES</b></a></dt>
+  <dd>The access mode of the open file description associated with <i>fd</i> is
+      not O_SEARCH and the permissions of the directory underlying <i>fd</i> do
+      not permit directory searches.</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The <i>path2</i> argument does not specify an absolute path and the
+      <i>fd</i> argument is neither AT_FDCWD nor a valid file descriptor open
+      for reading or searching.</dd>
+  <dt id="ENOTDIR~2"><a class="permalink" href="#ENOTDIR~2"><b>ENOTDIR</b></a></dt>
+  <dd>The <i>path2</i> argument is not an absolute path and <i>fd</i> is a file
+      descriptor associated with a non-directory file.</dd>
+</dl>
+<p class="Pp">These functions may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="ELOOP~2"><a class="permalink" href="#ELOOP~2"><b>ELOOP</b></a></dt>
+  <dd>More than {SYMLOOP_MAX} symbolic links were encountered during resolution
+      of the <i>path2</i> argument.</dd>
+  <dt id="ENAMETOOLONG~2"><a class="permalink" href="#ENAMETOOLONG~2"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of the <i>path2</i> argument exceeds {PATH_MAX} or pathname
+      resolution of a symbolic link in the <i>path2</i> argument produced an
+      intermediate result with a length that exceeds {PATH_MAX}.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">Like a hard link, a symbolic link allows a file to have multiple
+    logical names. The presence of a hard link guarantees the existence of a
+    file, even after the original name has been removed. A symbolic link
+    provides no such assurance; in fact, the file named by the <i>path1</i>
+    argument need not exist when the link is created. A symbolic link can cross
+    file system boundaries.</p>
+<p class="Pp">Normal permission checks are made on each component of the
+    symbolic link pathname during its resolution.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The purpose of the <i>symlinkat</i>() function is to create
+    symbolic links in directories other than the current working directory
+    without exposure to race conditions. Any part of the path of a file could be
+    changed in parallel to a call to <i>symlink</i>(), resulting in unspecified
+    behavior. By opening a file descriptor for the target directory and using
+    the <i>symlinkat</i>() function it can be guaranteed that the created
+    symbolic link is located relative to the desired directory.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>fdopendir</i>()</i>, <i><i>fstatat</i>()</i>,
+    <i><i>lchown</i>()</i>, <i><i>link</i>()</i>, <i><i>open</i>()</i>,
+    <i><i>readlink</i>()</i>, <i><i>rename</i>()</i>, <i><i>unlink</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;fcntl.h&gt;</b></i>, <i><b>&lt;unistd.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

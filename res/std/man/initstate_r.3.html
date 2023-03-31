@@ -1,0 +1,155 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/7963735371e7a5c22de9a6543d8dd6f75557f9d7">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>random_r(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">random_r(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">random_r(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">random_r, srandom_r, initstate_r, setstate_r - reentrant random
+    number generator</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;stdlib.h&gt;</b></pre>
+<pre><b>int random_r(struct random_data *restrict </b><i>buf</i><b>,</b>
+<b>             int32_t *restrict </b><i>result</i><b>);</b>
+<b>int srandom_r(unsigned int </b><i>seed</i><b>, struct random_data *</b><i>buf</i><b>);</b></pre>
+<pre><b>int initstate_r(unsigned int </b><i>seed</i><b>, char </b><i>statebuf</i><b>[restrict .</b><i>statelen</i><b>],</b>
+<b>             size_t </b><i>statelen</i><b>, struct random_data *restrict </b><i>buf</i><b>);</b>
+<b>int setstate_r(char *restrict </b><i>statebuf</i><b>,</b>
+<b>             struct random_data *restrict </b><i>buf</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>random_r</b>(), <b>srandom_r</b>(), <b>initstate_r</b>(),
+    <b>setstate_r</b>():</p>
+<pre><br>
+    /* glibc &gt;= 2.19: */ _DEFAULT_SOURCE
+<br>
+        || /* glibc &lt;= 2.19: */ _SVID_SOURCE || _BSD_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">These functions are the reentrant equivalents of the functions
+    described in <b>random</b>(3). They are suitable for use in multithreaded
+    programs where each thread needs to obtain an independent, reproducible
+    sequence of random numbers.</p>
+<p class="Pp">The <b>random_r</b>() function is like <b>random</b>(3), except
+    that instead of using state information maintained in a global variable, it
+    uses the state information in the argument pointed to by <i>buf</i>, which
+    must have been previously initialized by <b>initstate_r</b>(). The generated
+    random number is returned in the argument <i>result</i>.</p>
+<p class="Pp">The <b>srandom_r</b>() function is like <b>srandom</b>(3), except
+    that it initializes the seed for the random number generator whose state is
+    maintained in the object pointed to by <i>buf</i>, which must have been
+    previously initialized by <b>initstate_r</b>(), instead of the seed
+    associated with the global state variable.</p>
+<p class="Pp">The <b>initstate_r</b>() function is like <b>initstate</b>(3)
+    except that it initializes the state in the object pointed to by <i>buf</i>,
+    rather than initializing the global state variable. Before calling this
+    function, the <i>buf.state</i> field must be initialized to NULL. The
+    <b>initstate_r</b>() function records a pointer to the <i>statebuf</i>
+    argument inside the structure pointed to by <i>buf</i>. Thus,
+    <i>statebuf</i> should not be deallocated so long as <i>buf</i> is still in
+    use. (So, <i>statebuf</i> should typically be allocated as a static
+    variable, or allocated on the heap using <b>malloc</b>(3) or similar.)</p>
+<p class="Pp">The <b>setstate_r</b>() function is like <b>setstate</b>(3) except
+    that it modifies the state in the object pointed to by <i>buf</i>, rather
+    than modifying the global state variable. <i>state</i> must first have been
+    initialized using <b>initstate_r</b>() or be the result of a previous call
+    of <b>setstate_r</b>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">All of these functions return 0 on success. On error, -1 is
+    returned, with <i>errno</i> set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>A state array of less than 8 bytes was specified to
+    <b>initstate_r</b>().</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>The <i>statebuf</i> or <i>buf</i> argument to <b>setstate_r</b>() was
+      NULL.</dd>
+  <dt id="EINVAL~3"><a class="permalink" href="#EINVAL~3"><b>EINVAL</b></a></dt>
+  <dd>The <i>buf</i> or <i>result</i> argument to <b>random_r</b>() was
+    NULL.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>random_r (), srandom_r (), initstate_r (), setstate_r ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe race:buf</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These functions are nonstandard glibc extensions.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">The <b>initstate_r</b>() interface is confusing. It appears that
+    the <i>random_data</i> type is intended to be opaque, but the implementation
+    requires the user to either initialize the <i>buf.state</i> field to NULL or
+    zero out the entire structure before the call.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>drand48</b>(3), <b>rand</b>(3), <b>random</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

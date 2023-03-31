@@ -1,0 +1,542 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2010 by Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/3c263fff557ef5c7a67b35a42bd869f91f901be7">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>AIO(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">AIO(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">AIO(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">aio - POSIX asynchronous I/O overview</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The POSIX asynchronous I/O (AIO) interface allows applications to
+    initiate one or more I/O operations that are performed asynchronously (i.e.,
+    in the background). The application can elect to be notified of completion
+    of the I/O operation in a variety of ways: by delivery of a signal, by
+    instantiation of a thread, or no notification at all.</p>
+<p class="Pp">The POSIX AIO interface consists of the following functions:</p>
+<dl class="Bl-tag">
+  <dt id="aio_read"><a class="permalink" href="#aio_read"><b>aio_read</b>(3)</a></dt>
+  <dd>Enqueue a read request. This is the asynchronous analog of
+    <b>read</b>(2).</dd>
+  <dt id="aio_write"><a class="permalink" href="#aio_write"><b>aio_write</b>(3)</a></dt>
+  <dd>Enqueue a write request. This is the asynchronous analog of
+      <b>write</b>(2).</dd>
+  <dt id="aio_fsync"><a class="permalink" href="#aio_fsync"><b>aio_fsync</b>(3)</a></dt>
+  <dd>Enqueue a sync request for the I/O operations on a file descriptor. This
+      is the asynchronous analog of <b>fsync</b>(2) and
+    <b>fdatasync</b>(2).</dd>
+  <dt id="aio_error"><a class="permalink" href="#aio_error"><b>aio_error</b>(3)</a></dt>
+  <dd>Obtain the error status of an enqueued I/O request.</dd>
+  <dt id="aio_return"><a class="permalink" href="#aio_return"><b>aio_return</b>(3)</a></dt>
+  <dd>Obtain the return status of a completed I/O request.</dd>
+  <dt id="aio_suspend"><a class="permalink" href="#aio_suspend"><b>aio_suspend</b>(3)</a></dt>
+  <dd>Suspend the caller until one or more of a specified set of I/O requests
+      completes.</dd>
+  <dt id="aio_cancel"><a class="permalink" href="#aio_cancel"><b>aio_cancel</b>(3)</a></dt>
+  <dd>Attempt to cancel outstanding I/O requests on a specified file
+    descriptor.</dd>
+  <dt id="lio_listio"><a class="permalink" href="#lio_listio"><b>lio_listio</b>(3)</a></dt>
+  <dd>Enqueue multiple I/O requests using a single function call.</dd>
+</dl>
+<p class="Pp">The <i>aiocb</i> ("asynchronous I/O control block")
+    structure defines parameters that control an I/O operation. An argument of
+    this type is employed with all of the functions listed above. This structure
+    has the following form:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>#include &lt;aiocb.h&gt;
+struct aiocb {
+<br>
+    /* The order of these fields is implementation-dependent */
+<br>
+    int             aio_fildes;     /* File descriptor */
+<br>
+    off_t           aio_offset;     /* File offset */
+<br>
+    volatile void  *aio_buf;        /* Location of buffer */
+<br>
+    size_t          aio_nbytes;     /* Length of transfer */
+<br>
+    int             aio_reqprio;    /* Request priority */
+<br>
+    struct sigevent aio_sigevent;   /* Notification method */
+<br>
+    int             aio_lio_opcode; /* Operation to be performed;
+<br>
+                                       lio_listio() only */
+<br>
+    /* Various implementation-internal fields not shown */
+};
+/* Operation codes for 'aio_lio_opcode': */
+enum { LIO_READ, LIO_WRITE, LIO_NOP };
+</pre>
+<br>
+<p class="Pp">The fields of this structure are as follows:</p>
+<dl class="Bl-tag">
+  <dt id="aio_fildes"><a class="permalink" href="#aio_fildes"><i>aio_fildes</i></a></dt>
+  <dd>The file descriptor on which the I/O operation is to be performed.</dd>
+  <dt id="aio_offset"><a class="permalink" href="#aio_offset"><i>aio_offset</i></a></dt>
+  <dd>This is the file offset at which the I/O operation is to be
+    performed.</dd>
+  <dt id="aio_buf"><a class="permalink" href="#aio_buf"><i>aio_buf</i></a></dt>
+  <dd>This is the buffer used to transfer data for a read or write
+    operation.</dd>
+  <dt id="aio_nbytes"><a class="permalink" href="#aio_nbytes"><i>aio_nbytes</i></a></dt>
+  <dd>This is the size of the buffer pointed to by <i>aio_buf</i>.</dd>
+  <dt id="aio_reqprio"><a class="permalink" href="#aio_reqprio"><i>aio_reqprio</i></a></dt>
+  <dd>This field specifies a value that is subtracted from the calling thread's
+      real-time priority in order to determine the priority for execution of
+      this I/O request (see <b>pthread_setschedparam</b>(3)). The specified
+      value must be between 0 and the value returned by
+      <i>sysconf(_SC_AIO_PRIO_DELTA_MAX)</i>. This field is ignored for file
+      synchronization operations.</dd>
+  <dt id="aio_sigevent"><a class="permalink" href="#aio_sigevent"><i>aio_sigevent</i></a></dt>
+  <dd>This field is a structure that specifies how the caller is to be notified
+      when the asynchronous I/O operation completes. Possible values for
+      <i>aio_sigevent.sigev_notify</i> are <b>SIGEV_NONE</b>,
+      <b>SIGEV_SIGNAL</b>, and <b>SIGEV_THREAD</b>. See <b>sigevent</b>(7) for
+      further details.</dd>
+  <dt id="aio_lio_opcode"><a class="permalink" href="#aio_lio_opcode"><i>aio_lio_opcode</i></a></dt>
+  <dd>The type of operation to be performed; used only for
+    <b>lio_listio</b>(3).</dd>
+</dl>
+<p class="Pp">In addition to the standard functions listed above, the GNU C
+    library provides the following extension to the POSIX AIO API:</p>
+<dl class="Bl-tag">
+  <dt id="aio_init"><a class="permalink" href="#aio_init"><b>aio_init</b>(3)</a></dt>
+  <dd>Set parameters for tuning the behavior of the glibc POSIX AIO
+      implementation.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The <i>aio_reqprio</i> field of the <i>aiocb</i> structure was less than
+      0, or was greater than the limit returned by the call
+      <i>sysconf(_SC_AIO_PRIO_DELTA_MAX)</i>.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The POSIX AIO interfaces are provided by glibc since glibc
+  2.1.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">It is a good idea to zero out the control block buffer before use
+    (see <b>memset</b>(3)). The control block buffer and the buffer pointed to
+    by <i>aio_buf</i> must not be changed while the I/O operation is in
+    progress. These buffers must remain valid until the I/O operation
+  completes.</p>
+<p class="Pp">Simultaneous asynchronous read or write operations using the same
+    <i>aiocb</i> structure yield undefined results.</p>
+<p class="Pp">The current Linux POSIX AIO implementation is provided in user
+    space by glibc. This has a number of limitations, most notably that
+    maintaining multiple threads to perform I/O operations is expensive and
+    scales poorly. Work has been in progress for some time on a kernel
+    state-machine-based implementation of asynchronous I/O (see
+    <b>io_submit</b>(2), <b>io_setup</b>(2), <b>io_cancel</b>(2),
+    <b>io_destroy</b>(2), <b>io_getevents</b>(2)), but this implementation
+    hasn't yet matured to the point where the POSIX AIO implementation can be
+    completely reimplemented using the kernel system calls.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below opens each of the files named in its
+    command-line arguments and queues a request on the resulting file descriptor
+    using <b>aio_read</b>(3). The program then loops, periodically monitoring
+    each of the I/O operations that is still in progress using
+    <b>aio_error</b>(3). Each of the I/O requests is set up to provide
+    notification by delivery of a signal. After all I/O requests have completed,
+    the program retrieves their status using <b>aio_return</b>(3).</p>
+<p class="Pp">The <b>SIGQUIT</b> signal (generated by typing control-\) causes
+    the program to request cancelation of each of the outstanding requests using
+    <b>aio_cancel</b>(3).</p>
+<p class="Pp">Here is an example of what we might see when running this program.
+    In this example, the program queues two requests to standard input, and
+    these are satisfied by two lines of input containing "abc" and
+    "x".</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>./a.out /dev/stdin /dev/stdin</b>
+opened /dev/stdin on descriptor 3
+opened /dev/stdin on descriptor 4
+aio_error():
+<br>
+    for request 0 (descriptor 3): In progress
+<br>
+    for request 1 (descriptor 4): In progress
+<b>abc</b>
+I/O completion signal received
+aio_error():
+<br>
+    for request 0 (descriptor 3): I/O succeeded
+<br>
+    for request 1 (descriptor 4): In progress
+aio_error():
+<br>
+    for request 1 (descriptor 4): In progress
+<b>x</b>
+I/O completion signal received
+aio_error():
+<br>
+    for request 1 (descriptor 4): I/O succeeded
+All I/O requests completed
+aio_return():
+<br>
+    for request 0 (descriptor 3): 4
+<br>
+    for request 1 (descriptor 4): 2
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#include &lt;fcntl.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;aio.h&gt;
+#include &lt;signal.h&gt;
+#define BUF_SIZE 20     /* Size of buffers for read operations */
+#define errExit(msg) do { perror(msg); exit(EXIT_FAILURE); } while (0)
+struct ioRequest {      /* Application-defined structure for tracking
+<br>
+                           I/O requests */
+<br>
+    int           reqNum;
+<br>
+    int           status;
+<br>
+    struct aiocb *aiocbp;
+};
+static volatile sig_atomic_t gotSIGQUIT = 0;
+<br>
+                        /* On delivery of SIGQUIT, we attempt to
+<br>
+                           cancel all outstanding I/O requests */
+static void             /* Handler for SIGQUIT */
+quitHandler(int sig)
+{
+<br>
+    gotSIGQUIT = 1;
+}
+#define IO_SIGNAL SIGUSR1   /* Signal used to notify I/O completion */
+static void                 /* Handler for I/O completion signal */
+aioSigHandler(int sig, siginfo_t *si, void *ucontext)
+{
+<br>
+    if (si-&gt;si_code == SI_ASYNCIO) {
+<br>
+        write(STDOUT_FILENO, "I/O completion signal received\n", 31);
+<br>
+        /* The corresponding ioRequest structure would be available as
+<br>
+               struct ioRequest *ioReq = si-&gt;si_value.sival_ptr;
+<br>
+           and the file descriptor would then be available via
+<br>
+               ioReq-&gt;aiocbp-&gt;aio_fildes */
+<br>
+    }
+}
+int
+main(int argc, char *argv[])
+{
+<br>
+    struct sigaction sa;
+<br>
+    int s;
+<br>
+    int numReqs;        /* Total number of queued I/O requests */
+<br>
+    int openReqs;       /* Number of I/O requests still in progress */
+<br>
+    if (argc &lt; 2) {
+<br>
+        fprintf(stderr, "Usage: %s &lt;pathname&gt; &lt;pathname&gt;...\n",
+<br>
+                argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    numReqs = argc - 1;
+<br>
+    /* Allocate our arrays. */
+<br>
+    struct ioRequest *ioList = calloc(numReqs, sizeof(*ioList));
+<br>
+    if (ioList == NULL)
+<br>
+        errExit("calloc");
+<br>
+    struct aiocb *aiocbList = calloc(numReqs, sizeof(*aiocbList));
+<br>
+    if (aiocbList == NULL)
+<br>
+        errExit("calloc");
+<br>
+    /* Establish handlers for SIGQUIT and the I/O completion signal. */
+<br>
+    sa.sa_flags = SA_RESTART;
+<br>
+    sigemptyset(&amp;sa.sa_mask);
+<br>
+    sa.sa_handler = quitHandler;
+<br>
+    if (sigaction(SIGQUIT, &amp;sa, NULL) == -1)
+<br>
+        errExit("sigaction");
+<br>
+    sa.sa_flags = SA_RESTART | SA_SIGINFO;
+<br>
+    sa.sa_sigaction = aioSigHandler;
+<br>
+    if (sigaction(IO_SIGNAL, &amp;sa, NULL) == -1)
+<br>
+        errExit("sigaction");
+<br>
+    /* Open each file specified on the command line, and queue
+<br>
+       a read request on the resulting file descriptor. */
+<br>
+    for (size_t j = 0; j &lt; numReqs; j++) {
+<br>
+        ioList[j].reqNum = j;
+<br>
+        ioList[j].status = EINPROGRESS;
+<br>
+        ioList[j].aiocbp = &amp;aiocbList[j];
+<br>
+        ioList[j].aiocbp-&gt;aio_fildes = open(argv[j + 1], O_RDONLY);
+<br>
+        if (ioList[j].aiocbp-&gt;aio_fildes == -1)
+<br>
+            errExit("open");
+<br>
+        printf("opened %s on descriptor %d\n", argv[j + 1],
+<br>
+                ioList[j].aiocbp-&gt;aio_fildes);
+<br>
+        ioList[j].aiocbp-&gt;aio_buf = malloc(BUF_SIZE);
+<br>
+        if (ioList[j].aiocbp-&gt;aio_buf == NULL)
+<br>
+            errExit("malloc");
+<br>
+        ioList[j].aiocbp-&gt;aio_nbytes = BUF_SIZE;
+<br>
+        ioList[j].aiocbp-&gt;aio_reqprio = 0;
+<br>
+        ioList[j].aiocbp-&gt;aio_offset = 0;
+<br>
+        ioList[j].aiocbp-&gt;aio_sigevent.sigev_notify = SIGEV_SIGNAL;
+<br>
+        ioList[j].aiocbp-&gt;aio_sigevent.sigev_signo = IO_SIGNAL;
+<br>
+        ioList[j].aiocbp-&gt;aio_sigevent.sigev_value.sival_ptr =
+<br>
+                                &amp;ioList[j];
+<br>
+        s = aio_read(ioList[j].aiocbp);
+<br>
+        if (s == -1)
+<br>
+            errExit("aio_read");
+<br>
+    }
+<br>
+    openReqs = numReqs;
+<br>
+    /* Loop, monitoring status of I/O requests. */
+<br>
+    while (openReqs &gt; 0) {
+<br>
+        sleep(3);       /* Delay between each monitoring step */
+<br>
+        if (gotSIGQUIT) {
+<br>
+            /* On receipt of SIGQUIT, attempt to cancel each of the
+<br>
+               outstanding I/O requests, and display status returned
+<br>
+               from the cancelation requests. */
+<br>
+            printf("got SIGQUIT; canceling I/O requests: \n");
+<br>
+            for (size_t j = 0; j &lt; numReqs; j++) {
+<br>
+                if (ioList[j].status == EINPROGRESS) {
+<br>
+                    printf("    Request %zu on descriptor %d:", j,
+<br>
+                            ioList[j].aiocbp-&gt;aio_fildes);
+<br>
+                    s = aio_cancel(ioList[j].aiocbp-&gt;aio_fildes,
+<br>
+                            ioList[j].aiocbp);
+<br>
+                    if (s == AIO_CANCELED)
+<br>
+                        printf("I/O canceled\n");
+<br>
+                    else if (s == AIO_NOTCANCELED)
+<br>
+                        printf("I/O not canceled\n");
+<br>
+                    else if (s == AIO_ALLDONE)
+<br>
+                        printf("I/O all done\n");
+<br>
+                    else
+<br>
+                        perror("aio_cancel");
+<br>
+                }
+<br>
+            }
+<br>
+            gotSIGQUIT = 0;
+<br>
+        }
+<br>
+        /* Check the status of each I/O request that is still
+<br>
+           in progress. */
+<br>
+        printf("aio_error():\n");
+<br>
+        for (size_t j = 0; j &lt; numReqs; j++) {
+<br>
+            if (ioList[j].status == EINPROGRESS) {
+<br>
+                printf("    for request %zu (descriptor %d): ",
+<br>
+                        j, ioList[j].aiocbp-&gt;aio_fildes);
+<br>
+                ioList[j].status = aio_error(ioList[j].aiocbp);
+<br>
+                switch (ioList[j].status) {
+<br>
+                case 0:
+<br>
+                    printf("I/O succeeded\n");
+<br>
+                    break;
+<br>
+                case EINPROGRESS:
+<br>
+                    printf("In progress\n");
+<br>
+                    break;
+<br>
+                case ECANCELED:
+<br>
+                    printf("Canceled\n");
+<br>
+                    break;
+<br>
+                default:
+<br>
+                    perror("aio_error");
+<br>
+                    break;
+<br>
+                }
+<br>
+                if (ioList[j].status != EINPROGRESS)
+<br>
+                    openReqs--;
+<br>
+            }
+<br>
+        }
+<br>
+    }
+<br>
+    printf("All I/O requests completed\n");
+<br>
+    /* Check status return of all I/O requests. */
+<br>
+    printf("aio_return():\n");
+<br>
+    for (size_t j = 0; j &lt; numReqs; j++) {
+<br>
+        ssize_t s;
+<br>
+        s = aio_return(ioList[j].aiocbp);
+<br>
+        printf("    for request %zu (descriptor %d): %zd\n",
+<br>
+                j, ioList[j].aiocbp-&gt;aio_fildes, s);
+<br>
+    }
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>io_cancel</b>(2), <b>io_destroy</b>(2), <b>io_getevents</b>(2),
+    <b>io_setup</b>(2), <b>io_submit</b>(2), <b>aio_cancel</b>(3),
+    <b>aio_error</b>(3), <b>aio_init</b>(3), <b>aio_read</b>(3),
+    <b>aio_return</b>(3), <b>aio_write</b>(3), <b>lio_listio</b>(3)</p>
+<p class="Pp">"Asynchronous I/O Support in Linux 2.5", Bhattacharya,
+    Pratt, Pulavarty, and Morgan, Proceedings of the Linux Symposium, 2003,
+    <a class="Lk" href="https://www.kernel.org/doc/ols/2003/ols2003-pages-351-366.pdf">https://www.kernel.org/doc/ols/2003/ols2003-pages-351-366.pdf</a></p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

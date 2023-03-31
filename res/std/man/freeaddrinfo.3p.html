@@ -1,0 +1,445 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/fe17e421e72b94924f5957aa3ad36e38c53a583b">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>FREEADDRINFO(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">FREEADDRINFO(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">FREEADDRINFO(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">freeaddrinfo, getaddrinfo — get address information</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;sys/socket.h&gt;
+#include &lt;netdb.h&gt;</pre>
+<pre>void freeaddrinfo(struct addrinfo *<i>ai</i>);
+int getaddrinfo(const char *restrict <i>nodename</i>,
+<br>
+    const char *restrict <i>servname</i>,
+<br>
+    const struct addrinfo *restrict <i>hints</i>,
+<br>
+    struct addrinfo **restrict <i>res</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>freeaddrinfo</i>() function shall free one or more
+    <b>addrinfo</b> structures returned by <i>getaddrinfo</i>(), along with any
+    additional storage associated with those structures. If the <i>ai_next</i>
+    field of the structure is not null, the entire list of structures shall be
+    freed. The <i>freeaddrinfo</i>() function shall support the freeing of
+    arbitrary sublists of an <b>addrinfo</b> list originally returned by
+    <i>getaddrinfo</i>().</p>
+<p class="Pp">The <i>getaddrinfo</i>() function shall translate the name of a
+    service location (for example, a host name) and/or a service name and shall
+    return a set of socket addresses and associated information to be used in
+    creating a socket with which to address the specified service.</p>
+<dl class="Bl-tag">
+  <dt id="Note:"><a class="permalink" href="#Note:"><b>Note:</b></a></dt>
+  <dd>In many cases it is implemented by the Domain Name System, as documented
+      in RFC&nbsp;1034, RFC&nbsp;1035, and RFC&nbsp;1886.</dd>
+</dl>
+<p class="Pp">The <i>freeaddrinfo</i>() and <i>getaddrinfo</i>() functions shall
+    be thread-safe.</p>
+<p class="Pp">The <i>nodename</i> and <i>servname</i> arguments are either null
+    pointers or pointers to null-terminated strings. One or both of these two
+    arguments shall be supplied by the application as a non-null pointer.</p>
+<p class="Pp">The format of a valid name depends on the address family or
+    families. If a specific family is not given and the name could be
+    interpreted as valid within multiple supported families, the implementation
+    shall attempt to resolve the name in all supported families and, in absence
+    of errors, one or more results shall be returned.</p>
+<p class="Pp">If the <i>nodename</i> argument is not null, it can be a
+    descriptive name or can be an address string. If the specified address
+    family is AF_INET, AF_INET6, or AF_UNSPEC, valid descriptive names include
+    host names. If the specified address family is AF_INET or AF_UNSPEC, address
+    strings using Internet standard dot notation as specified in
+    <i><i>inet_addr</i>()</i> are valid.</p>
+<p class="Pp">If the specified address family is AF_INET6 or AF_UNSPEC, standard
+    IPv6 text forms described in <i><i>inet_ntop</i>()</i> are valid.</p>
+<p class="Pp">If <i>nodename</i> is not null, the requested service location is
+    named by <i>nodename</i>; otherwise, the requested service location is local
+    to the caller.</p>
+<p class="Pp">If <i>servname</i> is null, the call shall return network-level
+    addresses for the specified <i>nodename.</i> If <i>servname</i> is not null,
+    it is a null-terminated character string identifying the requested service.
+    This can be either a descriptive name or a numeric representation suitable
+    for use with the address family or families. If the specified address family
+    is AF_INET, AF_INET6, or AF_UNSPEC, the service can be specified as a string
+    specifying a decimal port number.</p>
+<p class="Pp">If the <i>hints</i> argument is not null, it refers to a structure
+    containing input values that directs the operation by providing options and
+    by limiting the returned information to a specific socket type, address
+    family, and/or protocol, as described below. The application shall ensure
+    that each of the <i>ai_addrlen</i>, <i>ai_addr</i>, <i>ai_canonname</i>, and
+    <i>ai_next</i> members, as well as each of the non-standard additional
+    members, if any, of this <i>hints</i> structure is initialized. If any of
+    these members has a value other than the value that would result from
+    default initialization, the behavior is implementation-defined. A value of
+    AF_UNSPEC for <i>ai_family</i> means that the caller shall accept any
+    address family. A value of zero for <i>ai_socktype</i> means that the caller
+    shall accept any socket type. A value of zero for <i>ai_protocol</i> means
+    that the caller shall accept any protocol. If <i>hints</i> is a null
+    pointer, the behavior shall be as if it referred to a structure containing
+    the value zero for the <i>ai_flags</i>, <i>ai_socktype</i>, and
+    <i>ai_protocol</i> fields, and AF_UNSPEC for the <i>ai_family</i> field.</p>
+<p class="Pp">The <i>ai_flags</i> field to which the <i>hints</i> parameter
+    points shall be set to zero or be the bitwise-inclusive OR of one or more of
+    the values AI_PASSIVE, AI_CANONNAME, AI_NUMERICHOST, AI_NUMERICSERV,
+    AI_V4MAPPED, AI_ALL, and AI_ADDRCONFIG.</p>
+<p class="Pp">If the AI_PASSIVE flag is specified, the returned address
+    information shall be suitable for use in binding a socket for accepting
+    incoming connections for the specified service. In this case, if the
+    <i>nodename</i> argument is null, then the IP address portion of the socket
+    address structure shall be set to INADDR_ANY for an IPv4 address or
+    IN6ADDR_ANY_INIT for an IPv6 address. If the AI_PASSIVE flag is not
+    specified, the returned address information shall be suitable for a call to
+    <i>connect</i>() (for a connection-mode protocol) or for a call to
+    <i>connect</i>(), <i>sendto</i>(), or <i>sendmsg</i>() (for a connectionless
+    protocol). In this case, if the <i>nodename</i> argument is null, then the
+    IP address portion of the socket address structure shall be set to the
+    loopback address. The AI_PASSIVE flag shall be ignored if the
+    <i>nodename</i> argument is not null.</p>
+<p class="Pp">If the AI_CANONNAME flag is specified and the <i>nodename</i>
+    argument is not null, the function shall attempt to determine the canonical
+    name corresponding to <i>nodename</i> (for example, if <i>nodename</i> is an
+    alias or shorthand notation for a complete name).</p>
+<dl class="Bl-tag">
+  <dt id="Note:~2"><a class="permalink" href="#Note:~2"><b>Note:</b></a></dt>
+  <dd>Since different implementations use different conceptual models, the terms
+      ``canonical name'' and ``alias'' cannot be precisely defined for the
+      general case. However, Domain Name System implementations are expected to
+      interpret them as they are used in RFC&nbsp;1034.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">A numeric host address string is not a ``name'', and thus does not
+    have a ``canonical name'' form; no address to host name translation is
+    performed. See below for handling of the case where a canonical name cannot
+    be obtained.</p>
+</div>
+<p class="Pp">If the AI_NUMERICHOST flag is specified, then a non-null
+    <i>nodename</i> string supplied shall be a numeric host address string.
+    Otherwise, an <b>[EAI_NONAME]</b> error is returned. This flag shall prevent
+    any type of name resolution service (for example, the DNS) from being
+    invoked.</p>
+<p class="Pp">If the AI_NUMERICSERV flag is specified, then a non-null
+    <i>servname</i> string supplied shall be a numeric port string. Otherwise,
+    an <b>[EAI_NONAME]</b> error shall be returned. This flag shall prevent any
+    type of name resolution service (for example, NIS+) from being invoked.</p>
+<p class="Pp">By default, with an <i>ai_family</i> of AF_INET6,
+    <i>getaddrinfo</i>() shall return only IPv6 addresses. If the AI_V4MAPPED
+    flag is specified along with an <i>ai_family</i> of AF_INET6, then
+    <i>getaddrinfo</i>() shall return IPv4-mapped IPv6 addresses on finding no
+    matching IPv6 addresses. The AI_V4MAPPED flag shall be ignored unless
+    <i>ai_family</i> equals AF_INET6. If the AI_ALL flag is used with the
+    AI_V4MAPPED flag, then <i>getaddrinfo</i>() shall return all matching IPv6
+    and IPv4 addresses. The AI_ALL flag without the AI_V4MAPPED flag shall be
+    ignored.</p>
+<p class="Pp">If the AI_ADDRCONFIG flag is specified, IPv4 addresses shall be
+    returned only if an IPv4 address is configured on the local system, and IPv6
+    addresses shall be returned only if an IPv6 address is configured on the
+    local system.</p>
+<p class="Pp">The <i>ai_socktype</i> field to which argument <i>hints</i> points
+    specifies the socket type for the service, as defined in
+    <i><i>socket</i>()</i>. If a specific socket type is not given (for example,
+    a value of zero) and the service name could be interpreted as valid with
+    multiple supported socket types, the implementation shall attempt to resolve
+    the service name for all supported socket types and, in the absence of
+    errors, all possible results shall be returned. A non-zero socket type value
+    shall limit the returned information to values with the specified socket
+    type.</p>
+<p class="Pp">If the <i>ai_family</i> field to which <i>hints</i> points has the
+    value AF_UNSPEC, addresses shall be returned for use with any address family
+    that can be used with the specified <i>nodename</i> and/or <i>servname</i>.
+    Otherwise, addresses shall be returned for use only with the specified
+    address family. If <i>ai_family</i> is not AF_UNSPEC and <i>ai_protocol</i>
+    is not zero, then addresses shall be returned for use only with the
+    specified address family and protocol; the value of <i>ai_protocol</i> shall
+    be interpreted as in a call to the <i>socket</i>() function with the
+    corresponding values of <i>ai_family</i> and <i>ai_protocol</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">A zero return value for <i>getaddrinfo</i>() indicates successful
+    completion; a non-zero return value indicates failure. The possible values
+    for the failures are listed in the ERRORS section.</p>
+<p class="Pp">Upon successful return of <i>getaddrinfo</i>(), the location to
+    which <i>res</i> points shall refer to a linked list of <b>addrinfo</b>
+    structures, each of which shall specify a socket address and information for
+    use in creating a socket with which to use that socket address. The list
+    shall include at least one <b>addrinfo</b> structure. The <i>ai_next</i>
+    field of each structure contains a pointer to the next structure on the
+    list, or a null pointer if it is the last structure on the list. Each
+    structure on the list shall include values for use with a call to the
+    <i>socket</i>() function, and a socket address for use with the
+    <i>connect</i>() function or, if the AI_PASSIVE flag was specified, for use
+    with the <i>bind</i>() function. The fields <i>ai_family</i>,
+    <i>ai_socktype</i>, and <i>ai_protocol</i> shall be usable as the arguments
+    to the <i>socket</i>() function to create a socket suitable for use with the
+    returned address. The fields <i>ai_addr</i> and <i>ai_addrlen</i> are usable
+    as the arguments to the <i>connect</i>() or <i>bind</i>() functions with
+    such a socket, according to the AI_PASSIVE flag.</p>
+<p class="Pp">If <i>nodename</i> is not null, and if requested by the
+    AI_CANONNAME flag, the <i>ai_canonname</i> field of the first returned
+    <b>addrinfo</b> structure shall point to a null-terminated string containing
+    the canonical name corresponding to the input <i>nodename</i>; if the
+    canonical name is not available, then <i>ai_canonname</i> shall refer to the
+    <i>nodename</i> argument or a string with the same contents. The contents of
+    the <i>ai_flags</i> field of the returned structures are undefined.</p>
+<p class="Pp">All fields in socket address structures returned by
+    <i>getaddrinfo</i>() that are not filled in through an explicit argument
+    (for example, <i>sin6_flowinfo</i>) shall be set to zero.</p>
+<dl class="Bl-tag">
+  <dt id="Note:~3"><a class="permalink" href="#Note:~3"><b>Note:</b></a></dt>
+  <dd>This makes it easier to compare socket address structures.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>getaddrinfo</i>() function shall fail and return the
+    corresponding error value if:</p>
+<dl class="Bl-tag">
+  <dt>[EAI_AGAIN]</dt>
+  <dd>The name could not be resolved at this time. Future attempts may
+    succeed.</dd>
+  <dt>[EAI_BADFLAGS]</dt>
+  <dd>
+    <br>
+    The <i>flags</i> parameter had an invalid value.</dd>
+  <dt>[EAI_FAIL]</dt>
+  <dd>A non-recoverable error occurred when attempting to resolve the name.</dd>
+  <dt>[EAI_FAMILY]</dt>
+  <dd>The address family was not recognized.</dd>
+  <dt>[EAI_MEMORY]</dt>
+  <dd>There was a memory allocation failure when trying to allocate storage for
+      the return value.</dd>
+  <dt>[EAI_NONAME]</dt>
+  <dd>The name does not resolve for the supplied parameters.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">Neither <i>nodename</i> nor <i>servname</i> were supplied. At
+    least one of these shall be supplied.</p>
+</div>
+<dl class="Bl-tag">
+  <dt>[EAI_SERVICE]</dt>
+  <dd>The service passed was not recognized for the specified socket type.</dd>
+  <dt>[EAI_SOCKTYPE]</dt>
+  <dd>
+    <br>
+    The intended socket type was not recognized.</dd>
+  <dt>[EAI_SYSTEM]</dt>
+  <dd>A system error occurred; the error code can be found in <i>errno</i>.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The following (incomplete) program demonstrates the use of
+    <i>getaddrinfo</i>() to obtain the socket address structure(s) for the
+    service named in the program's command-line argument. The program then loops
+    through each of the address structures attempting to create and bind a
+    socket to the address, until it performs a successful <i>bind</i>().</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;string.h&gt;
+#include &lt;sys/socket.h&gt;
+#include &lt;netdb.h&gt;</pre>
+<pre>int
+main(int argc, char *argv[])
+{
+<br>
+    struct addrinfo *result, *rp;
+<br>
+    int sfd, s;</pre>
+<pre><br>
+    if (argc != 2) {
+<br>
+        fprintf(stderr, "Usage: %s port\n", argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }</pre>
+<pre><br>
+    struct addrinfo hints = {0};
+<br>
+    hints.ai_family = AF_UNSPEC;
+<br>
+    hints.ai_socktype = SOCK_DGRAM;
+<br>
+    hints.ai_flags = AI_PASSIVE;
+<br>
+    hints.ai_protocol = 0;</pre>
+<pre><br>
+    s = getaddrinfo(NULL, argv[1], &amp;hints, &amp;result);
+<br>
+    if (s != 0) {
+<br>
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(s));
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }</pre>
+<pre><br>
+    /* getaddrinfo() returns a list of address structures.
+<br>
+       Try each address until a successful bind().
+<br>
+       If socket(2) (or bind(2)) fails, close the socket
+<br>
+       and try the next address. */</pre>
+<pre><br>
+    for (rp = result; rp != NULL; rp = rp-&gt;ai_next) {
+<br>
+        sfd = socket(rp-&gt;ai_family, rp-&gt;ai_socktype,
+<br>
+            rp-&gt;ai_protocol);
+<br>
+        if (sfd == -1)
+<br>
+            continue;</pre>
+<pre><br>
+        if (bind(sfd, rp-&gt;ai_addr, rp-&gt;ai_addrlen) == 0)
+<br>
+            break;            /* Success */</pre>
+<pre><br>
+        close(sfd);
+<br>
+    }</pre>
+<pre><br>
+    if (rp == NULL) {         /* No address succeeded */
+<br>
+        fprintf(stderr, "Could not bind\n");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }</pre>
+<pre><br>
+    freeaddrinfo(result);     /* No longer needed */</pre>
+<pre><br>
+             /* ... use socket bound to sfd ... */
+}</pre>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">If the caller handles only TCP and not UDP, for example, then the
+    <i>ai_protocol</i> member of the <i>hints</i> structure should be set to
+    IPPROTO_TCP when <i>getaddrinfo</i>() is called.</p>
+<p class="Pp">If the caller handles only IPv4 and not IPv6, then the
+    <i>ai_family</i> member of the <i>hints</i> structure should be set to
+    AF_INET when <i>getaddrinfo</i>() is called.</p>
+<p class="Pp">Although it is common practice to initialize the <i>hints</i>
+    structure using:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>struct addrinfo hints;
+memset(&amp;hints, 0, sizeof hints);</pre>
+</div>
+<p class="Pp">this method is not portable according to this standard, because
+    the structure can contain pointer or floating-point members that are not
+    required to have an all-bits-zero representation after default
+    initialization. Portable methods make use of default initialization; for
+    example:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>struct addrinfo hints = { 0 };</pre>
+</div>
+<p class="Pp">or:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>static struct addrinfo hints_init;
+struct addrinfo hints = hints_init;</pre>
+</div>
+<p class="Pp">A future version of this standard may require that a pointer
+    object with an all-bits-zero representation is a null pointer, and that
+    <b>addrinfo</b> does not have any floating-point members if a floating-point
+    object with an all-bits-zero representation does not have the value 0.0.</p>
+<p class="Pp">The term ``canonical name'' is misleading; it is taken from the
+    Domain Name System (RFC&nbsp;2181). It should be noted that the canonical
+    name is a result of alias processing, and not necessarily a unique attribute
+    of a host, address, or set of addresses. See RFC&nbsp;2181 for more
+    discussion of this in the Domain Name System context.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>connect</i>()</i>, <i><i>endservent</i>()</i>,
+    <i><i>gai_strerror</i>()</i>, <i><i>getnameinfo</i>()</i>,
+    <i><i>socket</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;netdb.h&gt;</b></i>, <i><b>&lt;sys_socket.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/fb2a8264db0ebf44c867b58e508bcf22b1957805">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>fsync(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">fsync(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">fsync(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">fsync, fdatasync - synchronize a file's in-core state with storage
+    device</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int fsync(int </b><i>fd</i><b>);</b></pre>
+<pre><b>int fdatasync(int </b><i>fd</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"></p>
+<pre><b>fsync</b>():
+<br>
+    glibc 2.16 and later:
+<br>
+        No feature test macros need be defined
+<br>
+    glibc up to and including 2.15:
+<br>
+        _BSD_SOURCE || _XOPEN_SOURCE
+<br>
+            || /* Since glibc 2.8: */ _POSIX_C_SOURCE &gt;= 200112L</pre>
+<p class="Pp"><b>fdatasync</b>():</p>
+<pre><br>
+    _POSIX_C_SOURCE &gt;= 199309L || _XOPEN_SOURCE &gt;= 500</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>fsync</b>() transfers ("flushes") all modified
+    in-core data of (i.e., modified buffer cache pages for) the file referred to
+    by the file descriptor <i>fd</i> to the disk device (or other permanent
+    storage device) so that all changed information can be retrieved even if the
+    system crashes or is rebooted. This includes writing through or flushing a
+    disk cache if present. The call blocks until the device reports that the
+    transfer has completed.</p>
+<p class="Pp">As well as flushing the file data, <b>fsync</b>() also flushes the
+    metadata information associated with the file (see <b>inode</b>(7)).</p>
+<p class="Pp">Calling <b>fsync</b>() does not necessarily ensure that the entry
+    in the directory containing the file has also reached disk. For that an
+    explicit <b>fsync</b>() on a file descriptor for the directory is also
+    needed.</p>
+<p class="Pp"><b>fdatasync</b>() is similar to <b>fsync</b>(), but does not
+    flush modified metadata unless that metadata is needed in order to allow a
+    subsequent data retrieval to be correctly handled. For example, changes to
+    <i>st_atime</i> or <i>st_mtime</i> (respectively, time of last access and
+    time of last modification; see <b>inode</b>(7)) do not require flushing
+    because they are not necessary for a subsequent data read to be handled
+    correctly. On the other hand, a change to the file size (<i>st_size</i>, as
+    made by say <b>ftruncate</b>(2)), would require a metadata flush.</p>
+<p class="Pp">The aim of <b>fdatasync</b>() is to reduce disk activity for
+    applications that do not require all metadata to be synchronized with the
+    disk.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, these system calls return zero. On error, -1 is
+    returned, and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd><i>fd</i> is not a valid open file descriptor.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The function was interrupted by a signal; see <b>signal</b>(7).</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>An error occurred during synchronization. This error may relate to data
+      written to some other file descriptor on the same file. Since Linux 4.13,
+      errors from write-back will be reported to all file descriptors that might
+      have written the data which triggered the error. Some filesystems (e.g.,
+      NFS) keep close track of which data came through which file descriptor,
+      and give more precise reporting. Other filesystems (e.g., most local
+      filesystems) will report errors to all file descriptors that were open on
+      the file when the error was recorded.</dd>
+  <dt id="ENOSPC"><a class="permalink" href="#ENOSPC"><b>ENOSPC</b></a></dt>
+  <dd>Disk space was exhausted while synchronizing.</dd>
+  <dt id="EROFS"><a class="permalink" href="#EROFS"><b>EROFS</b>,
+    <b>EINVAL</b></a></dt>
+  <dd><i>fd</i> is bound to a special file (e.g., a pipe, FIFO, or socket) which
+      does not support synchronization.</dd>
+  <dt id="ENOSPC~2"><a class="permalink" href="#ENOSPC~2"><b>ENOSPC</b>,
+    <b>EDQUOT</b></a></dt>
+  <dd><i>fd</i> is bound to a file on NFS or another filesystem which does not
+      allocate space at the time of a <b>write</b>(2) system call, and some
+      previous write failed due to insufficient storage space.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, 4.3BSD.</p>
+<p class="Pp">On POSIX systems on which <b>fdatasync</b>() is available,
+    <b>_POSIX_SYNCHRONIZED_IO</b> is defined in <i>&lt;unistd.h&gt;</i> to a
+    value greater than 0. (See also <b>sysconf</b>(3).)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">On some UNIX systems (but not Linux), <i>fd</i> must be a
+    <i>writable</i> file descriptor.</p>
+<p class="Pp">In Linux 2.2 and earlier, <b>fdatasync</b>() is equivalent to
+    <b>fsync</b>(), and so has no performance advantage.</p>
+<p class="Pp">The <b>fsync</b>() implementations in older kernels and lesser
+    used filesystems do not know how to flush disk caches. In these cases disk
+    caches need to be disabled using <b>hdparm</b>(8) or <b>sdparm</b>(8) to
+    guarantee safe operation.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>sync</b>(1), <b>bdflush</b>(2), <b>open</b>(2),
+    <b>posix_fadvise</b>(2), <b>pwritev</b>(2), <b>sync</b>(2),
+    <b>sync_file_range</b>(2), <b>fflush</b>(3), <b>fileno</b>(3),
+    <b>hdparm</b>(8), <b>mount</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

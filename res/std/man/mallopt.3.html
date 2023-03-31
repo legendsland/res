@@ -1,0 +1,523 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2012 by Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/398599c7e6f22e96c28bca99674ca540c0b3bbc1">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>mallopt(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">mallopt(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">mallopt(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">mallopt - set memory allocation parameters</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;malloc.h&gt;</b></pre>
+<pre><b>int mallopt(int </b><i>param</i><b>, int </b><i>value</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>mallopt</b>() function adjusts parameters that control the
+    behavior of the memory-allocation functions (see <b>malloc</b>(3)). The
+    <i>param</i> argument specifies the parameter to be modified, and
+    <i>value</i> specifies the new value for that parameter.</p>
+<p class="Pp">The following values can be specified for <i>param</i>:</p>
+<dl class="Bl-tag">
+  <dt id="M_ARENA_MAX"><a class="permalink" href="#M_ARENA_MAX"><b>M_ARENA_MAX</b></a></dt>
+  <dd>If this parameter has a nonzero value, it defines a hard limit on the
+      maximum number of arenas that can be created. An arena represents a pool
+      of memory that can be used by <b>malloc</b>(3) (and similar) calls to
+      service allocation requests. Arenas are thread safe and therefore may have
+      multiple concurrent memory requests. The trade-off is between the number
+      of threads and the number of arenas. The more arenas you have, the lower
+      the per-thread contention, but the higher the memory usage.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The default value of this parameter is 0, meaning that the limit on the
+      number of arenas is determined according to the setting of
+      <b>M_ARENA_TEST</b>.</dd>
+  <dt></dt>
+  <dd>This parameter has been available since glibc 2.10 via
+      <b>--enable-experimental-malloc</b>, and since glibc 2.15 by default. In
+      some versions of the allocator there was no limit on the number of created
+      arenas (e.g., CentOS 5, RHEL 5).</dd>
+  <dt></dt>
+  <dd>When employing newer glibc versions, applications may in some cases
+      exhibit high contention when accessing arenas. In these cases, it may be
+      beneficial to increase <b>M_ARENA_MAX</b> to match the number of threads.
+      This is similar in behavior to strategies taken by tcmalloc and jemalloc
+      (e.g., per-thread allocation pools).</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="M_ARENA_TEST"><a class="permalink" href="#M_ARENA_TEST"><b>M_ARENA_TEST</b></a></dt>
+  <dd>This parameter specifies a value, in number of arenas created, at which
+      point the system configuration will be examined to determine a hard limit
+      on the number of created arenas. (See <b>M_ARENA_MAX</b> for the
+      definition of an arena.)</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The computation of the arena hard limit is implementation-defined and is
+      usually calculated as a multiple of the number of available CPUs. Once the
+      hard limit is computed, the result is final and constrains the total
+      number of arenas.</dd>
+  <dt></dt>
+  <dd>The default value for the <b>M_ARENA_TEST</b> parameter is 2 on systems
+      where <i>sizeof(long)</i> is 4; otherwise the default value is 8.</dd>
+  <dt></dt>
+  <dd>This parameter has been available since glibc 2.10 via
+      <b>--enable-experimental-malloc</b>, and since glibc 2.15 by default.</dd>
+  <dt></dt>
+  <dd>The value of <b>M_ARENA_TEST</b> is not used when <b>M_ARENA_MAX</b> has a
+      nonzero value.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="M_CHECK_ACTION"><a class="permalink" href="#M_CHECK_ACTION"><b>M_CHECK_ACTION</b></a></dt>
+  <dd>Setting this parameter controls how glibc responds when various kinds of
+      programming errors are detected (e.g., freeing the same pointer twice).
+      The 3 least significant bits (2, 1, and 0) of the value assigned to this
+      parameter determine the glibc behavior, as follows:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="Bit"><a class="permalink" href="#Bit">Bit 0</a></dt>
+  <dd>If this bit is set, then print a one-line message on <i>stderr</i> that
+      provides details about the error. The message starts with the string
+      "***&nbsp;glibc detected&nbsp;***", followed by the program
+      name, the name of the memory-allocation function in which the error was
+      detected, a brief description of the error, and the memory address where
+      the error was detected.</dd>
+  <dt id="Bit~2"><a class="permalink" href="#Bit~2">Bit 1</a></dt>
+  <dd>If this bit is set, then, after printing any error message specified by
+      bit 0, the program is terminated by calling <b>abort</b>(3). Since glibc
+      2.4, if bit 0 is also set, then, between printing the error message and
+      aborting, the program also prints a stack trace in the manner of
+      <b>backtrace</b>(3), and prints the process's memory mapping in the style
+      of <i>/proc/</i>pid<i>/maps</i> (see <b>proc</b>(5)).</dd>
+  <dt id="Bit~3"><a class="permalink" href="#Bit~3">Bit 2 (since glibc
+    2.4)</a></dt>
+  <dd>This bit has an effect only if bit 0 is also set. If this bit is set, then
+      the one-line message describing the error is simplified to contain just
+      the name of the function where the error was detected and the brief
+      description of the error.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The remaining bits in <i>value</i> are ignored.</dd>
+  <dt></dt>
+  <dd>Combining the above details, the following numeric values are meaningful
+      for <b>M_CHECK_ACTION</b>:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt><b>0</b></dt>
+  <dd>Ignore error conditions; continue execution (with undefined results).</dd>
+  <dt><b>1</b></dt>
+  <dd>Print a detailed error message and continue execution.</dd>
+  <dt><b>2</b></dt>
+  <dd>Abort the program.</dd>
+  <dt><b>3</b></dt>
+  <dd>Print detailed error message, stack trace, and memory mappings, and abort
+      the program.</dd>
+  <dt><b>5</b></dt>
+  <dd>Print a simple error message and continue execution.</dd>
+  <dt><b>7</b></dt>
+  <dd>Print simple error message, stack trace, and memory mappings, and abort
+      the program.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Since glibc 2.3.4, the default value for the <b>M_CHECK_ACTION</b>
+      parameter is 3. In glibc 2.3.3 and earlier, the default value is 1.</dd>
+  <dt></dt>
+  <dd>Using a nonzero <b>M_CHECK_ACTION</b> value can be useful because
+      otherwise a crash may happen much later, and the true cause of the problem
+      is then very hard to track down.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="M_MMAP_MAX"><a class="permalink" href="#M_MMAP_MAX"><b>M_MMAP_MAX</b></a></dt>
+  <dd>This parameter specifies the maximum number of allocation requests that
+      may be simultaneously serviced using <b>mmap</b>(2). This parameter exists
+      because some systems have a limited number of internal tables for use by
+      <b>mmap</b>(2), and using more than a few of them may degrade
+    performance.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The default value is 65,536, a value which has no special significance and
+      which serves only as a safeguard. Setting this parameter to 0 disables the
+      use of <b>mmap</b>(2) for servicing large allocation requests.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="M_MMAP_THRESHOLD"><a class="permalink" href="#M_MMAP_THRESHOLD"><b>M_MMAP_THRESHOLD</b></a></dt>
+  <dd>For allocations greater than or equal to the limit specified (in bytes) by
+      <b>M_MMAP_THRESHOLD</b> that can't be satisfied from the free list, the
+      memory-allocation functions employ <b>mmap</b>(2) instead of increasing
+      the program break using <b>sbrk</b>(2).</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Allocating memory using <b>mmap</b>(2) has the significant advantage that
+      the allocated memory blocks can always be independently released back to
+      the system. (By contrast, the heap can be trimmed only if memory is freed
+      at the top end.) On the other hand, there are some disadvantages to the
+      use of <b>mmap</b>(2): deallocated space is not placed on the free list
+      for reuse by later allocations; memory may be wasted because
+      <b>mmap</b>(2) allocations must be page-aligned; and the kernel must
+      perform the expensive task of zeroing out memory allocated via
+      <b>mmap</b>(2). Balancing these factors leads to a default setting of
+      128*1024 for the <b>M_MMAP_THRESHOLD</b> parameter.</dd>
+  <dt></dt>
+  <dd>The lower limit for this parameter is 0. The upper limit is
+      <b>DEFAULT_MMAP_THRESHOLD_MAX</b>: 512*1024 on 32-bit systems or
+      <i>4*1024*1024*sizeof(long)</i> on 64-bit systems.</dd>
+  <dt></dt>
+  <dd><i>Note</i>: Nowadays, glibc uses a dynamic mmap threshold by default. The
+      initial value of the threshold is 128*1024, but when blocks larger than
+      the current threshold and less than or equal to
+      <b>DEFAULT_MMAP_THRESHOLD_MAX</b> are freed, the threshold is adjusted
+      upward to the size of the freed block. When dynamic mmap thresholding is
+      in effect, the threshold for trimming the heap is also dynamically
+      adjusted to be twice the dynamic mmap threshold. Dynamic adjustment of the
+      mmap threshold is disabled if any of the <b>M_TRIM_THRESHOLD</b>,
+      <b>M_TOP_PAD</b>, <b>M_MMAP_THRESHOLD</b>, or <b>M_MMAP_MAX</b> parameters
+      is set.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="M_MXFAST"><a class="permalink" href="#M_MXFAST"><b>M_MXFAST</b> (since
+    glibc 2.3)</a></dt>
+  <dd>Set the upper limit for memory allocation requests that are satisfied
+      using "fastbins". (The measurement unit for this parameter is
+      bytes.) Fastbins are storage areas that hold deallocated blocks of memory
+      of the same size without merging adjacent free blocks. Subsequent
+      reallocation of blocks of the same size can be handled very quickly by
+      allocating from the fastbin, although memory fragmentation and the overall
+      memory footprint of the program can increase.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The default value for this parameter is <i>64*sizeof(size_t)/4</i> (i.e.,
+      64 on 32-bit architectures). The range for this parameter is 0 to
+      <i>80*sizeof(size_t)/4</i>. Setting <b>M_MXFAST</b> to 0 disables the use
+      of fastbins.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="M_PERTURB"><a class="permalink" href="#M_PERTURB"><b>M_PERTURB</b>
+    (since glibc 2.4)</a></dt>
+  <dd>If this parameter is set to a nonzero value, then bytes of allocated
+      memory (other than allocations via <b>calloc</b>(3)) are initialized to
+      the complement of the value in the least significant byte of <i>value</i>,
+      and when allocated memory is released using <b>free</b>(3), the freed
+      bytes are set to the least significant byte of <i>value</i>. This can be
+      useful for detecting errors where programs incorrectly rely on allocated
+      memory being initialized to zero, or reuse values in memory that has
+      already been freed.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The default value for this parameter is 0.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="M_TOP_PAD"><a class="permalink" href="#M_TOP_PAD"><b>M_TOP_PAD</b></a></dt>
+  <dd>This parameter defines the amount of padding to employ when calling
+      <b>sbrk</b>(2) to modify the program break. (The measurement unit for this
+      parameter is bytes.) This parameter has an effect in the following
+      circumstances:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>When the program break is increased, then <b>M_TOP_PAD</b> bytes are added
+      to the <b>sbrk</b>(2) request.</dd>
+  <dt>•</dt>
+  <dd>When the heap is trimmed as a consequence of calling <b>free</b>(3) (see
+      the discussion of <b>M_TRIM_THRESHOLD</b>) this much free space is
+      preserved at the top of the heap.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>In either case, the amount of padding is always rounded to a system page
+      boundary.</dd>
+  <dt></dt>
+  <dd>Modifying <b>M_TOP_PAD</b> is a trade-off between increasing the number of
+      system calls (when the parameter is set low) and wasting unused memory at
+      the top of the heap (when the parameter is set high).</dd>
+  <dt></dt>
+  <dd>The default value for this parameter is 128*1024.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="M_TRIM_THRESHOLD"><a class="permalink" href="#M_TRIM_THRESHOLD"><b>M_TRIM_THRESHOLD</b></a></dt>
+  <dd>When the amount of contiguous free memory at the top of the heap grows
+      sufficiently large, <b>free</b>(3) employs <b>sbrk</b>(2) to release this
+      memory back to the system. (This can be useful in programs that continue
+      to execute for a long period after freeing a significant amount of
+      memory.) The <b>M_TRIM_THRESHOLD</b> parameter specifies the minimum size
+      (in bytes) that this block of memory must reach before <b>sbrk</b>(2) is
+      used to trim the heap.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The default value for this parameter is 128*1024. Setting
+      <b>M_TRIM_THRESHOLD</b> to -1 disables trimming completely.</dd>
+  <dt></dt>
+  <dd>Modifying <b>M_TRIM_THRESHOLD</b> is a trade-off between increasing the
+      number of system calls (when the parameter is set low) and wasting unused
+      memory at the top of the heap (when the parameter is set high).</dd>
+</dl>
+<section class="Ss">
+<h2 class="Ss" id="Environment_variables"><a class="permalink" href="#Environment_variables">Environment
+  variables</a></h2>
+<p class="Pp">A number of environment variables can be defined to modify some of
+    the same parameters as are controlled by <b>mallopt</b>(). Using these
+    variables has the advantage that the source code of the program need not be
+    changed. To be effective, these variables must be defined before the first
+    call to a memory-allocation function. (If the same parameters are adjusted
+    via <b>mallopt</b>(), then the <b>mallopt</b>() settings take precedence.)
+    For security reasons, these variables are ignored in set-user-ID and
+    set-group-ID programs.</p>
+<p class="Pp">The environment variables are as follows (note the trailing
+    underscore at the end of the name of some variables):</p>
+<dl class="Bl-tag">
+  <dt id="MALLOC_ARENA_MAX"><a class="permalink" href="#MALLOC_ARENA_MAX"><b>MALLOC_ARENA_MAX</b></a></dt>
+  <dd>Controls the same parameter as <b>mallopt</b>() <b>M_ARENA_MAX</b>.</dd>
+  <dt id="MALLOC_ARENA_TEST"><a class="permalink" href="#MALLOC_ARENA_TEST"><b>MALLOC_ARENA_TEST</b></a></dt>
+  <dd>Controls the same parameter as <b>mallopt</b>() <b>M_ARENA_TEST</b>.</dd>
+  <dt id="MALLOC_CHECK_"><a class="permalink" href="#MALLOC_CHECK_"><b>MALLOC_CHECK_</b></a></dt>
+  <dd>This environment variable controls the same parameter as <b>mallopt</b>()
+      <b>M_CHECK_ACTION</b>. If this variable is set to a nonzero value, then a
+      special implementation of the memory-allocation functions is used. (This
+      is accomplished using the <b>malloc_hook</b>(3) feature.) This
+      implementation performs additional error checking, but is slower than the
+      standard set of memory-allocation functions. (This implementation does not
+      detect all possible errors; memory leaks can still occur.)</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The value assigned to this environment variable should be a single digit,
+      whose meaning is as described for <b>M_CHECK_ACTION</b>. Any characters
+      beyond the initial digit are ignored.</dd>
+  <dt></dt>
+  <dd>For security reasons, the effect of <b>MALLOC_CHECK_</b> is disabled by
+      default for set-user-ID and set-group-ID programs. However, if the file
+      <i>/etc/suid-debug</i> exists (the content of the file is irrelevant),
+      then <b>MALLOC_CHECK_</b> also has an effect for set-user-ID and
+      set-group-ID programs.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="MALLOC_MMAP_MAX_"><a class="permalink" href="#MALLOC_MMAP_MAX_"><b>MALLOC_MMAP_MAX_</b></a></dt>
+  <dd>Controls the same parameter as <b>mallopt</b>() <b>M_MMAP_MAX</b>.</dd>
+  <dt id="MALLOC_MMAP_THRESHOLD_"><a class="permalink" href="#MALLOC_MMAP_THRESHOLD_"><b>MALLOC_MMAP_THRESHOLD_</b></a></dt>
+  <dd>Controls the same parameter as <b>mallopt</b>()
+    <b>M_MMAP_THRESHOLD</b>.</dd>
+  <dt id="MALLOC_PERTURB_"><a class="permalink" href="#MALLOC_PERTURB_"><b>MALLOC_PERTURB_</b></a></dt>
+  <dd>Controls the same parameter as <b>mallopt</b>() <b>M_PERTURB</b>.</dd>
+  <dt id="MALLOC_TRIM_THRESHOLD_"><a class="permalink" href="#MALLOC_TRIM_THRESHOLD_"><b>MALLOC_TRIM_THRESHOLD_</b></a></dt>
+  <dd>Controls the same parameter as <b>mallopt</b>()
+    <b>M_TRIM_THRESHOLD</b>.</dd>
+  <dt id="MALLOC_TOP_PAD_"><a class="permalink" href="#MALLOC_TOP_PAD_"><b>MALLOC_TOP_PAD_</b></a></dt>
+  <dd>Controls the same parameter as <b>mallopt</b>() <b>M_TOP_PAD</b>.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>mallopt</b>() returns 1. On error, it returns
+  0.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">On error, <i>errno</i> is <i>not</i> set.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This function is not specified by POSIX or the C standards. A
+    similar function exists on many System V derivatives, but the range of
+    values for <i>param</i> varies across systems. The SVID defined options
+    <b>M_MXFAST</b>, <b>M_NLBLKS</b>, <b>M_GRAIN</b>, and <b>M_KEEP</b>, but
+    only the first of these is implemented in glibc.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">Specifying an invalid value for <i>param</i> does not generate an
+    error.</p>
+<p class="Pp">A calculation error within the glibc implementation means that a
+    call of the form:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>mallopt(M_MXFAST, n)
+</pre>
+<br>
+<p class="Pp">does not result in fastbins being employed for all allocations of
+    size up to <i>n</i>. To ensure desired results, <i>n</i> should be rounded
+    up to the next multiple greater than or equal to
+    <i>(2k+1)*sizeof(size_t)</i>, where <i>k</i> is an integer.</p>
+<p class="Pp">If <b>mallopt</b>() is used to set <b>M_PERTURB</b>, then, as
+    expected, the bytes of allocated memory are initialized to the complement of
+    the byte in <i>value</i>, and when that memory is freed, the bytes of the
+    region are initialized to the byte specified in <i>value</i>. However, there
+    is an off-by-<i>sizeof(size_t)</i> error in the implementation: instead of
+    initializing precisely the block of memory being freed by the call
+    <i>free(p)</i>, the block starting at <i>p+sizeof(size_t)</i> is
+    initialized.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below demonstrates the use of <b>M_CHECK_ACTION</b>.
+    If the program is supplied with an (integer) command-line argument, then
+    that argument is used to set the <b>M_CHECK_ACTION</b> parameter. The
+    program then allocates a block of memory, and frees it twice (an error).</p>
+<p class="Pp">The following shell session shows what happens when we run this
+    program under glibc, with the default value for <b>M_CHECK_ACTION</b>:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>./a.out</b>
+main(): returned from first free() call
+*** glibc detected *** ./a.out: double free or corruption (top): 0x09d30008 ***
+======= Backtrace: =========
+/lib/libc.so.6(+0x6c501)[0x523501]
+/lib/libc.so.6(+0x6dd70)[0x524d70]
+/lib/libc.so.6(cfree+0x6d)[0x527e5d]
+./a.out[0x80485db]
+/lib/libc.so.6(__libc_start_main+0xe7)[0x4cdce7]
+./a.out[0x8048471]
+======= Memory map: ========
+001e4000-001fe000 r-xp 00000000 08:06 1083555    /lib/libgcc_s.so.1
+001fe000-001ff000 r--p 00019000 08:06 1083555    /lib/libgcc_s.so.1
+[some lines omitted]
+b7814000-b7817000 rw-p 00000000 00:00 0
+bff53000-bff74000 rw-p 00000000 00:00 0          [stack]
+Aborted (core dumped)
+</pre>
+<br>
+<p class="Pp">The following runs show the results when employing other values
+    for <b>M_CHECK_ACTION</b>:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>./a.out 1</b>             # Diagnose error and continue
+main(): returned from first free() call
+*** glibc detected *** ./a.out: double free or corruption (top): 0x09cbe008 ***
+main(): returned from second free() call
+$ <b>./a.out 2</b>             # Abort without error message
+main(): returned from first free() call
+Aborted (core dumped)
+$ <b>./a.out 0</b>             # Ignore error and continue
+main(): returned from first free() call
+main(): returned from second free() call
+</pre>
+<br>
+<p class="Pp">The next run shows how to set the same parameter using the
+    <b>MALLOC_CHECK_</b> environment variable:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>MALLOC_CHECK_=1 ./a.out</b>
+main(): returned from first free() call
+*** glibc detected *** ./a.out: free(): invalid pointer: 0x092c2008 ***
+main(): returned from second free() call
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#include &lt;malloc.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+int
+main(int argc, char *argv[])
+{
+<br>
+    char *p;
+<br>
+    if (argc &gt; 1) {
+<br>
+        if (mallopt(M_CHECK_ACTION, atoi(argv[1])) != 1) {
+<br>
+            fprintf(stderr, "mallopt() failed");
+<br>
+            exit(EXIT_FAILURE);
+<br>
+        }
+<br>
+    }
+<br>
+    p = malloc(1000);
+<br>
+    if (p == NULL) {
+<br>
+        fprintf(stderr, "malloc() failed");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    free(p);
+<br>
+    printf("%s(): returned from first free() call\n", __func__);
+<br>
+    free(p);
+<br>
+    printf("%s(): returned from second free() call\n", __func__);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>mmap</b>(2), <b>sbrk</b>(2), <b>mallinfo</b>(3),
+    <b>malloc</b>(3), <b>malloc_hook</b>(3), <b>malloc_info</b>(3),
+    <b>malloc_stats</b>(3), <b>malloc_trim</b>(3), <b>mcheck</b>(3),
+    <b>mtrace</b>(3), <b>posix_memalign</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

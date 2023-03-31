@@ -99,7 +99,8 @@ export class Archive {
         const urls = new Map<string, string>();
         this.generateIndex(this.root, urls);
 
-        Array.from(urls).map(([url, name]) => {
+        Array.from(urls).sort(([url1, name1], [url2, name2]) =>
+         name1.localeCompare(name2, undefined, {sensitivity: 'accent'})).map(([url, name]) => {
             this.$index('#res-wa-index ul').append(`
 <li><a href="${url}" target="_blank">${name}</a></li>
 `)
@@ -118,7 +119,7 @@ export class Archive {
                 this.generateIndex(fullpath, urls);
             } else if (fullpath.endsWith('.html') && !fullpath.endsWith('index.html')) {
                 const rel = fullpath.substring(WS_ROOT.length);
-                urls.set(rel, fullpath.substring(this.root.length + 1));
+                urls.set(rel, fullpath.substring(this.root.length + 1)); //TODO:
             }
         });
     }

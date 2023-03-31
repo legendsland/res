@@ -1,0 +1,157 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 2003 Andries Brouwer (aeb@cwi.nl)
+   and Copyright (C) 2010 Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+   --><head>
+<meta name="dc.identifier" content="res/a62a8cb27b9f3b001c09351a6bf109c693d39e72">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>aio_suspend(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">aio_suspend(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">aio_suspend(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">aio_suspend - wait for asynchronous I/O operation or timeout</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Real-time library (<i>librt</i>, <i>-lrt</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;aio.h&gt;</b></pre>
+<pre><b>int aio_suspend(const struct aiocb *const </b><i>aiocb_list</i><b>[], int </b><i>nitems</i><b>,</b>
+<b>                const struct timespec *restrict </b><i>timeout</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>aio_suspend</b>() function suspends the calling thread
+    until one of the following occurs:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>One or more of the asynchronous I/O requests in the list <i>aiocb_list</i>
+      has completed.</dd>
+  <dt>•</dt>
+  <dd>A signal is delivered.</dd>
+  <dt>•</dt>
+  <dd><i>timeout</i> is not NULL and the specified time interval has passed.
+      (For details of the <i>timespec</i> structure, see
+    <b>nanosleep</b>(2).)</dd>
+</dl>
+<p class="Pp">The <i>nitems</i> argument specifies the number of items in
+    <i>aiocb_list</i>. Each item in the list pointed to by <i>aiocb_list</i>
+    must be either NULL (and then is ignored), or a pointer to a control block
+    on which I/O was initiated using <b>aio_read</b>(3), <b>aio_write</b>(3), or
+    <b>lio_listio</b>(3). (See <b>aio</b>(7) for a description of the
+    <i>aiocb</i> structure.)</p>
+<p class="Pp">If <b>CLOCK_MONOTONIC</b> is supported, this clock is used to
+    measure the timeout interval (see <b>clock_gettime</b>(2)).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">If this function returns after completion of one of the I/O
+    requests specified in <i>aiocb_list</i>, 0 is returned. Otherwise, -1 is
+    returned, and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>The call timed out before any of the indicated operations had
+    completed.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The call was ended by signal (possibly the completion signal of one of the
+      operations we were waiting for); see <b>signal</b>(7).</dd>
+  <dt id="ENOSYS"><a class="permalink" href="#ENOSYS"><b>ENOSYS</b></a></dt>
+  <dd><b>aio_suspend</b>() is not implemented.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>aio_suspend ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>aio_suspend</b>() function is available since glibc
+  2.1.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+<p class="Pp">POSIX doesn't specify the parameters to be <i>restrict</i>; that
+    is specific to glibc.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">One can achieve polling by using a non-NULL <i>timeout</i> that
+    specifies a zero time interval.</p>
+<p class="Pp">If one or more of the asynchronous I/O operations specified in
+    <i>aiocb_list</i> has already completed at the time of the call to
+    <b>aio_suspend</b>(), then the call returns immediately.</p>
+<p class="Pp">To determine which I/O operations have completed after a
+    successful return from <b>aio_suspend</b>(), use <b>aio_error</b>(3) to scan
+    the list of <i>aiocb</i> structures pointed to by <i>aiocb_list</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">The glibc implementation of <b>aio_suspend</b>() is not
+    async-signal-safe, in violation of the requirements of POSIX.1.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>aio_cancel</b>(3), <b>aio_error</b>(3), <b>aio_fsync</b>(3),
+    <b>aio_read</b>(3), <b>aio_return</b>(3), <b>aio_write</b>(3),
+    <b>lio_listio</b>(3), <b>aio</b>(7), <b>time</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

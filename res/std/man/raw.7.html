@@ -1,0 +1,242 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   This man page is Copyright (C) 1999 Andi Kleen <ak@muc.de>.
+  
+   %%%LICENSE_START(VERBATIM_ONE_PARA)
+   Permission is granted to distribute possibly modified copies
+   of this page provided the header is included verbatim,
+   and in case of nontrivial modification author and date
+   of the modification is added to the header.
+   %%%LICENSE_END
+  
+   $Id: raw.7,v 1.6 1999/06/05 10:32:08 freitag Exp $
+   --><head>
+<meta name="dc.identifier" content="res/5a2788ad8f76820e6c05276ea3628d183865a3c3">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>raw(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">raw(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">raw(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">raw - Linux IPv4 raw sockets</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/socket.h&gt;</b>
+<b>#include &lt;netinet/in.h&gt;</b>
+<b>raw_socket = socket(AF_INET, SOCK_RAW, int </b><i>protocol</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">Raw sockets allow new IPv4 protocols to be implemented in user
+    space. A raw socket receives or sends the raw datagram not including link
+    level headers.</p>
+<p class="Pp">The IPv4 layer generates an IP header when sending a packet unless
+    the <b>IP_HDRINCL</b> socket option is enabled on the socket. When it is
+    enabled, the packet must contain an IP header. For receiving, the IP header
+    is always included in the packet.</p>
+<p class="Pp">In order to create a raw socket, a process must have the
+    <b>CAP_NET_RAW</b> capability in the user namespace that governs its network
+    namespace.</p>
+<p class="Pp">All packets or errors matching the <i>protocol</i> number
+    specified for the raw socket are passed to this socket. For a list of the
+    allowed protocols, see the IANA list of assigned protocol numbers at
+    <a class="Lk" href="http://www.iana.org/assignments/protocol-numbers/">http://www.iana.org/assignments/protocol-numbers/</a>
+    and <b>getprotobyname</b>(3).</p>
+<p class="Pp">A protocol of <b>IPPROTO_RAW</b> implies enabled <b>IP_HDRINCL</b>
+    and is able to send any IP protocol that is specified in the passed header.
+    Receiving of all IP protocols via <b>IPPROTO_RAW</b> is not possible using
+    raw sockets.</p>
+<div class="Bd-indent">
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td colspan="2" style="text-align: center;">IP Header fields modified on
+      sending by <b>IP_HDRINCL</b></td>
+  </tr>
+  <tr>
+    <td>IP Checksum</td>
+    <td>Always filled in</td>
+  </tr>
+  <tr>
+    <td>Source Address</td>
+    <td>Filled in when zero</td>
+  </tr>
+  <tr>
+    <td>Packet ID</td>
+    <td>Filled in when zero</td>
+  </tr>
+  <tr>
+    <td>Total Length</td>
+    <td>Always filled in</td>
+  </tr>
+</tbody></table>
+</div>
+<p class="Pp">If <b>IP_HDRINCL</b> is specified and the IP header has a nonzero
+    destination address, then the destination address of the socket is used to
+    route the packet. When <b>MSG_DONTROUTE</b> is specified, the destination
+    address should refer to a local interface, otherwise a routing table lookup
+    is done anyway but gatewayed routes are ignored.</p>
+<p class="Pp">If <b>IP_HDRINCL</b> isn't set, then IP header options can be set
+    on raw sockets with <b>setsockopt</b>(2); see <b>ip</b>(7) for more
+    information.</p>
+<p class="Pp">Starting with Linux 2.2, all IP header fields and options can be
+    set using IP socket options. This means raw sockets are usually needed only
+    for new protocols or protocols with no user interface (like ICMP).</p>
+<p class="Pp">When a packet is received, it is passed to any raw sockets which
+    have been bound to its protocol before it is passed to other protocol
+    handlers (e.g., kernel protocol modules).</p>
+<section class="Ss">
+<h2 class="Ss" id="Address_format"><a class="permalink" href="#Address_format">Address
+  format</a></h2>
+<p class="Pp">For sending and receiving datagrams (<b>sendto</b>(2),
+    <b>recvfrom</b>(2), and similar), raw sockets use the standard
+    <i>sockaddr_in</i> address structure defined in <b>ip</b>(7). The
+    <i>sin_port</i> field could be used to specify the IP protocol number, but
+    it is ignored for sending in Linux 2.2 and later, and should be always set
+    to 0 (see BUGS). For incoming packets, <i>sin_port</i> is set to zero.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Socket_options"><a class="permalink" href="#Socket_options">Socket
+  options</a></h2>
+<p class="Pp">Raw socket options can be set with <b>setsockopt</b>(2) and read
+    with <b>getsockopt</b>(2) by passing the <b>IPPROTO_RAW</b> family flag.</p>
+<dl class="Bl-tag">
+  <dt id="ICMP_FILTER"><a class="permalink" href="#ICMP_FILTER"><b>ICMP_FILTER</b></a></dt>
+  <dd>Enable a special filter for raw sockets bound to the <b>IPPROTO_ICMP</b>
+      protocol. The value has a bit set for each ICMP message type which should
+      be filtered out. The default is to filter no ICMP messages.</dd>
+</dl>
+<p class="Pp">In addition, all <b>ip</b>(7) <b>IPPROTO_IP</b> socket options
+    valid for datagram sockets are supported.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Error_handling"><a class="permalink" href="#Error_handling">Error
+  handling</a></h2>
+<p class="Pp">Errors originating from the network are passed to the user only
+    when the socket is connected or the <b>IP_RECVERR</b> flag is enabled. For
+    connected sockets, only <b>EMSGSIZE</b> and <b>EPROTO</b> are passed for
+    compatibility. With <b>IP_RECVERR</b>, all network errors are saved in the
+    error queue.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>User tried to send to a broadcast address without having the broadcast
+      flag set on the socket.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>An invalid memory address was supplied.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>Invalid argument.</dd>
+  <dt id="EMSGSIZE"><a class="permalink" href="#EMSGSIZE"><b>EMSGSIZE</b></a></dt>
+  <dd>Packet too big. Either Path MTU Discovery is enabled (the
+      <b>IP_MTU_DISCOVER</b> socket flag) or the packet size exceeds the maximum
+      allowed IPv4 packet size of 64&nbsp;kB.</dd>
+  <dt id="EOPNOTSUPP"><a class="permalink" href="#EOPNOTSUPP"><b>EOPNOTSUPP</b></a></dt>
+  <dd>Invalid flag has been passed to a socket call (like <b>MSG_OOB</b>).</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The user doesn't have permission to open raw sockets. Only processes with
+      an effective user ID of 0 or the <b>CAP_NET_RAW</b> attribute may do
+    that.</dd>
+  <dt id="EPROTO"><a class="permalink" href="#EPROTO"><b>EPROTO</b></a></dt>
+  <dd>An ICMP error has arrived reporting a parameter problem.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>IP_RECVERR</b> and <b>ICMP_FILTER</b> are new in Linux 2.2.
+    They are Linux extensions and should not be used in portable programs.</p>
+<p class="Pp">Linux 2.0 enabled some bug-to-bug compatibility with BSD in the
+    raw socket code when the <b>SO_BSDCOMPAT</b> socket option was set; since
+    Linux 2.2, this option no longer has that effect.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">By default, raw sockets do path MTU (Maximum Transmission Unit)
+    discovery. This means the kernel will keep track of the MTU to a specific
+    target IP address and return <b>EMSGSIZE</b> when a raw packet write exceeds
+    it. When this happens, the application should decrease the packet size. Path
+    MTU discovery can be also turned off using the <b>IP_MTU_DISCOVER</b> socket
+    option or the <i>/proc/sys/net/ipv4/ip_no_pmtu_disc</i> file, see
+    <b>ip</b>(7) for details. When turned off, raw sockets will fragment
+    outgoing packets that exceed the interface MTU. However, disabling it is not
+    recommended for performance and reliability reasons.</p>
+<p class="Pp">A raw socket can be bound to a specific local address using the
+    <b>bind</b>(2) call. If it isn't bound, all packets with the specified IP
+    protocol are received. In addition, a raw socket can be bound to a specific
+    network device using <b>SO_BINDTODEVICE</b>; see <b>socket</b>(7).</p>
+<p class="Pp">An <b>IPPROTO_RAW</b> socket is send only. If you really want to
+    receive all IP packets, use a <b>packet</b>(7) socket with the
+    <b>ETH_P_IP</b> protocol. Note that packet sockets don't reassemble IP
+    fragments, unlike raw sockets.</p>
+<p class="Pp">If you want to receive all ICMP packets for a datagram socket, it
+    is often better to use <b>IP_RECVERR</b> on that particular socket; see
+    <b>ip</b>(7).</p>
+<p class="Pp">Raw sockets may tap all IP protocols in Linux, even protocols like
+    ICMP or TCP which have a protocol module in the kernel. In this case, the
+    packets are passed to both the kernel module and the raw socket(s). This
+    should not be relied upon in portable programs, many other BSD socket
+    implementation have limitations here.</p>
+<p class="Pp">Linux never changes headers passed from the user (except for
+    filling in some zeroed fields as described for <b>IP_HDRINCL</b>). This
+    differs from many other implementations of raw sockets.</p>
+<p class="Pp">Raw sockets are generally rather unportable and should be avoided
+    in programs intended to be portable.</p>
+<p class="Pp">Sending on raw sockets should take the IP protocol from
+    <i>sin_port</i>; this ability was lost in Linux 2.2. The workaround is to
+    use <b>IP_HDRINCL</b>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">Transparent proxy extensions are not described.</p>
+<p class="Pp">When the <b>IP_HDRINCL</b> option is set, datagrams will not be
+    fragmented and are limited to the interface MTU.</p>
+<p class="Pp">Setting the IP protocol for sending in <i>sin_port</i> got lost in
+    Linux 2.2. The protocol that the socket was bound to or that was specified
+    in the initial <b>socket</b>(2) call is always used.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>recvmsg</b>(2), <b>sendmsg</b>(2), <b>capabilities</b>(7),
+    <b>ip</b>(7), <b>socket</b>(7)</p>
+<p class="Pp"><b>RFC&nbsp;1191</b> for path MTU discovery.
+    <b>RFC&nbsp;791</b> and the <i>&lt;linux/ip.h&gt;</i> header file for the
+    IP protocol.</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

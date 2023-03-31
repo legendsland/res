@@ -1,0 +1,147 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   This man page is Copyright (C) 1998 Heiner Eisen.
+  
+   %%%LICENSE_START(VERBATIM_ONE_PARA)
+   Permission is granted to distribute possibly modified copies
+   of this page provided the header is included verbatim,
+   and in case of nontrivial modification author and date
+   of the modification is added to the header.
+   %%%LICENSE_END
+  
+   $Id: x25.7,v 1.4 1999/05/18 10:35:12 freitag Exp $
+   --><head>
+<meta name="dc.identifier" content="res/b58bb94e25aafa58d485b423a3bf2074df44bc45">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>x25(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">x25(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">x25(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">x25 - ITU-T X.25 / ISO-8208 protocol interface</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/socket.h&gt;</b>
+<b>#include &lt;linux/x25.h&gt;</b></pre>
+<pre><i>x25_socket</i><b> = socket(AF_X25, SOCK_SEQPACKET, 0);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">X25 sockets provide an interface to the X.25 packet layer
+    protocol. This allows applications to communicate over a public X.25 data
+    network as standardized by International Telecommunication Union's
+    recommendation X.25 (X.25 DTE-DCE mode). X25 sockets can also be used for
+    communication without an intermediate X.25 network (X.25 DTE-DTE mode) as
+    described in ISO-8208.</p>
+<p class="Pp">Message boundaries are preserved — a <b>read</b>(2) from a
+    socket will retrieve the same chunk of data as output with the corresponding
+    <b>write</b>(2) to the peer socket. When necessary, the kernel takes care of
+    segmenting and reassembling long messages by means of the X.25 M-bit. There
+    is no hard-coded upper limit for the message size. However, reassembling of
+    a long message might fail if there is a temporary lack of system resources
+    or when other constraints (such as socket memory or buffer size limits)
+    become effective. If that occurs, the X.25 connection will be reset.</p>
+<section class="Ss">
+<h2 class="Ss" id="Socket_addresses"><a class="permalink" href="#Socket_addresses">Socket
+  addresses</a></h2>
+<p class="Pp">The <b>AF_X25</b> socket address family uses the <i>struct
+    sockaddr_x25</i> for representing network addresses as defined in ITU-T
+    recommendation X.121.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct sockaddr_x25 {
+<br>
+    sa_family_t sx25_family;    /* must be AF_X25 */
+<br>
+    x25_address sx25_addr;      /* X.121 Address */
+};
+</pre>
+<br>
+<p class="Pp"><i>sx25_addr</i> contains a char array <i>x25_addr[]</i> to be
+    interpreted as a null-terminated string. <i>sx25_addr.x25_addr[]</i>
+    consists of up to 15 (not counting the terminating null byte) ASCII
+    characters forming the X.121 address. Only the decimal digit characters from
+    '0' to '9' are allowed.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Socket_options"><a class="permalink" href="#Socket_options">Socket
+  options</a></h2>
+<p class="Pp">The following X.25-specific socket options can be set by using
+    <b>setsockopt</b>(2) and read with <b>getsockopt</b>(2) with the
+    <i>level</i> argument set to <b>SOL_X25</b>.</p>
+<dl class="Bl-tag">
+  <dt id="X25_QBITINCL"><a class="permalink" href="#X25_QBITINCL"><b>X25_QBITINCL</b></a></dt>
+  <dd>Controls whether the X.25 Q-bit (Qualified Data Bit) is accessible by the
+      user. It expects an integer argument. If set to 0 (default), the Q-bit is
+      never set for outgoing packets and the Q-bit of incoming packets is
+      ignored. If set to 1, an additional first byte is prepended to each
+      message read from or written to the socket. For data read from the socket,
+      a 0 first byte indicates that the Q-bits of the corresponding incoming
+      data packets were not set. A first byte with value 1 indicates that the
+      Q-bit of the corresponding incoming data packets was set. If the first
+      byte of the data written to the socket is 1, the Q-bit of the
+      corresponding outgoing data packets will be set. If the first byte is 0,
+      the Q-bit will not be set.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The AF_X25 protocol family is a new feature of Linux 2.2.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">Plenty, as the X.25 PLP implementation is
+    <b>CONFIG_EXPERIMENTAL</b>.</p>
+<p class="Pp">This man page is incomplete.</p>
+<p class="Pp">There is no dedicated application programmer's header file yet;
+    you need to include the kernel header file <i>&lt;linux/x25.h&gt;</i>.
+    <b>CONFIG_EXPERIMENTAL</b> might also imply that future versions of the
+    interface are not binary compatible.</p>
+<p class="Pp">X.25 N-Reset events are not propagated to the user process yet.
+    Thus, if a reset occurred, data might be lost without notice.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>socket</b>(2), <b>socket</b>(7)</p>
+<p class="Pp">Jonathan Simon Naylor: “The Re-Analysis and
+    Re-Implementation of X.25.” The URL is
+    <a class="Lk" href="ftp://ftp.pspt.fi/pub/ham/linux/ax25/x25doc.tgz">ftp://ftp.pspt.fi/pub/ham/linux/ax25/x25doc.tgz</a>.</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

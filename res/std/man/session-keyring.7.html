@@ -1,0 +1,121 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2014 Red Hat, Inc. All Rights Reserved.
+   Written by David Howells (dhowells@redhat.com)
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+   --><head>
+<meta name="dc.identifier" content="res/98280e4491d6b0bc8da7ea10127b81b179681f9d">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>session-keyring(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">session-keyring(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">session-keyring(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">session-keyring - session shared process keyring</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The session keyring is a keyring used to anchor keys on behalf of
+    a process. It is typically created by <b>pam_keyinit</b>(8) when a user logs
+    in and a link will be added that refers to the <b>user-keyring</b>(7).
+    Optionally, <b>PAM</b>(7) may revoke the session keyring on logout. (In
+    typical configurations, PAM does do this revocation.) The session keyring
+    has the name (description) <i>_ses</i>.</p>
+<p class="Pp">A special serial number value, <b>KEY_SPEC_SESSION_KEYRING</b>, is
+    defined that can be used in lieu of the actual serial number of the calling
+    process's session keyring.</p>
+<p class="Pp">From the <b>keyctl</b>(1) utility, '<b>@s</b>' can be used instead
+    of a numeric key ID in much the same way.</p>
+<p class="Pp">A process's session keyring is inherited across <b>clone</b>(2),
+    <b>fork</b>(2), and <b>vfork</b>(2). The session keyring is preserved across
+    <b>execve</b>(2), even when the executable is set-user-ID or set-group-ID or
+    has capabilities. The session keyring is destroyed when the last process
+    that refers to it exits.</p>
+<p class="Pp">If a process doesn't have a session keyring when it is accessed,
+    then, under certain circumstances, the <b>user-session-keyring</b>(7) will
+    be attached as the session keyring and under others a new session keyring
+    will be created. (See <b>user-session-keyring</b>(7) for further
+  details.)</p>
+<section class="Ss">
+<h2 class="Ss" id="Special_operations"><a class="permalink" href="#Special_operations">Special
+  operations</a></h2>
+<p class="Pp">The <i>keyutils</i> library provides the following special
+    operations for manipulating session keyrings:</p>
+<dl class="Bl-tag">
+  <dt id="keyctl_join_session_keyring"><a class="permalink" href="#keyctl_join_session_keyring"><b>keyctl_join_session_keyring</b>(3)</a></dt>
+  <dd>This operation allows the caller to change the session keyring that it
+      subscribes to. The caller can join an existing keyring with a specified
+      name (description), create a new keyring with a given name, or ask the
+      kernel to create a new "anonymous" session keyring with the name
+      "_ses". (This function is an interface to the <b>keyctl</b>(2)
+      <b>KEYCTL_JOIN_SESSION_KEYRING</b> operation.)</dd>
+  <dt id="keyctl_session_to_parent"><a class="permalink" href="#keyctl_session_to_parent"><b>keyctl_session_to_parent</b>(3)</a></dt>
+  <dd>This operation allows the caller to make the parent process's session
+      keyring to the same as its own. For this to succeed, the parent process
+      must have identical security attributes and must be single threaded. (This
+      function is an interface to the <b>keyctl</b>(2)
+      <b>KEYCTL_SESSION_TO_PARENT</b> operation.)</dd>
+</dl>
+<p class="Pp">These operations are also exposed through the <b>keyctl</b>(1)
+    utility as:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>keyctl session
+keyctl session - [&lt;prog&gt; &lt;arg1&gt; &lt;arg2&gt; ...]
+keyctl session &lt;name&gt; [&lt;prog&gt; &lt;arg1&gt; &lt;arg2&gt; ...]
+</pre>
+<br>
+<p class="Pp">and:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>keyctl new_session
+</pre>
+<br>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>keyctl</b>(1), <b>keyctl</b>(3),
+    <b>keyctl_join_session_keyring</b>(3), <b>keyctl_session_to_parent</b>(3),
+    <b>keyrings</b>(7), <b>PAM</b>(7), <b>persistent-keyring</b>(7),
+    <b>process-keyring</b>(7), <b>thread-keyring</b>(7), <b>user-keyring</b>(7),
+    <b>user-session-keyring</b>(7), <b>pam_keyinit</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

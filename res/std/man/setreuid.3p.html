@@ -1,0 +1,168 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/f4357ccaa0b0bd6dbe0f1c088c1fcd62cdf3ff72">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>SETREUID(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">SETREUID(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">SETREUID(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">setreuid — set real and effective user IDs</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;unistd.h&gt;</pre>
+<pre>int setreuid(uid_t <i>ruid</i>, uid_t <i>euid</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>setreuid</i>() function shall set the real and effective
+    user IDs of the current process to the values specified by the <i>ruid</i>
+    and <i>euid</i> arguments. If <i>ruid</i> or <i>euid</i> is -1, the
+    corresponding effective or real user ID of the current process shall be left
+    unchanged.</p>
+<p class="Pp">A process with appropriate privileges can set either ID to any
+    value. An unprivileged process can only set the effective user ID if the
+    <i>euid</i> argument is equal to either the real, effective, or saved user
+    ID of the process.</p>
+<p class="Pp">If the real user ID is being set (<i>ruid</i> is not -1), or the
+    effective user ID is being set to a value not equal to the real user ID,
+    then the saved set-user-ID of the current process shall be set equal to the
+    new effective user ID.</p>
+<p class="Pp">It is unspecified whether a process without appropriate privileges
+    is permitted to change the real user ID to match the current effective user
+    ID or saved set-user-ID of the process.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, 0 shall be returned. Otherwise, -1
+    shall be returned and <i>errno</i> set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>setreuid</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The value of the <i>ruid</i> or <i>euid</i> argument is invalid or
+      out-of-range.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The current process does not have appropriate privileges, and either an
+      attempt was made to change the effective user ID to a value other than the
+      real user ID or the saved set-user-ID or an attempt was made to change the
+      real user ID to a value not permitted by the implementation.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Setting_the_Effective_User_ID_to_the_Real_User_ID"><a class="permalink" href="#Setting_the_Effective_User_ID_to_the_Real_User_ID">Setting
+  the Effective User ID to the Real User ID</a></h2>
+<p class="Pp">The following example sets the effective user ID of the calling
+    process to the real user ID, so that files created later will be owned by
+    the current user. It also sets the saved set-user-ID to the real user ID, so
+    any future attempt to set the effective user ID back to its previous value
+    will fail.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;unistd.h&gt;
+#include &lt;sys/types.h&gt;
+...
+setreuid(getuid(), getuid());
+...</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">Earlier versions of this standard did not specify whether the
+    saved set-user-ID was affected by <i>setreuid</i>() calls. This version
+    specifies common existing practice that constitutes an important security
+    feature. The ability to set both the effective user ID and saved set-user-ID
+    to be the same as the real user ID means that any security weakness in code
+    that is executed after that point cannot result in malicious code being
+    executed with the previous effective user ID. Privileged applications could
+    already do this using just <i>setuid</i>(), but for non-privileged
+    applications the only standard method available is to use this feature of
+    <i>setreuid</i>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>getegid</i>()</i>, <i><i>geteuid</i>()</i>,
+    <i><i>getgid</i>()</i>, <i><i>getuid</i>()</i>, <i><i>setegid</i>()</i>,
+    <i><i>seteuid</i>()</i>, <i><i>setgid</i>()</i>, <i><i>setregid</i>()</i>,
+    <i><i>setuid</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;unistd.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

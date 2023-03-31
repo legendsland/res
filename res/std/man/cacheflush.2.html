@@ -1,0 +1,163 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Written by Ralf Baechle (ralf@waldorf-gmbh.de),
+   Copyright (c) 1994, 1995 Waldorf GMBH
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+   --><head>
+<meta name="dc.identifier" content="res/bcfdfc09a17bc93be944cc33f1cf36d67cf34850">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>cacheflush(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">cacheflush(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">cacheflush(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">cacheflush - flush contents of instruction and/or data cache</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/cachectl.h&gt;</b></pre>
+<pre><b>int cacheflush(void </b><i>addr</i><b>[.</b><i>nbytes</i><b>], int </b><i>nbytes</i><b>, int </b><i>cache</i><b>);</b></pre>
+<p class="Pp"><i>Note</i>: On some architectures, there is no glibc wrapper for
+    this system call; see NOTES.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>cacheflush</b>() flushes the contents of the indicated cache(s)
+    for the user addresses in the range <i>addr</i> to <i>(addr+nbytes-1)</i>.
+    <i>cache</i> may be one of:</p>
+<dl class="Bl-tag">
+  <dt id="ICACHE"><a class="permalink" href="#ICACHE"><b>ICACHE</b></a></dt>
+  <dd>Flush the instruction cache.</dd>
+  <dt id="DCACHE"><a class="permalink" href="#DCACHE"><b>DCACHE</b></a></dt>
+  <dd>Write back to memory and invalidate the affected valid cache lines.</dd>
+  <dt id="BCACHE"><a class="permalink" href="#BCACHE"><b>BCACHE</b></a></dt>
+  <dd>Same as <b>(ICACHE|DCACHE)</b>.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp"><b>cacheflush</b>() returns 0 on success. On error, it returns -1
+    and sets <i>errno</i> to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>Some or all of the address range <i>addr</i> to <i>(addr+nbytes-1)</i> is
+      not accessible.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>cache</i> is not one of <b>ICACHE</b>, <b>DCACHE</b>, or <b>BCACHE</b>
+      (but see BUGS).</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">Historically, this system call was available on all MIPS UNIX
+    variants including RISC/os, IRIX, Ultrix, NetBSD, OpenBSD, and FreeBSD (and
+    also on some non-UNIX MIPS operating systems), so that the existence of this
+    call in MIPS operating systems is a de-facto standard.</p>
+<section class="Ss">
+<h2 class="Ss" id="Caveat"><a class="permalink" href="#Caveat">Caveat</a></h2>
+<p class="Pp"><b>cacheflush</b>() should not be used in programs intended to be
+    portable. On Linux, this call first appeared on the MIPS architecture, but
+    nowadays, Linux provides a <b>cacheflush</b>() system call on some other
+    architectures, but with different arguments.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Architecture-specific_variants"><a class="permalink" href="#Architecture-specific_variants">Architecture-specific
+  variants</a></h2>
+<p class="Pp">glibc provides a wrapper for this system call, with the prototype
+    shown in SYNOPSIS, for the following architectures: ARC, CSKY, MIPS, and
+    NIOS2.</p>
+<p class="Pp">On some other architectures, Linux provides this system call, with
+    different arguments:</p>
+<dl class="Bl-tag">
+  <dt id="M68K:"><a class="permalink" href="#M68K:">M68K:</a></dt>
+  <dd>
+    <pre><b>int cacheflush(unsigned long </b><i>addr</i><b>, int </b><i>scope</i><b>, int </b><i>cache</i><b>,</b>
+<b>               unsigned long </b><i>len</i><b>);</b></pre>
+  </dd>
+  <dt id="SH:"><a class="permalink" href="#SH:">SH:</a></dt>
+  <dd>
+    <pre><b>int cacheflush(unsigned long </b><i>addr</i><b>, unsigned long </b><i>len</i><b>, int </b><i>op</i><b>);</b></pre>
+  </dd>
+  <dt id="NDS32:"><a class="permalink" href="#NDS32:">NDS32:</a></dt>
+  <dd>
+    <pre><b>int cacheflush(unsigned int </b><i>start</i><b>, unsigned int </b><i>end</i><b>, int </b><i>cache</i><b>);</b></pre>
+  </dd>
+</dl>
+<p class="Pp">On the above architectures, glibc does not provide a wrapper for
+    this system call; call it using <b>syscall</b>(2).</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="GCC_alternative"><a class="permalink" href="#GCC_alternative">GCC
+  alternative</a></h2>
+<p class="Pp">Unless you need the finer grained control that this system call
+    provides, you probably want to use the GCC built-in function
+    <b>__builtin___clear_cache</b>(), which provides a portable interface across
+    platforms supported by GCC and compatible compilers:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre><b>void __builtin___clear_cache(void *</b><i>begin</i><b>, void *</b><i>end</i><b>);</b>
+</pre>
+<br>
+<p class="Pp">On platforms that don't require instruction cache flushes,
+    <b>__builtin___clear_cache</b>() has no effect.</p>
+<p class="Pp"><i>Note</i>: On some GCC-compatible compilers, the prototype for
+    this built-in function uses <i>char *</i> instead of <i>void *</i> for the
+    parameters.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">Linux kernels older than Linux 2.6.11 ignore the <i>addr</i> and
+    <i>nbytes</i> arguments, making this function fairly expensive. Therefore,
+    the whole cache is always flushed.</p>
+<p class="Pp">This function always behaves as if <b>BCACHE</b> has been passed
+    for the <i>cache</i> argument and does not do any error checking on the
+    <i>cache</i> argument.</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

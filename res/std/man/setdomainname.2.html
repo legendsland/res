@@ -1,0 +1,132 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/8fcb39e5eb9697668cbedfaa6ed516d97790187d">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>getdomainname(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">getdomainname(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">getdomainname(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getdomainname, setdomainname - get/set NIS domain name</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int getdomainname(char *</b><i>name</i><b>, size_t </b><i>len</i><b>);</b>
+<b>int setdomainname(const char *</b><i>name</i><b>, size_t </b><i>len</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>getdomainname</b>(), <b>setdomainname</b>():</p>
+<pre><br>
+    Since glibc 2.21:
+<br>
+        _DEFAULT_SOURCE
+<br>
+    In glibc 2.19 and 2.20:
+<br>
+        _DEFAULT_SOURCE || (_XOPEN_SOURCE &amp;&amp; _XOPEN_SOURCE &lt; 500)
+<br>
+    Up to and including glibc 2.19:
+<br>
+        _BSD_SOURCE || (_XOPEN_SOURCE &amp;&amp; _XOPEN_SOURCE &lt; 500)</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">These functions are used to access or to change the NIS domain
+    name of the host system. More precisely, they operate on the NIS domain name
+    associated with the calling process's UTS namespace.</p>
+<p class="Pp"><b>setdomainname</b>() sets the domain name to the value given in
+    the character array <i>name</i>. The <i>len</i> argument specifies the
+    number of bytes in <i>name</i>. (Thus, <i>name</i> does not require a
+    terminating null byte.)</p>
+<p class="Pp"><b>getdomainname</b>() returns the null-terminated domain name in
+    the character array <i>name</i>, which has a length of <i>len</i> bytes. If
+    the null-terminated domain name requires more than <i>len</i> bytes,
+    <b>getdomainname</b>() returns the first <i>len</i> bytes (glibc) or gives
+    an error (libc).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, zero is returned. On error, -1 is returned, and
+    <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp"><b>setdomainname</b>() can fail with the following errors:</p>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>name</i> pointed outside of user address space.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>len</i> was negative or too large.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The caller did not have the <b>CAP_SYS_ADMIN</b> capability in the user
+      namespace associated with its UTS namespace (see
+    <b>namespaces</b>(7)).</dd>
+</dl>
+<p class="Pp"><b>getdomainname</b>() can fail with the following errors:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>For <b>getdomainname</b>() under libc: <i>name</i> is NULL or <i>name</i>
+      is longer than <i>len</i> bytes.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX does not specify these calls.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Since Linux 1.0, the limit on the length of a domain name,
+    including the terminating null byte, is 64 bytes. In older kernels, it was 8
+    bytes.</p>
+<p class="Pp">On most Linux architectures (including x86), there is no
+    <b>getdomainname</b>() system call; instead, glibc implements
+    <b>getdomainname</b>() as a library function that returns a copy of the
+    <i>domainname</i> field returned from a call to <b>uname</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>gethostname</b>(2), <b>sethostname</b>(2), <b>uname</b>(2),
+    <b>uts_namespaces</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,343 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 1995 Andries Brouwer (aeb@cwi.nl)
+   and Copyright 2008, 2015 Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Written 11 June 1995 by Andries Brouwer <aeb@cwi.nl>
+   Modified 22 July 1995 by Michael Chastain <mec@duracef.shout.net>:
+     Derived from 'readdir.2'.
+   Modified Tue Oct 22 08:11:14 EDT 1996 by Eric S. Raymond <esr@thyrsus.com>
+   --><head>
+<meta name="dc.identifier" content="res/7d4843abe5c4263816b3ccae6cb9f9acdc4e75bb">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>getdents(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">getdents(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">getdents(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getdents, getdents64 - get directory entries</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/syscall.h&gt;</b>      /* Definition of <b>SYS_*</b> constants */
+<b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>long syscall(SYS_getdents, unsigned int </b><i>fd</i><b>, struct linux_dirent *</b><i>dirp</i><b>,</b>
+<b>             unsigned int </b><i>count</i><b>);</b></pre>
+<pre><b>#define _GNU_SOURCE</b>           /* See feature_test_macros(7) */
+<b>#include &lt;dirent.h&gt;</b></pre>
+<pre><b>ssize_t getdents64(int </b><i>fd</i><b>, void </b><i>dirp</i><b>[.</b><i>count</i><b>], size_t </b><i>count</i><b>);</b></pre>
+<p class="Pp"><i>Note</i>: glibc provides no wrapper for <b>getdents</b>(),
+    necessitating the use of <b>syscall</b>(2).</p>
+<p class="Pp"><i>Note</i>: There is no definition of <i>struct linux_dirent</i>
+    in glibc; see NOTES.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">These are not the interfaces you are interested in. Look at
+    <b>readdir</b>(3) for the POSIX-conforming C library interface. This page
+    documents the bare kernel system call interfaces.</p>
+<section class="Ss">
+<h2 class="Ss" id="getdents()"><a class="permalink" href="#getdents()">getdents()</a></h2>
+<p class="Pp">The system call <b>getdents</b>() reads several
+    <i>linux_dirent</i> structures from the directory referred to by the open
+    file descriptor <i>fd</i> into the buffer pointed to by <i>dirp</i>. The
+    argument <i>count</i> specifies the size of that buffer.</p>
+<p class="Pp">The <i>linux_dirent</i> structure is declared as follows:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct linux_dirent {
+<br>
+    unsigned long  d_ino;     /* Inode number */
+<br>
+    unsigned long  d_off;     /* Offset to next <i>linux_dirent</i> */
+<br>
+    unsigned short d_reclen;  /* Length of this <i>linux_dirent</i> */
+<br>
+    char           d_name[];  /* Filename (null-terminated) */
+<br>
+                      /* length is actually (d_reclen - 2 -
+<br>
+                         offsetof(struct linux_dirent, d_name)) */
+<br>
+    /*
+<br>
+    char           pad;       // Zero padding byte
+<br>
+    char           d_type;    // File type (only since Linux
+<br>
+                              // 2.6.4); offset is (d_reclen - 1)
+<br>
+    */
+}
+</pre>
+<br>
+<p class="Pp"><i>d_ino</i> is an inode number. <i>d_off</i> is the distance from
+    the start of the directory to the start of the next <i>linux_dirent</i>.
+    <i>d_reclen</i> is the size of this entire <i>linux_dirent</i>.
+    <i>d_name</i> is a null-terminated filename.</p>
+<p class="Pp"><i>d_type</i> is a byte at the end of the structure that indicates
+    the file type. It contains one of the following values (defined in
+    <i>&lt;dirent.h&gt;</i>):</p>
+<dl class="Bl-tag">
+  <dt id="DT_BLK"><a class="permalink" href="#DT_BLK"><b>DT_BLK</b></a></dt>
+  <dd>This is a block device.</dd>
+  <dt id="DT_CHR"><a class="permalink" href="#DT_CHR"><b>DT_CHR</b></a></dt>
+  <dd>This is a character device.</dd>
+  <dt id="DT_DIR"><a class="permalink" href="#DT_DIR"><b>DT_DIR</b></a></dt>
+  <dd>This is a directory.</dd>
+  <dt id="DT_FIFO"><a class="permalink" href="#DT_FIFO"><b>DT_FIFO</b></a></dt>
+  <dd>This is a named pipe (FIFO).</dd>
+  <dt id="DT_LNK"><a class="permalink" href="#DT_LNK"><b>DT_LNK</b></a></dt>
+  <dd>This is a symbolic link.</dd>
+  <dt id="DT_REG"><a class="permalink" href="#DT_REG"><b>DT_REG</b></a></dt>
+  <dd>This is a regular file.</dd>
+  <dt id="DT_SOCK"><a class="permalink" href="#DT_SOCK"><b>DT_SOCK</b></a></dt>
+  <dd>This is a UNIX domain socket.</dd>
+  <dt id="DT_UNKNOWN"><a class="permalink" href="#DT_UNKNOWN"><b>DT_UNKNOWN</b></a></dt>
+  <dd>The file type is unknown.</dd>
+</dl>
+<p class="Pp">The <i>d_type</i> field is implemented since Linux 2.6.4. It
+    occupies a space that was previously a zero-filled padding byte in the
+    <i>linux_dirent</i> structure. Thus, on kernels up to and including Linux
+    2.6.3, attempting to access this field always provides the value 0
+    (<b>DT_UNKNOWN</b>).</p>
+<p class="Pp">Currently, only some filesystems (among them: Btrfs, ext2, ext3,
+    and ext4) have full support for returning the file type in <i>d_type</i>.
+    All applications must properly handle a return of <b>DT_UNKNOWN</b>.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="getdents64()"><a class="permalink" href="#getdents64()">getdents64()</a></h2>
+<p class="Pp">The original Linux <b>getdents</b>() system call did not handle
+    large filesystems and large file offsets. Consequently, Linux 2.4 added
+    <b>getdents64</b>(), with wider types for the <i>d_ino</i> and <i>d_off</i>
+    fields. In addition, <b>getdents64</b>() supports an explicit <i>d_type</i>
+    field.</p>
+<p class="Pp">The <b>getdents64</b>() system call is like <b>getdents</b>(),
+    except that its second argument is a pointer to a buffer containing
+    structures of the following type:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct linux_dirent64 {
+<br>
+    ino64_t        d_ino;    /* 64-bit inode number */
+<br>
+    off64_t        d_off;    /* 64-bit offset to next structure */
+<br>
+    unsigned short d_reclen; /* Size of this dirent */
+<br>
+    unsigned char  d_type;   /* File type */
+<br>
+    char           d_name[]; /* Filename (null-terminated) */
+};
+</pre>
+<br>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, the number of bytes read is returned. On end of
+    directory, 0 is returned. On error, -1 is returned, and <i>errno</i> is set
+    to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>Invalid file descriptor <i>fd</i>.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>Argument points outside the calling process's address space.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>Result buffer is too small.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>No such directory.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>File descriptor does not refer to a directory.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">SVr4.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Library support for <b>getdents64</b>() was added in glibc 2.30;
+    glibc does not provide a wrapper for <b>getdents</b>(); call
+    <b>getdents</b>() (or <b>getdents64</b>() on earlier glibc versions) using
+    <b>syscall</b>(2). In that case you will need to define the
+    <i>linux_dirent</i> or <i>linux_dirent64</i> structure yourself.</p>
+<p class="Pp">Probably, you want to use <b>readdir</b>(3) instead of these
+    system calls.</p>
+<p class="Pp">These calls supersede <b>readdir</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below demonstrates the use of <b>getdents</b>(). The
+    following output shows an example of what we see when running this program
+    on an ext2 directory:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$<b> ./a.out /testfs/</b>
+--------------- nread=120 ---------------
+inode#    file type  d_reclen  d_off   d_name
+<br>
+       2  directory    16         12  .
+<br>
+       2  directory    16         24  ..
+<br>
+      11  directory    24         44  lost+found
+<br>
+      12  regular      16         56  a
+<br>
+  228929  directory    16         68  sub
+<br>
+   16353  directory    16         80  sub2
+<br>
+  130817  directory    16       4096  sub3
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#define _GNU_SOURCE
+#include &lt;dirent.h&gt;     /* Defines DT_* constants */
+#include &lt;err.h&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;stdint.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;sys/syscall.h&gt;
+#include &lt;unistd.h&gt;
+struct linux_dirent {
+<br>
+    unsigned long  d_ino;
+<br>
+    off_t          d_off;
+<br>
+    unsigned short d_reclen;
+<br>
+    char           d_name[];
+};
+#define BUF_SIZE 1024
+int
+main(int argc, char *argv[])
+{
+<br>
+    int                  fd;
+<br>
+    char                 d_type;
+<br>
+    char                 buf[BUF_SIZE];
+<br>
+    long                 nread;
+<br>
+    struct linux_dirent  *d;
+<br>
+    fd = open(argc &gt; 1 ? argv[1] : ".", O_RDONLY | O_DIRECTORY);
+<br>
+    if (fd == -1)
+<br>
+        err(EXIT_FAILURE, "open");
+<br>
+    for (;;) {
+<br>
+        nread = syscall(SYS_getdents, fd, buf, BUF_SIZE);
+<br>
+        if (nread == -1)
+<br>
+            err(EXIT_FAILURE, "getdents");
+<br>
+        if (nread == 0)
+<br>
+            break;
+<br>
+        printf("--------------- nread=%ld ---------------\n", nread);
+<br>
+        printf("inode#    file type  d_reclen  d_off   d_name\n");
+<br>
+        for (size_t bpos = 0; bpos &lt; nread;) {
+<br>
+            d = (struct linux_dirent *) (buf + bpos);
+<br>
+            printf("%8lu  ", d-&gt;d_ino);
+<br>
+            d_type = *(buf + bpos + d-&gt;d_reclen - 1);
+<br>
+            printf("%-10s ", (d_type == DT_REG) ?  "regular" :
+<br>
+                             (d_type == DT_DIR) ?  "directory" :
+<br>
+                             (d_type == DT_FIFO) ? "FIFO" :
+<br>
+                             (d_type == DT_SOCK) ? "socket" :
+<br>
+                             (d_type == DT_LNK) ?  "symlink" :
+<br>
+                             (d_type == DT_BLK) ?  "block dev" :
+<br>
+                             (d_type == DT_CHR) ?  "char dev" : "???");
+<br>
+            printf("%4d %10jd  %s\n", d-&gt;d_reclen,
+<br>
+                   (intmax_t) d-&gt;d_off, d-&gt;d_name);
+<br>
+            bpos += d-&gt;d_reclen;
+<br>
+        }
+<br>
+    }
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>readdir</b>(2), <b>readdir</b>(3), <b>inode</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

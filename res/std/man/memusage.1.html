@@ -1,0 +1,271 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2013, Peter Schiffer <pschiffe@redhat.com>
+   and Copyright (C) 2014, Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+ --><head>
+<meta name="dc.identifier" content="res/b3f2f165de84517e4697960c0a65cb1380c35e6f">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>memusage(1)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">memusage(1)</td>
+    <td class="head-vol">General Commands Manual</td>
+    <td class="head-rtitle">memusage(1)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">memusage - profile memory usage of a program</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>memusage</b> [<i>option</i>]... <i>program</i> [<i>programoption</i>]...</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>memusage</b> is a bash script which profiles memory usage of
+    the program, <i>program</i>. It preloads the <b>libmemusage.so</b> library
+    into the caller's environment (via the <b>LD_PRELOAD</b> environment
+    variable; see <b>ld.so</b>(8)). The <b>libmemusage.so</b> library traces
+    memory allocation by intercepting calls to <b>malloc</b>(3),
+    <b>calloc</b>(3), <b>free</b>(3), and <b>realloc</b>(3); optionally, calls
+    to <b>mmap</b>(2), <b>mremap</b>(2), and <b>munmap</b>(2) can also be
+    intercepted.</p>
+<p class="Pp"><b>memusage</b> can output the collected data in textual form, or
+    it can use <b>memusagestat</b>(1) (see the <b>-p</b> option, below) to
+    create a PNG file containing graphical representation of the collected
+  data.</p>
+<section class="Ss">
+<h2 class="Ss" id="Memory_usage_summary"><a class="permalink" href="#Memory_usage_summary">Memory
+  usage summary</a></h2>
+<p class="Pp">The "Memory usage summary" line output by
+    <b>memusage</b> contains three fields:</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="heap"><a class="permalink" href="#heap"><b>heap total</b></a></dt>
+  <dd>Sum of <i>size</i> arguments of all <b>malloc</b>(3) calls, products of
+      arguments (<i>nmemb</i>*<i>size</i>) of all <b>calloc</b>(3) calls, and
+      sum of <i>length</i> arguments of all <b>mmap</b>(2) calls. In the case of
+      <b>realloc</b>(3) and <b>mremap</b>(2), if the new size of an allocation
+      is larger than the previous size, the sum of all such differences (new
+      size minus old size) is added.</dd>
+  <dt id="heap~2"><a class="permalink" href="#heap~2"><b>heap peak</b></a></dt>
+  <dd>Maximum of all <i>size</i> arguments of <b>malloc</b>(3), all products of
+      <i>nmemb</i>*<i>size</i> of <b>calloc</b>(3), all <i>size</i> arguments of
+      <b>realloc</b>(3), <i>length</i> arguments of <b>mmap</b>(2), and
+      <i>new_size</i> arguments of <b>mremap</b>(2).</dd>
+  <dt id="stack"><a class="permalink" href="#stack"><b>stack peak</b></a></dt>
+  <dd>Before the first call to any monitored function, the stack pointer address
+      (base stack pointer) is saved. After each function call, the actual stack
+      pointer address is read and the difference from the base stack pointer
+      computed. The maximum of these differences is then the stack peak.</dd>
+</dl>
+</div>
+<p class="Pp">Immediately following this summary line, a table shows the number
+    calls, total memory allocated or deallocated, and number of failed calls for
+    each intercepted function. For <b>realloc</b>(3) and <b>mremap</b>(2), the
+    additional field "nomove" shows reallocations that changed the
+    address of a block, and the additional "dec" field shows
+    reallocations that decreased the size of the block. For <b>realloc</b>(3),
+    the additional field "free" shows reallocations that caused a
+    block to be freed (i.e., the reallocated size was 0).</p>
+<p class="Pp">The "realloc/total memory" of the table output by
+    <b>memusage</b> does not reflect cases where <b>realloc</b>(3) is used to
+    reallocate a block of memory to have a smaller size than previously. This
+    can cause sum of all "total memory" cells (excluding
+    "free") to be larger than the "free/total memory"
+  cell.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Histogram_for_block_sizes"><a class="permalink" href="#Histogram_for_block_sizes">Histogram
+  for block sizes</a></h2>
+<p class="Pp">The "Histogram for block sizes" provides a breakdown of
+    memory allocations into various bucket sizes.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OPTIONS"><a class="permalink" href="#OPTIONS">OPTIONS</a></h1>
+<dl class="Bl-tag">
+  <dt id="n"><a class="permalink" href="#n"><b>-n&nbsp;</b><i>name</i><b>,&nbsp;<b>--progname=</b></b><i><b>name</b></i></a></dt>
+  <dd>Name of the program file to profile.</dd>
+  <dt id="p"><a class="permalink" href="#p"><b>-p&nbsp;</b><i>file</i><b>,&nbsp;<b>--png=</b></b><i><b>file</b></i></a></dt>
+  <dd>Generate PNG graphic and store it in <i>file</i>.</dd>
+  <dt id="d"><a class="permalink" href="#d"><b>-d&nbsp;</b><i>file</i><b>,&nbsp;<b>--data=</b></b><i><b>file</b></i></a></dt>
+  <dd>Generate binary data file and store it in <i>file</i>.</dd>
+  <dt id="u"><a class="permalink" href="#u"><b>-u,&nbsp;<b>--unbuffered</b></b></a></dt>
+  <dd>Do not buffer output.</dd>
+  <dt id="b"><a class="permalink" href="#b"><b>-b&nbsp;</b><i>size</i><b>,&nbsp;<b>--buffer=</b></b><i><b>size</b></i></a></dt>
+  <dd>Collect <i>size</i> entries before writing them out.</dd>
+  <dt id="no"><a class="permalink" href="#no"><b>--no-timer</b></a></dt>
+  <dd>Disable timer-based (<b>SIGPROF</b>) sampling of stack pointer value.</dd>
+  <dt id="m"><a class="permalink" href="#m"><b>-m,&nbsp;<b>--mmap</b></b></a></dt>
+  <dd>Also trace <b>mmap</b>(2), <b>mremap</b>(2), and <b>munmap</b>(2).</dd>
+  <dt><b>-?,&nbsp;<b>--help</b></b></dt>
+  <dd>Print help and exit.</dd>
+  <dt id="usage"><a class="permalink" href="#usage"><b>--usage</b></a></dt>
+  <dd>Print a short usage message and exit.</dd>
+  <dt id="V"><a class="permalink" href="#V"><b>-V,&nbsp;<b>--version</b></b></a></dt>
+  <dd>Print version information and exit.</dd>
+  <dt id="The"><a class="permalink" href="#The">The following options apply only
+    when generating graphical output:</a></dt>
+  <dd></dd>
+  <dt id="t"><a class="permalink" href="#t"><b>-t,&nbsp;<b>--time-based</b></b></a></dt>
+  <dd>Use time (rather than number of function calls) as the scale for the X
+      axis.</dd>
+  <dt id="T"><a class="permalink" href="#T"><b>-T,&nbsp;<b>--total</b></b></a></dt>
+  <dd>Also draw a graph of total memory use.</dd>
+  <dt id="title="><a class="permalink" href="#title="><b><b>--title=</b></b><i><b>name</b></i></a></dt>
+  <dd>Use <i>name</i> as the title of the graph.</dd>
+  <dt id="x"><a class="permalink" href="#x"><b>-x&nbsp;</b><i>size</i><b>,&nbsp;<b>--x-size=</b></b><i><b>size</b></i></a></dt>
+  <dd>Make the graph <i>size</i> pixels wide.</dd>
+  <dt id="y"><a class="permalink" href="#y"><b>-y&nbsp;</b><i>size</i><b>,&nbsp;<b>--y-size=</b></b><i><b>size</b></i></a></dt>
+  <dd>Make the graph <i>size</i> pixels high.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXIT_STATUS"><a class="permalink" href="#EXIT_STATUS">EXIT
+  STATUS</a></h1>
+<p class="Pp">The exit status of <b>memusage</b> is equal to the exit status of
+    the profiled program.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">To report bugs, see
+    <a class="Lk" href="http://www.gnu.org/software/libc/bugs.html">http://www.gnu.org/software/libc/bugs.html</a></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">Below is a simple program that reallocates a block of memory in
+    cycles that rise to a peak before then cyclically reallocating the memory in
+    smaller blocks that return to zero. After compiling the program and running
+    the following commands, a graph of the memory usage of the program can be
+    found in the file <i>memusage.png</i>:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>memusage --data=memusage.dat ./a.out</b>
+...
+Memory usage summary: heap total: 45200, heap peak: 6440, stack peak: 224
+<br>
+        total calls  total memory  failed calls
+<br>
+ malloc|         1           400             0
+realloc|        40         44800             0  (nomove:40, dec:19, free:0)
+<br>
+ calloc|         0             0             0
+<br>
+   free|         1           440
+Histogram for block sizes:
+<br>
+  192-207             1   2% ================
+...
+<br>
+ 2192-2207            1   2% ================
+<br>
+ 2240-2255            2   4% =================================
+<br>
+ 2832-2847            2   4% =================================
+<br>
+ 3440-3455            2   4% =================================
+<br>
+ 4032-4047            2   4% =================================
+<br>
+ 4640-4655            2   4% =================================
+<br>
+ 5232-5247            2   4% =================================
+<br>
+ 5840-5855            2   4% =================================
+<br>
+ 6432-6447            1   2% ================
+$ <b>memusagestat memusage.dat memusage.png</b>
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<pre>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#define CYCLES 20
+int
+main(int argc, char *argv[])
+{
+<br>
+    int i, j;
+<br>
+    size_t size;
+<br>
+    int *p;
+<br>
+    size = sizeof(*p) * 100;
+<br>
+    printf("malloc: %zu\n", size);
+<br>
+    p = malloc(size);
+<br>
+    for (i = 0; i &lt; CYCLES; i++) {
+<br>
+        if (i &lt; CYCLES / 2)
+<br>
+            j = i;
+<br>
+        else
+<br>
+            j--;
+<br>
+        size = sizeof(*p) * (j * 50 + 110);
+<br>
+        printf("realloc: %zu\n", size);
+<br>
+        p = realloc(p, size);
+<br>
+        size = sizeof(*p) * ((j + 1) * 150 + 110);
+<br>
+        printf("realloc: %zu\n", size);
+<br>
+        p = realloc(p, size);
+<br>
+    }
+<br>
+    free(p);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>memusagestat</b>(1), <b>mtrace</b>(1), <b>ld.so</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

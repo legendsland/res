@@ -1,0 +1,215 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 1990, 1993
+  	The Regents of the University of California.  All rights reserved.
+  
+   SPDX-License-Identifier: BSD-4-Clause-UC
+  
+  	@(#)btree.3	8.4 (Berkeley) 8/18/94
+   --><head>
+<meta name="dc.identifier" content="res/a5a9dd5c97716f6334d6924bf5d5789b7519fd63">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>btree(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">btree(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">btree(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">btree - btree database access method</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/types.h&gt;</b>
+<b>#include &lt;db.h&gt;</b>
+</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><i>Note well</i>: This page documents interfaces provided up until
+    glibc 2.1. Since glibc 2.2, glibc no longer provides these interfaces.
+    Probably, you are looking for the APIs provided by the <i>libdb</i> library
+    instead.</p>
+<p class="Pp">The routine <b>dbopen</b>(3) is the library interface to database
+    files. One of the supported file formats is btree files. The general
+    description of the database access methods is in <b>dbopen</b>(3), this
+    manual page describes only the btree-specific information.</p>
+<p class="Pp">The btree data structure is a sorted, balanced tree structure
+    storing associated key/data pairs.</p>
+<p class="Pp">The btree access-method-specific data structure provided to
+    <b>dbopen</b>(3) is defined in the <i>&lt;db.h&gt;</i> include file as
+    follows:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>typedef struct {
+<br>
+    unsigned long flags;
+<br>
+    unsigned int  cachesize;
+<br>
+    int           maxkeypage;
+<br>
+    int           minkeypage;
+<br>
+    unsigned int  psize;
+<br>
+    int         (*compare)(const DBT *key1, const DBT *key2);
+<br>
+    size_t      (*prefix)(const DBT *key1, const DBT *key2);
+<br>
+    int           lorder;
+} BTREEINFO;
+</pre>
+<br>
+<p class="Pp">The elements of this structure are as follows:</p>
+<dl class="Bl-tag">
+  <dt id="flags"><a class="permalink" href="#flags"><i>flags</i></a></dt>
+  <dd>The flag value is specified by ORing any of the following values:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="R_DUP"><a class="permalink" href="#R_DUP"><b>R_DUP</b></a></dt>
+  <dd>Permit duplicate keys in the tree, that is, permit insertion if the key to
+      be inserted already exists in the tree. The default behavior, as described
+      in <b>dbopen</b>(3), is to overwrite a matching key when inserting a new
+      key or to fail if the <b>R_NOOVERWRITE</b> flag is specified. The
+      <b>R_DUP</b> flag is overridden by the <b>R_NOOVERWRITE</b> flag, and if
+      the <b>R_NOOVERWRITE</b> flag is specified, attempts to insert duplicate
+      keys into the tree will fail.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>If the database contains duplicate keys, the order of retrieval of
+      key/data pairs is undefined if the <i>get</i> routine is used, however,
+      <i>seq</i> routine calls with the <b>R_CURSOR</b> flag set will always
+      return the logical "first" of any group of duplicate keys.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="cachesize"><a class="permalink" href="#cachesize"><i>cachesize</i></a></dt>
+  <dd>A suggested maximum size (in bytes) of the memory cache. This value is
+      <i>only</i> advisory, and the access method will allocate more memory
+      rather than fail. Since every search examines the root page of the tree,
+      caching the most recently used pages substantially improves access time.
+      In addition, physical writes are delayed as long as possible, so a
+      moderate cache can reduce the number of I/O operations significantly.
+      Obviously, using a cache increases (but only increases) the likelihood of
+      corruption or lost data if the system crashes while a tree is being
+      modified. If <i>cachesize</i> is 0 (no size is specified), a default cache
+      is used.</dd>
+  <dt id="maxkeypage"><a class="permalink" href="#maxkeypage"><i>maxkeypage</i></a></dt>
+  <dd>The maximum number of keys which will be stored on any single page. Not
+      currently implemented.</dd>
+  <dt id="minkeypage"><a class="permalink" href="#minkeypage"><i>minkeypage</i></a></dt>
+  <dd>The minimum number of keys which will be stored on any single page. This
+      value is used to determine which keys will be stored on overflow pages,
+      that is, if a key or data item is longer than the pagesize divided by the
+      minkeypage value, it will be stored on overflow pages instead of in the
+      page itself. If <i>minkeypage</i> is 0 (no minimum number of keys is
+      specified), a value of 2 is used.</dd>
+  <dt id="psize"><a class="permalink" href="#psize"><i>psize</i></a></dt>
+  <dd>Page size is the size (in bytes) of the pages used for nodes in the tree.
+      The minimum page size is 512 bytes and the maximum page size is
+      64&nbsp;KiB. If <i>psize</i> is 0 (no page size is specified), a page
+      size is chosen based on the underlying filesystem I/O block size.</dd>
+  <dt id="compare"><a class="permalink" href="#compare"><i>compare</i></a></dt>
+  <dd>Compare is the key comparison function. It must return an integer less
+      than, equal to, or greater than zero if the first key argument is
+      considered to be respectively less than, equal to, or greater than the
+      second key argument. The same comparison function must be used on a given
+      tree every time it is opened. If <i>compare</i> is NULL (no comparison
+      function is specified), the keys are compared lexically, with shorter keys
+      considered less than longer keys.</dd>
+  <dt id="prefix"><a class="permalink" href="#prefix"><i>prefix</i></a></dt>
+  <dd>Prefix is the prefix comparison function. If specified, this routine must
+      return the number of bytes of the second key argument which are necessary
+      to determine that it is greater than the first key argument. If the keys
+      are equal, the key length should be returned. Note, the usefulness of this
+      routine is very data-dependent, but, in some data sets can produce
+      significantly reduced tree sizes and search times. If <i>prefix</i> is
+      NULL (no prefix function is specified), <i>and</i> no comparison function
+      is specified, a default lexical comparison routine is used. If
+      <i>prefix</i> is NULL and a comparison routine is specified, no prefix
+      comparison is done.</dd>
+  <dt id="lorder"><a class="permalink" href="#lorder"><i>lorder</i></a></dt>
+  <dd>The byte order for integers in the stored database metadata. The number
+      should represent the order as an integer; for example, big endian order
+      would be the number 4,321. If <i>lorder</i> is 0 (no order is specified),
+      the current host order is used.</dd>
+</dl>
+<p class="Pp">If the file already exists (and the <b>O_TRUNC</b> flag is not
+    specified), the values specified for the arguments <i>flags</i>,
+    <i>lorder</i>, and <i>psize</i> are ignored in favor of the values used when
+    the tree was created.</p>
+<p class="Pp">Forward sequential scans of a tree are from the least key to the
+    greatest.</p>
+<p class="Pp">Space freed up by deleting key/data pairs from the tree is never
+    reclaimed, although it is normally made available for reuse. This means that
+    the btree storage structure is grow-only. The only solutions are to avoid
+    excessive deletions, or to create a fresh tree periodically from a scan of
+    an existing one.</p>
+<p class="Pp">Searches, insertions, and deletions in a btree will all complete
+    in O lg base N where base is the average fill factor. Often, inserting
+    ordered data into btrees results in a low fill factor. This implementation
+    has been modified to make ordered insertion the best case, resulting in a
+    much better than normal page fill factor.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>btree</i> access method routines may fail and set
+    <i>errno</i> for any of the errors specified for the library routine
+    <b>dbopen</b>(3).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">Only big and little endian byte order is supported.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>dbopen</b>(3), <b>hash</b>(3), <b>mpool</b>(3),
+  <b>recno</b>(3)</p>
+<p class="Pp"><i>The Ubiquitous B-tree</i>, Douglas Comer, ACM Comput. Surv. 11,
+    2 (June 1979), 121-138.</p>
+<p class="Pp"><i>Prefix B-trees</i>, Bayer and Unterauer, ACM Transactions on
+    Database Systems, Vol. 2, 1 (March 1977), 11-26.</p>
+<p class="Pp"><i>The Art of Computer Programming Vol. 3: Sorting and
+    Searching</i>, D.E. Knuth, 1968, pp 471-480.</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

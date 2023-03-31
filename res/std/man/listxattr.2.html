@@ -1,0 +1,387 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) Andreas Gruenbacher, February 2001
+   Copyright (C) Silicon Graphics Inc, September 2001
+   Copyright (C) 2015 Heinrich Schuchardt <xypron.glpk@gmx.de>
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+   --><head>
+<meta name="dc.identifier" content="res/875afb5a21c92a258ec4e3d6b39964d2be11e30d">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>listxattr(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">listxattr(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">listxattr(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">listxattr, llistxattr, flistxattr - list extended attribute
+  names</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/xattr.h&gt;</b></pre>
+<pre><b>ssize_t listxattr(const char *</b><i>path</i><b>, char *_Nullable </b><i>list</i><b>, size_t </b><i>size</i><b>);</b>
+<b>ssize_t llistxattr(const char *</b><i>path</i><b>, char *_Nullable </b><i>list</i><b>, size_t </b><i>size</i><b>);</b>
+<b>ssize_t flistxattr(int </b><i>fd</i><b>, char *_Nullable </b><i>list</i><b>, size_t </b><i>size</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">Extended attributes are <i>name</i>:<i>value</i> pairs associated
+    with inodes (files, directories, symbolic links, etc.). They are extensions
+    to the normal attributes which are associated with all inodes in the system
+    (i.e., the <b>stat</b>(2) data). A complete overview of extended attributes
+    concepts can be found in <b>xattr</b>(7).</p>
+<p class="Pp"><b>listxattr</b>() retrieves the list of extended attribute names
+    associated with the given <i>path</i> in the filesystem. The retrieved list
+    is placed in <i>list</i>, a caller-allocated buffer whose size (in bytes) is
+    specified in the argument <i>size</i>. The list is the set of
+    (null-terminated) names, one after the other. Names of extended attributes
+    to which the calling process does not have access may be omitted from the
+    list. The length of the attribute name <i>list</i> is returned.</p>
+<p class="Pp"><b>llistxattr</b>() is identical to <b>listxattr</b>(), except in
+    the case of a symbolic link, where the list of names of extended attributes
+    associated with the link itself is retrieved, not the file that it refers
+    to.</p>
+<p class="Pp"><b>flistxattr</b>() is identical to <b>listxattr</b>(), only the
+    open file referred to by <i>fd</i> (as returned by <b>open</b>(2)) is
+    interrogated in place of <i>path</i>.</p>
+<p class="Pp">A single extended attribute <i>name</i> is a null-terminated
+    string. The name includes a namespace prefix; there may be several, disjoint
+    namespaces associated with an individual inode.</p>
+<p class="Pp">If <i>size</i> is specified as zero, these calls return the
+    current size of the list of extended attribute names (and leave <i>list</i>
+    unchanged). This can be used to determine the size of the buffer that should
+    be supplied in a subsequent call. (But, bear in mind that there is a
+    possibility that the set of extended attributes may change between the two
+    calls, so that it is still necessary to check the return status from the
+    second call.)</p>
+<section class="Ss">
+<h2 class="Ss" id="Example"><a class="permalink" href="#Example">Example</a></h2>
+<p class="Pp">The <i>list</i> of names is returned as an unordered array of
+    null-terminated character strings (attribute names are separated by null
+    bytes ('\0')), like this:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>user.name1\0system.name1\0user.name2\0
+</pre>
+<br>
+<p class="Pp">Filesystems that implement POSIX ACLs using extended attributes
+    might return a <i>list</i> like this:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>system.posix_acl_access\0system.posix_acl_default\0
+</pre>
+<br>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, a nonnegative number is returned indicating the size
+    of the extended attribute name list. On failure, -1 is returned and
+    <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="E2BIG"><a class="permalink" href="#E2BIG"><b>E2BIG</b></a></dt>
+  <dd>The size of the list of extended attribute names is larger than the
+      maximum size allowed; the list cannot be retrieved. This can happen on
+      filesystems that support an unlimited number of extended attributes per
+      file such as XFS, for example. See BUGS.</dd>
+  <dt id="ENOTSUP"><a class="permalink" href="#ENOTSUP"><b>ENOTSUP</b></a></dt>
+  <dd>Extended attributes are not supported by the filesystem, or are
+    disabled.</dd>
+  <dt id="ERANGE"><a class="permalink" href="#ERANGE"><b>ERANGE</b></a></dt>
+  <dd>The <i>size</i> of the <i>list</i> buffer is too small to hold the
+    result.</dd>
+</dl>
+<p class="Pp">In addition, the errors documented in <b>stat</b>(2) can also
+    occur.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">These system calls have been available since Linux 2.4; glibc
+    support is provided since glibc 2.3.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These system calls are Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">As noted in <b>xattr</b>(7), the VFS imposes a limit of
+    64&nbsp;kB on the size of the extended attribute name list returned by
+    <b>listxattr</b>(). If the total size of attribute names attached to a file
+    exceeds this limit, it is no longer possible to retrieve the list of
+    attribute names.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The following program demonstrates the usage of <b>listxattr</b>()
+    and <b>getxattr</b>(2). For the file whose pathname is provided as a
+    command-line argument, it lists all extended file attributes and their
+    values.</p>
+<p class="Pp">To keep the code simple, the program assumes that attribute keys
+    and values are constant during the execution of the program. A production
+    program should expect and handle changes during execution of the program.
+    For example, the number of bytes required for attribute keys might increase
+    between the two calls to <b>listxattr</b>(). An application could handle
+    this possibility using a loop that retries the call (perhaps up to a
+    predetermined maximum number of attempts) with a larger buffer each time it
+    fails with the error <b>ERANGE</b>. Calls to <b>getxattr</b>(2) could be
+    handled similarly.</p>
+<p class="Pp">The following output was recorded by first creating a file,
+    setting some extended file attributes, and then listing the attributes with
+    the example program.</p>
+<section class="Ss">
+<h2 class="Ss" id="Example_output"><a class="permalink" href="#Example_output">Example
+  output</a></h2>
+<br>
+<pre>$ <b>touch /tmp/foo</b>
+$ <b>setfattr -n user.fred -v chocolate /tmp/foo</b>
+$ <b>setfattr -n user.frieda -v bar /tmp/foo</b>
+$ <b>setfattr -n user.empty /tmp/foo</b>
+$ <b>./listxattr /tmp/foo</b>
+user.fred: chocolate
+user.frieda: bar
+user.empty: &lt;no value&gt;
+</pre>
+<br>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Program_source_(listxattr.c)"><a class="permalink" href="#Program_source_(listxattr.c)">Program
+  source (listxattr.c)</a></h2>
+<pre>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;sys/xattr.h&gt;
+int
+main(int argc, char *argv[])
+{
+<br>
+    char     *buf, *key, *val;
+<br>
+    ssize_t  buflen, keylen, vallen;
+<br>
+    if (argc != 2) {
+<br>
+        fprintf(stderr, "Usage: %s path\n", argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    /*
+<br>
+     * Determine the length of the buffer needed.
+<br>
+     */
+<br>
+    buflen = listxattr(argv[1], NULL, 0);
+<br>
+    if (buflen == -1) {
+<br>
+        perror("listxattr");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    if (buflen == 0) {
+<br>
+        printf("%s has no attributes.\n", argv[1]);
+<br>
+        exit(EXIT_SUCCESS);
+<br>
+    }
+<br>
+    /*
+<br>
+     * Allocate the buffer.
+<br>
+     */
+<br>
+    buf = malloc(buflen);
+<br>
+    if (buf == NULL) {
+<br>
+        perror("malloc");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    /*
+<br>
+     * Copy the list of attribute keys to the buffer.
+<br>
+     */
+<br>
+    buflen = listxattr(argv[1], buf, buflen);
+<br>
+    if (buflen == -1) {
+<br>
+        perror("listxattr");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    /*
+<br>
+     * Loop over the list of zero terminated strings with the
+<br>
+     * attribute keys. Use the remaining buffer length to determine
+<br>
+     * the end of the list.
+<br>
+     */
+<br>
+    key = buf;
+<br>
+    while (buflen &gt; 0) {
+<br>
+        /*
+<br>
+         * Output attribute key.
+<br>
+         */
+<br>
+        printf("%s: ", key);
+<br>
+        /*
+<br>
+         * Determine length of the value.
+<br>
+         */
+<br>
+        vallen = getxattr(argv[1], key, NULL, 0);
+<br>
+        if (vallen == -1)
+<br>
+            perror("getxattr");
+<br>
+        if (vallen &gt; 0) {
+<br>
+            /*
+<br>
+             * Allocate value buffer.
+<br>
+             * One extra byte is needed to append 0x00.
+<br>
+             */
+<br>
+            val = malloc(vallen + 1);
+<br>
+            if (val == NULL) {
+<br>
+                perror("malloc");
+<br>
+                exit(EXIT_FAILURE);
+<br>
+            }
+<br>
+            /*
+<br>
+             * Copy value to buffer.
+<br>
+             */
+<br>
+            vallen = getxattr(argv[1], key, val, vallen);
+<br>
+            if (vallen == -1) {
+<br>
+                perror("getxattr");
+<br>
+            } else {
+<br>
+                /*
+<br>
+                 * Output attribute value.
+<br>
+                 */
+<br>
+                val[vallen] = 0;
+<br>
+                printf("%s", val);
+<br>
+            }
+<br>
+            free(val);
+<br>
+        } else if (vallen == 0) {
+<br>
+            printf("&lt;no value&gt;");
+<br>
+        }
+<br>
+        printf("\n");
+<br>
+        /*
+<br>
+         * Forward to next attribute key.
+<br>
+         */
+<br>
+        keylen = strlen(key) + 1;
+<br>
+        buflen -= keylen;
+<br>
+        key += keylen;
+<br>
+    }
+<br>
+    free(buf);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>getfattr</b>(1), <b>setfattr</b>(1), <b>getxattr</b>(2),
+    <b>open</b>(2), <b>removexattr</b>(2), <b>setxattr</b>(2), <b>stat</b>(2),
+    <b>symlink</b>(7), <b>xattr</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

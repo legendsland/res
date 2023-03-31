@@ -1,0 +1,162 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/aafbafda4936e5b9c2e0585023fdcb1ed9536540">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>POSIX_SPAWN_FILE_ACTIONS_ADDDUP2(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">POSIX_SPAWN_FILE_ACTIONS_ADDDUP2(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">POSIX_SPAWN_FILE_ACTIONS_ADDDUP2(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">posix_spawn_file_actions_adddup2 — add dup2 action to spawn
+    file actions object (<b>ADVANCED REALTIME</b>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;spawn.h&gt;</pre>
+<pre>int posix_spawn_file_actions_adddup2(posix_spawn_file_actions_t
+<br>
+    *<i>file_actions</i>, int <i>fildes</i>, int <i>newfildes</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>posix_spawn_file_actions_adddup2</i>() function shall add a
+    <i>dup2</i>() action to the object referenced by <i>file_actions</i> that
+    shall cause the file descriptor <i>fildes</i> to be duplicated as
+    <i>newfildes</i> (as if <i>dup2</i>(<i>fildes</i>, <i>newfildes</i>) had
+    been called) when a new process is spawned using this file actions
+  object.</p>
+<p class="Pp">A spawn file actions object is as defined in
+    <i><i>posix_spawn_file_actions_addclose</i>()</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, the
+    <i>posix_spawn_file_actions_adddup2</i>() function shall return zero;
+    otherwise, an error number shall be returned to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>posix_spawn_file_actions_adddup2</i>() function shall fail
+    if:</p>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The value specified by <i>fildes</i> or <i>newfildes</i> is negative or
+      greater than or equal to {OPEN_MAX}.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient memory exists to add to the spawn file actions object.</dd>
+</dl>
+<p class="Pp">The <i>posix_spawn_file_actions_adddup2</i>() function may fail
+    if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The value specified by <i>file_actions</i> is invalid.</dd>
+</dl>
+<p class="Pp">It shall not be considered an error for the <i>fildes</i> argument
+    passed to the <i>posix_spawn_file_actions_adddup2</i>() function to specify
+    a file descriptor for which the specified operation could not be performed
+    at the time of the call. Any such error will be detected when the associated
+    file actions object is later used during a <i>posix_spawn</i>() or
+    <i>posix_spawnp</i>() operation.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The <i>posix_spawn_file_actions_adddup2</i>() function is part of
+    the Spawn option and need not be provided on all implementations.</p>
+<p class="Pp">Implementations may use file descriptors that must be inherited
+    into child processes for the child process to remain conforming, such as for
+    message catalog or tracing purposes. Therefore, an application that calls
+    <i>posix_spawn_file_actions_adddup2</i>() with an arbitrary integer for
+    <i>newfildes</i> risks non-conforming behavior, and this function can only
+    portably be used to overwrite file descriptor values that the application
+    has obtained through explicit actions, or for the three file descriptors
+    corresponding to the standard file streams. In order to avoid a race
+    condition of leaking an unintended file descriptor into a child process, an
+    application should consider opening all file descriptors with the FD_CLOEXEC
+    bit set unless the file descriptor is intended to be inherited across
+    <i>exec</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">Refer to the RATIONALE section in
+    <i><i>posix_spawn_file_actions_addclose</i>()</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>dup</i>()</i>, <i><i>posix_spawn</i>()</i>,
+    <i><i>posix_spawn_file_actions_addclose</i>()</i>,
+    <i><i>posix_spawn_file_actions_destroy</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;spawn.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

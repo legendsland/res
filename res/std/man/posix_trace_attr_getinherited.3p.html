@@ -1,0 +1,269 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/e0528601ef405c572a81848fe5ddb12dfad81b92">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>POSIX_TRACE_ATTR_GETINHERITED(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">POSIX_TRACE_ATTR_GETINHERITED(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">POSIX_TRACE_ATTR_GETINHERITED(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">posix_trace_attr_getinherited, posix_trace_attr_getlogfullpolicy,
+    posix_trace_attr_getstreamfullpolicy, posix_trace_attr_setinherited,
+    posix_trace_attr_setlogfullpolicy, posix_trace_attr_setstreamfullpolicy
+    — retrieve and set the behavior of a trace stream
+  (<b>TRACING</b>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;trace.h&gt;</pre>
+<pre>int posix_trace_attr_getinherited(const trace_attr_t *restrict <i>attr</i>,
+<br>
+    int *restrict <i>inheritancepolicy</i>);
+int posix_trace_attr_getlogfullpolicy(const trace_attr_t *restrict <i>attr</i>,
+<br>
+    int *restrict <i>logpolicy</i>);
+int posix_trace_attr_getstreamfullpolicy(const trace_attr_t *restrict
+<br>
+    <i>attr</i>, int *restrict <i>streampolicy</i>);
+int posix_trace_attr_setinherited(trace_attr_t *<i>attr</i>,
+<br>
+    int <i>inheritancepolicy</i>);
+int posix_trace_attr_setlogfullpolicy(trace_attr_t *<i>attr</i>,
+<br>
+    int <i>logpolicy</i>);
+int posix_trace_attr_setstreamfullpolicy(trace_attr_t *<i>attr</i>,
+<br>
+    int <i>streampolicy</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>posix_trace_attr_getinherited</i>() and
+    <i>posix_trace_attr_setinherited</i>() functions, respectively, shall get
+    and set the inheritance policy stored in the <i>inheritance</i> attribute
+    for traced processes across the <i>fork</i>() and <i>spawn</i>() operations.
+    The <i>inheritance</i> attribute of the attributes object pointed to by the
+    <i>attr</i> argument shall be set to one of the following values defined by
+    manifest constants in the <i>&lt;trace.h&gt;</i> header:</p>
+<dl class="Bl-tag">
+  <dt id="POSIX_TRACE_CLOSE_FOR_CHILD"><a class="permalink" href="#POSIX_TRACE_CLOSE_FOR_CHILD">POSIX_TRACE_CLOSE_FOR_CHILD</a></dt>
+  <dd>
+    <br>
+    After a <i>fork</i>() or <i>spawn</i>() operation, the child shall not be
+      traced, and tracing of the parent shall continue.</dd>
+  <dt id="POSIX_TRACE_INHERITED"><a class="permalink" href="#POSIX_TRACE_INHERITED">POSIX_TRACE_INHERITED</a></dt>
+  <dd>
+    <br>
+    After a <i>fork</i>() or <i>spawn</i>() operation, if the parent is being
+      traced, its child shall be concurrently traced using the same trace
+      stream.</dd>
+</dl>
+<p class="Pp">The default value for the <i>inheritance</i> attribute is
+    POSIX_TRACE_CLOSE_FOR_CHILD.</p>
+<p class="Pp">The <i>posix_trace_attr_getlogfullpolicy</i>() and
+    <i>posix_trace_attr_setlogfullpolicy</i>() functions, respectively, shall
+    get and set the trace log full policy stored in the <i>log-full-policy</i>
+    attribute of the attributes object pointed to by the <i>attr</i>
+  argument.</p>
+<p class="Pp">The <i>log-full-policy</i> attribute shall be set to one of the
+    following values defined by manifest constants in the <i>&lt;trace.h&gt;</i>
+    header:</p>
+<dl class="Bl-tag">
+  <dt id="POSIX_TRACE_LOOP"><a class="permalink" href="#POSIX_TRACE_LOOP">POSIX_TRACE_LOOP</a></dt>
+  <dd>
+    <br>
+    The trace log shall loop until the associated trace stream is stopped. This
+      policy means that when the trace log gets full, the file system shall
+      reuse the resources allocated to the oldest trace events that were
+      recorded. In this way, the trace log will always contain the most recent
+      trace events flushed.</dd>
+  <dt id="POSIX_TRACE_UNTIL_FULL"><a class="permalink" href="#POSIX_TRACE_UNTIL_FULL">POSIX_TRACE_UNTIL_FULL</a></dt>
+  <dd>
+    <br>
+    The trace stream shall be flushed to the trace log until the trace log is
+      full. This condition can be deduced from the <i>posix_log_full_status</i>
+      member status (see the <b>posix_trace_status_info</b> structure defined in
+      <i>&lt;trace.h&gt;</i>). The last recorded trace event shall be the
+      POSIX_TRACE_STOP trace event.</dd>
+  <dt id="POSIX_TRACE_APPEND"><a class="permalink" href="#POSIX_TRACE_APPEND">POSIX_TRACE_APPEND</a></dt>
+  <dd>
+    <br>
+    The associated trace stream shall be flushed to the trace log without log
+      size limitation. If the application specifies POSIX_TRACE_APPEND, the
+      implementation shall ignore the <i>log-max-size</i> attribute.</dd>
+</dl>
+<p class="Pp">The default value for the <i>log-full-policy</i> attribute is
+    POSIX_TRACE_LOOP.</p>
+<p class="Pp">The <i>posix_trace_attr_getstreamfullpolicy</i>() and
+    <i>posix_trace_attr_setstreamfullpolicy</i>() functions, respectively, shall
+    get and set the trace stream full policy stored in the
+    <i>stream-full-policy</i> attribute of the attributes object pointed to by
+    the <i>attr</i> argument.</p>
+<p class="Pp">The <i>stream-full-policy</i> attribute shall be set to one of the
+    following values defined by manifest constants in the <i>&lt;trace.h&gt;</i>
+    header:</p>
+<dl class="Bl-tag">
+  <dt id="POSIX_TRACE_LOOP~2"><a class="permalink" href="#POSIX_TRACE_LOOP~2">POSIX_TRACE_LOOP</a></dt>
+  <dd>
+    <br>
+    The trace stream shall loop until explicitly stopped by the
+      <i>posix_trace_stop</i>() function. This policy means that when the trace
+      stream is full, the trace system shall reuse the resources allocated to
+      the oldest trace events recorded. In this way, the trace stream will
+      always contain the most recent trace events recorded.</dd>
+  <dt id="POSIX_TRACE_UNTIL_FULL~2"><a class="permalink" href="#POSIX_TRACE_UNTIL_FULL~2">POSIX_TRACE_UNTIL_FULL</a></dt>
+  <dd>
+    <br>
+    The trace stream will run until the trace stream resources are exhausted.
+      Then the trace stream will stop. This condition can be deduced from
+      <i>posix_stream_status</i> and <i>posix_stream_full_status</i> (see the
+      <b>posix_trace_status_info</b> structure defined in
+      <i>&lt;trace.h&gt;</i>). When this trace stream is read, a
+      POSIX_TRACE_STOP trace event shall be reported after reporting the last
+      recorded trace event. The trace system shall reuse the resources allocated
+      to any trace events already reported—see the
+      <i>posix_trace_getnext_event</i>(), <i>posix_trace_trygetnext_event</i>(),
+      and <i>posix_trace_timedgetnext_event</i>() functions—or already
+      flushed for an active trace stream with log if the Trace Log option is
+      supported; see the <i>posix_trace_flush</i>() function. The trace system
+      shall restart the trace stream when it is empty and may restart it sooner.
+      A POSIX_TRACE_START trace event shall be reported before reporting the
+      next recorded trace event.</dd>
+  <dt id="POSIX_TRACE_FLUSH"><a class="permalink" href="#POSIX_TRACE_FLUSH">POSIX_TRACE_FLUSH</a></dt>
+  <dd>
+    <br>
+    If the Trace Log option is supported, this policy is identical to the
+      POSIX_TRACE_UNTIL_FULL trace stream full policy except that the trace
+      stream shall be flushed regularly as if <i>posix_trace_flush</i>() had
+      been explicitly called. Defining this policy for an active trace stream
+      without log shall be invalid.</dd>
+</dl>
+<p class="Pp">The default value for the <i>stream-full-policy</i> attribute
+    shall be POSIX_TRACE_LOOP for an active trace stream without log.</p>
+<p class="Pp">If the Trace Log option is supported, the default value for the
+    <i>stream-full-policy</i> attribute shall be POSIX_TRACE_FLUSH for an active
+    trace stream with log.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, these functions shall return a value
+    of zero. Otherwise, they shall return the corresponding error number.</p>
+<p class="Pp">If successful, the <i>posix_trace_attr_getinherited</i>() function
+    shall store the <i>inheritance</i> attribute value in the object pointed to
+    by <i>inheritancepolicy</i>. Otherwise, the content of this object is
+    undefined.</p>
+<p class="Pp">If successful, the <i>posix_trace_attr_getlogfullpolicy</i>()
+    function shall store the <i>log-full-policy</i> attribute value in the
+    object pointed to by <i>logpolicy</i>. Otherwise, the content of this object
+    is undefined.</p>
+<p class="Pp">If successful, the <i>posix_trace_attr_getstreamfullpolicy</i>()
+    function shall store the <i>stream-full-policy</i> attribute value in the
+    object pointed to by <i>streampolicy</i>. Otherwise, the content of this
+    object is undefined.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">These functions may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The value specified by at least one of the arguments is invalid.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">The following functions:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre><i>posix_trace_attr_getinherited</i>()
+<i>posix_trace_attr_getlogfullpolicy</i>()
+<i>posix_trace_attr_getstreamfullpolicy</i>()
+<i>posix_trace_attr_setinherited</i>()
+<i>posix_trace_attr_setlogfullpolicy</i>()
+<i>posix_trace_attr_setstreamfullpolicy</i>()</pre>
+</div>
+<p class="Pp">may be removed in a future version.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>fork</i>()</i>, <i><i>posix_trace_attr_destroy</i>()</i>,
+    <i><i>posix_trace_create</i>()</i>, <i><i>posix_trace_get_attr</i>()</i>,
+    <i><i>posix_trace_getnext_event</i>()</i>,
+  <i><i>posix_trace_start</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;trace.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

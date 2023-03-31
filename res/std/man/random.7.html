@@ -1,0 +1,191 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (C) 2008, George Spelvin <linux@horizon.com>,
+   and Copyright (C) 2008, Matt Mackall <mpm@selenic.com>
+   and Copyright (C) 2016, Laurent Georget <laurent.georget@supelec.fr>
+   and Copyright (C) 2016, Nikos Mavrogiannopoulos <nmav@redhat.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   The following web page is quite informative:
+   http://www.2uo.de/myths-about-urandom/
+   --><head>
+<meta name="dc.identifier" content="res/606142b70a0a85fd02169c89b41c887d0f5012cf">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>random(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">random(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">random(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">random - overview of interfaces for obtaining randomness</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The kernel random-number generator relies on entropy gathered from
+    device drivers and other sources of environmental noise to seed a
+    cryptographically secure pseudorandom number generator (CSPRNG). It is
+    designed for security, rather than speed.</p>
+<p class="Pp">The following interfaces provide access to output from the kernel
+    CSPRNG:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>The <i>/dev/urandom</i> and <i>/dev/random</i> devices, both described in
+      <b>random</b>(4). These devices have been present on Linux since early
+      times, and are also available on many other systems.</dd>
+  <dt>•</dt>
+  <dd>The Linux-specific <b>getrandom</b>(2) system call, available since Linux
+      3.17. This system call provides access either to the same source as
+      <i>/dev/urandom</i> (called the <i>urandom</i> source in this page) or to
+      the same source as <i>/dev/random</i> (called the <i>random</i> source in
+      this page). The default is the <i>urandom</i> source; the <i>random</i>
+      source is selected by specifying the <b>GRND_RANDOM</b> flag to the system
+      call. (The <b>getentropy</b>(3) function provides a slightly more portable
+      interface on top of <b>getrandom</b>(2).)</dd>
+</dl>
+<section class="Ss">
+<h2 class="Ss" id="Initialization_of_the_entropy_pool"><a class="permalink" href="#Initialization_of_the_entropy_pool">Initialization
+  of the entropy pool</a></h2>
+<p class="Pp">The kernel collects bits of entropy from the environment. When a
+    sufficient number of random bits has been collected, the entropy pool is
+    considered to be initialized.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Choice_of_random_source"><a class="permalink" href="#Choice_of_random_source">Choice
+  of random source</a></h2>
+<p class="Pp">Unless you are doing long-term key generation (and most likely not
+    even then), you probably shouldn't be reading from the <i>/dev/random</i>
+    device or employing <b>getrandom</b>(2) with the <b>GRND_RANDOM</b> flag.
+    Instead, either read from the <i>/dev/urandom</i> device or employ
+    <b>getrandom</b>(2) without the <b>GRND_RANDOM</b> flag. The cryptographic
+    algorithms used for the <i>urandom</i> source are quite conservative, and so
+    should be sufficient for all purposes.</p>
+<p class="Pp">The disadvantage of <b>GRND_RANDOM</b> and reads from
+    <i>/dev/random</i> is that the operation can block for an indefinite period
+    of time. Furthermore, dealing with the partially fulfilled requests that can
+    occur when using <b>GRND_RANDOM</b> or when reading from <i>/dev/random</i>
+    increases code complexity.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Monte_Carlo_and_other_probabilistic_sampling_applications"><a class="permalink" href="#Monte_Carlo_and_other_probabilistic_sampling_applications">Monte
+  Carlo and other probabilistic sampling applications</a></h2>
+<p class="Pp">Using these interfaces to provide large quantities of data for
+    Monte Carlo simulations or other programs/algorithms which are doing
+    probabilistic sampling will be slow. Furthermore, it is unnecessary, because
+    such applications do not need cryptographically secure random numbers.
+    Instead, use the interfaces described in this page to obtain a small amount
+    of data to seed a user-space pseudorandom number generator for use by such
+    applications.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Comparison_between_getrandom,_/dev/urandom,_and_/dev/random"><a class="permalink" href="#Comparison_between_getrandom,_/dev/urandom,_and_/dev/random">Comparison
+  between getrandom, /dev/urandom, and /dev/random</a></h2>
+<p class="Pp">The following table summarizes the behavior of the various
+    interfaces that can be used to obtain randomness. <b>GRND_NONBLOCK</b> is a
+    flag that can be used to control the blocking behavior of
+    <b>getrandom</b>(2). The final column of the table considers the case that
+    can occur in early boot time when the entropy pool is not yet
+  initialized.</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Pool</b></td>
+    <td><b>Blocking behavior</b></td>
+    <td><b>Behavior when pool is not yet ready</b></td>
+  </tr>
+  <tr>
+    <td>/dev/random</td>
+    <td>Blocking pool</td>
+    <td>If entropy too low, blocks until there is enough entropy again</td>
+    <td>Blocks until enough entropy gathered</td>
+  </tr>
+  <tr>
+    <td>/dev/urandom</td>
+    <td>CSPRNG output</td>
+    <td>Never blocks</td>
+    <td>Returns output from uninitialized CSPRNG (may be low entropy and
+      unsuitable for cryptography)</td>
+  </tr>
+  <tr>
+    <td>getrandom ()</td>
+    <td>Same as /dev/urandom</td>
+    <td>Does not block once is pool ready</td>
+    <td>Blocks until pool ready</td>
+  </tr>
+  <tr>
+    <td>getrandom () GRND_RANDOM</td>
+    <td>Same as /dev/random</td>
+    <td>If entropy too low, blocks until there is enough entropy again</td>
+    <td>Blocks until pool ready</td>
+  </tr>
+  <tr>
+    <td>getrandom () GRND_NONBLOCK</td>
+    <td>Same as /dev/urandom</td>
+    <td>Does not block once is pool ready</td>
+    <td>EAGAIN</td>
+  </tr>
+  <tr>
+    <td>getrandom () GRND_RANDOM + GRND_NONBLOCK</td>
+    <td>Same as /dev/random</td>
+    <td>EAGAIN if not enough entropy available</td>
+    <td>EAGAIN</td>
+  </tr>
+</tbody></table>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Generating_cryptographic_keys"><a class="permalink" href="#Generating_cryptographic_keys">Generating
+  cryptographic keys</a></h2>
+<p class="Pp">The amount of seed material required to generate a cryptographic
+    key equals the effective key size of the key. For example, a 3072-bit RSA or
+    Diffie-Hellman private key has an effective key size of 128 bits (it
+    requires about 2^128 operations to break) so a key generator needs only 128
+    bits (16 bytes) of seed material from <i>/dev/random</i>.</p>
+<p class="Pp">While some safety margin above that minimum is reasonable, as a
+    guard against flaws in the CSPRNG algorithm, no cryptographic primitive
+    available today can hope to promise more than 256 bits of security, so if
+    any program reads more than 256 bits (32 bytes) from the kernel random pool
+    per invocation, or per reasonable reseed interval (not less than one
+    minute), that should be taken as a sign that its cryptography is <i>not</i>
+    skillfully implemented.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>getrandom</b>(2), <b>getauxval</b>(3), <b>getentropy</b>(3),
+    <b>random</b>(4), <b>urandom</b>(4), <b>signal</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

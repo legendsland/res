@@ -1,0 +1,166 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2022 by Alejandro Colomar <alx@kernel.org>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/2a8ac8ea2b650b3970cf77e922b3cf42b9e3d5ae">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>static_assert(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">static_assert(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">static_assert(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">static_assert, _Static_assert - fail compilation if assertion is
+    false</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;assert.h&gt;</b></pre>
+<pre><b>void static_assert(scalar </b><i>constant-expression</i><b>, const char *</b><i>msg</i><b>);</b></pre>
+<pre>/* Since C23: */
+<b>void static_assert(scalar </b><i>constant-expression</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">This macro is similar to <b>assert</b>(3), but it works at compile
+    time, generating a compilation error (with an optional message) when the
+    input is false (i.e., compares equal to zero).</p>
+<p class="Pp">If the input is nonzero, no code is emitted.</p>
+<p class="Pp"><i>msg</i> must be a string literal. Since C23, this argument is
+    optional.</p>
+<p class="Pp">There's a keyword, <b>_Static_assert</b>(), that behaves
+    identically, and can be used without including <i>&lt;assert.h&gt;</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">No value is returned.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">In C11, the second argument (<i>msg</i>) was mandatory; since C23,
+    it can be omitted.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">C11 and later.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp"><b>static_assert</b>() can't be used in some places, like for
+    example at global scope. For that, a macro <b>must_be</b>() can be written
+    in terms of <b>static_assert</b>(). The following program uses the macro to
+    get the size of an array safely.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>#include &lt;assert.h&gt;
+#include &lt;stddef.h&gt;
+#include &lt;stdint.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+/*
+<br>
+ * This macro behaves like static_assert(), failing to
+<br>
+ * compile if its argument is not true.  However, it always
+<br>
+ * returns 0, which allows using it everywhere an expression
+<br>
+ * can be used.
+<br>
+ */
+#define must_be(e)                                        \
+(                                                         \
+<br>
+    0 * (int) sizeof(                                     \
+<br>
+        struct {                                          \
+<br>
+            static_assert(e);                             \
+<br>
+            int  ISO_C_forbids_a_struct_with_no_members;  \
+<br>
+        }                                                 \
+<br>
+    )                                                     \
+)
+#define is_same_type(a, b)  \
+<br>
+    __builtin_types_compatible_p(typeof(a), typeof(b))
+#define is_array(arr)       (!is_same_type((arr), &amp;*(arr)))
+#define must_be_array(arr)  must_be(is_array(arr))
+#define sizeof_array(arr)   (sizeof(arr) + must_be_array(arr))
+#define nitems(arr)         (sizeof((arr)) / sizeof((arr)[0]) \
+<br>
+                             + must_be_array(arr))
+int     foo[10];
+int8_t  bar[sizeof_array(foo)];
+int
+main(void)
+{
+<br>
+    for (size_t i = 0; i &lt; nitems(foo); i++) {
+<br>
+        foo[i] = i;
+<br>
+    }
+<br>
+    memcpy(bar, foo, sizeof_array(bar));
+<br>
+    for (size_t i = 0; i &lt; nitems(bar); i++) {
+<br>
+        printf("%d,", bar[i]);
+<br>
+    }
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+<br>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>assert</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

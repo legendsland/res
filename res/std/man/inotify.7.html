@@ -1,0 +1,865 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2006, 2014 Michael Kerrisk <mtk.manpages@gmail.com>
+   Copyright (C) 2014 Heinrich Schuchardt <xypron.glpk@gmx.de>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/18792d7fe627712695970914e3834ab8ae0951b5">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>inotify(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">inotify(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">inotify(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">inotify - monitoring filesystem events</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>inotify</i> API provides a mechanism for monitoring
+    filesystem events. Inotify can be used to monitor individual files, or to
+    monitor directories. When a directory is monitored, inotify will return
+    events for the directory itself, and for files inside the directory.</p>
+<p class="Pp">The following system calls are used with this API:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><b>inotify_init</b>(2) creates an inotify instance and returns a file
+      descriptor referring to the inotify instance. The more recent
+      <b>inotify_init1</b>(2) is like <b>inotify_init</b>(2), but has a
+      <i>flags</i> argument that provides access to some extra
+    functionality.</dd>
+  <dt>•</dt>
+  <dd><b>inotify_add_watch</b>(2) manipulates the "watch list"
+      associated with an inotify instance. Each item ("watch") in the
+      watch list specifies the pathname of a file or directory, along with some
+      set of events that the kernel should monitor for the file referred to by
+      that pathname. <b>inotify_add_watch</b>(2) either creates a new watch
+      item, or modifies an existing watch. Each watch has a unique "watch
+      descriptor", an integer returned by <b>inotify_add_watch</b>(2) when
+      the watch is created.</dd>
+  <dt>•</dt>
+  <dd>When events occur for monitored files and directories, those events are
+      made available to the application as structured data that can be read from
+      the inotify file descriptor using <b>read</b>(2) (see below).</dd>
+  <dt>•</dt>
+  <dd><b>inotify_rm_watch</b>(2) removes an item from an inotify watch
+    list.</dd>
+  <dt>•</dt>
+  <dd>When all file descriptors referring to an inotify instance have been
+      closed (using <b>close</b>(2)), the underlying object and its resources
+      are freed for reuse by the kernel; all associated watches are
+      automatically freed.</dd>
+</dl>
+<p class="Pp">With careful programming, an application can use inotify to
+    efficiently monitor and cache the state of a set of filesystem objects.
+    However, robust applications should allow for the fact that bugs in the
+    monitoring logic or races of the kind described below may leave the cache
+    inconsistent with the filesystem state. It is probably wise to do some
+    consistency checking, and rebuild the cache when inconsistencies are
+    detected.</p>
+<section class="Ss">
+<h2 class="Ss" id="Reading_events_from_an_inotify_file_descriptor"><a class="permalink" href="#Reading_events_from_an_inotify_file_descriptor">Reading
+  events from an inotify file descriptor</a></h2>
+<p class="Pp">To determine what events have occurred, an application
+    <b>read</b>(2)s from the inotify file descriptor. If no events have so far
+    occurred, then, assuming a blocking file descriptor, <b>read</b>(2) will
+    block until at least one event occurs (unless interrupted by a signal, in
+    which case the call fails with the error <b>EINTR</b>; see
+    <b>signal</b>(7)).</p>
+<p class="Pp">Each successful <b>read</b>(2) returns a buffer containing one or
+    more of the following structures:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct inotify_event {
+<br>
+    int      wd;       /* Watch descriptor */
+<br>
+    uint32_t mask;     /* Mask describing event */
+<br>
+    uint32_t cookie;   /* Unique cookie associating related
+<br>
+                          events (for rename(2)) */
+<br>
+    uint32_t len;      /* Size of <i>name</i> field */
+<br>
+    char     name[];   /* Optional null-terminated name */
+};
+</pre>
+<br>
+<p class="Pp"><i>wd</i> identifies the watch for which this event occurs. It is
+    one of the watch descriptors returned by a previous call to
+    <b>inotify_add_watch</b>(2).</p>
+<p class="Pp"><i>mask</i> contains bits that describe the event that occurred
+    (see below).</p>
+<p class="Pp"><i>cookie</i> is a unique integer that connects related events.
+    Currently, this is used only for rename events, and allows the resulting
+    pair of <b>IN_MOVED_FROM</b> and <b>IN_MOVED_TO</b> events to be connected
+    by the application. For all other event types, <i>cookie</i> is set to
+  0.</p>
+<p class="Pp">The <i>name</i> field is present only when an event is returned
+    for a file inside a watched directory; it identifies the filename within the
+    watched directory. This filename is null-terminated, and may include further
+    null bytes ('\0') to align subsequent reads to a suitable address
+  boundary.</p>
+<p class="Pp">The <i>len</i> field counts all of the bytes in <i>name</i>,
+    including the null bytes; the length of each <i>inotify_event</i> structure
+    is thus <i>sizeof(struct inotify_event)+len</i>.</p>
+<p class="Pp">The behavior when the buffer given to <b>read</b>(2) is too small
+    to return information about the next event depends on the kernel version:
+    before Linux 2.6.21, <b>read</b>(2) returns 0; since Linux 2.6.21,
+    <b>read</b>(2) fails with the error <b>EINVAL</b>. Specifying a buffer of
+    size</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>sizeof(struct inotify_event) + NAME_MAX + 1
+</pre>
+<br>
+<p class="Pp">will be sufficient to read at least one event.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="inotify_events"><a class="permalink" href="#inotify_events">inotify
+  events</a></h2>
+<p class="Pp">The <b>inotify_add_watch</b>(2) <i>mask</i> argument and the
+    <i>mask</i> field of the <i>inotify_event</i> structure returned when
+    <b>read</b>(2)ing an inotify file descriptor are both bit masks identifying
+    inotify events. The following bits can be specified in <i>mask</i> when
+    calling <b>inotify_add_watch</b>(2) and may be returned in the <i>mask</i>
+    field returned by <b>read</b>(2):</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="IN_ACCESS"><a class="permalink" href="#IN_ACCESS"><b>IN_ACCESS</b>
+    (+)</a></dt>
+  <dd>File was accessed (e.g., <b>read</b>(2), <b>execve</b>(2)).</dd>
+  <dt id="IN_ATTRIB"><a class="permalink" href="#IN_ATTRIB"><b>IN_ATTRIB</b>
+    (*)</a></dt>
+  <dd>Metadata changed—for example, permissions (e.g., <b>chmod</b>(2)),
+      timestamps (e.g., <b>utimensat</b>(2)), extended attributes
+      (<b>setxattr</b>(2)), link count (since Linux 2.6.25; e.g., for the target
+      of <b>link</b>(2) and for <b>unlink</b>(2)), and user/group ID (e.g.,
+      <b>chown</b>(2)).</dd>
+  <dt id="IN_CLOSE_WRITE"><a class="permalink" href="#IN_CLOSE_WRITE"><b>IN_CLOSE_WRITE</b>
+    (+)</a></dt>
+  <dd>File opened for writing was closed.</dd>
+  <dt id="IN_CLOSE_NOWRITE"><a class="permalink" href="#IN_CLOSE_NOWRITE"><b>IN_CLOSE_NOWRITE</b>
+    (*)</a></dt>
+  <dd>File or directory not opened for writing was closed.</dd>
+  <dt id="IN_CREATE"><a class="permalink" href="#IN_CREATE"><b>IN_CREATE</b>
+    (+)</a></dt>
+  <dd>File/directory created in watched directory (e.g., <b>open</b>(2)
+      <b>O_CREAT</b>, <b>mkdir</b>(2), <b>link</b>(2), <b>symlink</b>(2),
+      <b>bind</b>(2) on a UNIX domain socket).</dd>
+  <dt id="IN_DELETE"><a class="permalink" href="#IN_DELETE"><b>IN_DELETE</b>
+    (+)</a></dt>
+  <dd>File/directory deleted from watched directory.</dd>
+  <dt id="IN_DELETE_SELF"><a class="permalink" href="#IN_DELETE_SELF"><b>IN_DELETE_SELF</b></a></dt>
+  <dd>Watched file/directory was itself deleted. (This event also occurs if an
+      object is moved to another filesystem, since <b>mv</b>(1) in effect copies
+      the file to the other filesystem and then deletes it from the original
+      filesystem.) In addition, an <b>IN_IGNORED</b> event will subsequently be
+      generated for the watch descriptor.</dd>
+  <dt id="IN_MODIFY"><a class="permalink" href="#IN_MODIFY"><b>IN_MODIFY</b>
+    (+)</a></dt>
+  <dd>File was modified (e.g., <b>write</b>(2), <b>truncate</b>(2)).</dd>
+  <dt id="IN_MOVE_SELF"><a class="permalink" href="#IN_MOVE_SELF"><b>IN_MOVE_SELF</b></a></dt>
+  <dd>Watched file/directory was itself moved.</dd>
+  <dt id="IN_MOVED_FROM"><a class="permalink" href="#IN_MOVED_FROM"><b>IN_MOVED_FROM</b>
+    (+)</a></dt>
+  <dd>Generated for the directory containing the old filename when a file is
+      renamed.</dd>
+  <dt id="IN_MOVED_TO"><a class="permalink" href="#IN_MOVED_TO"><b>IN_MOVED_TO</b>
+    (+)</a></dt>
+  <dd>Generated for the directory containing the new filename when a file is
+      renamed.</dd>
+  <dt id="IN_OPEN"><a class="permalink" href="#IN_OPEN"><b>IN_OPEN</b>
+    (*)</a></dt>
+  <dd>File or directory was opened.</dd>
+</dl>
+</div>
+<p class="Pp">Inotify monitoring is inode-based: when monitoring a file (but not
+    when monitoring the directory containing a file), an event can be generated
+    for activity on any link to the file (in the same or a different
+  directory).</p>
+<p class="Pp">When monitoring a directory:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>the events marked above with an asterisk (*) can occur both for the
+      directory itself and for objects inside the directory; and</dd>
+  <dt>•</dt>
+  <dd>the events marked with a plus sign (+) occur only for objects inside the
+      directory (not for the directory itself).</dd>
+</dl>
+<p class="Pp"><i>Note</i>: when monitoring a directory, events are not generated
+    for the files inside the directory when the events are performed via a
+    pathname (i.e., a link) that lies outside the monitored directory.</p>
+<p class="Pp">When events are generated for objects inside a watched directory,
+    the <i>name</i> field in the returned <i>inotify_event</i> structure
+    identifies the name of the file within the directory.</p>
+<p class="Pp">The <b>IN_ALL_EVENTS</b> macro is defined as a bit mask of all of
+    the above events. This macro can be used as the <i>mask</i> argument when
+    calling <b>inotify_add_watch</b>(2).</p>
+<p class="Pp">Two additional convenience macros are defined:</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="IN_MOVE"><a class="permalink" href="#IN_MOVE"><b>IN_MOVE</b></a></dt>
+  <dd>Equates to <b>IN_MOVED_FROM | IN_MOVED_TO</b>.</dd>
+  <dt id="IN_CLOSE"><a class="permalink" href="#IN_CLOSE"><b>IN_CLOSE</b></a></dt>
+  <dd>Equates to <b>IN_CLOSE_WRITE | IN_CLOSE_NOWRITE</b>.</dd>
+</dl>
+</div>
+<p class="Pp">The following further bits can be specified in <i>mask</i> when
+    calling <b>inotify_add_watch</b>(2):</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="IN_DONT_FOLLOW"><a class="permalink" href="#IN_DONT_FOLLOW"><b>IN_DONT_FOLLOW</b>
+    (since Linux 2.6.15)</a></dt>
+  <dd>Don't dereference <i>pathname</i> if it is a symbolic link.</dd>
+  <dt id="IN_EXCL_UNLINK"><a class="permalink" href="#IN_EXCL_UNLINK"><b>IN_EXCL_UNLINK</b>
+    (since Linux 2.6.36)</a></dt>
+  <dd>By default, when watching events on the children of a directory, events
+      are generated for children even after they have been unlinked from the
+      directory. This can result in large numbers of uninteresting events for
+      some applications (e.g., if watching <i>/tmp</i>, in which many
+      applications create temporary files whose names are immediately unlinked).
+      Specifying <b>IN_EXCL_UNLINK</b> changes the default behavior, so that
+      events are not generated for children after they have been unlinked from
+      the watched directory.</dd>
+  <dt id="IN_MASK_ADD"><a class="permalink" href="#IN_MASK_ADD"><b>IN_MASK_ADD</b></a></dt>
+  <dd>If a watch instance already exists for the filesystem object corresponding
+      to <i>pathname</i>, add (OR) the events in <i>mask</i> to the watch mask
+      (instead of replacing the mask); the error <b>EINVAL</b> results if
+      <b>IN_MASK_CREATE</b> is also specified.</dd>
+  <dt id="IN_ONESHOT"><a class="permalink" href="#IN_ONESHOT"><b>IN_ONESHOT</b></a></dt>
+  <dd>Monitor the filesystem object corresponding to <i>pathname</i> for one
+      event, then remove from watch list.</dd>
+  <dt id="IN_ONLYDIR"><a class="permalink" href="#IN_ONLYDIR"><b>IN_ONLYDIR</b>
+    (since Linux 2.6.15)</a></dt>
+  <dd>Watch <i>pathname</i> only if it is a directory; the error <b>ENOTDIR</b>
+      results if <i>pathname</i> is not a directory. Using this flag provides an
+      application with a race-free way of ensuring that the monitored object is
+      a directory.</dd>
+  <dt id="IN_MASK_CREATE"><a class="permalink" href="#IN_MASK_CREATE"><b>IN_MASK_CREATE</b>
+    (since Linux 4.18)</a></dt>
+  <dd>Watch <i>pathname</i> only if it does not already have a watch associated
+      with it; the error <b>EEXIST</b> results if <i>pathname</i> is already
+      being watched.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Using this flag provides an application with a way of ensuring that new
+      watches do not modify existing ones. This is useful because multiple paths
+      may refer to the same inode, and multiple calls to
+      <b>inotify_add_watch</b>(2) without this flag may clobber existing watch
+      masks.</dd>
+</dl>
+</div>
+<p class="Pp">The following bits may be set in the <i>mask</i> field returned by
+    <b>read</b>(2):</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="IN_IGNORED"><a class="permalink" href="#IN_IGNORED"><b>IN_IGNORED</b></a></dt>
+  <dd>Watch was removed explicitly (<b>inotify_rm_watch</b>(2)) or automatically
+      (file was deleted, or filesystem was unmounted). See also BUGS.</dd>
+  <dt id="IN_ISDIR"><a class="permalink" href="#IN_ISDIR"><b>IN_ISDIR</b></a></dt>
+  <dd>Subject of this event is a directory.</dd>
+  <dt id="IN_Q_OVERFLOW"><a class="permalink" href="#IN_Q_OVERFLOW"><b>IN_Q_OVERFLOW</b></a></dt>
+  <dd>Event queue overflowed (<i>wd</i> is -1 for this event).</dd>
+  <dt id="IN_UNMOUNT"><a class="permalink" href="#IN_UNMOUNT"><b>IN_UNMOUNT</b></a></dt>
+  <dd>Filesystem containing watched object was unmounted. In addition, an
+      <b>IN_IGNORED</b> event will subsequently be generated for the watch
+      descriptor.</dd>
+</dl>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Examples"><a class="permalink" href="#Examples">Examples</a></h2>
+<p class="Pp">Suppose an application is watching the directory <i>dir</i> and
+    the file <i>dir/myfile</i> for all events. The examples below show some
+    events that will be generated for these two objects.</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="fd"><a class="permalink" href="#fd">fd = open("dir/myfile",
+    O_RDWR);</a></dt>
+  <dd>Generates <b>IN_OPEN</b> events for both <i>dir</i> and
+    <i>dir/myfile</i>.</dd>
+  <dt id="read(fd,"><a class="permalink" href="#read(fd,">read(fd, buf,
+    count);</a></dt>
+  <dd>Generates <b>IN_ACCESS</b> events for both <i>dir</i> and
+      <i>dir/myfile</i>.</dd>
+  <dt id="write(fd,"><a class="permalink" href="#write(fd,">write(fd, buf,
+    count);</a></dt>
+  <dd>Generates <b>IN_MODIFY</b> events for both <i>dir</i> and
+      <i>dir/myfile</i>.</dd>
+  <dt id="fchmod(fd,"><a class="permalink" href="#fchmod(fd,">fchmod(fd,
+    mode);</a></dt>
+  <dd>Generates <b>IN_ATTRIB</b> events for both <i>dir</i> and
+      <i>dir/myfile</i>.</dd>
+  <dt id="close(fd);"><a class="permalink" href="#close(fd);">close(fd);</a></dt>
+  <dd>Generates <b>IN_CLOSE_WRITE</b> events for both <i>dir</i> and
+      <i>dir/myfile</i>.</dd>
+</dl>
+</div>
+<p class="Pp">Suppose an application is watching the directories <i>dir1</i> and
+    <i>dir2</i>, and the file <i>dir1/myfile</i>. The following examples show
+    some events that may be generated.</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="link(_dir1/myfile_,"><a class="permalink" href="#link(_dir1/myfile_,">link("dir1/myfile",
+    "dir2/new");</a></dt>
+  <dd>Generates an <b>IN_ATTRIB</b> event for <i>myfile</i> and an
+      <b>IN_CREATE</b> event for <i>dir2</i>.</dd>
+  <dt id="rename(_dir1/myfile_,"><a class="permalink" href="#rename(_dir1/myfile_,">rename("dir1/myfile",
+    "dir2/myfile");</a></dt>
+  <dd>Generates an <b>IN_MOVED_FROM</b> event for <i>dir1</i>, an
+      <b>IN_MOVED_TO</b> event for <i>dir2</i>, and an <b>IN_MOVE_SELF</b> event
+      for <i>myfile</i>. The <b>IN_MOVED_FROM</b> and <b>IN_MOVED_TO</b> events
+      will have the same <i>cookie</i> value.</dd>
+</dl>
+</div>
+<p class="Pp">Suppose that <i>dir1/xx</i> and <i>dir2/yy</i> are (the only)
+    links to the same file, and an application is watching <i>dir1</i>,
+    <i>dir2</i>, <i>dir1/xx</i>, and <i>dir2/yy</i>. Executing the following
+    calls in the order given below will generate the following events:</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="unlink(_dir2/yy_);"><a class="permalink" href="#unlink(_dir2/yy_);">unlink("dir2/yy");</a></dt>
+  <dd>Generates an <b>IN_ATTRIB</b> event for <i>xx</i> (because its link count
+      changes) and an <b>IN_DELETE</b> event for <i>dir2</i>.</dd>
+  <dt id="unlink(_dir1/xx_);"><a class="permalink" href="#unlink(_dir1/xx_);">unlink("dir1/xx");</a></dt>
+  <dd>Generates <b>IN_ATTRIB</b>, <b>IN_DELETE_SELF</b>, and <b>IN_IGNORED</b>
+      events for <i>xx</i>, and an <b>IN_DELETE</b> event for <i>dir1</i>.</dd>
+</dl>
+</div>
+<p class="Pp">Suppose an application is watching the directory <i>dir</i> and
+    (the empty) directory <i>dir/subdir</i>. The following examples show some
+    events that may be generated.</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="mkdir(_dir/new_,"><a class="permalink" href="#mkdir(_dir/new_,">mkdir("dir/new",
+    mode);</a></dt>
+  <dd>Generates an <b>IN_CREATE | IN_ISDIR</b> event for <i>dir</i>.</dd>
+  <dt id="rmdir(_dir/subdir_);"><a class="permalink" href="#rmdir(_dir/subdir_);">rmdir("dir/subdir");</a></dt>
+  <dd>Generates <b>IN_DELETE_SELF</b> and <b>IN_IGNORED</b> events for
+      <i>subdir</i>, and an <b>IN_DELETE | IN_ISDIR</b> event for
+    <i>dir</i>.</dd>
+</dl>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="/proc_interfaces"><a class="permalink" href="#/proc_interfaces">/proc
+  interfaces</a></h2>
+<p class="Pp">The following interfaces can be used to limit the amount of kernel
+    memory consumed by inotify:</p>
+<dl class="Bl-tag">
+  <dt><i>/proc/sys/fs/inotify/max_queued_events</i></dt>
+  <dd>The value in this file is used when an application calls
+      <b>inotify_init</b>(2) to set an upper limit on the number of events that
+      can be queued to the corresponding inotify instance. Events in excess of
+      this limit are dropped, but an <b>IN_Q_OVERFLOW</b> event is always
+      generated.</dd>
+  <dt><i>/proc/sys/fs/inotify/max_user_instances</i></dt>
+  <dd>This specifies an upper limit on the number of inotify instances that can
+      be created per real user ID.</dd>
+  <dt><i>/proc/sys/fs/inotify/max_user_watches</i></dt>
+  <dd>This specifies an upper limit on the number of watches that can be created
+      per real user ID.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">Inotify was merged into Linux 2.6.13. The required library
+    interfaces were added in glibc 2.4. (<b>IN_DONT_FOLLOW</b>,
+    <b>IN_MASK_ADD</b>, and <b>IN_ONLYDIR</b> were added in glibc 2.5.)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">The inotify API is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Inotify file descriptors can be monitored using <b>select</b>(2),
+    <b>poll</b>(2), and <b>epoll</b>(7). When an event is available, the file
+    descriptor indicates as readable.</p>
+<p class="Pp">Since Linux 2.6.25, signal-driven I/O notification is available
+    for inotify file descriptors; see the discussion of <b>F_SETFL</b> (for
+    setting the <b>O_ASYNC</b> flag), <b>F_SETOWN</b>, and <b>F_SETSIG</b> in
+    <b>fcntl</b>(2). The <i>siginfo_t</i> structure (described in
+    <b>sigaction</b>(2)) that is passed to the signal handler has the following
+    fields set: <i>si_fd</i> is set to the inotify file descriptor number;
+    <i>si_signo</i> is set to the signal number; <i>si_code</i> is set to
+    <b>POLL_IN</b>; and <b>POLLIN</b> is set in <i>si_band</i>.</p>
+<p class="Pp">If successive output inotify events produced on the inotify file
+    descriptor are identical (same <i>wd</i>, <i>mask</i>, <i>cookie</i>, and
+    <i>name</i>), then they are coalesced into a single event if the older event
+    has not yet been read (but see BUGS). This reduces the amount of kernel
+    memory required for the event queue, but also means that an application
+    can't use inotify to reliably count file events.</p>
+<p class="Pp">The events returned by reading from an inotify file descriptor
+    form an ordered queue. Thus, for example, it is guaranteed that when
+    renaming from one directory to another, events will be produced in the
+    correct order on the inotify file descriptor.</p>
+<p class="Pp">The set of watch descriptors that is being monitored via an
+    inotify file descriptor can be viewed via the entry for the inotify file
+    descriptor in the process's <i>/proc/</i>pid<i>/fdinfo</i> directory. See
+    <b>proc</b>(5) for further details. The <b>FIONREAD</b> <b>ioctl</b>(2)
+    returns the number of bytes available to read from an inotify file
+    descriptor.</p>
+<section class="Ss">
+<h2 class="Ss" id="Limitations_and_caveats"><a class="permalink" href="#Limitations_and_caveats">Limitations
+  and caveats</a></h2>
+<p class="Pp">The inotify API provides no information about the user or process
+    that triggered the inotify event. In particular, there is no easy way for a
+    process that is monitoring events via inotify to distinguish events that it
+    triggers itself from those that are triggered by other processes.</p>
+<p class="Pp">Inotify reports only events that a user-space program triggers
+    through the filesystem API. As a result, it does not catch remote events
+    that occur on network filesystems. (Applications must fall back to polling
+    the filesystem to catch such events.) Furthermore, various
+    pseudo-filesystems such as <i>/proc</i>, <i>/sys</i>, and <i>/dev/pts</i>
+    are not monitorable with inotify.</p>
+<p class="Pp">The inotify API does not report file accesses and modifications
+    that may occur because of <b>mmap</b>(2), <b>msync</b>(2), and
+    <b>munmap</b>(2).</p>
+<p class="Pp">The inotify API identifies affected files by filename. However, by
+    the time an application processes an inotify event, the filename may already
+    have been deleted or renamed.</p>
+<p class="Pp">The inotify API identifies events via watch descriptors. It is the
+    application's responsibility to cache a mapping (if one is needed) between
+    watch descriptors and pathnames. Be aware that directory renamings may
+    affect multiple cached pathnames.</p>
+<p class="Pp">Inotify monitoring of directories is not recursive: to monitor
+    subdirectories under a directory, additional watches must be created. This
+    can take a significant amount time for large directory trees.</p>
+<p class="Pp">If monitoring an entire directory subtree, and a new subdirectory
+    is created in that tree or an existing directory is renamed into that tree,
+    be aware that by the time you create a watch for the new subdirectory, new
+    files (and subdirectories) may already exist inside the subdirectory.
+    Therefore, you may want to scan the contents of the subdirectory immediately
+    after adding the watch (and, if desired, recursively add watches for any
+    subdirectories that it contains).</p>
+<p class="Pp">Note that the event queue can overflow. In this case, events are
+    lost. Robust applications should handle the possibility of lost events
+    gracefully. For example, it may be necessary to rebuild part or all of the
+    application cache. (One simple, but possibly expensive, approach is to close
+    the inotify file descriptor, empty the cache, create a new inotify file
+    descriptor, and then re-create watches and cache entries for the objects to
+    be monitored.)</p>
+<p class="Pp">If a filesystem is mounted on top of a monitored directory, no
+    event is generated, and no events are generated for objects immediately
+    under the new mount point. If the filesystem is subsequently unmounted,
+    events will subsequently be generated for the directory and the objects it
+    contains.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Dealing_with_rename()_events"><a class="permalink" href="#Dealing_with_rename()_events">Dealing
+  with rename() events</a></h2>
+<p class="Pp">As noted above, the <b>IN_MOVED_FROM</b> and <b>IN_MOVED_TO</b>
+    event pair that is generated by <b>rename</b>(2) can be matched up via their
+    shared cookie value. However, the task of matching has some challenges.</p>
+<p class="Pp">These two events are usually consecutive in the event stream
+    available when reading from the inotify file descriptor. However, this is
+    not guaranteed. If multiple processes are triggering events for monitored
+    objects, then (on rare occasions) an arbitrary number of other events may
+    appear between the <b>IN_MOVED_FROM</b> and <b>IN_MOVED_TO</b> events.
+    Furthermore, it is not guaranteed that the event pair is atomically inserted
+    into the queue: there may be a brief interval where the <b>IN_MOVED_FROM</b>
+    has appeared, but the <b>IN_MOVED_TO</b> has not.</p>
+<p class="Pp">Matching up the <b>IN_MOVED_FROM</b> and <b>IN_MOVED_TO</b> event
+    pair generated by <b>rename</b>(2) is thus inherently racy. (Don't forget
+    that if an object is renamed outside of a monitored directory, there may not
+    even be an <b>IN_MOVED_TO</b> event.) Heuristic approaches (e.g., assume the
+    events are always consecutive) can be used to ensure a match in most cases,
+    but will inevitably miss some cases, causing the application to perceive the
+    <b>IN_MOVED_FROM</b> and <b>IN_MOVED_TO</b> events as being unrelated. If
+    watch descriptors are destroyed and re-created as a result, then those watch
+    descriptors will be inconsistent with the watch descriptors in any pending
+    events. (Re-creating the inotify file descriptor and rebuilding the cache
+    may be useful to deal with this scenario.)</p>
+<p class="Pp">Applications should also allow for the possibility that the
+    <b>IN_MOVED_FROM</b> event was the last event that could fit in the buffer
+    returned by the current call to <b>read</b>(2), and the accompanying
+    <b>IN_MOVED_TO</b> event might be fetched only on the next <b>read</b>(2),
+    which should be done with a (small) timeout to allow for the fact that
+    insertion of the <b>IN_MOVED_FROM</b>+<b>IN_MOVED_TO</b> event pair is not
+    atomic, and also the possibility that there may not be any
+    <b>IN_MOVED_TO</b> event.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">Before Linux 3.19, <b>fallocate</b>(2) did not create any inotify
+    events. Since Linux 3.19, calls to <b>fallocate</b>(2) generate
+    <b>IN_MODIFY</b> events.</p>
+<p class="Pp">Before Linux 2.6.16, the <b>IN_ONESHOT</b> <i>mask</i> flag does
+    not work.</p>
+<p class="Pp">As originally designed and implemented, the <b>IN_ONESHOT</b> flag
+    did not cause an <b>IN_IGNORED</b> event to be generated when the watch was
+    dropped after one event. However, as an unintended effect of other changes,
+    since Linux 2.6.36, an <b>IN_IGNORED</b> event is generated in this
+  case.</p>
+<p class="Pp">Before Linux 2.6.25, the kernel code that was intended to coalesce
+    successive identical events (i.e., the two most recent events could
+    potentially be coalesced if the older had not yet been read) instead checked
+    if the most recent event could be coalesced with the <i>oldest</i> unread
+    event.</p>
+<p class="Pp">When a watch descriptor is removed by calling
+    <b>inotify_rm_watch</b>(2) (or because a watch file is deleted or the
+    filesystem that contains it is unmounted), any pending unread events for
+    that watch descriptor remain available to read. As watch descriptors are
+    subsequently allocated with <b>inotify_add_watch</b>(2), the kernel cycles
+    through the range of possible watch descriptors (0 to <b>INT_MAX</b>)
+    incrementally. When allocating a free watch descriptor, no check is made to
+    see whether that watch descriptor number has any pending unread events in
+    the inotify queue. Thus, it can happen that a watch descriptor is
+    reallocated even when pending unread events exist for a previous incarnation
+    of that watch descriptor number, with the result that the application might
+    then read those events and interpret them as belonging to the file
+    associated with the newly recycled watch descriptor. In practice, the
+    likelihood of hitting this bug may be extremely low, since it requires that
+    an application cycle through <b>INT_MAX</b> watch descriptors, release a
+    watch descriptor while leaving unread events for that watch descriptor in
+    the queue, and then recycle that watch descriptor. For this reason, and
+    because there have been no reports of the bug occurring in real-world
+    applications, as of Linux 3.15, no kernel changes have yet been made to
+    eliminate this possible bug.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The following program demonstrates the usage of the inotify API.
+    It marks the directories passed as a command-line arguments and waits for
+    events of type <b>IN_OPEN</b>, <b>IN_CLOSE_NOWRITE</b>, and
+    <b>IN_CLOSE_WRITE</b>.</p>
+<p class="Pp">The following output was recorded while editing the file
+    <i>/home/user/temp/foo</i> and listing directory <i>/tmp</i>. Before the
+    file and the directory were opened, <b>IN_OPEN</b> events occurred. After
+    the file was closed, an <b>IN_CLOSE_WRITE</b> event occurred. After the
+    directory was closed, an <b>IN_CLOSE_NOWRITE</b> event occurred. Execution
+    of the program ended when the user pressed the ENTER key.</p>
+<section class="Ss">
+<h2 class="Ss" id="Example_output"><a class="permalink" href="#Example_output">Example
+  output</a></h2>
+<br>
+<pre>$ <b>./a.out /tmp /home/user/temp</b>
+Press enter key to terminate.
+Listening for events.
+IN_OPEN: /home/user/temp/foo [file]
+IN_CLOSE_WRITE: /home/user/temp/foo [file]
+IN_OPEN: /tmp/ [directory]
+IN_CLOSE_NOWRITE: /tmp/ [directory]
+Listening for events stopped.
+</pre>
+<br>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#include &lt;errno.h&gt;
+#include &lt;poll.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;sys/inotify.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;string.h&gt;
+/* Read all available inotify events from the file descriptor 'fd'.
+<br>
+   wd is the table of watch descriptors for the directories in argv.
+<br>
+   argc is the length of wd and argv.
+<br>
+   argv is the list of watched directories.
+<br>
+   Entry 0 of wd and argv is unused. */
+static void
+handle_events(int fd, int *wd, int argc, char* argv[])
+{
+<br>
+    /* Some systems cannot read integer variables if they are not
+<br>
+       properly aligned. On other systems, incorrect alignment may
+<br>
+       decrease performance. Hence, the buffer used for reading from
+<br>
+       the inotify file descriptor should have the same alignment as
+<br>
+       struct inotify_event. */
+<br>
+    char buf[4096]
+<br>
+        __attribute__ ((aligned(__alignof__(struct inotify_event))));
+<br>
+    const struct inotify_event *event;
+<br>
+    ssize_t len;
+<br>
+    /* Loop while events can be read from inotify file descriptor. */
+<br>
+    for (;;) {
+<br>
+        /* Read some events. */
+<br>
+        len = read(fd, buf, sizeof(buf));
+<br>
+        if (len == -1 &amp;&amp; errno != EAGAIN) {
+<br>
+            perror("read");
+<br>
+            exit(EXIT_FAILURE);
+<br>
+        }
+<br>
+        /* If the nonblocking read() found no events to read, then
+<br>
+           it returns -1 with errno set to EAGAIN. In that case,
+<br>
+           we exit the loop. */
+<br>
+        if (len &lt;= 0)
+<br>
+            break;
+<br>
+        /* Loop over all events in the buffer. */
+<br>
+        for (char *ptr = buf; ptr &lt; buf + len;
+<br>
+                ptr += sizeof(struct inotify_event) + event-&gt;len) {
+<br>
+            event = (const struct inotify_event *) ptr;
+<br>
+            /* Print event type. */
+<br>
+            if (event-&gt;mask &amp; IN_OPEN)
+<br>
+                printf("IN_OPEN: ");
+<br>
+            if (event-&gt;mask &amp; IN_CLOSE_NOWRITE)
+<br>
+                printf("IN_CLOSE_NOWRITE: ");
+<br>
+            if (event-&gt;mask &amp; IN_CLOSE_WRITE)
+<br>
+                printf("IN_CLOSE_WRITE: ");
+<br>
+            /* Print the name of the watched directory. */
+<br>
+            for (size_t i = 1; i &lt; argc; ++i) {
+<br>
+                if (wd[i] == event-&gt;wd) {
+<br>
+                    printf("%s/", argv[i]);
+<br>
+                    break;
+<br>
+                }
+<br>
+            }
+<br>
+            /* Print the name of the file. */
+<br>
+            if (event-&gt;len)
+<br>
+                printf("%s", event-&gt;name);
+<br>
+            /* Print type of filesystem object. */
+<br>
+            if (event-&gt;mask &amp; IN_ISDIR)
+<br>
+                printf(" [directory]\n");
+<br>
+            else
+<br>
+                printf(" [file]\n");
+<br>
+        }
+<br>
+    }
+}
+int
+main(int argc, char* argv[])
+{
+<br>
+    char buf;
+<br>
+    int fd, i, poll_num;
+<br>
+    int *wd;
+<br>
+    nfds_t nfds;
+<br>
+    struct pollfd fds[2];
+<br>
+    if (argc &lt; 2) {
+<br>
+        printf("Usage: %s PATH [PATH ...]\n", argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    printf("Press ENTER key to terminate.\n");
+<br>
+    /* Create the file descriptor for accessing the inotify API. */
+<br>
+    fd = inotify_init1(IN_NONBLOCK);
+<br>
+    if (fd == -1) {
+<br>
+        perror("inotify_init1");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    /* Allocate memory for watch descriptors. */
+<br>
+    wd = calloc(argc, sizeof(int));
+<br>
+    if (wd == NULL) {
+<br>
+        perror("calloc");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    /* Mark directories for events
+<br>
+       - file was opened
+<br>
+       - file was closed */
+<br>
+    for (i = 1; i &lt; argc; i++) {
+<br>
+        wd[i] = inotify_add_watch(fd, argv[i],
+<br>
+                                  IN_OPEN | IN_CLOSE);
+<br>
+        if (wd[i] == -1) {
+<br>
+            fprintf(stderr, "Cannot watch '%s': %s\n",
+<br>
+                    argv[i], strerror(errno));
+<br>
+            exit(EXIT_FAILURE);
+<br>
+        }
+<br>
+    }
+<br>
+    /* Prepare for polling. */
+<br>
+    nfds = 2;
+<br>
+    fds[0].fd = STDIN_FILENO;       /* Console input */
+<br>
+    fds[0].events = POLLIN;
+<br>
+    fds[1].fd = fd;                 /* Inotify input */
+<br>
+    fds[1].events = POLLIN;
+<br>
+    /* Wait for events and/or terminal input. */
+<br>
+    printf("Listening for events.\n");
+<br>
+    while (1) {
+<br>
+        poll_num = poll(fds, nfds, -1);
+<br>
+        if (poll_num == -1) {
+<br>
+            if (errno == EINTR)
+<br>
+                continue;
+<br>
+            perror("poll");
+<br>
+            exit(EXIT_FAILURE);
+<br>
+        }
+<br>
+        if (poll_num &gt; 0) {
+<br>
+            if (fds[0].revents &amp; POLLIN) {
+<br>
+                /* Console input is available. Empty stdin and quit. */
+<br>
+                while (read(STDIN_FILENO, &amp;buf, 1) &gt; 0 &amp;&amp; buf != '\n')
+<br>
+                    continue;
+<br>
+                break;
+<br>
+            }
+<br>
+            if (fds[1].revents &amp; POLLIN) {
+<br>
+                /* Inotify events are available. */
+<br>
+                handle_events(fd, wd, argc, argv);
+<br>
+            }
+<br>
+        }
+<br>
+    }
+<br>
+    printf("Listening for events stopped.\n");
+<br>
+    /* Close inotify file descriptor. */
+<br>
+    close(fd);
+<br>
+    free(wd);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>inotifywait</b>(1), <b>inotifywatch</b>(1),
+    <b>inotify_add_watch</b>(2), <b>inotify_init</b>(2),
+    <b>inotify_init1</b>(2), <b>inotify_rm_watch</b>(2), <b>read</b>(2),
+    <b>stat</b>(2), <b>fanotify</b>(7)</p>
+<p class="Pp"><i>Documentation/filesystems/inotify.txt</i> in the Linux kernel
+    source tree</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

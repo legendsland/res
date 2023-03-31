@@ -1,0 +1,509 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright 1993 David Metcalfe (david@prism.demon.co.uk)
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   References consulted:
+       Linux libc source code
+       Lewine's _POSIX Programmer's Guide_ (O'Reilly & Associates, 1991)
+       386BSD man pages
+       GNU texinfo documentation on glibc date/time functions.
+   Modified Sat Jul 24 18:03:44 1993 by Rik Faith (faith@cs.unc.edu)
+   Applied fix by Wolfgang Franke, aeb, 961011
+   Corrected return value, aeb, 970307
+   Added Single UNIX Spec conversions and %z, aeb/esr, 990329.
+   2005-11-22 mtk, added glibc Notes covering optional 'flag' and
+             'width' components of conversion specifications.
+   --><head>
+<meta name="dc.identifier" content="res/9f89ef25a05e200cd68b9050d57063f44b9a7d45">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>strftime(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">strftime(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">strftime(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">strftime - format date and time</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;time.h&gt;</b></pre>
+<pre><b>size_t strftime(char </b><i>s</i><b>[restrict .</b><i>max</i><b>], size_t </b><i>max</i><b>,</b>
+<b>                const char *restrict </b><i>format</i><b>,</b>
+<b>                const struct tm *restrict </b><i>tm</i><b>);</b></pre>
+<pre><b>size_t strftime_l(char </b><i>s</i><b>[restrict .</b><i>max</i><b>], size_t </b><i>max</i><b>,</b>
+<b>                const char *restrict </b><i>format</i><b>,</b>
+<b>                const struct tm *restrict </b><i>tm</i><b>,</b>
+<b>                locale_t </b><i>locale</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>strftime</b>() function formats the broken-down time
+    <i>tm</i> according to the format specification <i>format</i> and places the
+    result in the character array <i>s</i> of size <i>max</i>. The broken-down
+    time structure <i>tm</i> is defined in <i>&lt;time.h&gt;</i>. See also
+    <b>ctime</b>(3).</p>
+<p class="Pp">The format specification is a null-terminated string and may
+    contain special character sequences called <i>conversion specifications</i>,
+    each of which is introduced by a '%' character and terminated by some other
+    character known as a <i>conversion specifier character</i>. All other
+    character sequences are <i>ordinary character sequences</i>.</p>
+<p class="Pp">The characters of ordinary character sequences (including the null
+    byte) are copied verbatim from <i>format</i> to <i>s</i>. However, the
+    characters of conversion specifications are replaced as shown in the list
+    below. In this list, the field(s) employed from the <i>tm</i> structure are
+    also shown.</p>
+<dl class="Bl-tag">
+  <dt><b>%a</b></dt>
+  <dd>The abbreviated name of the day of the week according to the current
+      locale. (Calculated from <i>tm_wday</i>.) (The specific names used in the
+      current locale can be obtained by calling <b>nl_langinfo</b>(3) with
+      <b>ABDAY_</b>{<b>1</b>–<b>7</b>} as an argument.)</dd>
+  <dt><b>%A</b></dt>
+  <dd>The full name of the day of the week according to the current locale.
+      (Calculated from <i>tm_wday</i>.) (The specific names used in the current
+      locale can be obtained by calling <b>nl_langinfo</b>(3) with
+      <b>DAY_</b>{<b>1</b>–<b>7</b>} as an argument.)</dd>
+  <dt><b>%b</b></dt>
+  <dd>The abbreviated month name according to the current locale. (Calculated
+      from <i>tm_mon</i>.) (The specific names used in the current locale can be
+      obtained by calling <b>nl_langinfo</b>(3) with
+      <b>ABMON_</b>{<b>1</b>–<b>12</b>} as an argument.)</dd>
+  <dt><b>%B</b></dt>
+  <dd>The full month name according to the current locale. (Calculated from
+      <i>tm_mon</i>.) (The specific names used in the current locale can be
+      obtained by calling <b>nl_langinfo</b>(3) with
+      <b>MON_</b>{<b>1</b>–<b>12</b>} as an argument.)</dd>
+  <dt><b>%c</b></dt>
+  <dd>The preferred date and time representation for the current locale. (The
+      specific format used in the current locale can be obtained by calling
+      <b>nl_langinfo</b>(3) with <b>D_T_FMT</b> as an argument for the <b>%c</b>
+      conversion specification, and with <b>ERA_D_T_FMT</b> for the <b>%Ec</b>
+      conversion specification.) (In the POSIX locale this is equivalent to
+      <b>%a %b %e %H:%M:%S %Y</b>.)</dd>
+  <dt><b>%C</b></dt>
+  <dd>The century number (year/100) as a 2-digit integer. (SU) (The <b>%EC</b>
+      conversion specification corresponds to the name of the era.) (Calculated
+      from <i>tm_year</i>.)</dd>
+  <dt><b>%d</b></dt>
+  <dd>The day of the month as a decimal number (range 01 to 31). (Calculated
+      from <i>tm_mday</i>.)</dd>
+  <dt><b>%D</b></dt>
+  <dd>Equivalent to <b>%m/%d/%y</b>. (Yecch—for Americans only. Americans
+      should note that in other countries <b>%d/%m/%y</b> is rather common. This
+      means that in international context this format is ambiguous and should
+      not be used.) (SU)</dd>
+  <dt><b>%e</b></dt>
+  <dd>Like <b>%d</b>, the day of the month as a decimal number, but a leading
+      zero is replaced by a space. (SU) (Calculated from <i>tm_mday</i>.)</dd>
+  <dt><b>%E</b></dt>
+  <dd>Modifier: use alternative ("era-based") format, see below.
+    (SU)</dd>
+  <dt><b>%F</b></dt>
+  <dd>Equivalent to <b>%Y-%m-%d</b> (the ISO&nbsp;8601 date format).
+    (C99)</dd>
+  <dt><b>%G</b></dt>
+  <dd>The ISO&nbsp;8601 week-based year (see NOTES) with century as a decimal
+      number. The 4-digit year corresponding to the ISO week number (see
+      <b>%V</b>). This has the same format and value as <b>%Y</b>, except that
+      if the ISO week number belongs to the previous or next year, that year is
+      used instead. (TZ) (Calculated from <i>tm_year</i>, <i>tm_yday</i>, and
+      <i>tm_wday</i>.)</dd>
+  <dt><b>%g</b></dt>
+  <dd>Like <b>%G</b>, but without century, that is, with a 2-digit year
+      (00–99). (TZ) (Calculated from <i>tm_year</i>, <i>tm_yday</i>, and
+      <i>tm_wday</i>.)</dd>
+  <dt><b>%h</b></dt>
+  <dd>Equivalent to <b>%b</b>. (SU)</dd>
+  <dt><b>%H</b></dt>
+  <dd>The hour as a decimal number using a 24-hour clock (range 00 to 23).
+      (Calculated from <i>tm_hour</i>.)</dd>
+  <dt><b>%I</b></dt>
+  <dd>The hour as a decimal number using a 12-hour clock (range 01 to 12).
+      (Calculated from <i>tm_hour</i>.)</dd>
+  <dt><b>%j</b></dt>
+  <dd>The day of the year as a decimal number (range 001 to 366). (Calculated
+      from <i>tm_yday</i>.)</dd>
+  <dt><b>%k</b></dt>
+  <dd>The hour (24-hour clock) as a decimal number (range 0 to 23); single
+      digits are preceded by a blank. (See also <b>%H</b>.) (Calculated from
+      <i>tm_hour</i>.) (TZ)</dd>
+  <dt><b>%l</b></dt>
+  <dd>The hour (12-hour clock) as a decimal number (range 1 to 12); single
+      digits are preceded by a blank. (See also <b>%I</b>.) (Calculated from
+      <i>tm_hour</i>.) (TZ)</dd>
+  <dt><b>%m</b></dt>
+  <dd>The month as a decimal number (range 01 to 12). (Calculated from
+      <i>tm_mon</i>.)</dd>
+  <dt><b>%M</b></dt>
+  <dd>The minute as a decimal number (range 00 to 59). (Calculated from
+      <i>tm_min</i>.)</dd>
+  <dt><b>%n</b></dt>
+  <dd>A newline character. (SU)</dd>
+  <dt><b>%O</b></dt>
+  <dd>Modifier: use alternative numeric symbols, see below. (SU)</dd>
+  <dt><b>%p</b></dt>
+  <dd>Either "AM" or "PM" according to the given time value,
+      or the corresponding strings for the current locale. Noon is treated as
+      "PM" and midnight as "AM". (Calculated from
+      <i>tm_hour</i>.) (The specific string representations used for
+      "AM" and "PM" in the current locale can be obtained by
+      calling <b>nl_langinfo</b>(3) with <b>AM_STR</b> and <b>PM_STR</b>,
+      respectively.)</dd>
+  <dt><b>%P</b></dt>
+  <dd>Like <b>%p</b> but in lowercase: "am" or "pm" or a
+      corresponding string for the current locale. (Calculated from
+      <i>tm_hour</i>.) (GNU)</dd>
+  <dt><b>%r</b></dt>
+  <dd>The time in a.m. or p.m. notation. (SU) (The specific format used in the
+      current locale can be obtained by calling <b>nl_langinfo</b>(3) with
+      <b>T_FMT_AMPM</b> as an argument.) (In the POSIX locale this is equivalent
+      to <b>%I:%M:%S %p</b>.)</dd>
+  <dt><b>%R</b></dt>
+  <dd>The time in 24-hour notation (<b>%H:%M</b>). (SU) For a version including
+      the seconds, see <b>%T</b> below.</dd>
+  <dt><b>%s</b></dt>
+  <dd>The number of seconds since the Epoch, 1970-01-01 00:00:00 +0000 (UTC).
+      (TZ) (Calculated from <i>mktime(tm)</i>.)</dd>
+  <dt><b>%S</b></dt>
+  <dd>The second as a decimal number (range 00 to 60). (The range is up to 60 to
+      allow for occasional leap seconds.) (Calculated from <i>tm_sec</i>.)</dd>
+  <dt><b>%t</b></dt>
+  <dd>A tab character. (SU)</dd>
+  <dt><b>%T</b></dt>
+  <dd>The time in 24-hour notation (<b>%H:%M:%S</b>). (SU)</dd>
+  <dt><b>%u</b></dt>
+  <dd>The day of the week as a decimal, range 1 to 7, Monday being 1. See also
+      <b>%w</b>. (Calculated from <i>tm_wday</i>.) (SU)</dd>
+  <dt><b>%U</b></dt>
+  <dd>The week number of the current year as a decimal number, range 00 to 53,
+      starting with the first Sunday as the first day of week 01. See also
+      <b>%V</b> and <b>%W</b>. (Calculated from <i>tm_yday</i> and
+      <i>tm_wday</i>.)</dd>
+  <dt><b>%V</b></dt>
+  <dd>The ISO&nbsp;8601 week number (see NOTES) of the current year as a
+      decimal number, range 01 to 53, where week 1 is the first week that has at
+      least 4 days in the new year. See also <b>%U</b> and <b>%W</b>.
+      (Calculated from <i>tm_year</i>, <i>tm_yday</i>, and <i>tm_wday</i>.)
+    (SU)</dd>
+  <dt><b>%w</b></dt>
+  <dd>The day of the week as a decimal, range 0 to 6, Sunday being 0. See also
+      <b>%u</b>. (Calculated from <i>tm_wday</i>.)</dd>
+  <dt><b>%W</b></dt>
+  <dd>The week number of the current year as a decimal number, range 00 to 53,
+      starting with the first Monday as the first day of week 01. (Calculated
+      from <i>tm_yday</i> and <i>tm_wday</i>.)</dd>
+  <dt><b>%x</b></dt>
+  <dd>The preferred date representation for the current locale without the time.
+      (The specific format used in the current locale can be obtained by calling
+      <b>nl_langinfo</b>(3) with <b>D_FMT</b> as an argument for the <b>%x</b>
+      conversion specification, and with <b>ERA_D_FMT</b> for the <b>%Ex</b>
+      conversion specification.) (In the POSIX locale this is equivalent to
+      <b>%m/%d/%y</b>.)</dd>
+  <dt><b>%X</b></dt>
+  <dd>The preferred time representation for the current locale without the date.
+      (The specific format used in the current locale can be obtained by calling
+      <b>nl_langinfo</b>(3) with <b>T_FMT</b> as an argument for the <b>%X</b>
+      conversion specification, and with <b>ERA_T_FMT</b> for the <b>%EX</b>
+      conversion specification.) (In the POSIX locale this is equivalent to
+      <b>%H:%M:%S</b>.)</dd>
+  <dt><b>%y</b></dt>
+  <dd>The year as a decimal number without a century (range 00 to 99). (The
+      <b>%Ey</b> conversion specification corresponds to the year since the
+      beginning of the era denoted by the <b>%EC</b> conversion specification.)
+      (Calculated from <i>tm_year</i>)</dd>
+  <dt><b>%Y</b></dt>
+  <dd>The year as a decimal number including the century. (The <b>%EY</b>
+      conversion specification corresponds to the full alternative year
+      representation.) (Calculated from <i>tm_year</i>)</dd>
+  <dt><b>%z</b></dt>
+  <dd>The <i>+hhmm</i> or <i>-hhmm</i> numeric timezone (that is, the hour and
+      minute offset from UTC). (SU)</dd>
+  <dt><b>%Z</b></dt>
+  <dd>The timezone name or abbreviation.</dd>
+  <dt><b>%+</b></dt>
+  <dd>The date and time in <b>date</b>(1) format. (TZ) (Not supported in
+      glibc2.)</dd>
+  <dt><b>%%</b></dt>
+  <dd>A literal '%' character.</dd>
+</dl>
+<p class="Pp">Some conversion specifications can be modified by preceding the
+    conversion specifier character by the <b>E</b> or <b>O</b> <i>modifier</i>
+    to indicate that an alternative format should be used. If the alternative
+    format or specification does not exist for the current locale, the behavior
+    will be as if the unmodified conversion specification were used. (SU) The
+    Single UNIX Specification mentions <b>%Ec</b>, <b>%EC</b>, <b>%Ex</b>,
+    <b>%EX</b>, <b>%Ey</b>, <b>%EY</b>, <b>%Od</b>, <b>%Oe</b>, <b>%OH</b>,
+    <b>%OI</b>, <b>%Om</b>, <b>%OM</b>, <b>%OS</b>, <b>%Ou</b>, <b>%OU</b>,
+    <b>%OV</b>, <b>%Ow</b>, <b>%OW</b>, <b>%Oy</b>, where the effect of the
+    <b>O</b> modifier is to use alternative numeric symbols (say, roman
+    numerals), and that of the <b>E</b> modifier is to use a locale-dependent
+    alternative representation. The rules governing date representation with the
+    <b>E</b> modifier can be obtained by supplying <b>ERA</b> as an argument to
+    a <b>nl_langinfo</b>(3). One example of such alternative forms is the
+    Japanese era calendar scheme in the <b>ja_JP</b> glibc locale.</p>
+<p class="Pp"><b>strftime_l</b>() is equivalent to <b>strftime</b>(), except it
+    uses the specified <i>locale</i> instead of the current locale. The
+    behaviour is undefined if <i>locale</i> is invalid or
+    <b>LC_GLOBAL_LOCALE</b>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Provided that the result string, including the terminating null
+    byte, does not exceed <i>max</i> bytes, <b>strftime</b>() returns the number
+    of bytes (excluding the terminating null byte) placed in the array <i>s</i>.
+    If the length of the result string (including the terminating null byte)
+    would exceed <i>max</i> bytes, then <b>strftime</b>() returns 0, and the
+    contents of the array are undefined.</p>
+<p class="Pp">Note that the return value 0 does not necessarily indicate an
+    error. For example, in many locales <b>%p</b> yields an empty string. An
+    empty <i>format</i> string will likewise yield an empty string.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ENVIRONMENT"><a class="permalink" href="#ENVIRONMENT">ENVIRONMENT</a></h1>
+<p class="Pp">The environment variables <b>TZ</b> and <b>LC_TIME</b> are
+  used.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>strftime (), strftime_l ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe env locale</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>strftime</b>(): SVr4, C89, C99.</p>
+<p class="Pp"><b>strftime_l</b>(): POSIX.1-2008.</p>
+<p class="Pp">There are strict inclusions between the set of conversions given
+    in ANSI C (unmarked), those given in the Single UNIX Specification (marked
+    SU), those given in Olson's timezone package (marked TZ), and those given in
+    glibc (marked GNU), except that <b>%+</b> is not supported in glibc2. On the
+    other hand glibc2 has several more extensions. POSIX.1 only refers to ANSI
+    C; POSIX.2 describes under <b>date</b>(1) several extensions that could
+    apply to <b>strftime</b>() as well. The <b>%F</b> conversion is in C99 and
+    POSIX.1-2001.</p>
+<p class="Pp">In SUSv2, the <b>%S</b> specifier allowed a range of 00 to 61, to
+    allow for the theoretical possibility of a minute that included a double
+    leap second (there never has been such a minute).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="ISO_8601_week_dates"><a class="permalink" href="#ISO_8601_week_dates">ISO
+  8601 week dates</a></h2>
+<p class="Pp"><b>%G</b>, <b>%g</b>, and <b>%V</b> yield values calculated from
+    the week-based year defined by the ISO&nbsp;8601 standard. In this system,
+    weeks start on a Monday, and are numbered from 01, for the first week, up to
+    52 or 53, for the last week. Week 1 is the first week where four or more
+    days fall within the new year (or, synonymously, week 01 is: the first week
+    of the year that contains a Thursday; or, the week that has 4 January in
+    it). When three or fewer days of the first calendar week of the new year
+    fall within that year, then the ISO 8601 week-based system counts those days
+    as part of week 52 or 53 of the preceding year. For example, 1 January 2010
+    is a Friday, meaning that just three days of that calendar week fall in
+    2010. Thus, the ISO&nbsp;8601 week-based system considers these days to be
+    part of week 53 (<b>%V</b>) of the year 2009 (<b>%G</b>); week 01 of
+    ISO&nbsp;8601 year 2010 starts on Monday, 4 January 2010. Similarly, the
+    first two days of January 2011 are considered to be part of week 52 of the
+    year 2010.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="glibc_notes"><a class="permalink" href="#glibc_notes">glibc
+  notes</a></h2>
+<p class="Pp">glibc provides some extensions for conversion specifications.
+    (These extensions are not specified in POSIX.1-2001, but a few other systems
+    provide similar features.) Between the '%' character and the conversion
+    specifier character, an optional <i>flag</i> and field <i>width</i> may be
+    specified. (These precede the <b>E</b> or <b>O</b> modifiers, if
+  present.)</p>
+<p class="Pp">The following flag characters are permitted:</p>
+<dl class="Bl-tag">
+  <dt><b>_</b></dt>
+  <dd>(underscore) Pad a numeric result string with spaces.</dd>
+  <dt><b>-</b></dt>
+  <dd>(dash) Do not pad a numeric result string.</dd>
+  <dt><b>0</b></dt>
+  <dd>Pad a numeric result string with zeros even if the conversion specifier
+      character uses space-padding by default.</dd>
+  <dt><b>^</b></dt>
+  <dd>Convert alphabetic characters in result string to uppercase.</dd>
+  <dt><b>#</b></dt>
+  <dd>Swap the case of the result string. (This flag works only with certain
+      conversion specifier characters, and of these, it is only really useful
+      with <b>%Z</b>.)</dd>
+</dl>
+<p class="Pp">An optional decimal width specifier may follow the (possibly
+    absent) flag. If the natural size of the field is smaller than this width,
+    then the result string is padded (on the left) to the specified width.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">If the output string would exceed <i>max</i> bytes, <i>errno</i>
+    is <i>not</i> set. This makes it impossible to distinguish this error case
+    from cases where the <i>format</i> string legitimately produces a
+    zero-length output string. POSIX.1-2001 does <i>not</i> specify any
+    <i>errno</i> settings for <b>strftime</b>().</p>
+<p class="Pp">Some buggy versions of <b>gcc</b>(1) complain about the use of
+    <b>%c</b>: <i>warning: `%c' yields only last 2 digits of year in some
+    locales</i>. Of course programmers are encouraged to use <b>%c</b>, as it
+    gives the preferred date and time representation. One meets all kinds of
+    strange obfuscations to circumvent this <b>gcc</b>(1) problem. A relatively
+    clean one is to add an intermediate function</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>size_t
+my_strftime(char *s, size_t max, const char *fmt,
+<br>
+            const struct tm *tm)
+{
+<br>
+    return strftime(s, max, fmt, tm);
+}
+</pre>
+<br>
+<p class="Pp">Nowadays, <b>gcc</b>(1) provides the <i>-Wno-format-y2k</i> option
+    to prevent the warning, so that the above workaround is no longer
+  required.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp"><b>RFC&nbsp;2822-compliant date format</b> (with an English
+    locale for %a and %b)</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>"%a,&nbsp;%d&nbsp;%b&nbsp;%Y&nbsp;%T&nbsp;%z"
+</pre>
+<br>
+<p class="Pp"><b>RFC&nbsp;822-compliant date format</b> (with an English
+    locale for %a and %b)</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>"%a,&nbsp;%d&nbsp;%b&nbsp;%y&nbsp;%T&nbsp;%z"
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Example_program"><a class="permalink" href="#Example_program">Example
+  program</a></h2>
+<p class="Pp">The program below can be used to experiment with
+    <b>strftime</b>().</p>
+<p class="Pp">Some examples of the result string produced by the glibc
+    implementation of <b>strftime</b>() are as follows:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$<b> ./a.out '%m'</b>
+Result string is "11"
+$<b> ./a.out '%5m'</b>
+Result string is "00011"
+$<b> ./a.out '%_5m'</b>
+Result string is "   11"
+</pre>
+<br>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;time.h&gt;
+int
+main(int argc, char *argv[])
+{
+<br>
+    char outstr[200];
+<br>
+    time_t t;
+<br>
+    struct tm *tmp;
+<br>
+    t = time(NULL);
+<br>
+    tmp = localtime(&amp;t);
+<br>
+    if (tmp == NULL) {
+<br>
+        perror("localtime");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    if (strftime(outstr, sizeof(outstr), argv[1], tmp) == 0) {
+<br>
+        fprintf(stderr, "strftime returned 0");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    printf("Result string is \"%s\"\n", outstr);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>date</b>(1), <b>time</b>(2), <b>ctime</b>(3),
+    <b>nl_langinfo</b>(3), <b>setlocale</b>(3), <b>sprintf</b>(3),
+    <b>strptime</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

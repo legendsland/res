@@ -1,0 +1,139 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/55674ff76f60615bbe2b6bfeaeaea95bcd267cce">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>pkey_alloc(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">pkey_alloc(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">pkey_alloc(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pkey_alloc, pkey_free - allocate or free a protection key</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#define _GNU_SOURCE</b>             /* See feature_test_macros(7) */
+<b>#include &lt;sys/mman.h&gt;</b></pre>
+<pre><b>int pkey_alloc(unsigned int </b><i>flags</i><b>, unsigned int </b><i>access_rights</i><b>);</b>
+<b>int pkey_free(int </b><i>pkey</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>pkey_alloc</b>() allocates a protection key (pkey) and allows
+    it to be passed to <b>pkey_mprotect</b>(2).</p>
+<p class="Pp">The <b>pkey_alloc</b>() <i>flags</i> is reserved for future use
+    and currently must always be specified as 0.</p>
+<p class="Pp">The <b>pkey_alloc</b>() <i>access_rights</i> argument may contain
+    zero or more disable operations:</p>
+<dl class="Bl-tag">
+  <dt id="PKEY_DISABLE_ACCESS"><a class="permalink" href="#PKEY_DISABLE_ACCESS"><b>PKEY_DISABLE_ACCESS</b></a></dt>
+  <dd>Disable all data access to memory covered by the returned protection
+    key.</dd>
+  <dt id="PKEY_DISABLE_WRITE"><a class="permalink" href="#PKEY_DISABLE_WRITE"><b>PKEY_DISABLE_WRITE</b></a></dt>
+  <dd>Disable write access to memory covered by the returned protection
+    key.</dd>
+</dl>
+<p class="Pp"><b>pkey_free</b>() frees a protection key and makes it available
+    for later allocations. After a protection key has been freed, it may no
+    longer be used in any protection-key-related operations.</p>
+<p class="Pp">An application should not call <b>pkey_free</b>() on any
+    protection key which has been assigned to an address range by
+    <b>pkey_mprotect</b>(2) and which is still in use. The behavior in this case
+    is undefined and may result in an error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>pkey_alloc</b>() returns a positive protection key
+    value. On success, <b>pkey_free</b>() returns zero. On error, -1 is
+    returned, and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>pkey</i>, <i>flags</i>, or <i>access_rights</i> is invalid.</dd>
+  <dt id="ENOSPC"><a class="permalink" href="#ENOSPC"><b>ENOSPC</b></a></dt>
+  <dd>(<b>pkey_alloc</b>()) All protection keys available for the current
+      process have been allocated. The number of keys available is
+      architecture-specific and implementation-specific and may be reduced by
+      kernel-internal use of certain keys. There are currently 15 keys available
+      to user programs on x86.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>This error will also be returned if the processor or operating system does
+      not support protection keys. Applications should always be prepared to
+      handle this error, since factors outside of the application's control can
+      reduce the number of available pkeys.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>pkey_alloc</b>() and <b>pkey_free</b>() were added in Linux
+    4.9; library support was added in glibc 2.27.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">The <b>pkey_alloc</b>() and <b>pkey_free</b>() system calls are
+    Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp"><b>pkey_alloc</b>() is always safe to call regardless of whether
+    or not the operating system supports protection keys. It can be used in lieu
+    of any other mechanism for detecting pkey support and will simply fail with
+    the error <b>ENOSPC</b> if the operating system has no pkey support.</p>
+<p class="Pp">The kernel guarantees that the contents of the hardware rights
+    register (PKRU) will be preserved only for allocated protection keys. Any
+    time a key is unallocated (either before the first call returning that key
+    from <b>pkey_alloc</b>() or after it is freed via <b>pkey_free</b>()), the
+    kernel may make arbitrary changes to the parts of the rights register
+    affecting access to that key.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">See <b>pkeys</b>(7).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>pkey_mprotect</b>(2), <b>pkeys</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

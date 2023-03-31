@@ -1,0 +1,166 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/09efa310b13c6e0c63889484e93e397afed7577a">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>sendfile(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">sendfile(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">sendfile(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">sendfile - transfer data between file descriptors</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/sendfile.h&gt;</b></pre>
+<pre><b>ssize_t sendfile(int</b><i> out_fd</i><b>, int</b><i> in_fd</i><b>, off_t *_Nullable </b><i>offset</i><b>,</b>
+<b>                 size_t</b><i> count</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>sendfile</b>() copies data between one file descriptor and
+    another. Because this copying is done within the kernel, <b>sendfile</b>()
+    is more efficient than the combination of <b>read</b>(2) and
+    <b>write</b>(2), which would require transferring data to and from user
+    space.</p>
+<p class="Pp"><i>in_fd</i> should be a file descriptor opened for reading and
+    <i>out_fd</i> should be a descriptor opened for writing.</p>
+<p class="Pp">If <i>offset</i> is not NULL, then it points to a variable holding
+    the file offset from which <b>sendfile</b>() will start reading data from
+    <i>in_fd</i>. When <b>sendfile</b>() returns, this variable will be set to
+    the offset of the byte following the last byte that was read. If
+    <i>offset</i> is not NULL, then <b>sendfile</b>() does not modify the file
+    offset of <i>in_fd</i>; otherwise the file offset is adjusted to reflect the
+    number of bytes read from <i>in_fd</i>.</p>
+<p class="Pp">If <i>offset</i> is NULL, then data will be read from <i>in_fd</i>
+    starting at the file offset, and the file offset will be updated by the
+    call.</p>
+<p class="Pp"><i>count</i> is the number of bytes to copy between the file
+    descriptors.</p>
+<p class="Pp">The <i>in_fd</i> argument must correspond to a file which supports
+    <b>mmap</b>(2)-like operations (i.e., it cannot be a socket).</p>
+<p class="Pp">Before Linux 2.6.33, <i>out_fd</i> must refer to a socket. Since
+    Linux 2.6.33 it can be any file. If it is a regular file, then
+    <b>sendfile</b>() changes the file offset appropriately.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">If the transfer was successful, the number of bytes written to
+    <i>out_fd</i> is returned. Note that a successful call to <b>sendfile</b>()
+    may write fewer bytes than requested; the caller should be prepared to retry
+    the call if there were unsent bytes. See also NOTES.</p>
+<p class="Pp">On error, -1 is returned, and <i>errno</i> is set to indicate the
+    error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>Nonblocking I/O has been selected using <b>O_NONBLOCK</b> and the write
+      would block.</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The input file was not opened for reading or the output file was not
+      opened for writing.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>Bad address.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>Descriptor is not valid or locked, or an <b>mmap</b>(2)-like operation is
+      not available for <i>in_fd</i>, or <i>count</i> is negative.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd><i>out_fd</i> has the <b>O_APPEND</b> flag set. This is not currently
+      supported by <b>sendfile</b>().</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>Unspecified error while reading from <i>in_fd</i>.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient memory to read from <i>in_fd</i>.</dd>
+  <dt id="EOVERFLOW"><a class="permalink" href="#EOVERFLOW"><b>EOVERFLOW</b></a></dt>
+  <dd><i>count</i> is too large, the operation would result in exceeding the
+      maximum size of either the input file or the output file.</dd>
+  <dt id="ESPIPE"><a class="permalink" href="#ESPIPE"><b>ESPIPE</b></a></dt>
+  <dd><i>offset</i> is not NULL but the input file is not seekable.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>sendfile</b>() first appeared in Linux 2.2. The include file
+    <i>&lt;sys/sendfile.h&gt;</i> is present since glibc 2.1.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">Not specified in POSIX.1-2001, nor in other standards.</p>
+<p class="Pp">Other UNIX systems implement <b>sendfile</b>() with different
+    semantics and prototypes. It should not be used in portable programs.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp"><b>sendfile</b>() will transfer at most 0x7ffff000 (2,147,479,552)
+    bytes, returning the number of bytes actually transferred. (This is true on
+    both 32-bit and 64-bit systems.)</p>
+<p class="Pp">If you plan to use <b>sendfile</b>() for sending files to a TCP
+    socket, but need to send some header data in front of the file contents, you
+    will find it useful to employ the <b>TCP_CORK</b> option, described in
+    <b>tcp</b>(7), to minimize the number of packets and to tune
+  performance.</p>
+<p class="Pp">In Linux 2.4 and earlier, <i>out_fd</i> could also refer to a
+    regular file; this possibility went away in the Linux 2.6.x kernel series,
+    but was restored in Linux 2.6.33.</p>
+<p class="Pp">The original Linux <b>sendfile</b>() system call was not designed
+    to handle large file offsets. Consequently, Linux 2.4 added
+    <b>sendfile64</b>(), with a wider type for the <i>offset</i> argument. The
+    glibc <b>sendfile</b>() wrapper function transparently deals with the kernel
+    differences.</p>
+<p class="Pp">Applications may wish to fall back to <b>read</b>(2) and
+    <b>write</b>(2) in the case where <b>sendfile</b>() fails with <b>EINVAL</b>
+    or <b>ENOSYS</b>.</p>
+<p class="Pp">If <i>out_fd</i> refers to a socket or pipe with zero-copy
+    support, callers must ensure the transferred portions of the file referred
+    to by <i>in_fd</i> remain unmodified until the reader on the other end of
+    <i>out_fd</i> has consumed the transferred data.</p>
+<p class="Pp">The Linux-specific <b>splice</b>(2) call supports transferring
+    data between arbitrary file descriptors provided one (or both) of them is a
+    pipe.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>copy_file_range</b>(2), <b>mmap</b>(2), <b>open</b>(2),
+    <b>socket</b>(2), <b>splice</b>(2)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/c117c914f0010031f2fb4d85b167cfab48090834">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>ENDUTXENT(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">ENDUTXENT(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">ENDUTXENT(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">endutxent, getutxent, getutxid, getutxline, pututxline, setutxent
+    — user accounting database functions</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;utmpx.h&gt;</pre>
+<pre>void endutxent(void);
+struct utmpx *getutxent(void);
+struct utmpx *getutxid(const struct utmpx *<i>id</i>);
+struct utmpx *getutxline(const struct utmpx *<i>line</i>);
+struct utmpx *pututxline(const struct utmpx *<i>utmpx</i>);
+void setutxent(void);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">These functions shall provide access to the user accounting
+    database.</p>
+<p class="Pp">The <i>getutxent</i>() function shall read the next entry from the
+    user accounting database. If the database is not already open, it shall open
+    it. If it reaches the end of the database, it shall fail.</p>
+<p class="Pp">The <i>getutxid</i>() function shall search forward from the
+    current point in the database. If the <i>ut_type</i> value of the
+    <b>utmpx</b> structure pointed to by <i>id</i> is BOOT_TIME, OLD_TIME, or
+    NEW_TIME, then it shall stop when it finds an entry with a matching
+    <i>ut_type</i> value. If the <i>ut_type</i> value is INIT_PROCESS,
+    LOGIN_PROCESS, USER_PROCESS, or DEAD_PROCESS, then it shall stop when it
+    finds an entry whose type is one of these four and whose <i>ut_id</i> member
+    matches the <i>ut_id</i> member of the <b>utmpx</b> structure pointed to by
+    <i>id</i>. If the end of the database is reached without a match,
+    <i>getutxid</i>() shall fail.</p>
+<p class="Pp">The <i>getutxline</i>() function shall search forward from the
+    current point in the database until it finds an entry of the type
+    LOGIN_PROCESS or USER_PROCESS which also has a <i>ut_line</i> value matching
+    that in the <b>utmpx</b> structure pointed to by <i>line</i>. If the end of
+    the database is reached without a match, <i>getutxline</i>() shall fail.</p>
+<p class="Pp">The <i>getutxid</i>() or <i>getutxline</i>() function may cache
+    data. For this reason, to use <i>getutxline</i>() to search for multiple
+    occurrences, the application shall zero out the static data after each
+    success, or <i>getutxline</i>() may return a pointer to the same
+    <b>utmpx</b> structure.</p>
+<p class="Pp">There is one exception to the rule about clearing the structure
+    before further reads are done. The implicit read done by <i>pututxline</i>()
+    (if it finds that it is not already at the correct place in the user
+    accounting database) shall not modify the static structure returned by
+    <i>getutxent</i>(), <i>getutxid</i>(), or <i>getutxline</i>(), if the
+    application has modified this structure and passed the pointer back to
+    <i>pututxline</i>().</p>
+<p class="Pp">For all entries that match a request, the <i>ut_type</i> member
+    indicates the type of the entry. Other members of the entry shall contain
+    meaningful data based on the value of the <i>ut_type</i> member as
+  follows:</p>
+<table class="tbl" style="border-style: solid;">
+  <tbody><tr style="border-bottom-style: solid;">
+    <td style="text-align: center; border-right-style: solid;"><b>ut_type
+      Member</b></td>
+    <td style="text-align: center;"><b>Other Members with Meaningful
+      Data</b></td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">EMPTY</td>
+    <td>No others</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">BOOT_TIME</td>
+    <td><i>ut_tv</i></td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">OLD_TIME</td>
+    <td><i>ut_tv</i></td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">NEW_TIME</td>
+    <td><i>ut_tv</i></td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">USER_PROCESS</td>
+    <td><i>ut_id</i>, <i>ut_user</i> (login name of the user), <i>ut_line</i>,
+      <i>ut_pid</i>, <i>ut_tv</i></td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">INIT_PROCESS</td>
+    <td><i>ut_id</i>, <i>ut_pid</i>, <i>ut_tv</i></td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">LOGIN_PROCESS</td>
+    <td>ut_id , ut_user (implementation-defined name of the login process),
+      ut_line , ut_pid , ut_tv</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">DEAD_PROCESS</td>
+    <td><i>ut_id</i>, <i>ut_pid</i>, <i>ut_tv</i></td>
+  </tr>
+</tbody></table>
+<p class="Pp">An implementation that provides extended security controls may
+    impose implementation-defined restrictions on accessing the user accounting
+    database. In particular, the system may deny the existence of some or all of
+    the user accounting database entries associated with users other than the
+    caller.</p>
+<p class="Pp">If the process has appropriate privileges, the <i>pututxline</i>()
+    function shall write out the structure into the user accounting database. It
+    shall search for a record as if by <i>getutxid</i>() that satisfies the
+    request. If this search succeeds, then the entry shall be replaced.
+    Otherwise, a new entry shall be made at the end of the user accounting
+    database.</p>
+<p class="Pp">The <i>endutxent</i>() function shall close the user accounting
+    database.</p>
+<p class="Pp">The <i>setutxent</i>() function shall reset the input to the
+    beginning of the database. This should be done before each search for a new
+    entry if it is desired that the entire database be examined.</p>
+<p class="Pp">These functions need not be thread-safe.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>getutxent</i>(), <i>getutxid</i>(),
+    and <i>getutxline</i>() shall return a pointer to a <b>utmpx</b> structure
+    containing a copy of the requested entry in the user accounting database.
+    Otherwise, a null pointer shall be returned.</p>
+<p class="Pp">The return value may point to a static area which is overwritten
+    by a subsequent call to <i>getutxid</i>() or <i>getutxline</i>().</p>
+<p class="Pp">Upon successful completion, <i>pututxline</i>() shall return a
+    pointer to a <b>utmpx</b> structure containing a copy of the entry added to
+    the user accounting database. Otherwise, a null pointer shall be
+  returned.</p>
+<p class="Pp">The <i>endutxent</i>() and <i>setutxent</i>() functions shall not
+    return a value.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">No errors are defined for the <i>endutxent</i>(),
+    <i>getutxent</i>(), <i>getutxid</i>(), <i>getutxline</i>(), and
+    <i>setutxent</i>() functions.</p>
+<p class="Pp">The <i>pututxline</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The process does not have appropriate privileges.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The sizes of the arrays in the structure can be found using the
+    <i>sizeof</i> operator.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;utmpx.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

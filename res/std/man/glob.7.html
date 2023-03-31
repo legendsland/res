@@ -1,0 +1,208 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 1998 Andries Brouwer
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+  
+   2003-08-24 fix for / by John Kristoff + joey
+   --><head>
+<meta name="dc.identifier" content="res/53d2e4614a22fbcee6d3b0b3399146c348ea98a7">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>glob(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">glob(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">glob(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">glob - globbing pathnames</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">Long ago, in UNIX&nbsp;V6, there was a program <i>/etc/glob</i>
+    that would expand wildcard patterns. Soon afterward this became a shell
+    built-in.</p>
+<p class="Pp">These days there is also a library routine <b>glob</b>(3) that
+    will perform this function for a user program.</p>
+<p class="Pp">The rules are as follows (POSIX.2, 3.13).</p>
+<section class="Ss">
+<h2 class="Ss" id="Wildcard_matching"><a class="permalink" href="#Wildcard_matching">Wildcard
+  matching</a></h2>
+<p class="Pp">A string is a wildcard pattern if it contains one of the
+    characters '?', '*', or '['. Globbing is the operation that expands a
+    wildcard pattern into the list of pathnames matching the pattern. Matching
+    is defined by:</p>
+<p class="Pp">A '?' (not between brackets) matches any single character.</p>
+<p class="Pp">A '*' (not between brackets) matches any string, including the
+    empty string.</p>
+<p class="Pp"><b>Character classes</b></p>
+<p class="Pp">An expression "<i>[...]</i>" where the first character
+    after the leading '[' is not an '!' matches a single character, namely any
+    of the characters enclosed by the brackets. The string enclosed by the
+    brackets cannot be empty; therefore ']' can be allowed between the brackets,
+    provided that it is the first character. (Thus, "<i>[][!]</i>"
+    matches the three characters '[', ']', and '!'.)</p>
+<p class="Pp"><b>Ranges</b></p>
+<p class="Pp">There is one special convention: two characters separated by '-'
+    denote a range. (Thus, "<i>[A-Fa-f0-9]</i>" is equivalent to
+    "<i>[ABCDEFabcdef0123456789]</i>".) One may include '-' in its
+    literal meaning by making it the first or last character between the
+    brackets. (Thus, "<i>[]-]</i>" matches just the two characters ']'
+    and '-', and "<i>[--0]</i>" matches the three characters '-', '.',
+    and '0', since '/' cannot be matched.)</p>
+<p class="Pp"><b>Complementation</b></p>
+<p class="Pp">An expression "<i>[!...]</i>" matches a single
+    character, namely any character that is not matched by the expression
+    obtained by removing the first '!' from it. (Thus, "<i>[!]a-]</i>"
+    matches any single character except ']', 'a', and '-'.)</p>
+<p class="Pp">One can remove the special meaning of '?', '*', and '[' by
+    preceding them by a backslash, or, in case this is part of a shell command
+    line, enclosing them in quotes. Between brackets these characters stand for
+    themselves. Thus, "<i>[[?*\]</i>" matches the four characters '[',
+    '?', '*', and '\'.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Pathnames"><a class="permalink" href="#Pathnames">Pathnames</a></h2>
+<p class="Pp">Globbing is applied on each of the components of a pathname
+    separately. A '/' in a pathname cannot be matched by a '?' or '*' wildcard,
+    or by a range like "<i>[.-0]</i>". A range containing an explicit
+    '/' character is syntactically incorrect. (POSIX requires that syntactically
+    incorrect patterns are left unchanged.)</p>
+<p class="Pp">If a filename starts with a '.', this character must be matched
+    explicitly. (Thus, <i>rm&nbsp;*</i> will not remove .profile, and
+    <i>tar&nbsp;c&nbsp;*</i> will not archive all your files;
+    <i>tar&nbsp;c&nbsp;.</i> is better.)</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Empty_lists"><a class="permalink" href="#Empty_lists">Empty
+  lists</a></h2>
+<p class="Pp">The nice and simple rule given above: "expand a wildcard
+    pattern into the list of matching pathnames" was the original UNIX
+    definition. It allowed one to have patterns that expand into an empty list,
+    as in</p>
+<p class="Pp"></p>
+<pre><br>
+    xv -wait 0 *.gif *.jpg</pre>
+<p class="Pp">where perhaps no *.gif files are present (and this is not an
+    error). However, POSIX requires that a wildcard pattern is left unchanged
+    when it is syntactically incorrect, or the list of matching pathnames is
+    empty. With <i>bash</i> one can force the classical behavior using this
+    command:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>shopt -s nullglob
+</pre>
+<br>
+<p class="Pp">(Similar problems occur elsewhere. For example, where old scripts
+    have</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>rm `find . -name "*~"`
+</pre>
+<br>
+<p class="Pp">new scripts require</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>rm -f nosuchfile `find . -name "*~"`
+</pre>
+<br>
+<p class="Pp">to avoid error messages from <i>rm</i> called with an empty
+    argument list.)</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Regular_expressions"><a class="permalink" href="#Regular_expressions">Regular
+  expressions</a></h2>
+<p class="Pp">Note that wildcard patterns are not regular expressions, although
+    they are a bit similar. First of all, they match filenames, rather than
+    text, and secondly, the conventions are not the same: for example, in a
+    regular expression '*' means zero or more copies of the preceding thing.</p>
+<p class="Pp">Now that regular expressions have bracket expressions where the
+    negation is indicated by a '^', POSIX has declared the effect of a wildcard
+    pattern "<i>[^...]</i>" to be undefined.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Character_classes_and_internationalization"><a class="permalink" href="#Character_classes_and_internationalization">Character
+  classes and internationalization</a></h2>
+<p class="Pp">Of course ranges were originally meant to be ASCII ranges, so that
+    "<i>[&nbsp;-%]</i>" stands for
+    "<i>[&nbsp;!"#$%]</i>" and "<i>[a-z]</i>" stands
+    for "any lowercase letter". Some UNIX implementations generalized
+    this so that a range X-Y stands for the set of characters with code between
+    the codes for X and for Y. However, this requires the user to know the
+    character coding in use on the local system, and moreover, is not convenient
+    if the collating sequence for the local alphabet differs from the ordering
+    of the character codes. Therefore, POSIX extended the bracket notation
+    greatly, both for wildcard patterns and for regular expressions. In the
+    above we saw three types of items that can occur in a bracket expression:
+    namely (i) the negation, (ii) explicit single characters, and (iii) ranges.
+    POSIX specifies ranges in an internationally more useful way and adds three
+    more types:</p>
+<p class="Pp">(iii) Ranges X-Y comprise all characters that fall between X and Y
+    (inclusive) in the current collating sequence as defined by the
+    <b>LC_COLLATE</b> category in the current locale.</p>
+<p class="Pp">(iv) Named character classes, like</p>
+<p class="Pp"></p>
+<pre>[:alnum:]  [:alpha:]  [:blank:]  [:cntrl:]
+[:digit:]  [:graph:]  [:lower:]  [:print:]
+[:punct:]  [:space:]  [:upper:]  [:xdigit:]</pre>
+<p class="Pp">so that one can say "<i>[[:lower:]]</i>" instead of
+    "<i>[a-z]</i>", and have things work in Denmark, too, where there
+    are three letters past 'z' in the alphabet. These character classes are
+    defined by the <b>LC_CTYPE</b> category in the current locale.</p>
+<p class="Pp">(v) Collating symbols, like "<i>[.ch.]</i>" or
+    "<i>[.a-acute.]</i>", where the string between
+    "<i>[.</i>" and "<i>.]</i>" is a collating element
+    defined for the current locale. Note that this may be a multicharacter
+    element.</p>
+<p class="Pp">(vi) Equivalence class expressions, like "<i>[=a=]</i>",
+    where the string between "<i>[=</i>" and "<i>=]</i>" is
+    any collating element from its equivalence class, as defined for the current
+    locale. For example, "<i>[[=a=]]</i>" might be equivalent to
+    "<i>[aáàäâ]</i>", that is, to
+    "<i>[a[.a-acute.][.a-grave.][.a-umlaut.][.a-circumflex.]]</i>".</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>sh</b>(1), <b>fnmatch</b>(3), <b>glob</b>(3), <b>locale</b>(7),
+    <b>regex</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

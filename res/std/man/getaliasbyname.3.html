@@ -1,0 +1,206 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/bc99aaf27fd6bb04d09313fc84cb8fc7e6c0aa1e">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>setaliasent(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">setaliasent(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">setaliasent(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">setaliasent, endaliasent, getaliasent, getaliasent_r,
+    getaliasbyname, getaliasbyname_r - read an alias entry</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;aliases.h&gt;</b></pre>
+<pre><b>void setaliasent(void);</b>
+<b>void endaliasent(void);</b></pre>
+<pre><b>struct aliasent *getaliasent(void);</b>
+<b>int getaliasent_r(struct aliasent *restrict </b><i>result</i><b>,</b>
+<b>                     char </b><i>buffer</i><b>[restrict .</b><i>buflen</i><b>], size_t </b><i>buflen</i><b>,</b>
+<b>                     struct aliasent **restrict </b><i>res</i><b>);</b></pre>
+<pre><b>struct aliasent *getaliasbyname(const char *</b><i>name</i><b>);</b>
+<b>int getaliasbyname_r(const char *restrict </b><i>name</i><b>,</b>
+<b>                     struct aliasent *restrict </b><i>result</i><b>,</b>
+<b>                     char </b><i>buffer</i><b>[restrict .</b><i>buflen</i><b>], size_t </b><i>buflen</i><b>,</b>
+<b>                     struct aliasent **restrict </b><i>res</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">One of the databases available with the Name Service Switch (NSS)
+    is the aliases database, that contains mail aliases. (To find out which
+    databases are supported, try <i>getent --help</i>.) Six functions are
+    provided to access the aliases database.</p>
+<p class="Pp">The <b>getaliasent</b>() function returns a pointer to a structure
+    containing the group information from the aliases database. The first time
+    it is called it returns the first entry; thereafter, it returns successive
+    entries.</p>
+<p class="Pp">The <b>setaliasent</b>() function rewinds the file pointer to the
+    beginning of the aliases database.</p>
+<p class="Pp">The <b>endaliasent</b>() function closes the aliases database.</p>
+<p class="Pp"><b>getaliasent_r</b>() is the reentrant version of the previous
+    function. The requested structure is stored via the first argument but the
+    programmer needs to fill the other arguments also. Not providing enough
+    space causes the function to fail.</p>
+<p class="Pp">The function <b>getaliasbyname</b>() takes the name argument and
+    searches the aliases database. The entry is returned as a pointer to a
+    <i>struct aliasent</i>.</p>
+<p class="Pp"><b>getaliasbyname_r</b>() is the reentrant version of the previous
+    function. The requested structure is stored via the second argument but the
+    programmer needs to fill the other arguments also. Not providing enough
+    space causes the function to fail.</p>
+<p class="Pp">The <i>struct aliasent</i> is defined in
+  <i>&lt;aliases.h&gt;</i>:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct aliasent {
+<br>
+    char    *alias_name;             /* alias name */
+<br>
+    size_t   alias_members_len;
+<br>
+    char   **alias_members;          /* alias name list */
+<br>
+    int      alias_local;
+};
+</pre>
+<br>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The functions <b>getaliasent_r</b>() and <b>getaliasbyname_r</b>()
+    return a nonzero value on error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FILES"><a class="permalink" href="#FILES">FILES</a></h1>
+<p class="Pp">The default alias database is the file <i>/etc/aliases</i>. This
+    can be changed in the <i>/etc/nsswitch.conf</i> file.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>setaliasent (), endaliasent (), getaliasent_r (), getaliasbyname_r
+      ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe locale</td>
+  </tr>
+  <tr>
+    <td>getaliasent (), getaliasbyname ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These routines are glibc-specific. The NeXT system has similar
+    routines:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>#include &lt;aliasdb.h&gt;
+void alias_setent(void);
+void alias_endent(void);
+alias_ent *alias_getent(void);
+alias_ent *alias_getbyname(char *name);
+</pre>
+<br>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The following example compiles with <i>gcc example.c -o
+    example</i>. It will dump all names in the alias database.</p>
+<p class="Pp"></p>
+<pre>#include &lt;aliases.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+int
+main(void)
+{
+<br>
+    struct aliasent *al;
+<br>
+    setaliasent();
+<br>
+    for (;;) {
+<br>
+        al = getaliasent();
+<br>
+        if (al == NULL)
+<br>
+            break;
+<br>
+        printf("Name: %s\n", al-&gt;alias_name);
+<br>
+    }
+<br>
+    if (errno) {
+<br>
+        perror("reading alias");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    endaliasent();
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>getgrent</b>(3), <b>getpwent</b>(3), <b>getspent</b>(3),
+    <b>aliases</b>(5)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

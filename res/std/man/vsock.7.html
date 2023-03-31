@@ -1,0 +1,220 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2018, Stefan Hajnoczi <stefanha@redhat.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/f7b94312ca478ab5eb02f66fea24409fb5990af5">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>vsock(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">vsock(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">vsock(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">vsock - Linux VSOCK address family</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/socket.h&gt;</b>
+<b>#include &lt;linux/vm_sockets.h&gt;</b></pre>
+<pre><i>stream_socket</i><b> = socket(AF_VSOCK, SOCK_STREAM, 0);</b>
+<i>datagram_socket</i><b> = socket(AF_VSOCK, SOCK_DGRAM, 0);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The VSOCK address family facilitates communication between virtual
+    machines and the host they are running on. This address family is used by
+    guest agents and hypervisor services that need a communications channel that
+    is independent of virtual machine network configuration.</p>
+<p class="Pp">Valid socket types are <b>SOCK_STREAM</b> and <b>SOCK_DGRAM</b>.
+    <b>SOCK_STREAM</b> provides connection-oriented byte streams with
+    guaranteed, in-order delivery. <b>SOCK_DGRAM</b> provides a connectionless
+    datagram packet service with best-effort delivery and best-effort ordering.
+    Availability of these socket types is dependent on the underlying
+    hypervisor.</p>
+<p class="Pp">A new socket is created with</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>socket(AF_VSOCK, socket_type, 0);
+</pre>
+<br>
+<p class="Pp">When a process wants to establish a connection, it calls
+    <b>connect</b>(2) with a given destination socket address. The socket is
+    automatically bound to a free port if unbound.</p>
+<p class="Pp">A process can listen for incoming connections by first binding to
+    a socket address using <b>bind</b>(2) and then calling <b>listen</b>(2).</p>
+<p class="Pp">Data is transmitted using the <b>send</b>(2) or <b>write</b>(2)
+    families of system calls and data is received using the <b>recv</b>(2) or
+    <b>read</b>(2) families of system calls.</p>
+<section class="Ss">
+<h2 class="Ss" id="Address_format"><a class="permalink" href="#Address_format">Address
+  format</a></h2>
+<p class="Pp">A socket address is defined as a combination of a 32-bit Context
+    Identifier (CID) and a 32-bit port number. The CID identifies the source or
+    destination, which is either a virtual machine or the host. The port number
+    differentiates between multiple services running on a single machine.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct sockaddr_vm {
+<br>
+    sa_family_t    svm_family;    /* Address family: AF_VSOCK */
+<br>
+    unsigned short svm_reserved1;
+<br>
+    unsigned int   svm_port;      /* Port # in host byte order */
+<br>
+    unsigned int   svm_cid;       /* Address in host byte order */
+<br>
+    unsigned char  svm_zero[sizeof(struct sockaddr) -
+<br>
+                            sizeof(sa_family_t) -
+<br>
+                            sizeof(unsigned short) -
+<br>
+                            sizeof(unsigned int) -
+<br>
+                            sizeof(unsigned int)];
+};
+</pre>
+<br>
+<p class="Pp"><i>svm_family</i> is always set to <b>AF_VSOCK</b>.
+    <i>svm_reserved1</i> is always set to 0. <i>svm_port</i> contains the port
+    number in host byte order. The port numbers below 1024 are called
+    <i>privileged ports</i>. Only a process with the <b>CAP_NET_BIND_SERVICE</b>
+    capability may <b>bind</b>(2) to these port numbers. <i>svm_zero</i> must be
+    zero-filled.</p>
+<p class="Pp">There are several special addresses: <b>VMADDR_CID_ANY</b> (-1U)
+    means any address for binding; <b>VMADDR_CID_HYPERVISOR</b> (0) is reserved
+    for services built into the hypervisor; <b>VMADDR_CID_LOCAL</b> (1) is the
+    well-known address for local communication (loopback);
+    <b>VMADDR_CID_HOST</b> (2) is the well-known address of the host.</p>
+<p class="Pp">The special constant <b>VMADDR_PORT_ANY</b> (-1U) means any port
+    number for binding.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Live_migration"><a class="permalink" href="#Live_migration">Live
+  migration</a></h2>
+<p class="Pp">Sockets are affected by live migration of virtual machines.
+    Connected <b>SOCK_STREAM</b> sockets become disconnected when the virtual
+    machine migrates to a new host. Applications must reconnect when this
+    happens.</p>
+<p class="Pp">The local CID may change across live migration if the old CID is
+    not available on the new host. Bound sockets are automatically updated to
+    the new CID.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Ioctls"><a class="permalink" href="#Ioctls">Ioctls</a></h2>
+<p class="Pp">The following ioctls are available on the <i>/dev/vsock</i>
+    device.</p>
+<dl class="Bl-tag">
+  <dt id="IOCTL_VM_SOCKETS_GET_LOCAL_CID"><a class="permalink" href="#IOCTL_VM_SOCKETS_GET_LOCAL_CID"><b>IOCTL_VM_SOCKETS_GET_LOCAL_CID</b></a></dt>
+  <dd>Get the CID of the local machine. The argument is a pointer to an
+      <i>unsigned int</i>.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>ioctl(fd, IOCTL_VM_SOCKETS_GET_LOCAL_CID, &amp;cid);
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>Consider using <b>VMADDR_CID_ANY</b> when binding instead of getting the
+      local CID with <b>IOCTL_VM_SOCKETS_GET_LOCAL_CID</b>.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Local_communication"><a class="permalink" href="#Local_communication">Local
+  communication</a></h2>
+<p class="Pp"><b>VMADDR_CID_LOCAL</b> (1) directs packets to the same host that
+    generated them. This is useful for testing applications on a single host and
+    for debugging.</p>
+<p class="Pp">The local CID obtained with <b>IOCTL_VM_SOCKETS_GET_LOCAL_CID</b>
+    can be used for the same purpose, but it is preferable to use
+    <b>VMADDR_CID_LOCAL .</b></p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>Unable to bind to a privileged port without the
+      <b>CAP_NET_BIND_SERVICE</b> capability.</dd>
+  <dt id="EADDRINUSE"><a class="permalink" href="#EADDRINUSE"><b>EADDRINUSE</b></a></dt>
+  <dd>Unable to bind to a port that is already in use.</dd>
+  <dt id="EADDRNOTAVAIL"><a class="permalink" href="#EADDRNOTAVAIL"><b>EADDRNOTAVAIL</b></a></dt>
+  <dd>Unable to find a free port for binding or unable to bind to a nonlocal
+      CID.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>Invalid parameters. This includes: attempting to bind a socket that is
+      already bound, providing an invalid struct <i>sockaddr_vm</i>, and other
+      input validation errors.</dd>
+  <dt id="ENOPROTOOPT"><a class="permalink" href="#ENOPROTOOPT"><b>ENOPROTOOPT</b></a></dt>
+  <dd>Invalid socket option in <b>setsockopt</b>(2) or
+    <b>getsockopt</b>(2).</dd>
+  <dt id="ENOTCONN"><a class="permalink" href="#ENOTCONN"><b>ENOTCONN</b></a></dt>
+  <dd>Unable to perform operation on an unconnected socket.</dd>
+  <dt id="EOPNOTSUPP"><a class="permalink" href="#EOPNOTSUPP"><b>EOPNOTSUPP</b></a></dt>
+  <dd>Operation not supported. This includes: the <b>MSG_OOB</b> flag that is
+      not implemented for the <b>send</b>(2) family of syscalls and
+      <b>MSG_PEEK</b> for the <b>recv</b>(2) family of syscalls.</dd>
+  <dt id="EPROTONOSUPPORT"><a class="permalink" href="#EPROTONOSUPPORT"><b>EPROTONOSUPPORT</b></a></dt>
+  <dd>Invalid socket protocol number. The protocol should always be 0.</dd>
+  <dt id="ESOCKTNOSUPPORT"><a class="permalink" href="#ESOCKTNOSUPPORT"><b>ESOCKTNOSUPPORT</b></a></dt>
+  <dd>Unsupported socket type in <b>socket</b>(2). Only <b>SOCK_STREAM</b> and
+      <b>SOCK_DGRAM</b> are valid.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">Support for VMware (VMCI) has been available since Linux 3.9. KVM
+    (virtio) is supported since Linux 4.8. Hyper-V is supported since Linux
+    4.14.</p>
+<p class="Pp"><b>VMADDR_CID_LOCAL</b> is supported since Linux 5.6. Local
+    communication in the guest and on the host is available since Linux 5.6.
+    Previous versions supported only local communication within a guest (not on
+    the host), and with only some transports (VMCI and virtio).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>bind</b>(2), <b>connect</b>(2), <b>listen</b>(2),
+    <b>recv</b>(2), <b>send</b>(2), <b>socket</b>(2), <b>capabilities</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

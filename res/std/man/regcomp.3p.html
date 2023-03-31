@@ -1,0 +1,572 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/f9ed4bf4ea5bda89c05075b7d639bc42af6e1dd5">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>REGCOMP(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">REGCOMP(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">REGCOMP(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">regcomp, regerror, regexec, regfree — regular expression
+    matching</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;regex.h&gt;</pre>
+<pre>int regcomp(regex_t *restrict <i>preg</i>, const char *restrict <i>pattern</i>,
+<br>
+    int <i>cflags</i>);
+size_t regerror(int <i>errcode</i>, const regex_t *restrict <i>preg</i>,
+<br>
+    char *restrict <i>errbuf</i>, size_t <i>errbuf_size</i>);
+int regexec(const regex_t *restrict <i>preg</i>, const char *restrict <i>string</i>,
+<br>
+    size_t <i>nmatch</i>, regmatch_t <i>pmatch</i>[restrict], int <i>eflags</i>);
+void regfree(regex_t *<i>preg</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">These functions interpret <i>basic</i> and <i>extended</i> regular
+    expressions as described in the Base Definitions volume of
+    POSIX.1‐2017, <i>Chapter 9</i>, <i>Regular Expressions</i>.</p>
+<p class="Pp">The <b>regex_t</b> structure is defined in <i>&lt;regex.h&gt;</i>
+    and contains at least the following member:</p>
+<table class="tbl" style="border-style: solid;">
+  <tbody><tr style="border-bottom-style: solid;">
+    <td style="text-align: center; border-right-style: solid;"><b>Member
+      Type</b></td>
+    <td style="text-align: center; border-right-style: solid;"><b>Member
+      Name</b></td>
+    <td style="text-align: center;"><b>Description</b></td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"><b>size_t</b></td>
+    <td style="border-right-style: solid;"><i>re_nsub</i></td>
+    <td>Number of parenthesized subexpressions.</td>
+  </tr>
+</tbody></table>
+<p class="Pp">The <b>regmatch_t</b> structure is defined in
+    <i>&lt;regex.h&gt;</i> and contains at least the following members:</p>
+<table class="tbl" style="border-style: solid;">
+  <tbody><tr style="border-bottom-style: solid;">
+    <td style="text-align: center; border-right-style: solid;"><b>Member
+      Type</b></td>
+    <td style="text-align: center; border-right-style: solid;"><b>Member
+      Name</b></td>
+    <td style="text-align: center;"><b>Description</b></td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"><b>regoff_t</b></td>
+    <td style="border-right-style: solid;"><i>rm_so</i></td>
+    <td>Byte offset from start of <i>string</i> to start of substring.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"><b>regoff_t</b></td>
+    <td style="border-right-style: solid;"><i>rm_eo</i></td>
+    <td>Byte offset from start of string of the first character after the end of
+      substring.</td>
+  </tr>
+</tbody></table>
+<p class="Pp">The <i>regcomp</i>() function shall compile the regular expression
+    contained in the string pointed to by the <i>pattern</i> argument and place
+    the results in the structure pointed to by <i>preg</i>. The <i>cflags</i>
+    argument is the bitwise-inclusive OR of zero or more of the following flags,
+    which are defined in the <i>&lt;regex.h&gt;</i> header:</p>
+<dl class="Bl-tag">
+  <dt id="REG_EXTENDED"><a class="permalink" href="#REG_EXTENDED">REG_EXTENDED</a></dt>
+  <dd>Use Extended Regular Expressions.</dd>
+  <dt id="REG_ICASE"><a class="permalink" href="#REG_ICASE">REG_ICASE</a></dt>
+  <dd>Ignore case in match (see the Base Definitions volume of
+      POSIX.1‐2017, <i>Chapter 9</i>, <i>Regular Expressions</i>).</dd>
+  <dt id="REG_NOSUB"><a class="permalink" href="#REG_NOSUB">REG_NOSUB</a></dt>
+  <dd>Report only success/fail in <i>regexec</i>().</dd>
+  <dt id="REG_NEWLINE"><a class="permalink" href="#REG_NEWLINE">REG_NEWLINE</a></dt>
+  <dd>Change the handling of &lt;newline&gt; characters, as described in the
+      text.</dd>
+</dl>
+<p class="Pp">The default regular expression type for <i>pattern</i> is a Basic
+    Regular Expression. The application can specify Extended Regular Expressions
+    using the REG_EXTENDED <i>cflags</i> flag.</p>
+<p class="Pp">If the REG_NOSUB flag was not set in <i>cflags</i>, then
+    <i>regcomp</i>() shall set <i>re_nsub</i> to the number of parenthesized
+    subexpressions (delimited by <b>"\(\)"</b> in basic regular
+    expressions or <b>"()"</b> in extended regular expressions) found
+    in <i>pattern</i>.</p>
+<p class="Pp">The <i>regexec</i>() function compares the null-terminated string
+    specified by <i>string</i> with the compiled regular expression <i>preg</i>
+    initialized by a previous call to <i>regcomp</i>(). If it finds a match,
+    <i>regexec</i>() shall return 0; otherwise, it shall return non-zero
+    indicating either no match or an error. The <i>eflags</i> argument is the
+    bitwise-inclusive OR of zero or more of the following flags, which are
+    defined in the <i>&lt;regex.h&gt;</i> header:</p>
+<dl class="Bl-tag">
+  <dt id="REG_NOTBOL"><a class="permalink" href="#REG_NOTBOL">REG_NOTBOL</a></dt>
+  <dd>The first character of the string pointed to by <i>string</i> is not the
+      beginning of the line. Therefore, the &lt;circumflex&gt; character
+      (<b>'^'</b>), when taken as a special character, shall not match the
+      beginning of <i>string</i>.</dd>
+  <dt id="REG_NOTEOL"><a class="permalink" href="#REG_NOTEOL">REG_NOTEOL</a></dt>
+  <dd>The last character of the string pointed to by <i>string</i> is not the
+      end of the line. Therefore, the &lt;dollar-sign&gt; (<b>'$'</b>), when
+      taken as a special character, shall not match the end of
+    <i>string</i>.</dd>
+</dl>
+<p class="Pp">If <i>nmatch</i> is 0 or REG_NOSUB was set in the <i>cflags</i>
+    argument to <i>regcomp</i>(), then <i>regexec</i>() shall ignore the
+    <i>pmatch</i> argument. Otherwise, the application shall ensure that the
+    <i>pmatch</i> argument points to an array with at least <i>nmatch</i>
+    elements, and <i>regexec</i>() shall fill in the elements of that array with
+    offsets of the substrings of <i>string</i> that correspond to the
+    parenthesized subexpressions of <i>pattern</i>:
+    <i>pmatch</i>[<i>i</i>].<i>rm_so</i> shall be the byte offset of the
+    beginning and <i>pmatch</i>[<i>i</i>].<i>rm_eo</i> shall be one greater than
+    the byte offset of the end of substring <i>i</i>. (Subexpression <i>i</i>
+    begins at the <i>i</i>th matched open parenthesis, counting from 1.) Offsets
+    in <i>pmatch</i>[0] identify the substring that corresponds to the entire
+    regular expression. Unused elements of <i>pmatch</i> up to
+    <i>pmatch</i>[<i>nmatch</i>-1] shall be filled with -1. If there are more
+    than <i>nmatch</i> subexpressions in <i>pattern</i> (<i>pattern</i> itself
+    counts as a subexpression), then <i>regexec</i>() shall still do the match,
+    but shall record only the first <i>nmatch</i> substrings.</p>
+<p class="Pp">When matching a basic or extended regular expression, any given
+    parenthesized subexpression of <i>pattern</i> might participate in the match
+    of several different substrings of <i>string</i>, or it might not match any
+    substring even though the pattern as a whole did match. The following rules
+    shall be used to determine which substrings to report in <i>pmatch</i> when
+    matching regular expressions:</p>
+<dl class="Bl-tag">
+  <dt> 1.</dt>
+  <dd>If subexpression <i>i</i> in a regular expression is not contained within
+      another subexpression, and it participated in the match several times,
+      then the byte offsets in <i>pmatch</i>[<i>i</i>] shall delimit the last
+      such match.</dd>
+  <dt> 2.</dt>
+  <dd>If subexpression <i>i</i> is not contained within another subexpression,
+      and it did not participate in an otherwise successful match, the byte
+      offsets in <i>pmatch</i>[<i>i</i>] shall be -1. A subexpression does not
+      participate in the match when:
+    <p class="Pp"></p>
+  </dd>
+</dl>
+<div class="Bd-indent"><b>'*'</b> or <b>"\{\}"</b> appears immediately
+  after the subexpression in a basic regular expression, or <b>'*'</b>,
+  <b>'?'</b>, or <b>"{}"</b> appears immediately after the
+  subexpression in an extended regular expression, and the subexpression did not
+  match (matched 0 times)</div>
+<div class="Bd-indent">
+<p class="Pp">or:</p>
+<p class="Pp"></p>
+<div class="Bd-indent"><b>'|'</b> is used in an extended regular expression to
+  select this subexpression or another, and the other subexpression
+  matched.</div>
+</div>
+<dl class="Bl-tag">
+  <dt> 3.</dt>
+  <dd>If subexpression <i>i</i> is contained within another subexpression
+      <i>j</i>, and <i>i</i> is not contained within any other subexpression
+      that is contained within <i>j</i>, and a match of subexpression <i>j</i>
+      is reported in <i>pmatch</i>[<i>j</i>], then the match or non-match of
+      subexpression <i>i</i> reported in <i>pmatch</i>[<i>i</i>] shall be as
+      described in 1. and 2. above, but within the substring reported in
+      <i>pmatch</i>[<i>j</i>] rather than the whole string. The offsets in
+      <i>pmatch</i>[<i>i</i>] are still relative to the start of
+    <i>string</i>.</dd>
+  <dt> 4.</dt>
+  <dd>If subexpression <i>i</i> is contained in subexpression <i>j</i>, and the
+      byte offsets in <i>pmatch</i>[<i>j</i>] are -1, then the pointers in
+      <i>pmatch</i>[<i>i</i>] shall also be -1.</dd>
+  <dt> 5.</dt>
+  <dd>If subexpression <i>i</i> matched a zero-length string, then both byte
+      offsets in <i>pmatch</i>[<i>i</i>] shall be the byte offset of the
+      character or null terminator immediately following the zero-length
+    string.</dd>
+</dl>
+<p class="Pp">If, when <i>regexec</i>() is called, the locale is different from
+    when the regular expression was compiled, the result is undefined.</p>
+<p class="Pp">If REG_NEWLINE is not set in <i>cflags</i>, then a &lt;newline&gt;
+    in <i>pattern</i> or <i>string</i> shall be treated as an ordinary
+    character. If REG_NEWLINE is set, then &lt;newline&gt; shall be treated as
+    an ordinary character except as follows:</p>
+<dl class="Bl-tag">
+  <dt> 1.</dt>
+  <dd>A &lt;newline&gt; in <i>string</i> shall not be matched by a
+      &lt;period&gt; outside a bracket expression or by any form of a
+      non-matching list (see the Base Definitions volume of POSIX.1‐2017,
+      <i>Chapter 9</i>, <i>Regular Expressions</i>).</dd>
+  <dt> 2.</dt>
+  <dd>A &lt;circumflex&gt; (<b>'^'</b>) in <i>pattern</i>, when used to specify
+      expression anchoring (see the Base Definitions volume of
+      POSIX.1‐2017, <i>Section 9.3.8</i>, <i>BRE Expression
+      Anchoring</i>), shall match the zero-length string immediately after a
+      &lt;newline&gt; in <i>string</i>, regardless of the setting of
+    REG_NOTBOL.</dd>
+  <dt> 3.</dt>
+  <dd>A &lt;dollar-sign&gt; (<b>'$'</b>) in <i>pattern</i>, when used to specify
+      expression anchoring, shall match the zero-length string immediately
+      before a &lt;newline&gt; in <i>string</i>, regardless of the setting of
+      REG_NOTEOL.</dd>
+</dl>
+<p class="Pp">The <i>regfree</i>() function frees any memory allocated by
+    <i>regcomp</i>() associated with <i>preg</i>.</p>
+<p class="Pp">The following constants are defined as the minimum set of error
+    return values, although other errors listed as implementation extensions in
+    <i>&lt;regex.h&gt;</i> are possible:</p>
+<dl class="Bl-tag">
+  <dt id="REG_BADBR"><a class="permalink" href="#REG_BADBR">REG_BADBR</a></dt>
+  <dd>Content of <b>"\{\}"</b> invalid: not a number, number too
+      large, more than two numbers, first larger than second.</dd>
+  <dt id="REG_BADPAT"><a class="permalink" href="#REG_BADPAT">REG_BADPAT</a></dt>
+  <dd>Invalid regular expression.</dd>
+  <dt id="REG_BADRPT"><a class="permalink" href="#REG_BADRPT">REG_BADRPT</a></dt>
+  <dd><b>'?'</b>, <b>'*'</b>, or <b>'+'</b> not preceded by valid regular
+      expression.</dd>
+  <dt id="REG_EBRACE"><a class="permalink" href="#REG_EBRACE">REG_EBRACE</a></dt>
+  <dd><b>"\{\}"</b> imbalance.</dd>
+  <dt id="REG_EBRACK"><a class="permalink" href="#REG_EBRACK">REG_EBRACK</a></dt>
+  <dd><b>"[]"</b> imbalance.</dd>
+  <dt id="REG_ECOLLATE"><a class="permalink" href="#REG_ECOLLATE">REG_ECOLLATE</a></dt>
+  <dd>Invalid collating element referenced.</dd>
+  <dt id="REG_ECTYPE"><a class="permalink" href="#REG_ECTYPE">REG_ECTYPE</a></dt>
+  <dd>Invalid character class type referenced.</dd>
+  <dt id="REG_EESCAPE"><a class="permalink" href="#REG_EESCAPE">REG_EESCAPE</a></dt>
+  <dd>Trailing &lt;backslash&gt; character in pattern.</dd>
+  <dt id="REG_EPAREN"><a class="permalink" href="#REG_EPAREN">REG_EPAREN</a></dt>
+  <dd><b>"\(\)"</b> or <b>"()"</b> imbalance.</dd>
+  <dt id="REG_ERANGE"><a class="permalink" href="#REG_ERANGE">REG_ERANGE</a></dt>
+  <dd>Invalid endpoint in range expression.</dd>
+  <dt id="REG_ESPACE"><a class="permalink" href="#REG_ESPACE">REG_ESPACE</a></dt>
+  <dd>Out of memory.</dd>
+  <dt id="REG_ESUBREG"><a class="permalink" href="#REG_ESUBREG">REG_ESUBREG</a></dt>
+  <dd>Number in <b>"\digit"</b> invalid or in error.</dd>
+  <dt id="REG_NOMATCH"><a class="permalink" href="#REG_NOMATCH">REG_NOMATCH</a></dt>
+  <dd><i>regexec</i>() failed to match.</dd>
+</dl>
+<p class="Pp">If more than one error occurs in processing a function call, any
+    one of the possible constants may be returned, as the order of detection is
+    unspecified.</p>
+<p class="Pp">The <i>regerror</i>() function provides a mapping from error codes
+    returned by <i>regcomp</i>() and <i>regexec</i>() to unspecified printable
+    strings. It generates a string corresponding to the value of the
+    <i>errcode</i> argument, which the application shall ensure is the last
+    non-zero value returned by <i>regcomp</i>() or <i>regexec</i>() with the
+    given value of <i>preg</i>. If <i>errcode</i> is not such a value, the
+    content of the generated string is unspecified.</p>
+<p class="Pp">If <i>preg</i> is a null pointer, but <i>errcode</i> is a value
+    returned by a previous call to <i>regexec</i>() or <i>regcomp</i>(), the
+    <i>regerror</i>() still generates an error string corresponding to the value
+    of <i>errcode</i>, but it might not be as detailed under some
+    implementations.</p>
+<p class="Pp">If the <i>errbuf_size</i> argument is not 0, <i>regerror</i>()
+    shall place the generated string into the buffer of size <i>errbuf_size</i>
+    bytes pointed to by <i>errbuf</i>. If the string (including the terminating
+    null) cannot fit in the buffer, <i>regerror</i>() shall truncate the string
+    and null-terminate the result.</p>
+<p class="Pp">If <i>errbuf_size</i> is 0, <i>regerror</i>() shall ignore the
+    <i>errbuf</i> argument, and return the size of the buffer needed to hold the
+    generated string.</p>
+<p class="Pp">If the <i>preg</i> argument to <i>regexec</i>() or
+    <i>regfree</i>() is not a compiled regular expression returned by
+    <i>regcomp</i>(), the result is undefined. A <i>preg</i> is no longer
+    treated as a compiled regular expression after it is given to
+    <i>regfree</i>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, the <i>regcomp</i>() function shall
+    return 0. Otherwise, it shall return an integer value indicating an error as
+    described in <i>&lt;regex.h&gt;</i>, and the content of <i>preg</i> is
+    undefined. If a code is returned, the interpretation shall be as given in
+    <i>&lt;regex.h&gt;</i>.</p>
+<p class="Pp">If <i>regcomp</i>() detects an invalid RE, it may return
+    REG_BADPAT, or it may return one of the error codes that more precisely
+    describes the error.</p>
+<p class="Pp">Upon successful completion, the <i>regexec</i>() function shall
+    return 0. Otherwise, it shall return REG_NOMATCH to indicate no match.</p>
+<p class="Pp">Upon successful completion, the <i>regerror</i>() function shall
+    return the number of bytes needed to hold the entire generated string,
+    including the null termination. If the return value is greater than
+    <i>errbuf_size</i>, the string returned in the buffer pointed to by
+    <i>errbuf</i> has been truncated.</p>
+<p class="Pp">The <i>regfree</i>() function shall not return a value.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">No errors are defined.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<div class="Bd-indent">
+<pre>#include &lt;regex.h&gt;</pre>
+<pre>/*
+<br>
+ * Match string against the extended regular expression in
+<br>
+ * pattern, treating errors as no match.
+<br>
+ *
+<br>
+ * Return 1 for match, 0 for no match.
+<br>
+ */</pre>
+<pre>int
+match(const char *string, char *pattern)
+{
+<br>
+    int    status;
+<br>
+    regex_t    re;</pre>
+<pre><br>
+    if (regcomp(&amp;re, pattern, REG_EXTENDED|REG_NOSUB) != 0) {
+<br>
+        return(0);      /* Report error. */
+<br>
+    }
+<br>
+    status = regexec(&amp;re, string, (size_t) 0, NULL, 0);
+<br>
+    regfree(&amp;re);
+<br>
+    if (status != 0) {
+<br>
+        return(0);      /* Report error. */
+<br>
+    }
+<br>
+    return(1);
+}</pre>
+</div>
+<p class="Pp">The following demonstrates how the REG_NOTBOL flag could be used
+    with <i>regexec</i>() to find all substrings in a line that match a pattern
+    supplied by a user. (For simplicity of the example, very little error
+    checking is done.)</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>(void) regcomp (&amp;re, pattern, 0);
+/* This call to regexec() finds the first match on the line. */
+error = regexec (&amp;re, &amp;buffer[0], 1, &amp;pm, 0);
+while (error == 0) {  /* While matches found. */
+<br>
+    /* Substring found between pm.rm_so and pm.rm_eo. */
+<br>
+    /* This call to regexec() finds the next match. */
+<br>
+    error = regexec (&amp;re, buffer + pm.rm_eo, 1, &amp;pm, REG_NOTBOL);
+}</pre>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">An application could use:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>regerror(code,preg,(char *)NULL,(size_t)0)</pre>
+</div>
+<p class="Pp">to find out how big a buffer is needed for the generated string,
+    <i>malloc</i>() a buffer to hold the string, and then call <i>regerror</i>()
+    again to get the string. Alternatively, it could allocate a fixed, static
+    buffer that is big enough to hold most strings, and then use <i>malloc</i>()
+    to allocate a larger buffer if it finds that this is too small.</p>
+<p class="Pp">To match a pattern as described in the Shell and Utilities volume
+    of POSIX.1‐2017, <i>Section 2.13</i>, <i>Pattern Matching
+    Notation</i>, use the <i>fnmatch</i>() function.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The <i>regexec</i>() function must fill in all <i>nmatch</i>
+    elements of <i>pmatch</i>, where <i>nmatch</i> and <i>pmatch</i> are
+    supplied by the application, even if some elements of <i>pmatch</i> do not
+    correspond to subexpressions in <i>pattern</i>. The application developer
+    should note that there is probably no reason for using a value of
+    <i>nmatch</i> that is larger than <i>preg</i>-&gt;<i>re_nsub</i>+1.</p>
+<p class="Pp">The REG_NEWLINE flag supports a use of RE matching that is needed
+    in some applications like text editors. In such applications, the user
+    supplies an RE asking the application to find a line that matches the given
+    expression. An anchor in such an RE anchors at the beginning or end of any
+    line. Such an application can pass a sequence of &lt;newline&gt;-separated
+    lines to <i>regexec</i>() as a single long string and specify REG_NEWLINE to
+    <i>regcomp</i>() to get the desired behavior. The application must ensure
+    that there are no explicit &lt;newline&gt; characters in <i>pattern</i> if
+    it wants to ensure that any match occurs entirely within a single line.</p>
+<p class="Pp">The REG_NEWLINE flag affects the behavior of <i>regexec</i>(), but
+    it is in the <i>cflags</i> parameter to <i>regcomp</i>() to allow
+    flexibility of implementation. Some implementations will want to generate
+    the same compiled RE in <i>regcomp</i>() regardless of the setting of
+    REG_NEWLINE and have <i>regexec</i>() handle anchors differently based on
+    the setting of the flag. Other implementations will generate different
+    compiled REs based on the REG_NEWLINE.</p>
+<p class="Pp">The REG_ICASE flag supports the operations taken by the
+    <i>grep</i> <b>-i</b> option and the historical implementations of <i>ex</i>
+    and <i>vi</i>. Including this flag will make it easier for application code
+    to be written that does the same thing as these utilities.</p>
+<p class="Pp">The substrings reported in <i>pmatch</i>[] are defined using
+    offsets from the start of the string rather than pointers. This allows
+    type-safe access to both constant and non-constant strings.</p>
+<p class="Pp">The type <b>regoff_t</b> is used for the elements of
+    <i>pmatch</i>[] to ensure that the application can represent large arrays in
+    memory (important for an application conforming to the Shell and Utilities
+    volume of POSIX.1‐2017).</p>
+<p class="Pp">The 1992 edition of this standard required <b>regoff_t</b> to be
+    at least as wide as <b>off_t</b>, to facilitate future extensions in which
+    the string to be searched is taken from a file. However, these future
+    extensions have not appeared. The requirement rules out popular
+    implementations with 32-bit <b>regoff_t</b> and 64-bit <b>off_t</b>, so it
+    has been removed.</p>
+<p class="Pp">The standard developers rejected the inclusion of a
+    <i>regsub</i>() function that would be used to do substitutions for a
+    matched RE. While such a routine would be useful to some applications, its
+    utility would be much more limited than the matching function described
+    here. Both RE parsing and substitution are possible to implement without
+    support other than that required by the ISO&nbsp;C standard, but matching
+    is much more complex than substituting. The only difficult part of
+    substitution, given the information supplied by <i>regexec</i>(), is finding
+    the next character in a string when there can be multi-byte characters. That
+    is a much larger issue, and one that needs a more general solution.</p>
+<p class="Pp">The <i>errno</i> variable has not been used for error returns to
+    avoid filling the <i>errno</i> name space for this feature.</p>
+<p class="Pp">The interface is defined so that the matched substrings
+    <i>rm_sp</i> and <i>rm_ep</i> are in a separate <b>regmatch_t</b> structure
+    instead of in <b>regex_t</b>. This allows a single compiled RE to be used
+    simultaneously in several contexts; in <i>main</i>() and a signal handler,
+    perhaps, or in multiple threads of lightweight processes. (The <i>preg</i>
+    argument to <i>regexec</i>() is declared with type <b>const</b>, so the
+    implementation is not permitted to use the structure to store intermediate
+    results.) It also allows an application to request an arbitrary number of
+    substrings from an RE. The number of subexpressions in the RE is reported in
+    <i>re_nsub</i> in <i>preg</i>. With this change to <i>regexec</i>(),
+    consideration was given to dropping the REG_NOSUB flag since the user can
+    now specify this with a zero <i>nmatch</i> argument to <i>regexec</i>().
+    However, keeping REG_NOSUB allows an implementation to use a different
+    (perhaps more efficient) algorithm if it knows in <i>regcomp</i>() that no
+    subexpressions need be reported. The implementation is only required to fill
+    in <i>pmatch</i> if <i>nmatch</i> is not zero and if REG_NOSUB is not
+    specified. Note that the <b>size_t</b> type, as defined in the ISO&nbsp;C
+    standard, is unsigned, so the description of <i>regexec</i>() does not need
+    to address negative values of <i>nmatch</i>.</p>
+<p class="Pp">REG_NOTBOL was added to allow an application to do repeated
+    searches for the same pattern in a line. If the pattern contains a
+    &lt;circumflex&gt; character that should match the beginning of a line, then
+    the pattern should only match when matched against the beginning of the
+    line. Without the REG_NOTBOL flag, the application could rewrite the
+    expression for subsequent matches, but in the general case this would
+    require parsing the expression. The need for REG_NOTEOL is not as clear; it
+    was added for symmetry.</p>
+<p class="Pp">The addition of the <i>regerror</i>() function addresses the
+    historical need for conforming application programs to have access to error
+    information more than ``Function failed to compile/match your RE for unknown
+    reasons''.</p>
+<p class="Pp">This interface provides for two different methods of dealing with
+    error conditions. The specific error codes (REG_EBRACE, for example),
+    defined in <i>&lt;regex.h&gt;</i>, allow an application to recover from an
+    error if it is so able. Many applications, especially those that use
+    patterns supplied by a user, will not try to deal with specific error cases,
+    but will just use <i>regerror</i>() to obtain a human-readable error message
+    to present to the user.</p>
+<p class="Pp">The <i>regerror</i>() function uses a scheme similar to
+    <i>confstr</i>() to deal with the problem of allocating memory to hold the
+    generated string. The scheme used by <i>strerror</i>() in the ISO&nbsp;C
+    standard was considered unacceptable since it creates difficulties for
+    multi-threaded applications.</p>
+<p class="Pp">The <i>preg</i> argument is provided to <i>regerror</i>() to allow
+    an implementation to generate a more descriptive message than would be
+    possible with <i>errcode</i> alone. An implementation might, for example,
+    save the character offset of the offending character of the pattern in a
+    field of <i>preg</i>, and then include that in the generated message string.
+    The implementation may also ignore <i>preg</i>.</p>
+<p class="Pp">A REG_FILENAME flag was considered, but omitted. This flag caused
+    <i>regexec</i>() to match patterns as described in the Shell and Utilities
+    volume of POSIX.1‐2017, <i>Section 2.13</i>, <i>Pattern Matching
+    Notation</i> instead of REs. This service is now provided by the
+    <i>fnmatch</i>() function.</p>
+<p class="Pp">Notice that there is a difference in philosophy between the
+    ISO&nbsp;POSIX‐2:1993 standard and POSIX.1‐2008 in how to
+    handle a ``bad'' regular expression. The ISO&nbsp;POSIX‐2:1993
+    standard says that many bad constructs ``produce undefined results'', or
+    that ``the interpretation is undefined''. POSIX.1‐2008, however, says
+    that the interpretation of such REs is unspecified. The term ``undefined''
+    means that the action by the application is an error, of similar severity to
+    passing a bad pointer to a function.</p>
+<p class="Pp">The <i>regcomp</i>() and <i>regexec</i>() functions are required
+    to accept any null-terminated string as the <i>pattern</i> argument. If the
+    meaning of the string is ``undefined'', the behavior of the function is
+    ``unspecified''. POSIX.1‐2008 does not specify how the functions will
+    interpret the pattern; they might return error codes, or they might do
+    pattern matching in some completely unexpected way, but they should not do
+    something like abort the process.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>fnmatch</i>()</i>, <i><i>glob</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Chapter
+    9</i>, <i>Regular Expressions</i>, <i><b>&lt;regex.h&gt;</b></i>,
+    <i><b>&lt;sys_types.h&gt;</b></i></p>
+<p class="Pp">The Shell and Utilities volume of POSIX.1‐2017, <i>Section
+    2.13</i>, <i>Pattern Matching Notation</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

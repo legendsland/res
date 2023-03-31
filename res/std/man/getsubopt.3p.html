@@ -1,0 +1,320 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/705e187ec51ed7ace1251e2decf6c211cdb0f301">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>GETSUBOPT(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">GETSUBOPT(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">GETSUBOPT(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getsubopt — parse suboption arguments from a string</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;stdlib.h&gt;</pre>
+<pre>int getsubopt(char **<i>optionp</i>, char * const *<i>keylistp</i>, char **<i>valuep</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>getsubopt</i>() function shall parse suboption arguments in
+    a flag argument. Such options often result from the use of
+  <i>getopt</i>().</p>
+<p class="Pp">The <i>getsubopt</i>() argument <i>optionp</i> is a pointer to a
+    pointer to the option argument string. The suboption arguments shall be
+    separated by &lt;comma&gt; characters and each may consist of either a
+    single token, or a token-value pair separated by an &lt;equals-sign&gt;.</p>
+<p class="Pp">The <i>keylistp</i> argument shall be a pointer to a vector of
+    strings. The end of the vector is identified by a null pointer. Each entry
+    in the vector is one of the possible tokens that might be found in
+    *<i>optionp</i>. Since &lt;comma&gt; characters delimit suboption arguments
+    in <i>optionp</i>, they should not appear in any of the strings pointed to
+    by <i>keylistp</i>. Similarly, because an &lt;equals-sign&gt; separates a
+    token from its value, the application should not include an
+    &lt;equals-sign&gt; in any of the strings pointed to by <i>keylistp</i>. The
+    <i>getsubopt</i>() function shall not modify the <i>keylistp</i> vector.</p>
+<p class="Pp">The <i>valuep</i> argument is the address of a value string
+    pointer.</p>
+<p class="Pp">If a &lt;comma&gt; appears in <i>optionp</i>, it shall be
+    interpreted as a suboption separator. After &lt;comma&gt; characters have
+    been processed, if there are one or more &lt;equals-sign&gt; characters in a
+    suboption string, the first &lt;equals-sign&gt; in any suboption string
+    shall be interpreted as a separator between a token and a value. Subsequent
+    &lt;equals-sign&gt; characters in a suboption string shall be interpreted as
+    part of the value.</p>
+<p class="Pp">If the string at *<i>optionp</i> contains only one suboption
+    argument (equivalently, no &lt;comma&gt; characters), <i>getsubopt</i>()
+    shall update *<i>optionp</i> to point to the null character at the end of
+    the string. Otherwise, it shall isolate the suboption argument by replacing
+    the &lt;comma&gt; separator with a null character, and shall update
+    *<i>optionp</i> to point to the start of the next suboption argument. If the
+    suboption argument has an associated value (equivalently, contains an
+    &lt;equals-sign&gt;), <i>getsubopt</i>() shall update *<i>valuep</i> to
+    point to the value's first character. Otherwise, it shall set *<i>valuep</i>
+    to a null pointer. The calling application may use this information to
+    determine whether the presence or absence of a value for the suboption is an
+    error.</p>
+<p class="Pp">Additionally, when <i>getsubopt</i>() fails to match the suboption
+    argument with a token in the <i>keylistp</i> array, the calling application
+    should decide if this is an error, or if the unrecognized option should be
+    processed in another way.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <i>getsubopt</i>() function shall return the index of the
+    matched token string, or -1 if no token strings were matched.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">No errors are defined.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Parsing_Suboptions"><a class="permalink" href="#Parsing_Suboptions">Parsing
+  Suboptions</a></h2>
+<p class="Pp">The following example uses the <i>getsubopt</i>() function to
+    parse a <i>value</i> argument in the <i>optarg</i> external variable
+    returned by a call to <i>getopt</i>().</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;</pre>
+<pre>int do_all;
+const char *type;
+int read_size;
+int write_size;
+int read_only;</pre>
+<pre>enum
+{
+<br>
+    RO_OPTION = 0,
+<br>
+    RW_OPTION,
+<br>
+    READ_SIZE_OPTION,
+<br>
+    WRITE_SIZE_OPTION
+};</pre>
+<pre>const char *mount_opts[] =
+{
+<br>
+    [RO_OPTION] = "ro",
+<br>
+    [RW_OPTION] = "rw",
+<br>
+    [READ_SIZE_OPTION] = "rsize",
+<br>
+    [WRITE_SIZE_OPTION] = "wsize",
+<br>
+    NULL
+};</pre>
+<pre>int
+main(int argc, char *argv[])
+{
+<br>
+    char *subopts, *value;
+<br>
+    int opt;</pre>
+<pre><br>
+    while ((opt = getopt(argc, argv, "at:o:")) != -1)
+<br>
+        switch(opt)
+<br>
+            {
+<br>
+            case 'a':
+<br>
+                do_all = 1;
+<br>
+                break;
+<br>
+            case 't':
+<br>
+                type = optarg;
+<br>
+                break;
+<br>
+            case 'o':
+<br>
+                subopts = optarg;
+<br>
+                while (*subopts != '&nbsp;')
+<br>
+                {
+<br>
+                    char *saved = subopts;
+<br>
+                    switch(getsubopt(&amp;subopts, (char **)mount_opts,
+<br>
+                        &amp;value))
+<br>
+                    {
+<br>
+                    case RO_OPTION:
+<br>
+                        read_only = 1;
+<br>
+                        break;
+<br>
+                    case RW_OPTION:
+<br>
+                        read_only = 0;
+<br>
+                        break;
+<br>
+                    case READ_SIZE_OPTION:
+<br>
+                        if (value == NULL)
+<br>
+                            abort();
+<br>
+                        read_size = atoi(value);
+<br>
+                        break;
+<br>
+                    case WRITE_SIZE_OPTION:
+<br>
+                        if (value == NULL)
+<br>
+                            abort();
+<br>
+                        write_size = atoi(value);
+<br>
+                        break;
+<br>
+                    default:
+<br>
+                        /* Unknown suboption. */
+<br>
+                        printf("Unknown suboption `%s'\n", saved);
+<br>
+                        abort();
+<br>
+                    }
+<br>
+                }
+<br>
+                break;
+<br>
+            default:
+<br>
+                abort();
+<br>
+            }</pre>
+<pre><br>
+    /* Do the real work. */</pre>
+<pre><br>
+    return 0;
+}</pre>
+</div>
+<p class="Pp">If the above example is invoked with:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>program -o ro,rsize=512</pre>
+</div>
+<p class="Pp">then after option parsing, the variable <i>do_all</i> will be 0,
+    <i>type</i> will be a null pointer, <i>read_size</i> will be 512,
+    <i>write_size</i> will be 0, and <i>read_only</i> will be 1. If it is
+    invoked with:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>program -o oops</pre>
+</div>
+<p class="Pp">it will print:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>"Unknown suboption `oops'"</pre>
+</div>
+<p class="Pp">before aborting.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The value of *<i>valuep</i> when <i>getsubopt</i>() returns -1 is
+    unspecified. Historical implementations provide various incompatible
+    extensions to allow an application to access the suboption text that was not
+    found in the <i>keylistp</i> array.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The <i>keylistp</i> argument of <i>getsubopt</i>() is typed as
+    <b>char * const *</b> to match historical practice. However, the standard is
+    clear that implementations will not modify either the array or the strings
+    contained in the array, as if the argument had been typed <b>const char *
+    const *</b>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>getopt</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;stdlib.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright 1993 David Metcalfe (david@prism.demon.co.uk)
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   References consulted:
+       Linux libc source code
+       Lewine's _POSIX Programmer's Guide_ (O'Reilly & Associates, 1991)
+       386BSD man pages
+   Modified Sat Jul 24 19:46:03 1993 by Rik Faith (faith@cs.unc.edu)
+ --><head>
+<meta name="dc.identifier" content="res/0a89bf4b381138cdf528c56c8d3a36ec4036abd3">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>drand48(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">drand48(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">drand48(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">drand48, erand48, lrand48, nrand48, mrand48, jrand48, srand48,
+    seed48, lcong48 - generate uniformly distributed pseudo-random numbers</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;stdlib.h&gt;</b></pre>
+<pre><b>double drand48(void);</b>
+<b>double erand48(unsigned short </b><i>xsubi</i><b>[3]);</b></pre>
+<pre><b>long lrand48(void);</b>
+<b>long nrand48(unsigned short </b><i>xsubi</i><b>[3]);</b></pre>
+<pre><b>long mrand48(void);</b>
+<b>long jrand48(unsigned short </b><i>xsubi</i><b>[3]);</b></pre>
+<pre><b>void srand48(long </b><i>seedval</i><b>);</b>
+<b>unsigned short *seed48(unsigned short </b><i>seed16v</i><b>[3]);</b>
+<b>void lcong48(unsigned short </b><i>param</i><b>[7]);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp">All functions shown above:</p>
+<pre><br>
+    _XOPEN_SOURCE
+<br>
+        || /* glibc &gt;= 2.19: */ _DEFAULT_SOURCE
+<br>
+        || /* glibc &lt;= 2.19: */ _SVID_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">These functions generate pseudo-random numbers using the linear
+    congruential algorithm and 48-bit integer arithmetic.</p>
+<p class="Pp">The <b>drand48</b>() and <b>erand48</b>() functions return
+    nonnegative double-precision floating-point values uniformly distributed
+    over the interval [0.0,&nbsp;1.0).</p>
+<p class="Pp">The <b>lrand48</b>() and <b>nrand48</b>() functions return
+    nonnegative long integers uniformly distributed over the interval
+    [0,&nbsp;2^31).</p>
+<p class="Pp">The <b>mrand48</b>() and <b>jrand48</b>() functions return signed
+    long integers uniformly distributed over the interval
+  [-2^31,&nbsp;2^31).</p>
+<p class="Pp">The <b>srand48</b>(), <b>seed48</b>(), and <b>lcong48</b>()
+    functions are initialization functions, one of which should be called before
+    using <b>drand48</b>(), <b>lrand48</b>(), or <b>mrand48</b>(). The functions
+    <b>erand48</b>(), <b>nrand48</b>(), and <b>jrand48</b>() do not require an
+    initialization function to be called first.</p>
+<p class="Pp">All the functions work by generating a sequence of 48-bit
+    integers, <i>Xi</i>, according to the linear congruential formula:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre><b>Xn+1 = (aXn + c) mod m, where n &gt;= 0</b>
+</pre>
+<br>
+<p class="Pp">The parameter <i>m</i> = 2^48, hence 48-bit integer arithmetic is
+    performed. Unless <b>lcong48</b>() is called, <i>a</i> and <i>c</i> are
+    given by:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre><b>a = 0x5DEECE66D</b>
+<b>c = 0xB</b>
+</pre>
+<br>
+<p class="Pp">The value returned by any of the functions <b>drand48</b>(),
+    <b>erand48</b>(), <b>lrand48</b>(), <b>nrand48</b>(), <b>mrand48</b>(), or
+    <b>jrand48</b>() is computed by first generating the next 48-bit <i>Xi</i>
+    in the sequence. Then the appropriate number of bits, according to the type
+    of data item to be returned, is copied from the high-order bits of <i>Xi</i>
+    and transformed into the returned value.</p>
+<p class="Pp">The functions <b>drand48</b>(), <b>lrand48</b>(), and
+    <b>mrand48</b>() store the last 48-bit <i>Xi</i> generated in an internal
+    buffer. The functions <b>erand48</b>(), <b>nrand48</b>(), and
+    <b>jrand48</b>() require the calling program to provide storage for the
+    successive <i>Xi</i> values in the array argument <i>xsubi</i>. The
+    functions are initialized by placing the initial value of <i>Xi</i> into the
+    array before calling the function for the first time.</p>
+<p class="Pp">The initializer function <b>srand48</b>() sets the high order
+    32-bits of <i>Xi</i> to the argument <i>seedval</i>. The low order 16-bits
+    are set to the arbitrary value 0x330E.</p>
+<p class="Pp">The initializer function <b>seed48</b>() sets the value of
+    <i>Xi</i> to the 48-bit value specified in the array argument
+    <i>seed16v</i>. The previous value of <i>Xi</i> is copied into an internal
+    buffer and a pointer to this buffer is returned by <b>seed48</b>().</p>
+<p class="Pp">The initialization function <b>lcong48</b>() allows the user to
+    specify initial values for <i>Xi</i>, <i>a</i>, and <i>c</i>. Array argument
+    elements <i>param[0-2]</i> specify <i>Xi</i>, <i>param[3-5]</i> specify
+    <i>a</i>, and <i>param[6]</i> specifies <i>c</i>. After <b>lcong48</b>() has
+    been called, a subsequent call to either <b>srand48</b>() or <b>seed48</b>()
+    will restore the standard values of <i>a</i> and <i>c</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>drand48 (), erand48 (), lrand48 (), nrand48 (), mrand48 (), jrand48 (),
+      srand48 (), seed48 (), lcong48 ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race:drand48</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+<p class="Pp">The above functions record global state information for the random
+    number generator, so they are not thread-safe.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, SVr4.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>rand</b>(3), <b>random</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2008, Linux Foundation, written by Michael Kerrisk
+   <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/0a90499e6211d410c113f9764b7fbf701f86f874">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>clock_nanosleep(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">clock_nanosleep(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">clock_nanosleep(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">clock_nanosleep - high-resolution sleep with specifiable clock</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>), since glibc 2.17</p>
+<p class="Pp">Before glibc 2.17, Real-time library (<i>librt</i>,
+  <i>-lrt</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<p class="Pp"><b>#include &lt;time.h&gt;</b></p>
+<pre><b>int clock_nanosleep(clockid_t </b><i>clockid</i><b>, int </b><i>flags</i><b>,</b>
+<b>                    const struct timespec *</b><i>request</i><b>,</b>
+<b>                    struct timespec *_Nullable </b><i>remain</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>clock_nanosleep</b>():</p>
+<pre><br>
+    _POSIX_C_SOURCE &gt;= 200112L</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">Like <b>nanosleep</b>(2), <b>clock_nanosleep</b>() allows the
+    calling thread to sleep for an interval specified with nanosecond precision.
+    It differs in allowing the caller to select the clock against which the
+    sleep interval is to be measured, and in allowing the sleep interval to be
+    specified as either an absolute or a relative value.</p>
+<p class="Pp">The time values passed to and returned by this call are specified
+    using <b>timespec</b>(3) structures.</p>
+<p class="Pp">The <i>clockid</i> argument specifies the clock against which the
+    sleep interval is to be measured. This argument can have one of the
+    following values:</p>
+<dl class="Bl-tag">
+  <dt id="CLOCK_REALTIME"><a class="permalink" href="#CLOCK_REALTIME"><b>CLOCK_REALTIME</b></a></dt>
+  <dd>A settable system-wide real-time clock.</dd>
+  <dt id="CLOCK_TAI"><a class="permalink" href="#CLOCK_TAI"><b>CLOCK_TAI</b>
+    (since Linux 3.10)</a></dt>
+  <dd>A system-wide clock derived from wall-clock time but ignoring leap
+      seconds.</dd>
+  <dt id="CLOCK_MONOTONIC"><a class="permalink" href="#CLOCK_MONOTONIC"><b>CLOCK_MONOTONIC</b></a></dt>
+  <dd>A nonsettable, monotonically increasing clock that measures time since
+      some unspecified point in the past that does not change after system
+      startup.</dd>
+  <dt id="CLOCK_BOOTTIME"><a class="permalink" href="#CLOCK_BOOTTIME"><b>CLOCK_BOOTTIME</b>
+    (since Linux 2.6.39)</a></dt>
+  <dd>Identical to <b>CLOCK_MONOTONIC</b>, except that it also includes any time
+      that the system is suspended.</dd>
+  <dt id="CLOCK_PROCESS_CPUTIME_ID"><a class="permalink" href="#CLOCK_PROCESS_CPUTIME_ID"><b>CLOCK_PROCESS_CPUTIME_ID</b></a></dt>
+  <dd>A settable per-process clock that measures CPU time consumed by all
+      threads in the process.</dd>
+</dl>
+<p class="Pp">See <b>clock_getres</b>(2) for further details on these clocks. In
+    addition, the CPU clock IDs returned by <b>clock_getcpuclockid</b>(3) and
+    <b>pthread_getcpuclockid</b>(3) can also be passed in <i>clockid</i>.</p>
+<p class="Pp">If <i>flags</i> is 0, then the value specified in <i>request</i>
+    is interpreted as an interval relative to the current value of the clock
+    specified by <i>clockid</i>.</p>
+<p class="Pp">If <i>flags</i> is <b>TIMER_ABSTIME</b>, then <i>request</i> is
+    interpreted as an absolute time as measured by the clock, <i>clockid</i>. If
+    <i>request</i> is less than or equal to the current value of the clock, then
+    <b>clock_nanosleep</b>() returns immediately without suspending the calling
+    thread.</p>
+<p class="Pp"><b>clock_nanosleep</b>() suspends the execution of the calling
+    thread until either at least the time specified by <i>request</i> has
+    elapsed, or a signal is delivered that causes a signal handler to be called
+    or that terminates the process.</p>
+<p class="Pp">If the call is interrupted by a signal handler,
+    <b>clock_nanosleep</b>() fails with the error <b>EINTR</b>. In addition, if
+    <i>remain</i> is not NULL, and <i>flags</i> was not <b>TIMER_ABSTIME</b>, it
+    returns the remaining unslept time in <i>remain</i>. This value can then be
+    used to call <b>clock_nanosleep</b>() again and complete a (relative)
+  sleep.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On successfully sleeping for the requested interval,
+    <b>clock_nanosleep</b>() returns 0. If the call is interrupted by a signal
+    handler or encounters an error, then it returns one of the positive error
+    number listed in ERRORS.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>request</i> or <i>remain</i> specified an invalid address.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The sleep was interrupted by a signal handler; see <b>signal</b>(7).</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The value in the <i>tv_nsec</i> field was not in the range [0, 999999999]
+      or <i>tv_sec</i> was negative.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd><i>clockid</i> was invalid. (<b>CLOCK_THREAD_CPUTIME_ID</b> is not a
+      permitted value for <i>clockid</i>.)</dd>
+  <dt id="ENOTSUP"><a class="permalink" href="#ENOTSUP"><b>ENOTSUP</b></a></dt>
+  <dd>The kernel does not support sleeping against this <i>clockid</i>.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>clock_nanosleep</b>() system call first appeared in Linux
+    2.6. Support is available since glibc 2.1.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">If the interval specified in <i>request</i> is not an exact
+    multiple of the granularity underlying clock (see <b>time</b>(7)), then the
+    interval will be rounded up to the next multiple. Furthermore, after the
+    sleep completes, there may still be a delay before the CPU becomes free to
+    once again execute the calling thread.</p>
+<p class="Pp">Using an absolute timer is useful for preventing timer drift
+    problems of the type described in <b>nanosleep</b>(2). (Such problems are
+    exacerbated in programs that try to restart a relative sleep that is
+    repeatedly interrupted by signals.) To perform a relative sleep that avoids
+    these problems, call <b>clock_gettime</b>(2) for the desired clock, add the
+    desired interval to the returned time value, and then call
+    <b>clock_nanosleep</b>() with the <b>TIMER_ABSTIME</b> flag.</p>
+<p class="Pp"><b>clock_nanosleep</b>() is never restarted after being
+    interrupted by a signal handler, regardless of the use of the
+    <b>sigaction</b>(2) <b>SA_RESTART</b> flag.</p>
+<p class="Pp">The <i>remain</i> argument is unused, and unnecessary, when
+    <i>flags</i> is <b>TIMER_ABSTIME</b>. (An absolute sleep can be restarted
+    using the same <i>request</i> argument.)</p>
+<p class="Pp">POSIX.1 specifies that <b>clock_nanosleep</b>() has no effect on
+    signals dispositions or the signal mask.</p>
+<p class="Pp">POSIX.1 specifies that after changing the value of the
+    <b>CLOCK_REALTIME</b> clock via <b>clock_settime</b>(2), the new clock value
+    shall be used to determine the time at which a thread blocked on an absolute
+    <b>clock_nanosleep</b>() will wake up; if the new clock value falls past the
+    end of the sleep interval, then the <b>clock_nanosleep</b>() call will
+    return immediately.</p>
+<p class="Pp">POSIX.1 specifies that changing the value of the
+    <b>CLOCK_REALTIME</b> clock via <b>clock_settime</b>(2) shall have no effect
+    on a thread that is blocked on a relative <b>clock_nanosleep</b>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>clock_getres</b>(2), <b>nanosleep</b>(2),
+    <b>restart_syscall</b>(2), <b>timer_create</b>(2), <b>sleep</b>(3),
+    <b>timespec</b>(3), <b>usleep</b>(3), <b>time</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

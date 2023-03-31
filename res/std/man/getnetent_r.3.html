@@ -1,0 +1,161 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright 2008, Linux Foundation, written by Michael Kerrisk
+  	<mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/81179b293b8d67478d6ce0a4257e08ebd3e7e600">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>getnetent_r(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">getnetent_r(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">getnetent_r(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getnetent_r, getnetbyname_r, getnetbyaddr_r - get network entry
+    (reentrant)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;netdb.h&gt;</b></pre>
+<pre><b>int getnetent_r(struct netent *restrict </b><i>result_buf</i><b>,</b>
+<b>                char </b><i>buf</i><b>[restrict .</b><i>buflen</i><b>], size_t </b><i>buflen</i><b>,</b>
+<b>                struct netent **restrict </b><i>result</i><b>,</b>
+<b>                int *restrict </b><i>h_errnop</i><b>);</b>
+<b>int getnetbyname_r(const char *restrict </b><i>name</i><b>,</b>
+<b>                struct netent *restrict </b><i>result_buf</i><b>,</b>
+<b>                char </b><i>buf</i><b>[restrict .</b><i>buflen</i><b>], size_t </b><i>buflen</i><b>,</b>
+<b>                struct netent **restrict </b><i>result</i><b>,</b>
+<b>                int *restrict </b><i>h_errnop</i><b>);</b>
+<b>int getnetbyaddr_r(uint32_t </b><i>net</i><b>, int </b><i>type</i><b>,</b>
+<b>                struct netent *restrict </b><i>result_buf</i><b>,</b>
+<b>                char </b><i>buf</i><b>[restrict .</b><i>buflen</i><b>], size_t </b><i>buflen</i><b>,</b>
+<b>                struct netent **restrict </b><i>result</i><b>,</b>
+<b>                int *restrict </b><i>h_errnop</i><b>);</b></pre>
+<pre></pre>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>getnetent_r</b>(), <b>getnetbyname_r</b>(),
+    <b>getnetbyaddr_r</b>():</p>
+<pre><br>
+    Since glibc 2.19:
+<br>
+        _DEFAULT_SOURCE
+<br>
+    glibc 2.19 and earlier:
+<br>
+        _BSD_SOURCE || _SVID_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>getnetent_r</b>(), <b>getnetbyname_r</b>(), and
+    <b>getnetbyaddr_r</b>() functions are the reentrant equivalents of,
+    respectively, <b>getnetent</b>(3), <b>getnetbyname</b>(3), and
+    <b>getnetbynumber</b>(3). They differ in the way that the <i>netent</i>
+    structure is returned, and in the function calling signature and return
+    value. This manual page describes just the differences from the nonreentrant
+    functions.</p>
+<p class="Pp">Instead of returning a pointer to a statically allocated
+    <i>netent</i> structure as the function result, these functions copy the
+    structure into the location pointed to by <i>result_buf</i>.</p>
+<p class="Pp">The <i>buf</i> array is used to store the string fields pointed to
+    by the returned <i>netent</i> structure. (The nonreentrant functions
+    allocate these strings in static storage.) The size of this array is
+    specified in <i>buflen</i>. If <i>buf</i> is too small, the call fails with
+    the error <b>ERANGE</b>, and the caller must try again with a larger buffer.
+    (A buffer of length 1024 bytes should be sufficient for most
+  applications.)</p>
+<p class="Pp">If the function call successfully obtains a network record, then
+    <i>*result</i> is set pointing to <i>result_buf</i>; otherwise,
+    <i>*result</i> is set to NULL.</p>
+<p class="Pp">The buffer pointed to by <i>h_errnop</i> is used to return the
+    value that would be stored in the global variable <i>h_errno</i> by the
+    nonreentrant versions of these functions.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, these functions return 0. On error, they return one of
+    the positive error numbers listed in ERRORS.</p>
+<p class="Pp">On error, record not found (<b>getnetbyname_r</b>(),
+    <b>getnetbyaddr_r</b>()), or end of input (<b>getnetent_r</b>())
+    <i>result</i> is set to NULL.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>(<b>getnetent_r</b>()) No more records in database.</dd>
+  <dt id="ERANGE"><a class="permalink" href="#ERANGE"><b>ERANGE</b></a></dt>
+  <dd><i>buf</i> is too small. Try again with a larger buffer (and increased
+      <i>buflen</i>).</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>getnetent_r (), getnetbyname_r (), getnetbyaddr_r ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe locale</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These functions are GNU extensions. Functions with similar names
+    exist on some other systems, though typically with different calling
+    signatures.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>getnetent</b>(3), <b>networks</b>(5)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

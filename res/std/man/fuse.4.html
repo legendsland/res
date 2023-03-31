@@ -1,0 +1,659 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2016 Julia Computing Inc, Keno Fischer
+   Description based on include/uapi/fuse.h and code in fs/fuse
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/db854c4149f68051a9cbef3d291ae80fbe1160fe">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>fuse(4)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">fuse(4)</td>
+    <td class="head-vol">Device Drivers Manual</td>
+    <td class="head-rtitle">fuse(4)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">fuse - Filesystem in Userspace (FUSE) device</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;linux/fuse.h&gt;</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">This device is the primary interface between the FUSE filesystem
+    driver and a user-space process wishing to provide the filesystem (referred
+    to in the rest of this manual page as the <i>filesystem daemon</i>). This
+    manual page is intended for those interested in understanding the kernel
+    interface itself. Those implementing a FUSE filesystem may wish to make use
+    of a user-space library such as <i>libfuse</i> that abstracts away the
+    low-level interface.</p>
+<p class="Pp">At its core, FUSE is a simple client-server protocol, in which the
+    Linux kernel is the client and the daemon is the server. After obtaining a
+    file descriptor for this device, the daemon may <b>read</b>(2) requests from
+    that file descriptor and is expected to <b>write</b>(2) back its replies. It
+    is important to note that a file descriptor is associated with a unique FUSE
+    filesystem. In particular, opening a second copy of this device, will not
+    allow access to resources created through the first file descriptor (and
+    vice versa).</p>
+<section class="Ss">
+<h2 class="Ss" id="The_basic_protocol"><a class="permalink" href="#The_basic_protocol">The
+  basic protocol</a></h2>
+<p class="Pp">Every message that is read by the daemon begins with a header
+    described by the following structure:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct fuse_in_header {
+<br>
+    uint32_t len;       /* Total length of the data,
+<br>
+                           including this header */
+<br>
+    uint32_t opcode;    /* The kind of operation (see below) */
+<br>
+    uint64_t unique;    /* A unique identifier for this request */
+<br>
+    uint64_t nodeid;    /* ID of the filesystem object
+<br>
+                           being operated on */
+<br>
+    uint32_t uid;       /* UID of the requesting process */
+<br>
+    uint32_t gid;       /* GID of the requesting process */
+<br>
+    uint32_t pid;       /* PID of the requesting process */
+<br>
+    uint32_t padding;
+};
+</pre>
+<br>
+<p class="Pp">The header is followed by a variable-length data portion (which
+    may be empty) specific to the requested operation (the requested operation
+    is indicated by <i>opcode</i>).</p>
+<p class="Pp">The daemon should then process the request and if applicable send
+    a reply (almost all operations require a reply; if they do not, this is
+    documented below), by performing a <b>write</b>(2) to the file descriptor.
+    All replies must start with the following header:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct fuse_out_header {
+<br>
+    uint32_t len;       /* Total length of data written to
+<br>
+                           the file descriptor */
+<br>
+    int32_t  error;     /* Any error that occurred (0 if none) */
+<br>
+    uint64_t unique;    /* The value from the
+<br>
+                           corresponding request */
+};
+</pre>
+<br>
+<p class="Pp">This header is also followed by (potentially empty) variable-sized
+    data depending on the executed request. However, if the reply is an error
+    reply (i.e., <i>error</i> is set), then no further payload data should be
+    sent, independent of the request.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Exchanged_messages"><a class="permalink" href="#Exchanged_messages">Exchanged
+  messages</a></h2>
+<p class="Pp">This section should contain documentation for each of the messages
+    in the protocol. This manual page is currently incomplete, so not all
+    messages are documented. For each message, first the struct sent by the
+    kernel is given, followed by a description of the semantics of the
+  message.</p>
+<dl class="Bl-tag">
+  <dt id="FUSE_INIT"><a class="permalink" href="#FUSE_INIT"><b>FUSE_INIT</b></a></dt>
+  <dd></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct fuse_init_in {
+<br>
+    uint32_t major;
+<br>
+    uint32_t minor;
+<br>
+    uint32_t max_readahead; /* Since protocol v7.6 */
+<br>
+    uint32_t flags;         /* Since protocol v7.6 */
+};
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>This is the first request sent by the kernel to the daemon. It is used to
+      negotiate the protocol version and other filesystem parameters. Note that
+      the protocol version may affect the layout of any structure in the
+      protocol (including this structure). The daemon must thus remember the
+      negotiated version and flags for each session. As of the writing of this
+      man page, the highest supported kernel protocol version is
+    <i>7.26</i>.</dd>
+  <dt></dt>
+  <dd>Users should be aware that the descriptions in this manual page may be
+      incomplete or incorrect for older or more recent protocol versions.</dd>
+  <dt></dt>
+  <dd>The reply for this request has the following format:</dd>
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct fuse_init_out {
+<br>
+    uint32_t major;
+<br>
+    uint32_t minor;
+<br>
+    uint32_t max_readahead;   /* Since v7.6 */
+<br>
+    uint32_t flags;           /* Since v7.6; some flags bits
+<br>
+                                 were introduced later */
+<br>
+    uint16_t max_background;  /* Since v7.13 */
+<br>
+    uint16_t congestion_threshold;  /* Since v7.13 */
+<br>
+    uint32_t max_write;       /* Since v7.5 */
+<br>
+    uint32_t time_gran;       /* Since v7.6 */
+<br>
+    uint32_t unused[9];
+};
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>If the major version supported by the kernel is larger than that supported
+      by the daemon, the reply shall consist of only <i>uint32_t major</i>
+      (following the usual header), indicating the largest major version
+      supported by the daemon. The kernel will then issue a new <b>FUSE_INIT</b>
+      request conforming to the older version. In the reverse case, the daemon
+      should quietly fall back to the kernel's major version.</dd>
+  <dt></dt>
+  <dd>The negotiated minor version is considered to be the minimum of the minor
+      versions provided by the daemon and the kernel and both parties should use
+      the protocol corresponding to said minor version.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="FUSE_GETATTR"><a class="permalink" href="#FUSE_GETATTR"><b>FUSE_GETATTR</b></a></dt>
+  <dd></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct fuse_getattr_in {
+<br>
+    uint32_t getattr_flags;
+<br>
+    uint32_t dummy;
+<br>
+    uint64_t fh;      /* Set only if
+<br>
+                         (getattr_flags &amp; FUSE_GETATTR_FH)
+};
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>The requested operation is to compute the attributes to be returned by
+      <b>stat</b>(2) and similar operations for the given filesystem object. The
+      object for which the attributes should be computed is indicated either by
+      <i>header-&gt;nodeid</i> or, if the <b>FUSE_GETATTR_FH</b> flag is set, by
+      the file handle <i>fh</i>. The latter case of operation is analogous to
+      <b>fstat</b>(2).</dd>
+  <dt></dt>
+  <dd>For performance reasons, these attributes may be cached in the kernel for
+      a specified duration of time. While the cache timeout has not been
+      exceeded, the attributes will be served from the cache and will not cause
+      additional <b>FUSE_GETATTR</b> requests.</dd>
+  <dt></dt>
+  <dd>The computed attributes and the requested cache timeout should then be
+      returned in the following structure:</dd>
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct fuse_attr_out {
+<br>
+    /* Attribute cache duration (seconds + nanoseconds) */
+<br>
+    uint64_t attr_valid;
+<br>
+    uint32_t attr_valid_nsec;
+<br>
+    uint32_t dummy;
+<br>
+    struct fuse_attr {
+<br>
+        uint64_t ino;
+<br>
+        uint64_t size;
+<br>
+        uint64_t blocks;
+<br>
+        uint64_t atime;
+<br>
+        uint64_t mtime;
+<br>
+        uint64_t ctime;
+<br>
+        uint32_t atimensec;
+<br>
+        uint32_t mtimensec;
+<br>
+        uint32_t ctimensec;
+<br>
+        uint32_t mode;
+<br>
+        uint32_t nlink;
+<br>
+        uint32_t uid;
+<br>
+        uint32_t gid;
+<br>
+        uint32_t rdev;
+<br>
+        uint32_t blksize;
+<br>
+        uint32_t padding;
+<br>
+    } attr;
+};
+    </pre>
+    <br>
+  </dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="FUSE_ACCESS"><a class="permalink" href="#FUSE_ACCESS"><b>FUSE_ACCESS</b></a></dt>
+  <dd></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct fuse_access_in {
+<br>
+    uint32_t mask;
+<br>
+    uint32_t padding;
+};
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>If the <i>default_permissions</i> mount options is not used, this request
+      may be used for permissions checking. No reply data is expected, but
+      errors may be indicated as usual by setting the <i>error</i> field in the
+      reply header (in particular, access denied errors may be indicated by
+      returning <b>-EACCES</b>).</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="FUSE_OPEN"><a class="permalink" href="#FUSE_OPEN"><b>FUSE_OPEN</b> and
+    <b>FUSE_OPENDIR</b></a></dt>
+  <dd>
+    <br>
+    <pre>struct fuse_open_in {
+<br>
+    uint32_t flags;     /* The flags that were passed
+<br>
+                           to the open(2) */
+<br>
+    uint32_t unused;
+};
+    </pre>
+    <br>
+  </dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The requested operation is to open the node indicated by
+      <i>header-&gt;nodeid</i>. The exact semantics of what this means will
+      depend on the filesystem being implemented. However, at the very least the
+      filesystem should validate that the requested <i>flags</i> are valid for
+      the indicated resource and then send a reply with the following
+    format:</dd>
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct fuse_open_out {
+<br>
+    uint64_t fh;
+<br>
+    uint32_t open_flags;
+<br>
+    uint32_t padding;
+};
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>The <i>fh</i> field is an opaque identifier that the kernel will use to
+      refer to this resource The <i>open_flags</i> field is a bit mask of any
+      number of the flags that indicate properties of this file handle to the
+      kernel:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="FOPEN_DIRECT_IO"><a class="permalink" href="#FOPEN_DIRECT_IO"><b>FOPEN_DIRECT_IO</b></a></dt>
+  <dd>Bypass page cache for this open file.</dd>
+  <dt id="FOPEN_KEEP_CACHE"><a class="permalink" href="#FOPEN_KEEP_CACHE"><b>FOPEN_KEEP_CACHE</b></a></dt>
+  <dd>Don't invalidate the data cache on open.</dd>
+  <dt id="FOPEN_NONSEEKABLE"><a class="permalink" href="#FOPEN_NONSEEKABLE"><b>FOPEN_NONSEEKABLE</b></a></dt>
+  <dd>The file is not seekable.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="FUSE_READ"><a class="permalink" href="#FUSE_READ"><b>FUSE_READ</b> and
+    <b>FUSE_READDIR</b></a></dt>
+  <dd></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct fuse_read_in {
+<br>
+    uint64_t fh;
+<br>
+    uint64_t offset;
+<br>
+    uint32_t size;
+<br>
+    uint32_t read_flags;
+<br>
+    uint64_t lock_owner;
+<br>
+    uint32_t flags;
+<br>
+    uint32_t padding;
+};
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>The requested action is to read up to <i>size</i> bytes of the file or
+      directory, starting at <i>offset</i>. The bytes should be returned
+      directly following the usual reply header.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="FUSE_INTERRUPT"><a class="permalink" href="#FUSE_INTERRUPT"><b>FUSE_INTERRUPT</b></a></dt>
+  <dd>
+    <br>
+    <pre>struct fuse_interrupt_in {
+<br>
+    uint64_t unique;
+};
+    </pre>
+    <br>
+  </dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The requested action is to cancel the pending operation indicated by
+      <i>unique</i>. This request requires no response. However, receipt of this
+      message does not by itself cancel the indicated operation. The kernel will
+      still expect a reply to said operation (e.g., an <i>EINTR</i> error or a
+      short read). At most one <b>FUSE_INTERRUPT</b> request will be issued for
+      a given operation. After issuing said operation, the kernel will wait
+      uninterruptibly for completion of the indicated request.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="FUSE_LOOKUP"><a class="permalink" href="#FUSE_LOOKUP"><b>FUSE_LOOKUP</b></a></dt>
+  <dd>Directly following the header is a filename to be looked up in the
+      directory indicated by <i>header-&gt;nodeid</i>. The expected reply is of
+      the form:</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct fuse_entry_out {
+<br>
+    uint64_t nodeid;            /* Inode ID */
+<br>
+    uint64_t generation;        /* Inode generation */
+<br>
+    uint64_t entry_valid;
+<br>
+    uint64_t attr_valid;
+<br>
+    uint32_t entry_valid_nsec;
+<br>
+    uint32_t attr_valid_nsec;
+<br>
+    struct fuse_attr attr;
+};
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>The combination of <i>nodeid</i> and <i>generation</i> must be unique for
+      the filesystem's lifetime.</dd>
+  <dt></dt>
+  <dd>The interpretation of timeouts and <i>attr</i> is as for
+      <b>FUSE_GETATTR</b>.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="FUSE_FLUSH"><a class="permalink" href="#FUSE_FLUSH"><b>FUSE_FLUSH</b></a></dt>
+  <dd>
+    <br>
+    <pre>struct fuse_flush_in {
+<br>
+    uint64_t fh;
+<br>
+    uint32_t unused;
+<br>
+    uint32_t padding;
+<br>
+    uint64_t lock_owner;
+};
+    </pre>
+    <br>
+  </dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The requested action is to flush any pending changes to the indicated file
+      handle. No reply data is expected. However, an empty reply message still
+      needs to be issued once the flush operation is complete.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="FUSE_RELEASE"><a class="permalink" href="#FUSE_RELEASE"><b>FUSE_RELEASE</b>
+    and <b>FUSE_RELEASEDIR</b></a></dt>
+  <dd>
+    <br>
+    <pre>struct fuse_release_in {
+<br>
+    uint64_t fh;
+<br>
+    uint32_t flags;
+<br>
+    uint32_t release_flags;
+<br>
+    uint64_t lock_owner;
+};
+    </pre>
+    <br>
+  </dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>These are the converse of <b>FUSE_OPEN</b> and <b>FUSE_OPENDIR</b>
+      respectively. The daemon may now free any resources associated with the
+      file handle <i>fh</i> as the kernel will no longer refer to it. There is
+      no reply data associated with this request, but a reply still needs to be
+      issued once the request has been completely processed.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="FUSE_STATFS"><a class="permalink" href="#FUSE_STATFS"><b>FUSE_STATFS</b></a></dt>
+  <dd>This operation implements <b>statfs</b>(2) for this filesystem. There is
+      no input data associated with this request. The expected reply data has
+      the following structure:</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct fuse_kstatfs {
+<br>
+    uint64_t blocks;
+<br>
+    uint64_t bfree;
+<br>
+    uint64_t bavail;
+<br>
+    uint64_t files;
+<br>
+    uint64_t ffree;
+<br>
+    uint32_t bsize;
+<br>
+    uint32_t namelen;
+<br>
+    uint32_t frsize;
+<br>
+    uint32_t padding;
+<br>
+    uint32_t spare[6];
+};
+struct fuse_statfs_out {
+<br>
+    struct fuse_kstatfs st;
+};
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>For the interpretation of these fields, see <b>statfs</b>(2).</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="E2BIG"><a class="permalink" href="#E2BIG"><b>E2BIG</b></a></dt>
+  <dd>Returned from <b>read</b>(2) operations when the kernel's request is too
+      large for the provided buffer and the request was
+    <b>FUSE_SETXATTR</b>.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>Returned from <b>write</b>(2) if validation of the reply failed. Not all
+      mistakes in replies will be caught by this validation. However, basic
+      mistakes, such as short replies or an incorrect <i>unique</i> value, are
+      detected.</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>Returned from <b>read</b>(2) operations when the kernel's request is too
+      large for the provided buffer.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd><i>Note</i>: There are various ways in which incorrect use of these
+      interfaces can cause operations on the provided filesystem's files and
+      directories to fail with <b>EIO</b>. Among the possible incorrect uses
+      are:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>changing <i>mode &amp; S_IFMT</i> for an inode that has previously been
+      reported to the kernel; or</dd>
+  <dt>•</dt>
+  <dd>giving replies to the kernel that are shorter than what the kernel
+      expected.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="ENODEV"><a class="permalink" href="#ENODEV"><b>ENODEV</b></a></dt>
+  <dd>Returned from <b>read</b>(2) and <b>write</b>(2) if the FUSE filesystem
+      was unmounted.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>Returned from operations on a <i>/dev/fuse</i> file descriptor that has
+      not been mounted.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">The FUSE filesystem is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The following messages are not yet documented in this manual
+  page:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre><b>FUSE_BATCH_FORGET</b>
+<b>FUSE_BMAP</b>
+<b>FUSE_CREATE</b>
+<b>FUSE_DESTROY</b>
+<b>FUSE_FALLOCATE</b>
+<b>FUSE_FORGET</b>
+<b>FUSE_FSYNC</b>
+<b>FUSE_FSYNCDIR</b>
+<b>FUSE_GETLK</b>
+<b>FUSE_GETXATTR</b>
+<b>FUSE_IOCTL</b>
+<b>FUSE_LINK</b>
+<b>FUSE_LISTXATTR</b>
+<b>FUSE_LSEEK</b>
+<b>FUSE_MKDIR</b>
+<b>FUSE_MKNOD</b>
+<b>FUSE_NOTIFY_REPLY</b>
+<b>FUSE_POLL</b>
+<b>FUSE_READDIRPLUS</b>
+<b>FUSE_READLINK</b>
+<b>FUSE_REMOVEXATTR</b>
+<b>FUSE_RENAME</b>
+<b>FUSE_RENAME2</b>
+<b>FUSE_RMDIR</b>
+<b>FUSE_SETATTR</b>
+<b>FUSE_SETLK</b>
+<b>FUSE_SETLKW</b>
+<b>FUSE_SYMLINK</b>
+<b>FUSE_UNLINK</b>
+<b>FUSE_WRITE</b>
+</pre>
+<br>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>fusermount</b>(1), <b>mount.fuse</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

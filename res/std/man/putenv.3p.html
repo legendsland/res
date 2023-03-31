@@ -1,0 +1,162 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/1c398093fa7c97bc0ca7aa247628000f4936c2a8">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>PUTENV(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">PUTENV(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">PUTENV(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">putenv — change or add a value to an environment</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;stdlib.h&gt;</pre>
+<pre>int putenv(char *<i>string</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>putenv</i>() function shall use the <i>string</i> argument
+    to set environment variable values. The <i>string</i> argument should point
+    to a string of the form "<i>name</i>=<i>value</i>". The
+    <i>putenv</i>() function shall make the value of the environment variable
+    <i>name</i> equal to <i>value</i> by altering an existing variable or
+    creating a new one. In either case, the string pointed to by <i>string</i>
+    shall become part of the environment, so altering the string shall change
+    the environment.</p>
+<p class="Pp">The <i>putenv</i>() function need not be thread-safe.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>putenv</i>() shall return 0;
+    otherwise, it shall return a non-zero value and set <i>errno</i> to indicate
+    the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>putenv</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient memory was available.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Changing_the_Value_of_an_Environment_Variable"><a class="permalink" href="#Changing_the_Value_of_an_Environment_Variable">Changing
+  the Value of an Environment Variable</a></h2>
+<p class="Pp">The following example changes the value of the <i>HOME</i>
+    environment variable to the value <b>/usr/home</b>.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;stdlib.h&gt;
+...
+static char *var = "HOME=/usr/home";
+int ret;</pre>
+<pre>ret = putenv(var);</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The <i>putenv</i>() function manipulates the environment pointed
+    to by <i>environ</i>, and can be used in conjunction with
+  <i>getenv</i>().</p>
+<p class="Pp">See <i>exec</i>() for restrictions on changing the environment in
+    multi-threaded applications.</p>
+<p class="Pp">This routine may use <i>malloc</i>() to enlarge the
+  environment.</p>
+<p class="Pp">A potential error is to call <i>putenv</i>() with an automatic
+    variable as the argument, then return from the calling function while
+    <i>string</i> is still part of the environment.</p>
+<p class="Pp">Although the space used by <i>string</i> is no longer used once a
+    new string which defines <i>name</i> is passed to <i>putenv</i>(), if any
+    thread in the application has used <i>getenv</i>() to retrieve a pointer to
+    this variable, it should not be freed by calling <i>free</i>(). If the
+    changed environment variable is one known by the system (such as the locale
+    environment variables) the application should never free the buffer used by
+    earlier calls to <i>putenv</i>() for the same variable.</p>
+<p class="Pp">The <i>setenv</i>() function is preferred over this function. One
+    reason is that <i>putenv</i>() is optional and therefore less portable.
+    Another is that using <i>putenv</i>() can slow down environment searches, as
+    explained in the RATIONALE section for <i><i>getenv</i>()</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">Refer to the RATIONALE section in <i><i>setenv</i>()</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>exec</i></i>, <i><i>free</i>()</i>, <i><i>getenv</i>()</i>,
+    <i><i>malloc</i>()</i>, <i><i>setenv</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;stdlib.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

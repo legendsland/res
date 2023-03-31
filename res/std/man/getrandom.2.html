@@ -1,0 +1,217 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2014, Theodore Ts'o <tytso@mit.edu>
+   Copyright (C) 2014,2015 Heinrich Schuchardt <xypron.glpk@gmx.de>
+   Copyright (C) 2015, Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/0c79480406271364362f859495e30bb9eb4256d0">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>getrandom(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">getrandom(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">getrandom(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getrandom - obtain a series of random bytes</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/random.h&gt;</b></pre>
+<pre><b>ssize_t getrandom(void </b><i>buf</i><b>[.</b><i>buflen</i><b>], size_t </b><i>buflen</i><b>, unsigned int </b><i>flags</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>getrandom</b>() system call fills the buffer pointed to by
+    <i>buf</i> with up to <i>buflen</i> random bytes. These bytes can be used to
+    seed user-space random number generators or for cryptographic purposes.</p>
+<p class="Pp">By default, <b>getrandom</b>() draws entropy from the
+    <i>urandom</i> source (i.e., the same source as the <i>/dev/urandom</i>
+    device). This behavior can be changed via the <i>flags</i> argument.</p>
+<p class="Pp">If the <i>urandom</i> source has been initialized, reads of up to
+    256 bytes will always return as many bytes as requested and will not be
+    interrupted by signals. No such guarantees apply for larger buffer sizes.
+    For example, if the call is interrupted by a signal handler, it may return a
+    partially filled buffer, or fail with the error <b>EINTR</b>.</p>
+<p class="Pp">If the <i>urandom</i> source has not yet been initialized, then
+    <b>getrandom</b>() will block, unless <b>GRND_NONBLOCK</b> is specified in
+    <i>flags</i>.</p>
+<p class="Pp">The <i>flags</i> argument is a bit mask that can contain zero or
+    more of the following values ORed together:</p>
+<dl class="Bl-tag">
+  <dt id="GRND_RANDOM"><a class="permalink" href="#GRND_RANDOM"><b>GRND_RANDOM</b></a></dt>
+  <dd>If this bit is set, then random bytes are drawn from the <i>random</i>
+      source (i.e., the same source as the <i>/dev/random</i> device) instead of
+      the <i>urandom</i> source. The <i>random</i> source is limited based on
+      the entropy that can be obtained from environmental noise. If the number
+      of available bytes in the <i>random</i> source is less than requested in
+      <i>buflen</i>, the call returns just the available random bytes. If no
+      random bytes are available, the behavior depends on the presence of
+      <b>GRND_NONBLOCK</b> in the <i>flags</i> argument.</dd>
+  <dt id="GRND_NONBLOCK"><a class="permalink" href="#GRND_NONBLOCK"><b>GRND_NONBLOCK</b></a></dt>
+  <dd>By default, when reading from the <i>random</i> source, <b>getrandom</b>()
+      blocks if no random bytes are available, and when reading from the
+      <i>urandom</i> source, it blocks if the entropy pool has not yet been
+      initialized. If the <b>GRND_NONBLOCK</b> flag is set, then
+      <b>getrandom</b>() does not block in these cases, but instead immediately
+      returns -1 with <i>errno</i> set to <b>EAGAIN</b>.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>getrandom</b>() returns the number of bytes that
+    were copied to the buffer <i>buf</i>. This may be less than the number of
+    bytes requested via <i>buflen</i> if either <b>GRND_RANDOM</b> was specified
+    in <i>flags</i> and insufficient entropy was present in the <i>random</i>
+    source or the system call was interrupted by a signal.</p>
+<p class="Pp">On error, -1 is returned, and <i>errno</i> is set to indicate the
+    error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>The requested entropy was not available, and <b>getrandom</b>() would have
+      blocked if the <b>GRND_NONBLOCK</b> flag was not set.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>The address referred to by <i>buf</i> is outside the accessible address
+      space.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The call was interrupted by a signal handler; see the description of how
+      interrupted <b>read</b>(2) calls on "slow" devices are handled
+      with and without the <b>SA_RESTART</b> flag in the <b>signal</b>(7) man
+      page.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>An invalid flag was specified in <i>flags</i>.</dd>
+  <dt id="ENOSYS"><a class="permalink" href="#ENOSYS"><b>ENOSYS</b></a></dt>
+  <dd>The glibc wrapper function for <b>getrandom</b>() determined that the
+      underlying kernel does not implement this system call.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>getrandom</b>() was introduced in Linux 3.17. Support was added
+    in glibc 2.25.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This system call is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">For an overview and comparison of the various interfaces that can
+    be used to obtain randomness, see <b>random</b>(7).</p>
+<p class="Pp">Unlike <i>/dev/random</i> and <i>/dev/urandom</i>,
+    <b>getrandom</b>() does not involve the use of pathnames or file
+    descriptors. Thus, <b>getrandom</b>() can be useful in cases where
+    <b>chroot</b>(2) makes <i>/dev</i> pathnames invisible, and where an
+    application (e.g., a daemon during start-up) closes a file descriptor for
+    one of these files that was opened by a library.</p>
+<section class="Ss">
+<h2 class="Ss" id="Maximum_number_of_bytes_returned"><a class="permalink" href="#Maximum_number_of_bytes_returned">Maximum
+  number of bytes returned</a></h2>
+<p class="Pp">As of Linux 3.19 the following limits apply:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>When reading from the <i>urandom</i> source, a maximum of 32Mi-1 bytes is
+      returned by a single call to <b>getrandom</b>() on systems where
+      <i>int</i> has a size of 32 bits.</dd>
+  <dt>•</dt>
+  <dd>When reading from the <i>random</i> source, a maximum of 512 bytes is
+      returned.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Interruption_by_a_signal_handler"><a class="permalink" href="#Interruption_by_a_signal_handler">Interruption
+  by a signal handler</a></h2>
+<p class="Pp">When reading from the <i>urandom</i> source (<b>GRND_RANDOM</b> is
+    not set), <b>getrandom</b>() will block until the entropy pool has been
+    initialized (unless the <b>GRND_NONBLOCK</b> flag was specified). If a
+    request is made to read a large number of bytes (more than 256),
+    <b>getrandom</b>() will block until those bytes have been generated and
+    transferred from kernel memory to <i>buf</i>. When reading from the
+    <i>random</i> source (<b>GRND_RANDOM</b> is set), <b>getrandom</b>() will
+    block until some random bytes become available (unless the
+    <b>GRND_NONBLOCK</b> flag was specified).</p>
+<p class="Pp">The behavior when a call to <b>getrandom</b>() that is blocked
+    while reading from the <i>urandom</i> source is interrupted by a signal
+    handler depends on the initialization state of the entropy buffer and on the
+    request size, <i>buflen</i>. If the entropy is not yet initialized, then the
+    call fails with the <b>EINTR</b> error. If the entropy pool has been
+    initialized and the request size is large
+    (<i>buflen</i>&nbsp;&gt;&nbsp;256), the call either succeeds, returning
+    a partially filled buffer, or fails with the error <b>EINTR</b>. If the
+    entropy pool has been initialized and the request size is small
+    (<i>buflen</i>&nbsp;&lt;=&nbsp;256), then <b>getrandom</b>() will not
+    fail with <b>EINTR</b>. Instead, it will return all of the bytes that have
+    been requested.</p>
+<p class="Pp">When reading from the <i>random</i> source, blocking requests of
+    any size can be interrupted by a signal handler (the call fails with the
+    error <b>EINTR</b>).</p>
+<p class="Pp">Using <b>getrandom</b>() to read small buffers (&lt;=&nbsp;256
+    bytes) from the <i>urandom</i> source is the preferred mode of usage.</p>
+<p class="Pp">The special treatment of small values of <i>buflen</i> was
+    designed for compatibility with OpenBSD's <b>getentropy</b>(3), which is
+    nowadays supported by glibc.</p>
+<p class="Pp">The user of <b>getrandom</b>() <i>must</i> always check the return
+    value, to determine whether either an error occurred or fewer bytes than
+    requested were returned. In the case where <b>GRND_RANDOM</b> is not
+    specified and <i>buflen</i> is less than or equal to 256, a return of fewer
+    bytes than requested should never happen, but the careful programmer will
+    check for this anyway!</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">As of Linux 3.19, the following bug exists:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Depending on CPU load, <b>getrandom</b>() does not react to interrupts
+      before reading all bytes requested.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>getentropy</b>(3), <b>random</b>(4), <b>urandom</b>(4),
+    <b>random</b>(7), <b>signal</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

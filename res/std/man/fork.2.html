@@ -1,0 +1,313 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2006 Michael Kerrisk <mtk.manpages@gmail.com>
+   A few fragments remain from an earlier (1992) page by
+   Drew Eckhardt (drew@cs.colorado.edu),
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Modified by Michael Haardt (michael@moria.de)
+   Modified Sat Jul 24 13:22:07 1993 by Rik Faith (faith@cs.unc.edu)
+   Modified 21 Aug 1994 by Michael Chastain (mec@shell.portal.com):
+     Referenced 'clone(2)'.
+   Modified 1995-06-10, 1996-04-18, 1999-11-01, 2000-12-24
+     by Andries Brouwer (aeb@cwi.nl)
+   Modified, 27 May 2004, Michael Kerrisk <mtk.manpages@gmail.com>
+       Added notes on capability requirements
+   2006-09-04, Michael Kerrisk
+       Greatly expanded, to describe all attributes that differ
+  	parent and child.
+   --><head>
+<meta name="dc.identifier" content="res/187e8cac7f5bb68c88fa323d94fe0701873257bd">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>fork(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">fork(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">fork(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">fork - create a child process</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>pid_t fork(void);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>fork</b>() creates a new process by duplicating the calling
+    process. The new process is referred to as the <i>child</i> process. The
+    calling process is referred to as the <i>parent</i> process.</p>
+<p class="Pp">The child process and the parent process run in separate memory
+    spaces. At the time of <b>fork</b>() both memory spaces have the same
+    content. Memory writes, file mappings (<b>mmap</b>(2)), and unmappings
+    (<b>munmap</b>(2)) performed by one of the processes do not affect the
+    other.</p>
+<p class="Pp">The child process is an exact duplicate of the parent process
+    except for the following points:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>The child has its own unique process ID, and this PID does not match the
+      ID of any existing process group (<b>setpgid</b>(2)) or session.</dd>
+  <dt>•</dt>
+  <dd>The child's parent process ID is the same as the parent's process ID.</dd>
+  <dt>•</dt>
+  <dd>The child does not inherit its parent's memory locks (<b>mlock</b>(2),
+      <b>mlockall</b>(2)).</dd>
+  <dt>•</dt>
+  <dd>Process resource utilizations (<b>getrusage</b>(2)) and CPU time counters
+      (<b>times</b>(2)) are reset to zero in the child.</dd>
+  <dt>•</dt>
+  <dd>The child's set of pending signals is initially empty
+      (<b>sigpending</b>(2)).</dd>
+  <dt>•</dt>
+  <dd>The child does not inherit semaphore adjustments from its parent
+      (<b>semop</b>(2)).</dd>
+  <dt>•</dt>
+  <dd>The child does not inherit process-associated record locks from its parent
+      (<b>fcntl</b>(2)). (On the other hand, it does inherit <b>fcntl</b>(2)
+      open file description locks and <b>flock</b>(2) locks from its
+    parent.)</dd>
+  <dt>•</dt>
+  <dd>The child does not inherit timers from its parent (<b>setitimer</b>(2),
+      <b>alarm</b>(2), <b>timer_create</b>(2)).</dd>
+  <dt>•</dt>
+  <dd>The child does not inherit outstanding asynchronous I/O operations from
+      its parent (<b>aio_read</b>(3), <b>aio_write</b>(3)), nor does it inherit
+      any asynchronous I/O contexts from its parent (see
+    <b>io_setup</b>(2)).</dd>
+</dl>
+<p class="Pp">The process attributes in the preceding list are all specified in
+    POSIX.1. The parent and child also differ with respect to the following
+    Linux-specific process attributes:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>The child does not inherit directory change notifications (dnotify) from
+      its parent (see the description of <b>F_NOTIFY</b> in
+    <b>fcntl</b>(2)).</dd>
+  <dt>•</dt>
+  <dd>The <b>prctl</b>(2) <b>PR_SET_PDEATHSIG</b> setting is reset so that the
+      child does not receive a signal when its parent terminates.</dd>
+  <dt>•</dt>
+  <dd>The default timer slack value is set to the parent's current timer slack
+      value. See the description of <b>PR_SET_TIMERSLACK</b> in
+    <b>prctl</b>(2).</dd>
+  <dt>•</dt>
+  <dd>Memory mappings that have been marked with the <b>madvise</b>(2)
+      <b>MADV_DONTFORK</b> flag are not inherited across a <b>fork</b>().</dd>
+  <dt>•</dt>
+  <dd>Memory in address ranges that have been marked with the <b>madvise</b>(2)
+      <b>MADV_WIPEONFORK</b> flag is zeroed in the child after a <b>fork</b>().
+      (The <b>MADV_WIPEONFORK</b> setting remains in place for those address
+      ranges in the child.)</dd>
+  <dt>•</dt>
+  <dd>The termination signal of the child is always <b>SIGCHLD</b> (see
+      <b>clone</b>(2)).</dd>
+  <dt>•</dt>
+  <dd>The port access permission bits set by <b>ioperm</b>(2) are not inherited
+      by the child; the child must turn on any bits that it requires using
+      <b>ioperm</b>(2).</dd>
+</dl>
+<p class="Pp">Note the following further points:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>The child process is created with a single thread—the one that
+      called <b>fork</b>(). The entire virtual address space of the parent is
+      replicated in the child, including the states of mutexes, condition
+      variables, and other pthreads objects; the use of <b>pthread_atfork</b>(3)
+      may be helpful for dealing with problems that this can cause.</dd>
+  <dt>•</dt>
+  <dd>After a <b>fork</b>() in a multithreaded program, the child can safely
+      call only async-signal-safe functions (see <b>signal-safety</b>(7)) until
+      such time as it calls <b>execve</b>(2).</dd>
+  <dt>•</dt>
+  <dd>The child inherits copies of the parent's set of open file descriptors.
+      Each file descriptor in the child refers to the same open file description
+      (see <b>open</b>(2)) as the corresponding file descriptor in the parent.
+      This means that the two file descriptors share open file status flags,
+      file offset, and signal-driven I/O attributes (see the description of
+      <b>F_SETOWN</b> and <b>F_SETSIG</b> in <b>fcntl</b>(2)).</dd>
+  <dt>•</dt>
+  <dd>The child inherits copies of the parent's set of open message queue
+      descriptors (see <b>mq_overview</b>(7)). Each file descriptor in the child
+      refers to the same open message queue description as the corresponding
+      file descriptor in the parent. This means that the two file descriptors
+      share the same flags (<i>mq_flags</i>).</dd>
+  <dt>•</dt>
+  <dd>The child inherits copies of the parent's set of open directory streams
+      (see <b>opendir</b>(3)). POSIX.1 says that the corresponding directory
+      streams in the parent and child <i>may</i> share the directory stream
+      positioning; on Linux/glibc they do not.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, the PID of the child process is returned in the
+    parent, and 0 is returned in the child. On failure, -1 is returned in the
+    parent, no child process is created, and <i>errno</i> is set to indicate the
+    error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>A system-imposed limit on the number of threads was encountered. There are
+      a number of limits that may trigger this error:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>the <b>RLIMIT_NPROC</b> soft resource limit (set via <b>setrlimit</b>(2)),
+      which limits the number of processes and threads for a real user ID, was
+      reached;</dd>
+  <dt>•</dt>
+  <dd>the kernel's system-wide limit on the number of processes and threads,
+      <i>/proc/sys/kernel/threads-max</i>, was reached (see
+    <b>proc</b>(5));</dd>
+  <dt>•</dt>
+  <dd>the maximum number of PIDs, <i>/proc/sys/kernel/pid_max</i>, was reached
+      (see <b>proc</b>(5)); or</dd>
+  <dt>•</dt>
+  <dd>the PID limit (<i>pids.max</i>) imposed by the cgroup "process
+      number" (PIDs) controller was reached.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="EAGAIN~2"><a class="permalink" href="#EAGAIN~2"><b>EAGAIN</b></a></dt>
+  <dd>The caller is operating under the <b>SCHED_DEADLINE</b> scheduling policy
+      and does not have the reset-on-fork flag set. See <b>sched</b>(7).</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd><b>fork</b>() failed to allocate the necessary kernel structures because
+      memory is tight.</dd>
+  <dt id="ENOMEM~2"><a class="permalink" href="#ENOMEM~2"><b>ENOMEM</b></a></dt>
+  <dd>An attempt was made to create a child process in a PID namespace whose
+      "init" process has terminated. See
+    <b>pid_namespaces</b>(7).</dd>
+  <dt id="ENOSYS"><a class="permalink" href="#ENOSYS"><b>ENOSYS</b></a></dt>
+  <dd><b>fork</b>() is not supported on this platform (for example, hardware
+      without a Memory-Management Unit).</dd>
+  <dt id="ERESTARTNOINTR"><a class="permalink" href="#ERESTARTNOINTR"><b>ERESTARTNOINTR</b>
+    (since Linux 2.6.17)</a></dt>
+  <dd>System call was interrupted by a signal and will be restarted. (This can
+      be seen only during a trace.)</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, SVr4, 4.3BSD.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Under Linux, <b>fork</b>() is implemented using copy-on-write
+    pages, so the only penalty that it incurs is the time and memory required to
+    duplicate the parent's page tables, and to create a unique task structure
+    for the child.</p>
+<section class="Ss">
+<h2 class="Ss" id="C_library/kernel_differences"><a class="permalink" href="#C_library/kernel_differences">C
+  library/kernel differences</a></h2>
+<p class="Pp">Since glibc 2.3.3, rather than invoking the kernel's <b>fork</b>()
+    system call, the glibc <b>fork</b>() wrapper that is provided as part of the
+    NPTL threading implementation invokes <b>clone</b>(2) with flags that
+    provide the same effect as the traditional system call. (A call to
+    <b>fork</b>() is equivalent to a call to <b>clone</b>(2) specifying
+    <i>flags</i> as just <b>SIGCHLD</b>.) The glibc wrapper invokes any fork
+    handlers that have been established using <b>pthread_atfork</b>(3).</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">See <b>pipe</b>(2) and <b>wait</b>(2) for more examples.</p>
+<p class="Pp"></p>
+<pre>#include &lt;signal.h&gt;
+#include &lt;stdint.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+int
+main(void)
+{
+<br>
+    pid_t pid;
+<br>
+    if (signal(SIGCHLD, SIG_IGN) == SIG_ERR) {
+<br>
+        perror("signal");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    pid = fork();
+<br>
+    switch (pid) {
+<br>
+    case -1:
+<br>
+        perror("fork");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    case 0:
+<br>
+        puts("Child exiting.");
+<br>
+        exit(EXIT_SUCCESS);
+<br>
+    default:
+<br>
+        printf("Child is PID %jd\n", (intmax_t) pid);
+<br>
+        puts("Parent exiting.");
+<br>
+        exit(EXIT_SUCCESS);
+<br>
+    }
+}
+</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>clone</b>(2), <b>execve</b>(2), <b>exit</b>(2),
+    <b>setrlimit</b>(2), <b>unshare</b>(2), <b>vfork</b>(2), <b>wait</b>(2),
+    <b>daemon</b>(3), <b>pthread_atfork</b>(3), <b>capabilities</b>(7),
+    <b>credentials</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

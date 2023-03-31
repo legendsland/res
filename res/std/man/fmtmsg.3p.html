@@ -1,0 +1,277 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/d3b3ee8324ab86fc9a914cf849e74f60c3d84743">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>FMTMSG(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">FMTMSG(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">FMTMSG(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">fmtmsg — display a message in the specified format on
+    standard error and/or a system console</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;fmtmsg.h&gt;</pre>
+<pre>int fmtmsg(long <i>classification</i>, const char *<i>label</i>, int <i>severity</i>,
+<br>
+    const char *<i>text</i>, const char *<i>action</i>, const char *<i>tag</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>fmtmsg</i>() function shall display messages in a specified
+    format instead of the traditional <i>printf</i>() function.</p>
+<p class="Pp">Based on a message's classification component, <i>fmtmsg</i>()
+    shall write a formatted message either to standard error, to the console, or
+    to both.</p>
+<p class="Pp">A formatted message consists of up to five components as defined
+    below. The component <i>classification</i> is not part of a message
+    displayed to the user, but defines the source of the message and directs the
+    display of the formatted message.</p>
+<dl class="Bl-tag">
+  <dt id="classification"><a class="permalink" href="#classification"><i>classification</i></a></dt>
+  <dd>Contains the sum of identifying values constructed from the constants
+      defined below. Any one identifier from a subclass may be used in
+      combination with a single identifier from a different subclass. Two or
+      more identifiers from the same subclass should not be used together, with
+      the exception of identifiers from the display subclass. (Both display
+      subclass identifiers may be used so that messages can be displayed to both
+      standard error and the system console.)</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="Major"><a class="permalink" href="#Major"><b>Major
+    Classifications</b></a></dt>
+  <dd>
+    <br>
+    Identifies the source of the condition. Identifiers are: MM_HARD (hardware),
+      MM_SOFT (software), and MM_FIRM (firmware).</dd>
+  <dt id="Message"><a class="permalink" href="#Message"><b>Message Source
+    Subclassifications</b></a></dt>
+  <dd>
+    <br>
+    Identifies the type of software in which the problem is detected.
+      Identifiers are: MM_APPL (application), MM_UTIL (utility), and MM_OPSYS
+      (operating system).</dd>
+  <dt id="Display"><a class="permalink" href="#Display"><b>Display
+    Subclassifications</b></a></dt>
+  <dd>
+    <br>
+    Indicates where the message is to be displayed. Identifiers are: MM_PRINT to
+      display the message on the standard error stream, MM_CONSOLE to display
+      the message on the system console. One or both identifiers may be
+    used.</dd>
+  <dt id="Status"><a class="permalink" href="#Status"><b>Status
+    Subclassifications</b></a></dt>
+  <dd>
+    <br>
+    Indicates whether the application can recover from the condition.
+      Identifiers are: MM_RECOVER (recoverable) and MM_NRECOV
+    (non-recoverable).</dd>
+</dl>
+<p class="Pp">An additional identifier, MM_NULLMC, indicates that no
+    classification component is supplied for the message.</p>
+</div>
+<dl class="Bl-tag">
+  <dt id="label"><a class="permalink" href="#label"><i>label</i></a></dt>
+  <dd>Identifies the source of the message. The format is two fields separated
+      by a &lt;colon&gt;. The first field is up to 10 bytes, the second is up to
+      14 bytes.</dd>
+  <dt id="severity"><a class="permalink" href="#severity"><i>severity</i></a></dt>
+  <dd>Indicates the seriousness of the condition. Identifiers for the levels of
+      <i>severity</i> are:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="MM_HALT"><a class="permalink" href="#MM_HALT">MM_HALT</a></dt>
+  <dd>Indicates that the application has encountered a severe fault and is
+      halting. Produces the string <b>"HALT"</b>.</dd>
+  <dt id="MM_ERROR"><a class="permalink" href="#MM_ERROR">MM_ERROR</a></dt>
+  <dd>Indicates that the application has detected a fault. Produces the string
+      <b>"ERROR"</b>.</dd>
+  <dt id="MM_WARNING"><a class="permalink" href="#MM_WARNING">MM_WARNING</a></dt>
+  <dd>Indicates a condition that is out of the ordinary, that might be a
+      problem, and should be watched. Produces the string
+      <b>"WARNING"</b>.</dd>
+  <dt id="MM_INFO"><a class="permalink" href="#MM_INFO">MM_INFO</a></dt>
+  <dd>Provides information about a condition that is not in error. Produces the
+      string <b>"INFO"</b>.</dd>
+  <dt id="MM_NOSEV"><a class="permalink" href="#MM_NOSEV">MM_NOSEV</a></dt>
+  <dd>Indicates that no severity level is supplied for the message.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="text"><a class="permalink" href="#text"><i>text</i></a></dt>
+  <dd>Describes the error condition that produced the message. The character
+      string is not limited to a specific size. If the character string is
+      empty, then the text produced is unspecified.</dd>
+  <dt id="action"><a class="permalink" href="#action"><i>action</i></a></dt>
+  <dd>Describes the first step to be taken in the error-recovery process. The
+      <i>fmtmsg</i>() function precedes the action string with the prefix:
+      <b>"TO</b>FIX:"<b>.</b> The <i>action</i> string is not limited
+      to a specific size.</dd>
+  <dt id="tag"><a class="permalink" href="#tag"><i>tag</i></a></dt>
+  <dd>An identifier that references on-line documentation for the message.
+      Suggested usage is that <i>tag</i> includes the <i>label</i> and a unique
+      identifying number. A sample <i>tag</i> is
+    <b>"XSI:cat:146"</b>.</dd>
+</dl>
+<p class="Pp">The <i>MSGVERB</i> environment variable (for message verbosity)
+    shall determine for <i>fmtmsg</i>() which message components it is to select
+    when writing messages to standard error. The value of <i>MSGVERB</i> shall
+    be a &lt;colon&gt;-separated list of optional keywords. Valid keywords are:
+    <i>label</i>, <i>severity</i>, <i>text</i>, <i>action</i>, and <i>tag</i>.
+    If <i>MSGVERB</i> contains a keyword for a component and the component's
+    value is not the component's null value, <i>fmtmsg</i>() shall include that
+    component in the message when writing the message to standard error. If
+    <i>MSGVERB</i> does not include a keyword for a message component, that
+    component shall not be included in the display of the message. The keywords
+    may appear in any order. If <i>MSGVERB</i> is not defined, if its value is
+    the null string, if its value is not of the correct format, or if it
+    contains keywords other than the valid ones listed above, <i>fmtmsg</i>()
+    shall select all components.</p>
+<p class="Pp"><i>MSGVERB</i> shall determine which components are selected for
+    display to standard error. All message components shall be included in
+    console messages.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <i>fmtmsg</i>() function shall return one of the following
+    values:</p>
+<dl class="Bl-tag">
+  <dt id="MM_OK"><a class="permalink" href="#MM_OK">MM_OK</a></dt>
+  <dd>The function succeeded.</dd>
+  <dt id="MM_NOTOK"><a class="permalink" href="#MM_NOTOK">MM_NOTOK</a></dt>
+  <dd>The function failed completely.</dd>
+  <dt id="MM_NOMSG"><a class="permalink" href="#MM_NOMSG">MM_NOMSG</a></dt>
+  <dd>The function was unable to generate a message on standard error, but
+      otherwise succeeded.</dd>
+  <dt id="MM_NOCON"><a class="permalink" href="#MM_NOCON">MM_NOCON</a></dt>
+  <dd>The function was unable to generate a console message, but otherwise
+      succeeded.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">None.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<dl class="Bl-tag">
+  <dt> 1.</dt>
+  <dd>The following example of <i>fmtmsg</i>():</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>fmtmsg(MM_PRINT, "XSI:cat", MM_ERROR, "illegal option",
+"refer to cat in user's reference manual", "XSI:cat:001")</pre>
+</div>
+<p class="Pp">produces a complete message in the specified message format:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>XSI:cat: ERROR: illegal option
+TO FIX: refer to cat in user's reference manual XSI:cat:001</pre>
+</div>
+</div>
+<dl class="Bl-tag">
+  <dt> 2.</dt>
+  <dd>When the environment variable <i>MSGVERB</i> is set as follows:</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>MSGVERB=severity:text:action</pre>
+</div>
+<p class="Pp">and Example 1 is used, <i>fmtmsg</i>() produces:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>ERROR: illegal option
+TO FIX: refer to cat in user's reference manual</pre>
+</div>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">One or more message components may be systematically omitted from
+    messages generated by an application by using the null value of the argument
+    for that component.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>fprintf</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;fmtmsg.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

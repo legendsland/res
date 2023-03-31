@@ -1,0 +1,823 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 1993 Michael Haardt (michael@moria.de)
+   Fri Apr  2 11:32:09 MET DST 1993
+   Copyright (c) 2006-2015, Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+  
+   Modified 1993-07-24 by Rik Faith <faith@cs.unc.edu>
+   Modified 1995-02-25 by Jim Van Zandt <jrv@vanzandt.mv.com>
+   Modified 1995-09-02 by Jim Van Zandt <jrv@vanzandt.mv.com>
+   moved to man3, aeb, 950919
+   Modified 2001-09-22 by Michael Kerrisk <mtk.manpages@gmail.com>
+   Modified 2001-12-17, aeb
+   Modified 2004-10-31, aeb
+   2006-12-28, mtk:
+       Added .SS headers to give some structure to this page; and a
+       small amount of reordering.
+       Added a section on canonical and noncanonical mode.
+       Enhanced the discussion of "raw" mode for cfmakeraw().
+       Document CMSPAR.
+   --><head>
+<meta name="dc.identifier" content="res/ef5d3fb412900d8fc826d7b7b64d954a63e4b68f">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>termios(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">termios(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">termios(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">termios, tcgetattr, tcsetattr, tcsendbreak, tcdrain, tcflush,
+    tcflow, cfmakeraw, cfgetospeed, cfgetispeed, cfsetispeed, cfsetospeed,
+    cfsetspeed - get and set terminal attributes, line control, get and set baud
+    rate</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;termios.h&gt;</b>
+<b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int tcgetattr(int </b><i>fd</i><b>, struct termios *</b><i>termios_p</i><b>);</b>
+<b>int tcsetattr(int </b><i>fd</i><b>, int </b><i>optional_actions</i><b>,</b>
+<b>              const struct termios *</b><i>termios_p</i><b>);</b></pre>
+<pre><b>int tcsendbreak(int </b><i>fd</i><b>, int </b><i>duration</i><b>);</b>
+<b>int tcdrain(int </b><i>fd</i><b>);</b>
+<b>int tcflush(int </b><i>fd</i><b>, int </b><i>queue_selector</i><b>);</b>
+<b>int tcflow(int </b><i>fd</i><b>, int </b><i>action</i><b>);</b></pre>
+<pre><b>void cfmakeraw(struct termios *</b><i>termios_p</i><b>);</b></pre>
+<pre><b>speed_t cfgetispeed(const struct termios *</b><i>termios_p</i><b>);</b>
+<b>speed_t cfgetospeed(const struct termios *</b><i>termios_p</i><b>);</b></pre>
+<pre><b>int cfsetispeed(struct termios *</b><i>termios_p</i><b>, speed_t </b><i>speed</i><b>);</b>
+<b>int cfsetospeed(struct termios *</b><i>termios_p</i><b>, speed_t </b><i>speed</i><b>);</b>
+<b>int cfsetspeed(struct termios *</b><i>termios_p</i><b>, speed_t </b><i>speed</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>cfsetspeed</b>(), <b>cfmakeraw</b>():</p>
+<pre><br>
+    Since glibc 2.19:
+<br>
+        _DEFAULT_SOURCE
+<br>
+    glibc 2.19 and earlier:
+<br>
+        _BSD_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The termios functions describe a general terminal interface that
+    is provided to control asynchronous communications ports.</p>
+<section class="Ss">
+<h2 class="Ss" id="The_termios_structure"><a class="permalink" href="#The_termios_structure">The
+  termios structure</a></h2>
+<p class="Pp">Many of the functions described here have a <i>termios_p</i>
+    argument that is a pointer to a <i>termios</i> structure. This structure
+    contains at least the following members:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>tcflag_t c_iflag;      /* input modes */
+tcflag_t c_oflag;      /* output modes */
+tcflag_t c_cflag;      /* control modes */
+tcflag_t c_lflag;      /* local modes */
+cc_t     c_cc[NCCS];   /* special characters */
+</pre>
+<br>
+<p class="Pp">The values that may be assigned to these fields are described
+    below. In the case of the first four bit-mask fields, the definitions of
+    some of the associated flags that may be set are exposed only if a specific
+    feature test macro (see <b>feature_test_macros</b>(7)) is defined, as noted
+    in brackets ("[]").</p>
+<p class="Pp">In the descriptions below, "not in POSIX" means that the
+    value is not specified in POSIX.1-2001, and "XSI" means that the
+    value is specified in POSIX.1-2001 as part of the XSI extension.</p>
+<p class="Pp"><i>c_iflag</i> flag constants:</p>
+<dl class="Bl-tag">
+  <dt id="IGNBRK"><a class="permalink" href="#IGNBRK"><b>IGNBRK</b></a></dt>
+  <dd>Ignore BREAK condition on input.</dd>
+  <dt id="BRKINT"><a class="permalink" href="#BRKINT"><b>BRKINT</b></a></dt>
+  <dd>If <b>IGNBRK</b> is set, a BREAK is ignored. If it is not set but
+      <b>BRKINT</b> is set, then a BREAK causes the input and output queues to
+      be flushed, and if the terminal is the controlling terminal of a
+      foreground process group, it will cause a <b>SIGINT</b> to be sent to this
+      foreground process group. When neither <b>IGNBRK</b> nor <b>BRKINT</b> are
+      set, a BREAK reads as a null byte ('\0'), except when <b>PARMRK</b> is
+      set, in which case it reads as the sequence \377 \0 \0.</dd>
+  <dt id="IGNPAR"><a class="permalink" href="#IGNPAR"><b>IGNPAR</b></a></dt>
+  <dd>Ignore framing errors and parity errors.</dd>
+  <dt id="PARMRK"><a class="permalink" href="#PARMRK"><b>PARMRK</b></a></dt>
+  <dd>If this bit is set, input bytes with parity or framing errors are marked
+      when passed to the program. This bit is meaningful only when <b>INPCK</b>
+      is set and <b>IGNPAR</b> is not set. The way erroneous bytes are marked is
+      with two preceding bytes, \377 and \0. Thus, the program actually reads
+      three bytes for one erroneous byte received from the terminal. If a valid
+      byte has the value \377, and <b>ISTRIP</b> (see below) is not set, the
+      program might confuse it with the prefix that marks a parity error.
+      Therefore, a valid byte \377 is passed to the program as two bytes, \377
+      \377, in this case.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>If neither <b>IGNPAR</b> nor <b>PARMRK</b> is set, read a character with a
+      parity error or framing error as \0.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="INPCK"><a class="permalink" href="#INPCK"><b>INPCK</b></a></dt>
+  <dd>Enable input parity checking.</dd>
+  <dt id="ISTRIP"><a class="permalink" href="#ISTRIP"><b>ISTRIP</b></a></dt>
+  <dd>Strip off eighth bit.</dd>
+  <dt id="INLCR"><a class="permalink" href="#INLCR"><b>INLCR</b></a></dt>
+  <dd>Translate NL to CR on input.</dd>
+  <dt id="IGNCR"><a class="permalink" href="#IGNCR"><b>IGNCR</b></a></dt>
+  <dd>Ignore carriage return on input.</dd>
+  <dt id="ICRNL"><a class="permalink" href="#ICRNL"><b>ICRNL</b></a></dt>
+  <dd>Translate carriage return to newline on input (unless <b>IGNCR</b> is
+      set).</dd>
+  <dt id="IUCLC"><a class="permalink" href="#IUCLC"><b>IUCLC</b></a></dt>
+  <dd>(not in POSIX) Map uppercase characters to lowercase on input.</dd>
+  <dt id="IXON"><a class="permalink" href="#IXON"><b>IXON</b></a></dt>
+  <dd>Enable XON/XOFF flow control on output.</dd>
+  <dt id="IXANY"><a class="permalink" href="#IXANY"><b>IXANY</b></a></dt>
+  <dd>(XSI) Typing any character will restart stopped output. (The default is to
+      allow just the START character to restart output.)</dd>
+  <dt id="IXOFF"><a class="permalink" href="#IXOFF"><b>IXOFF</b></a></dt>
+  <dd>Enable XON/XOFF flow control on input.</dd>
+  <dt id="IMAXBEL"><a class="permalink" href="#IMAXBEL"><b>IMAXBEL</b></a></dt>
+  <dd>(not in POSIX) Ring bell when input queue is full. Linux does not
+      implement this bit, and acts as if it is always set.</dd>
+  <dt id="IUTF8"><a class="permalink" href="#IUTF8"><b>IUTF8</b> (since Linux
+    2.6.4)</a></dt>
+  <dd>(not in POSIX) Input is UTF8; this allows character-erase to be correctly
+      performed in cooked mode.</dd>
+</dl>
+<p class="Pp"><i>c_oflag</i> flag constants:</p>
+<dl class="Bl-tag">
+  <dt id="OPOST"><a class="permalink" href="#OPOST"><b>OPOST</b></a></dt>
+  <dd>Enable implementation-defined output processing.</dd>
+  <dt id="OLCUC"><a class="permalink" href="#OLCUC"><b>OLCUC</b></a></dt>
+  <dd>(not in POSIX) Map lowercase characters to uppercase on output.</dd>
+  <dt id="ONLCR"><a class="permalink" href="#ONLCR"><b>ONLCR</b></a></dt>
+  <dd>(XSI) Map NL to CR-NL on output.</dd>
+  <dt id="OCRNL"><a class="permalink" href="#OCRNL"><b>OCRNL</b></a></dt>
+  <dd>Map CR to NL on output.</dd>
+  <dt id="ONOCR"><a class="permalink" href="#ONOCR"><b>ONOCR</b></a></dt>
+  <dd>Don't output CR at column 0.</dd>
+  <dt id="ONLRET"><a class="permalink" href="#ONLRET"><b>ONLRET</b></a></dt>
+  <dd>The NL character is assumed to do the carriage-return function; the
+      kernel's idea of the current column is set to 0 after both NL and CR.</dd>
+  <dt id="OFILL"><a class="permalink" href="#OFILL"><b>OFILL</b></a></dt>
+  <dd>Send fill characters for a delay, rather than using a timed delay.</dd>
+  <dt id="OFDEL"><a class="permalink" href="#OFDEL"><b>OFDEL</b></a></dt>
+  <dd>Fill character is ASCII DEL (0177). If unset, fill character is ASCII NUL
+      ('\0'). (Not implemented on Linux.)</dd>
+  <dt id="NLDLY"><a class="permalink" href="#NLDLY"><b>NLDLY</b></a></dt>
+  <dd>Newline delay mask. Values are <b>NL0</b> and <b>NL1</b>. [requires
+      <b>_BSD_SOURCE</b> or <b>_SVID_SOURCE</b> or <b>_XOPEN_SOURCE</b>]</dd>
+  <dt id="CRDLY"><a class="permalink" href="#CRDLY"><b>CRDLY</b></a></dt>
+  <dd>Carriage return delay mask. Values are <b>CR0</b>, <b>CR1</b>, <b>CR2</b>,
+      or <b>CR3</b>. [requires <b>_BSD_SOURCE</b> or <b>_SVID_SOURCE</b> or
+      <b>_XOPEN_SOURCE</b>]</dd>
+  <dt id="TABDLY"><a class="permalink" href="#TABDLY"><b>TABDLY</b></a></dt>
+  <dd>Horizontal tab delay mask. Values are <b>TAB0</b>, <b>TAB1</b>,
+      <b>TAB2</b>, <b>TAB3</b> (or <b>XTABS</b>, but see the <b>BUGS</b>
+      section). A value of TAB3, that is, XTABS, expands tabs to spaces (with
+      tab stops every eight columns). [requires <b>_BSD_SOURCE</b> or
+      <b>_SVID_SOURCE</b> or <b>_XOPEN_SOURCE</b>]</dd>
+  <dt id="BSDLY"><a class="permalink" href="#BSDLY"><b>BSDLY</b></a></dt>
+  <dd>Backspace delay mask. Values are <b>BS0</b> or <b>BS1</b>. (Has never been
+      implemented.) [requires <b>_BSD_SOURCE</b> or <b>_SVID_SOURCE</b> or
+      <b>_XOPEN_SOURCE</b>]</dd>
+  <dt id="VTDLY"><a class="permalink" href="#VTDLY"><b>VTDLY</b></a></dt>
+  <dd>Vertical tab delay mask. Values are <b>VT0</b> or <b>VT1</b>.</dd>
+  <dt id="FFDLY"><a class="permalink" href="#FFDLY"><b>FFDLY</b></a></dt>
+  <dd>Form feed delay mask. Values are <b>FF0</b> or <b>FF1</b>. [requires
+      <b>_BSD_SOURCE</b> or <b>_SVID_SOURCE</b> or <b>_XOPEN_SOURCE</b>]</dd>
+</dl>
+<p class="Pp"><i>c_cflag</i> flag constants:</p>
+<dl class="Bl-tag">
+  <dt id="CBAUD"><a class="permalink" href="#CBAUD"><b>CBAUD</b></a></dt>
+  <dd>(not in POSIX) Baud speed mask (4+1 bits). [requires <b>_BSD_SOURCE</b> or
+      <b>_SVID_SOURCE</b>]</dd>
+  <dt id="CBAUDEX"><a class="permalink" href="#CBAUDEX"><b>CBAUDEX</b></a></dt>
+  <dd>(not in POSIX) Extra baud speed mask (1 bit), included in <b>CBAUD</b>.
+      [requires <b>_BSD_SOURCE</b> or <b>_SVID_SOURCE</b>]</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>(POSIX says that the baud speed is stored in the <i>termios</i> structure
+      without specifying where precisely, and provides <b>cfgetispeed</b>() and
+      <b>cfsetispeed</b>() for getting at it. Some systems use bits selected by
+      <b>CBAUD</b> in <i>c_cflag</i>, other systems use separate fields, for
+      example, <i>sg_ispeed</i> and <i>sg_ospeed</i>.)</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="CSIZE"><a class="permalink" href="#CSIZE"><b>CSIZE</b></a></dt>
+  <dd>Character size mask. Values are <b>CS5</b>, <b>CS6</b>, <b>CS7</b>, or
+      <b>CS8</b>.</dd>
+  <dt id="CSTOPB"><a class="permalink" href="#CSTOPB"><b>CSTOPB</b></a></dt>
+  <dd>Set two stop bits, rather than one.</dd>
+  <dt id="CREAD"><a class="permalink" href="#CREAD"><b>CREAD</b></a></dt>
+  <dd>Enable receiver.</dd>
+  <dt id="PARENB"><a class="permalink" href="#PARENB"><b>PARENB</b></a></dt>
+  <dd>Enable parity generation on output and parity checking for input.</dd>
+  <dt id="PARODD"><a class="permalink" href="#PARODD"><b>PARODD</b></a></dt>
+  <dd>If set, then parity for input and output is odd; otherwise even parity is
+      used.</dd>
+  <dt id="HUPCL"><a class="permalink" href="#HUPCL"><b>HUPCL</b></a></dt>
+  <dd>Lower modem control lines after last process closes the device (hang
+    up).</dd>
+  <dt id="CLOCAL"><a class="permalink" href="#CLOCAL"><b>CLOCAL</b></a></dt>
+  <dd>Ignore modem control lines.</dd>
+  <dt id="LOBLK"><a class="permalink" href="#LOBLK"><b>LOBLK</b></a></dt>
+  <dd>(not in POSIX) Block output from a noncurrent shell layer. For use by
+      <b>shl</b> (shell layers). (Not implemented on Linux.)</dd>
+  <dt id="CIBAUD"><a class="permalink" href="#CIBAUD"><b>CIBAUD</b></a></dt>
+  <dd>(not in POSIX) Mask for input speeds. The values for the <b>CIBAUD</b>
+      bits are the same as the values for the <b>CBAUD</b> bits, shifted left
+      <b>IBSHIFT</b> bits. [requires <b>_BSD_SOURCE</b> or <b>_SVID_SOURCE</b>]
+      (Not implemented in glibc, supported on Linux via <b>TCGET</b>* and
+      <b>TCSET</b>* ioctls; see <b>ioctl_tty</b>(2))</dd>
+  <dt id="CMSPAR"><a class="permalink" href="#CMSPAR"><b>CMSPAR</b></a></dt>
+  <dd>(not in POSIX) Use "stick" (mark/space) parity (supported on
+      certain serial devices): if <b>PARODD</b> is set, the parity bit is always
+      1; if <b>PARODD</b> is not set, then the parity bit is always 0. [requires
+      <b>_BSD_SOURCE</b> or <b>_SVID_SOURCE</b>]</dd>
+  <dt id="CRTSCTS"><a class="permalink" href="#CRTSCTS"><b>CRTSCTS</b></a></dt>
+  <dd>(not in POSIX) Enable RTS/CTS (hardware) flow control. [requires
+      <b>_BSD_SOURCE</b> or <b>_SVID_SOURCE</b>]</dd>
+</dl>
+<p class="Pp"><i>c_lflag</i> flag constants:</p>
+<dl class="Bl-tag">
+  <dt id="ISIG"><a class="permalink" href="#ISIG"><b>ISIG</b></a></dt>
+  <dd>When any of the characters INTR, QUIT, SUSP, or DSUSP are received,
+      generate the corresponding signal.</dd>
+  <dt id="ICANON"><a class="permalink" href="#ICANON"><b>ICANON</b></a></dt>
+  <dd>Enable canonical mode (described below).</dd>
+  <dt id="XCASE"><a class="permalink" href="#XCASE"><b>XCASE</b></a></dt>
+  <dd>(not in POSIX; not supported under Linux) If <b>ICANON</b> is also set,
+      terminal is uppercase only. Input is converted to lowercase, except for
+      characters preceded by \. On output, uppercase characters are preceded by
+      \ and lowercase characters are converted to uppercase. [requires
+      <b>_BSD_SOURCE</b> or <b>_SVID_SOURCE</b> or <b>_XOPEN_SOURCE</b>]</dd>
+  <dt id="ECHO"><a class="permalink" href="#ECHO"><b>ECHO</b></a></dt>
+  <dd>Echo input characters.</dd>
+  <dt id="ECHOE"><a class="permalink" href="#ECHOE"><b>ECHOE</b></a></dt>
+  <dd>If <b>ICANON</b> is also set, the ERASE character erases the preceding
+      input character, and WERASE erases the preceding word.</dd>
+  <dt id="ECHOK"><a class="permalink" href="#ECHOK"><b>ECHOK</b></a></dt>
+  <dd>If <b>ICANON</b> is also set, the KILL character erases the current
+    line.</dd>
+  <dt id="ECHONL"><a class="permalink" href="#ECHONL"><b>ECHONL</b></a></dt>
+  <dd>If <b>ICANON</b> is also set, echo the NL character even if ECHO is not
+      set.</dd>
+  <dt id="ECHOCTL"><a class="permalink" href="#ECHOCTL"><b>ECHOCTL</b></a></dt>
+  <dd>(not in POSIX) If <b>ECHO</b> is also set, terminal special characters
+      other than TAB, NL, START, and STOP are echoed as <b>^X</b>, where X is
+      the character with ASCII code 0x40 greater than the special character. For
+      example, character 0x08 (BS) is echoed as <b>^H</b>. [requires
+      <b>_BSD_SOURCE</b> or <b>_SVID_SOURCE</b>]</dd>
+  <dt id="ECHOPRT"><a class="permalink" href="#ECHOPRT"><b>ECHOPRT</b></a></dt>
+  <dd>(not in POSIX) If <b>ICANON</b> and <b>ECHO</b> are also set, characters
+      are printed as they are being erased. [requires <b>_BSD_SOURCE</b> or
+      <b>_SVID_SOURCE</b>]</dd>
+  <dt id="ECHOKE"><a class="permalink" href="#ECHOKE"><b>ECHOKE</b></a></dt>
+  <dd>(not in POSIX) If <b>ICANON</b> is also set, KILL is echoed by erasing
+      each character on the line, as specified by <b>ECHOE</b> and
+      <b>ECHOPRT</b>. [requires <b>_BSD_SOURCE</b> or <b>_SVID_SOURCE</b>]</dd>
+  <dt id="DEFECHO"><a class="permalink" href="#DEFECHO"><b>DEFECHO</b></a></dt>
+  <dd>(not in POSIX) Echo only when a process is reading. (Not implemented on
+      Linux.)</dd>
+  <dt id="FLUSHO"><a class="permalink" href="#FLUSHO"><b>FLUSHO</b></a></dt>
+  <dd>(not in POSIX; not supported under Linux) Output is being flushed. This
+      flag is toggled by typing the DISCARD character. [requires
+      <b>_BSD_SOURCE</b> or <b>_SVID_SOURCE</b>]</dd>
+  <dt id="NOFLSH"><a class="permalink" href="#NOFLSH"><b>NOFLSH</b></a></dt>
+  <dd>Disable flushing the input and output queues when generating signals for
+      the INT, QUIT, and SUSP characters.</dd>
+  <dt id="TOSTOP"><a class="permalink" href="#TOSTOP"><b>TOSTOP</b></a></dt>
+  <dd>Send the <b>SIGTTOU</b> signal to the process group of a background
+      process which tries to write to its controlling terminal.</dd>
+  <dt id="PENDIN"><a class="permalink" href="#PENDIN"><b>PENDIN</b></a></dt>
+  <dd>(not in POSIX; not supported under Linux) All characters in the input
+      queue are reprinted when the next character is read. (<b>bash</b>(1)
+      handles typeahead this way.) [requires <b>_BSD_SOURCE</b> or
+      <b>_SVID_SOURCE</b>]</dd>
+  <dt id="IEXTEN"><a class="permalink" href="#IEXTEN"><b>IEXTEN</b></a></dt>
+  <dd>Enable implementation-defined input processing. This flag, as well as
+      <b>ICANON</b> must be enabled for the special characters EOL2, LNEXT,
+      REPRINT, WERASE to be interpreted, and for the <b>IUCLC</b> flag to be
+      effective.</dd>
+</dl>
+<p class="Pp">The <i>c_cc</i> array defines the terminal special characters. The
+    symbolic indices (initial values) and meaning are:</p>
+<dl class="Bl-tag">
+  <dt id="VDISCARD"><a class="permalink" href="#VDISCARD"><b>VDISCARD</b></a></dt>
+  <dd>(not in POSIX; not supported under Linux; 017, SI, Ctrl-O) Toggle:
+      start/stop discarding pending output. Recognized when <b>IEXTEN</b> is
+      set, and then not passed as input.</dd>
+  <dt id="VDSUSP"><a class="permalink" href="#VDSUSP"><b>VDSUSP</b></a></dt>
+  <dd>(not in POSIX; not supported under Linux; 031, EM, Ctrl-Y) Delayed suspend
+      character (DSUSP): send <b>SIGTSTP</b> signal when the character is read
+      by the user program. Recognized when <b>IEXTEN</b> and <b>ISIG</b> are
+      set, and the system supports job control, and then not passed as
+    input.</dd>
+  <dt id="VEOF"><a class="permalink" href="#VEOF"><b>VEOF</b></a></dt>
+  <dd>(004, EOT, Ctrl-D) End-of-file character (EOF). More precisely: this
+      character causes the pending tty buffer to be sent to the waiting user
+      program without waiting for end-of-line. If it is the first character of
+      the line, the <b>read</b>(2) in the user program returns 0, which
+      signifies end-of-file. Recognized when <b>ICANON</b> is set, and then not
+      passed as input.</dd>
+  <dt id="VEOL"><a class="permalink" href="#VEOL"><b>VEOL</b></a></dt>
+  <dd>(0, NUL) Additional end-of-line character (EOL). Recognized when
+      <b>ICANON</b> is set.</dd>
+  <dt id="VEOL2"><a class="permalink" href="#VEOL2"><b>VEOL2</b></a></dt>
+  <dd>(not in POSIX; 0, NUL) Yet another end-of-line character (EOL2).
+      Recognized when <b>ICANON</b> is set.</dd>
+  <dt id="VERASE"><a class="permalink" href="#VERASE"><b>VERASE</b></a></dt>
+  <dd>(0177, DEL, rubout, or 010, BS, Ctrl-H, or also #) Erase character
+      (ERASE). This erases the previous not-yet-erased character, but does not
+      erase past EOF or beginning-of-line. Recognized when <b>ICANON</b> is set,
+      and then not passed as input.</dd>
+  <dt id="VINTR"><a class="permalink" href="#VINTR"><b>VINTR</b></a></dt>
+  <dd>(003, ETX, Ctrl-C, or also 0177, DEL, rubout) Interrupt character (INTR).
+      Send a <b>SIGINT</b> signal. Recognized when <b>ISIG</b> is set, and then
+      not passed as input.</dd>
+  <dt id="VKILL"><a class="permalink" href="#VKILL"><b>VKILL</b></a></dt>
+  <dd>(025, NAK, Ctrl-U, or Ctrl-X, or also @) Kill character (KILL). This
+      erases the input since the last EOF or beginning-of-line. Recognized when
+      <b>ICANON</b> is set, and then not passed as input.</dd>
+  <dt id="VLNEXT"><a class="permalink" href="#VLNEXT"><b>VLNEXT</b></a></dt>
+  <dd>(not in POSIX; 026, SYN, Ctrl-V) Literal next (LNEXT). Quotes the next
+      input character, depriving it of a possible special meaning. Recognized
+      when <b>IEXTEN</b> is set, and then not passed as input.</dd>
+  <dt id="VMIN"><a class="permalink" href="#VMIN"><b>VMIN</b></a></dt>
+  <dd>Minimum number of characters for noncanonical read (MIN).</dd>
+  <dt id="VQUIT"><a class="permalink" href="#VQUIT"><b>VQUIT</b></a></dt>
+  <dd>(034, FS, Ctrl-\) Quit character (QUIT). Send <b>SIGQUIT</b> signal.
+      Recognized when <b>ISIG</b> is set, and then not passed as input.</dd>
+  <dt id="VREPRINT"><a class="permalink" href="#VREPRINT"><b>VREPRINT</b></a></dt>
+  <dd>(not in POSIX; 022, DC2, Ctrl-R) Reprint unread characters (REPRINT).
+      Recognized when <b>ICANON</b> and <b>IEXTEN</b> are set, and then not
+      passed as input.</dd>
+  <dt id="VSTART"><a class="permalink" href="#VSTART"><b>VSTART</b></a></dt>
+  <dd>(021, DC1, Ctrl-Q) Start character (START). Restarts output stopped by the
+      Stop character. Recognized when <b>IXON</b> is set, and then not passed as
+      input.</dd>
+  <dt id="VSTATUS"><a class="permalink" href="#VSTATUS"><b>VSTATUS</b></a></dt>
+  <dd>(not in POSIX; not supported under Linux; status request: 024, DC4,
+      Ctrl-T). Status character (STATUS). Display status information at
+      terminal, including state of foreground process and amount of CPU time it
+      has consumed. Also sends a <b>SIGINFO</b> signal (not supported on Linux)
+      to the foreground process group.</dd>
+  <dt id="VSTOP"><a class="permalink" href="#VSTOP"><b>VSTOP</b></a></dt>
+  <dd>(023, DC3, Ctrl-S) Stop character (STOP). Stop output until Start
+      character typed. Recognized when <b>IXON</b> is set, and then not passed
+      as input.</dd>
+  <dt id="VSUSP"><a class="permalink" href="#VSUSP"><b>VSUSP</b></a></dt>
+  <dd>(032, SUB, Ctrl-Z) Suspend character (SUSP). Send <b>SIGTSTP</b> signal.
+      Recognized when <b>ISIG</b> is set, and then not passed as input.</dd>
+  <dt id="VSWTCH"><a class="permalink" href="#VSWTCH"><b>VSWTCH</b></a></dt>
+  <dd>(not in POSIX; not supported under Linux; 0, NUL) Switch character
+      (SWTCH). Used in System V to switch shells in <i>shell layers</i>, a
+      predecessor to shell job control.</dd>
+  <dt id="VTIME"><a class="permalink" href="#VTIME"><b>VTIME</b></a></dt>
+  <dd>Timeout in deciseconds for noncanonical read (TIME).</dd>
+  <dt id="VWERASE"><a class="permalink" href="#VWERASE"><b>VWERASE</b></a></dt>
+  <dd>(not in POSIX; 027, ETB, Ctrl-W) Word erase (WERASE). Recognized when
+      <b>ICANON</b> and <b>IEXTEN</b> are set, and then not passed as
+    input.</dd>
+</dl>
+<p class="Pp">An individual terminal special character can be disabled by
+    setting the value of the corresponding <i>c_cc</i> element to
+    <b>_POSIX_VDISABLE</b>.</p>
+<p class="Pp">The above symbolic subscript values are all different, except that
+    <b>VTIME</b>, <b>VMIN</b> may have the same value as <b>VEOL</b>,
+    <b>VEOF</b>, respectively. In noncanonical mode the special character
+    meaning is replaced by the timeout meaning. For an explanation of
+    <b>VMIN</b> and <b>VTIME</b>, see the description of noncanonical mode
+    below.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Retrieving_and_changing_terminal_settings"><a class="permalink" href="#Retrieving_and_changing_terminal_settings">Retrieving
+  and changing terminal settings</a></h2>
+<p class="Pp"><b>tcgetattr</b>() gets the parameters associated with the object
+    referred by <i>fd</i> and stores them in the <i>termios</i> structure
+    referenced by <i>termios_p</i>. This function may be invoked from a
+    background process; however, the terminal attributes may be subsequently
+    changed by a foreground process.</p>
+<p class="Pp"><b>tcsetattr</b>() sets the parameters associated with the
+    terminal (unless support is required from the underlying hardware that is
+    not available) from the <i>termios</i> structure referred to by
+    <i>termios_p</i>. <i>optional_actions</i> specifies when the changes take
+    effect:</p>
+<dl class="Bl-tag">
+  <dt id="TCSANOW"><a class="permalink" href="#TCSANOW"><b>TCSANOW</b></a></dt>
+  <dd>the change occurs immediately.</dd>
+  <dt id="TCSADRAIN"><a class="permalink" href="#TCSADRAIN"><b>TCSADRAIN</b></a></dt>
+  <dd>the change occurs after all output written to <i>fd</i> has been
+      transmitted. This option should be used when changing parameters that
+      affect output.</dd>
+  <dt id="TCSAFLUSH"><a class="permalink" href="#TCSAFLUSH"><b>TCSAFLUSH</b></a></dt>
+  <dd>the change occurs after all output written to the object referred by
+      <i>fd</i> has been transmitted, and all input that has been received but
+      not read will be discarded before the change is made.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Canonical_and_noncanonical_mode"><a class="permalink" href="#Canonical_and_noncanonical_mode">Canonical
+  and noncanonical mode</a></h2>
+<p class="Pp">The setting of the <b>ICANON</b> canon flag in <i>c_lflag</i>
+    determines whether the terminal is operating in canonical mode
+    (<b>ICANON</b> set) or noncanonical mode (<b>ICANON</b> unset). By default,
+    <b>ICANON</b> is set.</p>
+<p class="Pp">In canonical mode:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Input is made available line by line. An input line is available when one
+      of the line delimiters is typed (NL, EOL, EOL2; or EOF at the start of
+      line). Except in the case of EOF, the line delimiter is included in the
+      buffer returned by <b>read</b>(2).</dd>
+  <dt>•</dt>
+  <dd>Line editing is enabled (ERASE, KILL; and if the <b>IEXTEN</b> flag is
+      set: WERASE, REPRINT, LNEXT). A <b>read</b>(2) returns at most one line of
+      input; if the <b>read</b>(2) requested fewer bytes than are available in
+      the current line of input, then only as many bytes as requested are read,
+      and the remaining characters will be available for a future
+      <b>read</b>(2).</dd>
+  <dt>•</dt>
+  <dd>The maximum line length is 4096 chars (including the terminating newline
+      character); lines longer than 4096 chars are truncated. After 4095
+      characters, input processing (e.g., <b>ISIG</b> and <b>ECHO*</b>
+      processing) continues, but any input data after 4095 characters up to (but
+      not including) any terminating newline is discarded. This ensures that the
+      terminal can always receive more input until at least one line can be
+      read.</dd>
+</dl>
+<p class="Pp">In noncanonical mode input is available immediately (without the
+    user having to type a line-delimiter character), no input processing is
+    performed, and line editing is disabled. The read buffer will only accept
+    4095 chars; this provides the necessary space for a newline char if the
+    input mode is switched to canonical. The settings of MIN (<i>c_cc[VMIN]</i>)
+    and TIME (<i>c_cc[VTIME]</i>) determine the circumstances in which a
+    <b>read</b>(2) completes; there are four distinct cases:</p>
+<dl class="Bl-tag">
+  <dt id="MIN"><a class="permalink" href="#MIN">MIN == 0, TIME == 0 (polling
+    read)</a></dt>
+  <dd>If data is available, <b>read</b>(2) returns immediately, with the lesser
+      of the number of bytes available, or the number of bytes requested. If no
+      data is available, <b>read</b>(2) returns 0.</dd>
+  <dt id="MIN~2"><a class="permalink" href="#MIN~2">MIN &gt; 0, TIME == 0
+    (blocking read)</a></dt>
+  <dd><b>read</b>(2) blocks until MIN bytes are available, and returns up to the
+      number of bytes requested.</dd>
+  <dt id="MIN~3"><a class="permalink" href="#MIN~3">MIN == 0, TIME &gt; 0 (read
+    with timeout)</a></dt>
+  <dd>TIME specifies the limit for a timer in tenths of a second. The timer is
+      started when <b>read</b>(2) is called. <b>read</b>(2) returns either when
+      at least one byte of data is available, or when the timer expires. If the
+      timer expires without any input becoming available, <b>read</b>(2) returns
+      0. If data is already available at the time of the call to <b>read</b>(2),
+      the call behaves as though the data was received immediately after the
+      call.</dd>
+  <dt id="MIN~4"><a class="permalink" href="#MIN~4">MIN &gt; 0, TIME &gt; 0
+    (read with interbyte timeout)</a></dt>
+  <dd>TIME specifies the limit for a timer in tenths of a second. Once an
+      initial byte of input becomes available, the timer is restarted after each
+      further byte is received. <b>read</b>(2) returns when any of the following
+      conditions is met:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>MIN bytes have been received.</dd>
+  <dt>•</dt>
+  <dd>The interbyte timer expires.</dd>
+  <dt>•</dt>
+  <dd>The number of bytes requested by <b>read</b>(2) has been received. (POSIX
+      does not specify this termination condition, and on some other
+      implementations <b>read</b>(2) does not return in this case.)</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Because the timer is started only after the initial byte becomes
+      available, at least one byte will be read. If data is already available at
+      the time of the call to <b>read</b>(2), the call behaves as though the
+      data was received immediately after the call.</dd>
+</dl>
+<p class="Pp">POSIX does not specify whether the setting of the
+    <b>O_NONBLOCK</b> file status flag takes precedence over the MIN and TIME
+    settings. If <b>O_NONBLOCK</b> is set, a <b>read</b>(2) in noncanonical mode
+    may return immediately, regardless of the setting of MIN or TIME.
+    Furthermore, if no data is available, POSIX permits a <b>read</b>(2) in
+    noncanonical mode to return either 0, or -1 with <i>errno</i> set to
+    <b>EAGAIN</b>.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Raw_mode"><a class="permalink" href="#Raw_mode">Raw
+  mode</a></h2>
+<p class="Pp"><b>cfmakeraw</b>() sets the terminal to something like the
+    "raw" mode of the old Version 7 terminal driver: input is
+    available character by character, echoing is disabled, and all special
+    processing of terminal input and output characters is disabled. The terminal
+    attributes are set as follows:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>termios_p-&gt;c_iflag &amp;= ~(IGNBRK | BRKINT | PARMRK | ISTRIP
+<br>
+                | INLCR | IGNCR | ICRNL | IXON);
+termios_p-&gt;c_oflag &amp;= ~OPOST;
+termios_p-&gt;c_lflag &amp;= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
+termios_p-&gt;c_cflag &amp;= ~(CSIZE | PARENB);
+termios_p-&gt;c_cflag |= CS8;
+</pre>
+<br>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Line_control"><a class="permalink" href="#Line_control">Line
+  control</a></h2>
+<p class="Pp"><b>tcsendbreak</b>() transmits a continuous stream of zero-valued
+    bits for a specific duration, if the terminal is using asynchronous serial
+    data transmission. If <i>duration</i> is zero, it transmits zero-valued bits
+    for at least 0.25 seconds, and not more than 0.5 seconds. If <i>duration</i>
+    is not zero, it sends zero-valued bits for some implementation-defined
+    length of time.</p>
+<p class="Pp">If the terminal is not using asynchronous serial data
+    transmission, <b>tcsendbreak</b>() returns without taking any action.</p>
+<p class="Pp"><b>tcdrain</b>() waits until all output written to the object
+    referred to by <i>fd</i> has been transmitted.</p>
+<p class="Pp"><b>tcflush</b>() discards data written to the object referred to
+    by <i>fd</i> but not transmitted, or data received but not read, depending
+    on the value of <i>queue_selector</i>:</p>
+<dl class="Bl-tag">
+  <dt id="TCIFLUSH"><a class="permalink" href="#TCIFLUSH"><b>TCIFLUSH</b></a></dt>
+  <dd>flushes data received but not read.</dd>
+  <dt id="TCOFLUSH"><a class="permalink" href="#TCOFLUSH"><b>TCOFLUSH</b></a></dt>
+  <dd>flushes data written but not transmitted.</dd>
+  <dt id="TCIOFLUSH"><a class="permalink" href="#TCIOFLUSH"><b>TCIOFLUSH</b></a></dt>
+  <dd>flushes both data received but not read, and data written but not
+      transmitted.</dd>
+</dl>
+<p class="Pp"><b>tcflow</b>() suspends transmission or reception of data on the
+    object referred to by <i>fd</i>, depending on the value of
+  <i>action</i>:</p>
+<dl class="Bl-tag">
+  <dt id="TCOOFF"><a class="permalink" href="#TCOOFF"><b>TCOOFF</b></a></dt>
+  <dd>suspends output.</dd>
+  <dt id="TCOON"><a class="permalink" href="#TCOON"><b>TCOON</b></a></dt>
+  <dd>restarts suspended output.</dd>
+  <dt id="TCIOFF"><a class="permalink" href="#TCIOFF"><b>TCIOFF</b></a></dt>
+  <dd>transmits a STOP character, which stops the terminal device from
+      transmitting data to the system.</dd>
+  <dt id="TCION"><a class="permalink" href="#TCION"><b>TCION</b></a></dt>
+  <dd>transmits a START character, which starts the terminal device transmitting
+      data to the system.</dd>
+</dl>
+<p class="Pp">The default on open of a terminal file is that neither its input
+    nor its output is suspended.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Line_speed"><a class="permalink" href="#Line_speed">Line
+  speed</a></h2>
+<p class="Pp">The baud rate functions are provided for getting and setting the
+    values of the input and output baud rates in the <i>termios</i> structure.
+    The new values do not take effect until <b>tcsetattr</b>() is successfully
+    called.</p>
+<p class="Pp">Setting the speed to <b>B0</b> instructs the modem to "hang
+    up". The actual bit rate corresponding to <b>B38400</b> may be altered
+    with <b>setserial</b>(8).</p>
+<p class="Pp">The input and output baud rates are stored in the <i>termios</i>
+    structure.</p>
+<p class="Pp"><b>cfgetospeed</b>() returns the output baud rate stored in the
+    <i>termios</i> structure pointed to by <i>termios_p</i>.</p>
+<p class="Pp"><b>cfsetospeed</b>() sets the output baud rate stored in the
+    <i>termios</i> structure pointed to by <i>termios_p</i> to <i>speed</i>,
+    which must be one of these constants:</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="B0"><a class="permalink" href="#B0"><b>B0</b></a></dt>
+  <dd></dd>
+  <dt id="B50"><a class="permalink" href="#B50"><b>B50</b></a></dt>
+  <dd></dd>
+  <dt id="B75"><a class="permalink" href="#B75"><b>B75</b></a></dt>
+  <dd></dd>
+  <dt id="B110"><a class="permalink" href="#B110"><b>B110</b></a></dt>
+  <dd></dd>
+  <dt id="B134"><a class="permalink" href="#B134"><b>B134</b></a></dt>
+  <dd></dd>
+  <dt id="B150"><a class="permalink" href="#B150"><b>B150</b></a></dt>
+  <dd></dd>
+  <dt id="B200"><a class="permalink" href="#B200"><b>B200</b></a></dt>
+  <dd></dd>
+  <dt id="B300"><a class="permalink" href="#B300"><b>B300</b></a></dt>
+  <dd></dd>
+  <dt id="B600"><a class="permalink" href="#B600"><b>B600</b></a></dt>
+  <dd></dd>
+  <dt id="B1200"><a class="permalink" href="#B1200"><b>B1200</b></a></dt>
+  <dd></dd>
+  <dt id="B1800"><a class="permalink" href="#B1800"><b>B1800</b></a></dt>
+  <dd></dd>
+  <dt id="B2400"><a class="permalink" href="#B2400"><b>B2400</b></a></dt>
+  <dd></dd>
+  <dt id="B4800"><a class="permalink" href="#B4800"><b>B4800</b></a></dt>
+  <dd></dd>
+  <dt id="B9600"><a class="permalink" href="#B9600"><b>B9600</b></a></dt>
+  <dd></dd>
+  <dt id="B19200"><a class="permalink" href="#B19200"><b>B19200</b></a></dt>
+  <dd></dd>
+  <dt id="B38400"><a class="permalink" href="#B38400"><b>B38400</b></a></dt>
+  <dd></dd>
+  <dt id="B57600"><a class="permalink" href="#B57600"><b>B57600</b></a></dt>
+  <dd></dd>
+  <dt id="B115200"><a class="permalink" href="#B115200"><b>B115200</b></a></dt>
+  <dd></dd>
+  <dt id="B230400"><a class="permalink" href="#B230400"><b>B230400</b></a></dt>
+  <dd></dd>
+  <dt id="B460800"><a class="permalink" href="#B460800"><b>B460800</b></a></dt>
+  <dd></dd>
+  <dt id="B500000"><a class="permalink" href="#B500000"><b>B500000</b></a></dt>
+  <dd></dd>
+  <dt id="B576000"><a class="permalink" href="#B576000"><b>B576000</b></a></dt>
+  <dd></dd>
+  <dt id="B921600"><a class="permalink" href="#B921600"><b>B921600</b></a></dt>
+  <dd></dd>
+  <dt id="B1000000"><a class="permalink" href="#B1000000"><b>B1000000</b></a></dt>
+  <dd></dd>
+  <dt id="B1152000"><a class="permalink" href="#B1152000"><b>B1152000</b></a></dt>
+  <dd></dd>
+  <dt id="B1500000"><a class="permalink" href="#B1500000"><b>B1500000</b></a></dt>
+  <dd></dd>
+  <dt id="B2000000"><a class="permalink" href="#B2000000"><b>B2000000</b></a></dt>
+  <dd></dd>
+</dl>
+</div>
+<p class="Pp">These constants are additionally supported on the SPARC
+    architecture:</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="B76800"><a class="permalink" href="#B76800"><b>B76800</b></a></dt>
+  <dd></dd>
+  <dt id="B153600"><a class="permalink" href="#B153600"><b>B153600</b></a></dt>
+  <dd></dd>
+  <dt id="B307200"><a class="permalink" href="#B307200"><b>B307200</b></a></dt>
+  <dd></dd>
+  <dt id="B614400"><a class="permalink" href="#B614400"><b>B614400</b></a></dt>
+  <dd></dd>
+</dl>
+</div>
+<p class="Pp">These constants are additionally supported on non-SPARC
+    architectures:</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="B2500000"><a class="permalink" href="#B2500000"><b>B2500000</b></a></dt>
+  <dd></dd>
+  <dt id="B3000000"><a class="permalink" href="#B3000000"><b>B3000000</b></a></dt>
+  <dd></dd>
+  <dt id="B3500000"><a class="permalink" href="#B3500000"><b>B3500000</b></a></dt>
+  <dd></dd>
+  <dt id="B4000000"><a class="permalink" href="#B4000000"><b>B4000000</b></a></dt>
+  <dd></dd>
+</dl>
+</div>
+<p class="Pp">Due to differences between architectures, portable applications
+    should check if a particular <b>B</b><i>nnn</i> constant is defined prior to
+    using it.</p>
+<p class="Pp">The zero baud rate, <b>B0</b>, is used to terminate the
+    connection. If <b>B0</b> is specified, the modem control lines shall no
+    longer be asserted. Normally, this will disconnect the line. <b>CBAUDEX</b>
+    is a mask for the speeds beyond those defined in POSIX.1 (57600 and above).
+    Thus, <b>B57600</b> &amp; <b>CBAUDEX</b> is nonzero.</p>
+<p class="Pp">Setting the baud rate to a value other than those defined by
+    <b>B</b><i>nnn</i> constants is possible via the <b>TCSETS2</b> ioctl; see
+    <b>ioctl_tty</b>(2).</p>
+<p class="Pp"><b>cfgetispeed</b>() returns the input baud rate stored in the
+    <i>termios</i> structure.</p>
+<p class="Pp"><b>cfsetispeed</b>() sets the input baud rate stored in the
+    <i>termios</i> structure to <i>speed</i>, which must be specified as one of
+    the <b>B</b><i>nnn</i> constants listed above for <b>cfsetospeed</b>(). If
+    the input baud rate is set to the literal constant <b>0</b> (not the
+    symbolic constant <b>B0</b>), the input baud rate will be equal to the
+    output baud rate.</p>
+<p class="Pp"><b>cfsetspeed</b>() is a 4.4BSD extension. It takes the same
+    arguments as <b>cfsetispeed</b>(), and sets both input and output speed.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp"><b>cfgetispeed</b>() returns the input baud rate stored in the
+    <i>termios</i> structure.</p>
+<p class="Pp"><b>cfgetospeed</b>() returns the output baud rate stored in the
+    <i>termios</i> structure.</p>
+<p class="Pp">All other functions return:</p>
+<dl class="Bl-tag">
+  <dt><b>0</b></dt>
+  <dd>on success.</dd>
+  <dt><b>-1</b></dt>
+  <dd>on failure and set <i>errno</i> to indicate the error.</dd>
+</dl>
+<p class="Pp">Note that <b>tcsetattr</b>() returns success if <i>any</i> of the
+    requested changes could be successfully carried out. Therefore, when making
+    multiple changes it may be necessary to follow this call with a further call
+    to <b>tcgetattr</b>() to check that all changes have been performed
+    successfully.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>tcgetattr (), tcsetattr (), tcdrain (), tcflush (), tcflow (),
+      tcsendbreak (), cfmakeraw (), cfgetispeed (), cfgetospeed (), cfsetispeed
+      (), cfsetospeed (), cfsetspeed ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>tcgetattr</b>(), <b>tcsetattr</b>(), <b>tcsendbreak</b>(),
+    <b>tcdrain</b>(), <b>tcflush</b>(), <b>tcflow</b>(), <b>cfgetispeed</b>(),
+    <b>cfgetospeed</b>(), <b>cfsetispeed</b>(), and <b>cfsetospeed</b>() are
+    specified in POSIX.1-2001.</p>
+<p class="Pp"><b>cfmakeraw</b>() and <b>cfsetspeed</b>() are nonstandard, but
+    available on the BSDs.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">UNIX&nbsp;V7 and several later systems have a list of baud rates
+    where after the values <b>B0</b> through <b>B9600</b> one finds the two
+    constants <b>EXTA</b>, <b>EXTB</b> ("External A" and
+    "External B"). Many systems extend the list with much higher baud
+    rates.</p>
+<p class="Pp">The effect of a nonzero <i>duration</i> with <b>tcsendbreak</b>()
+    varies. SunOS specifies a break of <i>duration&nbsp;*&nbsp;N</i>
+    seconds, where <i>N</i> is at least 0.25, and not more than 0.5. Linux, AIX,
+    DU, Tru64 send a break of <i>duration</i> milliseconds. FreeBSD and NetBSD
+    and HP-UX and MacOS ignore the value of <i>duration</i>. Under Solaris and
+    UnixWare, <b>tcsendbreak</b>() with nonzero <i>duration</i> behaves like
+    <b>tcdrain</b>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">On the Alpha architecture before Linux 4.16 (and glibc before
+    glibc 2.28), the <b>XTABS</b> value was different from <b>TAB3</b> and it
+    was ignored by the <b>N_TTY</b> line discipline code of the terminal driver
+    as a result (because as it wasn't part of the <b>TABDLY</b> mask).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>reset</b>(1), <b>setterm</b>(1), <b>stty</b>(1),
+    <b>tput</b>(1), <b>tset</b>(1), <b>tty</b>(1), <b>ioctl_console</b>(2),
+    <b>ioctl_tty</b>(2), <b>cc_t</b>(3type), <b>speed_t</b>(3type),
+    <b>tcflag_t</b>(3type), <b>setserial</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

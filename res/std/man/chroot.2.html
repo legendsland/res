@@ -1,0 +1,171 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 1992 Drew Eckhardt (drew@cs.colorado.edu), March 28, 1992
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Modified by Michael Haardt <michael@moria.de>
+   Modified 1993-07-21 by Rik Faith <faith@cs.unc.edu>
+   Modified 1994-08-21 by Michael Chastain <mec@shell.portal.com>
+   Modified 1996-06-13 by aeb
+   Modified 1996-11-06 by Eric S. Raymond <esr@thyrsus.com>
+   Modified 1997-08-21 by Joseph S. Myers <jsm28@cam.ac.uk>
+   Modified 2004-06-23 by Michael Kerrisk <mtk.manpages@gmail.com>
+   --><head>
+<meta name="dc.identifier" content="res/a81df56d9b3569713fbe9331937bacc6e183131f">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>chroot(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">chroot(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">chroot(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">chroot - change root directory</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int chroot(const char *</b><i>path</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>chroot</b>():</p>
+<pre><br>
+    Since glibc 2.2.2:
+<br>
+        _XOPEN_SOURCE &amp;&amp; ! (_POSIX_C_SOURCE &gt;= 200112L)
+<br>
+            || /* Since glibc 2.20: */ _DEFAULT_SOURCE
+<br>
+            || /* glibc &lt;= 2.19: */ _BSD_SOURCE
+<br>
+    Before glibc 2.2.2:
+<br>
+        none</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>chroot</b>() changes the root directory of the calling process
+    to that specified in <i>path</i>. This directory will be used for pathnames
+    beginning with <i>/</i>. The root directory is inherited by all children of
+    the calling process.</p>
+<p class="Pp">Only a privileged process (Linux: one with the
+    <b>CAP_SYS_CHROOT</b> capability in its user namespace) may call
+    <b>chroot</b>().</p>
+<p class="Pp">This call changes an ingredient in the pathname resolution process
+    and does nothing else. In particular, it is not intended to be used for any
+    kind of security purpose, neither to fully sandbox a process nor to restrict
+    filesystem system calls. In the past, <b>chroot</b>() has been used by
+    daemons to restrict themselves prior to passing paths supplied by untrusted
+    users to system calls such as <b>open</b>(2). However, if a folder is moved
+    out of the chroot directory, an attacker can exploit that to get out of the
+    chroot directory as well. The easiest way to do that is to <b>chdir</b>(2)
+    to the to-be-moved directory, wait for it to be moved out, then open a path
+    like ../../../etc/passwd.</p>
+<p class="Pp">A slightly trickier variation also works under some circumstances
+    if <b>chdir</b>(2) is not permitted. If a daemon allows a "chroot
+    directory" to be specified, that usually means that if you want to
+    prevent remote users from accessing files outside the chroot directory, you
+    must ensure that folders are never moved out of it.</p>
+<p class="Pp">This call does not change the current working directory, so that
+    after the call '<i>.</i>' can be outside the tree rooted at '<i>/</i>'. In
+    particular, the superuser can escape from a "chroot jail" by
+    doing:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>mkdir foo; chroot foo; cd ..
+</pre>
+<br>
+<p class="Pp">This call does not close open file descriptors, and such file
+    descriptors may allow access to files outside the chroot tree.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, zero is returned. On error, -1 is returned, and
+    <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">Depending on the filesystem, other errors can be returned. The
+    more general errors are listed below:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>Search permission is denied on a component of the path prefix. (See also
+      <b>path_resolution</b>(7).)</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>path</i> points outside your accessible address space.</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>An I/O error occurred.</dd>
+  <dt id="ELOOP"><a class="permalink" href="#ELOOP"><b>ELOOP</b></a></dt>
+  <dd>Too many symbolic links were encountered in resolving <i>path</i>.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd><i>path</i> is too long.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>The file does not exist.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient kernel memory was available.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>A component of <i>path</i> is not a directory.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The caller has insufficient privilege.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">SVr4, 4.4BSD, SUSv2 (marked LEGACY). This function is not part of
+    POSIX.1-2001.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">A child process created via <b>fork</b>(2) inherits its parent's
+    root directory. The root directory is left unchanged by
+  <b>execve</b>(2).</p>
+<p class="Pp">The magic symbolic link, <i>/proc/[pid]/root</i>, can be used to
+    discover a process's root directory; see <b>proc</b>(5) for details.</p>
+<p class="Pp">FreeBSD has a stronger <b>jail</b>() system call.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>chroot</b>(1), <b>chdir</b>(2), <b>pivot_root</b>(2),
+    <b>path_resolution</b>(7), <b>switch_root</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

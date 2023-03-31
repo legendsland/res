@@ -1,0 +1,354 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright 1993 Giorgio Ciucci (giorgio@crcc.it)
+   and Copyright (C) 2020 Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Modified Tue Oct 22 17:54:56 1996 by Eric S. Raymond <esr@thyrsus.com>
+   Modified 1 Jan 2002, Martin Schulze <joey@infodrom.org>
+   Modified 4 Jan 2002, Michael Kerrisk <mtk.manpages@gmail.com>
+   Modified, 27 May 2004, Michael Kerrisk <mtk.manpages@gmail.com>
+       Added notes on capability requirements
+   Modified, 11 Nov 2004, Michael Kerrisk <mtk.manpages@gmail.com>
+  	Language and formatting clean-ups
+  	Added notes on /proc files
+  	Rewrote BUGS note about semget()'s failure to initialize
+  		semaphore values
+   --><head>
+<meta name="dc.identifier" content="res/f42fbf6a69f810bfbc74317cef684a067b753cc3">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>semget(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">semget(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">semget(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">semget - get a System V semaphore set identifier</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/sem.h&gt;</b></pre>
+<p class="Pp"><b>int semget(key_t </b><i>key</i><b>,</b> <b>int
+    </b><i>nsems</i><b>,</b> <b>int </b><i>semflg</i><b>);</b></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>semget</b>() system call returns the System&nbsp;V
+    semaphore set identifier associated with the argument <i>key</i>. It may be
+    used either to obtain the identifier of a previously created semaphore set
+    (when <i>semflg</i> is zero and <i>key</i> does not have the value
+    <b>IPC_PRIVATE</b>), or to create a new set.</p>
+<p class="Pp">A new set of <i>nsems</i> semaphores is created if <i>key</i> has
+    the value <b>IPC_PRIVATE</b> or if no existing semaphore set is associated
+    with <i>key</i> and <b>IPC_CREAT</b> is specified in <i>semflg</i>.</p>
+<p class="Pp">If <i>semflg</i> specifies both <b>IPC_CREAT</b> and
+    <b>IPC_EXCL</b> and a semaphore set already exists for <i>key</i>, then
+    <b>semget</b>() fails with <i>errno</i> set to <b>EEXIST</b>. (This is
+    analogous to the effect of the combination <b>O_CREAT | O_EXCL</b> for
+    <b>open</b>(2).)</p>
+<p class="Pp">Upon creation, the least significant 9 bits of the argument
+    <i>semflg</i> define the permissions (for owner, group, and others) for the
+    semaphore set. These bits have the same format, and the same meaning, as the
+    <i>mode</i> argument of <b>open</b>(2) (though the execute permissions are
+    not meaningful for semaphores, and write permissions mean permission to
+    alter semaphore values).</p>
+<p class="Pp">When creating a new semaphore set, <b>semget</b>() initializes the
+    set's associated data structure, <i>semid_ds</i> (see <b>semctl</b>(2)), as
+    follows:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><i>sem_perm.cuid</i> and <i>sem_perm.uid</i> are set to the effective user
+      ID of the calling process.</dd>
+  <dt>•</dt>
+  <dd><i>sem_perm.cgid</i> and <i>sem_perm.gid</i> are set to the effective
+      group ID of the calling process.</dd>
+  <dt>•</dt>
+  <dd>The least significant 9 bits of <i>sem_perm.mode</i> are set to the least
+      significant 9 bits of <i>semflg</i>.</dd>
+  <dt>•</dt>
+  <dd><i>sem_nsems</i> is set to the value of <i>nsems</i>.</dd>
+  <dt>•</dt>
+  <dd><i>sem_otime</i> is set to 0.</dd>
+  <dt>•</dt>
+  <dd><i>sem_ctime</i> is set to the current time.</dd>
+</dl>
+<p class="Pp">The argument <i>nsems</i> can be 0 (a don't care) when a semaphore
+    set is not being created. Otherwise, <i>nsems</i> must be greater than 0 and
+    less than or equal to the maximum number of semaphores per semaphore set
+    (<b>SEMMSL</b>).</p>
+<p class="Pp">If the semaphore set already exists, the permissions are
+  verified.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>semget</b>() returns the semaphore set identifier
+    (a nonnegative integer). On failure, -1 is returned, and <i>errno</i> is set
+    to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>A semaphore set exists for <i>key</i>, but the calling process does not
+      have permission to access the set, and does not have the
+      <b>CAP_IPC_OWNER</b> capability in the user namespace that governs its IPC
+      namespace.</dd>
+  <dt id="EEXIST"><a class="permalink" href="#EEXIST"><b>EEXIST</b></a></dt>
+  <dd><b>IPC_CREAT</b> and <b>IPC_EXCL</b> were specified in <i>semflg</i>, but
+      a semaphore set already exists for <i>key</i>.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>nsems</i> is less than 0 or greater than the limit on the number of
+      semaphores per semaphore set (<b>SEMMSL</b>).</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>A semaphore set corresponding to <i>key</i> already exists, but
+      <i>nsems</i> is larger than the number of semaphores in that set.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>No semaphore set exists for <i>key</i> and <i>semflg</i> did not specify
+      <b>IPC_CREAT</b>.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>A semaphore set has to be created but the system does not have enough
+      memory for the new data structure.</dd>
+  <dt id="ENOSPC"><a class="permalink" href="#ENOSPC"><b>ENOSPC</b></a></dt>
+  <dd>A semaphore set has to be created but the system limit for the maximum
+      number of semaphore sets (<b>SEMMNI</b>), or the system wide maximum
+      number of semaphores (<b>SEMMNS</b>), would be exceeded.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">SVr4, POSIX.1-2001.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp"><b>IPC_PRIVATE</b> isn't a flag field but a <i>key_t</i> type. If
+    this special value is used for <i>key</i>, the system call ignores all but
+    the least significant 9 bits of <i>semflg</i> and creates a new semaphore
+    set (on success).</p>
+<section class="Ss">
+<h2 class="Ss" id="Semaphore_initialization"><a class="permalink" href="#Semaphore_initialization">Semaphore
+  initialization</a></h2>
+<p class="Pp">The values of the semaphores in a newly created set are
+    indeterminate. (POSIX.1-2001 and POSIX.1-2008 are explicit on this point,
+    although POSIX.1-2008 notes that a future version of the standard may
+    require an implementation to initialize the semaphores to 0.) Although
+    Linux, like many other implementations, initializes the semaphore values to
+    0, a portable application cannot rely on this: it should explicitly
+    initialize the semaphores to the desired values.</p>
+<p class="Pp">Initialization can be done using <b>semctl</b>(2) <b>SETVAL</b> or
+    <b>SETALL</b> operation. Where multiple peers do not know who will be the
+    first to initialize the set, checking for a nonzero <i>sem_otime</i> in the
+    associated data structure retrieved by a <b>semctl</b>(2) <b>IPC_STAT</b>
+    operation can be used to avoid races.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Semaphore_limits"><a class="permalink" href="#Semaphore_limits">Semaphore
+  limits</a></h2>
+<p class="Pp">The following limits on semaphore set resources affect the
+    <b>semget</b>() call:</p>
+<dl class="Bl-tag">
+  <dt id="SEMMNI"><a class="permalink" href="#SEMMNI"><b>SEMMNI</b></a></dt>
+  <dd>System-wide limit on the number of semaphore sets. Before Linux 3.19, the
+      default value for this limit was 128. Since Linux 3.19, the default value
+      is 32,000. On Linux, this limit can be read and modified via the fourth
+      field of <i>/proc/sys/kernel/sem</i>.</dd>
+  <dt id="SEMMSL"><a class="permalink" href="#SEMMSL"><b>SEMMSL</b></a></dt>
+  <dd>Maximum number of semaphores per semaphore ID. Before Linux 3.19, the
+      default value for this limit was 250. Since Linux 3.19, the default value
+      is 32,000. On Linux, this limit can be read and modified via the first
+      field of <i>/proc/sys/kernel/sem</i>.</dd>
+  <dt id="SEMMNS"><a class="permalink" href="#SEMMNS"><b>SEMMNS</b></a></dt>
+  <dd>System-wide limit on the number of semaphores: policy dependent (on Linux,
+      this limit can be read and modified via the second field of
+      <i>/proc/sys/kernel/sem</i>). Note that the number of semaphores
+      system-wide is also limited by the product of <b>SEMMSL</b> and
+      <b>SEMMNI</b>.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">The name choice <b>IPC_PRIVATE</b> was perhaps unfortunate,
+    <b>IPC_NEW</b> would more clearly show its function.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program shown below uses <b>semget</b>() to create a new
+    semaphore set or retrieve the ID of an existing set. It generates the
+    <i>key</i> for <b>semget</b>() using <b>ftok</b>(3). The first two
+    command-line arguments are used as the <i>pathname</i> and <i>proj_id</i>
+    arguments for <b>ftok</b>(3). The third command-line argument is an integer
+    that specifies the <i>nsems</i> argument for <b>semget</b>(). Command-line
+    options can be used to specify the <b>IPC_CREAT</b> (<i>-c</i>) and
+    <b>IPC_EXCL</b> (<i>-x</i>) flags for the call to <b>semget</b>(). The usage
+    of this program is demonstrated below.</p>
+<p class="Pp">We first create two files that will be used to generate keys using
+    <b>ftok</b>(3), create two semaphore sets using those files, and then list
+    the sets using <b>ipcs</b>(1):</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>touch mykey mykey2</b>
+$ <b>./t_semget -c mykey p 1</b>
+ID = 9
+$ <b>./t_semget -c mykey2 p 2</b>
+ID = 10
+$ <b>ipcs -s</b>
+------ Semaphore Arrays --------
+key        semid      owner      perms      nsems
+0x7004136d 9          mtk        600        1
+0x70041368 10         mtk        600        2
+</pre>
+<br>
+<p class="Pp">Next, we demonstrate that when <b>semctl</b>(2) is given the same
+    <i>key</i> (as generated by the same arguments to <b>ftok</b>(3)), it
+    returns the ID of the already existing semaphore set:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>./t_semget -c mykey p 1</b>
+ID = 9
+</pre>
+<br>
+<p class="Pp">Finally, we demonstrate the kind of collision that can occur when
+    <b>ftok</b>(3) is given different <i>pathname</i> arguments that have the
+    same inode number:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>ln mykey link</b>
+$ <b>ls -i1 link mykey</b>
+2233197 link
+2233197 mykey
+$ <b>./t_semget link p 1</b>       # Generates same key as 'mykey'
+ID = 9
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>/* t_semget.c
+<br>
+   Licensed under GNU General Public License v2 or later.
+*/
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;sys/ipc.h&gt;
+#include &lt;sys/sem.h&gt;
+#include &lt;unistd.h&gt;
+static void
+usage(const char *pname)
+{
+<br>
+    fprintf(stderr, "Usage: %s [-cx] pathname proj-id num-sems\n",
+<br>
+            pname);
+<br>
+    fprintf(stderr, "    -c           Use IPC_CREAT flag\n");
+<br>
+    fprintf(stderr, "    -x           Use IPC_EXCL flag\n");
+<br>
+    exit(EXIT_FAILURE);
+}
+int
+main(int argc, char *argv[])
+{
+<br>
+    int    semid, nsems, flags, opt;
+<br>
+    key_t  key;
+<br>
+    flags = 0;
+<br>
+    while ((opt = getopt(argc, argv, "cx")) != -1) {
+<br>
+        switch (opt) {
+<br>
+        case 'c': flags |= IPC_CREAT;   break;
+<br>
+        case 'x': flags |= IPC_EXCL;    break;
+<br>
+        default:  usage(argv[0]);
+<br>
+        }
+<br>
+    }
+<br>
+    if (argc != optind + 3)
+<br>
+        usage(argv[0]);
+<br>
+    key = ftok(argv[optind], argv[optind + 1][0]);
+<br>
+    if (key == -1) {
+<br>
+        perror("ftok");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    nsems = atoi(argv[optind + 2]);
+<br>
+    semid = semget(key, nsems, flags | 0600);
+<br>
+    if (semid == -1) {
+<br>
+        perror("semget");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    printf("ID = %d\n", semid);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>semctl</b>(2), <b>semop</b>(2), <b>ftok</b>(3),
+    <b>capabilities</b>(7), <b>sem_overview</b>(7), <b>sysvipc</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

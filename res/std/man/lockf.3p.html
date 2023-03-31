@@ -1,0 +1,273 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/efa879c4015a99eedd98fc602d057c9f43aac87b">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>LOCKF(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">LOCKF(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">LOCKF(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">lockf — record locking on files</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;unistd.h&gt;</pre>
+<pre>int lockf(int <i>fildes</i>, int <i>function</i>, off_t <i>size</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>lockf</i>() function shall lock sections of a file with
+    advisory-mode locks. Calls to <i>lockf</i>() from threads in other processes
+    which attempt to lock the locked file section shall either return an error
+    value or block until the section becomes unlocked. All the locks for a
+    process are removed when the process terminates. Record locking with
+    <i>lockf</i>() shall be supported for regular files and may be supported for
+    other files.</p>
+<p class="Pp">The <i>fildes</i> argument is an open file descriptor. To
+    establish a lock with this function, the file descriptor shall be opened
+    with write-only permission (O_WRONLY) or with read/write permission
+    (O_RDWR).</p>
+<p class="Pp">The <i>function</i> argument is a control value which specifies
+    the action to be taken. The permissible values for <i>function</i> are
+    defined in <i>&lt;unistd.h&gt;</i> as follows:</p>
+<table class="tbl" style="border-style: solid;">
+  <tbody><tr style="border-bottom-style: solid;">
+    <td style="text-align: center; border-right-style: solid;"><b>Function</b></td>
+    <td style="text-align: center;"><b>Description</b></td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">F_ULOCK</td>
+    <td>Unlock locked sections.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">F_LOCK</td>
+    <td>Lock a section for exclusive use.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">F_TLOCK</td>
+    <td>Test and lock a section for exclusive use.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">F_TEST</td>
+    <td>Test a section for locks by other processes.</td>
+  </tr>
+</tbody></table>
+<p class="Pp">F_TEST shall detect if a lock by another process is present on the
+    specified section.</p>
+<p class="Pp">F_LOCK and F_TLOCK shall both lock a section of a file if the
+    section is available.</p>
+<p class="Pp">F_ULOCK shall remove locks from a section of the file.</p>
+<p class="Pp">The <i>size</i> argument is the number of contiguous bytes to be
+    locked or unlocked. The section to be locked or unlocked starts at the
+    current offset in the file and extends forward for a positive size or
+    backward for a negative size (the preceding bytes up to but not including
+    the current offset). If <i>size</i> is 0, the section from the current
+    offset through the largest possible file offset shall be locked (that is,
+    from the current offset through the present or any future end-of-file). An
+    area need not be allocated to the file to be locked because locks may exist
+    past the end-of-file.</p>
+<p class="Pp">The sections locked with F_LOCK or F_TLOCK may, in whole or in
+    part, contain or be contained by a previously locked section for the same
+    process. When this occurs, or if adjacent locked sections would occur, the
+    sections shall be combined into a single locked section. If the request
+    would cause the number of locks to exceed a system-imposed limit, the
+    request shall fail.</p>
+<p class="Pp">F_LOCK and F_TLOCK requests differ only by the action taken if the
+    section is not available. F_LOCK shall block the calling thread until the
+    section is available. F_TLOCK shall cause the function to fail if the
+    section is already locked by another process.</p>
+<p class="Pp">File locks shall be released on first close by the locking process
+    of any file descriptor for the file.</p>
+<p class="Pp">F_ULOCK requests may release (wholly or in part) one or more
+    locked sections controlled by the process. Locked sections shall be unlocked
+    starting at the current file offset through <i>size</i> bytes or to the
+    end-of-file if <i>size</i> is (<b>off_t</b>)0. When all of a locked section
+    is not released (that is, when the beginning or end of the area to be
+    unlocked falls within a locked section), the remaining portions of that
+    section shall remain locked by the process. Releasing the center portion of
+    a locked section shall cause the remaining locked beginning and end portions
+    to become two separate locked sections. If the request would cause the
+    number of locks in the system to exceed a system-imposed limit, the request
+    shall fail.</p>
+<p class="Pp">A potential for deadlock occurs if the threads of a process
+    controlling a locked section are blocked by accessing a locked section of
+    another process. If the system detects that deadlock would occur,
+    <i>lockf</i>() shall fail with an <b>[EDEADLK]</b> error.</p>
+<p class="Pp">The interaction between <i>fcntl</i>() and <i>lockf</i>() locks is
+    unspecified.</p>
+<p class="Pp">Blocking on a section shall be interrupted by any signal.</p>
+<p class="Pp">An F_ULOCK request in which <i>size</i> is non-zero and the offset
+    of the last byte of the requested section is the maximum value for an object
+    of type <b>off_t</b>, when the process has an existing lock in which
+    <i>size</i> is 0 and which includes the last byte of the requested section,
+    shall be treated as a request to unlock from the start of the requested
+    section with a size equal to 0. Otherwise, an F_ULOCK request shall attempt
+    to unlock only the requested section.</p>
+<p class="Pp">Attempting to lock a section of a file that is associated with a
+    buffered stream produces unspecified results.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>lockf</i>() shall return 0.
+    Otherwise, it shall return -1, set <i>errno</i> to indicate an error, and
+    existing locks shall not be changed.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>lockf</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The <i>fildes</i> argument is not a valid open file descriptor; or
+      <i>function</i> is F_LOCK or F_TLOCK and <i>fildes</i> is not a valid file
+      descriptor open for writing.</dd>
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b> or
+    <b>EAGAIN</b></a></dt>
+  <dd>
+    <br>
+    The <i>function</i> argument is F_TLOCK or F_TEST and the section is already
+      locked by another process.</dd>
+  <dt id="EDEADLK"><a class="permalink" href="#EDEADLK"><b>EDEADLK</b></a></dt>
+  <dd>The <i>function</i> argument is F_LOCK and a deadlock is detected.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>A signal was caught during execution of the function.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The <i>function</i> argument is not one of F_LOCK, F_TLOCK, F_TEST, or
+      F_ULOCK; or <i>size</i> plus the current file offset is less than 0.</dd>
+  <dt id="EOVERFLOW"><a class="permalink" href="#EOVERFLOW"><b>EOVERFLOW</b></a></dt>
+  <dd>The offset of the first, or if <i>size</i> is not 0 then the last, byte in
+      the requested section cannot be represented correctly in an object of type
+      <b>off_t</b>.</dd>
+</dl>
+<p class="Pp">The <i>lockf</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>The <i>function</i> argument is F_LOCK or F_TLOCK and the file is mapped
+      with <i>mmap</i>().</dd>
+  <dt id="EDEADLK~2"><a class="permalink" href="#EDEADLK~2"><b>EDEADLK</b> or
+    <b>ENOLCK</b></a></dt>
+  <dd>
+    <br>
+    The <i>function</i> argument is F_LOCK, F_TLOCK, or F_ULOCK, and the request
+      would cause the number of locks to exceed a system-imposed limit.</dd>
+  <dt id="EOPNOTSUPP"><a class="permalink" href="#EOPNOTSUPP"><b>EOPNOTSUPP</b>
+    or <b>EINVAL</b></a></dt>
+  <dd>
+    <br>
+    The implementation does not support the locking of files of the type
+      indicated by the <i>fildes</i> argument.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Locking_a_Portion_of_a_File"><a class="permalink" href="#Locking_a_Portion_of_a_File">Locking
+  a Portion of a File</a></h2>
+<p class="Pp">In the following example, a file named <b>/home/cnd/mod1</b> is
+    being modified. Other processes that use locking are prevented from changing
+    it during this process. Only the first 10000 bytes are locked, and the lock
+    call fails if another process has any part of this area locked already.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;fcntl.h&gt;
+#include &lt;unistd.h&gt;</pre>
+<pre>int fildes;
+int status;
+...
+fildes = open("/home/cnd/mod1", O_RDWR);
+status = lockf(fildes, F_TLOCK, (off_t)10000);</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">Record-locking should not be used in combination with the
+    <i>fopen</i>(), <i>fread</i>(), <i>fwrite</i>(), and other <i>stdio</i>
+    functions. Instead, the more primitive, non-buffered functions (such as
+    <i>open</i>()) should be used. Unexpected results may occur in processes
+    that do buffering in the user address space. The process may later
+    read/write data which is/was locked. The <i>stdio</i> functions are the most
+    common source of unexpected buffering.</p>
+<p class="Pp">The <i>alarm</i>() function may be used to provide a timeout
+    facility in applications requiring it.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>alarm</i>()</i>, <i><i>chmod</i>()</i>,
+    <i><i>close</i>()</i>, <i><i>creat</i>()</i>, <i><i>fcntl</i>()</i>,
+    <i><i>fopen</i>()</i>, <i><i>mmap</i>()</i>, <i><i>open</i>()</i>,
+    <i><i>read</i>()</i>, <i><i>write</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;unistd.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) Markus Kuhn, 1996
+   and Copyright (C) Linux Foundation, 2008, written by Michael Kerrisk
+       <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+  
+   1996-04-10  Markus Kuhn <mskuhn@cip.informatik.uni-erlangen.de>
+               First version written
+   Modified, 2004-10-24, aeb
+   2008-06-24, mtk
+       Minor rewrites of some parts.
+       NOTES: describe case where clock_nanosleep() can be preferable.
+       NOTES: describe CLOCK_REALTIME versus CLOCK_NANOSLEEP
+       Replace crufty discussion of HZ with a pointer to time(7).
+ --><head>
+<meta name="dc.identifier" content="res/252831e21b99aeac04b2c9c510b9f477f9aab285">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>nanosleep(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">nanosleep(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">nanosleep(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">nanosleep - high-resolution sleep</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;time.h&gt;</b></pre>
+<pre><b>int nanosleep(const struct timespec *</b><i>req</i><b>,</b>
+<b>              struct timespec *_Nullable </b><i>rem</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>nanosleep</b>():</p>
+<pre><br>
+    _POSIX_C_SOURCE &gt;= 199309L</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>nanosleep</b>() suspends the execution of the calling thread
+    until either at least the time specified in <i>*req</i> has elapsed, or the
+    delivery of a signal that triggers the invocation of a handler in the
+    calling thread or that terminates the process.</p>
+<p class="Pp">If the call is interrupted by a signal handler, <b>nanosleep</b>()
+    returns -1, sets <i>errno</i> to <b>EINTR</b>, and writes the remaining time
+    into the structure pointed to by <i>rem</i> unless <i>rem</i> is NULL. The
+    value of <i>*rem</i> can then be used to call <b>nanosleep</b>() again and
+    complete the specified pause (but see NOTES).</p>
+<p class="Pp">The <b>timespec</b>(3) structure is used to specify intervals of
+    time with nanosecond precision.</p>
+<p class="Pp">The value of the nanoseconds field must be in the range [0,
+    999999999].</p>
+<p class="Pp">Compared to <b>sleep</b>(3) and <b>usleep</b>(3),
+    <b>nanosleep</b>() has the following advantages: it provides a higher
+    resolution for specifying the sleep interval; POSIX.1 explicitly specifies
+    that it does not interact with signals; and it makes the task of resuming a
+    sleep that has been interrupted by a signal handler easier.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On successfully sleeping for the requested interval,
+    <b>nanosleep</b>() returns 0. If the call is interrupted by a signal handler
+    or encounters an error, then it returns -1, with <i>errno</i> set to
+    indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>Problem with copying information from user space.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The pause has been interrupted by a signal that was delivered to the
+      thread (see <b>signal</b>(7)). The remaining sleep time has been written
+      into <i>*rem</i> so that the thread can easily call <b>nanosleep</b>()
+      again and continue with the pause.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The value in the <i>tv_nsec</i> field was not in the range [0, 999999999]
+      or <i>tv_sec</i> was negative.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">If the interval specified in <i>req</i> is not an exact multiple
+    of the granularity underlying clock (see <b>time</b>(7)), then the interval
+    will be rounded up to the next multiple. Furthermore, after the sleep
+    completes, there may still be a delay before the CPU becomes free to once
+    again execute the calling thread.</p>
+<p class="Pp">The fact that <b>nanosleep</b>() sleeps for a relative interval
+    can be problematic if the call is repeatedly restarted after being
+    interrupted by signals, since the time between the interruptions and
+    restarts of the call will lead to drift in the time when the sleep finally
+    completes. This problem can be avoided by using <b>clock_nanosleep</b>(2)
+    with an absolute time value.</p>
+<p class="Pp">POSIX.1 specifies that <b>nanosleep</b>() should measure time
+    against the <b>CLOCK_REALTIME</b> clock. However, Linux measures the time
+    using the <b>CLOCK_MONOTONIC</b> clock. This probably does not matter, since
+    the POSIX.1 specification for <b>clock_settime</b>(2) says that
+    discontinuous changes in <b>CLOCK_REALTIME</b> should not affect
+    <b>nanosleep</b>():</p>
+<div class="Bd-indent">
+<p class="Pp">Setting the value of the <b>CLOCK_REALTIME</b> clock via
+    <b>clock_settime</b>(2) shall have no effect on threads that are blocked
+    waiting for a relative time service based upon this clock, including the
+    <b>nanosleep</b>() function; ... Consequently, these time services shall
+    expire when the requested relative interval elapses, independently of the
+    new or old value of the clock.</p>
+</div>
+<section class="Ss">
+<h2 class="Ss" id="Old_behavior"><a class="permalink" href="#Old_behavior">Old
+  behavior</a></h2>
+<p class="Pp">In order to support applications requiring much more precise
+    pauses (e.g., in order to control some time-critical hardware),
+    <b>nanosleep</b>() would handle pauses of up to 2 milliseconds by busy
+    waiting with microsecond precision when called from a thread scheduled under
+    a real-time policy like <b>SCHED_FIFO</b> or <b>SCHED_RR</b>. This special
+    extension was removed in Linux 2.5.39, and is thus not available in Linux
+    2.6.0 and later kernels.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">If a program that catches signals and uses <b>nanosleep</b>()
+    receives signals at a very high rate, then scheduling delays and rounding
+    errors in the kernel's calculation of the sleep interval and the returned
+    <i>remain</i> value mean that the <i>remain</i> value may steadily
+    <i>increase</i> on successive restarts of the <b>nanosleep</b>() call. To
+    avoid such problems, use <b>clock_nanosleep</b>(2) with the
+    <b>TIMER_ABSTIME</b> flag to sleep to an absolute deadline.</p>
+<p class="Pp">In Linux 2.4, if <b>nanosleep</b>() is stopped by a signal (e.g.,
+    <b>SIGTSTP</b>), then the call fails with the error <b>EINTR</b> after the
+    thread is resumed by a <b>SIGCONT</b> signal. If the system call is
+    subsequently restarted, then the time that the thread spent in the stopped
+    state is <i>not</i> counted against the sleep interval. This problem is
+    fixed in Linux 2.6.0 and later kernels.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>clock_nanosleep</b>(2), <b>restart_syscall</b>(2),
+    <b>sched_setscheduler</b>(2), <b>timer_create</b>(2), <b>sleep</b>(3),
+    <b>timespec</b>(3), <b>usleep</b>(3), <b>time</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

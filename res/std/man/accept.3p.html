@@ -1,0 +1,198 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/f3541330c83173c09269cca8d6ab70c0814f8cd5">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>ACCEPT(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">ACCEPT(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">ACCEPT(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">accept — accept a new connection on a socket</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;sys/socket.h&gt;</pre>
+<pre>int accept(int <i>socket</i>, struct sockaddr *restrict <i>address</i>,
+<br>
+    socklen_t *restrict <i>address_len</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>accept</i>() function shall extract the first connection on
+    the queue of pending connections, create a new socket with the same socket
+    type protocol and address family as the specified socket, and allocate a new
+    file descriptor for that socket. The file descriptor shall be allocated as
+    described in <i>Section 2.14</i>, <i>File Descriptor Allocation</i>.</p>
+<p class="Pp">The <i>accept</i>() function takes the following arguments:</p>
+<dl class="Bl-tag">
+  <dt id="socket"><a class="permalink" href="#socket"><i>socket</i></a></dt>
+  <dd>Specifies a socket that was created with <i>socket</i>(), has been bound
+      to an address with <i>bind</i>(), and has issued a successful call to
+      <i>listen</i>().</dd>
+  <dt id="address"><a class="permalink" href="#address"><i>address</i></a></dt>
+  <dd>Either a null pointer, or a pointer to a <b>sockaddr</b> structure where
+      the address of the connecting socket shall be returned.</dd>
+  <dt id="address_len"><a class="permalink" href="#address_len"><i>address_len</i></a></dt>
+  <dd>Either a null pointer, if <i>address</i> is a null pointer, or a pointer
+      to a <b>socklen_t</b> object which on input specifies the length of the
+      supplied <b>sockaddr</b> structure, and on output specifies the length of
+      the stored address.</dd>
+</dl>
+<p class="Pp">If <i>address</i> is not a null pointer, the address of the peer
+    for the accepted connection shall be stored in the <b>sockaddr</b> structure
+    pointed to by <i>address</i>, and the length of this address shall be stored
+    in the object pointed to by <i>address_len</i>.</p>
+<p class="Pp">If the actual length of the address is greater than the length of
+    the supplied <b>sockaddr</b> structure, the stored address shall be
+    truncated.</p>
+<p class="Pp">If the protocol permits connections by unbound clients, and the
+    peer is not bound, then the value stored in the object pointed to by
+    <i>address</i> is unspecified.</p>
+<p class="Pp">If the listen queue is empty of connection requests and O_NONBLOCK
+    is not set on the file descriptor for the socket, <i>accept</i>() shall
+    block until a connection is present. If the <i>listen</i>() queue is empty
+    of connection requests and O_NONBLOCK is set on the file descriptor for the
+    socket, <i>accept</i>() shall fail and set <i>errno</i> to <b>[EAGAIN]</b>
+    or <b>[EWOULDBLOCK]</b>.</p>
+<p class="Pp">The accepted socket cannot itself accept more connections. The
+    original socket remains open and can accept more connections.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>accept</i>() shall return the
+    non-negative file descriptor of the accepted socket. Otherwise, -1 shall be
+    returned, <i>errno</i> shall be set to indicate the error, and any object
+    pointed to by <i>address_len</i> shall remain unchanged.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>accept</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b> or
+    <b>EWOULDBLOCK</b></a></dt>
+  <dd>
+    <br>
+    O_NONBLOCK is set for the socket file descriptor and no connections are
+      present to be accepted.</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The <i>socket</i> argument is not a valid file descriptor.</dd>
+  <dt id="ECONNABORTED"><a class="permalink" href="#ECONNABORTED"><b>ECONNABORTED</b></a></dt>
+  <dd>
+    <br>
+    A connection has been aborted.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The <i>accept</i>() function was interrupted by a signal that was caught
+      before a valid connection arrived.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The <i>socket</i> is not accepting connections.</dd>
+  <dt id="EMFILE"><a class="permalink" href="#EMFILE"><b>EMFILE</b></a></dt>
+  <dd>All file descriptors available to the process are currently open.</dd>
+  <dt id="ENFILE"><a class="permalink" href="#ENFILE"><b>ENFILE</b></a></dt>
+  <dd>The maximum number of file descriptors in the system are already
+    open.</dd>
+  <dt id="ENOBUFS"><a class="permalink" href="#ENOBUFS"><b>ENOBUFS</b></a></dt>
+  <dd>No buffer space is available.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>There was insufficient memory available to complete the operation.</dd>
+  <dt id="ENOTSOCK"><a class="permalink" href="#ENOTSOCK"><b>ENOTSOCK</b></a></dt>
+  <dd>The <i>socket</i> argument does not refer to a socket.</dd>
+  <dt id="EOPNOTSUPP"><a class="permalink" href="#EOPNOTSUPP"><b>EOPNOTSUPP</b></a></dt>
+  <dd>The socket type of the specified socket does not support accepting
+      connections.</dd>
+</dl>
+<p class="Pp">The <i>accept</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EPROTO"><a class="permalink" href="#EPROTO"><b>EPROTO</b></a></dt>
+  <dd>A protocol error has occurred; for example, the STREAMS protocol stack has
+      not been initialized.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">When a connection is available, <i>select</i>() indicates that the
+    file descriptor for the socket is ready for reading.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i>Section 2.14</i>, <i>File Descriptor Allocation</i>,
+    <i><i>bind</i>()</i>, <i><i>connect</i>()</i>, <i><i>listen</i>()</i>,
+    <i><i>socket</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;sys_socket.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

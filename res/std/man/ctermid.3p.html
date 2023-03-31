@@ -1,0 +1,165 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/70fe54a0008687b36ca3a2fea7e7151c8d142ce2">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>CTERMID(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">CTERMID(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">CTERMID(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">ctermid — generate a pathname for the controlling
+  terminal</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;stdio.h&gt;</pre>
+<pre>char *ctermid(char *<i>s</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>ctermid</i>() function shall generate a string that, when
+    used as a pathname, refers to the current controlling terminal for the
+    current process. If <i>ctermid</i>() returns a pathname, access to the file
+    is not guaranteed.</p>
+<p class="Pp">The <i>ctermid</i>() function need not be thread-safe if called
+    with a NULL parameter.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">If <i>s</i> is a null pointer, the string shall be generated in an
+    area that may be static, the address of which shall be returned. The
+    application shall not modify the string returned. The returned pointer might
+    be invalidated or the string content might be overwritten by a subsequent
+    call to <i>ctermid</i>(). The returned pointer might also be invalidated if
+    the calling thread is terminated. If <i>s</i> is not a null pointer,
+    <i>s</i> is assumed to point to a character array of at least L_ctermid
+    bytes; the string is placed in this array and the value of <i>s</i> shall be
+    returned. The symbolic constant L_ctermid is defined in
+    <i>&lt;stdio.h&gt;</i>, and shall have a value greater than 0.</p>
+<p class="Pp">The <i>ctermid</i>() function shall return an empty string if the
+    pathname that would refer to the controlling terminal cannot be determined,
+    or if the function is unsuccessful.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">No errors are defined.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Determining_the_Controlling_Terminal_for_the_Current_Process"><a class="permalink" href="#Determining_the_Controlling_Terminal_for_the_Current_Process">Determining
+  the Controlling Terminal for the Current Process</a></h2>
+<p class="Pp">The following example returns a pointer to a string that
+    identifies the controlling terminal for the current process. The pathname
+    for the terminal is stored in the array pointed to by the <i>ptr</i>
+    argument, which has a size of L_ctermid bytes, as indicated by the
+    <i>term</i> argument.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;stdio.h&gt;
+...
+char term[L_ctermid];
+char *ptr;</pre>
+<pre>ptr = ctermid(term);</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The difference between <i>ctermid</i>() and <i>ttyname</i>() is
+    that <i>ttyname</i>() must be handed a file descriptor and return a path of
+    the terminal associated with that file descriptor, while <i>ctermid</i>()
+    returns a string (such as <b>"/dev/tty"</b>) that refers to the
+    current controlling terminal if used as a pathname.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">L_ctermid must be defined appropriately for a given implementation
+    and must be greater than zero so that array declarations using it are
+    accepted by the compiler. The value includes the terminating null byte.</p>
+<p class="Pp">Conforming applications that use multiple threads cannot call
+    <i>ctermid</i>() with NULL as the parameter. If <i>s</i> is not NULL, the
+    <i>ctermid</i>() function generates a string that, when used as a pathname,
+    refers to the current controlling terminal for the current process. If
+    <i>s</i> is NULL, the return value of <i>ctermid</i>() is undefined.</p>
+<p class="Pp">There is no additional burden on the programmer—changing to
+    use a hypothetical thread-safe version of <i>ctermid</i>() along with
+    allocating a buffer is more of a burden than merely allocating a buffer.
+    Application code should not assume that the returned string is short, as
+    some implementations have more than two pathname components before reaching
+    a logical device name.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>ttyname</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;stdio.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

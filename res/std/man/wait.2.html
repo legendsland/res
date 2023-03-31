@@ -1,0 +1,540 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 1993 by Thomas Koenig <ig25@rz.uni-karlsruhe.de>
+   and Copyright (c) 2004 by Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Modified Sat Jul 24 13:30:06 1993 by Rik Faith <faith@cs.unc.edu>
+   Modified Sun Aug 21 17:42:42 1994 by Rik Faith <faith@cs.unc.edu>
+            (Thanks to Koen Holtman <koen@win.tue.nl>)
+   Modified Wed May 17 15:54:12 1995 by Rik Faith <faith@cs.unc.edu>
+             To remove *'s from status in macros (Thanks to Michael Shields).
+   Modified as suggested by Nick Duffek <nsd@bbc.com>, aeb, 960426
+   Modified Mon Jun 23 14:09:52 1997 by aeb - add EINTR.
+   Modified Thu Nov 26 02:12:45 1998 by aeb - add SIGCHLD stuff.
+   Modified Mon Jul 24 21:37:38 2000 by David A. Wheeler
+            <dwheeler@dwheeler.com> - noted thread issues.
+   Modified 26 Jun 01 by Michael Kerrisk
+            Added __WCLONE, __WALL, and __WNOTHREAD descriptions
+   Modified 2001-09-25, aeb
+   Modified 26 Jun 01 by Michael Kerrisk, <mtk.manpages@gmail.com>
+  	Updated notes on setting disposition of SIGCHLD to SIG_IGN
+   2004-11-11, mtk
+  	Added waitid(2); added WCONTINUED and WIFCONTINUED()
+  	Added text on SA_NOCLDSTOP
+  	Updated discussion of SA_NOCLDWAIT to reflect 2.6 behavior
+  	Much other text rewritten
+   2005-05-10, mtk, __W* flags can't be used with waitid()
+   2008-07-04, mtk, removed erroneous text about SA_NOCLDSTOP
+   --><head>
+<meta name="dc.identifier" content="res/848529659f915ca22e432f42860a92923b4d5e89">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>wait(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">wait(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">wait(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">wait, waitpid, waitid - wait for process to change state</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/wait.h&gt;</b></pre>
+<pre><b>pid_t wait(int *_Nullable </b><i>wstatus</i><b>);</b>
+<b>pid_t waitpid(pid_t </b><i>pid</i><b>, int *_Nullable </b><i>wstatus</i><b>, int </b><i>options</i><b>);</b></pre>
+<pre><b>int waitid(idtype_t </b><i>idtype</i><b>, id_t </b><i>id</i><b>, siginfo_t *</b><i>infop</i><b>, int </b><i>options</i><b>);</b>
+<br>
+                /* This is the glibc and POSIX interface; see
+<br>
+                   NOTES for information on the raw system call. */</pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>waitid</b>():</p>
+<pre><br>
+    Since glibc 2.26:
+<br>
+        _XOPEN_SOURCE &gt;= 500 || _POSIX_C_SOURCE &gt;= 200809L
+<br>
+    glibc 2.25 and earlier:
+<br>
+        _XOPEN_SOURCE
+<br>
+            || /* Since glibc 2.12: */ _POSIX_C_SOURCE &gt;= 200809L
+<br>
+            || /* glibc &lt;= 2.19: */ _BSD_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">All of these system calls are used to wait for state changes in a
+    child of the calling process, and obtain information about the child whose
+    state has changed. A state change is considered to be: the child terminated;
+    the child was stopped by a signal; or the child was resumed by a signal. In
+    the case of a terminated child, performing a wait allows the system to
+    release the resources associated with the child; if a wait is not performed,
+    then the terminated child remains in a "zombie" state (see NOTES
+    below).</p>
+<p class="Pp">If a child has already changed state, then these calls return
+    immediately. Otherwise, they block until either a child changes state or a
+    signal handler interrupts the call (assuming that system calls are not
+    automatically restarted using the <b>SA_RESTART</b> flag of
+    <b>sigaction</b>(2)). In the remainder of this page, a child whose state has
+    changed and which has not yet been waited upon by one of these system calls
+    is termed <i>waitable</i>.</p>
+<section class="Ss">
+<h2 class="Ss" id="wait()_and_waitpid()"><a class="permalink" href="#wait()_and_waitpid()">wait()
+  and waitpid()</a></h2>
+<p class="Pp">The <b>wait</b>() system call suspends execution of the calling
+    thread until one of its children terminates. The call
+    <i>wait(&amp;wstatus)</i> is equivalent to:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>waitpid(-1, &amp;wstatus, 0);
+</pre>
+<br>
+<p class="Pp">The <b>waitpid</b>() system call suspends execution of the calling
+    thread until a child specified by <i>pid</i> argument has changed state. By
+    default, <b>waitpid</b>() waits only for terminated children, but this
+    behavior is modifiable via the <i>options</i> argument, as described
+  below.</p>
+<p class="Pp">The value of <i>pid</i> can be:</p>
+<dl class="Bl-tag">
+  <dt>&lt; <b>-1</b></dt>
+  <dd>meaning wait for any child process whose process group ID is equal to the
+      absolute value of <i>pid</i>.</dd>
+  <dt><b>-1</b></dt>
+  <dd>meaning wait for any child process.</dd>
+  <dt><b>0</b></dt>
+  <dd>meaning wait for any child process whose process group ID is equal to that
+      of the calling process at the time of the call to <b>waitpid</b>().</dd>
+  <dt>&gt; <b>0</b></dt>
+  <dd>meaning wait for the child whose process ID is equal to the value of
+      <i>pid</i>.</dd>
+</dl>
+<p class="Pp">The value of <i>options</i> is an OR of zero or more of the
+    following constants:</p>
+<dl class="Bl-tag">
+  <dt id="WNOHANG"><a class="permalink" href="#WNOHANG"><b>WNOHANG</b></a></dt>
+  <dd>return immediately if no child has exited.</dd>
+  <dt id="WUNTRACED"><a class="permalink" href="#WUNTRACED"><b>WUNTRACED</b></a></dt>
+  <dd>also return if a child has stopped (but not traced via <b>ptrace</b>(2)).
+      Status for <i>traced</i> children which have stopped is provided even if
+      this option is not specified.</dd>
+  <dt id="WCONTINUED"><a class="permalink" href="#WCONTINUED"><b>WCONTINUED</b>
+    (since Linux 2.6.10)</a></dt>
+  <dd>also return if a stopped child has been resumed by delivery of
+      <b>SIGCONT</b>.</dd>
+</dl>
+<p class="Pp">(For Linux-only options, see below.)</p>
+<p class="Pp">If <i>wstatus</i> is not NULL, <b>wait</b>() and <b>waitpid</b>()
+    store status information in the <i>int</i> to which it points. This integer
+    can be inspected with the following macros (which take the integer itself as
+    an argument, not a pointer to it, as is done in <b>wait</b>() and
+    <b>waitpid</b>()!):</p>
+<dl class="Bl-tag">
+  <dt id="WIFEXITED("><a class="permalink" href="#WIFEXITED("><b>WIFEXITED(</b><i>wstatus</i><b>)</b></a></dt>
+  <dd>returns true if the child terminated normally, that is, by calling
+      <b>exit</b>(3) or <b>_exit</b>(2), or by returning from main().</dd>
+  <dt id="WEXITSTATUS("><a class="permalink" href="#WEXITSTATUS("><b>WEXITSTATUS(</b><i>wstatus</i><b>)</b></a></dt>
+  <dd>returns the exit status of the child. This consists of the least
+      significant 8 bits of the <i>status</i> argument that the child specified
+      in a call to <b>exit</b>(3) or <b>_exit</b>(2) or as the argument for a
+      return statement in main(). This macro should be employed only if
+      <b>WIFEXITED</b> returned true.</dd>
+  <dt id="WIFSIGNALED("><a class="permalink" href="#WIFSIGNALED("><b>WIFSIGNALED(</b><i>wstatus</i><b>)</b></a></dt>
+  <dd>returns true if the child process was terminated by a signal.</dd>
+  <dt id="WTERMSIG("><a class="permalink" href="#WTERMSIG("><b>WTERMSIG(</b><i>wstatus</i><b>)</b></a></dt>
+  <dd>returns the number of the signal that caused the child process to
+      terminate. This macro should be employed only if <b>WIFSIGNALED</b>
+      returned true.</dd>
+  <dt id="WCOREDUMP("><a class="permalink" href="#WCOREDUMP("><b>WCOREDUMP(</b><i>wstatus</i><b>)</b></a></dt>
+  <dd>returns true if the child produced a core dump (see <b>core</b>(5)). This
+      macro should be employed only if <b>WIFSIGNALED</b> returned true.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>This macro is not specified in POSIX.1-2001 and is not available on some
+      UNIX implementations (e.g., AIX, SunOS). Therefore, enclose its use inside
+      <i>#ifdef WCOREDUMP ... #endif</i>.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="WIFSTOPPED("><a class="permalink" href="#WIFSTOPPED("><b>WIFSTOPPED(</b><i>wstatus</i><b>)</b></a></dt>
+  <dd>returns true if the child process was stopped by delivery of a signal;
+      this is possible only if the call was done using <b>WUNTRACED</b> or when
+      the child is being traced (see <b>ptrace</b>(2)).</dd>
+  <dt id="WSTOPSIG("><a class="permalink" href="#WSTOPSIG("><b>WSTOPSIG(</b><i>wstatus</i><b>)</b></a></dt>
+  <dd>returns the number of the signal which caused the child to stop. This
+      macro should be employed only if <b>WIFSTOPPED</b> returned true.</dd>
+  <dt id="WIFCONTINUED("><a class="permalink" href="#WIFCONTINUED("><b>WIFCONTINUED(</b><i>wstatus</i><b>)</b></a></dt>
+  <dd>(since Linux 2.6.10) returns true if the child process was resumed by
+      delivery of <b>SIGCONT</b>.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="waitid()"><a class="permalink" href="#waitid()">waitid()</a></h2>
+<p class="Pp">The <b>waitid</b>() system call (available since Linux 2.6.9)
+    provides more precise control over which child state changes to wait
+  for.</p>
+<p class="Pp">The <i>idtype</i> and <i>id</i> arguments select the child(ren) to
+    wait for, as follows:</p>
+<dl class="Bl-tag">
+  <dt id="idtype"><a class="permalink" href="#idtype"><i>idtype</i> ==
+    <i><b>P_PID</b></i></a></dt>
+  <dd>Wait for the child whose process ID matches <i>id</i>.</dd>
+  <dt id="idtype~2"><a class="permalink" href="#idtype~2"><i>idtype</i> ==
+    <i><b>P_PIDFD</b></i> (since Linux 5.4)</a></dt>
+  <dd>Wait for the child referred to by the PID file descriptor specified in
+      <i>id</i>. (See <b>pidfd_open</b>(2) for further information on PID file
+      descriptors.)</dd>
+  <dt id="idtype~3"><a class="permalink" href="#idtype~3"><i>idtype</i> ==
+    <i><b>P_PGID</b></i></a></dt>
+  <dd>Wait for any child whose process group ID matches <i>id</i>. Since Linux
+      5.4, if <i>id</i> is zero, then wait for any child that is in the same
+      process group as the caller's process group at the time of the call.</dd>
+  <dt id="idtype~4"><a class="permalink" href="#idtype~4"><i>idtype</i> ==
+    <i><b>P_ALL</b></i></a></dt>
+  <dd>Wait for any child; <i>id</i> is ignored.</dd>
+</dl>
+<p class="Pp">The child state changes to wait for are specified by ORing one or
+    more of the following flags in <i>options</i>:</p>
+<dl class="Bl-tag">
+  <dt id="WEXITED"><a class="permalink" href="#WEXITED"><b>WEXITED</b></a></dt>
+  <dd>Wait for children that have terminated.</dd>
+  <dt id="WSTOPPED"><a class="permalink" href="#WSTOPPED"><b>WSTOPPED</b></a></dt>
+  <dd>Wait for children that have been stopped by delivery of a signal.</dd>
+  <dt id="WCONTINUED~2"><a class="permalink" href="#WCONTINUED~2"><b>WCONTINUED</b></a></dt>
+  <dd>Wait for (previously stopped) children that have been resumed by delivery
+      of <b>SIGCONT</b>.</dd>
+</dl>
+<p class="Pp">The following flags may additionally be ORed in
+  <i>options</i>:</p>
+<dl class="Bl-tag">
+  <dt id="WNOHANG~2"><a class="permalink" href="#WNOHANG~2"><b>WNOHANG</b></a></dt>
+  <dd>As for <b>waitpid</b>().</dd>
+  <dt id="WNOWAIT"><a class="permalink" href="#WNOWAIT"><b>WNOWAIT</b></a></dt>
+  <dd>Leave the child in a waitable state; a later wait call can be used to
+      again retrieve the child status information.</dd>
+</dl>
+<p class="Pp">Upon successful return, <b>waitid</b>() fills in the following
+    fields of the <i>siginfo_t</i> structure pointed to by <i>infop</i>:</p>
+<dl class="Bl-tag">
+  <dt id="si_pid"><a class="permalink" href="#si_pid"><i>si_pid</i></a></dt>
+  <dd>The process ID of the child.</dd>
+  <dt id="si_uid"><a class="permalink" href="#si_uid"><i>si_uid</i></a></dt>
+  <dd>The real user ID of the child. (This field is not set on most other
+      implementations.)</dd>
+  <dt id="si_signo"><a class="permalink" href="#si_signo"><i>si_signo</i></a></dt>
+  <dd>Always set to <b>SIGCHLD</b>.</dd>
+  <dt id="si_status"><a class="permalink" href="#si_status"><i>si_status</i></a></dt>
+  <dd>Either the exit status of the child, as given to <b>_exit</b>(2) (or
+      <b>exit</b>(3)), or the signal that caused the child to terminate, stop,
+      or continue. The <i>si_code</i> field can be used to determine how to
+      interpret this field.</dd>
+  <dt id="si_code"><a class="permalink" href="#si_code"><i>si_code</i></a></dt>
+  <dd>Set to one of: <b>CLD_EXITED</b> (child called <b>_exit</b>(2));
+      <b>CLD_KILLED</b> (child killed by signal); <b>CLD_DUMPED</b> (child
+      killed by signal, and dumped core); <b>CLD_STOPPED</b> (child stopped by
+      signal); <b>CLD_TRAPPED</b> (traced child has trapped); or
+      <b>CLD_CONTINUED</b> (child continued by <b>SIGCONT</b>).</dd>
+</dl>
+<p class="Pp">If <b>WNOHANG</b> was specified in <i>options</i> and there were
+    no children in a waitable state, then <b>waitid</b>() returns 0 immediately
+    and the state of the <i>siginfo_t</i> structure pointed to by <i>infop</i>
+    depends on the implementation. To (portably) distinguish this case from that
+    where a child was in a waitable state, zero out the <i>si_pid</i> field
+    before the call and check for a nonzero value in this field after the call
+    returns.</p>
+<p class="Pp">POSIX.1-2008 Technical Corrigendum 1 (2013) adds the requirement
+    that when <b>WNOHANG</b> is specified in <i>options</i> and there were no
+    children in a waitable state, then <b>waitid</b>() should zero out the
+    <i>si_pid</i> and <i>si_signo</i> fields of the structure. On Linux and
+    other implementations that adhere to this requirement, it is not necessary
+    to zero out the <i>si_pid</i> field before calling <b>waitid</b>(). However,
+    not all implementations follow the POSIX.1 specification on this point.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp"><b>wait</b>(): on success, returns the process ID of the
+    terminated child; on failure, -1 is returned.</p>
+<p class="Pp"><b>waitpid</b>(): on success, returns the process ID of the child
+    whose state has changed; if <b>WNOHANG</b> was specified and one or more
+    child(ren) specified by <i>pid</i> exist, but have not yet changed state,
+    then 0 is returned. On failure, -1 is returned.</p>
+<p class="Pp"><b>waitid</b>(): returns 0 on success or if <b>WNOHANG</b> was
+    specified and no child(ren) specified by <i>id</i> has yet changed state; on
+    failure, -1 is returned.</p>
+<p class="Pp">On failure, each of these calls sets <i>errno</i> to indicate the
+    error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>The PID file descriptor specified in <i>id</i> is nonblocking and the
+      process that it refers to has not terminated.</dd>
+  <dt id="ECHILD"><a class="permalink" href="#ECHILD"><b>ECHILD</b></a></dt>
+  <dd>(for <b>wait</b>()) The calling process does not have any unwaited-for
+      children.</dd>
+  <dt id="ECHILD~2"><a class="permalink" href="#ECHILD~2"><b>ECHILD</b></a></dt>
+  <dd>(for <b>waitpid</b>() or <b>waitid</b>()) The process specified by
+      <i>pid</i> (<b>waitpid</b>()) or <i>idtype</i> and <i>id</i>
+      (<b>waitid</b>()) does not exist or is not a child of the calling process.
+      (This can happen for one's own child if the action for <b>SIGCHLD</b> is
+      set to <b>SIG_IGN</b>. See also the <i>Linux Notes</i> section about
+      threads.)</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd><b>WNOHANG</b> was not set and an unblocked signal or a <b>SIGCHLD</b> was
+      caught; see <b>signal</b>(7).</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The <i>options</i> argument was invalid.</dd>
+  <dt id="ESRCH"><a class="permalink" href="#ESRCH"><b>ESRCH</b></a></dt>
+  <dd>(for <b>wait</b>() or <b>waitpid</b>()) <i>pid</i> is equal to
+      <b>INT_MIN</b>.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">SVr4, 4.3BSD, POSIX.1-2001.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">A child that terminates, but has not been waited for becomes a
+    "zombie". The kernel maintains a minimal set of information about
+    the zombie process (PID, termination status, resource usage information) in
+    order to allow the parent to later perform a wait to obtain information
+    about the child. As long as a zombie is not removed from the system via a
+    wait, it will consume a slot in the kernel process table, and if this table
+    fills, it will not be possible to create further processes. If a parent
+    process terminates, then its "zombie" children (if any) are
+    adopted by <b>init</b>(1), (or by the nearest "subreaper" process
+    as defined through the use of the <b>prctl</b>(2)
+    <b>PR_SET_CHILD_SUBREAPER</b> operation); <b>init</b>(1) automatically
+    performs a wait to remove the zombies.</p>
+<p class="Pp">POSIX.1-2001 specifies that if the disposition of <b>SIGCHLD</b>
+    is set to <b>SIG_IGN</b> or the <b>SA_NOCLDWAIT</b> flag is set for
+    <b>SIGCHLD</b> (see <b>sigaction</b>(2)), then children that terminate do
+    not become zombies and a call to <b>wait</b>() or <b>waitpid</b>() will
+    block until all children have terminated, and then fail with <i>errno</i>
+    set to <b>ECHILD</b>. (The original POSIX standard left the behavior of
+    setting <b>SIGCHLD</b> to <b>SIG_IGN</b> unspecified. Note that even though
+    the default disposition of <b>SIGCHLD</b> is "ignore", explicitly
+    setting the disposition to <b>SIG_IGN</b> results in different treatment of
+    zombie process children.)</p>
+<p class="Pp">Linux 2.6 conforms to the POSIX requirements. However, Linux 2.4
+    (and earlier) does not: if a <b>wait</b>() or <b>waitpid</b>() call is made
+    while <b>SIGCHLD</b> is being ignored, the call behaves just as though
+    <b>SIGCHLD</b> were not being ignored, that is, the call blocks until the
+    next child terminates and then returns the process ID and status of that
+    child.</p>
+<section class="Ss">
+<h2 class="Ss" id="Linux_notes"><a class="permalink" href="#Linux_notes">Linux
+  notes</a></h2>
+<p class="Pp">In the Linux kernel, a kernel-scheduled thread is not a distinct
+    construct from a process. Instead, a thread is simply a process that is
+    created using the Linux-unique <b>clone</b>(2) system call; other routines
+    such as the portable <b>pthread_create</b>(3) call are implemented using
+    <b>clone</b>(2). Before Linux 2.4, a thread was just a special case of a
+    process, and as a consequence one thread could not wait on the children of
+    another thread, even when the latter belongs to the same thread group.
+    However, POSIX prescribes such functionality, and since Linux 2.4 a thread
+    can, and by default will, wait on children of other threads in the same
+    thread group.</p>
+<p class="Pp">The following Linux-specific <i>options</i> are for use with
+    children created using <b>clone</b>(2); they can also, since Linux 4.7, be
+    used with <b>waitid</b>():</p>
+<dl class="Bl-tag">
+  <dt><b>__WCLONE</b></dt>
+  <dd>Wait for "clone" children only. If omitted, then wait for
+      "non-clone" children only. (A "clone" child is one
+      which delivers no signal, or a signal other than <b>SIGCHLD</b> to its
+      parent upon termination.) This option is ignored if <b>__WALL</b> is also
+      specified.</dd>
+  <dt><b>__WALL</b> (since Linux 2.4)</dt>
+  <dd>Wait for all children, regardless of type ("clone" or
+      "non-clone").</dd>
+  <dt><b>__WNOTHREAD</b> (since Linux 2.4)</dt>
+  <dd>Do not wait for children of other threads in the same thread group. This
+      was the default before Linux 2.4.</dd>
+</dl>
+<p class="Pp">Since Linux 4.7, the <b>__WALL</b> flag is automatically implied
+    if the child is being ptraced.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="C_library/kernel_differences"><a class="permalink" href="#C_library/kernel_differences">C
+  library/kernel differences</a></h2>
+<p class="Pp"><b>wait</b>() is actually a library function that (in glibc) is
+    implemented as a call to <b>wait4</b>(2).</p>
+<p class="Pp">On some architectures, there is no <b>waitpid</b>() system call;
+    instead, this interface is implemented via a C library wrapper function that
+    calls <b>wait4</b>(2).</p>
+<p class="Pp">The raw <b>waitid</b>() system call takes a fifth argument, of
+    type <i>struct rusage&nbsp;*</i>. If this argument is non-NULL, then it is
+    used to return resource usage information about the child, in the same
+    manner as <b>wait4</b>(2). See <b>getrusage</b>(2) for details.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">According to POSIX.1-2008, an application calling <b>waitid</b>()
+    must ensure that <i>infop</i> points to a <i>siginfo_t</i> structure (i.e.,
+    that it is a non-null pointer). On Linux, if <i>infop</i> is NULL,
+    <b>waitid</b>() succeeds, and returns the process ID of the waited-for
+    child. Applications should avoid relying on this inconsistent, nonstandard,
+    and unnecessary feature.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The following program demonstrates the use of <b>fork</b>(2) and
+    <b>waitpid</b>(). The program creates a child process. If no command-line
+    argument is supplied to the program, then the child suspends its execution
+    using <b>pause</b>(2), to allow the user to send signals to the child.
+    Otherwise, if a command-line argument is supplied, then the child exits
+    immediately, using the integer supplied on the command line as the exit
+    status. The parent process executes a loop that monitors the child using
+    <b>waitpid</b>(), and uses the W*() macros described above to analyze the
+    wait status value.</p>
+<p class="Pp">The following shell session demonstrates the use of the
+  program:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$<b> ./a.out &amp;</b>
+Child PID is 32360
+[1] 32359
+$<b> kill -STOP 32360</b>
+stopped by signal 19
+$<b> kill -CONT 32360</b>
+continued
+$<b> kill -TERM 32360</b>
+killed by signal 15
+[1]+  Done                    ./a.out
+$
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#include &lt;stdint.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;sys/wait.h&gt;
+#include &lt;unistd.h&gt;
+int
+main(int argc, char *argv[])
+{
+<br>
+    int    wstatus;
+<br>
+    pid_t  cpid, w;
+<br>
+    cpid = fork();
+<br>
+    if (cpid == -1) {
+<br>
+        perror("fork");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    if (cpid == 0) {            /* Code executed by child */
+<br>
+        printf("Child PID is %jd\n", (intmax_t) getpid());
+<br>
+        if (argc == 1)
+<br>
+            pause();                    /* Wait for signals */
+<br>
+        _exit(atoi(argv[1]));
+<br>
+    } else {                    /* Code executed by parent */
+<br>
+        do {
+<br>
+            w = waitpid(cpid, &amp;wstatus, WUNTRACED | WCONTINUED);
+<br>
+            if (w == -1) {
+<br>
+                perror("waitpid");
+<br>
+                exit(EXIT_FAILURE);
+<br>
+            }
+<br>
+            if (WIFEXITED(wstatus)) {
+<br>
+                printf("exited, status=%d\n", WEXITSTATUS(wstatus));
+<br>
+            } else if (WIFSIGNALED(wstatus)) {
+<br>
+                printf("killed by signal %d\n", WTERMSIG(wstatus));
+<br>
+            } else if (WIFSTOPPED(wstatus)) {
+<br>
+                printf("stopped by signal %d\n", WSTOPSIG(wstatus));
+<br>
+            } else if (WIFCONTINUED(wstatus)) {
+<br>
+                printf("continued\n");
+<br>
+            }
+<br>
+        } while (!WIFEXITED(wstatus) &amp;&amp; !WIFSIGNALED(wstatus));
+<br>
+        exit(EXIT_SUCCESS);
+<br>
+    }
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>_exit</b>(2), <b>clone</b>(2), <b>fork</b>(2), <b>kill</b>(2),
+    <b>ptrace</b>(2), <b>sigaction</b>(2), <b>signal</b>(2), <b>wait4</b>(2),
+    <b>pthread_create</b>(3), <b>core</b>(5), <b>credentials</b>(7),
+    <b>signal</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

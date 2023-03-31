@@ -1,0 +1,155 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/26d4b231c1be5e1e3cf38e5f8721ead4bd8ee0b2">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>openpty(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">openpty(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">openpty(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">openpty, login_tty, forkpty - terminal utility functions</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">System utilities library (<i>libutil</i>, <i>-lutil</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;pty.h&gt;</b></pre>
+<pre><b>int openpty(int *</b><i>amaster</i><b>, int *</b><i>aslave</i><b>, char *</b><i>name</i><b>,</b>
+<b>              const struct termios *</b><i>termp</i><b>,</b>
+<b>              const struct winsize *</b><i>winp</i><b>);</b>
+<b>pid_t forkpty(int *</b><i>amaster</i><b>, char *</b><i>name</i><b>,</b>
+<b>              const struct termios *</b><i>termp</i><b>,</b>
+<b>              const struct winsize *</b><i>winp</i><b>);</b></pre>
+<pre><b>#include &lt;utmp.h&gt;</b></pre>
+<pre><b>int login_tty(int </b><i>fd</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>openpty</b>() function finds an available pseudoterminal
+    and returns file descriptors for the master and slave in <i>amaster</i> and
+    <i>aslave</i>. If <i>name</i> is not NULL, the filename of the slave is
+    returned in <i>name</i>. If <i>termp</i> is not NULL, the terminal
+    parameters of the slave will be set to the values in <i>termp</i>. If
+    <i>winp</i> is not NULL, the window size of the slave will be set to the
+    values in <i>winp</i>.</p>
+<p class="Pp">The <b>login_tty</b>() function prepares for a login on the
+    terminal referred to by the file descriptor <i>fd</i> (which may be a real
+    terminal device, or the slave of a pseudoterminal as returned by
+    <b>openpty</b>()) by creating a new session, making <i>fd</i> the
+    controlling terminal for the calling process, setting <i>fd</i> to be the
+    standard input, output, and error streams of the current process, and
+    closing <i>fd</i>.</p>
+<p class="Pp">The <b>forkpty</b>() function combines <b>openpty</b>(),
+    <b>fork</b>(2), and <b>login_tty</b>() to create a new process operating in
+    a pseudoterminal. A file descriptor referring to master side of the
+    pseudoterminal is returned in <i>amaster</i>. If <i>name</i> is not NULL,
+    the buffer it points to is used to return the filename of the slave. The
+    <i>termp</i> and <i>winp</i> arguments, if not NULL, will determine the
+    terminal attributes and window size of the slave side of the
+  pseudoterminal.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">If a call to <b>openpty</b>(), <b>login_tty</b>(), or
+    <b>forkpty</b>() is not successful, -1 is returned and <i>errno</i> is set
+    to indicate the error. Otherwise, <b>openpty</b>(), <b>login_tty</b>(), and
+    the child process of <b>forkpty</b>() return 0, and the parent process of
+    <b>forkpty</b>() returns the process ID of the child process.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp"><b>openpty</b>() fails if:</p>
+<dl class="Bl-tag">
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>There are no available terminals.</dd>
+</dl>
+<p class="Pp"><b>login_tty</b>() fails if <b>ioctl</b>(2) fails to set <i>fd</i>
+    to the controlling terminal of the calling process.</p>
+<p class="Pp"><b>forkpty</b>() fails if either <b>openpty</b>() or
+    <b>fork</b>(2) fails.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>forkpty (), openpty ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe locale</td>
+  </tr>
+  <tr>
+    <td>login_tty ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race:ttyname</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These are BSD functions, present in glibc. They are not
+    standardized in POSIX.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The <b>const</b> modifiers were added to the structure pointer
+    arguments of <b>openpty</b>() and <b>forkpty</b>() in glibc 2.8.</p>
+<p class="Pp">Before glibc 2.0.92, <b>openpty</b>() returns file descriptors for
+    a BSD pseudoterminal pair; since glibc 2.0.92, it first attempts to open a
+    UNIX 98 pseudoterminal pair, and falls back to opening a BSD pseudoterminal
+    pair if that fails.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">Nobody knows how much space should be reserved for <i>name</i>.
+    So, calling <b>openpty</b>() or <b>forkpty</b>() with non-NULL <i>name</i>
+    may not be secure.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>fork</b>(2), <b>ttyname</b>(3), <b>pty</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

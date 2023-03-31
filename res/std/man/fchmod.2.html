@@ -1,0 +1,288 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/6a25a01f25734d089e7dc125d4f1246d0141c385">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>chmod(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">chmod(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">chmod(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">chmod, fchmod, fchmodat - change permissions of a file</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/stat.h&gt;</b></pre>
+<pre><b>int chmod(const char *</b><i>pathname</i><b>, mode_t </b><i>mode</i><b>);</b>
+<b>int fchmod(int </b><i>fd</i><b>, mode_t </b><i>mode</i><b>);</b></pre>
+<pre><b>#include &lt;fcntl.h&gt;</b>           /* Definition of AT_* constants */
+<b>#include &lt;sys/stat.h&gt;</b></pre>
+<pre><b>int fchmodat(int </b><i>dirfd</i><b>, const char *</b><i>pathname</i><b>, mode_t </b><i>mode</i><b>, int </b><i>flags</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"></p>
+<pre><b>fchmod</b>():
+<br>
+    Since glibc 2.24:
+<br>
+        _POSIX_C_SOURCE &gt;= 199309L
+<br>
+    glibc 2.19 to glibc 2.23
+<br>
+        _POSIX_C_SOURCE
+<br>
+    glibc 2.16 to glibc 2.19:
+<br>
+        _BSD_SOURCE || _POSIX_C_SOURCE
+<br>
+    glibc 2.12 to glibc 2.16:
+<br>
+        _BSD_SOURCE || _XOPEN_SOURCE &gt;= 500
+<br>
+            || _POSIX_C_SOURCE &gt;= 200809L
+<br>
+    glibc 2.11 and earlier:
+<br>
+        _BSD_SOURCE || _XOPEN_SOURCE &gt;= 500</pre>
+<p class="Pp"><b>fchmodat</b>():</p>
+<pre><br>
+    Since glibc 2.10:
+<br>
+        _POSIX_C_SOURCE &gt;= 200809L
+<br>
+    Before glibc 2.10:
+<br>
+        _ATFILE_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>chmod</b>() and <b>fchmod</b>() system calls change a
+    file's mode bits. (The file mode consists of the file permission bits plus
+    the set-user-ID, set-group-ID, and sticky bits.) These system calls differ
+    only in how the file is specified:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><b>chmod</b>() changes the mode of the file specified whose pathname is
+      given in <i>pathname</i>, which is dereferenced if it is a symbolic
+    link.</dd>
+  <dt>•</dt>
+  <dd><b>fchmod</b>() changes the mode of the file referred to by the open file
+      descriptor <i>fd</i>.</dd>
+</dl>
+<p class="Pp">The new file mode is specified in <i>mode</i>, which is a bit mask
+    created by ORing together zero or more of the following:</p>
+<dl class="Bl-tag">
+  <dt id="S_ISUID"><a class="permalink" href="#S_ISUID"><b>S_ISUID</b>
+    (04000)</a></dt>
+  <dd>set-user-ID (set process effective user ID on <b>execve</b>(2))</dd>
+  <dt id="S_ISGID"><a class="permalink" href="#S_ISGID"><b>S_ISGID</b>
+    (02000)</a></dt>
+  <dd>set-group-ID (set process effective group ID on <b>execve</b>(2);
+      mandatory locking, as described in <b>fcntl</b>(2); take a new file's
+      group from parent directory, as described in <b>chown</b>(2) and
+      <b>mkdir</b>(2))</dd>
+  <dt id="S_ISVTX"><a class="permalink" href="#S_ISVTX"><b>S_ISVTX</b>
+    (01000)</a></dt>
+  <dd>sticky bit (restricted deletion flag, as described in
+    <b>unlink</b>(2))</dd>
+  <dt id="S_IRUSR"><a class="permalink" href="#S_IRUSR"><b>S_IRUSR</b>
+    (00400)</a></dt>
+  <dd>read by owner</dd>
+  <dt id="S_IWUSR"><a class="permalink" href="#S_IWUSR"><b>S_IWUSR</b>
+    (00200)</a></dt>
+  <dd>write by owner</dd>
+  <dt id="S_IXUSR"><a class="permalink" href="#S_IXUSR"><b>S_IXUSR</b>
+    (00100)</a></dt>
+  <dd>execute/search by owner ("search" applies for directories, and
+      means that entries within the directory can be accessed)</dd>
+  <dt id="S_IRGRP"><a class="permalink" href="#S_IRGRP"><b>S_IRGRP</b>
+    (00040)</a></dt>
+  <dd>read by group</dd>
+  <dt id="S_IWGRP"><a class="permalink" href="#S_IWGRP"><b>S_IWGRP</b>
+    (00020)</a></dt>
+  <dd>write by group</dd>
+  <dt id="S_IXGRP"><a class="permalink" href="#S_IXGRP"><b>S_IXGRP</b>
+    (00010)</a></dt>
+  <dd>execute/search by group</dd>
+  <dt id="S_IROTH"><a class="permalink" href="#S_IROTH"><b>S_IROTH</b>
+    (00004)</a></dt>
+  <dd>read by others</dd>
+  <dt id="S_IWOTH"><a class="permalink" href="#S_IWOTH"><b>S_IWOTH</b>
+    (00002)</a></dt>
+  <dd>write by others</dd>
+  <dt id="S_IXOTH"><a class="permalink" href="#S_IXOTH"><b>S_IXOTH</b>
+    (00001)</a></dt>
+  <dd>execute/search by others</dd>
+</dl>
+<p class="Pp">The effective UID of the calling process must match the owner of
+    the file, or the process must be privileged (Linux: it must have the
+    <b>CAP_FOWNER</b> capability).</p>
+<p class="Pp">If the calling process is not privileged (Linux: does not have the
+    <b>CAP_FSETID</b> capability), and the group of the file does not match the
+    effective group ID of the process or one of its supplementary group IDs, the
+    <b>S_ISGID</b> bit will be turned off, but this will not cause an error to
+    be returned.</p>
+<p class="Pp">As a security measure, depending on the filesystem, the
+    set-user-ID and set-group-ID execution bits may be turned off if a file is
+    written. (On Linux, this occurs if the writing process does not have the
+    <b>CAP_FSETID</b> capability.) On some filesystems, only the superuser can
+    set the sticky bit, which may have a special meaning. For the sticky bit,
+    and for set-user-ID and set-group-ID bits on directories, see
+    <b>inode</b>(7).</p>
+<p class="Pp">On NFS filesystems, restricting the permissions will immediately
+    influence already open files, because the access control is done on the
+    server, but open files are maintained by the client. Widening the
+    permissions may be delayed for other clients if attribute caching is enabled
+    on them.</p>
+<section class="Ss">
+<h2 class="Ss" id="fchmodat()"><a class="permalink" href="#fchmodat()">fchmodat()</a></h2>
+<p class="Pp">The <b>fchmodat</b>() system call operates in exactly the same way
+    as <b>chmod</b>(), except for the differences described here.</p>
+<p class="Pp">If the pathname given in <i>pathname</i> is relative, then it is
+    interpreted relative to the directory referred to by the file descriptor
+    <i>dirfd</i> (rather than relative to the current working directory of the
+    calling process, as is done by <b>chmod</b>() for a relative pathname).</p>
+<p class="Pp">If <i>pathname</i> is relative and <i>dirfd</i> is the special
+    value <b>AT_FDCWD</b>, then <i>pathname</i> is interpreted relative to the
+    current working directory of the calling process (like <b>chmod</b>()).</p>
+<p class="Pp">If <i>pathname</i> is absolute, then <i>dirfd</i> is ignored.</p>
+<p class="Pp"><i>flags</i> can either be 0, or include the following flag:</p>
+<dl class="Bl-tag">
+  <dt id="AT_SYMLINK_NOFOLLOW"><a class="permalink" href="#AT_SYMLINK_NOFOLLOW"><b>AT_SYMLINK_NOFOLLOW</b></a></dt>
+  <dd>If <i>pathname</i> is a symbolic link, do not dereference it: instead
+      operate on the link itself. This flag is not currently implemented.</dd>
+</dl>
+<p class="Pp">See <b>openat</b>(2) for an explanation of the need for
+    <b>fchmodat</b>().</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, zero is returned. On error, -1 is returned, and
+    <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">Depending on the filesystem, errors other than those listed below
+    can be returned.</p>
+<p class="Pp">The more general errors for <b>chmod</b>() are listed below:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>Search permission is denied on a component of the path prefix. (See also
+      <b>path_resolution</b>(7).)</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>(<b>fchmod</b>()) The file descriptor <i>fd</i> is not valid.</dd>
+  <dt id="EBADF~2"><a class="permalink" href="#EBADF~2"><b>EBADF</b></a></dt>
+  <dd>(<b>fchmodat</b>()) <i>pathname</i> is relative but <i>dirfd</i> is
+      neither <b>AT_FDCWD</b> nor a valid file descriptor.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>pathname</i> points outside your accessible address space.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>(<b>fchmodat</b>()) Invalid flag specified in <i>flags</i>.</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>An I/O error occurred.</dd>
+  <dt id="ELOOP"><a class="permalink" href="#ELOOP"><b>ELOOP</b></a></dt>
+  <dd>Too many symbolic links were encountered in resolving
+    <i>pathname</i>.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd><i>pathname</i> is too long.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>The file does not exist.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient kernel memory was available.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>A component of the path prefix is not a directory.</dd>
+  <dt id="ENOTDIR~2"><a class="permalink" href="#ENOTDIR~2"><b>ENOTDIR</b></a></dt>
+  <dd>(<b>fchmodat</b>()) <i>pathname</i> is relative and <i>dirfd</i> is a file
+      descriptor referring to a file other than a directory.</dd>
+  <dt id="ENOTSUP"><a class="permalink" href="#ENOTSUP"><b>ENOTSUP</b></a></dt>
+  <dd>(<b>fchmodat</b>()) <i>flags</i> specified <b>AT_SYMLINK_NOFOLLOW</b>,
+      which is not supported.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The effective UID does not match the owner of the file, and the process is
+      not privileged (Linux: it does not have the <b>CAP_FOWNER</b>
+    capability).</dd>
+  <dt id="EPERM~2"><a class="permalink" href="#EPERM~2"><b>EPERM</b></a></dt>
+  <dd>The file is marked immutable or append-only. (See
+    <b>ioctl_iflags</b>(2).)</dd>
+  <dt id="EROFS"><a class="permalink" href="#EROFS"><b>EROFS</b></a></dt>
+  <dd>The named file resides on a read-only filesystem.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>fchmodat</b>() was added in Linux 2.6.16; library support was
+    added in glibc 2.4.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>chmod</b>(), <b>fchmod</b>(): 4.4BSD, SVr4, POSIX.1-2001i,
+    POSIX.1-2008.</p>
+<p class="Pp"><b>fchmodat</b>(): POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="C_library/kernel_differences"><a class="permalink" href="#C_library/kernel_differences">C
+  library/kernel differences</a></h2>
+<p class="Pp">The GNU C library <b>fchmodat</b>() wrapper function implements
+    the POSIX-specified interface described in this page. This interface differs
+    from the underlying Linux system call, which does <i>not</i> have a
+    <i>flags</i> argument.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="glibc_notes"><a class="permalink" href="#glibc_notes">glibc
+  notes</a></h2>
+<p class="Pp">On older kernels where <b>fchmodat</b>() is unavailable, the glibc
+    wrapper function falls back to the use of <b>chmod</b>(). When
+    <i>pathname</i> is a relative pathname, glibc constructs a pathname based on
+    the symbolic link in <i>/proc/self/fd</i> that corresponds to the
+    <i>dirfd</i> argument.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>chmod</b>(1), <b>chown</b>(2), <b>execve</b>(2),
+    <b>open</b>(2), <b>stat</b>(2), <b>inode</b>(7), <b>path_resolution</b>(7),
+    <b>symlink</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

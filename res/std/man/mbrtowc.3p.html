@@ -1,0 +1,186 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/22571cec0bc130cda1dc4936572db5d6b61249e0">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>MBRTOWC(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">MBRTOWC(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">MBRTOWC(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">mbrtowc — convert a character to a wide-character code
+    (restartable)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;wchar.h&gt;</pre>
+<pre>size_t mbrtowc(wchar_t *restrict <i>pwc</i>, const char *restrict <i>s</i>,
+<br>
+    size_t <i>n</i>, mbstate_t *restrict <i>ps</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The functionality described on this reference page is aligned with
+    the ISO&nbsp;C standard. Any conflict between the requirements described
+    here and the ISO&nbsp;C standard is unintentional. This volume of
+    POSIX.1‐2017 defers to the ISO&nbsp;C standard.</p>
+<p class="Pp">If <i>s</i> is a null pointer, the <i>mbrtowc</i>() function shall
+    be equivalent to the call:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>mbrtowc(NULL, "", 1, ps)</pre>
+</div>
+<p class="Pp">In this case, the values of the arguments <i>pwc</i> and <i>n</i>
+    are ignored.</p>
+<p class="Pp">If <i>s</i> is not a null pointer, the <i>mbrtowc</i>() function
+    shall inspect at most <i>n</i> bytes beginning at the byte pointed to by
+    <i>s</i> to determine the number of bytes needed to complete the next
+    character (including any shift sequences). If the function determines that
+    the next character is completed, it shall determine the value of the
+    corresponding wide character and then, if <i>pwc</i> is not a null pointer,
+    shall store that value in the object pointed to by <i>pwc</i>. If the
+    corresponding wide character is the null wide character, the resulting state
+    described shall be the initial conversion state.</p>
+<p class="Pp">If <i>ps</i> is a null pointer, the <i>mbrtowc</i>() function
+    shall use its own internal <b>mbstate_t</b> object, which shall be
+    initialized at program start-up to the initial conversion state. Otherwise,
+    the <b>mbstate_t</b> object pointed to by <i>ps</i> shall be used to
+    completely describe the current conversion state of the associated character
+    sequence. The implementation shall behave as if no function defined in this
+    volume of POSIX.1‐2017 calls <i>mbrtowc</i>().</p>
+<p class="Pp">The behavior of this function is affected by the <i>LC_CTYPE</i>
+    category of the current locale.</p>
+<p class="Pp">The <i>mbrtowc</i>() function need not be thread-safe if called
+    with a NULL <i>ps</i> argument.</p>
+<p class="Pp">The <i>mbrtowc</i>() function shall not change the setting of
+    <i>errno</i> if successful.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <i>mbrtowc</i>() function shall return the first of the
+    following that applies:</p>
+<dl class="Bl-tag">
+  <dt>0</dt>
+  <dd>If the next <i>n</i> or fewer bytes complete the character that
+      corresponds to the null wide character (which is the value stored).</dd>
+  <dt id="between"><a class="permalink" href="#between">between 1 and <i>n</i>
+    inclusive</a></dt>
+  <dd>
+    <br>
+    If the next <i>n</i> or fewer bytes complete a valid character (which is the
+      value stored); the value returned shall be the number of bytes that
+      complete the character.</dd>
+  <dt>(<b>size_t</b>)-2</dt>
+  <dd>If the next <i>n</i> bytes contribute to an incomplete but potentially
+      valid character, and all <i>n</i> bytes have been processed (no value is
+      stored). When <i>n</i> has at least the value of the {MB_CUR_MAX} macro,
+      this case can only occur if <i>s</i> points at a sequence of redundant
+      shift sequences (for implementations with state-dependent encodings).</dd>
+  <dt>(<b>size_t</b>)-1</dt>
+  <dd>If an encoding error occurs, in which case the next <i>n</i> or fewer
+      bytes do not contribute to a complete and valid character (no value is
+      stored). In this case, <b>[EILSEQ]</b> shall be stored in <i>errno</i> and
+      the conversion state is undefined.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>mbrtowc</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EILSEQ"><a class="permalink" href="#EILSEQ"><b>EILSEQ</b></a></dt>
+  <dd>An invalid character sequence is detected. In the POSIX locale an
+      <b>[EILSEQ]</b> error cannot occur since all byte values are valid
+      characters.</dd>
+</dl>
+<p class="Pp">The <i>mbrtowc</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>ps</i> points to an object that contains an invalid conversion
+    state.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>mbsinit</i>()</i>, <i><i>mbsrtowcs</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;wchar.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

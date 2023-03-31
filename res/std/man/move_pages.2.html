@@ -1,0 +1,219 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   This manpage is Copyright (C) 2006 Silicon Graphics, Inc.
+                                 Christoph Lameter
+  
+   %%%LICENSE_START(VERBATIM_TWO_PARA)
+   Permission is granted to make and distribute verbatim copies of this
+   manual provided the copyright notice and this permission notice are
+   preserved on all copies.
+  
+   Permission is granted to copy and distribute modified versions of this
+   manual under the conditions for verbatim copying, provided that the
+   entire resulting derived work is distributed under the terms of a
+   permission notice identical to this one.
+   %%%LICENSE_END
+  
+   FIXME Should programs normally be using move_pages() directly, or should
+   they rather be using interfaces in the numactl package?
+   (e.g., compare with recommendation in mbind(2)).
+   Does this page need to give advice on this topic?
+   --><head>
+<meta name="dc.identifier" content="res/43c1e2b3732c3ab307ace40c6d77798e030ba7a9">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>move_pages(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">move_pages(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">move_pages(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">move_pages - move individual pages of a process to another
+  node</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">NUMA (Non-Uniform Memory Access) policy library (<i>libnuma</i>,
+    <i>-lnuma</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;numaif.h&gt;</b></pre>
+<pre><b>long move_pages(int </b><i>pid</i><b>, unsigned long </b><i>count</i><b>, void *</b><i>pages</i><b>[.</b><i>count</i><b>],</b>
+<b>                const int </b><i>nodes</i><b>[.</b><i>count</i><b>], int </b><i>status</i><b>[.</b><i>count</i><b>], int </b><i>flags</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>move_pages</b>() moves the specified <i>pages</i> of the
+    process <i>pid</i> to the memory nodes specified by <i>nodes</i>. The result
+    of the move is reflected in <i>status</i>. The <i>flags</i> indicate
+    constraints on the pages to be moved.</p>
+<p class="Pp"><i>pid</i> is the ID of the process in which pages are to be
+    moved. If <i>pid</i> is 0, then <b>move_pages</b>() moves pages of the
+    calling process.</p>
+<p class="Pp">To move pages in another process requires the following
+    privileges:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Up to and including Linux 4.12: the caller must be privileged
+      (<b>CAP_SYS_NICE</b>) or the real or effective user ID of the calling
+      process must match the real or saved-set user ID of the target
+    process.</dd>
+  <dt>•</dt>
+  <dd>The older rules allowed the caller to discover various virtual address
+      choices made by the kernel that could lead to the defeat of
+      address-space-layout randomization for a process owned by the same UID as
+      the caller, the rules were changed starting with Linux 4.13. Since Linux
+      4.13, permission is governed by a ptrace access mode
+      <b>PTRACE_MODE_READ_REALCREDS</b> check with respect to the target
+      process; see <b>ptrace</b>(2).</dd>
+</dl>
+<p class="Pp"><i>count</i> is the number of pages to move. It defines the size
+    of the three arrays <i>pages</i>, <i>nodes</i>, and <i>status</i>.</p>
+<p class="Pp"><i>pages</i> is an array of pointers to the pages that should be
+    moved. These are pointers that should be aligned to page boundaries.
+    Addresses are specified as seen by the process specified by <i>pid</i>.</p>
+<p class="Pp"><i>nodes</i> is an array of integers that specify the desired
+    location for each page. Each element in the array is a node number.
+    <i>nodes</i> can also be NULL, in which case <b>move_pages</b>() does not
+    move any pages but instead will return the node where each page currently
+    resides, in the <i>status</i> array. Obtaining the status of each page may
+    be necessary to determine pages that need to be moved.</p>
+<p class="Pp"><i>status</i> is an array of integers that return the status of
+    each page. The array contains valid values only if <b>move_pages</b>() did
+    not return an error. Preinitialization of the array to a value which cannot
+    represent a real numa node or valid error of status array could help to
+    identify pages that have been migrated.</p>
+<p class="Pp"><i>flags</i> specify what types of pages to move.
+    <b>MPOL_MF_MOVE</b> means that only pages that are in exclusive use by the
+    process are to be moved. <b>MPOL_MF_MOVE_ALL</b> means that pages shared
+    between multiple processes can also be moved. The process must be privileged
+    (<b>CAP_SYS_NICE</b>) to use <b>MPOL_MF_MOVE_ALL</b>.</p>
+<section class="Ss">
+<h2 class="Ss" id="Page_states_in_the_status_array"><a class="permalink" href="#Page_states_in_the_status_array">Page
+  states in the status array</a></h2>
+<p class="Pp">The following values can be returned in each element of the
+    <i>status</i> array.</p>
+<dl class="Bl-tag">
+  <dt><b>0..MAX_NUMNODES</b></dt>
+  <dd>Identifies the node on which the page resides.</dd>
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>-EACCES</b></a></dt>
+  <dd>The page is mapped by multiple processes and can be moved only if
+      <b>MPOL_MF_MOVE_ALL</b> is specified.</dd>
+  <dt id="EBUSY"><a class="permalink" href="#EBUSY"><b>-EBUSY</b></a></dt>
+  <dd>The page is currently busy and cannot be moved. Try again later. This
+      occurs if a page is undergoing I/O or another kernel subsystem is holding
+      a reference to the page.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>-EFAULT</b></a></dt>
+  <dd>This is a zero page or the memory area is not mapped by the process.</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>-EIO</b></a></dt>
+  <dd>Unable to write back a page. The page has to be written back in order to
+      move it since the page is dirty and the filesystem does not provide a
+      migration function that would allow the move of dirty pages.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>-EINVAL</b></a></dt>
+  <dd>A dirty page cannot be moved. The filesystem does not provide a migration
+      function and has no ability to write back pages.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>-ENOENT</b></a></dt>
+  <dd>The page is not present.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>-ENOMEM</b></a></dt>
+  <dd>Unable to allocate memory on target node.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success <b>move_pages</b>() returns zero. On error, it returns
+    -1, and sets <i>errno</i> to indicate the error. If positive value is
+    returned, it is the number of nonmigrated pages.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="Positive"><a class="permalink" href="#Positive"><b>Positive
+    value</b></a></dt>
+  <dd>The number of nonmigrated pages if they were the result of nonfatal
+      reasons (since Linux 4.17).</dd>
+  <dt id="E2BIG"><a class="permalink" href="#E2BIG"><b>E2BIG</b></a></dt>
+  <dd>Too many pages to move. Since Linux 2.6.29, the kernel no longer generates
+      this error.</dd>
+  <dt id="EACCES~2"><a class="permalink" href="#EACCES~2"><b>EACCES</b></a></dt>
+  <dd>One of the target nodes is not allowed by the current cpuset.</dd>
+  <dt id="EFAULT~2"><a class="permalink" href="#EFAULT~2"><b>EFAULT</b></a></dt>
+  <dd>Parameter array could not be accessed.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>Flags other than <b>MPOL_MF_MOVE</b> and <b>MPOL_MF_MOVE_ALL</b> was
+      specified or an attempt was made to migrate pages of a kernel thread.</dd>
+  <dt id="ENODEV"><a class="permalink" href="#ENODEV"><b>ENODEV</b></a></dt>
+  <dd>One of the target nodes is not online.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The caller specified <b>MPOL_MF_MOVE_ALL</b> without sufficient privileges
+      (<b>CAP_SYS_NICE</b>). Or, the caller attempted to move pages of a process
+      belonging to another user but did not have privilege to do so
+      (<b>CAP_SYS_NICE</b>).</dd>
+  <dt id="ESRCH"><a class="permalink" href="#ESRCH"><b>ESRCH</b></a></dt>
+  <dd>Process does not exist.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>move_pages</b>() first appeared in Linux 2.6.18.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This system call is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">For information on library support, see <b>numa</b>(7).</p>
+<p class="Pp">Use <b>get_mempolicy</b>(2) with the <b>MPOL_F_MEMS_ALLOWED</b>
+    flag to obtain the set of nodes that are allowed by the current cpuset. Note
+    that this information is subject to change at any time by manual or
+    automatic reconfiguration of the cpuset.</p>
+<p class="Pp">Use of this function may result in pages whose location (node)
+    violates the memory policy established for the specified addresses (See
+    <b>mbind</b>(2)) and/or the specified process (See <b>set_mempolicy</b>(2)).
+    That is, memory policy does not constrain the destination nodes used by
+    <b>move_pages</b>().</p>
+<p class="Pp">The <i>&lt;numaif.h&gt;</i> header is not included with glibc, but
+    requires installing <i>libnuma-devel</i> or a similar package.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>get_mempolicy</b>(2), <b>mbind</b>(2), <b>set_mempolicy</b>(2),
+    <b>numa</b>(3), <b>numa_maps</b>(5), <b>cpuset</b>(7), <b>numa</b>(7),
+    <b>migratepages</b>(8), <b>numastat</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

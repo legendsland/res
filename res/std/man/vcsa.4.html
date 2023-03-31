@@ -1,0 +1,208 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/6df36b76b9d0d6f9eac1079acaee45446d83594f">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>vcs(4)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">vcs(4)</td>
+    <td class="head-vol">Device Drivers Manual</td>
+    <td class="head-rtitle">vcs(4)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">vcs, vcsa - virtual console memory</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><i>/dev/vcs0</i> is a character device with major number 7 and
+    minor number 0, usually with mode 0644 and ownership root:tty. It refers to
+    the memory of the currently displayed virtual console terminal.</p>
+<p class="Pp"><i>/dev/vcs[1-63]</i> are character devices for virtual console
+    terminals, they have major number 7 and minor number 1 to 63, usually mode
+    0644 and ownership root:tty. <i>/dev/vcsa[0-63]</i> are the same, but using
+    <i>unsigned short</i>s (in host byte order) that include attributes, and
+    prefixed with four bytes giving the screen dimensions and cursor position:
+    <i>lines</i>, <i>columns</i>, <i>x</i>, <i>y</i>. (<i>x</i> = <i>y</i> = 0
+    at the top left corner of the screen.)</p>
+<p class="Pp">When a 512-character font is loaded, the 9th bit position can be
+    fetched by applying the <b>ioctl</b>(2) <b>VT_GETHIFONTMASK</b> operation
+    (available since Linux 2.6.18) on <i>/dev/tty[1-63]</i>; the value is
+    returned in the <i>unsigned short</i> pointed to by the third
+    <b>ioctl</b>(2) argument.</p>
+<p class="Pp">These devices replace the screendump <b>ioctl</b>(2) operations of
+    <b>ioctl_console</b>(2), so the system administrator can control access
+    using filesystem permissions.</p>
+<p class="Pp">The devices for the first eight virtual consoles may be created
+    by:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>for x in 0 1 2 3 4 5 6 7 8; do
+<br>
+    mknod -m 644 /dev/vcs$x c 7 $x;
+<br>
+    mknod -m 644 /dev/vcsa$x c 7 $[$x+128];
+done
+chown root:tty /dev/vcs*
+</pre>
+<br>
+<p class="Pp">No <b>ioctl</b>(2) requests are supported.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FILES"><a class="permalink" href="#FILES">FILES</a></h1>
+<p class="Pp"><i>/dev/vcs[0-63]</i>
+  <br>
+  <i>/dev/vcsa[0-63]</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">Introduced with Linux 1.1.92.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">You may do a screendump on vt3 by switching to vt1 and typing</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>cat /dev/vcs3 &gt;foo
+</pre>
+<br>
+<p class="Pp">Note that the output does not contain newline characters, so some
+    processing may be required, like in</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>fold -w 81 /dev/vcs3 | lpr
+</pre>
+<br>
+<p class="Pp">or (horrors)</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>setterm -dump 3 -file /proc/self/fd/1
+</pre>
+<br>
+<p class="Pp">The <i>/dev/vcsa0</i> device is used for Braille support.</p>
+<p class="Pp">This program displays the character and screen attributes under
+    the cursor of the second virtual console, then changes the background color
+    there:</p>
+<p class="Pp"></p>
+<pre>#include &lt;unistd.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;sys/ioctl.h&gt;
+#include &lt;linux/vt.h&gt;
+int
+main(void)
+{
+<br>
+    int fd;
+<br>
+    char *device = "/dev/vcsa2";
+<br>
+    char *console = "/dev/tty2";
+<br>
+    struct {unsigned char lines, cols, x, y;} scrn;
+<br>
+    unsigned short s;
+<br>
+    unsigned short mask;
+<br>
+    unsigned char attrib;
+<br>
+    int ch;
+<br>
+    fd = open(console, O_RDWR);
+<br>
+    if (fd &lt; 0) {
+<br>
+        perror(console);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    if (ioctl(fd, VT_GETHIFONTMASK, &amp;mask) &lt; 0) {
+<br>
+        perror("VT_GETHIFONTMASK");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    (void) close(fd);
+<br>
+    fd = open(device, O_RDWR);
+<br>
+    if (fd &lt; 0) {
+<br>
+        perror(device);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    (void) read(fd, &amp;scrn, 4);
+<br>
+    (void) lseek(fd, 4 + 2*(scrn.y*scrn.cols + scrn.x), SEEK_SET);
+<br>
+    (void) read(fd, &amp;s, 2);
+<br>
+    ch = s &amp; 0xff;
+<br>
+    if (s &amp; mask)
+<br>
+        ch |= 0x100;
+<br>
+    attrib = ((s &amp; ~mask) &gt;&gt; 8);
+<br>
+    printf("ch=%#03x attrib=%#02x\n", ch, attrib);
+<br>
+    s ^= 0x1000;
+<br>
+    (void) lseek(fd, -2, SEEK_CUR);
+<br>
+    (void) write(fd, &amp;s, 2);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>ioctl_console</b>(2), <b>tty</b>(4), <b>ttyS</b>(4),
+    <b>gpm</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

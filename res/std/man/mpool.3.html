@@ -1,0 +1,155 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 1990, 1993
+  	The Regents of the University of California.  All rights reserved.
+  
+   SPDX-License-Identifier: BSD-4-Clause-UC
+  
+  	@(#)mpool.3	8.1 (Berkeley) 6/4/93
+   --><head>
+<meta name="dc.identifier" content="res/ebc11ba6826285039ed39feb3ea5ad79627a8f21">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>mpool(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">mpool(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">mpool(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">mpool - shared memory buffer pool</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;db.h&gt;</b>
+<b>#include &lt;mpool.h&gt;</b></pre>
+<pre><b>MPOOL *mpool_open(DBT *</b><i>key</i><b>, int </b><i>fd</i><b>, pgno_t </b><i>pagesize</i><b>, pgno_t </b><i>maxcache</i><b>);</b></pre>
+<pre><b>void mpool_filter(MPOOL *</b><i>mp</i><b>, void (*pgin)(void *, pgno_t, void *),</b>
+<b>                  void (*</b><i>pgout</i><b>)(void *, pgno_t, void *),</b>
+<b>                  void *</b><i>pgcookie</i><b>);</b></pre>
+<pre><b>void *mpool_new(MPOOL *</b><i>mp</i><b>, pgno_t *</b><i>pgnoaddr</i><b>);</b>
+<b>void *mpool_get(MPOOL *</b><i>mp</i><b>, pgno_t </b><i>pgno</i><b>, unsigned int </b><i>flags</i><b>);</b>
+<b>int mpool_put(MPOOL *</b><i>mp</i><b>, void *</b><i>pgaddr</i><b>, unsigned int </b><i>flags</i><b>);</b></pre>
+<pre><b>int mpool_sync(MPOOL *</b><i>mp</i><b>);</b>
+<b>int mpool_close(MPOOL *</b><i>mp</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><i>Note well</i>: This page documents interfaces provided up until
+    glibc 2.1. Since glibc 2.2, glibc no longer provides these interfaces.
+    Probably, you are looking for the APIs provided by the <i>libdb</i> library
+    instead.</p>
+<p class="Pp"><i>Mpool</i> is the library interface intended to provide page
+    oriented buffer management of files. The buffers may be shared between
+    processes.</p>
+<p class="Pp">The function <b>mpool_open</b>() initializes a memory pool. The
+    <i>key</i> argument is the byte string used to negotiate between multiple
+    processes wishing to share buffers. If the file buffers are mapped in shared
+    memory, all processes using the same key will share the buffers. If
+    <i>key</i> is NULL, the buffers are mapped into private memory. The
+    <i>fd</i> argument is a file descriptor for the underlying file, which must
+    be seekable. If <i>key</i> is non-NULL and matches a file already being
+    mapped, the <i>fd</i> argument is ignored.</p>
+<p class="Pp">The <i>pagesize</i> argument is the size, in bytes, of the pages
+    into which the file is broken up. The <i>maxcache</i> argument is the
+    maximum number of pages from the underlying file to cache at any one time.
+    This value is not relative to the number of processes which share a file's
+    buffers, but will be the largest value specified by any of the processes
+    sharing the file.</p>
+<p class="Pp">The <b>mpool_filter</b>() function is intended to make transparent
+    input and output processing of the pages possible. If the <i>pgin</i>
+    function is specified, it is called each time a buffer is read into the
+    memory pool from the backing file. If the <i>pgout</i> function is
+    specified, it is called each time a buffer is written into the backing file.
+    Both functions are called with the <i>pgcookie</i> pointer, the page number
+    and a pointer to the page to being read or written.</p>
+<p class="Pp">The function <b>mpool_new</b>() takes an <i>MPOOL</i> pointer and
+    an address as arguments. If a new page can be allocated, a pointer to the
+    page is returned and the page number is stored into the <i>pgnoaddr</i>
+    address. Otherwise, NULL is returned and <i>errno</i> is set.</p>
+<p class="Pp">The function <b>mpool_get</b>() takes an <i>MPOOL</i> pointer and
+    a page number as arguments. If the page exists, a pointer to the page is
+    returned. Otherwise, NULL is returned and <i>errno</i> is set. The
+    <i>flags</i> argument is not currently used.</p>
+<p class="Pp">The function <b>mpool_put</b>() unpins the page referenced by
+    <i>pgaddr</i>. <i>pgaddr</i> must be an address previously returned by
+    <b>mpool_get</b>() or <b>mpool_new</b>(). The flag value is specified by
+    ORing any of the following values:</p>
+<dl class="Bl-tag">
+  <dt id="MPOOL_DIRTY"><a class="permalink" href="#MPOOL_DIRTY"><b>MPOOL_DIRTY</b></a></dt>
+  <dd>The page has been modified and needs to be written to the backing
+    file.</dd>
+</dl>
+<p class="Pp"><b>mpool_put</b>() returns 0 on success and -1 if an error
+  occurs.</p>
+<p class="Pp">The function <b>mpool_sync</b>() writes all modified pages
+    associated with the <i>MPOOL</i> pointer to the backing file.
+    <b>mpool_sync</b>() returns 0 on success and -1 if an error occurs.</p>
+<p class="Pp">The <b>mpool_close</b>() function free's up any allocated memory
+    associated with the memory pool cookie. Modified pages are <b>not</b>
+    written to the backing file. <b>mpool_close</b>() returns 0 on success and
+    -1 if an error occurs.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <b>mpool_open</b>() function may fail and set <i>errno</i> for
+    any of the errors specified for the library routine <b>malloc</b>(3).</p>
+<p class="Pp">The <b>mpool_get</b>() function may fail and set <i>errno</i> for
+    the following:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The requested record doesn't exist.</dd>
+</dl>
+<p class="Pp">The <b>mpool_new</b>() and <b>mpool_get</b>() functions may fail
+    and set <i>errno</i> for any of the errors specified for the library
+    routines <b>read</b>(2), <b>write</b>(2), and <b>malloc</b>(3).</p>
+<p class="Pp">The <b>mpool_sync</b>() function may fail and set <i>errno</i> for
+    any of the errors specified for the library routine <b>write</b>(2).</p>
+<p class="Pp">The <b>mpool_close</b>() function may fail and set <i>errno</i>
+    for any of the errors specified for the library routine <b>free</b>(3).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">Not in POSIX.1. Present on the BSDs.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>btree</b>(3), <b>dbopen</b>(3), <b>hash</b>(3),
+  <b>recno</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">4.4 Berkeley Distribution</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

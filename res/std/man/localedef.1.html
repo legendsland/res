@@ -1,0 +1,348 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2001 Richard Braakman
+   Copyright (C) 2004 Alastair McKinstry
+   Copyright (C) 2005 Lars Wirzenius
+   Copyright (C) 2014 Marko Myllynen
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+  
+   This manual page was initially written by Richard Braakman
+   on behalf of the Debian GNU/Linux Project and anyone else
+   who wants it. It was amended by Alastair McKinstry to
+   explain new ISO/IEC 14652 elements, and amended further by
+   Lars Wirzenius to document new functionality (as of GNU
+   C library 2.3.5).
+   --><head>
+<meta name="dc.identifier" content="res/086bd82be0cb73a335844ff8cc4258994d359802">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>localedef(1)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">localedef(1)</td>
+    <td class="head-vol">General Commands Manual</td>
+    <td class="head-rtitle">localedef(1)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">localedef - compile locale definition files</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<table class="Nm">
+  <tbody><tr>
+    <td><code class="Nm">localedef</code></td>
+    <td>[<i>options</i>] <i>outputpath</i></td>
+  </tr>
+</tbody></table>
+<table class="Nm">
+  <tbody><tr>
+    <td><code class="Nm">localedef</code></td>
+    <td><b>--add-to-archive</b> [<i>options</i>] <i>compiledpath</i></td>
+  </tr>
+</tbody></table>
+<table class="Nm">
+  <tbody><tr>
+    <td><code class="Nm">localedef</code></td>
+    <td><b>--delete-from-archive</b> [<i>options</i>] <i>localename</i> ...</td>
+  </tr>
+</tbody></table>
+<table class="Nm">
+  <tbody><tr>
+    <td><code class="Nm">localedef</code></td>
+    <td><b>--list-archive</b> [<i>options</i>]</td>
+  </tr>
+</tbody></table>
+<table class="Nm">
+  <tbody><tr>
+    <td><code class="Nm">localedef</code></td>
+    <td><b>--help</b></td>
+  </tr>
+</tbody></table>
+<table class="Nm">
+  <tbody><tr>
+    <td><code class="Nm">localedef</code></td>
+    <td><b>--usage</b></td>
+  </tr>
+</tbody></table>
+<table class="Nm">
+  <tbody><tr>
+    <td><code class="Nm">localedef</code></td>
+    <td><b>--version</b></td>
+  </tr>
+</tbody></table>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>localedef</b> program reads the indicated <i>charmap</i>
+    and <i>input</i> files, compiles them to a binary form quickly usable by the
+    locale functions in the C library (<b>setlocale</b>(3),
+    <b>localeconv</b>(3), etc.), and places the output in <i>outputpath</i>.</p>
+<p class="Pp">The <i>outputpath</i> argument is interpreted as follows:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>If <i>outputpath</i> contains a slash character ('/'), it is interpreted
+      as the name of the directory where the output definitions are to be
+      stored. In this case, there is a separate output file for each locale
+      category (<i>LC_TIME</i>, <i>LC_NUMERIC</i>, and so on).</dd>
+  <dt>•</dt>
+  <dd>If the <b>--no-archive</b> option is used, <i>outputpath</i> is the name
+      of a subdirectory in <i>/usr/lib/locale</i> where per-category compiled
+      files are placed.</dd>
+  <dt>•</dt>
+  <dd>Otherwise, <i>outputpath</i> is the name of a locale and the compiled
+      locale data is added to the archive file
+      <i>/usr/lib/locale/locale-archive</i>. A locale archive is a memory-mapped
+      file which contains all the system-provided locales; it is used by all
+      localized programs when the environment variable <b>LOCPATH</b> is not
+      set.</dd>
+</dl>
+<p class="Pp">In any case, <b>localedef</b> aborts if the directory in which it
+    tries to write locale files has not already been created.</p>
+<p class="Pp">If no <i>charmapfile</i> is given, the value <i>ANSI_X3.4-1968</i>
+    (for ASCII) is used by default. If no <i>inputfile</i> is given, or if it is
+    given as a dash (-), <b>localedef</b> reads from standard input.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OPTIONS"><a class="permalink" href="#OPTIONS">OPTIONS</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Operation-selection_options"><a class="permalink" href="#Operation-selection_options">Operation-selection
+  options</a></h2>
+<p class="Pp">A few options direct <b>localedef</b> to do something other than
+    compile locale definitions. Only one of these options should be used at a
+    time.</p>
+<dl class="Bl-tag">
+  <dt id="add"><a class="permalink" href="#add"><b>--add-to-archive</b></a></dt>
+  <dd>Add the <i>compiledpath</i> directories to the locale archive file. The
+      directories should have been created by previous runs of <b>localedef</b>,
+      using <b>--no-archive</b>.</dd>
+  <dt id="delete"><a class="permalink" href="#delete"><b>--delete-from-archive</b></a></dt>
+  <dd>Delete the named locales from the locale archive file.</dd>
+  <dt id="list"><a class="permalink" href="#list"><b>--list-archive</b></a></dt>
+  <dd>List the locales contained in the locale archive file.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Other_options"><a class="permalink" href="#Other_options">Other
+  options</a></h2>
+<p class="Pp">Some of the following options are sensible only for certain
+    operations; generally, it should be self-evident which ones. Notice that
+    <b>-f</b> and <b>-c</b> are reversed from what you might expect; that is,
+    <b>-f</b> is not the same as <b>--force</b>.</p>
+<dl class="Bl-tag">
+  <dt id="f"><a class="permalink" href="#f"><b>-f</b><i> charmapfile</i><b>,
+    --charmap=</b><i>charmapfile</i></a></dt>
+  <dd>Specify the file that defines the character set that is used by the input
+      file. If <i>charmapfile</i> contains a slash character ('/'), it is
+      interpreted as the name of the character map. Otherwise, the file is
+      sought in the current directory and the default directory for character
+      maps. If the environment variable <b>I18NPATH</b> is set,
+      <i>$I18NPATH/charmaps/</i> and <i>$I18NPATH/</i> are also searched after
+      the current directory. The default directory for character maps is printed
+      by <b>localedef --help</b>.</dd>
+  <dt id="i"><a class="permalink" href="#i"><b>-i</b><i> inputfile</i><b>,
+    --inputfile=</b><i>inputfile</i></a></dt>
+  <dd>Specify the locale definition file to compile. The file is sought in the
+      current directory and the default directory for locale definition files.
+      If the environment variable <b>I18NPATH</b> is set,
+      <i>$I18NPATH/locales/</i> and <i>$I18NPATH</i> are also searched after the
+      current directory. The default directory for locale definition files is
+      printed by <b>localedef --help</b>.</dd>
+  <dt id="u"><a class="permalink" href="#u"><b>-u</b><i> repertoirefile</i><b>,
+    --repertoire-map=</b><i>repertoirefile</i></a></dt>
+  <dd>Read mappings from symbolic names to Unicode code points from
+      <i>repertoirefile</i>. If <i>repertoirefile</i> contains a slash character
+      ('/'), it is interpreted as the pathname of the repertoire map. Otherwise,
+      the file is sought in the current directory and the default directory for
+      repertoire maps. If the environment variable <b>I18NPATH</b> is set,
+      <i>$I18NPATH/repertoiremaps/</i> and <i>$I18NPATH</i> are also searched
+      after the current directory. The default directory for repertoire maps is
+      printed by <b>localedef --help</b>.</dd>
+  <dt id="A"><a class="permalink" href="#A"><b>-A</b><i> aliasfile</i><b>,
+    --alias-file=</b><i>aliasfile</i></a></dt>
+  <dd>Use <i>aliasfile</i> to look up aliases for locale names. There is no
+      default aliases file.</dd>
+  <dt id="c"><a class="permalink" href="#c"><b>-c</b>, <b>--force</b></a></dt>
+  <dd>Write the output files even if warnings were generated about the input
+      file.</dd>
+  <dt id="v"><a class="permalink" href="#v"><b>-v</b>, <b>--verbose</b></a></dt>
+  <dd>Generate extra warnings about errors that are normally ignored.</dd>
+  <dt id="big"><a class="permalink" href="#big"><b>--big-endian</b></a></dt>
+  <dd>Generate big-endian output.</dd>
+  <dt id="little"><a class="permalink" href="#little"><b>--little-endian</b></a></dt>
+  <dd>Generate little-endian output.</dd>
+  <dt id="no"><a class="permalink" href="#no"><b>--no-archive</b></a></dt>
+  <dd>Do not use the locale archive file, instead create <i>outputpath</i> as a
+      subdirectory in the same directory as the locale archive file, and create
+      separate output files for locale categories in it. This is helpful to
+      prevent system locale archive updates from overwriting custom locales
+      created with <b>localedef</b>.</dd>
+  <dt id="no~2"><a class="permalink" href="#no~2"><b>--no-hard-links</b></a></dt>
+  <dd>Do not create hard links between installed locales.</dd>
+  <dt id="no~3"><a class="permalink" href="#no~3"><b>--no-warnings=</b><i>warnings</i></a></dt>
+  <dd>Comma-separated list of warnings to disable. Supported warnings are
+      <i>ascii</i> and <i>intcurrsym</i>.</dd>
+  <dt id="posix"><a class="permalink" href="#posix"><b>--posix</b></a></dt>
+  <dd>Conform strictly to POSIX. Implies <b>--verbose</b>. This option currently
+      has no other effect. POSIX conformance is assumed if the environment
+      variable <b>POSIXLY_CORRECT</b> is set.</dd>
+  <dt id="prefix="><a class="permalink" href="#prefix="><b>--prefix=</b><i>pathname</i></a></dt>
+  <dd>Set the prefix to be prepended to the full archive pathname. By default,
+      the prefix is empty. Setting the prefix to <i>foo</i>, the archive would
+      be placed in <i>foo/usr/lib/locale/locale-archive</i>.</dd>
+  <dt id="quiet"><a class="permalink" href="#quiet"><b>--quiet</b></a></dt>
+  <dd>Suppress all notifications and warnings, and report only fatal
+    errors.</dd>
+  <dt id="replace"><a class="permalink" href="#replace"><b>--replace</b></a></dt>
+  <dd>Replace a locale in the locale archive file. Without this option, if the
+      locale is in the archive file already, an error occurs.</dd>
+  <dt id="warnings="><a class="permalink" href="#warnings="><b>--warnings=</b><i>warnings</i></a></dt>
+  <dd>Comma-separated list of warnings to enable. Supported warnings are
+      <i>ascii</i> and <i>intcurrsym</i>.</dd>
+  <dt><b>-?</b>, <b>--help</b></dt>
+  <dd>Print a usage summary and exit. Also prints the default paths used by
+      <b>localedef</b>.</dd>
+  <dt id="usage"><a class="permalink" href="#usage"><b>--usage</b></a></dt>
+  <dd>Print a short usage summary and exit.</dd>
+  <dt id="V"><a class="permalink" href="#V"><b>-V</b>, <b>--version</b></a></dt>
+  <dd>Print the version number, license, and disclaimer of warranty for
+      <b>localedef</b>.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXIT_STATUS"><a class="permalink" href="#EXIT_STATUS">EXIT
+  STATUS</a></h1>
+<p class="Pp">One of the following exit values can be returned by
+    <b>localedef</b>:</p>
+<dl class="Bl-tag">
+  <dt><b>0</b></dt>
+  <dd>Command completed successfully.</dd>
+  <dt><b>1</b></dt>
+  <dd>Warnings or errors occurred, output files were written.</dd>
+  <dt><b>4</b></dt>
+  <dd>Errors encountered, no output created.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ENVIRONMENT"><a class="permalink" href="#ENVIRONMENT">ENVIRONMENT</a></h1>
+<dl class="Bl-tag">
+  <dt id="POSIXLY_CORRECT"><a class="permalink" href="#POSIXLY_CORRECT"><b>POSIXLY_CORRECT</b></a></dt>
+  <dd>The <b>--posix</b> flag is assumed if this environment variable is
+    set.</dd>
+  <dt id="I18NPATH"><a class="permalink" href="#I18NPATH"><b>I18NPATH</b></a></dt>
+  <dd>A colon-separated list of search directories for files.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FILES"><a class="permalink" href="#FILES">FILES</a></h1>
+<dl class="Bl-tag">
+  <dt><i>/usr/share/i18n/charmaps</i></dt>
+  <dd>Usual default character map path.</dd>
+  <dt><i>/usr/share/i18n/locales</i></dt>
+  <dd>Usual default path for locale definition files.</dd>
+  <dt><i>/usr/share/i18n/repertoiremaps</i></dt>
+  <dd>Usual default repertoire map path.</dd>
+  <dt><i>/usr/lib/locale/locale-archive</i></dt>
+  <dd>Usual default locale archive location.</dd>
+  <dt><i>/usr/lib/locale</i></dt>
+  <dd>Usual default path for compiled individual locale data files.</dd>
+  <dt id="outputpath/LC_ADDRESS"><a class="permalink" href="#outputpath/LC_ADDRESS"><i>outputpath/LC_ADDRESS</i></a></dt>
+  <dd>An output file that contains information about formatting of addresses and
+      geography-related items.</dd>
+  <dt id="outputpath/LC_COLLATE"><a class="permalink" href="#outputpath/LC_COLLATE"><i>outputpath/LC_COLLATE</i></a></dt>
+  <dd>An output file that contains information about the rules for comparing
+      strings.</dd>
+  <dt id="outputpath/LC_CTYPE"><a class="permalink" href="#outputpath/LC_CTYPE"><i>outputpath/LC_CTYPE</i></a></dt>
+  <dd>An output file that contains information about character classes.</dd>
+  <dt id="outputpath/LC_IDENTIFICATION"><a class="permalink" href="#outputpath/LC_IDENTIFICATION"><i>outputpath/LC_IDENTIFICATION</i></a></dt>
+  <dd>An output file that contains metadata about the locale.</dd>
+  <dt id="outputpath/LC_MEASUREMENT"><a class="permalink" href="#outputpath/LC_MEASUREMENT"><i>outputpath/LC_MEASUREMENT</i></a></dt>
+  <dd>An output file that contains information about locale measurements (metric
+      versus US customary).</dd>
+  <dt id="outputpath/LC_MESSAGES/SYS_LC_MESSAGES"><a class="permalink" href="#outputpath/LC_MESSAGES/SYS_LC_MESSAGES"><i>outputpath/LC_MESSAGES/SYS_LC_MESSAGES</i></a></dt>
+  <dd>An output file that contains information about the language messages
+      should be printed in, and what an affirmative or negative answer looks
+      like.</dd>
+  <dt id="outputpath/LC_MONETARY"><a class="permalink" href="#outputpath/LC_MONETARY"><i>outputpath/LC_MONETARY</i></a></dt>
+  <dd>An output file that contains information about formatting of monetary
+      values.</dd>
+  <dt id="outputpath/LC_NAME"><a class="permalink" href="#outputpath/LC_NAME"><i>outputpath/LC_NAME</i></a></dt>
+  <dd>An output file that contains information about salutations for
+    persons.</dd>
+  <dt id="outputpath/LC_NUMERIC"><a class="permalink" href="#outputpath/LC_NUMERIC"><i>outputpath/LC_NUMERIC</i></a></dt>
+  <dd>An output file that contains information about formatting of nonmonetary
+      numeric values.</dd>
+  <dt id="outputpath/LC_PAPER"><a class="permalink" href="#outputpath/LC_PAPER"><i>outputpath/LC_PAPER</i></a></dt>
+  <dd>An output file that contains information about settings related to
+      standard paper size.</dd>
+  <dt id="outputpath/LC_TELEPHONE"><a class="permalink" href="#outputpath/LC_TELEPHONE"><i>outputpath/LC_TELEPHONE</i></a></dt>
+  <dd>An output file that contains information about formats to be used with
+      telephone services.</dd>
+  <dt id="outputpath/LC_TIME"><a class="permalink" href="#outputpath/LC_TIME"><i>outputpath/LC_TIME</i></a></dt>
+  <dd>An output file that contains information about formatting of data and time
+      values.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">Compile the locale files for Finnish in the UTF-8 character set
+    and add it to the default locale archive with the name
+  <b>fi_FI.UTF-8</b>:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>localedef -f UTF-8 -i fi_FI fi_FI.UTF-8
+</pre>
+<br>
+<p class="Pp">The next example does the same thing, but generates files into the
+    <i>fi_FI.UTF-8</i> directory which can then be used by programs when the
+    environment variable <b>LOCPATH</b> is set to the current directory (note
+    that the last argument must contain a slash):</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>localedef -f UTF-8 -i fi_FI ./fi_FI.UTF-8
+</pre>
+<br>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>locale</b>(1), <b>charmap</b>(5), <b>locale</b>(5),
+    <b>repertoiremap</b>(5), <b>locale</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

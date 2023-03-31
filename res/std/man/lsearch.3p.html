@@ -1,0 +1,191 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/42a823f7505606596c1752f5d919715a646ab753">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>LSEARCH(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">LSEARCH(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">LSEARCH(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">lsearch, lfind — linear search and update</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;search.h&gt;</pre>
+<pre>void *lsearch(const void *<i>key</i>, void *<i>base</i>, size_t *<i>nelp</i>, size_t <i>width</i>,
+<br>
+    int (*<i>compar</i>)(const void *, const void *));
+void *lfind(const void *<i>key</i>, const void *<i>base</i>, size_t *<i>nelp</i>,
+<br>
+    size_t width, int (*<i>compar</i>)(const void *, const void *));</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>lsearch</i>() function shall linearly search the table and
+    return a pointer into the table for the matching entry. If the entry does
+    not occur, it shall be added at the end of the table. The <i>key</i>
+    argument points to the entry to be sought in the table. The <i>base</i>
+    argument points to the first element in the table. The <i>width</i> argument
+    is the size of an element in bytes. The <i>nelp</i> argument points to an
+    integer containing the current number of elements in the table. The integer
+    to which <i>nelp</i> points shall be incremented if the entry is added to
+    the table. The <i>compar</i> argument points to a comparison function which
+    the application shall supply (for example, <i>strcmp</i>()). It is called
+    with two arguments that point to the elements being compared. The
+    application shall ensure that the function returns 0 if the elements are
+    equal, and non-zero otherwise.</p>
+<p class="Pp">The <i>lfind</i>() function shall be equivalent to
+    <i>lsearch</i>(), except that if the entry is not found, it is not added to
+    the table. Instead, a null pointer is returned.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">If the searched for entry is found, both <i>lsearch</i>() and
+    <i>lfind</i>() shall return a pointer to it. Otherwise, <i>lfind</i>() shall
+    return a null pointer and <i>lsearch</i>() shall return a pointer to the
+    newly added element.</p>
+<p class="Pp">Both functions shall return a null pointer in case of error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">No errors are defined.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Storing_Strings_in_a_Table"><a class="permalink" href="#Storing_Strings_in_a_Table">Storing
+  Strings in a Table</a></h2>
+<p class="Pp">This fragment reads in less than or equal to TABSIZE strings of
+    length less than or equal to ELSIZE and stores them in a table, eliminating
+    duplicates.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;search.h&gt;</pre>
+<pre>#define TABSIZE 50
+#define ELSIZE 120</pre>
+<pre>...
+<br>
+    char line[ELSIZE], tab[TABSIZE][ELSIZE];
+<br>
+    size_t nel = 0;
+<br>
+    ...
+<br>
+    while (fgets(line, ELSIZE, stdin) != NULL &amp;&amp; nel &lt; TABSIZE)
+<br>
+        (void) lsearch(line, tab, &amp;nel,
+<br>
+            ELSIZE, (int (*)(const void *, const void *)) strcmp);
+<br>
+    ...</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Finding_a_Matching_Entry"><a class="permalink" href="#Finding_a_Matching_Entry">Finding
+  a Matching Entry</a></h2>
+<p class="Pp">The following example finds any line that reads
+    <b>"This</b>is<b>a</b>test."<b>.</b></p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;search.h&gt;
+#include &lt;string.h&gt;
+...
+char line[ELSIZE], tab[TABSIZE][ELSIZE];
+size_t nel = 0;
+char *findline;
+void *entry;</pre>
+<pre>findline = "This is a test.\n";</pre>
+<pre>entry = lfind(findline, tab, &amp;nel, ELSIZE, (
+<br>
+    int (*)(const void *, const void *)) strcmp);</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The comparison function need not compare every byte, so arbitrary
+    data may be contained in the elements in addition to the values being
+    compared.</p>
+<p class="Pp">Undefined results can occur if there is not enough room in the
+    table to add a new item.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>hcreate</i>()</i>, <i><i>tdelete</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;search.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

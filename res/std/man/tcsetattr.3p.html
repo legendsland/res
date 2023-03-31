@@ -1,0 +1,236 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/d6c6cbba38045027d035282a7da0fe17fd983545">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>TCSETATTR(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">TCSETATTR(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">TCSETATTR(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">tcsetattr — set the parameters associated with the
+  terminal</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;termios.h&gt;</pre>
+<pre>int tcsetattr(int <i>fildes</i>, int <i>optional_actions</i>,
+<br>
+    const struct termios *<i>termios_p</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>tcsetattr</i>() function shall set the parameters
+    associated with the terminal referred to by the open file descriptor
+    <i>fildes</i> (an open file descriptor associated with a terminal) from the
+    <b>termios</b> structure referenced by <i>termios_p</i> as follows:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>If <i>optional_actions</i> is TCSANOW, the change shall occur
+    immediately.</dd>
+  <dt> *</dt>
+  <dd>If <i>optional_actions</i> is TCSADRAIN, the change shall occur after all
+      output written to <i>fildes</i> is transmitted. This function should be
+      used when changing parameters that affect output.</dd>
+  <dt> *</dt>
+  <dd>If <i>optional_actions</i> is TCSAFLUSH, the change shall occur after all
+      output written to <i>fildes</i> is transmitted, and all input so far
+      received but not read shall be discarded before the change is made.</dd>
+</dl>
+<p class="Pp">If the output baud rate stored in the <b>termios</b> structure
+    pointed to by <i>termios_p</i> is the zero baud rate, B0, the modem control
+    lines shall no longer be asserted. Normally, this shall disconnect the
+  line.</p>
+<p class="Pp">If the input baud rate stored in the <b>termios</b> structure
+    pointed to by <i>termios_p</i> is 0, the input baud rate given to the
+    hardware is the same as the output baud rate stored in the <b>termios</b>
+    structure.</p>
+<p class="Pp">The <i>tcsetattr</i>() function shall return successfully if it
+    was able to perform any of the requested actions, even if some of the
+    requested actions could not be performed. It shall set all the attributes
+    that the implementation supports as requested and leave all the attributes
+    not supported by the implementation unchanged. If no part of the request can
+    be honored, it shall return -1 and set <i>errno</i> to <b>[EINVAL]</b>. If
+    the input and output baud rates differ and are a combination that is not
+    supported, neither baud rate shall be changed. A subsequent call to
+    <i>tcgetattr</i>() shall return the actual state of the terminal device
+    (reflecting both the changes made and not made in the previous
+    <i>tcsetattr</i>() call). The <i>tcsetattr</i>() function shall not change
+    the values found in the <b>termios</b> structure under any
+  circumstances.</p>
+<p class="Pp">The effect of <i>tcsetattr</i>() is undefined if the value of the
+    <b>termios</b> structure pointed to by <i>termios_p</i> was not derived from
+    the result of a call to <i>tcgetattr</i>() on <i>fildes</i>; an application
+    should modify only fields and flags defined by this volume of
+    POSIX.1‐2017 between the call to <i>tcgetattr</i>() and
+    <i>tcsetattr</i>(), leaving all other fields and flags unmodified.</p>
+<p class="Pp">No actions defined by this volume of POSIX.1‐2017, other
+    than a call to <i>tcsetattr</i>(), a close of the last file descriptor in
+    the system associated with this terminal device, or an open of the first
+    file descriptor in the system associated with this terminal device (using
+    the O_TTY_INIT flag if it is non-zero and the device is not a
+    pseudo-terminal), shall cause any of the terminal attributes defined by this
+    volume of POSIX.1‐2017 to change.</p>
+<p class="Pp">If <i>tcsetattr</i>() is called from a process which is a member
+    of a background process group on a <i>fildes</i> associated with its
+    controlling terminal:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>If the calling thread is blocking SIGTTOU signals or the process is
+      ignoring SIGTTOU signals, the operation completes normally and no signal
+      is sent.</dd>
+  <dt> *</dt>
+  <dd>Otherwise, a SIGTTOU signal shall be sent to the process group.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, 0 shall be returned. Otherwise, -1
+    shall be returned and <i>errno</i> set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>tcsetattr</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The <i>fildes</i> argument is not a valid file descriptor.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>A signal interrupted <i>tcsetattr</i>().</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The <i>optional_actions</i> argument is not a supported value, or an
+      attempt was made to change an attribute represented in the <b>termios</b>
+      structure to an unsupported value.</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>The process group of the writing process is orphaned, the calling thread
+      is not blocking SIGTTOU, and the process is not ignoring SIGTTOU.</dd>
+  <dt id="ENOTTY"><a class="permalink" href="#ENOTTY"><b>ENOTTY</b></a></dt>
+  <dd>The file associated with <i>fildes</i> is not a terminal.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">If trying to change baud rates, applications should call
+    <i>tcsetattr</i>() then call <i>tcgetattr</i>() in order to determine what
+    baud rates were actually selected.</p>
+<p class="Pp">In general, there are two reasons for an application to change the
+    parameters associated with a terminal device:</p>
+<dl class="Bl-tag">
+  <dt> 1.</dt>
+  <dd>The device already has working parameter settings but the application
+      needs a different behavior, such as non-canonical mode instead of
+      canonical mode. The application sets (or clears) only a few flags or
+      <i>c_cc</i>[] values. Typically, the terminal device in this case is
+      either the controlling terminal for the process or a pseudo-terminal.</dd>
+  <dt> 2.</dt>
+  <dd>The device is a modem or similar piece of equipment connected by a serial
+      line, and it was not open before the application opened it. In this case,
+      the application needs to initialize all of the parameter settings ``from
+      scratch''. However, since the <b>termios</b> structure may include both
+      standard and non-standard parameters, the application cannot just
+      initialize the whole structure in an arbitrary way (e.g., using
+      <i>memset</i>()) as this may cause some of the non-standard parameters to
+      be set incorrectly, resulting in non-conforming behavior of the terminal
+      device. Conversely, the application cannot just set the standard
+      parameters, assuming that the non-standard parameters will already have
+      suitable values, as the device might previously have been used with
+      non-conforming parameter settings (and some implementations retain the
+      settings from one use to the next). The solution is to open the terminal
+      device using the O_TTY_INIT flag to initialize the terminal device to have
+      conforming parameter settings, obtain those settings using
+      <i>tcgetattr</i>(), and then set all of the standard parameters to the
+      desired settings.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The <i>tcsetattr</i>() function can be interrupted in the
+    following situations:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>It is interrupted while waiting for output to drain.</dd>
+  <dt> *</dt>
+  <dd>It is called from a process in a background process group and SIGTTOU is
+      caught.</dd>
+</dl>
+<p class="Pp">See also the RATIONALE section in <i><i>tcgetattr</i>()</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">Using an input baud rate of 0 to set the input rate equal to the
+    output rate may not necessarily be supported in a future version of this
+    volume of POSIX.1‐2017.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>cfgetispeed</i>()</i>, <i><i>tcgetattr</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Chapter
+    11</i>, <i>General Terminal Interface</i>,
+  <i><b>&lt;termios.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

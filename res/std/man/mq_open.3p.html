@@ -1,0 +1,252 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/459efd26e1db4ec7f0d65673c5ab98e66d926a50">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>MQ_OPEN(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">MQ_OPEN(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">MQ_OPEN(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">mq_open — open a message queue (<b>REALTIME</b>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;mqueue.h&gt;</pre>
+<pre>mqd_t mq_open(const char *<i>name</i>, int <i>oflag</i>, ...);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>mq_open</i>() function shall establish the connection
+    between a process and a message queue with a message queue descriptor. It
+    shall create an open message queue description that refers to the message
+    queue, and a message queue descriptor that refers to that open message queue
+    description. The message queue descriptor is used by other functions to
+    refer to that message queue. The <i>name</i> argument points to a string
+    naming a message queue. It is unspecified whether the name appears in the
+    file system and is visible to other functions that take pathnames as
+    arguments. The <i>name</i> argument conforms to the construction rules for a
+    pathname, except that the interpretation of &lt;slash&gt; characters other
+    than the leading &lt;slash&gt; character in <i>name</i> is
+    implementation-defined, and that the length limits for the <i>name</i>
+    argument are implementation-defined and need not be the same as the pathname
+    limits {PATH_MAX} and {NAME_MAX}. If <i>name</i> begins with the
+    &lt;slash&gt; character, then processes calling <i>mq_open</i>() with the
+    same value of <i>name</i> shall refer to the same message queue object, as
+    long as that name has not been removed. If <i>name</i> does not begin with
+    the &lt;slash&gt; character, the effect is implementation-defined. If the
+    <i>name</i> argument is not the name of an existing message queue and
+    creation is not requested, <i>mq_open</i>() shall fail and return an
+  error.</p>
+<p class="Pp">A message queue descriptor may be implemented using a file
+    descriptor, in which case applications can open up to at least {OPEN_MAX}
+    file and message queues.</p>
+<p class="Pp">The <i>oflag</i> argument requests the desired receive and/or send
+    access to the message queue. The requested access permission to receive
+    messages or send messages shall be granted if the calling process would be
+    granted read or write access, respectively, to an equivalently protected
+    file.</p>
+<p class="Pp">The value of <i>oflag</i> is the bitwise-inclusive OR of values
+    from the following list. Applications shall specify exactly one of the first
+    three values (access modes) below in the value of <i>oflag</i>:</p>
+<dl class="Bl-tag">
+  <dt id="O_RDONLY"><a class="permalink" href="#O_RDONLY">O_RDONLY</a></dt>
+  <dd>Open the message queue for receiving messages. The process can use the
+      returned message queue descriptor with <i>mq_receive</i>(), but not
+      <i>mq_send</i>(). A message queue may be open multiple times in the same
+      or different processes for receiving messages.</dd>
+  <dt id="O_WRONLY"><a class="permalink" href="#O_WRONLY">O_WRONLY</a></dt>
+  <dd>Open the queue for sending messages. The process can use the returned
+      message queue descriptor with <i>mq_send</i>() but not
+      <i>mq_receive</i>(). A message queue may be open multiple times in the
+      same or different processes for sending messages.</dd>
+  <dt id="O_RDWR"><a class="permalink" href="#O_RDWR">O_RDWR</a></dt>
+  <dd>Open the queue for both receiving and sending messages. The process can
+      use any of the functions allowed for O_RDONLY and O_WRONLY. A message
+      queue may be open multiple times in the same or different processes for
+      sending messages.</dd>
+</dl>
+<p class="Pp">Any combination of the remaining flags may be specified in the
+    value of <i>oflag</i>:</p>
+<dl class="Bl-tag">
+  <dt id="O_CREAT"><a class="permalink" href="#O_CREAT">O_CREAT</a></dt>
+  <dd>Create a message queue. It requires two additional arguments: <i>mode</i>,
+      which shall be of type <b>mode_t</b>, and <i>attr</i>, which shall be a
+      pointer to an <b>mq_attr</b> structure. If the pathname <i>name</i> has
+      already been used to create a message queue that still exists, then this
+      flag shall have no effect, except as noted under O_EXCL. Otherwise, a
+      message queue shall be created without any messages in it. The user ID of
+      the message queue shall be set to the effective user ID of the process.
+      The group ID of the message queue shall be set to the effective group ID
+      of the process; however, if the <i>name</i> argument is visible in the
+      file system, the group ID may be set to the group ID of the containing
+      directory. When bits in <i>mode</i> other than the file permission bits
+      are specified, the effect is unspecified. If <i>attr</i> is NULL, the
+      message queue shall be created with implementation-defined default message
+      queue attributes. If <i>attr</i> is non-NULL and the calling process has
+      appropriate privileges on <i>name</i>, the message queue <i>mq_maxmsg</i>
+      and <i>mq_msgsize</i> attributes shall be set to the values of the
+      corresponding members in the <b>mq_attr</b> structure referred to by
+      <i>attr</i>. The values of the <i>mq_flags</i> and <i>mq_curmsgs</i>
+      members of the <b>mq_attr</b> structure shall be ignored. If <i>attr</i>
+      is non-NULL, but the calling process does not have appropriate privileges
+      on <i>name</i>, the <i>mq_open</i>() function shall fail and return an
+      error without creating the message queue.</dd>
+  <dt id="O_EXCL"><a class="permalink" href="#O_EXCL">O_EXCL</a></dt>
+  <dd>If O_EXCL and O_CREAT are set, <i>mq_open</i>() shall fail if the message
+      queue <i>name</i> exists. The check for the existence of the message queue
+      and the creation of the message queue if it does not exist shall be atomic
+      with respect to other threads executing <i>mq_open</i>() naming the same
+      <i>name</i> with O_EXCL and O_CREAT set. If O_EXCL is set and O_CREAT is
+      not set, the result is undefined.</dd>
+  <dt id="O_NONBLOCK"><a class="permalink" href="#O_NONBLOCK">O_NONBLOCK</a></dt>
+  <dd>Determines whether an <i>mq_send</i>() or <i>mq_receive</i>() waits for
+      resources or messages that are not currently available, or fails with
+      <i>errno</i> set to <b>[EAGAIN]</b>; see <i><i>mq_send</i>()</i> and
+      <i><i>mq_receive</i>()</i> for details.</dd>
+</dl>
+<p class="Pp">The <i>mq_open</i>() function does not add or remove messages from
+    the queue.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, the function shall return a message
+    queue descriptor; otherwise, the function shall return (<b>mqd_t</b>)-1 and
+    set <i>errno</i> to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>mq_open</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>The message queue exists and the permissions specified by <i>oflag</i> are
+      denied, or the message queue does not exist and permission to create the
+      message queue is denied.</dd>
+  <dt id="EEXIST"><a class="permalink" href="#EEXIST"><b>EEXIST</b></a></dt>
+  <dd>O_CREAT and O_EXCL are set and the named message queue already
+    exists.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The <i>mq_open</i>() function was interrupted by a signal.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The <i>mq_open</i>() function is not supported for the given name.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>O_CREAT was specified in <i>oflag</i>, the value of <i>attr</i> is not
+      NULL, and either <i>mq_maxmsg</i> or <i>mq_msgsize</i> was less than or
+      equal to zero.</dd>
+  <dt id="EMFILE"><a class="permalink" href="#EMFILE"><b>EMFILE</b></a></dt>
+  <dd>Too many message queue descriptors or file descriptors are currently in
+      use by this process.</dd>
+  <dt id="ENFILE"><a class="permalink" href="#ENFILE"><b>ENFILE</b></a></dt>
+  <dd>Too many message queues are currently open in the system.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>O_CREAT is not set and the named message queue does not exist.</dd>
+  <dt id="ENOSPC"><a class="permalink" href="#ENOSPC"><b>ENOSPC</b></a></dt>
+  <dd>There is insufficient space for the creation of the new message queue.
+    <br>
+  </dd>
+</dl>
+<p class="Pp">If any of the following conditions occur, the <i>mq_open</i>()
+    function may return (<b>mqd_t</b>)-1 and set <i>errno</i> to the
+    corresponding value.</p>
+<dl class="Bl-tag">
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of the <i>name</i> argument exceeds {_POSIX_PATH_MAX} on systems
+      that do not support the XSI option or exceeds {_XOPEN_PATH_MAX} on XSI
+      systems, or has a pathname component that is longer than {_POSIX_NAME_MAX}
+      on systems that do not support the XSI option or longer than
+      {_XOPEN_NAME_MAX} on XSI systems.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">A future version might require the <i>mq_open</i>() and
+    <i>mq_unlink</i>() functions to have semantics similar to normal file system
+    operations.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>mq_close</i>()</i>, <i><i>mq_getattr</i>()</i>,
+    <i><i>mq_receive</i>()</i>, <i><i>mq_send</i>()</i>,
+    <i><i>mq_setattr</i>()</i>, <i><i>mq_unlink</i>()</i>,
+    <i><i>msgctl</i>()</i>, <i><i>msgget</i>()</i>, <i><i>msgrcv</i>()</i>,
+    <i><i>msgsnd</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;mqueue.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

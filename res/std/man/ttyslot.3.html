@@ -1,0 +1,187 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (C) 2002 Andries Brouwer <aeb@cwi.nl>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   This replaces an earlier man page written by Walter Harms
+   <walter.harms@informatik.uni-oldenburg.de>.
+   --><head>
+<meta name="dc.identifier" content="res/e85622795aa536dfc3f2e3470982acb865eb77d5">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>ttyslot(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">ttyslot(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">ttyslot(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">ttyslot - find the slot of the current user's terminal in some
+    file</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;unistd.h&gt;</b>       /* See NOTES */</pre>
+<pre><b>int ttyslot(void);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>ttyslot</b>():</p>
+<pre><br>
+    Since glibc 2.24:
+<br>
+        _DEFAULT_SOURCE
+<br>
+    From glibc 2.20 to glibc 2.23:
+<br>
+        _DEFAULT_SOURCE || (_XOPEN_SOURCE &amp;&amp; _XOPEN_SOURCE &lt; 500)
+<br>
+    glibc 2.19 and earlier:
+<br>
+        _BSD_SOURCE || (_XOPEN_SOURCE &amp;&amp; _XOPEN_SOURCE &lt; 500)</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The legacy function <b>ttyslot</b>() returns the index of the
+    current user's entry in some file.</p>
+<p class="Pp">Now "What file?" you ask. Well, let's first look at some
+    history.</p>
+<section class="Ss">
+<h2 class="Ss" id="Ancient_history"><a class="permalink" href="#Ancient_history">Ancient
+  history</a></h2>
+<p class="Pp">There used to be a file <i>/etc/ttys</i> in UNIX&nbsp;V6, that
+    was read by the <b>init</b>(1) program to find out what to do with each
+    terminal line. Each line consisted of three characters. The first character
+    was either '0' or '1', where '0' meant "ignore". The second
+    character denoted the terminal: '8' stood for "/dev/tty8". The
+    third character was an argument to <b>getty</b>(8) indicating the sequence
+    of line speeds to try ('-' was: start trying 110 baud). Thus a typical line
+    was "18-". A hang on some line was solved by changing the '1' to a
+    '0', signaling init, changing back again, and signaling init again.</p>
+<p class="Pp">In UNIX&nbsp;V7 the format was changed: here the second
+    character was the argument to <b>getty</b>(8) indicating the sequence of
+    line speeds to try ('0' was: cycle through 300-1200-150-110 baud; '4' was
+    for the on-line console DECwriter) while the rest of the line contained the
+    name of the tty. Thus a typical line was "14console".</p>
+<p class="Pp">Later systems have more elaborate syntax. System V-like systems
+    have <i>/etc/inittab</i> instead.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Ancient_history_(2)"><a class="permalink" href="#Ancient_history_(2)">Ancient
+  history (2)</a></h2>
+<p class="Pp">On the other hand, there is the file <i>/etc/utmp</i> listing the
+    people currently logged in. It is maintained by <b>login</b>(1). It has a
+    fixed size, and the appropriate index in the file was determined by
+    <b>login</b>(1) using the <b>ttyslot</b>() call to find the number of the
+    line in <i>/etc/ttys</i> (counting from 1).</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="The_semantics_of_ttyslot"><a class="permalink" href="#The_semantics_of_ttyslot">The
+  semantics of ttyslot</a></h2>
+<p class="Pp">Thus, the function <b>ttyslot</b>() returns the index of the
+    controlling terminal of the calling process in the file <i>/etc/ttys</i>,
+    and that is (usually) the same as the index of the entry for the current
+    user in the file <i>/etc/utmp</i>. BSD still has the <i>/etc/ttys</i> file,
+    but System V-like systems do not, and hence cannot refer to it. Thus, on
+    such systems the documentation says that <b>ttyslot</b>() returns the
+    current user's index in the user accounting data base.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">If successful, this function returns the slot number. On error
+    (e.g., if none of the file descriptors 0, 1, or 2 is associated with a
+    terminal that occurs in this data base) it returns 0 on UNIX&nbsp;V6 and
+    V7 and BSD-like systems, but -1 on System V-like systems.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>ttyslot ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">SUSv1; marked as LEGACY in SUSv2; removed in POSIX.1-2001. SUSv2
+    requires -1 on error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The utmp file is found in various places on various systems, such
+    as <i>/etc/utmp</i>, <i>/var/adm/utmp</i>, <i>/var/run/utmp</i>.</p>
+<p class="Pp">The glibc2 implementation of this function reads the file
+    <b>_PATH_TTYS</b>, defined in <i>&lt;ttyent.h&gt;</i> as
+    "/etc/ttys". It returns 0 on error. Since Linux systems do not
+    usually have "/etc/ttys", it will always return 0.</p>
+<p class="Pp">On BSD-like systems and Linux, the declaration of <b>ttyslot</b>()
+    is provided by <i>&lt;unistd.h&gt;</i>. On System V-like systems, the
+    declaration is provided by <i>&lt;stdlib.h&gt;</i>. Since glibc 2.24,
+    <i>&lt;stdlib.h&gt;</i> also provides the declaration with the following
+    feature test macro definitions:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>(_XOPEN_SOURCE &gt;= 500 ||
+<br>
+        (_XOPEN_SOURCE &amp;&amp; _XOPEN_SOURCE_EXTENDED))
+<br>
+    &amp;&amp; ! (_POSIX_C_SOURCE &gt;= 200112L || _XOPEN_SOURCE &gt;= 600)
+</pre>
+<br>
+<p class="Pp">Minix also has <i>fttyslot</i>(<i>fd</i>).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>getttyent</b>(3), <b>ttyname</b>(3), <b>utmp</b>(5)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

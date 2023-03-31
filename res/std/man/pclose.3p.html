@@ -1,0 +1,216 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/8ae514d29a8f2f20b20dc8fd369f4bb8b63eec1a">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>PCLOSE(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">PCLOSE(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">PCLOSE(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pclose — close a pipe stream to or from a process</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;stdio.h&gt;</pre>
+<pre>int pclose(FILE *<i>stream</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>pclose</i>() function shall close a stream that was opened
+    by <i>popen</i>(), wait for the command to terminate, and return the
+    termination status of the process that was running the command language
+    interpreter. However, if a call caused the termination status to be
+    unavailable to <i>pclose</i>(), then <i>pclose</i>() shall return -1 with
+    <i>errno</i> set to <b>[ECHILD]</b> to report this situation. This can
+    happen if the application calls one of the following functions:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd><i>wait</i>()</dd>
+  <dt> *</dt>
+  <dd><i>waitpid</i>() with a <i>pid</i> argument less than or equal to 0 or
+      equal to the process ID of the command line interpreter</dd>
+  <dt> *</dt>
+  <dd>Any other function not defined in this volume of POSIX.1‐2017 that
+      could do one of the above</dd>
+</dl>
+<p class="Pp">In any case, <i>pclose</i>() shall not return before the child
+    process created by <i>popen</i>() has terminated.</p>
+<p class="Pp">If the command language interpreter cannot be executed, the child
+    termination status returned by <i>pclose</i>() shall be as if the command
+    language interpreter terminated using <i>exit</i>(127) or
+  <i>_exit</i>(127).</p>
+<p class="Pp">The <i>pclose</i>() function shall not affect the termination
+    status of any child of the calling process other than the one created by
+    <i>popen</i>() for the associated stream.</p>
+<p class="Pp">If the argument <i>stream</i> to <i>pclose</i>() is not a pointer
+    to a stream created by <i>popen</i>(), the result of <i>pclose</i>() is
+    undefined.</p>
+<p class="Pp">If a thread is canceled during execution of <i>pclose</i>(), the
+    behavior is undefined.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful return, <i>pclose</i>() shall return the
+    termination status of the command language interpreter. Otherwise,
+    <i>pclose</i>() shall return -1 and set <i>errno</i> to indicate the
+  error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>pclose</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="ECHILD"><a class="permalink" href="#ECHILD"><b>ECHILD</b></a></dt>
+  <dd>The status of the child process could not be obtained, as described
+    above.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">There is a requirement that <i>pclose</i>() not return before the
+    child process terminates. This is intended to disallow implementations that
+    return <b>[EINTR]</b> if a signal is received while waiting. If
+    <i>pclose</i>() returned before the child terminated, there would be no way
+    for the application to discover which child used to be associated with the
+    stream, and it could not do the cleanup itself.</p>
+<p class="Pp">If the stream pointed to by <i>stream</i> was not created by
+    <i>popen</i>(), historical implementations of <i>pclose</i>() return -1
+    without setting <i>errno</i>. To avoid requiring <i>pclose</i>() to set
+    <i>errno</i> in this case, POSIX.1‐2008 makes the behavior
+    unspecified. An application should not use <i>pclose</i>() to close any
+    stream that was not created by <i>popen</i>().</p>
+<p class="Pp">Some historical implementations of <i>pclose</i>() either block or
+    ignore the signals SIGINT, SIGQUIT, and SIGHUP while waiting for the child
+    process to terminate. Since this behavior is not described for the
+    <i>pclose</i>() function in POSIX.1‐2008, such implementations are
+    not conforming. Also, some historical implementations return <b>[EINTR]</b>
+    if a signal is received, even though the child process has not terminated.
+    Such implementations are also considered non-conforming.</p>
+<p class="Pp">Consider, for example, an application that uses:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>popen("command", "r")</pre>
+</div>
+<p class="Pp">to start <i>command</i>, which is part of the same application.
+    The parent writes a prompt to its standard output (presumably the terminal)
+    and then reads from the <i>popen</i>()ed stream. The child reads the
+    response from the user, does some transformation on the response (pathname
+    expansion, perhaps) and writes the result to its standard output. The parent
+    process reads the result from the pipe, does something with it, and prints
+    another prompt. The cycle repeats. Assuming that both processes do
+    appropriate buffer flushing, this would be expected to work.</p>
+<p class="Pp">To conform to POSIX.1‐2008, <i>pclose</i>() must use
+    <i>waitpid</i>(), or some similar function, instead of <i>wait</i>().</p>
+<p class="Pp">The code sample below illustrates how the <i>pclose</i>() function
+    might be implemented on a system conforming to POSIX.1‐2008.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>int pclose(FILE *stream)
+{
+<br>
+    int stat;
+<br>
+    pid_t pid;</pre>
+<pre><br>
+    pid = &lt;pid for process created for stream by popen()&gt;
+<br>
+    (void) fclose(stream);
+<br>
+    while (waitpid(pid, &amp;stat, 0) == -1) {
+<br>
+        if (errno != EINTR){
+<br>
+            stat = -1;
+<br>
+            break;
+<br>
+        }
+<br>
+    }
+<br>
+    return(stat);
+}</pre>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>fork</i>()</i>, <i><i>popen</i>()</i>,
+  <i><i>wait</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;stdio.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

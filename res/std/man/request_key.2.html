@@ -1,0 +1,426 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2006 Red Hat, Inc. All Rights Reserved.
+       Written by David Howells (dhowells@redhat.com)
+   and Copyright (C) 2016 Michael Kerrisk <mtk.man-pages@gmail.com>
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+   --><head>
+<meta name="dc.identifier" content="res/b7468dc95d0480d4384b5a56fc5d9369aef51698">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>request_key(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">request_key(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">request_key(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">request_key - request a key from the kernel's key management
+    facility</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Linux Key Management Utilities (<i>libkeyutils</i>,
+    <i>-lkeyutils</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;keyutils.h&gt;</b></pre>
+<pre><b>key_serial_t request_key(const char *</b><i>type</i><b>, const char *</b><i>description</i><b>,</b>
+<b>                         const char *_Nullable </b><i>callout_info</i><b>,</b>
+<b>                         key_serial_t </b><i>dest_keyring</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>request_key</b>() attempts to find a key of the given
+    <i>type</i> with a description (name) that matches the specified
+    <i>description</i>. If such a key could not be found, then the key is
+    optionally created. If the key is found or created, <b>request_key</b>()
+    attaches it to the keyring whose ID is specified in <i>dest_keyring</i> and
+    returns the key's serial number.</p>
+<p class="Pp"><b>request_key</b>() first recursively searches for a matching key
+    in all of the keyrings attached to the calling process. The keyrings are
+    searched in the order: thread-specific keyring, process-specific keyring,
+    and then session keyring.</p>
+<p class="Pp">If <b>request_key</b>() is called from a program invoked by
+    <b>request_key</b>() on behalf of some other process to generate a key, then
+    the keyrings of that other process will be searched next, using that other
+    process's user ID, group ID, supplementary group IDs, and security context
+    to determine access.</p>
+<p class="Pp">The search of the keyring tree is breadth-first: the keys in each
+    keyring searched are checked for a match before any child keyrings are
+    recursed into. Only keys for which the caller has <i>search</i> permission
+    be found, and only keyrings for which the caller has <i>search</i>
+    permission may be searched.</p>
+<p class="Pp">If the key is not found and <i>callout</i> is NULL, then the call
+    fails with the error <b>ENOKEY</b>.</p>
+<p class="Pp">If the key is not found and <i>callout</i> is not NULL, then the
+    kernel attempts to invoke a user-space program to instantiate the key. The
+    details are given below.</p>
+<p class="Pp">The <i>dest_keyring</i> serial number may be that of a valid
+    keyring for which the caller has <i>write</i> permission, or it may be one
+    of the following special keyring IDs:</p>
+<dl class="Bl-tag">
+  <dt id="KEY_SPEC_THREAD_KEYRING"><a class="permalink" href="#KEY_SPEC_THREAD_KEYRING"><b>KEY_SPEC_THREAD_KEYRING</b></a></dt>
+  <dd>This specifies the caller's thread-specific keyring (see
+      <b>thread-keyring</b>(7)).</dd>
+  <dt id="KEY_SPEC_PROCESS_KEYRING"><a class="permalink" href="#KEY_SPEC_PROCESS_KEYRING"><b>KEY_SPEC_PROCESS_KEYRING</b></a></dt>
+  <dd>This specifies the caller's process-specific keyring (see
+      <b>process-keyring</b>(7)).</dd>
+  <dt id="KEY_SPEC_SESSION_KEYRING"><a class="permalink" href="#KEY_SPEC_SESSION_KEYRING"><b>KEY_SPEC_SESSION_KEYRING</b></a></dt>
+  <dd>This specifies the caller's session-specific keyring (see
+      <b>session-keyring</b>(7)).</dd>
+  <dt id="KEY_SPEC_USER_KEYRING"><a class="permalink" href="#KEY_SPEC_USER_KEYRING"><b>KEY_SPEC_USER_KEYRING</b></a></dt>
+  <dd>This specifies the caller's UID-specific keyring (see
+      <b>user-keyring</b>(7)).</dd>
+  <dt id="KEY_SPEC_USER_SESSION_KEYRING"><a class="permalink" href="#KEY_SPEC_USER_SESSION_KEYRING"><b>KEY_SPEC_USER_SESSION_KEYRING</b></a></dt>
+  <dd>This specifies the caller's UID-session keyring (see
+      <b>user-session-keyring</b>(7)).</dd>
+</dl>
+<p class="Pp">When the <i>dest_keyring</i> is specified as 0 and no key
+    construction has been performed, then no additional linking is done.</p>
+<p class="Pp">Otherwise, if <i>dest_keyring</i> is 0 and a new key is
+    constructed, the new key will be linked to the "default" keyring.
+    More precisely, when the kernel tries to determine to which keyring the
+    newly constructed key should be linked, it tries the following keyrings,
+    beginning with the keyring set via the <b>keyctl</b>(2)
+    <b>KEYCTL_SET_REQKEY_KEYRING</b> operation and continuing in the order shown
+    below until it finds the first keyring that exists:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>The requestor keyring (<b>KEY_REQKEY_DEFL_REQUESTOR_KEYRING</b>, since
+      Linux 2.6.29).</dd>
+  <dt>•</dt>
+  <dd>The thread-specific keyring (<b>KEY_REQKEY_DEFL_THREAD_KEYRING</b>; see
+      <b>thread-keyring</b>(7)).</dd>
+  <dt>•</dt>
+  <dd>The process-specific keyring (<b>KEY_REQKEY_DEFL_PROCESS_KEYRING</b>; see
+      <b>process-keyring</b>(7)).</dd>
+  <dt>•</dt>
+  <dd>The session-specific keyring (<b>KEY_REQKEY_DEFL_SESSION_KEYRING</b>; see
+      <b>session-keyring</b>(7)).</dd>
+  <dt>•</dt>
+  <dd>The session keyring for the process's user ID
+      (<b>KEY_REQKEY_DEFL_USER_SESSION_KEYRING</b>; see
+      <b>user-session-keyring</b>(7)). This keyring is expected to always
+    exist.</dd>
+  <dt>•</dt>
+  <dd>The UID-specific keyring (<b>KEY_REQKEY_DEFL_USER_KEYRING</b>; see
+      <b>user-keyring</b>(7)). This keyring is also expected to always
+    exist.</dd>
+</dl>
+<p class="Pp">If the <b>keyctl</b>(2) <b>KEYCTL_SET_REQKEY_KEYRING</b> operation
+    specifies <b>KEY_REQKEY_DEFL_DEFAULT</b> (or no
+    <b>KEYCTL_SET_REQKEY_KEYRING</b> operation is performed), then the kernel
+    looks for a keyring starting from the beginning of the list.</p>
+<section class="Ss">
+<h2 class="Ss" id="Requesting_user-space_instantiation_of_a_key"><a class="permalink" href="#Requesting_user-space_instantiation_of_a_key">Requesting
+  user-space instantiation of a key</a></h2>
+<p class="Pp">If the kernel cannot find a key matching <i>type</i> and
+    <i>description</i>, and <i>callout</i> is not NULL, then the kernel attempts
+    to invoke a user-space program to instantiate a key with the given
+    <i>type</i> and <i>description</i>. In this case, the following steps are
+    performed:</p>
+<dl class="Bl-tag">
+  <dt>(1)</dt>
+  <dd>The kernel creates an uninstantiated key, U, with the requested
+      <i>type</i> and <i>description</i>.</dd>
+  <dt>(2)</dt>
+  <dd>The kernel creates an authorization key, V, that refers to the key U and
+      records the facts that the caller of <b>request_key</b>() is:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>(2.1)</dt>
+  <dd>the context in which the key U should be instantiated and secured,
+    and</dd>
+  <dt>(2.2)</dt>
+  <dd>the context from which associated key requests may be satisfied.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The authorization key is constructed as follows:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>The key type is <i>".request_key_auth"</i>.</dd>
+  <dt>•</dt>
+  <dd>The key's UID and GID are the same as the corresponding filesystem IDs of
+      the requesting process.</dd>
+  <dt>•</dt>
+  <dd>The key grants <i>view</i>, <i>read</i>, and <i>search</i> permissions to
+      the key possessor as well as <i>view</i> permission for the key user.</dd>
+  <dt>•</dt>
+  <dd>The description (name) of the key is the hexadecimal string representing
+      the ID of the key that is to be instantiated in the requesting
+    program.</dd>
+  <dt>•</dt>
+  <dd>The payload of the key is taken from the data specified in
+      <i>callout_info</i>.</dd>
+  <dt>•</dt>
+  <dd>Internally, the kernel also records the PID of the process that called
+      <b>request_key</b>().</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt>(3)</dt>
+  <dd>The kernel creates a process that executes a user-space service such as
+      <b>request-key</b>(8) with a new session keyring that contains a link to
+      the authorization key, V.</dd>
+  <dt></dt>
+  <dd>This program is supplied with the following command-line arguments:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>[0]</dt>
+  <dd>The string <i>"/sbin/request-key"</i>.</dd>
+  <dt>[1]</dt>
+  <dd>The string <i>"create"</i> (indicating that a key is to be
+      created).</dd>
+  <dt>[2]</dt>
+  <dd>The ID of the key that is to be instantiated.</dd>
+  <dt>[3]</dt>
+  <dd>The filesystem UID of the caller of <b>request_key</b>().</dd>
+  <dt>[4]</dt>
+  <dd>The filesystem GID of the caller of <b>request_key</b>().</dd>
+  <dt>[5]</dt>
+  <dd>The ID of the thread keyring of the caller of <b>request_key</b>(). This
+      may be zero if that keyring hasn't been created.</dd>
+  <dt>[6]</dt>
+  <dd>The ID of the process keyring of the caller of <b>request_key</b>(). This
+      may be zero if that keyring hasn't been created.</dd>
+  <dt>[7]</dt>
+  <dd>The ID of the session keyring of the caller of <b>request_key</b>().</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd><i>Note</i>: each of the command-line arguments that is a key ID is
+      encoded in <i>decimal</i> (unlike the key IDs shown in <i>/proc/keys</i>,
+      which are shown as hexadecimal values).</dd>
+  <dt>(4)</dt>
+  <dd>The program spawned in the previous step:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Assumes the authority to instantiate the key U using the <b>keyctl</b>(2)
+      <b>KEYCTL_ASSUME_AUTHORITY</b> operation (typically via the
+      <b>keyctl_assume_authority</b>(3) function).</dd>
+  <dt>•</dt>
+  <dd>Obtains the callout data from the payload of the authorization key V
+      (using the <b>keyctl</b>(2) <b>KEYCTL_READ</b> operation (or, more
+      commonly, the <b>keyctl_read</b>(3) function) with a key ID value of
+      <b>KEY_SPEC_REQKEY_AUTH_KEY</b>).</dd>
+  <dt>•</dt>
+  <dd>Instantiates the key (or execs another program that performs that task),
+      specifying the payload and destination keyring. (The destination keyring
+      that the requestor specified when calling <b>request_key</b>() can be
+      accessed using the special key ID <b>KEY_SPEC_REQUESTOR_KEYRING</b>.)
+      Instantiation is performed using the <b>keyctl</b>(2)
+      <b>KEYCTL_INSTANTIATE</b> operation (or, more commonly, the
+      <b>keyctl_instantiate</b>(3) function). At this point, the
+      <b>request_key</b>() call completes, and the requesting program can
+      continue execution.</dd>
+</dl>
+</div>
+<p class="Pp">If these steps are unsuccessful, then an <b>ENOKEY</b> error will
+    be returned to the caller of <b>request_key</b>() and a temporary,
+    negatively instantiated key will be installed in the keyring specified by
+    <i>dest_keyring</i>. This will expire after a few seconds, but will cause
+    subsequent calls to <b>request_key</b>() to fail until it does. The purpose
+    of this negatively instantiated key is to prevent (possibly different)
+    processes making repeated requests (that require expensive
+    <b>request-key</b>(8) upcalls) for a key that can't (at the moment) be
+    positively instantiated.</p>
+<p class="Pp">Once the key has been instantiated, the authorization key
+    (<b>KEY_SPEC_REQKEY_AUTH_KEY</b>) is revoked, and the destination keyring
+    (<b>KEY_SPEC_REQUESTOR_KEYRING</b>) is no longer accessible from the
+    <b>request-key</b>(8) program.</p>
+<p class="Pp">If a key is created, then—regardless of whether it is a
+    valid key or a negatively instantiated key—it will displace any other
+    key with the same type and description from the keyring specified in
+    <i>dest_keyring</i>.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>request_key</b>() returns the serial number of the
+    key it found or caused to be created. On error, -1 is returned and
+    <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>The keyring wasn't available for modification by the user.</dd>
+  <dt id="EDQUOT"><a class="permalink" href="#EDQUOT"><b>EDQUOT</b></a></dt>
+  <dd>The key quota for this user would be exceeded by creating this key or
+      linking it to the keyring.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>One of <i>type</i>, <i>description</i>, or <i>callout_info</i> points
+      outside the process's accessible address space.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The request was interrupted by a signal; see <b>signal</b>(7).</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The size of the string (including the terminating null byte) specified in
+      <i>type</i> or <i>description</i> exceeded the limit (32 bytes and 4096
+      bytes respectively).</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>The size of the string (including the terminating null byte) specified in
+      <i>callout_info</i> exceeded the system page size.</dd>
+  <dt id="EKEYEXPIRED"><a class="permalink" href="#EKEYEXPIRED"><b>EKEYEXPIRED</b></a></dt>
+  <dd>An expired key was found, but no replacement could be obtained.</dd>
+  <dt id="EKEYREJECTED"><a class="permalink" href="#EKEYREJECTED"><b>EKEYREJECTED</b></a></dt>
+  <dd>The attempt to generate a new key was rejected.</dd>
+  <dt id="EKEYREVOKED"><a class="permalink" href="#EKEYREVOKED"><b>EKEYREVOKED</b></a></dt>
+  <dd>A revoked key was found, but no replacement could be obtained.</dd>
+  <dt id="ENOKEY"><a class="permalink" href="#ENOKEY"><b>ENOKEY</b></a></dt>
+  <dd>No matching key was found.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient memory to create a key.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The <i>type</i> argument started with a period ('.').</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">This system call first appeared in Linux 2.6.10. The ability to
+    instantiate keys upon request was added in Linux 2.6.13.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This system call is a nonstandard Linux extension.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below demonstrates the use of <b>request_key</b>().
+    The <i>type</i>, <i>description</i>, and <i>callout_info</i> arguments for
+    the system call are taken from the values supplied in the command-line
+    arguments. The call specifies the session keyring as the target keyring.</p>
+<p class="Pp">In order to demonstrate this program, we first create a suitable
+    entry in the file <i>/etc/request-key.conf</i>.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ sudo sh
+# <b>echo 'create user mtk:* *   /bin/keyctl instantiate %k %c %S' \</b>
+<br>
+          <b>&gt; /etc/request-key.conf</b>
+# <b>exit</b>
+</pre>
+<br>
+<p class="Pp">This entry specifies that when a new "user" key with the
+    prefix "mtk:" must be instantiated, that task should be performed
+    via the <b>keyctl</b>(1) command's <b>instantiate</b> operation. The
+    arguments supplied to the <b>instantiate</b> operation are: the ID of the
+    uninstantiated key (<i>%k</i>); the callout data supplied to the
+    <b>request_key</b>() call (<i>%c</i>); and the session keyring (<i>%S</i>)
+    of the requestor (i.e., the caller of <b>request_key</b>()). See
+    <b>request-key.conf</b>(5) for details of these <i>%</i> specifiers.</p>
+<p class="Pp">Then we run the program and check the contents of
+    <i>/proc/keys</i> to verify that the requested key has been
+  instantiated:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>./t_request_key user mtk:key1 "Payload data"</b>
+$ <b>grep '2dddaf50' /proc/keys</b>
+2dddaf50 I--Q---  1 perm 3f010000  1000  1000 user  mtk:key1: 12
+</pre>
+<br>
+<p class="Pp">For another example of the use of this program, see
+    <b>keyctl</b>(2).</p>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>/* t_request_key.c */
+#include &lt;keyutils.h&gt;
+#include &lt;stdint.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+int
+main(int argc, char *argv[])
+{
+<br>
+    key_serial_t key;
+<br>
+    if (argc != 4) {
+<br>
+        fprintf(stderr, "Usage: %s type description callout-data\n",
+<br>
+                argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    key = request_key(argv[1], argv[2], argv[3],
+<br>
+                      KEY_SPEC_SESSION_KEYRING);
+<br>
+    if (key == -1) {
+<br>
+        perror("request_key");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    printf("Key ID is %jx\n", (uintmax_t) key);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>keyctl</b>(1), <b>add_key</b>(2), <b>keyctl</b>(2),
+    <b>keyctl</b>(3), <b>capabilities</b>(7), <b>keyrings</b>(7),
+    <b>keyutils</b>(7), <b>persistent-keyring</b>(7), <b>process-keyring</b>(7),
+    <b>session-keyring</b>(7), <b>thread-keyring</b>(7), <b>user-keyring</b>(7),
+    <b>user-session-keyring</b>(7), <b>request-key</b>(8)</p>
+<p class="Pp">The kernel source files
+    <i>Documentation/security/keys/core.rst</i> and
+    <i>Documentation/keys/request-key.rst</i> (or, before Linux 4.13, in the
+    files <i>Documentation/security/keys.txt</i> and
+    <i>Documentation/security/keys-request-key.txt</i>).</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

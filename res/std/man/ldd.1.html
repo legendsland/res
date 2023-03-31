@@ -1,0 +1,157 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright 1995-2000 David Engel (david@ods.com)
+   Copyright 1995 Rickard E. Faith (faith@cs.unc.edu)
+   Copyright 2000 Ben Collins (bcollins@debian.org)
+      Redone for glibc 2.2
+   Copyright 2000 Jakub Jelinek (jakub@redhat.com)
+      Corrected.
+   and Copyright (C) 2012, 2016, Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: GPL-1.0-or-later
+   --><head>
+<meta name="dc.identifier" content="res/46fbec78587ff27a24a5c6bbaff110f428d08975">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>ldd(1)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">ldd(1)</td>
+    <td class="head-vol">General Commands Manual</td>
+    <td class="head-rtitle">ldd(1)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">ldd - print shared object dependencies</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>ldd</b> [<i>option</i>]... <i>file</i>...</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>ldd</b> prints the shared objects (shared libraries) required
+    by each program or shared object specified on the command line. An example
+    of its use and output is the following:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>ldd /bin/ls</b>
+<br>
+    linux-vdso.so.1 (0x00007ffcc3563000)
+<br>
+    libselinux.so.1 =&gt; /lib64/libselinux.so.1 (0x00007f87e5459000)
+<br>
+    libcap.so.2 =&gt; /lib64/libcap.so.2 (0x00007f87e5254000)
+<br>
+    libc.so.6 =&gt; /lib64/libc.so.6 (0x00007f87e4e92000)
+<br>
+    libpcre.so.1 =&gt; /lib64/libpcre.so.1 (0x00007f87e4c22000)
+<br>
+    libdl.so.2 =&gt; /lib64/libdl.so.2 (0x00007f87e4a1e000)
+<br>
+    /lib64/ld-linux-x86-64.so.2 (0x00005574bf12e000)
+<br>
+    libattr.so.1 =&gt; /lib64/libattr.so.1 (0x00007f87e4817000)
+<br>
+    libpthread.so.0 =&gt; /lib64/libpthread.so.0 (0x00007f87e45fa000)
+</pre>
+<br>
+<p class="Pp">In the usual case, <b>ldd</b> invokes the standard dynamic linker
+    (see <b>ld.so</b>(8)) with the <b>LD_TRACE_LOADED_OBJECTS</b> environment
+    variable set to 1. This causes the dynamic linker to inspect the program's
+    dynamic dependencies, and find (according to the rules described in
+    <b>ld.so</b>(8)) and load the objects that satisfy those dependencies. For
+    each dependency, <b>ldd</b> displays the location of the matching object and
+    the (hexadecimal) address at which it is loaded. (The <i>linux-vdso</i> and
+    <i>ld-linux</i> shared dependencies are special; see <b>vdso</b>(7) and
+    <b>ld.so</b>(8).)</p>
+<section class="Ss">
+<h2 class="Ss" id="Security"><a class="permalink" href="#Security">Security</a></h2>
+<p class="Pp">Be aware that in some circumstances (e.g., where the program
+    specifies an ELF interpreter other than <i>ld-linux.so</i>), some versions
+    of <b>ldd</b> may attempt to obtain the dependency information by attempting
+    to directly execute the program, which may lead to the execution of whatever
+    code is defined in the program's ELF interpreter, and perhaps to execution
+    of the program itself. (Before glibc 2.27, the upstream <b>ldd</b>
+    implementation did this for example, although most distributions provided a
+    modified version that did not.)</p>
+<p class="Pp">Thus, you should <i>never</i> employ <b>ldd</b> on an untrusted
+    executable, since this may result in the execution of arbitrary code. A
+    safer alternative when dealing with untrusted executables is:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>objdump -p /path/to/program | grep NEEDED</b>
+</pre>
+<br>
+<p class="Pp">Note, however, that this alternative shows only the direct
+    dependencies of the executable, while <b>ldd</b> shows the entire dependency
+    tree of the executable.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OPTIONS"><a class="permalink" href="#OPTIONS">OPTIONS</a></h1>
+<dl class="Bl-tag">
+  <dt id="version"><a class="permalink" href="#version"><b>--version</b></a></dt>
+  <dd>Print the version number of <b>ldd</b>.</dd>
+  <dt id="v"><a class="permalink" href="#v"><b>-v</b>, <b>--verbose</b></a></dt>
+  <dd>Print all information, including, for example, symbol versioning
+      information.</dd>
+  <dt id="u"><a class="permalink" href="#u"><b>-u</b>, <b>--unused</b></a></dt>
+  <dd>Print unused direct dependencies. (Since glibc 2.3.4.)</dd>
+  <dt id="d"><a class="permalink" href="#d"><b>-d</b>,
+    <b>--data-relocs</b></a></dt>
+  <dd>Perform relocations and report any missing objects (ELF only).</dd>
+  <dt id="r"><a class="permalink" href="#r"><b>-r</b>,
+    <b>--function-relocs</b></a></dt>
+  <dd>Perform relocations for both data objects and functions, and report any
+      missing objects or functions (ELF only).</dd>
+  <dt id="help"><a class="permalink" href="#help"><b>--help</b></a></dt>
+  <dd>Usage information.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp"><b>ldd</b> does not work on a.out shared libraries.</p>
+<p class="Pp"><b>ldd</b> does not work with some extremely old a.out programs
+    which were built before <b>ldd</b> support was added to the compiler
+    releases. If you use <b>ldd</b> on one of these programs, the program will
+    attempt to run with <i>argc</i> = 0 and the results will be
+  unpredictable.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>pldd</b>(1), <b>sprof</b>(1), <b>ld.so</b>(8),
+    <b>ldconfig</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

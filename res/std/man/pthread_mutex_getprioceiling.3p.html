@@ -1,0 +1,186 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/e82f71755db037e797835f0fb956d80fb9de29d9">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>PTHREAD_MUTEX_GETPRIOCEILING(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">PTHREAD_MUTEX_GETPRIOCEILING(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">PTHREAD_MUTEX_GETPRIOCEILING(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pthread_mutex_getprioceiling, pthread_mutex_setprioceiling
+    — get and set the priority ceiling of a mutex (<b>REALTIME
+    THREADS</b>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;pthread.h&gt;</pre>
+<pre>int pthread_mutex_getprioceiling(const pthread_mutex_t *restrict <i>mutex</i>,
+<br>
+    int *restrict <i>prioceiling</i>);
+int pthread_mutex_setprioceiling(pthread_mutex_t *restrict <i>mutex</i>,
+<br>
+    int <i>prioceiling</i>, int *restrict <i>old_ceiling</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>pthread_mutex_getprioceiling</i>() function shall return
+    the current priority ceiling of the mutex.</p>
+<p class="Pp">The <i>pthread_mutex_setprioceiling</i>() function shall attempt
+    to lock the mutex as if by a call to <i>pthread_mutex_lock</i>(), except
+    that the process of locking the mutex need not adhere to the priority
+    protect protocol. On acquiring the mutex it shall change the mutex's
+    priority ceiling and then release the mutex as if by a call to
+    <i>pthread_mutex_unlock</i>(). When the change is successful, the previous
+    value of the priority ceiling shall be returned in <i>old_ceiling</i>.</p>
+<p class="Pp">If the <i>pthread_mutex_setprioceiling</i>() function fails, the
+    mutex priority ceiling shall not be changed.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">If successful, the <i>pthread_mutex_getprioceiling</i>() and
+    <i>pthread_mutex_setprioceiling</i>() functions shall return zero;
+    otherwise, an error number shall be returned to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">These functions shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The protocol attribute of <i>mutex</i> is PTHREAD_PRIO_NONE.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The implementation requires appropriate privileges to perform the
+      operation and the caller does not have appropriate privileges.</dd>
+</dl>
+<p class="Pp">The <i>pthread_mutex_setprioceiling</i>() function shall fail
+  if:</p>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>The mutex could not be acquired because the maximum number of recursive
+      locks for <i>mutex</i> has been exceeded.</dd>
+  <dt id="EDEADLK"><a class="permalink" href="#EDEADLK"><b>EDEADLK</b></a></dt>
+  <dd>The mutex type is PTHREAD_MUTEX_ERRORCHECK and the current thread already
+      owns the mutex.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>The mutex was created with the protocol attribute having the value
+      PTHREAD_PRIO_PROTECT and the calling thread's priority is higher than the
+      mutex's current priority ceiling, and the implementation adheres to the
+      priority protect protocol in the process of locking the mutex.</dd>
+  <dt id="ENOTRECOVERABLE"><a class="permalink" href="#ENOTRECOVERABLE"><b>ENOTRECOVERABLE</b></a></dt>
+  <dd>
+    <br>
+    The mutex is a robust mutex and the state protected by the mutex is not
+      recoverable.</dd>
+  <dt id="EOWNERDEAD"><a class="permalink" href="#EOWNERDEAD"><b>EOWNERDEAD</b></a></dt>
+  <dd>
+    <br>
+    The mutex is a robust mutex and the process containing the previous owning
+      thread terminated while holding the mutex lock. The mutex lock shall be
+      acquired by the calling thread and it is up to the new owner to make the
+      state consistent (see <i><i>pthread_mutex_lock</i>()</i>).</dd>
+</dl>
+<p class="Pp">The <i>pthread_mutex_setprioceiling</i>() function may fail
+  if:</p>
+<dl class="Bl-tag">
+  <dt id="EDEADLK~2"><a class="permalink" href="#EDEADLK~2"><b>EDEADLK</b></a></dt>
+  <dd>A deadlock condition was detected.</dd>
+  <dt id="EINVAL~3"><a class="permalink" href="#EINVAL~3"><b>EINVAL</b></a></dt>
+  <dd>The priority requested by <i>prioceiling</i> is out of range.</dd>
+  <dt id="EOWNERDEAD~2"><a class="permalink" href="#EOWNERDEAD~2"><b>EOWNERDEAD</b></a></dt>
+  <dd>
+    <br>
+    The mutex is a robust mutex and the previous owning thread terminated while
+      holding the mutex lock. The mutex lock shall be acquired by the calling
+      thread and it is up to the new owner to make the state consistent (see
+      <i><i>pthread_mutex_lock</i>()</i>).</dd>
+</dl>
+<p class="Pp">These functions shall not return an error code of
+  <b>[EINTR]</b>.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>pthread_mutex_destroy</i>()</i>,
+    <i><i>pthread_mutex_lock</i>()</i>,
+  <i><i>pthread_mutex_timedlock</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;pthread.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

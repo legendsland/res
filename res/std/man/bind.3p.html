@@ -1,0 +1,266 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/e31bc26f646daf8e913f08a93cd82365889ad51a">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>BIND(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">BIND(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">BIND(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">bind — bind a name to a socket</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;sys/socket.h&gt;</pre>
+<pre>int bind(int <i>socket</i>, const struct sockaddr *<i>address</i>,
+<br>
+    socklen_t <i>address_len</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>bind</i>() function shall assign a local socket address
+    <i>address</i> to a socket identified by descriptor <i>socket</i> that has
+    no local socket address assigned. Sockets created with the <i>socket</i>()
+    function are initially unnamed; they are identified only by their address
+    family.</p>
+<p class="Pp">The <i>bind</i>() function takes the following arguments:</p>
+<dl class="Bl-tag">
+  <dt id="socket"><a class="permalink" href="#socket"><i>socket</i></a></dt>
+  <dd>Specifies the file descriptor of the socket to be bound.</dd>
+  <dt id="address"><a class="permalink" href="#address"><i>address</i></a></dt>
+  <dd>Points to a <b>sockaddr</b> structure containing the address to be bound
+      to the socket. The length and format of the address depend on the address
+      family of the socket.</dd>
+  <dt id="address_len"><a class="permalink" href="#address_len"><i>address_len</i></a></dt>
+  <dd>Specifies the length of the <b>sockaddr</b> structure pointed to by the
+      <i>address</i> argument.</dd>
+</dl>
+<p class="Pp">The socket specified by <i>socket</i> may require the process to
+    have appropriate privileges to use the <i>bind</i>() function.</p>
+<p class="Pp">If the address family of the socket is AF_UNIX and the pathname in
+    <i>address</i> names a symbolic link, <i>bind</i>() shall fail and set
+    <i>errno</i> to <b>[EADDRINUSE]</b>.</p>
+<p class="Pp">If the socket address cannot be assigned immediately and
+    O_NONBLOCK is set for the file descriptor for the socket, <i>bind</i>()
+    shall fail and set <i>errno</i> to <b>[EINPROGRESS]</b>, but the assignment
+    request shall not be aborted, and the assignment shall be completed
+    asynchronously. Subsequent calls to <i>bind</i>() for the same socket,
+    before the assignment is completed, shall fail and set <i>errno</i> to
+    <b>[EALREADY]</b>.</p>
+<p class="Pp">When the assignment has been performed asynchronously,
+    <i>pselect</i>(), <i>select</i>(), and <i>poll</i>() shall indicate that the
+    file descriptor for the socket is ready for reading and writing.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>bind</i>() shall return 0;
+    otherwise, -1 shall be returned and <i>errno</i> set to indicate the
+  error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>bind</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EADDRINUSE"><a class="permalink" href="#EADDRINUSE"><b>EADDRINUSE</b></a></dt>
+  <dd>The specified address is already in use.</dd>
+  <dt id="EADDRNOTAVAIL"><a class="permalink" href="#EADDRNOTAVAIL"><b>EADDRNOTAVAIL</b></a></dt>
+  <dd>
+    <br>
+    The specified address is not available from the local machine.</dd>
+  <dt id="EAFNOSUPPORT"><a class="permalink" href="#EAFNOSUPPORT"><b>EAFNOSUPPORT</b></a></dt>
+  <dd>
+    <br>
+    The specified address is not a valid address for the address family of the
+      specified socket.</dd>
+  <dt id="EALREADY"><a class="permalink" href="#EALREADY"><b>EALREADY</b></a></dt>
+  <dd>An assignment request is already in progress for the specified
+    socket.</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The <i>socket</i> argument is not a valid file descriptor.</dd>
+  <dt id="EINPROGRESS"><a class="permalink" href="#EINPROGRESS"><b>EINPROGRESS</b></a></dt>
+  <dd>O_NONBLOCK is set for the file descriptor for the socket and the
+      assignment cannot be immediately performed; the assignment shall be
+      performed asynchronously.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The socket is already bound to an address, and the protocol does not
+      support binding to a new address; or the socket has been shut down.</dd>
+  <dt id="ENOBUFS"><a class="permalink" href="#ENOBUFS"><b>ENOBUFS</b></a></dt>
+  <dd>Insufficient resources were available to complete the call.</dd>
+  <dt id="ENOTSOCK"><a class="permalink" href="#ENOTSOCK"><b>ENOTSOCK</b></a></dt>
+  <dd>The <i>socket</i> argument does not refer to a socket.</dd>
+  <dt id="EOPNOTSUPP"><a class="permalink" href="#EOPNOTSUPP"><b>EOPNOTSUPP</b></a></dt>
+  <dd>The socket type of the specified socket does not support binding to an
+      address.</dd>
+</dl>
+<p class="Pp">If the address family of the socket is AF_UNIX, then <i>bind</i>()
+    shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>A component of the path prefix denies search permission, or the requested
+      name requires writing in a directory with a mode that denies write
+      permission.</dd>
+  <dt id="EDESTADDRREQ"><a class="permalink" href="#EDESTADDRREQ"><b>EDESTADDRREQ</b>
+    or <b>EISDIR</b></a></dt>
+  <dd>
+    <br>
+    The <i>address</i> argument is a null pointer.</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>An I/O error occurred.</dd>
+  <dt id="ELOOP"><a class="permalink" href="#ELOOP"><b>ELOOP</b></a></dt>
+  <dd>A loop exists in symbolic links encountered during resolution of the
+      pathname in <i>address</i>.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of a component of a pathname is longer than {NAME_MAX}.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>A component of the path prefix of the pathname in <i>address</i> does not
+      name an existing file or the pathname is an empty string.</dd>
+  <dt id="ENOENT~2"><a class="permalink" href="#ENOENT~2"><b>ENOENT</b> or
+    <b>ENOTDIR</b></a></dt>
+  <dd>
+    <br>
+    The pathname in <i>address</i> contains at least one non-&lt;slash&gt;
+      character and ends with one or more trailing &lt;slash&gt; characters. If
+      the pathname without the trailing &lt;slash&gt; characters would name an
+      existing file, an <b>[ENOENT]</b> error shall not occur.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>A component of the path prefix of the pathname in <i>address</i> names an
+      existing file that is neither a directory nor a symbolic link to a
+      directory, or the pathname in <i>address</i> contains at least one
+      non-&lt;slash&gt; character and ends with one or more trailing
+      &lt;slash&gt; characters and the last pathname component names an existing
+      file that is neither a directory nor a symbolic link to a directory.</dd>
+  <dt id="EROFS"><a class="permalink" href="#EROFS"><b>EROFS</b></a></dt>
+  <dd>The name would reside on a read-only file system.</dd>
+</dl>
+<p class="Pp">The <i>bind</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES~2"><a class="permalink" href="#EACCES~2"><b>EACCES</b></a></dt>
+  <dd>The specified address is protected and the current user does not have
+      permission to bind to it.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>The <i>address_len</i> argument is not a valid length for the address
+      family.</dd>
+  <dt id="EISCONN"><a class="permalink" href="#EISCONN"><b>EISCONN</b></a></dt>
+  <dd>The socket is already connected.</dd>
+  <dt id="ELOOP~2"><a class="permalink" href="#ELOOP~2"><b>ELOOP</b></a></dt>
+  <dd>More than {SYMLOOP_MAX} symbolic links were encountered during resolution
+      of the pathname in <i>address</i>.</dd>
+  <dt id="ENAMETOOLONG~2"><a class="permalink" href="#ENAMETOOLONG~2"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of a pathname exceeds {PATH_MAX}, or pathname resolution of a
+      symbolic link produced an intermediate result with a length that exceeds
+      {PATH_MAX}.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The following code segment shows how to create a socket and bind
+    it to a name in the AF_UNIX domain.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#define MY_SOCK_PATH "/somepath"</pre>
+<pre>int sfd;
+struct sockaddr_un my_addr;</pre>
+<pre>sfd = socket(AF_UNIX, SOCK_STREAM, 0);
+if (sfd == -1)
+<br>
+    /* Handle error */;</pre>
+<pre>memset(&amp;my_addr, '\0', sizeof(struct sockaddr_un));
+<br>
+                     /* Clear structure */
+my_addr.sun_family = AF_UNIX;
+strncpy(my_addr.sun_path, MY_SOCK_PATH, sizeof(my_addr.sun_path) -1);</pre>
+<pre>if (bind(sfd, (struct sockaddr *) &amp;my_addr,
+<br>
+    sizeof(struct sockaddr_un)) == -1)
+<br>
+    /* Handle error */;</pre>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">An application program can retrieve the assigned socket name with
+    the <i>getsockname</i>() function.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>connect</i>()</i>, <i><i>getsockname</i>()</i>,
+    <i><i>listen</i>()</i>, <i><i>socket</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;sys_socket.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

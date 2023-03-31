@@ -1,0 +1,384 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2017 by Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/5c0acc9b5aa967a67cf8f80d91c56fb52e5db7bf">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>ioctl_ns(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">ioctl_ns(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">ioctl_ns(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">ioctl_ns - ioctl() operations for Linux namespaces</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Discovering_namespace_relationships"><a class="permalink" href="#Discovering_namespace_relationships">Discovering
+  namespace relationships</a></h2>
+<p class="Pp">The following <b>ioctl</b>(2) operations are provided to allow
+    discovery of namespace relationships (see <b>user_namespaces</b>(7) and
+    <b>pid_namespaces</b>(7)). The form of the calls is:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>new_fd = ioctl(fd, request);
+</pre>
+<br>
+<p class="Pp">In each case, <i>fd</i> refers to a <i>/proc/</i>pid<i>/ns/*</i>
+    file. Both operations return a new file descriptor on success.</p>
+<dl class="Bl-tag">
+  <dt id="NS_GET_USERNS"><a class="permalink" href="#NS_GET_USERNS"><b>NS_GET_USERNS</b>
+    (since Linux 4.9)</a></dt>
+  <dd>Returns a file descriptor that refers to the owning user namespace for the
+      namespace referred to by <i>fd</i>.</dd>
+  <dt id="NS_GET_PARENT"><a class="permalink" href="#NS_GET_PARENT"><b>NS_GET_PARENT</b>
+    (since Linux 4.9)</a></dt>
+  <dd>Returns a file descriptor that refers to the parent namespace of the
+      namespace referred to by <i>fd</i>. This operation is valid only for
+      hierarchical namespaces (i.e., PID and user namespaces). For user
+      namespaces, <b>NS_GET_PARENT</b> is synonymous with
+    <b>NS_GET_USERNS</b>.</dd>
+</dl>
+<p class="Pp">The new file descriptor returned by these operations is opened
+    with the <b>O_RDONLY</b> and <b>O_CLOEXEC</b> (close-on-exec; see
+    <b>fcntl</b>(2)) flags.</p>
+<p class="Pp">By applying <b>fstat</b>(2) to the returned file descriptor, one
+    obtains a <i>stat</i> structure whose <i>st_dev</i> (resident device) and
+    <i>st_ino</i> (inode number) fields together identify the owning/parent
+    namespace. This inode number can be matched with the inode number of another
+    <i>/proc/</i>pid<i>/ns/</i>{<i>pid</i>,<i>user</i>} file to determine
+    whether that is the owning/parent namespace.</p>
+<p class="Pp">Either of these <b>ioctl</b>(2) operations can fail with the
+    following errors:</p>
+<dl class="Bl-tag">
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The requested namespace is outside of the caller's namespace scope. This
+      error can occur if, for example, the owning user namespace is an ancestor
+      of the caller's current user namespace. It can also occur on attempts to
+      obtain the parent of the initial user or PID namespace.</dd>
+  <dt id="ENOTTY"><a class="permalink" href="#ENOTTY"><b>ENOTTY</b></a></dt>
+  <dd>The operation is not supported by this kernel version.</dd>
+</dl>
+<p class="Pp">Additionally, the <b>NS_GET_PARENT</b> operation can fail with the
+    following error:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>fd</i> refers to a nonhierarchical namespace.</dd>
+</dl>
+<p class="Pp">See the EXAMPLES section for an example of the use of these
+    operations.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Discovering_the_namespace_type"><a class="permalink" href="#Discovering_the_namespace_type">Discovering
+  the namespace type</a></h2>
+<p class="Pp">The <b>NS_GET_NSTYPE</b> operation (available since Linux 4.11)
+    can be used to discover the type of namespace referred to by the file
+    descriptor <i>fd</i>:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>nstype = ioctl(fd, NS_GET_NSTYPE);
+</pre>
+<br>
+<p class="Pp"><i>fd</i> refers to a <i>/proc/</i>pid<i>/ns/*</i> file.</p>
+<p class="Pp">The return value is one of the <b>CLONE_NEW*</b> values that can
+    be specified to <b>clone</b>(2) or <b>unshare</b>(2) in order to create a
+    namespace.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Discovering_the_owner_of_a_user_namespace"><a class="permalink" href="#Discovering_the_owner_of_a_user_namespace">Discovering
+  the owner of a user namespace</a></h2>
+<p class="Pp">The <b>NS_GET_OWNER_UID</b> operation (available since Linux 4.11)
+    can be used to discover the owner user ID of a user namespace (i.e., the
+    effective user ID of the process that created the user namespace). The form
+    of the call is:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>uid_t uid;
+ioctl(fd, NS_GET_OWNER_UID, &amp;uid);
+</pre>
+<br>
+<p class="Pp"><i>fd</i> refers to a <i>/proc/</i>pid<i>/ns/user</i> file.</p>
+<p class="Pp">The owner user ID is returned in the <i>uid_t</i> pointed to by
+    the third argument.</p>
+<p class="Pp">This operation can fail with the following error:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd><i>fd</i> does not refer to a user namespace.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">Any of the above <b>ioctl</b>() operations can return the
+    following errors:</p>
+<dl class="Bl-tag">
+  <dt id="ENOTTY~2"><a class="permalink" href="#ENOTTY~2"><b>ENOTTY</b></a></dt>
+  <dd><i>fd</i> does not refer to a <i>/proc/[pid]/ns/*</i> file.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">Namespaces and the operations described on this page are a
+    Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The example shown below uses the <b>ioctl</b>(2) operations
+    described above to perform simple discovery of namespace relationships. The
+    following shell sessions show various examples of the use of this
+  program.</p>
+<p class="Pp">Trying to get the parent of the initial user namespace fails,
+    since it has no parent:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>./ns_show /proc/self/ns/user p</b>
+The parent namespace is outside your namespace scope
+</pre>
+<br>
+<p class="Pp">Create a process running <b>sleep</b>(1) that resides in new user
+    and UTS namespaces, and show that the new UTS namespace is associated with
+    the new user namespace:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>unshare -Uu sleep 1000 &amp;</b>
+[1] 23235
+$ <b>./ns_show /proc/23235/ns/uts u</b>
+Device/Inode of owning user namespace is: [0,3] / 4026532448
+$ <b>readlink /proc/23235/ns/user</b>
+user:[4026532448]
+</pre>
+<br>
+<p class="Pp">Then show that the parent of the new user namespace in the
+    preceding example is the initial user namespace:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>readlink /proc/self/ns/user</b>
+user:[4026531837]
+$ <b>./ns_show /proc/23235/ns/user p</b>
+Device/Inode of parent namespace is: [0,3] / 4026531837
+</pre>
+<br>
+<p class="Pp">Start a shell in a new user namespace, and show that from within
+    this shell, the parent user namespace can't be discovered. Similarly, the
+    UTS namespace (which is associated with the initial user namespace) can't be
+    discovered.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>PS1="sh2$ " unshare -U bash</b>
+sh2$ <b>./ns_show /proc/self/ns/user p</b>
+The parent namespace is outside your namespace scope
+sh2$ <b>./ns_show /proc/self/ns/uts u</b>
+The owning user namespace is outside your namespace scope
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>/* ns_show.c
+<br>
+   Licensed under the GNU General Public License v2 or later.
+*/
+#include &lt;errno.h&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;linux/nsfs.h&gt;
+#include &lt;stdint.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;sys/ioctl.h&gt;
+#include &lt;sys/stat.h&gt;
+#include &lt;sys/sysmacros.h&gt;
+#include &lt;unistd.h&gt;
+int
+main(int argc, char *argv[])
+{
+<br>
+    int          fd, userns_fd, parent_fd;
+<br>
+    struct stat  sb;
+<br>
+    if (argc &lt; 2) {
+<br>
+        fprintf(stderr, "Usage: %s /proc/[pid]/ns/[file] [p|u]\n",
+<br>
+                argv[0]);
+<br>
+        fprintf(stderr, "\nDisplay the result of one or both "
+<br>
+                "of NS_GET_USERNS (u) or NS_GET_PARENT (p)\n"
+<br>
+                "for the specified /proc/[pid]/ns/[file]. If neither "
+<br>
+                "'p' nor 'u' is specified,\n"
+<br>
+                "NS_GET_USERNS is the default.\n");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    /* Obtain a file descriptor for the 'ns' file specified
+<br>
+       in argv[1]. */
+<br>
+    fd = open(argv[1], O_RDONLY);
+<br>
+    if (fd == -1) {
+<br>
+        perror("open");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    /* Obtain a file descriptor for the owning user namespace and
+<br>
+       then obtain and display the inode number of that namespace. */
+<br>
+    if (argc &lt; 3 || strchr(argv[2], 'u')) {
+<br>
+        userns_fd = ioctl(fd, NS_GET_USERNS);
+<br>
+        if (userns_fd == -1) {
+<br>
+            if (errno == EPERM)
+<br>
+                printf("The owning user namespace is outside "
+<br>
+                       "your namespace scope\n");
+<br>
+            else
+<br>
+               perror("ioctl-NS_GET_USERNS");
+<br>
+            exit(EXIT_FAILURE);
+<br>
+         }
+<br>
+        if (fstat(userns_fd, &amp;sb) == -1) {
+<br>
+            perror("fstat-userns");
+<br>
+            exit(EXIT_FAILURE);
+<br>
+        }
+<br>
+        printf("Device/Inode of owning user namespace is: "
+<br>
+               "[%x,%x] / %ju\n",
+<br>
+               major(sb.st_dev),
+<br>
+               minor(sb.st_dev),
+<br>
+               (uintmax_t) sb.st_ino);
+<br>
+        close(userns_fd);
+<br>
+    }
+<br>
+    /* Obtain a file descriptor for the parent namespace and
+<br>
+       then obtain and display the inode number of that namespace. */
+<br>
+    if (argc &gt; 2 &amp;&amp; strchr(argv[2], 'p')) {
+<br>
+        parent_fd = ioctl(fd, NS_GET_PARENT);
+<br>
+        if (parent_fd == -1) {
+<br>
+            if (errno == EINVAL)
+<br>
+                printf("Can' get parent namespace of a "
+<br>
+                       "nonhierarchical namespace\n");
+<br>
+            else if (errno == EPERM)
+<br>
+                printf("The parent namespace is outside "
+<br>
+                       "your namespace scope\n");
+<br>
+            else
+<br>
+                perror("ioctl-NS_GET_PARENT");
+<br>
+            exit(EXIT_FAILURE);
+<br>
+        }
+<br>
+        if (fstat(parent_fd, &amp;sb) == -1) {
+<br>
+            perror("fstat-parentns");
+<br>
+            exit(EXIT_FAILURE);
+<br>
+        }
+<br>
+        printf("Device/Inode of parent namespace is: [%x,%x] / %ju\n",
+<br>
+               major(sb.st_dev),
+<br>
+               minor(sb.st_dev),
+<br>
+               (uintmax_t) sb.st_ino);
+<br>
+        close(parent_fd);
+<br>
+    }
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>fstat</b>(2), <b>ioctl</b>(2), <b>proc</b>(5),
+    <b>namespaces</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

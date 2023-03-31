@@ -1,0 +1,239 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/bb4c0d1412c9784da815d8831fa99fee094b3f50">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>PTHREAD_ATTR_DESTROY(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">PTHREAD_ATTR_DESTROY(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">PTHREAD_ATTR_DESTROY(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pthread_attr_destroy, pthread_attr_init — destroy and
+    initialize the thread attributes object</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;pthread.h&gt;</pre>
+<pre>int pthread_attr_destroy(pthread_attr_t *<i>attr</i>);
+int pthread_attr_init(pthread_attr_t *<i>attr</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>pthread_attr_destroy</i>() function shall destroy a thread
+    attributes object. An implementation may cause <i>pthread_attr_destroy</i>()
+    to set <i>attr</i> to an implementation-defined invalid value. A destroyed
+    <i>attr</i> attributes object can be reinitialized using
+    <i>pthread_attr_init</i>(); the results of otherwise referencing the object
+    after it has been destroyed are undefined.</p>
+<p class="Pp">The <i>pthread_attr_init</i>() function shall initialize a thread
+    attributes object <i>attr</i> with the default value for all of the
+    individual attributes used by a given implementation.</p>
+<p class="Pp">The resulting attributes object (possibly modified by setting
+    individual attribute values) when used by <i>pthread_create</i>() defines
+    the attributes of the thread created. A single attributes object can be used
+    in multiple simultaneous calls to <i>pthread_create</i>(). Results are
+    undefined if <i>pthread_attr_init</i>() is called specifying an already
+    initialized <i>attr</i> attributes object.</p>
+<p class="Pp">The behavior is undefined if the value specified by the
+    <i>attr</i> argument to <i>pthread_attr_destroy</i>() does not refer to an
+    initialized thread attributes object.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>pthread_attr_destroy</i>() and
+    <i>pthread_attr_init</i>() shall return a value of 0; otherwise, an error
+    number shall be returned to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>pthread_attr_init</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient memory exists to initialize the thread attributes
+    object.</dd>
+</dl>
+<p class="Pp">These functions shall not return an error code of
+  <b>[EINTR]</b>.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">Attributes objects are provided for threads, mutexes, and
+    condition variables as a mechanism to support probable future
+    standardization in these areas without requiring that the function itself be
+    changed.</p>
+<p class="Pp">Attributes objects provide clean isolation of the configurable
+    aspects of threads. For example, ``stack size'' is an important attribute of
+    a thread, but it cannot be expressed portably. When porting a threaded
+    program, stack sizes often need to be adjusted. The use of attributes
+    objects can help by allowing the changes to be isolated in a single place,
+    rather than being spread across every instance of thread creation.</p>
+<p class="Pp">Attributes objects can be used to set up ``classes' of threads
+    with similar attributes; for example, ``threads with large stacks and high
+    priority'' or ``threads with minimal stacks''. These classes can be defined
+    in a single place and then referenced wherever threads need to be created.
+    Changes to ``class'' decisions become straightforward, and detailed analysis
+    of each <i>pthread_create</i>() call is not required.</p>
+<p class="Pp">The attributes objects are defined as opaque types as an aid to
+    extensibility. If these objects had been specified as structures, adding new
+    attributes would force recompilation of all multi-threaded programs when the
+    attributes objects are extended; this might not be possible if different
+    program components were supplied by different vendors.</p>
+<p class="Pp">Additionally, opaque attributes objects present opportunities for
+    improving performance. Argument validity can be checked once when attributes
+    are set, rather than each time a thread is created. Implementations often
+    need to cache kernel objects that are expensive to create. Opaque attributes
+    objects provide an efficient mechanism to detect when cached objects become
+    invalid due to attribute changes.</p>
+<p class="Pp">Since assignment is not necessarily defined on a given opaque
+    type, implementation-defined default values cannot be defined in a portable
+    way. The solution to this problem is to allow attributes objects to be
+    initialized dynamically by attributes object initialization functions, so
+    that default values can be supplied automatically by the implementation.</p>
+<p class="Pp">The following proposal was provided as a suggested alternative to
+    the supplied attributes:</p>
+<dl class="Bl-tag">
+  <dt> 1.</dt>
+  <dd>Maintain the style of passing a parameter formed by the bitwise-inclusive
+      OR of flags to the initialization routines (<i>pthread_create</i>(),
+      <i>pthread_mutex_init</i>(), <i>pthread_cond_init</i>()). The parameter
+      containing the flags should be an opaque type for extensibility. If no
+      flags are set in the parameter, then the objects are created with default
+      characteristics. An implementation may specify implementation-defined flag
+      values and associated behavior.</dd>
+  <dt> 2.</dt>
+  <dd>If further specialization of mutexes and condition variables is necessary,
+      implementations may specify additional procedures that operate on the
+      <b>pthread_mutex_t</b> and <b>pthread_cond_t</b> objects (instead of on
+      attributes objects).</dd>
+</dl>
+<p class="Pp">The difficulties with this solution are:</p>
+<dl class="Bl-tag">
+  <dt> 1.</dt>
+  <dd>A bitmask is not opaque if bits have to be set into bitvector attributes
+      objects using explicitly-coded bitwise-inclusive OR operations. If the set
+      of options exceeds an <b>int</b>, application programmers need to know the
+      location of each bit. If bits are set or read by encapsulation (that is,
+      get and set functions), then the bitmask is merely an implementation of
+      attributes objects as currently defined and should not be exposed to the
+      programmer.</dd>
+  <dt> 2.</dt>
+  <dd>Many attributes are not Boolean or very small integral values. For
+      example, scheduling policy may be placed in 3-bit or 4-bit, but priority
+      requires 5-bit or more, thereby taking up at least 8 bits out of a
+      possible 16 bits on machines with 16-bit integers. Because of this, the
+      bitmask can only reasonably control whether particular attributes are set
+      or not, and it cannot serve as the repository of the value itself. The
+      value needs to be specified as a function parameter (which is
+      non-extensible), or by setting a structure field (which is non-opaque), or
+      by get and set functions (making the bitmask a redundant addition to the
+      attributes objects).</dd>
+</dl>
+<p class="Pp">Stack size is defined as an optional attribute because the very
+    notion of a stack is inherently machine-dependent. Some implementations may
+    not be able to change the size of the stack, for example, and others may not
+    need to because stack pages may be discontiguous and can be allocated and
+    released on demand.</p>
+<p class="Pp">The attribute mechanism has been designed in large measure for
+    extensibility. Future extensions to the attribute mechanism or to any
+    attributes object defined in this volume of POSIX.1‐2017 has to be
+    done with care so as not to affect binary-compatibility.</p>
+<p class="Pp">Attributes objects, even if allocated by means of dynamic
+    allocation functions such as <i>malloc</i>(), may have their size fixed at
+    compile time. This means, for example, a <i>pthread_create</i>() in an
+    implementation with extensions to <b>pthread_attr_t</b> cannot look beyond
+    the area that the binary application assumes is valid. This suggests that
+    implementations should maintain a size field in the attributes object, as
+    well as possibly version information, if extensions in different directions
+    (possibly by different vendors) are to be accommodated.</p>
+<p class="Pp">If an implementation detects that the value specified by the
+    <i>attr</i> argument to <i>pthread_attr_destroy</i>() does not refer to an
+    initialized thread attributes object, it is recommended that the function
+    should fail and report an <b>[EINVAL]</b> error.</p>
+<p class="Pp">If an implementation detects that the value specified by the
+    <i>attr</i> argument to <i>pthread_attr_init</i>() refers to an already
+    initialized thread attributes object, it is recommended that the function
+    should fail and report an <b>[EBUSY]</b> error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>pthread_attr_getstacksize</i>()</i>,
+    <i><i>pthread_attr_getdetachstate</i>()</i>,
+  <i><i>pthread_create</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;pthread.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

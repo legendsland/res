@@ -1,0 +1,145 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 2003 Andries Brouwer (aeb@cwi.nl)
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+   --><head>
+<meta name="dc.identifier" content="res/3b2b0763a0bf61ab22e1eee3f68a9f587776ee03">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>aio_cancel(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">aio_cancel(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">aio_cancel(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">aio_cancel - cancel an outstanding asynchronous I/O request</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Real-time library (<i>librt</i>, <i>-lrt</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;aio.h&gt;</b></pre>
+<pre><b>int aio_cancel(int </b><i>fd</i><b>, struct aiocb *</b><i>aiocbp</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>aio_cancel</b>() function attempts to cancel outstanding
+    asynchronous I/O requests for the file descriptor <i>fd</i>. If
+    <i>aiocbp</i> is NULL, all such requests are canceled. Otherwise, only the
+    request described by the control block pointed to by <i>aiocbp</i> is
+    canceled. (See <b>aio</b>(7) for a description of the <i>aiocb</i>
+    structure.)</p>
+<p class="Pp">Normal asynchronous notification occurs for canceled requests (see
+    <b>aio</b>(7) and <b>sigevent</b>(7)). The request return status
+    (<b>aio_return</b>(3)) is set to -1, and the request error status
+    (<b>aio_error</b>(3)) is set to <b>ECANCELED</b>. The control block of
+    requests that cannot be canceled is not changed.</p>
+<p class="Pp">If the request could not be canceled, then it will terminate in
+    the usual way after performing the I/O operation. (In this case,
+    <b>aio_error</b>(3) will return the status <b>EINPROGRESSS</b>.)</p>
+<p class="Pp">If <i>aiocbp</i> is not NULL, and <i>fd</i> differs from the file
+    descriptor with which the asynchronous operation was initiated, unspecified
+    results occur.</p>
+<p class="Pp">Which operations are cancelable is implementation-defined.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <b>aio_cancel</b>() function returns one of the following
+    values:</p>
+<dl class="Bl-tag">
+  <dt id="AIO_CANCELED"><a class="permalink" href="#AIO_CANCELED"><b>AIO_CANCELED</b></a></dt>
+  <dd>All requests were successfully canceled.</dd>
+  <dt id="AIO_NOTCANCELED"><a class="permalink" href="#AIO_NOTCANCELED"><b>AIO_NOTCANCELED</b></a></dt>
+  <dd>At least one of the requests specified was not canceled because it was in
+      progress. In this case, one may check the status of individual requests
+      using <b>aio_error</b>(3).</dd>
+  <dt id="AIO_ALLDONE"><a class="permalink" href="#AIO_ALLDONE"><b>AIO_ALLDONE</b></a></dt>
+  <dd>All requests had already been completed before the call.</dd>
+  <dt>-1</dt>
+  <dd>An error occurred. The cause of the error can be found by inspecting
+      <i>errno</i>.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd><i>fd</i> is not a valid file descriptor.</dd>
+  <dt id="ENOSYS"><a class="permalink" href="#ENOSYS"><b>ENOSYS</b></a></dt>
+  <dd><b>aio_cancel</b>() is not implemented.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>aio_cancel ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>aio_cancel</b>() function is available since glibc 2.1.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">See <b>aio</b>(7).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>aio_error</b>(3), <b>aio_fsync</b>(3), <b>aio_read</b>(3),
+    <b>aio_return</b>(3), <b>aio_suspend</b>(3), <b>aio_write</b>(3),
+    <b>lio_listio</b>(3), <b>aio</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

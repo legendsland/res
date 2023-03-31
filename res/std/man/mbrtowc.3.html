@@ -1,0 +1,152 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) Bruno Haible <haible@clisp.cons.org>
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+  
+   References consulted:
+     GNU glibc-2 source code and manual
+     Dinkumware C library reference http://www.dinkumware.com/
+     OpenGroup's Single UNIX specification
+        http://www.UNIX-systems.org/online.html
+     ISO/IEC 9899:1999
+   --><head>
+<meta name="dc.identifier" content="res/ad979756e3da7045fbd999941d1c1f61c06658cf">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>mbrtowc(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">mbrtowc(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">mbrtowc(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">mbrtowc - convert a multibyte sequence to a wide character</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;wchar.h&gt;</b></pre>
+<pre><b>size_t mbrtowc(wchar_t *restrict </b><i>pwc</i><b>, const char </b><i>s</i><b>[restrict .</b><i>n</i><b>],</b>
+<b>               size_t </b><i>n</i><b>, mbstate_t *restrict </b><i>ps</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The main case for this function is when <i>s</i> is not NULL and
+    <i>pwc</i> is not NULL. In this case, the <b>mbrtowc</b>() function inspects
+    at most <i>n</i> bytes of the multibyte string starting at <i>s</i>,
+    extracts the next complete multibyte character, converts it to a wide
+    character and stores it at <i>*pwc</i>. It updates the shift state
+    <i>*ps</i>. If the converted wide character is not L'\0' (the null wide
+    character), it returns the number of bytes that were consumed from <i>s</i>.
+    If the converted wide character is L'\0', it resets the shift state
+    <i>*ps</i> to the initial state and returns 0.</p>
+<p class="Pp">If the <i>n</i> bytes starting at <i>s</i> do not contain a
+    complete multibyte character, <b>mbrtowc</b>() returns
+    <i>(size_t)&nbsp;-2</i>. This can happen even if <i>n</i> &gt;=
+    <i>MB_CUR_MAX</i>, if the multibyte string contains redundant shift
+    sequences.</p>
+<p class="Pp">If the multibyte string starting at <i>s</i> contains an invalid
+    multibyte sequence before the next complete character, <b>mbrtowc</b>()
+    returns <i>(size_t)&nbsp;-1</i> and sets <i>errno</i> to <b>EILSEQ</b>. In
+    this case, the effects on <i>*ps</i> are undefined.</p>
+<p class="Pp">A different case is when <i>s</i> is not NULL but <i>pwc</i> is
+    NULL. In this case, the <b>mbrtowc</b>() function behaves as above, except
+    that it does not store the converted wide character in memory.</p>
+<p class="Pp">A third case is when <i>s</i> is NULL. In this case, <i>pwc</i>
+    and <i>n</i> are ignored. If the conversion state represented by <i>*ps</i>
+    denotes an incomplete multibyte character conversion, the <b>mbrtowc</b>()
+    function returns <i>(size_t)&nbsp;-1</i>, sets <i>errno</i> to
+    <b>EILSEQ</b>, and leaves <i>*ps</i> in an undefined state. Otherwise, the
+    <b>mbrtowc</b>() function puts <i>*ps</i> in the initial state and returns
+    0.</p>
+<p class="Pp">In all of the above cases, if <i>ps</i> is NULL, a static
+    anonymous state known only to the <b>mbrtowc</b>() function is used instead.
+    Otherwise, <i>*ps</i> must be a valid <i>mbstate_t</i> object. An
+    <i>mbstate_t</i> object <i>a</i> can be initialized to the initial state by
+    zeroing it, for example using</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>memset(&amp;a, 0, sizeof(a));
+</pre>
+<br>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <b>mbrtowc</b>() function returns the number of bytes parsed
+    from the multibyte sequence starting at <i>s</i>, if a non-L'\0' wide
+    character was recognized. It returns 0, if a L'\0' wide character was
+    recognized. It returns <i>(size_t)&nbsp;-1</i> and sets <i>errno</i> to
+    <b>EILSEQ</b>, if an invalid multibyte sequence was encountered. It returns
+    <i>(size_t)&nbsp;-2</i> if it couldn't parse a complete multibyte
+    character, meaning that <i>n</i> should be increased.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>mbrtowc ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race:mbrtowc/!ps</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, C99.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The behavior of <b>mbrtowc</b>() depends on the <b>LC_CTYPE</b>
+    category of the current locale.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>mbsinit</b>(3), <b>mbsrtowcs</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

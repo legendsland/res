@@ -1,0 +1,397 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/0894bffa7022f670b948f2e81f85e6b7d12f49e1">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>GETOPTS(1P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">GETOPTS(1P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">GETOPTS(1P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getopts — parse utility options</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>getopts <i>optstring name </i><b>[</b><i>arg</i>...<b>]</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>getopts</i> utility shall retrieve options and
+    option-arguments from a list of parameters. It shall support the Utility
+    Syntax Guidelines 3 to 10, inclusive, described in the Base Definitions
+    volume of POSIX.1‐2017, <i>Section 12.2</i>, <i>Utility Syntax
+    Guidelines</i>.</p>
+<p class="Pp">Each time it is invoked, the <i>getopts</i> utility shall place
+    the value of the next option in the shell variable specified by the
+    <i>name</i> operand and the index of the next argument to be processed in
+    the shell variable <i>OPTIND</i>. Whenever the shell is invoked,
+    <i>OPTIND</i> shall be initialized to 1.</p>
+<p class="Pp">When the option requires an option-argument, the <i>getopts</i>
+    utility shall place it in the shell variable <i>OPTARG</i>. If no option was
+    found, or if the option that was found does not have an option-argument,
+    <i>OPTARG</i> shall be unset.</p>
+<p class="Pp">If an option character not contained in the <i>optstring</i>
+    operand is found where an option character is expected, the shell variable
+    specified by <i>name</i> shall be set to the &lt;question-mark&gt;
+    (<b>'?'</b>) character. In this case, if the first character in
+    <i>optstring</i> is a &lt;colon&gt; (<b>':'</b>), the shell variable
+    <i>OPTARG</i> shall be set to the option character found, but no output
+    shall be written to standard error; otherwise, the shell variable
+    <i>OPTARG</i> shall be unset and a diagnostic message shall be written to
+    standard error. This condition shall be considered to be an error detected
+    in the way arguments were presented to the invoking application, but shall
+    not be an error in <i>getopts</i> processing.</p>
+<p class="Pp">If an option-argument is missing:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>If the first character of <i>optstring</i> is a &lt;colon&gt;, the shell
+      variable specified by <i>name</i> shall be set to the &lt;colon&gt;
+      character and the shell variable <i>OPTARG</i> shall be set to the option
+      character found.</dd>
+  <dt> *</dt>
+  <dd>Otherwise, the shell variable specified by <i>name</i> shall be set to the
+      &lt;question-mark&gt; character, the shell variable <i>OPTARG</i> shall be
+      unset, and a diagnostic message shall be written to standard error. This
+      condition shall be considered to be an error detected in the way arguments
+      were presented to the invoking application, but shall not be an error in
+      <i>getopts</i> processing; a diagnostic message shall be written as
+      stated, but the exit status shall be zero.</dd>
+</dl>
+<p class="Pp">When the end of options is encountered, the <i>getopts</i> utility
+    shall exit with a return value greater than zero; the shell variable
+    <i>OPTIND</i> shall be set to the index of the first operand, or the value
+    <b>"$#"</b>+1 if there are no operands; the <i>name</i> variable
+    shall be set to the &lt;question-mark&gt; character. Any of the following
+    shall identify the end of options: the first <b>"--"</b> argument
+    that is not an option-argument, finding an argument that is not an
+    option-argument and does not begin with a <b>'-'</b>, or encountering an
+    error.</p>
+<p class="Pp">The shell variables <i>OPTIND</i> and <i>OPTARG</i> shall be local
+    to the caller of <i>getopts</i> and shall not be exported by default.</p>
+<p class="Pp">The shell variable specified by the <i>name</i> operand,
+    <i>OPTIND</i>, and <i>OPTARG</i> shall affect the current shell execution
+    environment; see <i>Section 2.12</i>, <i>Shell Execution
+  Environment</i>.</p>
+<p class="Pp">If the application sets <i>OPTIND</i> to the value 1, a new set of
+    parameters can be used: either the current positional parameters or new
+    <i>arg</i> values. Any other attempt to invoke <i>getopts</i> multiple times
+    in a single shell execution environment with parameters (positional
+    parameters or <i>arg</i> operands) that are not the same in all invocations,
+    or with an <i>OPTIND</i> value modified to be a value other than 1, produces
+    unspecified results.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OPTIONS"><a class="permalink" href="#OPTIONS">OPTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OPERANDS"><a class="permalink" href="#OPERANDS">OPERANDS</a></h1>
+<p class="Pp">The following operands shall be supported:</p>
+<dl class="Bl-tag">
+  <dt id="optstring"><a class="permalink" href="#optstring"><i>optstring</i></a></dt>
+  <dd>A string containing the option characters recognized by the utility
+      invoking <i>getopts</i>. If a character is followed by a &lt;colon&gt;,
+      the option shall be expected to have an argument, which should be supplied
+      as a separate argument. Applications should specify an option character
+      and its option-argument as separate arguments, but <i>getopts</i> shall
+      interpret the characters following an option character requiring arguments
+      as an argument whether or not this is done. An explicit null
+      option-argument need not be recognized if it is not supplied as a separate
+      argument when <i>getopts</i> is invoked. (See also the <i>getopt</i>()
+      function defined in the System Interfaces volume of POSIX.1‐2017.)
+      The characters &lt;question-mark&gt; and &lt;colon&gt; shall not be used
+      as option characters by an application. The use of other option characters
+      that are not alphanumeric produces unspecified results. If the
+      option-argument is not supplied as a separate argument from the option
+      character, the value in <i>OPTARG</i> shall be stripped of the option
+      character and the <b>'-'</b>. The first character in <i>optstring</i>
+      determines how <i>getopts</i> behaves if an option character is not known
+      or an option-argument is missing.</dd>
+  <dt id="name"><a class="permalink" href="#name"><i>name</i></a></dt>
+  <dd>The name of a shell variable that shall be set by the <i>getopts</i>
+      utility to the option character that was found.</dd>
+</dl>
+<p class="Pp">The <i>getopts</i> utility by default shall parse positional
+    parameters passed to the invoking shell procedure. If <i>arg</i>s are given,
+    they shall be parsed instead of the positional parameters.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDIN"><a class="permalink" href="#STDIN">STDIN</a></h1>
+<p class="Pp">Not used.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="INPUT_FILES"><a class="permalink" href="#INPUT_FILES">INPUT
+  FILES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ENVIRONMENT_VARIABLES"><a class="permalink" href="#ENVIRONMENT_VARIABLES">ENVIRONMENT
+  VARIABLES</a></h1>
+<p class="Pp">The following environment variables shall affect the execution of
+    <i>getopts</i>:</p>
+<dl class="Bl-tag">
+  <dt id="LANG"><a class="permalink" href="#LANG"><i>LANG</i></a></dt>
+  <dd>Provide a default value for the internationalization variables that are
+      unset or null. (See the Base Definitions volume of POSIX.1‐2017,
+      <i>Section 8.2</i>, <i>Internationalization Variables</i> for the
+      precedence of internationalization variables used to determine the values
+      of locale categories.)</dd>
+  <dt id="LC_ALL"><a class="permalink" href="#LC_ALL"><i>LC_ALL</i></a></dt>
+  <dd>If set to a non-empty string value, override the values of all the other
+      internationalization variables.</dd>
+  <dt id="LC_CTYPE"><a class="permalink" href="#LC_CTYPE"><i>LC_CTYPE</i></a></dt>
+  <dd>Determine the locale for the interpretation of sequences of bytes of text
+      data as characters (for example, single-byte as opposed to multi-byte
+      characters in arguments and input files).</dd>
+  <dt id="LC_MESSAGES"><a class="permalink" href="#LC_MESSAGES"><i>LC_MESSAGES</i></a></dt>
+  <dd>
+    <br>
+    Determine the locale that should be used to affect the format and contents
+      of diagnostic messages written to standard error.</dd>
+  <dt id="NLSPATH"><a class="permalink" href="#NLSPATH"><i>NLSPATH</i></a></dt>
+  <dd>Determine the location of message catalogs for the processing of
+      <i>LC_MESSAGES</i>.</dd>
+  <dt id="OPTIND"><a class="permalink" href="#OPTIND"><i>OPTIND</i></a></dt>
+  <dd>This variable shall be used by the <i>getopts</i> utility as the index of
+      the next argument to be processed.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ASYNCHRONOUS_EVENTS"><a class="permalink" href="#ASYNCHRONOUS_EVENTS">ASYNCHRONOUS
+  EVENTS</a></h1>
+<p class="Pp">Default.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDOUT"><a class="permalink" href="#STDOUT">STDOUT</a></h1>
+<p class="Pp">Not used.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDERR"><a class="permalink" href="#STDERR">STDERR</a></h1>
+<p class="Pp">Whenever an error is detected and the first character in the
+    <i>optstring</i> operand is not a &lt;colon&gt; (<b>':'</b>), a diagnostic
+    message shall be written to standard error with the following information in
+    an unspecified format:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>The invoking program name shall be identified in the message. The invoking
+      program name shall be the value of the shell special parameter 0 (see
+      <i>Section 2.5.2</i>, <i>Special Parameters</i>) at the time the
+      <i>getopts</i> utility is invoked. A name equivalent to:</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>basename "$0"</pre>
+</div>
+<p class="Pp">may be used.</p>
+</div>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>If an option is found that was not specified in <i>optstring</i>, this
+      error is identified and the invalid option character shall be identified
+      in the message.</dd>
+  <dt> *</dt>
+  <dd>If an option requiring an option-argument is found, but an option-argument
+      is not found, this error shall be identified and the invalid option
+      character shall be identified in the message.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OUTPUT_FILES"><a class="permalink" href="#OUTPUT_FILES">OUTPUT
+  FILES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXTENDED_DESCRIPTION"><a class="permalink" href="#EXTENDED_DESCRIPTION">EXTENDED
+  DESCRIPTION</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXIT_STATUS"><a class="permalink" href="#EXIT_STATUS">EXIT
+  STATUS</a></h1>
+<p class="Pp">The following exit values shall be returned:</p>
+<dl class="Bl-tag">
+  <dt>&nbsp;0</dt>
+  <dd>An option, specified or unspecified by <i>optstring</i>, was found.</dd>
+  <dt>&gt;0</dt>
+  <dd>The end of options was encountered or an error occurred.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="CONSEQUENCES_OF_ERRORS"><a class="permalink" href="#CONSEQUENCES_OF_ERRORS">CONSEQUENCES
+  OF ERRORS</a></h1>
+<p class="Pp">Default.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">Since <i>getopts</i> affects the current shell execution
+    environment, it is generally provided as a shell regular built-in. If it is
+    called in a subshell or separate utility execution environment, such as one
+    of the following:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>(getopts abc value "$@")
+nohup getopts ...
+find . -exec getopts ... \;</pre>
+</div>
+<p class="Pp">it does not affect the shell variables in the caller's
+    environment.</p>
+<p class="Pp">Note that shell functions share <i>OPTIND</i> with the calling
+    shell even though the positional parameters are changed. If the calling
+    shell and any of its functions uses <i>getopts</i> to parse arguments, the
+    results are unspecified.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The following example script parses and displays its
+  arguments:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>aflag=
+bflag=
+while getopts ab: name
+do
+<br>
+    case $name in
+<br>
+    a)    aflag=1;;
+<br>
+    b)    bflag=1
+<br>
+          bval="$OPTARG";;
+<br>
+    ?)   printf "Usage: %s: [-a] [-b value] args\n" $0
+<br>
+          exit 2;;
+<br>
+    esac
+done
+if [ ! -z "$aflag" ]; then
+<br>
+    printf "Option -a specified\n"
+fi
+if [ ! -z "$bflag" ]; then
+<br>
+    printf 'Option -b "%s" specified\n' "$bval"
+fi
+shift $(($OPTIND - 1))
+printf "Remaining arguments are: %s\n$*"</pre>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The <i>getopts</i> utility was chosen in preference to the System
+    V <i>getopt</i> utility because <i>getopts</i> handles option-arguments
+    containing &lt;blank&gt; characters.</p>
+<p class="Pp">The <i>OPTARG</i> variable is not mentioned in the ENVIRONMENT
+    VARIABLES section because it does not affect the execution of
+    <i>getopts</i>; it is one of the few ``output-only'' variables used by the
+    standard utilities.</p>
+<p class="Pp">The &lt;colon&gt; is not allowed as an option character because
+    that is not historical behavior, and it violates the Utility Syntax
+    Guidelines. The &lt;colon&gt; is now specified to behave as in the KornShell
+    version of the <i>getopts</i> utility; when used as the first character in
+    the <i>optstring</i> operand, it disables diagnostics concerning missing
+    option-arguments and unexpected option characters. This replaces the use of
+    the <i>OPTERR</i> variable that was specified in an early proposal.</p>
+<p class="Pp">The formats of the diagnostic messages produced by the
+    <i>getopts</i> utility and the <i>getopt</i>() function are not fully
+    specified because implementations with superior (``friendlier'') formats
+    objected to the formats used by some historical implementations. The
+    standard developers considered it important that the information in the
+    messages used be uniform between <i>getopts</i> and <i>getopt</i>(). Exact
+    duplication of the messages might not be possible, particularly if a utility
+    is built on another system that has a different <i>getopt</i>() function,
+    but the messages must have specific information included so that the program
+    name, invalid option character, and type of error can be distinguished by a
+    user.</p>
+<p class="Pp">Only a rare application program intercepts a <i>getopts</i>
+    standard error message and wants to parse it. Therefore, implementations are
+    free to choose the most usable messages they can devise. The following
+    formats are used by many historical implementations:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>"%s: illegal option -- %c\n", &lt;<i>program name</i>&gt;, &lt;<i>option character</i>&gt;</pre>
+<pre>"%s: option requires an argument -- %c\n", &lt;<i>program name</i>&gt;, \
+<br>
+    &lt;<i>option character</i>&gt;</pre>
+</div>
+<p class="Pp">Historical shells with built-in versions of <i>getopt</i>() or
+    <i>getopts</i> have used different formats, frequently not even indicating
+    the option character found in error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i>Section 2.5.2</i>, <i>Special Parameters</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Chapter
+    8</i>, <i>Environment Variables</i>, <i>Section 12.2</i>, <i>Utility Syntax
+    Guidelines</i></p>
+<p class="Pp">The System Interfaces volume of POSIX.1‐2017,
+    <i><i>getopt</i>()</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

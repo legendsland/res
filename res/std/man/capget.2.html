@@ -1,0 +1,237 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright: written by Andrew Morgan <morgan@kernel.org>
+   and Copyright 2006, 2008, Michael Kerrisk <tmk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: GPL-1.0-or-later
+  
+   Modified by David A. Wheeler <dwheeler@ida.org>
+   Modified 2004-05-27, mtk
+   Modified 2004-06-21, aeb
+   Modified 2008-04-28, morgan of kernel.org
+       Update in line with addition of file capabilities and
+       64-bit capability sets in Linux 2.6.2[45].
+   Modified 2009-01-26, andi kleen
+   --><head>
+<meta name="dc.identifier" content="res/e9b3d4c733f8357b58beec97420c3308bf239146">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>capget(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">capget(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">capget(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">capget, capset - set/get capabilities of thread(s)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;linux/capability.h&gt;</b> /* Definition of <b>CAP_*</b> and
+<b>                                 _LINUX_CAPABILITY_*</b> constants */
+<b>#include &lt;sys/syscall.h&gt;</b>      /* Definition of <b>SYS_*</b> constants */
+<b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int syscall(SYS_capget, cap_user_header_t </b><i>hdrp</i><b>,</b>
+<b>            cap_user_data_t </b><i>datap</i><b>);</b>
+<b>int syscall(SYS_capset, cap_user_header_t </b><i>hdrp</i><b>,</b>
+<b>            const cap_user_data_t </b><i>datap</i><b>);</b></pre>
+<p class="Pp"><i>Note</i>: glibc provides no wrappers for these system calls,
+    necessitating the use of <b>syscall</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">These two system calls are the raw kernel interface for getting
+    and setting thread capabilities. Not only are these system calls specific to
+    Linux, but the kernel API is likely to change and use of these system calls
+    (in particular the format of the <i>cap_user_*_t</i> types) is subject to
+    extension with each kernel revision, but old programs will keep working.</p>
+<p class="Pp">The portable interfaces are <b>cap_set_proc</b>(3) and
+    <b>cap_get_proc</b>(3); if possible, you should use those interfaces in
+    applications; see NOTES.</p>
+<section class="Ss">
+<h2 class="Ss" id="Current_details"><a class="permalink" href="#Current_details">Current
+  details</a></h2>
+<p class="Pp">Now that you have been warned, some current kernel details. The
+    structures are defined as follows.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>#define _LINUX_CAPABILITY_VERSION_1  0x19980330
+#define _LINUX_CAPABILITY_U32S_1     1
+<br>
+        /* V2 added in Linux 2.6.25; deprecated */
+#define _LINUX_CAPABILITY_VERSION_2  0x20071026
+#define _LINUX_CAPABILITY_U32S_2     2
+<br>
+        /* V3 added in Linux 2.6.26 */
+#define _LINUX_CAPABILITY_VERSION_3  0x20080522
+#define _LINUX_CAPABILITY_U32S_3     2
+typedef struct __user_cap_header_struct {
+<br>
+   __u32 version;
+<br>
+   int pid;
+} *cap_user_header_t;
+typedef struct __user_cap_data_struct {
+<br>
+   __u32 effective;
+<br>
+   __u32 permitted;
+<br>
+   __u32 inheritable;
+} *cap_user_data_t;
+</pre>
+<br>
+<p class="Pp">The <i>effective</i>, <i>permitted</i>, and <i>inheritable</i>
+    fields are bit masks of the capabilities defined in <b>capabilities</b>(7).
+    Note that the <b>CAP_*</b> values are bit indexes and need to be bit-shifted
+    before ORing into the bit fields. To define the structures for passing to
+    the system call, you have to use the <i>struct __user_cap_header_struct</i>
+    and <i>struct __user_cap_data_struct</i> names because the typedefs are only
+    pointers.</p>
+<p class="Pp">Kernels prior to Linux 2.6.25 prefer 32-bit capabilities with
+    version <b>_LINUX_CAPABILITY_VERSION_1</b>. Linux 2.6.25 added 64-bit
+    capability sets, with version <b>_LINUX_CAPABILITY_VERSION_2</b>. There was,
+    however, an API glitch, and Linux 2.6.26 added
+    <b>_LINUX_CAPABILITY_VERSION_3</b> to fix the problem.</p>
+<p class="Pp">Note that 64-bit capabilities use <i>datap[0]</i> and
+    <i>datap[1]</i>, whereas 32-bit capabilities use only <i>datap[0]</i>.</p>
+<p class="Pp">On kernels that support file capabilities (VFS capabilities
+    support), these system calls behave slightly differently. This support was
+    added as an option in Linux 2.6.24, and became fixed (nonoptional) in Linux
+    2.6.33.</p>
+<p class="Pp">For <b>capget</b>() calls, one can probe the capabilities of any
+    process by specifying its process ID with the <i>hdrp-&gt;pid</i> field
+    value.</p>
+<p class="Pp">For details on the data, see <b>capabilities</b>(7).</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="With_VFS_capabilities_support"><a class="permalink" href="#With_VFS_capabilities_support">With
+  VFS capabilities support</a></h2>
+<p class="Pp">VFS capabilities employ a file extended attribute (see
+    <b>xattr</b>(7)) to allow capabilities to be attached to executables. This
+    privilege model obsoletes kernel support for one process asynchronously
+    setting the capabilities of another. That is, on kernels that have VFS
+    capabilities support, when calling <b>capset</b>(), the only permitted
+    values for <i>hdrp-&gt;pid</i> are 0 or, equivalently, the value returned by
+    <b>gettid</b>(2).</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Without_VFS_capabilities_support"><a class="permalink" href="#Without_VFS_capabilities_support">Without
+  VFS capabilities support</a></h2>
+<p class="Pp">On older kernels that do not provide VFS capabilities support
+    <b>capset</b>() can, if the caller has the <b>CAP_SETPCAP</b> capability, be
+    used to change not only the caller's own capabilities, but also the
+    capabilities of other threads. The call operates on the capabilities of the
+    thread specified by the <i>pid</i> field of <i>hdrp</i> when that is
+    nonzero, or on the capabilities of the calling thread if <i>pid</i> is 0. If
+    <i>pid</i> refers to a single-threaded process, then <i>pid</i> can be
+    specified as a traditional process ID; operating on a thread of a
+    multithreaded process requires a thread ID of the type returned by
+    <b>gettid</b>(2). For <b>capset</b>(), <i>pid</i> can also be: -1, meaning
+    perform the change on all threads except the caller and <b>init</b>(1); or a
+    value less than -1, in which case the change is applied to all members of
+    the process group whose ID is -<i>pid</i>.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, zero is returned. On error, -1 is returned, and
+    <i>errno</i> is set to indicate the error.</p>
+<p class="Pp">The calls fail with the error <b>EINVAL</b>, and set the
+    <i>version</i> field of <i>hdrp</i> to the kernel preferred value of
+    <b>_LINUX_CAPABILITY_VERSION_?</b> when an unsupported <i>version</i> value
+    is specified. In this way, one can probe what the current preferred
+    capability revision is.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>Bad memory address. <i>hdrp</i> must not be NULL. <i>datap</i> may be NULL
+      only when the user is trying to determine the preferred capability version
+      format supported by the kernel.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>One of the arguments was invalid.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>An attempt was made to add a capability to the permitted set, or to set a
+      capability in the effective set that is not in the permitted set.</dd>
+  <dt id="EPERM~2"><a class="permalink" href="#EPERM~2"><b>EPERM</b></a></dt>
+  <dd>An attempt was made to add a capability to the inheritable set, and
+      either:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>that capability was not in the caller's bounding set; or</dd>
+  <dt>•</dt>
+  <dd>the capability was not in the caller's permitted set and the caller lacked
+      the <b>CAP_SETPCAP</b> capability in its effective set.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="EPERM~3"><a class="permalink" href="#EPERM~3"><b>EPERM</b></a></dt>
+  <dd>The caller attempted to use <b>capset</b>() to modify the capabilities of
+      a thread other than itself, but lacked sufficient privilege. For kernels
+      supporting VFS capabilities, this is never permitted. For kernels lacking
+      VFS support, the <b>CAP_SETPCAP</b> capability is required. (A bug in
+      kernels before Linux 2.6.11 meant that this error could also occur if a
+      thread without this capability tried to change its own capabilities by
+      specifying the <i>pid</i> field as a nonzero value (i.e., the value
+      returned by <b>getpid</b>(2)) instead of 0.)</dd>
+  <dt id="ESRCH"><a class="permalink" href="#ESRCH"><b>ESRCH</b></a></dt>
+  <dd>No such thread.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These system calls are Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The portable interface to the capability querying and setting
+    functions is provided by the <i>libcap</i> library and is available here:
+  <br>
+  <a class="Lk" href="http://git.kernel.org/cgit/linux/kernel/git/morgan/libcap.git">http://git.kernel.org/cgit/linux/kernel/git/morgan/libcap.git</a></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>clone</b>(2), <b>gettid</b>(2), <b>capabilities</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

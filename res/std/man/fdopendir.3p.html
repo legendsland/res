@@ -1,0 +1,317 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/cb32d0c06548127d0915b0fcd5e9cbf4f9c8dda4">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>FDOPENDIR(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">FDOPENDIR(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">FDOPENDIR(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">fdopendir, opendir — open directory associated with file
+    descriptor</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;dirent.h&gt;</pre>
+<pre>DIR *fdopendir(int <i>fd</i>);
+DIR *opendir(const char *<i>dirname</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>fdopendir</i>() function shall be equivalent to the
+    <i>opendir</i>() function except that the directory is specified by a file
+    descriptor rather than by a name. The file offset associated with the file
+    descriptor at the time of the call determines which entries are
+  returned.</p>
+<p class="Pp">Upon successful return from <i>fdopendir</i>(), the file
+    descriptor is under the control of the system, and if any attempt is made to
+    close the file descriptor, or to modify the state of the associated
+    description, other than by means of <i>closedir</i>(), <i>readdir</i>(),
+    <i>readdir_r</i>(), <i>rewinddir</i>(), or <i>seekdir</i>(), the behavior is
+    undefined. Upon calling <i>closedir</i>() the file descriptor shall be
+    closed.</p>
+<p class="Pp">It is unspecified whether the FD_CLOEXEC flag will be set on the
+    file descriptor by a successful call to <i>fdopendir</i>().</p>
+<p class="Pp">The <i>opendir</i>() function shall open a directory stream
+    corresponding to the directory named by the <i>dirname</i> argument. The
+    directory stream is positioned at the first entry. If the type <b>DIR</b> is
+    implemented using a file descriptor, applications shall only be able to open
+    up to a total of {OPEN_MAX} files and directories.</p>
+<p class="Pp">If the type <b>DIR</b> is implemented using a file descriptor, the
+    descriptor shall be obtained as if the O_DIRECTORY flag was passed to
+    <i>open</i>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, these functions shall return a pointer
+    to an object of type <b>DIR</b>. Otherwise, these functions shall return a
+    null pointer and set <i>errno</i> to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>fdopendir</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The <i>fd</i> argument is not a valid file descriptor open for
+    reading.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>The descriptor <i>fd</i> is not associated with a directory.</dd>
+</dl>
+<p class="Pp">The <i>opendir</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>Search permission is denied for the component of the path prefix of
+      <i>dirname</i> or read permission is denied for <i>dirname</i>.</dd>
+  <dt id="ELOOP"><a class="permalink" href="#ELOOP"><b>ELOOP</b></a></dt>
+  <dd>A loop exists in symbolic links encountered during resolution of the
+      <i>dirname</i> argument.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of a component of a pathname is longer than {NAME_MAX}.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>A component of <i>dirname</i> does not name an existing directory or
+      <i>dirname</i> is an empty string.</dd>
+  <dt id="ENOTDIR~2"><a class="permalink" href="#ENOTDIR~2"><b>ENOTDIR</b></a></dt>
+  <dd>A component of <i>dirname</i> names an existing file that is neither a
+      directory nor a symbolic link to a directory.
+    <br>
+  </dd>
+</dl>
+<p class="Pp">The <i>opendir</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="ELOOP~2"><a class="permalink" href="#ELOOP~2"><b>ELOOP</b></a></dt>
+  <dd>More than {SYMLOOP_MAX} symbolic links were encountered during resolution
+      of the <i>dirname</i> argument.</dd>
+  <dt id="EMFILE"><a class="permalink" href="#EMFILE"><b>EMFILE</b></a></dt>
+  <dd>All file descriptors available to the process are currently open.</dd>
+  <dt id="ENAMETOOLONG~2"><a class="permalink" href="#ENAMETOOLONG~2"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of a pathname exceeds {PATH_MAX}, or pathname resolution of a
+      symbolic link produced an intermediate result with a length that exceeds
+      {PATH_MAX}.</dd>
+  <dt id="ENFILE"><a class="permalink" href="#ENFILE"><b>ENFILE</b></a></dt>
+  <dd>Too many files are currently open in the system.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Open_a_Directory_Stream"><a class="permalink" href="#Open_a_Directory_Stream">Open
+  a Directory Stream</a></h2>
+<p class="Pp">The following program fragment demonstrates how the
+    <i>opendir</i>() function is used.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;dirent.h&gt;
+...
+<br>
+    DIR *dir;
+<br>
+    struct dirent *dp;
+...
+<br>
+    if ((dir = opendir (".")) == NULL) {
+<br>
+        perror ("Cannot open .");
+<br>
+        exit (1);
+<br>
+    }</pre>
+<pre><br>
+    while ((dp = readdir (dir)) != NULL) {
+...</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Find_And_Open_a_File"><a class="permalink" href="#Find_And_Open_a_File">Find
+  And Open a File</a></h2>
+<p class="Pp">The following program searches through a given directory looking
+    for files whose name does not begin with a dot and whose size is larger than
+    1 MiB.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;stdio.h&gt;
+#include &lt;dirent.h&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;sys/stat.h&gt;
+#include &lt;stdint.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;</pre>
+<pre>int
+main(int argc, char *argv[])
+{
+<br>
+    struct stat statbuf;
+<br>
+    DIR *d;
+<br>
+    struct dirent *dp;
+<br>
+    int dfd, ffd;</pre>
+<pre><br>
+    if ((d = fdopendir((dfd = open("./tmp", O_RDONLY)))) == NULL) {
+<br>
+        fprintf(stderr, "Cannot open ./tmp directory\n");
+<br>
+        exit(1);
+<br>
+    }
+<br>
+    while ((dp = readdir(d)) != NULL) {
+<br>
+        if (dp-&gt;d_name[0] == '.')
+<br>
+            continue;
+<br>
+        /* there is a possible race condition here as the file
+<br>
+         * could be renamed between the readdir and the open */
+<br>
+        if ((ffd = openat(dfd, dp-&gt;d_name, O_RDONLY)) == -1) {
+<br>
+            perror(dp-&gt;d_name);
+<br>
+            continue;
+<br>
+        }
+<br>
+        if (fstat(ffd, &amp;statbuf) == 0 &amp;&amp; statbuf.st_size &gt; (1024*1024)) {
+<br>
+            /* found it ... */
+<br>
+            printf("%s: %jdK\n", dp-&gt;d_name,
+<br>
+                (intmax_t)(statbuf.st_size / 1024));
+<br>
+        }
+<br>
+        close(ffd);
+<br>
+    }
+<br>
+    closedir(d); // note this implicitly closes dfd
+<br>
+    return 0;
+}</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The <i>opendir</i>() function should be used in conjunction with
+    <i>readdir</i>(), <i>closedir</i>(), and <i>rewinddir</i>() to examine the
+    contents of the directory (see the EXAMPLES section in
+    <i><i>readdir</i>()</i>). This method is recommended for portability.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The purpose of the <i>fdopendir</i>() function is to enable
+    opening files in directories other than the current working directory
+    without exposure to race conditions. Any part of the path of a file could be
+    changed in parallel to a call to <i>opendir</i>(), resulting in unspecified
+    behavior.</p>
+<p class="Pp">Based on historical implementations, the rules about file
+    descriptors apply to directory streams as well. However, this volume of
+    POSIX.1‐2017 does not mandate that the directory stream be
+    implemented using file descriptors. The description of <i>closedir</i>()
+    clarifies that if a file descriptor is used for the directory stream, it is
+    mandatory that <i>closedir</i>() deallocate the file descriptor. When a file
+    descriptor is used to implement the directory stream, it behaves as if the
+    FD_CLOEXEC had been set for the file descriptor.</p>
+<p class="Pp">The directory entries for dot and dot-dot are optional. This
+    volume of POSIX.1‐2017 does not provide a way to test <i>a priori</i>
+    for their existence because an application that is portable must be written
+    to look for (and usually ignore) those entries. Writing code that presumes
+    that they are the first two entries does not always work, as many
+    implementations permit them to be other than the first two entries, with a
+    ``normal'' entry preceding them. There is negligible value in providing a
+    way to determine what the implementation does because the code to deal with
+    dot and dot-dot must be written in any case and because such a flag would
+    add to the list of those flags (which has proven in itself to be
+    objectionable) and might be abused.</p>
+<p class="Pp">Since the structure and buffer allocation, if any, for directory
+    operations are defined by the implementation, this volume of
+    POSIX.1‐2017 imposes no portability requirements for erroneous
+    program constructs, erroneous data, or the use of unspecified values such as
+    the use or referencing of a <i>dirp</i> value or a <b>dirent</b> structure
+    value after a directory stream has been closed or after a <i>fork</i>() or
+    one of the <i>exec</i> function calls.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>closedir</i>()</i>, <i><i>dirfd</i>()</i>,
+    <i><i>fstatat</i>()</i>, <i><i>open</i>()</i>, <i><i>readdir</i>()</i>,
+    <i><i>rewinddir</i>()</i>, <i><i>symlink</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;dirent.h&gt;</b></i>, <i><b>&lt;sys_types.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

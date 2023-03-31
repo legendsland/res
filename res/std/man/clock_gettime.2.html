@@ -1,0 +1,448 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/b990692939b4c56b61bffa21d18c779d875b6745">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>clock_getres(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">clock_getres(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">clock_getres(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">clock_getres, clock_gettime, clock_settime - clock and time
+    functions</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>), since glibc 2.17</p>
+<p class="Pp">Before glibc 2.17, Real-time library (<i>librt</i>,
+  <i>-lrt</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;time.h&gt;</b></pre>
+<pre><b>int clock_getres(clockid_t </b><i>clockid</i><b>, struct timespec *_Nullable </b><i>res</i><b>);</b></pre>
+<pre><b>int clock_gettime(clockid_t </b><i>clockid</i><b>, struct timespec *</b><i>tp</i><b>);</b>
+<b>int clock_settime(clockid_t </b><i>clockid</i><b>, const struct timespec *</b><i>tp</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>clock_getres</b>(), <b>clock_gettime</b>(),
+    <b>clock_settime</b>():</p>
+<pre><br>
+    _POSIX_C_SOURCE &gt;= 199309L</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The function <b>clock_getres</b>() finds the resolution
+    (precision) of the specified clock <i>clockid</i>, and, if <i>res</i> is
+    non-NULL, stores it in the <i>struct timespec</i> pointed to by <i>res</i>.
+    The resolution of clocks depends on the implementation and cannot be
+    configured by a particular process. If the time value pointed to by the
+    argument <i>tp</i> of <b>clock_settime</b>() is not a multiple of
+    <i>res</i>, then it is truncated to a multiple of <i>res</i>.</p>
+<p class="Pp">The functions <b>clock_gettime</b>() and <b>clock_settime</b>()
+    retrieve and set the time of the specified clock <i>clockid</i>.</p>
+<p class="Pp">The <i>res</i> and <i>tp</i> arguments are <b>timespec</b>(3)
+    structures.</p>
+<p class="Pp">The <i>clockid</i> argument is the identifier of the particular
+    clock on which to act. A clock may be system-wide and hence visible for all
+    processes, or per-process if it measures time only within a single
+  process.</p>
+<p class="Pp">All implementations support the system-wide real-time clock, which
+    is identified by <b>CLOCK_REALTIME</b>. Its time represents seconds and
+    nanoseconds since the Epoch. When its time is changed, timers for a relative
+    interval are unaffected, but timers for an absolute point in time are
+    affected.</p>
+<p class="Pp">More clocks may be implemented. The interpretation of the
+    corresponding time values and the effect on timers is unspecified.</p>
+<p class="Pp">Sufficiently recent versions of glibc and the Linux kernel support
+    the following clocks:</p>
+<dl class="Bl-tag">
+  <dt id="CLOCK_REALTIME"><a class="permalink" href="#CLOCK_REALTIME"><b>CLOCK_REALTIME</b></a></dt>
+  <dd>A settable system-wide clock that measures real (i.e., wall-clock) time.
+      Setting this clock requires appropriate privileges. This clock is affected
+      by discontinuous jumps in the system time (e.g., if the system
+      administrator manually changes the clock), and by the incremental
+      adjustments performed by <b>adjtime</b>(3) and NTP.</dd>
+  <dt id="CLOCK_REALTIME_ALARM"><a class="permalink" href="#CLOCK_REALTIME_ALARM"><b>CLOCK_REALTIME_ALARM</b>
+    (since Linux 3.0; Linux-specific)</a></dt>
+  <dd>Like <b>CLOCK_REALTIME</b>, but not settable. See <b>timer_create</b>(2)
+      for further details.</dd>
+  <dt id="CLOCK_REALTIME_COARSE"><a class="permalink" href="#CLOCK_REALTIME_COARSE"><b>CLOCK_REALTIME_COARSE</b>
+    (since Linux 2.6.32; Linux-specific)</a></dt>
+  <dd>A faster but less precise version of <b>CLOCK_REALTIME</b>. This clock is
+      not settable. Use when you need very fast, but not fine-grained
+      timestamps. Requires per-architecture support, and probably also
+      architecture support for this flag in the <b>vdso</b>(7).</dd>
+  <dt id="CLOCK_TAI"><a class="permalink" href="#CLOCK_TAI"><b>CLOCK_TAI</b>
+    (since Linux 3.10; Linux-specific)</a></dt>
+  <dd>A nonsettable system-wide clock derived from wall-clock time but ignoring
+      leap seconds. This clock does not experience discontinuities and backwards
+      jumps caused by NTP inserting leap seconds as <b>CLOCK_REALTIME</b>
+    does.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The acronym TAI refers to International Atomic Time.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="CLOCK_MONOTONIC"><a class="permalink" href="#CLOCK_MONOTONIC"><b>CLOCK_MONOTONIC</b></a></dt>
+  <dd>A nonsettable system-wide clock that represents monotonic time
+      since—as described by POSIX—"some unspecified point in
+      the past". On Linux, that point corresponds to the number of seconds
+      that the system has been running since it was booted.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The <b>CLOCK_MONOTONIC</b> clock is not affected by discontinuous jumps in
+      the system time (e.g., if the system administrator manually changes the
+      clock), but is affected by the incremental adjustments performed by
+      <b>adjtime</b>(3) and NTP. This clock does not count time that the system
+      is suspended. All <b>CLOCK_MONOTONIC</b> variants guarantee that the time
+      returned by consecutive calls will not go backwards, but successive calls
+      may—depending on the architecture—return identical
+      (not-increased) time values.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="CLOCK_MONOTONIC_COARSE"><a class="permalink" href="#CLOCK_MONOTONIC_COARSE"><b>CLOCK_MONOTONIC_COARSE</b>
+    (since Linux 2.6.32; Linux-specific)</a></dt>
+  <dd>A faster but less precise version of <b>CLOCK_MONOTONIC</b>. Use when you
+      need very fast, but not fine-grained timestamps. Requires per-architecture
+      support, and probably also architecture support for this flag in the
+      <b>vdso</b>(7).</dd>
+  <dt id="CLOCK_MONOTONIC_RAW"><a class="permalink" href="#CLOCK_MONOTONIC_RAW"><b>CLOCK_MONOTONIC_RAW</b>
+    (since Linux 2.6.28; Linux-specific)</a></dt>
+  <dd>Similar to <b>CLOCK_MONOTONIC</b>, but provides access to a raw
+      hardware-based time that is not subject to NTP adjustments or the
+      incremental adjustments performed by <b>adjtime</b>(3). This clock does
+      not count time that the system is suspended.</dd>
+  <dt id="CLOCK_BOOTTIME"><a class="permalink" href="#CLOCK_BOOTTIME"><b>CLOCK_BOOTTIME</b>
+    (since Linux 2.6.39; Linux-specific)</a></dt>
+  <dd>A nonsettable system-wide clock that is identical to
+      <b>CLOCK_MONOTONIC</b>, except that it also includes any time that the
+      system is suspended. This allows applications to get a suspend-aware
+      monotonic clock without having to deal with the complications of
+      <b>CLOCK_REALTIME</b>, which may have discontinuities if the time is
+      changed using <b>settimeofday</b>(2) or similar.</dd>
+  <dt id="CLOCK_BOOTTIME_ALARM"><a class="permalink" href="#CLOCK_BOOTTIME_ALARM"><b>CLOCK_BOOTTIME_ALARM</b>
+    (since Linux 3.0; Linux-specific)</a></dt>
+  <dd>Like <b>CLOCK_BOOTTIME</b>. See <b>timer_create</b>(2) for further
+      details.</dd>
+  <dt id="CLOCK_PROCESS_CPUTIME_ID"><a class="permalink" href="#CLOCK_PROCESS_CPUTIME_ID"><b>CLOCK_PROCESS_CPUTIME_ID</b>
+    (since Linux 2.6.12)</a></dt>
+  <dd>This is a clock that measures CPU time consumed by this process (i.e., CPU
+      time consumed by all threads in the process). On Linux, this clock is not
+      settable.</dd>
+  <dt id="CLOCK_THREAD_CPUTIME_ID"><a class="permalink" href="#CLOCK_THREAD_CPUTIME_ID"><b>CLOCK_THREAD_CPUTIME_ID</b>
+    (since Linux 2.6.12)</a></dt>
+  <dd>This is a clock that measures CPU time consumed by this thread. On Linux,
+      this clock is not settable.</dd>
+</dl>
+<p class="Pp">Linux also implements dynamic clock instances as described
+  below.</p>
+<section class="Ss">
+<h2 class="Ss" id="Dynamic_clocks"><a class="permalink" href="#Dynamic_clocks">Dynamic
+  clocks</a></h2>
+<p class="Pp">In addition to the hard-coded System-V style clock IDs described
+    above, Linux also supports POSIX clock operations on certain character
+    devices. Such devices are called "dynamic" clocks, and are
+    supported since Linux 2.6.39.</p>
+<p class="Pp">Using the appropriate macros, open file descriptors may be
+    converted into clock IDs and passed to <b>clock_gettime</b>(),
+    <b>clock_settime</b>(), and <b>clock_adjtime</b>(2). The following example
+    shows how to convert a file descriptor into a dynamic clock ID.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>#define CLOCKFD 3
+#define FD_TO_CLOCKID(fd)   ((~(clockid_t) (fd) &lt;&lt; 3) | CLOCKFD)
+#define CLOCKID_TO_FD(clk)  ((unsigned int) ~((clk) &gt;&gt; 3))
+struct timespec ts;
+clockid_t clkid;
+int fd;
+fd = open("/dev/ptp0", O_RDWR);
+clkid = FD_TO_CLOCKID(fd);
+clock_gettime(clkid, &amp;ts);
+</pre>
+<br>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp"><b>clock_gettime</b>(), <b>clock_settime</b>(), and
+    <b>clock_getres</b>() return 0 for success. On error, -1 is returned and
+    <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd><b>clock_settime</b>() does not have write permission for the dynamic
+      POSIX clock device indicated.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>tp</i> points outside the accessible address space.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The <i>clockid</i> specified is invalid for one of two reasons. Either the
+      System-V style hard coded positive value is out of range, or the dynamic
+      clock ID does not refer to a valid instance of a clock object.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>(<b>clock_settime</b>()): <i>tp.tv_sec</i> is negative or
+      <i>tp.tv_nsec</i> is outside the range [0, 999,999,999].</dd>
+  <dt id="EINVAL~3"><a class="permalink" href="#EINVAL~3"><b>EINVAL</b></a></dt>
+  <dd>The <i>clockid</i> specified in a call to <b>clock_settime</b>() is not a
+      settable clock.</dd>
+  <dt id="EINVAL~4"><a class="permalink" href="#EINVAL~4"><b>EINVAL</b> (since
+    Linux 4.3)</a></dt>
+  <dd>A call to <b>clock_settime</b>() with a <i>clockid</i> of
+      <b>CLOCK_REALTIME</b> attempted to set the time to a value less than the
+      current value of the <b>CLOCK_MONOTONIC</b> clock.</dd>
+  <dt id="ENODEV"><a class="permalink" href="#ENODEV"><b>ENODEV</b></a></dt>
+  <dd>The hot-pluggable device (like USB for example) represented by a dynamic
+      <i>clk_id</i> has disappeared after its character device was opened.</dd>
+  <dt id="ENOTSUP"><a class="permalink" href="#ENOTSUP"><b>ENOTSUP</b></a></dt>
+  <dd>The operation is not supported by the dynamic POSIX clock device
+      specified.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd><b>clock_settime</b>() does not have permission to set the clock
+      indicated.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>clock_getres (), clock_gettime (), clock_settime ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">These system calls first appeared in Linux 2.6.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, SUSv2.</p>
+<p class="Pp">On POSIX systems on which these functions are available, the
+    symbol <b>_POSIX_TIMERS</b> is defined in <i>&lt;unistd.h&gt;</i> to a value
+    greater than 0. The symbols <b>_POSIX_MONOTONIC_CLOCK</b>,
+    <b>_POSIX_CPUTIME</b>, <b>_POSIX_THREAD_CPUTIME</b> indicate that
+    <b>CLOCK_MONOTONIC</b>, <b>CLOCK_PROCESS_CPUTIME_ID</b>,
+    <b>CLOCK_THREAD_CPUTIME_ID</b> are available. (See also
+  <b>sysconf</b>(3).)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">POSIX.1 specifies the following:</p>
+<div class="Bd-indent">
+<p class="Pp">Setting the value of the <b>CLOCK_REALTIME</b> clock via
+    <b>clock_settime</b>() shall have no effect on threads that are blocked
+    waiting for a relative time service based upon this clock, including the
+    <b>nanosleep</b>() function; nor on the expiration of relative timers based
+    upon this clock. Consequently, these time services shall expire when the
+    requested relative interval elapses, independently of the new or old value
+    of the clock.</p>
+</div>
+<p class="Pp">According to POSIX.1-2001, a process with "appropriate
+    privileges" may set the <b>CLOCK_PROCESS_CPUTIME_ID</b> and
+    <b>CLOCK_THREAD_CPUTIME_ID</b> clocks using <b>clock_settime</b>(). On
+    Linux, these clocks are not settable (i.e., no process has "appropriate
+    privileges").</p>
+<section class="Ss">
+<h2 class="Ss" id="C_library/kernel_differences"><a class="permalink" href="#C_library/kernel_differences">C
+  library/kernel differences</a></h2>
+<p class="Pp">On some architectures, an implementation of <b>clock_gettime</b>()
+    is provided in the <b>vdso</b>(7).</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Historical_note_for_SMP_systems"><a class="permalink" href="#Historical_note_for_SMP_systems">Historical
+  note for SMP systems</a></h2>
+<p class="Pp">Before Linux added kernel support for
+    <b>CLOCK_PROCESS_CPUTIME_ID</b> and <b>CLOCK_THREAD_CPUTIME_ID</b>, glibc
+    implemented these clocks on many platforms using timer registers from the
+    CPUs (TSC on i386, AR.ITC on Itanium). These registers may differ between
+    CPUs and as a consequence these clocks may return <b>bogus results</b> if a
+    process is migrated to another CPU.</p>
+<p class="Pp">If the CPUs in an SMP system have different clock sources, then
+    there is no way to maintain a correlation between the timer registers since
+    each CPU will run at a slightly different frequency. If that is the case,
+    then <i>clock_getcpuclockid(0)</i> will return <b>ENOENT</b> to signify this
+    condition. The two clocks will then be useful only if it can be ensured that
+    a process stays on a certain CPU.</p>
+<p class="Pp">The processors in an SMP system do not start all at exactly the
+    same time and therefore the timer registers are typically running at an
+    offset. Some architectures include code that attempts to limit these offsets
+    on bootup. However, the code cannot guarantee to accurately tune the
+    offsets. glibc contains no provisions to deal with these offsets (unlike the
+    Linux Kernel). Typically these offsets are small and therefore the effects
+    may be negligible in most cases.</p>
+<p class="Pp">Since glibc 2.4, the wrapper functions for the system calls
+    described in this page avoid the abovementioned problems by employing the
+    kernel implementation of <b>CLOCK_PROCESS_CPUTIME_ID</b> and
+    <b>CLOCK_THREAD_CPUTIME_ID</b>, on systems that provide such an
+    implementation (i.e., Linux 2.6.12 and later).</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below demonstrates the use of <b>clock_gettime</b>()
+    and <b>clock_getres</b>() with various clocks. This is an example of what we
+    might see when running the program:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>./clock_times x</b>
+CLOCK_REALTIME : 1585985459.446 (18356 days +  7h 30m 59s)
+<br>
+     resolution:          0.000000001
+CLOCK_TAI      : 1585985496.447 (18356 days +  7h 31m 36s)
+<br>
+     resolution:          0.000000001
+CLOCK_MONOTONIC:      52395.722 (14h 33m 15s)
+<br>
+     resolution:          0.000000001
+CLOCK_BOOTTIME :      72691.019 (20h 11m 31s)
+<br>
+     resolution:          0.000000001
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>/* clock_times.c
+<br>
+   Licensed under GNU General Public License v2 or later.
+*/
+#define _XOPEN_SOURCE 600
+#include &lt;stdbool.h&gt;
+#include &lt;stdint.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;time.h&gt;
+#define SECS_IN_DAY (24 * 60 * 60)
+static void
+displayClock(clockid_t clock, const char *name, bool showRes)
+{
+<br>
+    long             days;
+<br>
+    struct timespec  ts;
+<br>
+    if (clock_gettime(clock, &amp;ts) == -1) {
+<br>
+        perror("clock_gettime");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    printf("%-15s: %10jd.%03ld (", name,
+<br>
+           (intmax_t) ts.tv_sec, ts.tv_nsec / 1000000);
+<br>
+    days = ts.tv_sec / SECS_IN_DAY;
+<br>
+    if (days &gt; 0)
+<br>
+        printf("%ld days + ", days);
+<br>
+    printf("%2dh %2dm %2ds",
+<br>
+           (int) (ts.tv_sec % SECS_IN_DAY) / 3600,
+<br>
+           (int) (ts.tv_sec % 3600) / 60,
+<br>
+           (int) ts.tv_sec % 60);
+<br>
+    printf(")\n");
+<br>
+    if (clock_getres(clock, &amp;ts) == -1) {
+<br>
+        perror("clock_getres");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    if (showRes)
+<br>
+        printf("     resolution: %10jd.%09ld\n",
+<br>
+               (intmax_t) ts.tv_sec, ts.tv_nsec);
+}
+int
+main(int argc, char *argv[])
+{
+<br>
+    bool showRes = argc &gt; 1;
+<br>
+    displayClock(CLOCK_REALTIME, "CLOCK_REALTIME", showRes);
+#ifdef CLOCK_TAI
+<br>
+    displayClock(CLOCK_TAI, "CLOCK_TAI", showRes);
+#endif
+<br>
+    displayClock(CLOCK_MONOTONIC, "CLOCK_MONOTONIC", showRes);
+#ifdef CLOCK_BOOTTIME
+<br>
+    displayClock(CLOCK_BOOTTIME, "CLOCK_BOOTTIME", showRes);
+#endif
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>date</b>(1), <b>gettimeofday</b>(2), <b>settimeofday</b>(2),
+    <b>time</b>(2), <b>adjtime</b>(3), <b>clock_getcpuclockid</b>(3),
+    <b>ctime</b>(3), <b>ftime</b>(3), <b>pthread_getcpuclockid</b>(3),
+    <b>sysconf</b>(3), <b>timespec</b>(3), <b>time</b>(7),
+    <b>time_namespaces</b>(7), <b>vdso</b>(7), <b>hwclock</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) International Business Machines Corp., 2006
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+  
+   HISTORY:
+   2005-09-28, created by Arnd Bergmann <arndb@de.ibm.com>
+   2006-06-16, revised by Eduardo M. Fleury <efleury@br.ibm.com>
+   2007-07-10, some polishing by mtk
+   2007-09-28, updates for newer kernels by Jeremy Kerr <jk@ozlabs.org>
+   --><head>
+<meta name="dc.identifier" content="res/b5f17d5274bc027491d6fb63c0c54a5594cafbeb">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>spu_create(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">spu_create(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">spu_create(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">spu_create - create a new spu context</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/spu.h&gt;</b>          /* Definition of <b>SPU_*</b> constants */
+<b>#include &lt;sys/syscall.h&gt;</b>      /* Definition of <b>SYS_*</b> constants */
+<b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int syscall(SYS_spu_create, const char *</b><i>pathname</i><b>, unsigned int </b><i>flags</i><b>,</b>
+<b>            mode_t </b><i>mode</i><b>, int </b><i>neighbor_fd</i><b>);</b></pre>
+<p class="Pp"><i>Note</i>: glibc provides no wrapper for <b>spu_create</b>(),
+    necessitating the use of <b>syscall</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>spu_create</b>() system call is used on PowerPC machines
+    that implement the Cell Broadband Engine Architecture in order to access
+    Synergistic Processor Units (SPUs). It creates a new logical context for an
+    SPU in <i>pathname</i> and returns a file descriptor associated with it.
+    <i>pathname</i> must refer to a nonexistent directory in the mount point of
+    the SPU filesystem (<b>spufs</b>). If <b>spu_create</b>() is successful, a
+    directory is created at <i>pathname</i> and it is populated with the files
+    described in <b>spufs</b>(7).</p>
+<p class="Pp">When a context is created, the returned file descriptor can only
+    be passed to <b>spu_run</b>(2), used as the <i>dirfd</i> argument to the
+    <b>*at</b> family of system calls (e.g., <b>openat</b>(2)), or closed; other
+    operations are not defined. A logical SPU context is destroyed (along with
+    all files created within the context's <i>pathname</i> directory) once the
+    last reference to the context has gone; this usually occurs when the file
+    descriptor returned by <b>spu_create</b>() is closed.</p>
+<p class="Pp">The <i>mode</i> argument (minus any bits set in the process's
+    <b>umask</b>(2)) specifies the permissions used for creating the new
+    directory in <b>spufs</b>. See <b>stat</b>(2) for a full list of the
+    possible <i>mode</i> values.</p>
+<p class="Pp">The <i>neighbor_fd</i> is used only when the
+    <b>SPU_CREATE_AFFINITY_SPU</b> flag is specified; see below.</p>
+<p class="Pp">The <i>flags</i> argument can be zero or any bitwise OR-ed
+    combination of the following constants:</p>
+<dl class="Bl-tag">
+  <dt id="SPU_CREATE_EVENTS_ENABLED"><a class="permalink" href="#SPU_CREATE_EVENTS_ENABLED"><b>SPU_CREATE_EVENTS_ENABLED</b></a></dt>
+  <dd>Rather than using signals for reporting DMA errors, use the <i>event</i>
+      argument to <b>spu_run</b>(2).</dd>
+  <dt id="SPU_CREATE_GANG"><a class="permalink" href="#SPU_CREATE_GANG"><b>SPU_CREATE_GANG</b></a></dt>
+  <dd>Create an SPU gang instead of a context. (A gang is a group of SPU
+      contexts that are functionally related to each other and which share
+      common scheduling parameters—priority and policy. In the future,
+      gang scheduling may be implemented causing the group to be switched in and
+      out as a single unit.)</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>A new directory will be created at the location specified by the
+      <i>pathname</i> argument. This gang may be used to hold other SPU
+      contexts, by providing a pathname that is within the gang directory to
+      further calls to <b>spu_create</b>().</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="SPU_CREATE_NOSCHED"><a class="permalink" href="#SPU_CREATE_NOSCHED"><b>SPU_CREATE_NOSCHED</b></a></dt>
+  <dd>Create a context that is not affected by the SPU scheduler. Once the
+      context is run, it will not be scheduled out until it is destroyed by the
+      creating process.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Because the context cannot be removed from the SPU, some functionality is
+      disabled for <b>SPU_CREATE_NOSCHED</b> contexts. Only a subset of the
+      files will be available in this context directory in <b>spufs</b>.
+      Additionally, <b>SPU_CREATE_NOSCHED</b> contexts cannot dump a core file
+      when crashing.</dd>
+  <dt></dt>
+  <dd>Creating <b>SPU_CREATE_NOSCHED</b> contexts requires the
+      <b>CAP_SYS_NICE</b> capability.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="SPU_CREATE_ISOLATE"><a class="permalink" href="#SPU_CREATE_ISOLATE"><b>SPU_CREATE_ISOLATE</b></a></dt>
+  <dd>Create an isolated SPU context. Isolated contexts are protected from some
+      PPE (PowerPC Processing Element) operations, such as access to the SPU
+      local store and the NPC register.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Creating <b>SPU_CREATE_ISOLATE</b> contexts also requires the
+      <b>SPU_CREATE_NOSCHED</b> flag.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="SPU_CREATE_AFFINITY_SPU"><a class="permalink" href="#SPU_CREATE_AFFINITY_SPU"><b>SPU_CREATE_AFFINITY_SPU</b>
+    (since Linux 2.6.23)</a></dt>
+  <dd>Create a context with affinity to another SPU context. This affinity
+      information is used within the SPU scheduling algorithm. Using this flag
+      requires that a file descriptor referring to the other SPU context be
+      passed in the <i>neighbor_fd</i> argument.</dd>
+  <dt id="SPU_CREATE_AFFINITY_MEM"><a class="permalink" href="#SPU_CREATE_AFFINITY_MEM"><b>SPU_CREATE_AFFINITY_MEM</b>
+    (since Linux 2.6.23)</a></dt>
+  <dd>Create a context with affinity to system memory. This affinity information
+      is used within the SPU scheduling algorithm.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>spu_create</b>() returns a new file descriptor. On
+    failure, -1 is returned, and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>The current user does not have write access to the <b>spufs</b>(7) mount
+      point.</dd>
+  <dt id="EEXIST"><a class="permalink" href="#EEXIST"><b>EEXIST</b></a></dt>
+  <dd>An SPU context already exists at the given pathname.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>pathname</i> is not a valid string pointer in the calling process's
+      address space.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>pathname</i> is not a directory in the <b>spufs</b>(7) mount point, or
+      invalid flags have been provided.</dd>
+  <dt id="ELOOP"><a class="permalink" href="#ELOOP"><b>ELOOP</b></a></dt>
+  <dd>Too many symbolic links were found while resolving <i>pathname</i>.</dd>
+  <dt id="EMFILE"><a class="permalink" href="#EMFILE"><b>EMFILE</b></a></dt>
+  <dd>The per-process limit on the number of open file descriptors has been
+      reached.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd><i>pathname</i> is too long.</dd>
+  <dt id="ENFILE"><a class="permalink" href="#ENFILE"><b>ENFILE</b></a></dt>
+  <dd>The system-wide limit on the total number of open files has been
+    reached.</dd>
+  <dt id="ENODEV"><a class="permalink" href="#ENODEV"><b>ENODEV</b></a></dt>
+  <dd>An isolated context was requested, but the hardware does not support SPU
+      isolation.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>Part of <i>pathname</i> could not be resolved.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>The kernel could not allocate all resources required.</dd>
+  <dt id="ENOSPC"><a class="permalink" href="#ENOSPC"><b>ENOSPC</b></a></dt>
+  <dd>There are not enough SPU resources available to create a new context or
+      the user-specific limit for the number of SPU contexts has been
+    reached.</dd>
+  <dt id="ENOSYS"><a class="permalink" href="#ENOSYS"><b>ENOSYS</b></a></dt>
+  <dd>The functionality is not provided by the current system, because either
+      the hardware does not provide SPUs or the spufs module is not loaded.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>A part of <i>pathname</i> is not a directory.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The <b>SPU_CREATE_NOSCHED</b> flag has been given, but the user does not
+      have the <b>CAP_SYS_NICE</b> capability.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FILES"><a class="permalink" href="#FILES">FILES</a></h1>
+<p class="Pp"><i>pathname</i> must point to a location beneath the mount point
+    of <b>spufs</b>. By convention, it gets mounted in <i>/spu</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>spu_create</b>() system call was added in Linux 2.6.16.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This call is Linux-specific and implemented only on the PowerPC
+    architecture. Programs using this system call are not portable.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp"><b>spu_create</b>() is meant to be used from libraries that
+    implement a more abstract interface to SPUs, not to be used from regular
+    applications. See
+    <a class="Lk" href="http://www.bsc.es/projects/deepcomputing/linuxoncell/">http://www.bsc.es/projects/deepcomputing/linuxoncell/</a>
+    for the recommended libraries.</p>
+<p class="Pp">Prior to the addition of the <b>SPU_CREATE_AFFINITY_SPU</b> flag
+    in Linux 2.6.23, the <b>spu_create</b>() system call took only three
+    arguments (i.e., there was no <i>neighbor_fd</i> argument).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">See <b>spu_run</b>(2) for an example of the use of
+    <b>spu_create</b>()</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>close</b>(2), <b>spu_run</b>(2), <b>capabilities</b>(7),
+    <b>spufs</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

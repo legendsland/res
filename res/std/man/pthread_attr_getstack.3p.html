@@ -1,0 +1,190 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/b10c478a57470d94ae5dffbb1bd8edfa2c335ce0">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>PTHREAD_ATTR_GETSTACK(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">PTHREAD_ATTR_GETSTACK(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">PTHREAD_ATTR_GETSTACK(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pthread_attr_getstack, pthread_attr_setstack — get and set
+    stack attributes</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;pthread.h&gt;</pre>
+<pre>int pthread_attr_getstack(const pthread_attr_t *restrict <i>attr</i>,
+<br>
+    void **restrict <i>stackaddr</i>, size_t *restrict <i>stacksize</i>);
+int pthread_attr_setstack(pthread_attr_t *<i>attr</i>, void *<i>stackaddr</i>,
+<br>
+    size_t <i>stacksize</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>pthread_attr_getstack</i>() and
+    <i>pthread_attr_setstack</i>() functions, respectively, shall get and set
+    the thread creation stack attributes <i>stackaddr</i> and <i>stacksize</i>
+    in the <i>attr</i> object.</p>
+<p class="Pp">The stack attributes specify the area of storage to be used for
+    the created thread's stack. The base (lowest addressable byte) of the
+    storage shall be <i>stackaddr</i>, and the size of the storage shall be
+    <i>stacksize</i> bytes. The <i>stacksize</i> shall be at least
+    {PTHREAD_STACK_MIN}. The <i>pthread_attr_setstack</i>() function may fail
+    with <b>[EINVAL]</b> if <i>stackaddr</i> does not meet
+    implementation-defined alignment requirements. All pages within the stack
+    described by <i>stackaddr</i> and <i>stacksize</i> shall be both readable
+    and writable by the thread.</p>
+<p class="Pp">If the <i>pthread_attr_getstack</i>() function is called before
+    the <i>stackaddr</i> attribute has been set, the behavior is
+  unspecified.</p>
+<p class="Pp">The behavior is undefined if the value specified by the
+    <i>attr</i> argument to <i>pthread_attr_getstack</i>() or
+    <i>pthread_attr_setstack</i>() does not refer to an initialized thread
+    attributes object.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, these functions shall return a value
+    of 0; otherwise, an error number shall be returned to indicate the
+  error.</p>
+<p class="Pp">The <i>pthread_attr_getstack</i>() function shall store the stack
+    attribute values in <i>stackaddr</i> and <i>stacksize</i> if successful.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>pthread_attr_setstack</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The value of <i>stacksize</i> is less than {PTHREAD_STACK_MIN} or exceeds
+      an implementation-defined limit.</dd>
+</dl>
+<p class="Pp">The <i>pthread_attr_setstack</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>The value of <i>stackaddr</i> does not have proper alignment to be used as
+      a stack, or ((<b>char *</b>)<i>stackaddr</i> + <i>stacksize</i>) lacks
+      proper alignment.</dd>
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>The stack page(s) described by <i>stackaddr</i> and <i>stacksize</i> are
+      not both readable and writable by the thread.</dd>
+</dl>
+<p class="Pp">These functions shall not return an error code of
+  <b>[EINTR]</b>.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">These functions are appropriate for use by applications in an
+    environment where the stack for a thread must be placed in some particular
+    region of memory.</p>
+<p class="Pp">While it might seem that an application could detect stack
+    overflow by providing a protected page outside the specified stack region,
+    this cannot be done portably. Implementations are free to place the thread's
+    initial stack pointer anywhere within the specified region to accommodate
+    the machine's stack pointer behavior and allocation requirements.
+    Furthermore, on some architectures, such as the IA‐64, ``overflow''
+    might mean that two separate stack pointers allocated within the region will
+    overlap somewhere in the middle of the region.</p>
+<p class="Pp">After a successful call to <i>pthread_attr_setstack</i>(), the
+    storage area specified by the <i>stackaddr</i> parameter is under the
+    control of the implementation, as described in <i>Section 2.9.8</i>, <i>Use
+    of Application-Managed Thread Stacks</i>.</p>
+<p class="Pp">The specification of the <i>stackaddr</i> attribute presents
+    several ambiguities that make portable use of these functions impossible.
+    For example, the standard allows implementations to impose arbitrary
+    alignment requirements on <i>stackaddr</i>. Applications cannot assume that
+    a buffer obtained from <i>malloc</i>() is suitably aligned. Note that
+    although the <i>stacksize</i> value passed to <i>pthread_attr_setstack</i>()
+    must satisfy alignment requirements, the same is not true for
+    <i>pthread_attr_setstacksize</i>() where the implementation must increase
+    the specified size if necessary to achieve the proper alignment.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">If an implementation detects that the value specified by the
+    <i>attr</i> argument to <i>pthread_attr_getstack</i>() or
+    <i>pthread_attr_setstack</i>() does not refer to an initialized thread
+    attributes object, it is recommended that the function should fail and
+    report an <b>[EINVAL]</b> error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>pthread_attr_destroy</i>()</i>,
+    <i><i>pthread_attr_getdetachstate</i>()</i>,
+    <i><i>pthread_attr_getstacksize</i>()</i>,
+  <i><i>pthread_create</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;limits.h&gt;</b></i>, <i><b>&lt;pthread.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

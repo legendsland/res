@@ -1,0 +1,656 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 2009 Petr Baudis <pasky@suse.cz>
+   and clean-ups and additions (C) Copyright 2010 Michael Kerrisk
+                                   <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   References: http://people.redhat.com/drepper/asynchnl.pdf,
+       http://www.imperialviolet.org/2005/06/01/asynchronous-dns-lookups-with-glibc.html
+   --><head>
+<meta name="dc.identifier" content="res/87a14dc1951d183a5ebac1493c041624c81a7c80">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>getaddrinfo_a(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">getaddrinfo_a(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">getaddrinfo_a(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getaddrinfo_a, gai_suspend, gai_error, gai_cancel - asynchronous
+    network address and service translation</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Asynchronous name lookup library (<i>libanl</i>, <i>-lanl</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#define _GNU_SOURCE</b>         /* See feature_test_macros(7) */
+<b>#include &lt;netdb.h&gt;</b></pre>
+<pre><b>int getaddrinfo_a(int </b><i>mode</i><b>, struct gaicb *</b><i>list</i><b>[restrict],</b>
+<b>                  int </b><i>nitems</i><b>, struct sigevent *restrict </b><i>sevp</i><b>);</b>
+<b>int gai_suspend(const struct gaicb *const </b><i>list</i><b>[], int </b><i>nitems</i><b>,</b>
+<b>                  const struct timespec *</b><i>timeout</i><b>);</b></pre>
+<pre><b>int gai_error(struct gaicb *</b><i>req</i><b>);</b>
+<b>int gai_cancel(struct gaicb *</b><i>req</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>getaddrinfo_a</b>() function performs the same task as
+    <b>getaddrinfo</b>(3), but allows multiple name look-ups to be performed
+    asynchronously, with optional notification on completion of look-up
+    operations.</p>
+<p class="Pp">The <i>mode</i> argument has one of the following values:</p>
+<dl class="Bl-tag">
+  <dt id="GAI_WAIT"><a class="permalink" href="#GAI_WAIT"><b>GAI_WAIT</b></a></dt>
+  <dd>Perform the look-ups synchronously. The call blocks until the look-ups
+      have completed.</dd>
+  <dt id="GAI_NOWAIT"><a class="permalink" href="#GAI_NOWAIT"><b>GAI_NOWAIT</b></a></dt>
+  <dd>Perform the look-ups asynchronously. The call returns immediately, and the
+      requests are resolved in the background. See the discussion of the
+      <i>sevp</i> argument below.</dd>
+</dl>
+<p class="Pp">The array <i>list</i> specifies the look-up requests to process.
+    The <i>nitems</i> argument specifies the number of elements in <i>list</i>.
+    The requested look-up operations are started in parallel. NULL elements in
+    <i>list</i> are ignored. Each request is described by a <i>gaicb</i>
+    structure, defined as follows:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct gaicb {
+<br>
+    const char            *ar_name;
+<br>
+    const char            *ar_service;
+<br>
+    const struct addrinfo *ar_request;
+<br>
+    struct addrinfo       *ar_result;
+};
+</pre>
+<br>
+<p class="Pp">The elements of this structure correspond to the arguments of
+    <b>getaddrinfo</b>(3). Thus, <i>ar_name</i> corresponds to the <i>node</i>
+    argument and <i>ar_service</i> to the <i>service</i> argument, identifying
+    an Internet host and a service. The <i>ar_request</i> element corresponds to
+    the <i>hints</i> argument, specifying the criteria for selecting the
+    returned socket address structures. Finally, <i>ar_result</i> corresponds to
+    the <i>res</i> argument; you do not need to initialize this element, it will
+    be automatically set when the request is resolved. The <i>addrinfo</i>
+    structure referenced by the last two elements is described in
+    <b>getaddrinfo</b>(3).</p>
+<p class="Pp">When <i>mode</i> is specified as <b>GAI_NOWAIT</b>, notifications
+    about resolved requests can be obtained by employing the <i>sigevent</i>
+    structure pointed to by the <i>sevp</i> argument. For the definition and
+    general details of this structure, see <b>sigevent</b>(7). The
+    <i>sevp-&gt;sigev_notify</i> field can have the following values:</p>
+<dl class="Bl-tag">
+  <dt id="SIGEV_NONE"><a class="permalink" href="#SIGEV_NONE"><b>SIGEV_NONE</b></a></dt>
+  <dd>Don't provide any notification.</dd>
+  <dt id="SIGEV_SIGNAL"><a class="permalink" href="#SIGEV_SIGNAL"><b>SIGEV_SIGNAL</b></a></dt>
+  <dd>When a look-up completes, generate the signal <i>sigev_signo</i> for the
+      process. See <b>sigevent</b>(7) for general details. The <i>si_code</i>
+      field of the <i>siginfo_t</i> structure will be set to
+    <b>SI_ASYNCNL</b>.</dd>
+  <dt id="SIGEV_THREAD"><a class="permalink" href="#SIGEV_THREAD"><b>SIGEV_THREAD</b></a></dt>
+  <dd>When a look-up completes, invoke <i>sigev_notify_function</i> as if it
+      were the start function of a new thread. See <b>sigevent</b>(7) for
+      details.</dd>
+</dl>
+<p class="Pp">For <b>SIGEV_SIGNAL</b> and <b>SIGEV_THREAD</b>, it may be useful
+    to point <i>sevp-&gt;sigev_value.sival_ptr</i> to <i>list</i>.</p>
+<p class="Pp">The <b>gai_suspend</b>() function suspends execution of the
+    calling thread, waiting for the completion of one or more requests in the
+    array <i>list</i>. The <i>nitems</i> argument specifies the size of the
+    array <i>list</i>. The call blocks until one of the following occurs:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>One or more of the operations in <i>list</i> completes.</dd>
+  <dt>•</dt>
+  <dd>The call is interrupted by a signal that is caught.</dd>
+  <dt>•</dt>
+  <dd>The time interval specified in <i>timeout</i> elapses. This argument
+      specifies a timeout in seconds plus nanoseconds (see <b>nanosleep</b>(2)
+      for details of the <i>timespec</i> structure). If <i>timeout</i> is NULL,
+      then the call blocks indefinitely (until one of the events above
+    occurs).</dd>
+</dl>
+<p class="Pp">No explicit indication of which request was completed is given;
+    you must determine which request(s) have completed by iterating with
+    <b>gai_error</b>() over the list of requests.</p>
+<p class="Pp">The <b>gai_error</b>() function returns the status of the request
+    <i>req</i>: either <b>EAI_INPROGRESS</b> if the request was not completed
+    yet, 0 if it was handled successfully, or an error code if the request could
+    not be resolved.</p>
+<p class="Pp">The <b>gai_cancel</b>() function cancels the request <i>req</i>.
+    If the request has been canceled successfully, the error status of the
+    request will be set to <b>EAI_CANCELED</b> and normal asynchronous
+    notification will be performed. The request cannot be canceled if it is
+    currently being processed; in that case, it will be handled as if
+    <b>gai_cancel</b>() has never been called. If <i>req</i> is NULL, an attempt
+    is made to cancel all outstanding requests that the process has made.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <b>getaddrinfo_a</b>() function returns 0 if all of the
+    requests have been enqueued successfully, or one of the following nonzero
+    error codes:</p>
+<dl class="Bl-tag">
+  <dt id="EAI_AGAIN"><a class="permalink" href="#EAI_AGAIN"><b>EAI_AGAIN</b></a></dt>
+  <dd>The resources necessary to enqueue the look-up requests were not
+      available. The application may check the error status of each request to
+      determine which ones failed.</dd>
+  <dt id="EAI_MEMORY"><a class="permalink" href="#EAI_MEMORY"><b>EAI_MEMORY</b></a></dt>
+  <dd>Out of memory.</dd>
+  <dt id="EAI_SYSTEM"><a class="permalink" href="#EAI_SYSTEM"><b>EAI_SYSTEM</b></a></dt>
+  <dd><i>mode</i> is invalid.</dd>
+</dl>
+<p class="Pp">The <b>gai_suspend</b>() function returns 0 if at least one of the
+    listed requests has been completed. Otherwise, it returns one of the
+    following nonzero error codes:</p>
+<dl class="Bl-tag">
+  <dt id="EAI_AGAIN~2"><a class="permalink" href="#EAI_AGAIN~2"><b>EAI_AGAIN</b></a></dt>
+  <dd>The given timeout expired before any of the requests could be
+    completed.</dd>
+  <dt id="EAI_ALLDONE"><a class="permalink" href="#EAI_ALLDONE"><b>EAI_ALLDONE</b></a></dt>
+  <dd>There were no actual requests given to the function.</dd>
+  <dt id="EAI_INTR"><a class="permalink" href="#EAI_INTR"><b>EAI_INTR</b></a></dt>
+  <dd>A signal has interrupted the function. Note that this interruption might
+      have been caused by signal notification of some completed look-up
+    request.</dd>
+</dl>
+<p class="Pp">The <b>gai_error</b>() function can return <b>EAI_INPROGRESS</b>
+    for an unfinished look-up request, 0 for a successfully completed look-up
+    (as described above), one of the error codes that could be returned by
+    <b>getaddrinfo</b>(3), or the error code <b>EAI_CANCELED</b> if the request
+    has been canceled explicitly before it could be finished.</p>
+<p class="Pp">The <b>gai_cancel</b>() function can return one of these
+  values:</p>
+<dl class="Bl-tag">
+  <dt id="EAI_CANCELED"><a class="permalink" href="#EAI_CANCELED"><b>EAI_CANCELED</b></a></dt>
+  <dd>The request has been canceled successfully.</dd>
+  <dt id="EAI_NOTCANCELED"><a class="permalink" href="#EAI_NOTCANCELED"><b>EAI_NOTCANCELED</b></a></dt>
+  <dd>The request has not been canceled.</dd>
+  <dt id="EAI_ALLDONE~2"><a class="permalink" href="#EAI_ALLDONE~2"><b>EAI_ALLDONE</b></a></dt>
+  <dd>The request has already completed.</dd>
+</dl>
+<p class="Pp">The <b>gai_strerror</b>(3) function translates these error codes
+    to a human readable string, suitable for error reporting.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>getaddrinfo_a (), gai_suspend (), gai_error (), gai_cancel ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These functions are GNU extensions; they first appeared in glibc
+    2.2.3.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The interface of <b>getaddrinfo_a</b>() was modeled after the
+    <b>lio_listio</b>(3) interface.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">Two examples are provided: a simple example that resolves several
+    requests in parallel synchronously, and a complex example showing some of
+    the asynchronous capabilities.</p>
+<section class="Ss">
+<h2 class="Ss" id="Synchronous_example"><a class="permalink" href="#Synchronous_example">Synchronous
+  example</a></h2>
+<p class="Pp">The program below simply resolves several hostnames in parallel,
+    giving a speed-up compared to resolving the hostnames sequentially using
+    <b>getaddrinfo</b>(3). The program might be used like this:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>./a.out mirrors.kernel.org enoent.linuxfoundation.org gnu.org</b>
+mirrors.kernel.org: 139.178.88.99
+enoent.linuxfoundation.org: Name or service not known
+gnu.org: 209.51.188.116
+</pre>
+<br>
+<p class="Pp">Here is the program source code</p>
+<p class="Pp"></p>
+<pre>#define _GNU_SOURCE
+#include &lt;netdb.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+int
+main(int argc, char *argv[])
+{
+<br>
+    int ret;
+<br>
+    struct gaicb *reqs[argc - 1];
+<br>
+    char host[NI_MAXHOST];
+<br>
+    struct addrinfo *res;
+<br>
+    if (argc &lt; 2) {
+<br>
+        fprintf(stderr, "Usage: %s HOST...\n", argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    for (size_t i = 0; i &lt; argc - 1; i++) {
+<br>
+        reqs[i] = malloc(sizeof(*reqs[0]));
+<br>
+        if (reqs[i] == NULL) {
+<br>
+            perror("malloc");
+<br>
+            exit(EXIT_FAILURE);
+<br>
+        }
+<br>
+        memset(reqs[i], 0, sizeof(*reqs[0]));
+<br>
+        reqs[i]-&gt;ar_name = argv[i + 1];
+<br>
+    }
+<br>
+    ret = getaddrinfo_a(GAI_WAIT, reqs, argc - 1, NULL);
+<br>
+    if (ret != 0) {
+<br>
+        fprintf(stderr, "getaddrinfo_a() failed: %s\n",
+<br>
+                gai_strerror(ret));
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    for (size_t i = 0; i &lt; argc - 1; i++) {
+<br>
+        printf("%s: ", reqs[i]-&gt;ar_name);
+<br>
+        ret = gai_error(reqs[i]);
+<br>
+        if (ret == 0) {
+<br>
+            res = reqs[i]-&gt;ar_result;
+<br>
+            ret = getnameinfo(res-&gt;ai_addr, res-&gt;ai_addrlen,
+<br>
+                              host, sizeof(host),
+<br>
+                              NULL, 0, NI_NUMERICHOST);
+<br>
+            if (ret != 0) {
+<br>
+                fprintf(stderr, "getnameinfo() failed: %s\n",
+<br>
+                        gai_strerror(ret));
+<br>
+                exit(EXIT_FAILURE);
+<br>
+            }
+<br>
+            puts(host);
+<br>
+        } else {
+<br>
+            puts(gai_strerror(ret));
+<br>
+        }
+<br>
+    }
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Asynchronous_example"><a class="permalink" href="#Asynchronous_example">Asynchronous
+  example</a></h2>
+<p class="Pp">This example shows a simple interactive <b>getaddrinfo_a</b>()
+    front-end. The notification facility is not demonstrated.</p>
+<p class="Pp">An example session might look like this:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>./a.out</b>
+&gt; a mirrors.kernel.org enoent.linuxfoundation.org gnu.org
+&gt; c 2
+[2] gnu.org: Request not canceled
+&gt; w 0 1
+[00] mirrors.kernel.org: Finished
+&gt; l
+[00] mirrors.kernel.org: 139.178.88.99
+[01] enoent.linuxfoundation.org: Processing request in progress
+[02] gnu.org: 209.51.188.116
+&gt; l
+[00] mirrors.kernel.org: 139.178.88.99
+[01] enoent.linuxfoundation.org: Name or service not known
+[02] gnu.org: 209.51.188.116
+</pre>
+<br>
+<p class="Pp">The program source is as follows:</p>
+<p class="Pp"></p>
+<pre>#define _GNU_SOURCE
+#include &lt;netdb.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+static struct gaicb **reqs = NULL;
+static size_t nreqs = 0;
+static char *
+getcmd(void)
+{
+<br>
+    static char buf[256];
+<br>
+    fputs("&gt; ", stdout); fflush(stdout);
+<br>
+    if (fgets(buf, sizeof(buf), stdin) == NULL)
+<br>
+        return NULL;
+<br>
+    if (buf[strlen(buf) - 1] == '\n')
+<br>
+        buf[strlen(buf) - 1] = 0;
+<br>
+    return buf;
+}
+/* Add requests for specified hostnames. */
+static void
+add_requests(void)
+{
+<br>
+    size_t nreqs_base = nreqs;
+<br>
+    char *host;
+<br>
+    int ret;
+<br>
+    while ((host = strtok(NULL, " "))) {
+<br>
+        nreqs++;
+<br>
+        reqs = realloc(reqs, sizeof(reqs[0]) * nreqs);
+<br>
+        reqs[nreqs - 1] = calloc(1, sizeof(*reqs[0]));
+<br>
+        reqs[nreqs - 1]-&gt;ar_name = strdup(host);
+<br>
+    }
+<br>
+    /* Queue nreqs_base..nreqs requests. */
+<br>
+    ret = getaddrinfo_a(GAI_NOWAIT, &amp;reqs[nreqs_base],
+<br>
+                        nreqs - nreqs_base, NULL);
+<br>
+    if (ret) {
+<br>
+        fprintf(stderr, "getaddrinfo_a() failed: %s\n",
+<br>
+                gai_strerror(ret));
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+}
+/* Wait until at least one of specified requests completes. */
+static void
+wait_requests(void)
+{
+<br>
+    char *id;
+<br>
+    int ret;
+<br>
+    size_t n;
+<br>
+    struct gaicb const **wait_reqs = calloc(nreqs, sizeof(*wait_reqs));
+<br>
+                /* NULL elements are ignored by gai_suspend(). */
+<br>
+    while ((id = strtok(NULL, " ")) != NULL) {
+<br>
+        n = atoi(id);
+<br>
+        if (n &gt;= nreqs) {
+<br>
+            printf("Bad request number: %s\n", id);
+<br>
+            return;
+<br>
+        }
+<br>
+        wait_reqs[n] = reqs[n];
+<br>
+    }
+<br>
+    ret = gai_suspend(wait_reqs, nreqs, NULL);
+<br>
+    if (ret) {
+<br>
+        printf("gai_suspend(): %s\n", gai_strerror(ret));
+<br>
+        return;
+<br>
+    }
+<br>
+    for (size_t i = 0; i &lt; nreqs; i++) {
+<br>
+        if (wait_reqs[i] == NULL)
+<br>
+            continue;
+<br>
+        ret = gai_error(reqs[i]);
+<br>
+        if (ret == EAI_INPROGRESS)
+<br>
+            continue;
+<br>
+        printf("[%02zu] %s: %s\n", i, reqs[i]-&gt;ar_name,
+<br>
+               ret == 0 ? "Finished" : gai_strerror(ret));
+<br>
+    }
+}
+/* Cancel specified requests. */
+static void
+cancel_requests(void)
+{
+<br>
+    char *id;
+<br>
+    int ret;
+<br>
+    size_t n;
+<br>
+    while ((id = strtok(NULL, " ")) != NULL) {
+<br>
+        n = atoi(id);
+<br>
+        if (n &gt;= nreqs) {
+<br>
+            printf("Bad request number: %s\n", id);
+<br>
+            return;
+<br>
+        }
+<br>
+        ret = gai_cancel(reqs[n]);
+<br>
+        printf("[%s] %s: %s\n", id, reqs[atoi(id)]-&gt;ar_name,
+<br>
+               gai_strerror(ret));
+<br>
+    }
+}
+/* List all requests. */
+static void
+list_requests(void)
+{
+<br>
+    int ret;
+<br>
+    char host[NI_MAXHOST];
+<br>
+    struct addrinfo *res;
+<br>
+    for (size_t i = 0; i &lt; nreqs; i++) {
+<br>
+        printf("[%02zu] %s: ", i, reqs[i]-&gt;ar_name);
+<br>
+        ret = gai_error(reqs[i]);
+<br>
+        if (!ret) {
+<br>
+            res = reqs[i]-&gt;ar_result;
+<br>
+            ret = getnameinfo(res-&gt;ai_addr, res-&gt;ai_addrlen,
+<br>
+                              host, sizeof(host),
+<br>
+                              NULL, 0, NI_NUMERICHOST);
+<br>
+            if (ret) {
+<br>
+                fprintf(stderr, "getnameinfo() failed: %s\n",
+<br>
+                        gai_strerror(ret));
+<br>
+                exit(EXIT_FAILURE);
+<br>
+            }
+<br>
+            puts(host);
+<br>
+        } else {
+<br>
+            puts(gai_strerror(ret));
+<br>
+        }
+<br>
+    }
+}
+int
+main(void)
+{
+<br>
+    char *cmdline;
+<br>
+    char *cmd;
+<br>
+    while ((cmdline = getcmd()) != NULL) {
+<br>
+        cmd = strtok(cmdline, " ");
+<br>
+        if (cmd == NULL) {
+<br>
+            list_requests();
+<br>
+        } else {
+<br>
+            switch (cmd[0]) {
+<br>
+            case 'a':
+<br>
+                add_requests();
+<br>
+                break;
+<br>
+            case 'w':
+<br>
+                wait_requests();
+<br>
+                break;
+<br>
+            case 'c':
+<br>
+                cancel_requests();
+<br>
+                break;
+<br>
+            case 'l':
+<br>
+                list_requests();
+<br>
+                break;
+<br>
+            default:
+<br>
+                fprintf(stderr, "Bad command: %c\n", cmd[0]);
+<br>
+                break;
+<br>
+            }
+<br>
+        }
+<br>
+    }
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>getaddrinfo</b>(3), <b>inet</b>(3), <b>lio_listio</b>(3),
+    <b>hostname</b>(7), <b>ip</b>(7), <b>sigevent</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

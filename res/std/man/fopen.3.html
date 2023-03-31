@@ -1,0 +1,313 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 1990, 1991 The Regents of the University of California.
+   All rights reserved.
+  
+   This code is derived from software contributed to Berkeley by
+   Chris Torek and the American National Standards Committee X3,
+   on Information Processing Systems.
+  
+   SPDX-License-Identifier: BSD-4-Clause-UC
+  
+       @(#)fopen.3	6.8 (Berkeley) 6/29/91
+  
+   Converted for Linux, Mon Nov 29 15:22:01 1993, faith@cs.unc.edu
+   Modified, aeb, 960421, 970806
+   Modified, joey, aeb, 2002-01-03
+   --><head>
+<meta name="dc.identifier" content="res/449da470956519f0055559c730cffd519844d89c">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>fopen(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">fopen(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">fopen(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">fopen, fdopen, freopen - stream open functions</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;stdio.h&gt;</b></pre>
+<pre><b>FILE *fopen(const char *restrict </b><i>pathname</i><b>, const char *restrict </b><i>mode</i><b>);</b>
+<b>FILE *fdopen(int </b><i>fd</i><b>, const char *</b><i>mode</i><b>);</b>
+<b>FILE *freopen(const char *restrict </b><i>pathname</i><b>, const char *restrict </b><i>mode</i><b>,</b>
+<b>              FILE *restrict </b><i>stream</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>fdopen</b>():</p>
+<pre><br>
+    _POSIX_C_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>fopen</b>() function opens the file whose name is the
+    string pointed to by <i>pathname</i> and associates a stream with it.</p>
+<p class="Pp">The argument <i>mode</i> points to a string beginning with one of
+    the following sequences (possibly followed by additional characters, as
+    described below):</p>
+<dl class="Bl-tag">
+  <dt id="r"><a class="permalink" href="#r"><b>r</b></a></dt>
+  <dd>Open text file for reading. The stream is positioned at the beginning of
+      the file.</dd>
+  <dt id="r+"><a class="permalink" href="#r+"><b>r+</b></a></dt>
+  <dd>Open for reading and writing. The stream is positioned at the beginning of
+      the file.</dd>
+  <dt id="w"><a class="permalink" href="#w"><b>w</b></a></dt>
+  <dd>Truncate file to zero length or create text file for writing. The stream
+      is positioned at the beginning of the file.</dd>
+  <dt id="w+"><a class="permalink" href="#w+"><b>w+</b></a></dt>
+  <dd>Open for reading and writing. The file is created if it does not exist,
+      otherwise it is truncated. The stream is positioned at the beginning of
+      the file.</dd>
+  <dt id="a"><a class="permalink" href="#a"><b>a</b></a></dt>
+  <dd>Open for appending (writing at end of file). The file is created if it
+      does not exist. The stream is positioned at the end of the file.</dd>
+  <dt id="a+"><a class="permalink" href="#a+"><b>a+</b></a></dt>
+  <dd>Open for reading and appending (writing at end of file). The file is
+      created if it does not exist. Output is always appended to the end of the
+      file. POSIX is silent on what the initial read position is when using this
+      mode. For glibc, the initial file position for reading is at the beginning
+      of the file, but for Android/BSD/MacOS, the initial file position for
+      reading is at the end of the file.</dd>
+</dl>
+<p class="Pp">The <i>mode</i> string can also include the letter 'b' either as a
+    last character or as a character between the characters in any of the
+    two-character strings described above. This is strictly for compatibility
+    with ISO C and has no effect; the 'b' is ignored on all POSIX conforming
+    systems, including Linux. (Other systems may treat text files and binary
+    files differently, and adding the 'b' may be a good idea if you do I/O to a
+    binary file and expect that your program may be ported to non-UNIX
+    environments.)</p>
+<p class="Pp">See NOTES below for details of glibc extensions for
+  <i>mode</i>.</p>
+<p class="Pp">Any created file will have the mode <b>S_IRUSR</b> |
+    <b>S_IWUSR</b> | <b>S_IRGRP</b> | <b>S_IWGRP</b> | <b>S_IROTH</b> |
+    <b>S_IWOTH</b> (0666), as modified by the process's umask value (see
+    <b>umask</b>(2)).</p>
+<p class="Pp">Reads and writes may be intermixed on read/write streams in any
+    order. Note that ANSI C requires that a file positioning function intervene
+    between output and input, unless an input operation encounters end-of-file.
+    (If this condition is not met, then a read is allowed to return the result
+    of writes other than the most recent.) Therefore it is good practice (and
+    indeed sometimes necessary under Linux) to put an <b>fseek</b>(3) or
+    <b>fsetpos</b>(3) operation between write and read operations on such a
+    stream. This operation may be an apparent no-op (as in <i>fseek(..., 0L,
+    SEEK_CUR)</i> called for its synchronizing side effect).</p>
+<p class="Pp">Opening a file in append mode (<b>a</b> as the first character of
+    <i>mode</i>) causes all subsequent write operations to this stream to occur
+    at end-of-file, as if preceded by the call:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>fseek(stream, 0, SEEK_END);
+</pre>
+<br>
+<p class="Pp">The file descriptor associated with the stream is opened as if by
+    a call to <b>open</b>(2) with the following flags:</p>
+<div class="Bd-indent">
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>fopen() mode</b></td>
+    <td><b>open() flags</b></td>
+  </tr>
+  <tr>
+    <td style="text-align: center;"><i>r</i></td>
+    <td>O_RDONLY</td>
+  </tr>
+  <tr>
+    <td style="text-align: center;"><i>w</i></td>
+    <td>O_WRONLY | O_CREAT | O_TRUNC</td>
+  </tr>
+  <tr>
+    <td style="text-align: center;"><i>a</i></td>
+    <td>O_WRONLY | O_CREAT | O_APPEND</td>
+  </tr>
+  <tr>
+    <td style="text-align: center;"><i>r+</i></td>
+    <td>O_RDWR</td>
+  </tr>
+  <tr>
+    <td style="text-align: center;"><i>w+</i></td>
+    <td>O_RDWR | O_CREAT | O_TRUNC</td>
+  </tr>
+  <tr>
+    <td style="text-align: center;"><i>a+</i></td>
+    <td>O_RDWR | O_CREAT | O_APPEND</td>
+  </tr>
+</tbody></table>
+</div>
+<section class="Ss">
+<h2 class="Ss" id="fdopen()"><a class="permalink" href="#fdopen()">fdopen()</a></h2>
+<p class="Pp">The <b>fdopen</b>() function associates a stream with the existing
+    file descriptor, <i>fd</i>. The <i>mode</i> of the stream (one of the values
+    "r", "r+", "w", "w+", "a",
+    "a+") must be compatible with the mode of the file descriptor. The
+    file position indicator of the new stream is set to that belonging to
+    <i>fd</i>, and the error and end-of-file indicators are cleared. Modes
+    "w" or "w+" do not cause truncation of the file. The
+    file descriptor is not dup'ed, and will be closed when the stream created by
+    <b>fdopen</b>() is closed. The result of applying <b>fdopen</b>() to a
+    shared memory object is undefined.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="freopen()"><a class="permalink" href="#freopen()">freopen()</a></h2>
+<p class="Pp">The <b>freopen</b>() function opens the file whose name is the
+    string pointed to by <i>pathname</i> and associates the stream pointed to by
+    <i>stream</i> with it. The original stream (if it exists) is closed. The
+    <i>mode</i> argument is used just as in the <b>fopen</b>() function.</p>
+<p class="Pp">If the <i>pathname</i> argument is a null pointer,
+    <b>freopen</b>() changes the mode of the stream to that specified in
+    <i>mode</i>; that is, <b>freopen</b>() reopens the pathname that is
+    associated with the stream. The specification for this behavior was added in
+    the C99 standard, which says:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">In this case, the file descriptor associated with the
+  stream need not be closed if the call to <b>freopen</b>() succeeds. It is
+  implementation-defined which changes of mode are permitted (if any), and under
+  what circumstances.</div>
+<p class="Pp">The primary use of the <b>freopen</b>() function is to change the
+    file associated with a standard text stream (<i>stderr</i>, <i>stdin</i>, or
+    <i>stdout</i>).</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion <b>fopen</b>(), <b>fdopen</b>(), and
+    <b>freopen</b>() return a <i>FILE</i> pointer. Otherwise, NULL is returned
+    and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The <i>mode</i> provided to <b>fopen</b>(), <b>fdopen</b>(), or
+      <b>freopen</b>() was invalid.</dd>
+</dl>
+<p class="Pp">The <b>fopen</b>(), <b>fdopen</b>(), and <b>freopen</b>()
+    functions may also fail and set <i>errno</i> for any of the errors specified
+    for the routine <b>malloc</b>(3).</p>
+<p class="Pp">The <b>fopen</b>() function may also fail and set <i>errno</i> for
+    any of the errors specified for the routine <b>open</b>(2).</p>
+<p class="Pp">The <b>fdopen</b>() function may also fail and set <i>errno</i>
+    for any of the errors specified for the routine <b>fcntl</b>(2).</p>
+<p class="Pp">The <b>freopen</b>() function may also fail and set <i>errno</i>
+    for any of the errors specified for the routines <b>open</b>(2),
+    <b>fclose</b>(3), and <b>fflush</b>(3).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>fopen (), fdopen (), freopen ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>fopen</b>(), <b>freopen</b>(): POSIX.1-2001, POSIX.1-2008, C89,
+    C99.</p>
+<p class="Pp"><b>fdopen</b>(): POSIX.1-2001, POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="glibc_notes"><a class="permalink" href="#glibc_notes">glibc
+  notes</a></h2>
+<p class="Pp">The GNU C library allows the following extensions for the string
+    specified in <i>mode</i>:</p>
+<dl class="Bl-tag">
+  <dt id="c"><a class="permalink" href="#c"><b>c</b> (since glibc
+    2.3.3)</a></dt>
+  <dd>Do not make the open operation, or subsequent read and write operations,
+      thread cancelation points. This flag is ignored for <b>fdopen</b>().</dd>
+  <dt id="e"><a class="permalink" href="#e"><b>e</b> (since glibc 2.7)</a></dt>
+  <dd>Open the file with the <b>O_CLOEXEC</b> flag. See <b>open</b>(2) for more
+      information. This flag is ignored for <b>fdopen</b>().</dd>
+  <dt id="m"><a class="permalink" href="#m"><b>m</b> (since glibc 2.3)</a></dt>
+  <dd>Attempt to access the file using <b>mmap</b>(2), rather than I/O system
+      calls (<b>read</b>(2), <b>write</b>(2)). Currently, use of <b>mmap</b>(2)
+      is attempted only for a file opened for reading.</dd>
+  <dt id="x"><a class="permalink" href="#x"><b>x</b></a></dt>
+  <dd>Open the file exclusively (like the <b>O_EXCL</b> flag of <b>open</b>(2)).
+      If the file already exists, <b>fopen</b>() fails, and sets <i>errno</i> to
+      <b>EEXIST</b>. This flag is ignored for <b>fdopen</b>().</dd>
+</dl>
+<p class="Pp">In addition to the above characters, <b>fopen</b>() and
+    <b>freopen</b>() support the following syntax in <i>mode</i>:</p>
+<p class="Pp"><b> ,ccs=</b><i>string</i></p>
+<p class="Pp">The given <i>string</i> is taken as the name of a coded character
+    set and the stream is marked as wide-oriented. Thereafter, internal
+    conversion functions convert I/O to and from the character set
+    <i>string</i>. If the <b>,ccs=</b><i>string</i> syntax is not specified,
+    then the wide-orientation of the stream is determined by the first file
+    operation. If that operation is a wide-character operation, the stream is
+    marked wide-oriented, and functions to convert to the coded character set
+    are loaded.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">When parsing for individual flag characters in <i>mode</i> (i.e.,
+    the characters preceding the "ccs" specification), the glibc
+    implementation of <b>fopen</b>() and <b>freopen</b>() limits the number of
+    characters examined in <i>mode</i> to 7 (or, before glibc 2.14, to 6, which
+    was not enough to include possible specifications such as
+    "rb+cmxe"). The current implementation of <b>fdopen</b>() parses
+    at most 5 characters in <i>mode</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>open</b>(2), <b>fclose</b>(3), <b>fileno</b>(3),
+    <b>fmemopen</b>(3), <b>fopencookie</b>(3), <b>open_memstream</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

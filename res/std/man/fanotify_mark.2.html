@@ -1,0 +1,495 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2013,  Heinrich Schuchardt <xypron.glpk@gmx.de>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+ --><head>
+<meta name="dc.identifier" content="res/01fcf1f8c6ec69bdae112bee9e3ab34d808fba7c">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>fanotify_mark(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">fanotify_mark(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">fanotify_mark(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">fanotify_mark - add, remove, or modify an fanotify mark on a
+    filesystem object</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/fanotify.h&gt;</b></pre>
+<pre><b>int fanotify_mark(int </b><i>fanotify_fd</i><b>, unsigned int </b><i>flags</i><b>,</b>
+<b>                  uint64_t </b><i>mask</i><b>, int </b><i>dirfd</i><b>,</b>
+<b>                  const char *_Nullable </b><i>pathname</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">For an overview of the fanotify API, see <b>fanotify</b>(7).</p>
+<p class="Pp"><b>fanotify_mark</b>() adds, removes, or modifies an fanotify mark
+    on a filesystem object. The caller must have read permission on the
+    filesystem object that is to be marked.</p>
+<p class="Pp">The <i>fanotify_fd</i> argument is a file descriptor returned by
+    <b>fanotify_init</b>(2).</p>
+<p class="Pp"><i>flags</i> is a bit mask describing the modification to perform.
+    It must include exactly one of the following values:</p>
+<dl class="Bl-tag">
+  <dt id="FAN_MARK_ADD"><a class="permalink" href="#FAN_MARK_ADD"><b>FAN_MARK_ADD</b></a></dt>
+  <dd>The events in <i>mask</i> will be added to the mark mask (or to the ignore
+      mask). <i>mask</i> must be nonempty or the error <b>EINVAL</b> will
+    occur.</dd>
+  <dt id="FAN_MARK_REMOVE"><a class="permalink" href="#FAN_MARK_REMOVE"><b>FAN_MARK_REMOVE</b></a></dt>
+  <dd>The events in argument <i>mask</i> will be removed from the mark mask (or
+      from the ignore mask). <i>mask</i> must be nonempty or the error
+      <b>EINVAL</b> will occur.</dd>
+  <dt id="FAN_MARK_FLUSH"><a class="permalink" href="#FAN_MARK_FLUSH"><b>FAN_MARK_FLUSH</b></a></dt>
+  <dd>Remove either all marks for filesystems, all marks for mounts, or all
+      marks for directories and files from the fanotify group. If <i>flags</i>
+      contains <b>FAN_MARK_MOUNT</b>, all marks for mounts are removed from the
+      group. If <i>flags</i> contains <b>FAN_MARK_FILESYSTEM</b>, all marks for
+      filesystems are removed from the group. Otherwise, all marks for
+      directories and files are removed. No flag other than, and at most one of,
+      the flags <b>FAN_MARK_MOUNT</b> or <b>FAN_MARK_FILESYSTEM</b> can be used
+      in conjunction with <b>FAN_MARK_FLUSH</b>. <i>mask</i> is ignored.</dd>
+</dl>
+<p class="Pp">If none of the values above is specified, or more than one is
+    specified, the call fails with the error <b>EINVAL</b>.</p>
+<p class="Pp">In addition, zero or more of the following values may be ORed into
+    <i>flags</i>:</p>
+<dl class="Bl-tag">
+  <dt id="FAN_MARK_DONT_FOLLOW"><a class="permalink" href="#FAN_MARK_DONT_FOLLOW"><b>FAN_MARK_DONT_FOLLOW</b></a></dt>
+  <dd>If <i>pathname</i> is a symbolic link, mark the link itself, rather than
+      the file to which it refers. (By default, <b>fanotify_mark</b>()
+      dereferences <i>pathname</i> if it is a symbolic link.)</dd>
+  <dt id="FAN_MARK_ONLYDIR"><a class="permalink" href="#FAN_MARK_ONLYDIR"><b>FAN_MARK_ONLYDIR</b></a></dt>
+  <dd>If the filesystem object to be marked is not a directory, the error
+      <b>ENOTDIR</b> shall be raised.</dd>
+  <dt id="FAN_MARK_MOUNT"><a class="permalink" href="#FAN_MARK_MOUNT"><b>FAN_MARK_MOUNT</b></a></dt>
+  <dd>Mark the mount specified by <i>pathname</i>. If <i>pathname</i> is not
+      itself a mount point, the mount containing <i>pathname</i> will be marked.
+      All directories, subdirectories, and the contained files of the mount will
+      be monitored. The events which require that filesystem objects are
+      identified by file handles, such as <b>FAN_CREATE</b>, <b>FAN_ATTRIB</b>,
+      <b>FAN_MOVE</b>, and <b>FAN_DELETE_SELF</b>, cannot be provided as a
+      <i>mask</i> when <i>flags</i> contains <b>FAN_MARK_MOUNT</b>. Attempting
+      to do so will result in the error <b>EINVAL</b> being returned. Use of
+      this flag requires the <b>CAP_SYS_ADMIN</b> capability.</dd>
+  <dt id="FAN_MARK_FILESYSTEM"><a class="permalink" href="#FAN_MARK_FILESYSTEM"><b>FAN_MARK_FILESYSTEM</b>
+    (since Linux 4.20)</a></dt>
+  <dd>Mark the filesystem specified by <i>pathname</i>. The filesystem
+      containing <i>pathname</i> will be marked. All the contained files and
+      directories of the filesystem from any mount point will be monitored. Use
+      of this flag requires the <b>CAP_SYS_ADMIN</b> capability.</dd>
+  <dt id="FAN_MARK_IGNORED_MASK"><a class="permalink" href="#FAN_MARK_IGNORED_MASK"><b>FAN_MARK_IGNORED_MASK</b></a></dt>
+  <dd>The events in <i>mask</i> shall be added to or removed from the ignore
+      mask. Note that the flags <b>FAN_ONDIR</b>, and <b>FAN_EVENT_ON_CHILD</b>
+      have no effect when provided with this flag. The effect of setting the
+      flags <b>FAN_ONDIR</b>, and <b>FAN_EVENT_ON_CHILD</b> in the mark mask on
+      the events that are set in the ignore mask is undefined and depends on the
+      Linux kernel version. Specifically, prior to Linux 5.9, setting a mark
+      mask on a file and a mark with ignore mask on its parent directory would
+      not result in ignoring events on the file, regardless of the
+      <b>FAN_EVENT_ON_CHILD</b> flag in the parent directory's mark mask. When
+      the ignore mask is updated with the <b>FAN_MARK_IGNORED_MASK</b> flag on a
+      mark that was previously updated with the <b>FAN_MARK_IGNORE</b> flag, the
+      update fails with <b>EEXIST</b> error.</dd>
+  <dt id="FAN_MARK_IGNORE"><a class="permalink" href="#FAN_MARK_IGNORE"><b>FAN_MARK_IGNORE</b>
+    (since Linux 6.0)</a></dt>
+  <dd>This flag has a similar effect as setting the <b>FAN_MARK_IGNORED_MASK</b>
+      flag. The events in <i>mask</i> shall be added to or removed from the
+      ignore mask. Unlike the <b>FAN_MARK_IGNORED_MASK</b> flag, this flag also
+      has the effect that the <b>FAN_ONDIR</b>, and <b>FAN_EVENT_ON_CHILD</b>
+      flags take effect on the ignore mask. Specifically, unless the
+      <b>FAN_ONDIR</b> flag is set with <b>FAN_MARK_IGNORE</b>, events on
+      directories will not be ignored. If the flag <b>FAN_EVENT_ON_CHILD</b> is
+      set with <b>FAN_MARK_IGNORE</b>, events on children will be ignored. For
+      example, a mark on a directory with combination of a mask with
+      <b>FAN_CREATE</b> event and <b>FAN_ONDIR</b> flag and an ignore mask with
+      <b>FAN_CREATE</b> event and without <b>FAN_ONDIR</b> flag, will result in
+      getting only the events for creation of sub-directories. When using the
+      <b>FAN_MARK_IGNORE</b> flag to add to an ignore mask of a mount,
+      filesystem, or directory inode mark, the
+      <b>FAN_MARK_IGNORED_SURV_MODIFY</b> flag must be specified. Failure to do
+      so will results with <b>EINVAL</b> or <b>EISDIR</b> error.</dd>
+  <dt id="FAN_MARK_IGNORED_SURV_MODIFY"><a class="permalink" href="#FAN_MARK_IGNORED_SURV_MODIFY"><b>FAN_MARK_IGNORED_SURV_MODIFY</b></a></dt>
+  <dd>The ignore mask shall survive modify events. If this flag is not set, the
+      ignore mask is cleared when a modify event occurs on the marked object.
+      Omitting this flag is typically used to suppress events (e.g.,
+      <b>FAN_OPEN</b>) for a specific file, until that specific file's content
+      has been modified. It is far less useful to suppress events on an entire
+      filesystem, or mount, or on all files inside a directory, until some
+      file's content has been modified. For this reason, the
+      <b>FAN_MARK_IGNORE</b> flag requires the
+      <b>FAN_MARK_IGNORED_SURV_MODIFY</b> flag on a mount, filesystem, or
+      directory inode mark. This flag cannot be removed from a mark once set.
+      When the ignore mask is updated without this flag on a mark that was
+      previously updated with the <b>FAN_MARK_IGNORE</b> and
+      <b>FAN_MARK_IGNORED_SURV_MODIFY</b> flags, the update fails with
+      <b>EEXIST</b> error.</dd>
+  <dt id="FAN_MARK_IGNORE_SURV"><a class="permalink" href="#FAN_MARK_IGNORE_SURV"><b>FAN_MARK_IGNORE_SURV</b></a></dt>
+  <dd>This is a synonym for
+      (<b>FAN_MARK_IGNORE</b>|<b>FAN_MARK_IGNORED_SURV_MODIFY</b>).</dd>
+  <dt id="FAN_MARK_EVICTABLE"><a class="permalink" href="#FAN_MARK_EVICTABLE"><b>FAN_MARK_EVICTABLE</b>
+    (since Linux 5.19)</a></dt>
+  <dd>When an inode mark is created with this flag, the inode object will not be
+      pinned to the inode cache, therefore, allowing the inode object to be
+      evicted from the inode cache when the memory pressure on the system is
+      high. The eviction of the inode object results in the evictable mark also
+      being lost. When the mask of an evictable inode mark is updated without
+      using the <b>FAN_MARK_EVICATBLE</b> flag, the marked inode is pinned to
+      inode cache and the mark is no longer evictable. When the mask of a
+      non-evictable inode mark is updated with the <b>FAN_MARK_EVICTABLE</b>
+      flag, the inode mark remains non-evictable and the update fails with
+      <b>EEXIST</b> error. Mounts and filesystems are not evictable objects,
+      therefore, an attempt to create a mount mark or a filesystem mark with the
+      <b>FAN_MARK_EVICTABLE</b> flag, will result in the error <b>EINVAL</b>.
+      For example, inode marks can be used in combination with mount marks to
+      reduce the amount of events from noninteresting paths. The event listener
+      reads events, checks if the path reported in the event is of interest, and
+      if it is not, the listener sets a mark with an ignore mask on the
+      directory. Evictable inode marks allow using this method for a large
+      number of directories without the concern of pinning all inodes and
+      exhausting the system's memory.</dd>
+</dl>
+<p class="Pp"><i>mask</i> defines which events shall be listened for (or which
+    shall be ignored). It is a bit mask composed of the following values:</p>
+<dl class="Bl-tag">
+  <dt id="FAN_ACCESS"><a class="permalink" href="#FAN_ACCESS"><b>FAN_ACCESS</b></a></dt>
+  <dd>Create an event when a file or directory (but see BUGS) is accessed
+      (read).</dd>
+  <dt id="FAN_MODIFY"><a class="permalink" href="#FAN_MODIFY"><b>FAN_MODIFY</b></a></dt>
+  <dd>Create an event when a file is modified (write).</dd>
+  <dt id="FAN_CLOSE_WRITE"><a class="permalink" href="#FAN_CLOSE_WRITE"><b>FAN_CLOSE_WRITE</b></a></dt>
+  <dd>Create an event when a writable file is closed.</dd>
+  <dt id="FAN_CLOSE_NOWRITE"><a class="permalink" href="#FAN_CLOSE_NOWRITE"><b>FAN_CLOSE_NOWRITE</b></a></dt>
+  <dd>Create an event when a read-only file or directory is closed.</dd>
+  <dt id="FAN_OPEN"><a class="permalink" href="#FAN_OPEN"><b>FAN_OPEN</b></a></dt>
+  <dd>Create an event when a file or directory is opened.</dd>
+  <dt id="FAN_OPEN_EXEC"><a class="permalink" href="#FAN_OPEN_EXEC"><b>FAN_OPEN_EXEC</b>
+    (since Linux 5.0)</a></dt>
+  <dd>Create an event when a file is opened with the intent to be executed. See
+      NOTES for additional details.</dd>
+  <dt id="FAN_ATTRIB"><a class="permalink" href="#FAN_ATTRIB"><b>FAN_ATTRIB</b>
+    (since Linux 5.1)</a></dt>
+  <dd>Create an event when the metadata for a file or directory has changed. An
+      fanotify group that identifies filesystem objects by file handles is
+      required.</dd>
+  <dt id="FAN_CREATE"><a class="permalink" href="#FAN_CREATE"><b>FAN_CREATE</b>
+    (since Linux 5.1)</a></dt>
+  <dd>Create an event when a file or directory has been created in a marked
+      parent directory. An fanotify group that identifies filesystem objects by
+      file handles is required.</dd>
+  <dt id="FAN_DELETE"><a class="permalink" href="#FAN_DELETE"><b>FAN_DELETE</b>
+    (since Linux 5.1)</a></dt>
+  <dd>Create an event when a file or directory has been deleted in a marked
+      parent directory. An fanotify group that identifies filesystem objects by
+      file handles is required.</dd>
+  <dt id="FAN_DELETE_SELF"><a class="permalink" href="#FAN_DELETE_SELF"><b>FAN_DELETE_SELF</b>
+    (since Linux 5.1)</a></dt>
+  <dd>Create an event when a marked file or directory itself is deleted. An
+      fanotify group that identifies filesystem objects by file handles is
+      required.</dd>
+  <dt id="FAN_FS_ERROR"><a class="permalink" href="#FAN_FS_ERROR"><b>FAN_FS_ERROR</b>
+    (since Linux 5.16)</a></dt>
+  <dd>Create an event when a filesystem error leading to inconsistent filesystem
+      metadata is detected. An additional information record of type
+      <b>FAN_EVENT_INFO_TYPE_ERROR</b> is returned for each event in the read
+      buffer. An fanotify group that identifies filesystem objects by file
+      handles is required.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Events of such type are dependent on support from the underlying
+      filesystem. At the time of writing, only the <b>ext4</b> filesystem
+      reports <b>FAN_FS_ERROR</b> events.</dd>
+  <dt></dt>
+  <dd>See <b>fanotify</b>(7) for additional details.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="FAN_MOVED_FROM"><a class="permalink" href="#FAN_MOVED_FROM"><b>FAN_MOVED_FROM</b>
+    (since Linux 5.1)</a></dt>
+  <dd>Create an event when a file or directory has been moved from a marked
+      parent directory. An fanotify group that identifies filesystem objects by
+      file handles is required.</dd>
+  <dt id="FAN_MOVED_TO"><a class="permalink" href="#FAN_MOVED_TO"><b>FAN_MOVED_TO</b>
+    (since Linux 5.1)</a></dt>
+  <dd>Create an event when a file or directory has been moved to a marked parent
+      directory. An fanotify group that identifies filesystem objects by file
+      handles is required.</dd>
+  <dt id="FAN_RENAME"><a class="permalink" href="#FAN_RENAME"><b>FAN_RENAME</b>
+    (since Linux 5.17)</a></dt>
+  <dd>This event contains the same information provided by events
+      <b>FAN_MOVED_FROM</b> and <b>FAN_MOVED_TO</b>, however is represented by a
+      single event with up to two information records. An fanotify group that
+      identifies filesystem objects by file handles is required. If the
+      filesystem object to be marked is not a directory, the error
+      <b>ENOTDIR</b> shall be raised.</dd>
+  <dt id="FAN_MOVE_SELF"><a class="permalink" href="#FAN_MOVE_SELF"><b>FAN_MOVE_SELF</b>
+    (since Linux 5.1)</a></dt>
+  <dd>Create an event when a marked file or directory itself has been moved. An
+      fanotify group that identifies filesystem objects by file handles is
+      required.</dd>
+  <dt id="FAN_OPEN_PERM"><a class="permalink" href="#FAN_OPEN_PERM"><b>FAN_OPEN_PERM</b></a></dt>
+  <dd>Create an event when a permission to open a file or directory is
+      requested. An fanotify file descriptor created with
+      <b>FAN_CLASS_PRE_CONTENT</b> or <b>FAN_CLASS_CONTENT</b> is required.</dd>
+  <dt id="FAN_OPEN_EXEC_PERM"><a class="permalink" href="#FAN_OPEN_EXEC_PERM"><b>FAN_OPEN_EXEC_PERM</b>
+    (since Linux 5.0)</a></dt>
+  <dd>Create an event when a permission to open a file for execution is
+      requested. An fanotify file descriptor created with
+      <b>FAN_CLASS_PRE_CONTENT</b> or <b>FAN_CLASS_CONTENT</b> is required. See
+      NOTES for additional details.</dd>
+  <dt id="FAN_ACCESS_PERM"><a class="permalink" href="#FAN_ACCESS_PERM"><b>FAN_ACCESS_PERM</b></a></dt>
+  <dd>Create an event when a permission to read a file or directory is
+      requested. An fanotify file descriptor created with
+      <b>FAN_CLASS_PRE_CONTENT</b> or <b>FAN_CLASS_CONTENT</b> is required.</dd>
+  <dt id="FAN_ONDIR"><a class="permalink" href="#FAN_ONDIR"><b>FAN_ONDIR</b></a></dt>
+  <dd>Create events for directories—for example, when <b>opendir</b>(3),
+      <b>readdir</b>(3) (but see BUGS), and <b>closedir</b>(3) are called.
+      Without this flag, events are created only for files. In the context of
+      directory entry events, such as <b>FAN_CREATE</b>, <b>FAN_DELETE</b>,
+      <b>FAN_MOVED_FROM</b>, and <b>FAN_MOVED_TO</b>, specifying the flag
+      <b>FAN_ONDIR</b> is required in order to create events when subdirectory
+      entries are modified (i.e., <b>mkdir</b>(2)/ <b>rmdir</b>(2)).</dd>
+  <dt id="FAN_EVENT_ON_CHILD"><a class="permalink" href="#FAN_EVENT_ON_CHILD"><b>FAN_EVENT_ON_CHILD</b></a></dt>
+  <dd>Events for the immediate children of marked directories shall be created.
+      The flag has no effect when marking mounts and filesystems. Note that
+      events are not generated for children of the subdirectories of marked
+      directories. More specifically, the directory entry modification events
+      <b>FAN_CREATE</b>, <b>FAN_DELETE</b>, <b>FAN_MOVED_FROM</b>, and
+      <b>FAN_MOVED_TO</b> are not generated for any entry modifications
+      performed inside subdirectories of marked directories. Note that the
+      events <b>FAN_DELETE_SELF</b> and <b>FAN_MOVE_SELF</b> are not generated
+      for children of marked directories. To monitor complete directory trees it
+      is necessary to mark the relevant mount or filesystem.</dd>
+</dl>
+<p class="Pp">The following composed values are defined:</p>
+<dl class="Bl-tag">
+  <dt id="FAN_CLOSE"><a class="permalink" href="#FAN_CLOSE"><b>FAN_CLOSE</b></a></dt>
+  <dd>A file is closed (<b>FAN_CLOSE_WRITE</b>|<b>FAN_CLOSE_NOWRITE</b>).</dd>
+  <dt id="FAN_MOVE"><a class="permalink" href="#FAN_MOVE"><b>FAN_MOVE</b></a></dt>
+  <dd>A file or directory has been moved
+      (<b>FAN_MOVED_FROM</b>|<b>FAN_MOVED_TO</b>).</dd>
+</dl>
+<p class="Pp">The filesystem object to be marked is determined by the file
+    descriptor <i>dirfd</i> and the pathname specified in <i>pathname</i>:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>If <i>pathname</i> is NULL, <i>dirfd</i> defines the filesystem object to
+      be marked.</dd>
+  <dt>•</dt>
+  <dd>If <i>pathname</i> is NULL, and <i>dirfd</i> takes the special value
+      <b>AT_FDCWD</b>, the current working directory is to be marked.</dd>
+  <dt>•</dt>
+  <dd>If <i>pathname</i> is absolute, it defines the filesystem object to be
+      marked, and <i>dirfd</i> is ignored.</dd>
+  <dt>•</dt>
+  <dd>If <i>pathname</i> is relative, and <i>dirfd</i> does not have the value
+      <b>AT_FDCWD</b>, then the filesystem object to be marked is determined by
+      interpreting <i>pathname</i> relative the directory referred to by
+      <i>dirfd</i>.</dd>
+  <dt>•</dt>
+  <dd>If <i>pathname</i> is relative, and <i>dirfd</i> has the value
+      <b>AT_FDCWD</b>, then the filesystem object to be marked is determined by
+      interpreting <i>pathname</i> relative to the current working directory.
+      (See <b>openat</b>(2) for an explanation of why the <i>dirfd</i> argument
+      is useful.)</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>fanotify_mark</b>() returns 0. On error, -1 is
+    returned, and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>An invalid file descriptor was passed in <i>fanotify_fd</i>.</dd>
+  <dt id="EBADF~2"><a class="permalink" href="#EBADF~2"><b>EBADF</b></a></dt>
+  <dd><i>pathname</i> is relative but <i>dirfd</i> is neither <b>AT_FDCWD</b>
+      nor a valid file descriptor.</dd>
+  <dt id="EEXIST"><a class="permalink" href="#EEXIST"><b>EEXIST</b></a></dt>
+  <dd>The filesystem object indicated by <i>dirfd</i> and <i>pathname</i> has a
+      mark that was updated without the <b>FAN_MARK_EVICTABLE</b> flag, and the
+      user attempted to update the mark with <b>FAN_MARK_EVICTABLE</b>
+    flag.</dd>
+  <dt id="EEXIST~2"><a class="permalink" href="#EEXIST~2"><b>EEXIST</b></a></dt>
+  <dd>The filesystem object indicated by <i>dirfd</i> and <i>pathname</i> has a
+      mark that was updated with the <b>FAN_MARK_IGNORE</b> flag, and the user
+      attempted to update the mark with <b>FAN_MARK_IGNORED_MASK</b> flag.</dd>
+  <dt id="EEXIST~3"><a class="permalink" href="#EEXIST~3"><b>EEXIST</b></a></dt>
+  <dd>The filesystem object indicated by <i>dirfd</i> and <i>pathname</i> has a
+      mark that was updated with the <b>FAN_MARK_IGNORE</b> and
+      <b>FAN_MARK_IGNORED_SURV_MODIFY</b> flags, and the user attempted to
+      update the mark only with <b>FAN_MARK_IGNORE</b> flag.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>An invalid value was passed in <i>flags</i> or <i>mask</i>, or
+      <i>fanotify_fd</i> was not an fanotify file descriptor.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>The fanotify file descriptor was opened with <b>FAN_CLASS_NOTIF</b> or the
+      fanotify group identifies filesystem objects by file handles and mask
+      contains a flag for permission events (<b>FAN_OPEN_PERM</b> or
+      <b>FAN_ACCESS_PERM</b>).</dd>
+  <dt id="EINVAL~3"><a class="permalink" href="#EINVAL~3"><b>EINVAL</b></a></dt>
+  <dd>The group was initialized without <b>FAN_REPORT_FID</b> but one or more
+      event types specified in the <i>mask</i> require it.</dd>
+  <dt id="EINVAL~4"><a class="permalink" href="#EINVAL~4"><b>EINVAL</b></a></dt>
+  <dd><i>flags</i> contains <b>FAN_MARK_IGNORE</b>, and either
+      <b>FAN_MARK_MOUNT</b> or <b>FAN_MARK_FILESYSTEM</b>, but does not contain
+      <b>FAN_MARK_IGNORED_SURV_MODIFY</b>.</dd>
+  <dt id="EISDIR"><a class="permalink" href="#EISDIR"><b>EISDIR</b></a></dt>
+  <dd><i>flags</i> contains <b>FAN_MARK_IGNORE</b>, but does not contain
+      <b>FAN_MARK_IGNORED_SURV_MODIFY</b>, and <i>dirfd</i> and <i>pathname</i>
+      specify a directory.</dd>
+  <dt id="ENODEV"><a class="permalink" href="#ENODEV"><b>ENODEV</b></a></dt>
+  <dd>The filesystem object indicated by <i>dirfd</i> and <i>pathname</i> is not
+      associated with a filesystem that supports <i>fsid</i> (e.g.,
+      <b>fuse</b>(4)). <b>tmpfs</b>(5) did not support <i>fsid</i> prior to
+      Linux 5.13. This error can be returned only with an fanotify group that
+      identifies filesystem objects by file handles.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>The filesystem object indicated by <i>dirfd</i> and <i>pathname</i> does
+      not exist. This error also occurs when trying to remove a mark from an
+      object which is not marked.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>The necessary memory could not be allocated.</dd>
+  <dt id="ENOSPC"><a class="permalink" href="#ENOSPC"><b>ENOSPC</b></a></dt>
+  <dd>The number of marks for this user exceeds the limit and the
+      <b>FAN_UNLIMITED_MARKS</b> flag was not specified when the fanotify file
+      descriptor was created with <b>fanotify_init</b>(2). See
+      <b>fanotify</b>(7) for details about this limit.</dd>
+  <dt id="ENOSYS"><a class="permalink" href="#ENOSYS"><b>ENOSYS</b></a></dt>
+  <dd>This kernel does not implement <b>fanotify_mark</b>(). The fanotify API is
+      available only if the kernel was configured with
+    <b>CONFIG_FANOTIFY</b>.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd><i>flags</i> contains <b>FAN_MARK_ONLYDIR</b>, and <i>dirfd</i> and
+      <i>pathname</i> do not specify a directory.</dd>
+  <dt id="ENOTDIR~2"><a class="permalink" href="#ENOTDIR~2"><b>ENOTDIR</b></a></dt>
+  <dd><i>mask</i> contains <b>FAN_RENAME</b>, and <i>dirfd</i> and
+      <i>pathname</i> do not specify a directory.</dd>
+  <dt id="ENOTDIR~3"><a class="permalink" href="#ENOTDIR~3"><b>ENOTDIR</b></a></dt>
+  <dd><i>flags</i> contains <b>FAN_MARK_IGNORE</b>, or the fanotify group was
+      initialized with flag <b>FAN_REPORT_TARGET_FID</b>, and <i>mask</i>
+      contains directory entry modification events (e.g., <b>FAN_CREATE</b>,
+      <b>FAN_DELETE</b>), or directory event flags (e.g., <b>FAN_ONDIR</b>,
+      <b>FAN_EVENT_ON_CHILD</b>), and <i>dirfd</i> and <i>pathname</i> do not
+      specify a directory.</dd>
+  <dt id="EOPNOTSUPP"><a class="permalink" href="#EOPNOTSUPP"><b>EOPNOTSUPP</b></a></dt>
+  <dd>The object indicated by <i>pathname</i> is associated with a filesystem
+      that does not support the encoding of file handles. This error can be
+      returned only with an fanotify group that identifies filesystem objects by
+      file handles.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The operation is not permitted because the caller lacks a required
+      capability.</dd>
+  <dt id="EXDEV"><a class="permalink" href="#EXDEV"><b>EXDEV</b></a></dt>
+  <dd>The filesystem object indicated by <i>pathname</i> resides within a
+      filesystem subvolume (e.g., <b>btrfs</b>(5)) which uses a different
+      <i>fsid</i> than its root superblock. This error can be returned only with
+      an fanotify group that identifies filesystem objects by file handles.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>fanotify_mark</b>() was introduced in Linux 2.6.36 and enabled
+    in Linux 2.6.37.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This system call is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="FAN_OPEN_EXEC_and_FAN_OPEN_EXEC_PERM"><a class="permalink" href="#FAN_OPEN_EXEC_and_FAN_OPEN_EXEC_PERM">FAN_OPEN_EXEC
+  and FAN_OPEN_EXEC_PERM</a></h2>
+<p class="Pp">When using either <b>FAN_OPEN_EXEC</b> or
+    <b>FAN_OPEN_EXEC_PERM</b> within the <i>mask</i>, events of these types will
+    be returned only when the direct execution of a program occurs. More
+    specifically, this means that events of these types will be generated for
+    files that are opened using <b>execve</b>(2), <b>execveat</b>(2), or
+    <b>uselib</b>(2). Events of these types will not be raised in the situation
+    where an interpreter is passed (or reads) a file for interpretation.</p>
+<p class="Pp">Additionally, if a mark has also been placed on the Linux dynamic
+    linker, a user should also expect to receive an event for it when an ELF
+    object has been successfully opened using <b>execve</b>(2) or
+    <b>execveat</b>(2).</p>
+<p class="Pp">For example, if the following ELF binary were to be invoked and a
+    <b>FAN_OPEN_EXEC</b> mark has been placed on /:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ /bin/echo foo
+</pre>
+<br>
+<p class="Pp">The listening application in this case would receive
+    <b>FAN_OPEN_EXEC</b> events for both the ELF binary and interpreter,
+    respectively:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>/bin/echo
+/lib64/ld-linux-x86-64.so.2
+</pre>
+<br>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">The following bugs were present in before Linux 3.16:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>If <i>flags</i> contains <b>FAN_MARK_FLUSH</b>, <i>dirfd</i>, and
+      <i>pathname</i> must specify a valid filesystem object, even though this
+      object is not used.</dd>
+  <dt>•</dt>
+  <dd><b>readdir</b>(2) does not generate a <b>FAN_ACCESS</b> event.</dd>
+  <dt>•</dt>
+  <dd>If <b>fanotify_mark</b>() is called with <b>FAN_MARK_FLUSH</b>,
+      <i>flags</i> is not checked for invalid values.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>fanotify_init</b>(2), <b>fanotify</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

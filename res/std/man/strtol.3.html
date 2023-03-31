@@ -1,0 +1,269 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright 1993 David Metcalfe (david@prism.demon.co.uk)
+   and Copyright 2006 Michael Kerrisk <mtk.manpages@ganil.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   References consulted:
+       Linux libc source code
+       Lewine's _POSIX Programmer's Guide_ (O'Reilly & Associates, 1991)
+       386BSD man pages
+   Modified Sun Jul 25 10:53:39 1993 by Rik Faith (faith@cs.unc.edu)
+   Added correction due to nsd@bbc.com (Nick Duffek) - aeb, 950610
+ --><head>
+<meta name="dc.identifier" content="res/7fb7de6d5bd2ac3f371080c50475d6118ece9c40">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>strtol(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">strtol(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">strtol(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">strtol, strtoll, strtoq - convert a string to a long integer</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;stdlib.h&gt;</b></pre>
+<pre><b>long strtol(const char *restrict </b><i>nptr</i><b>,</b>
+<b>            char **restrict </b><i>endptr</i><b>, int </b><i>base</i><b>);</b>
+<b>long long strtoll(const char *restrict </b><i>nptr</i><b>,</b>
+<b>            char **restrict </b><i>endptr</i><b>, int </b><i>base</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>strtoll</b>():</p>
+<pre><br>
+    _ISOC99_SOURCE
+<br>
+        || /* glibc &lt;= 2.19: */ _SVID_SOURCE || _BSD_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>strtol</b>() function converts the initial part of the
+    string in <i>nptr</i> to a long integer value according to the given
+    <i>base</i>, which must be between 2 and 36 inclusive, or be the special
+    value 0.</p>
+<p class="Pp">The string may begin with an arbitrary amount of white space (as
+    determined by <b>isspace</b>(3)) followed by a single optional '+' or '-'
+    sign. If <i>base</i> is zero or 16, the string may then include a
+    "0x" or "0X" prefix, and the number will be read in base
+    16; otherwise, a zero <i>base</i> is taken as 10 (decimal) unless the next
+    character is '0', in which case it is taken as 8 (octal).</p>
+<p class="Pp">The remainder of the string is converted to a <i>long</i> value in
+    the obvious manner, stopping at the first character which is not a valid
+    digit in the given base. (In bases above 10, the letter 'A' in either
+    uppercase or lowercase represents 10, 'B' represents 11, and so forth, with
+    'Z' representing 35.)</p>
+<p class="Pp">If <i>endptr</i> is not NULL, <b>strtol</b>() stores the address
+    of the first invalid character in <i>*endptr</i>. If there were no digits at
+    all, <b>strtol</b>() stores the original value of <i>nptr</i> in
+    <i>*endptr</i> (and returns 0). In particular, if <i>*nptr</i> is not '\0'
+    but <i>**endptr</i> is '\0' on return, the entire string is valid.</p>
+<p class="Pp">The <b>strtoll</b>() function works just like the <b>strtol</b>()
+    function but returns a <i>long long</i> integer value.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <b>strtol</b>() function returns the result of the conversion,
+    unless the value would underflow or overflow. If an underflow occurs,
+    <b>strtol</b>() returns <b>LONG_MIN</b>. If an overflow occurs,
+    <b>strtol</b>() returns <b>LONG_MAX</b>. In both cases, <i>errno</i> is set
+    to <b>ERANGE</b>. Precisely the same holds for <b>strtoll</b>() (with
+    <b>LLONG_MIN</b> and <b>LLONG_MAX</b> instead of <b>LONG_MIN</b> and
+    <b>LONG_MAX</b>).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>(not in C99) The given <i>base</i> contains an unsupported value.</dd>
+  <dt id="ERANGE"><a class="permalink" href="#ERANGE"><b>ERANGE</b></a></dt>
+  <dd>The resulting value was out of range.</dd>
+</dl>
+<p class="Pp">The implementation may also set <i>errno</i> to <b>EINVAL</b> in
+    case no conversion was performed (no digits seen, and 0 returned).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>strtol (), strtoll (), strtoq ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe locale</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>strtol</b>(): POSIX.1-2001, POSIX.1-2008, C89, C99 SVr4,
+    4.3BSD.</p>
+<p class="Pp"><b>strtoll</b>(): POSIX.1-2001, POSIX.1-2008, C99.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Since <b>strtol</b>() can legitimately return 0, <b>LONG_MAX</b>,
+    or <b>LONG_MIN</b> (<b>LLONG_MAX</b> or <b>LLONG_MIN</b> for
+    <b>strtoll</b>()) on both success and failure, the calling program should
+    set <i>errno</i> to 0 before the call, and then determine if an error
+    occurred by checking whether <i>errno</i> has a nonzero value after the
+    call.</p>
+<p class="Pp">According to POSIX.1, in locales other than "C" and
+    "POSIX", these functions may accept other, implementation-defined
+    numeric strings.</p>
+<p class="Pp">BSD also has</p>
+<p class="Pp">
+  <br>
+</p>
+<pre><b>quad_t strtoq(const char *</b><i>nptr</i><b>, char **</b><i>endptr</i><b>, int </b><i>base</i><b>);</b>
+</pre>
+<br>
+<p class="Pp">with completely analogous definition. Depending on the wordsize of
+    the current architecture, this may be equivalent to <b>strtoll</b>() or to
+    <b>strtol</b>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program shown below demonstrates the use of <b>strtol</b>().
+    The first command-line argument specifies a string from which
+    <b>strtol</b>() should parse a number. The second (optional) argument
+    specifies the base to be used for the conversion. (This argument is
+    converted to numeric form using <b>atoi</b>(3), a function that performs no
+    error checking and has a simpler interface than <b>strtol</b>().) Some
+    examples of the results produced by this program are the following:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$<b> ./a.out 123</b>
+strtol() returned 123
+$<b> ./a.out '    123'</b>
+strtol() returned 123
+$<b> ./a.out 123abc</b>
+strtol() returned 123
+Further characters after number: "abc"
+$<b> ./a.out 123abc 55</b>
+strtol: Invalid argument
+$<b> ./a.out ''</b>
+No digits were found
+$<b> ./a.out 4000000000</b>
+strtol: Numerical result out of range
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#include &lt;errno.h&gt;
+#include &lt;limits.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+int
+main(int argc, char *argv[])
+{
+<br>
+    int base;
+<br>
+    char *endptr, *str;
+<br>
+    long val;
+<br>
+    if (argc &lt; 2) {
+<br>
+        fprintf(stderr, "Usage: %s str [base]\n", argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    str = argv[1];
+<br>
+    base = (argc &gt; 2) ? atoi(argv[2]) : 0;
+<br>
+    errno = 0;    /* To distinguish success/failure after call */
+<br>
+    val = strtol(str, &amp;endptr, base);
+<br>
+    /* Check for various possible errors. */
+<br>
+    if (errno != 0) {
+<br>
+        perror("strtol");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    if (endptr == str) {
+<br>
+        fprintf(stderr, "No digits were found\n");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    /* If we got here, strtol() successfully parsed a number. */
+<br>
+    printf("strtol() returned %ld\n", val);
+<br>
+    if (*endptr != '\0')        /* Not necessarily an error... */
+<br>
+        printf("Further characters after number: \"%s\"\n", endptr);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>atof</b>(3), <b>atoi</b>(3), <b>atol</b>(3), <b>strtod</b>(3),
+    <b>strtoimax</b>(3), <b>strtoul</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

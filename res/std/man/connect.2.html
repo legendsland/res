@@ -1,0 +1,201 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright 1993 Rickard E. Faith (faith@cs.unc.edu)
+   Portions extracted from /usr/include/sys/socket.h, which does not have
+   any authorship information in it.  It is probably available under the GPL.
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Other portions are from the 6.9 (Berkeley) 3/10/91 man page:
+  
+   Copyright (c) 1983 The Regents of the University of California.
+   All rights reserved.
+  
+   SPDX-License-Identifier: BSD-4-Clause-UC
+  
+   Modified 1997-01-31 by Eric S. Raymond <esr@thyrsus.com>
+   Modified 1998, 1999 by Andi Kleen
+   Modified 2004-06-23 by Michael Kerrisk <mtk.manpages@gmail.com>
+   --><head>
+<meta name="dc.identifier" content="res/50ee58a57e2f7cbe2beca01c76b82554928225dc">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>connect(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">connect(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">connect(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">connect - initiate a connection on a socket</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/socket.h&gt;</b></pre>
+<pre><b>int connect(int </b><i>sockfd</i><b>, const struct sockaddr *</b><i>addr</i><b>,</b>
+<b>            socklen_t </b><i>addrlen</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>connect</b>() system call connects the socket referred to
+    by the file descriptor <i>sockfd</i> to the address specified by
+    <i>addr</i>. The <i>addrlen</i> argument specifies the size of <i>addr</i>.
+    The format of the address in <i>addr</i> is determined by the address space
+    of the socket <i>sockfd</i>; see <b>socket</b>(2) for further details.</p>
+<p class="Pp">If the socket <i>sockfd</i> is of type <b>SOCK_DGRAM</b>, then
+    <i>addr</i> is the address to which datagrams are sent by default, and the
+    only address from which datagrams are received. If the socket is of type
+    <b>SOCK_STREAM</b> or <b>SOCK_SEQPACKET</b>, this call attempts to make a
+    connection to the socket that is bound to the address specified by
+    <i>addr</i>.</p>
+<p class="Pp">Some protocol sockets (e.g., UNIX domain stream sockets) may
+    successfully <b>connect</b>() only once.</p>
+<p class="Pp">Some protocol sockets (e.g., datagram sockets in the UNIX and
+    Internet domains) may use <b>connect</b>() multiple times to change their
+    association.</p>
+<p class="Pp">Some protocol sockets (e.g., TCP sockets as well as datagram
+    sockets in the UNIX and Internet domains) may dissolve the association by
+    connecting to an address with the <i>sa_family</i> member of <i>sockaddr</i>
+    set to <b>AF_UNSPEC</b>; thereafter, the socket can be connected to another
+    address. (<b>AF_UNSPEC</b> is supported since Linux 2.2.)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">If the connection or binding succeeds, zero is returned. On error,
+    -1 is returned, and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The following are general socket errors only. There may be other
+    domain-specific error codes.</p>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>For UNIX domain sockets, which are identified by pathname: Write
+      permission is denied on the socket file, or search permission is denied
+      for one of the directories in the path prefix. (See also
+      <b>path_resolution</b>(7).)</dd>
+  <dt id="EACCES~2"><a class="permalink" href="#EACCES~2"><b>EACCES</b>,
+    <b>EPERM</b></a></dt>
+  <dd>The user tried to connect to a broadcast address without having the socket
+      broadcast flag enabled or the connection request failed because of a local
+      firewall rule.</dd>
+  <dt id="EACCES~3"><a class="permalink" href="#EACCES~3"><b>EACCES</b></a></dt>
+  <dd>It can also be returned if an SELinux policy denied a connection (for
+      example, if there is a policy saying that an HTTP proxy can only connect
+      to ports associated with HTTP servers, and the proxy tries to connect to a
+      different port).</dd>
+  <dt id="EADDRINUSE"><a class="permalink" href="#EADDRINUSE"><b>EADDRINUSE</b></a></dt>
+  <dd>Local address is already in use.</dd>
+  <dt id="EADDRNOTAVAIL"><a class="permalink" href="#EADDRNOTAVAIL"><b>EADDRNOTAVAIL</b></a></dt>
+  <dd>(Internet domain sockets) The socket referred to by <i>sockfd</i> had not
+      previously been bound to an address and, upon attempting to bind it to an
+      ephemeral port, it was determined that all port numbers in the ephemeral
+      port range are currently in use. See the discussion of
+      <i>/proc/sys/net/ipv4/ip_local_port_range</i> in <b>ip</b>(7).</dd>
+  <dt id="EAFNOSUPPORT"><a class="permalink" href="#EAFNOSUPPORT"><b>EAFNOSUPPORT</b></a></dt>
+  <dd>The passed address didn't have the correct address family in its
+      <i>sa_family</i> field.</dd>
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>For nonblocking UNIX domain sockets, the socket is nonblocking, and the
+      connection cannot be completed immediately. For other socket families,
+      there are insufficient entries in the routing cache.</dd>
+  <dt id="EALREADY"><a class="permalink" href="#EALREADY"><b>EALREADY</b></a></dt>
+  <dd>The socket is nonblocking and a previous connection attempt has not yet
+      been completed.</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd><i>sockfd</i> is not a valid open file descriptor.</dd>
+  <dt id="ECONNREFUSED"><a class="permalink" href="#ECONNREFUSED"><b>ECONNREFUSED</b></a></dt>
+  <dd>A <b>connect</b>() on a stream socket found no one listening on the remote
+      address.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>The socket structure address is outside the user's address space.</dd>
+  <dt id="EINPROGRESS"><a class="permalink" href="#EINPROGRESS"><b>EINPROGRESS</b></a></dt>
+  <dd>The socket is nonblocking and the connection cannot be completed
+      immediately. (UNIX domain sockets failed with <b>EAGAIN</b> instead.) It
+      is possible to <b>select</b>(2) or <b>poll</b>(2) for completion by
+      selecting the socket for writing. After <b>select</b>(2) indicates
+      writability, use <b>getsockopt</b>(2) to read the <b>SO_ERROR</b> option
+      at level <b>SOL_SOCKET</b> to determine whether <b>connect</b>() completed
+      successfully (<b>SO_ERROR</b> is zero) or unsuccessfully (<b>SO_ERROR</b>
+      is one of the usual error codes listed here, explaining the reason for the
+      failure).</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The system call was interrupted by a signal that was caught; see
+      <b>signal</b>(7).</dd>
+  <dt id="EISCONN"><a class="permalink" href="#EISCONN"><b>EISCONN</b></a></dt>
+  <dd>The socket is already connected.</dd>
+  <dt id="ENETUNREACH"><a class="permalink" href="#ENETUNREACH"><b>ENETUNREACH</b></a></dt>
+  <dd>Network is unreachable.</dd>
+  <dt id="ENOTSOCK"><a class="permalink" href="#ENOTSOCK"><b>ENOTSOCK</b></a></dt>
+  <dd>The file descriptor <i>sockfd</i> does not refer to a socket.</dd>
+  <dt id="EPROTOTYPE"><a class="permalink" href="#EPROTOTYPE"><b>EPROTOTYPE</b></a></dt>
+  <dd>The socket type does not support the requested communications protocol.
+      This error can occur, for example, on an attempt to connect a UNIX domain
+      datagram socket to a stream socket.</dd>
+  <dt id="ETIMEDOUT"><a class="permalink" href="#ETIMEDOUT"><b>ETIMEDOUT</b></a></dt>
+  <dd>Timeout while attempting connection. The server may be too busy to accept
+      new connections. Note that for IP sockets the timeout may be very long
+      when syncookies are enabled on the server.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, SVr4, 4.4BSD, (connect<b>()</b> first
+    appeared in 4.2BSD).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">For background on the <i>socklen_t</i> type, see
+  <b>accept</b>(2).</p>
+<p class="Pp">If <b>connect</b>() fails, consider the state of the socket as
+    unspecified. Portable applications should close the socket and create a new
+    one for reconnecting.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">An example of the use of <b>connect</b>() is shown in
+    <b>getaddrinfo</b>(3).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>accept</b>(2), <b>bind</b>(2), <b>getsockname</b>(2),
+    <b>listen</b>(2), <b>socket</b>(2), <b>path_resolution</b>(7),
+    <b>selinux</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

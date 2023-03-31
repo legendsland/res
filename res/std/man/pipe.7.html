@@ -1,0 +1,308 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2005 Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/97e1854415137c8ead42b14a79c1938a21ad4ff1">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>pipe(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">pipe(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">pipe(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pipe - overview of pipes and FIFOs</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">Pipes and FIFOs (also known as named pipes) provide a
+    unidirectional interprocess communication channel. A pipe has a <i>read
+    end</i> and a <i>write end</i>. Data written to the write end of a pipe can
+    be read from the read end of the pipe.</p>
+<p class="Pp">A pipe is created using <b>pipe</b>(2), which creates a new pipe
+    and returns two file descriptors, one referring to the read end of the pipe,
+    the other referring to the write end. Pipes can be used to create a
+    communication channel between related processes; see <b>pipe</b>(2) for an
+    example.</p>
+<p class="Pp">A FIFO (short for First In First Out) has a name within the
+    filesystem (created using <b>mkfifo</b>(3)), and is opened using
+    <b>open</b>(2). Any process may open a FIFO, assuming the file permissions
+    allow it. The read end is opened using the <b>O_RDONLY</b> flag; the write
+    end is opened using the <b>O_WRONLY</b> flag. See <b>fifo</b>(7) for further
+    details. <i>Note</i>: although FIFOs have a pathname in the filesystem, I/O
+    on FIFOs does not involve operations on the underlying device (if there is
+    one).</p>
+<section class="Ss">
+<h2 class="Ss" id="I/O_on_pipes_and_FIFOs"><a class="permalink" href="#I/O_on_pipes_and_FIFOs">I/O
+  on pipes and FIFOs</a></h2>
+<p class="Pp">The only difference between pipes and FIFOs is the manner in which
+    they are created and opened. Once these tasks have been accomplished, I/O on
+    pipes and FIFOs has exactly the same semantics.</p>
+<p class="Pp">If a process attempts to read from an empty pipe, then
+    <b>read</b>(2) will block until data is available. If a process attempts to
+    write to a full pipe (see below), then <b>write</b>(2) blocks until
+    sufficient data has been read from the pipe to allow the write to complete.
+    Nonblocking I/O is possible by using the <b>fcntl</b>(2) <b>F_SETFL</b>
+    operation to enable the <b>O_NONBLOCK</b> open file status flag.</p>
+<p class="Pp">The communication channel provided by a pipe is a <i>byte
+    stream</i>: there is no concept of message boundaries.</p>
+<p class="Pp">If all file descriptors referring to the write end of a pipe have
+    been closed, then an attempt to <b>read</b>(2) from the pipe will see
+    end-of-file (<b>read</b>(2) will return 0). If all file descriptors
+    referring to the read end of a pipe have been closed, then a <b>write</b>(2)
+    will cause a <b>SIGPIPE</b> signal to be generated for the calling process.
+    If the calling process is ignoring this signal, then <b>write</b>(2) fails
+    with the error <b>EPIPE</b>. An application that uses <b>pipe</b>(2) and
+    <b>fork</b>(2) should use suitable <b>close</b>(2) calls to close
+    unnecessary duplicate file descriptors; this ensures that end-of-file and
+    <b>SIGPIPE</b>/<b>EPIPE</b> are delivered when appropriate.</p>
+<p class="Pp">It is not possible to apply <b>lseek</b>(2) to a pipe.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Pipe_capacity"><a class="permalink" href="#Pipe_capacity">Pipe
+  capacity</a></h2>
+<p class="Pp">A pipe has a limited capacity. If the pipe is full, then a
+    <b>write</b>(2) will block or fail, depending on whether the
+    <b>O_NONBLOCK</b> flag is set (see below). Different implementations have
+    different limits for the pipe capacity. Applications should not rely on a
+    particular capacity: an application should be designed so that a reading
+    process consumes data as soon as it is available, so that a writing process
+    does not remain blocked.</p>
+<p class="Pp">Before Linux 2.6.11, the capacity of a pipe was the same as the
+    system page size (e.g., 4096 bytes on i386). Since Linux 2.6.11, the pipe
+    capacity is 16 pages (i.e., 65,536 bytes in a system with a page size of
+    4096 bytes). Since Linux 2.6.35, the default pipe capacity is 16 pages, but
+    the capacity can be queried and set using the <b>fcntl</b>(2)
+    <b>F_GETPIPE_SZ</b> and <b>F_SETPIPE_SZ</b> operations. See <b>fcntl</b>(2)
+    for more information.</p>
+<p class="Pp">The following <b>ioctl</b>(2) operation, which can be applied to a
+    file descriptor that refers to either end of a pipe, places a count of the
+    number of unread bytes in the pipe in the <i>int</i> buffer pointed to by
+    the final argument of the call:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>ioctl(fd, FIONREAD, &amp;nbytes);
+</pre>
+<br>
+<p class="Pp">The <b>FIONREAD</b> operation is not specified in any standard,
+    but is provided on many implementations.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="/proc_files"><a class="permalink" href="#/proc_files">/proc
+  files</a></h2>
+<p class="Pp">On Linux, the following files control how much memory can be used
+    for pipes:</p>
+<dl class="Bl-tag">
+  <dt><i>/proc/sys/fs/pipe-max-pages</i> (only in Linux 2.6.34)</dt>
+  <dd>An upper limit, in pages, on the capacity that an unprivileged user (one
+      without the <b>CAP_SYS_RESOURCE</b> capability) can set for a pipe.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The default value for this limit is 16 times the default pipe capacity
+      (see above); the lower limit is two pages.</dd>
+  <dt></dt>
+  <dd>This interface was removed in Linux 2.6.35, in favor of
+      <i>/proc/sys/fs/pipe-max-size</i>.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt><i>/proc/sys/fs/pipe-max-size</i> (since Linux 2.6.35)</dt>
+  <dd>The maximum size (in bytes) of individual pipes that can be set by users
+      without the <b>CAP_SYS_RESOURCE</b> capability. The value assigned to this
+      file may be rounded upward, to reflect the value actually employed for a
+      convenient implementation. To determine the rounded-up value, display the
+      contents of this file after assigning a value to it.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The default value for this file is 1048576 (1&nbsp;MiB). The minimum
+      value that can be assigned to this file is the system page size. Attempts
+      to set a limit less than the page size cause <b>write</b>(2) to fail with
+      the error <b>EINVAL</b>.</dd>
+  <dt></dt>
+  <dd>Since Linux 4.9, the value on this file also acts as a ceiling on the
+      default capacity of a new pipe or newly opened FIFO.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt><i>/proc/sys/fs/pipe-user-pages-hard</i> (since Linux 4.5)</dt>
+  <dd>The hard limit on the total size (in pages) of all pipes created or set by
+      a single unprivileged user (i.e., one with neither the
+      <b>CAP_SYS_RESOURCE</b> nor the <b>CAP_SYS_ADMIN</b> capability). So long
+      as the total number of pages allocated to pipe buffers for this user is at
+      this limit, attempts to create new pipes will be denied, and attempts to
+      increase a pipe's capacity will be denied.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>When the value of this limit is zero (which is the default), no hard limit
+      is applied.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt><i>/proc/sys/fs/pipe-user-pages-soft</i> (since Linux 4.5)</dt>
+  <dd>The soft limit on the total size (in pages) of all pipes created or set by
+      a single unprivileged user (i.e., one with neither the
+      <b>CAP_SYS_RESOURCE</b> nor the <b>CAP_SYS_ADMIN</b> capability). So long
+      as the total number of pages allocated to pipe buffers for this user is at
+      this limit, individual pipes created by a user will be limited to one
+      page, and attempts to increase a pipe's capacity will be denied.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>When the value of this limit is zero, no soft limit is applied. The
+      default value for this file is 16384, which permits creating up to 1024
+      pipes with the default capacity.</dd>
+</dl>
+<p class="Pp">Before Linux 4.9, some bugs affected the handling of the
+    <i>pipe-user-pages-soft</i> and <i>pipe-user-pages-hard</i> limits; see
+    BUGS.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="PIPE_BUF"><a class="permalink" href="#PIPE_BUF">PIPE_BUF</a></h2>
+<p class="Pp">POSIX.1 says that writes of less than <b>PIPE_BUF</b> bytes must
+    be atomic: the output data is written to the pipe as a contiguous sequence.
+    Writes of more than <b>PIPE_BUF</b> bytes may be nonatomic: the kernel may
+    interleave the data with data written by other processes. POSIX.1 requires
+    <b>PIPE_BUF</b> to be at least 512 bytes. (On Linux, <b>PIPE_BUF</b> is 4096
+    bytes.) The precise semantics depend on whether the file descriptor is
+    nonblocking (<b>O_NONBLOCK</b>), whether there are multiple writers to the
+    pipe, and on <i>n</i>, the number of bytes to be written:</p>
+<dl class="Bl-tag">
+  <dt id="O_NONBLOCK"><a class="permalink" href="#O_NONBLOCK"><b>O_NONBLOCK</b>
+    disabled, <i>n</i> &lt;= <b>PIPE_BUF</b></a></dt>
+  <dd>All <i>n</i> bytes are written atomically; <b>write</b>(2) may block if
+      there is not room for <i>n</i> bytes to be written immediately</dd>
+  <dt id="O_NONBLOCK~2"><a class="permalink" href="#O_NONBLOCK~2"><b>O_NONBLOCK</b>
+    enabled, <i>n</i> &lt;= <b>PIPE_BUF</b></a></dt>
+  <dd>If there is room to write <i>n</i> bytes to the pipe, then <b>write</b>(2)
+      succeeds immediately, writing all <i>n</i> bytes; otherwise
+      <b>write</b>(2) fails, with <i>errno</i> set to <b>EAGAIN</b>.</dd>
+  <dt id="O_NONBLOCK~3"><a class="permalink" href="#O_NONBLOCK~3"><b>O_NONBLOCK</b>
+    disabled, <i>n</i> &gt; <b>PIPE_BUF</b></a></dt>
+  <dd>The write is nonatomic: the data given to <b>write</b>(2) may be
+      interleaved with <b>write</b>(2)s by other process; the <b>write</b>(2)
+      blocks until <i>n</i> bytes have been written.</dd>
+  <dt id="O_NONBLOCK~4"><a class="permalink" href="#O_NONBLOCK~4"><b>O_NONBLOCK</b>
+    enabled, <i>n</i> &gt; <b>PIPE_BUF</b></a></dt>
+  <dd>If the pipe is full, then <b>write</b>(2) fails, with <i>errno</i> set to
+      <b>EAGAIN</b>. Otherwise, from 1 to <i>n</i> bytes may be written (i.e., a
+      "partial write" may occur; the caller should check the return
+      value from <b>write</b>(2) to see how many bytes were actually written),
+      and these bytes may be interleaved with writes by other processes.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Open_file_status_flags"><a class="permalink" href="#Open_file_status_flags">Open
+  file status flags</a></h2>
+<p class="Pp">The only open file status flags that can be meaningfully applied
+    to a pipe or FIFO are <b>O_NONBLOCK</b> and <b>O_ASYNC</b>.</p>
+<p class="Pp">Setting the <b>O_ASYNC</b> flag for the read end of a pipe causes
+    a signal (<b>SIGIO</b> by default) to be generated when new input becomes
+    available on the pipe. The target for delivery of signals must be set using
+    the <b>fcntl</b>(2) <b>F_SETOWN</b> command. On Linux, <b>O_ASYNC</b> is
+    supported for pipes and FIFOs only since Linux 2.6.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Portability_notes"><a class="permalink" href="#Portability_notes">Portability
+  notes</a></h2>
+<p class="Pp">On some systems (but not Linux), pipes are bidirectional: data can
+    be transmitted in both directions between the pipe ends. POSIX.1 requires
+    only unidirectional pipes. Portable applications should avoid reliance on
+    bidirectional pipe semantics.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h2>
+<p class="Pp">Before Linux 4.9, some bugs affected the handling of the
+    <i>pipe-user-pages-soft</i> and <i>pipe-user-pages-hard</i> limits when
+    using the <b>fcntl</b>(2) <b>F_SETPIPE_SZ</b> operation to change a pipe's
+    capacity:</p>
+<dl class="Bl-tag">
+  <dt>(a)</dt>
+  <dd>When increasing the pipe capacity, the checks against the soft and hard
+      limits were made against existing consumption, and excluded the memory
+      required for the increased pipe capacity. The new increase in pipe
+      capacity could then push the total memory used by the user for pipes
+      (possibly far) over a limit. (This could also trigger the problem
+      described next.)</dd>
+  <dt></dt>
+  <dd>Starting with Linux 4.9, the limit checking includes the memory required
+      for the new pipe capacity.</dd>
+  <dt>(b)</dt>
+  <dd>The limit checks were performed even when the new pipe capacity was less
+      than the existing pipe capacity. This could lead to problems if a user set
+      a large pipe capacity, and then the limits were lowered, with the result
+      that the user could no longer decrease the pipe capacity.</dd>
+  <dt></dt>
+  <dd>Starting with Linux 4.9, checks against the limits are performed only when
+      increasing a pipe's capacity; an unprivileged user can always decrease a
+      pipe's capacity.</dd>
+  <dt>(c)</dt>
+  <dd>The accounting and checking against the limits were done as follows:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>(1)</dt>
+  <dd>Test whether the user has exceeded the limit.</dd>
+  <dt>(2)</dt>
+  <dd>Make the new pipe buffer allocation.</dd>
+  <dt>(3)</dt>
+  <dd>Account new allocation against the limits.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>This was racey. Multiple processes could pass point (1) simultaneously,
+      and then allocate pipe buffers that were accounted for only in step (3),
+      with the result that the user's pipe buffer allocation could be pushed
+      over the limit.</dd>
+  <dt></dt>
+  <dd>Starting with Linux 4.9, the accounting step is performed before doing the
+      allocation, and the operation fails if the limit would be exceeded.</dd>
+</dl>
+<p class="Pp">Before Linux 4.9, bugs similar to points (a) and (c) could also
+    occur when the kernel allocated memory for a new pipe buffer; that is, when
+    calling <b>pipe</b>(2) and when opening a previously unopened FIFO.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>mkfifo</b>(1), <b>dup</b>(2), <b>fcntl</b>(2), <b>open</b>(2),
+    <b>pipe</b>(2), <b>poll</b>(2), <b>select</b>(2), <b>socketpair</b>(2),
+    <b>splice</b>(2), <b>stat</b>(2), <b>tee</b>(2), <b>vmsplice</b>(2),
+    <b>mkfifo</b>(3), <b>epoll</b>(7), <b>fifo</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

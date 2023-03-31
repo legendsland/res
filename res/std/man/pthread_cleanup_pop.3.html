@@ -1,0 +1,323 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/589dd6d9ffc5d4f0fdb1d85677a08f3d1fdb2eee">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>pthread_cleanup_push(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">pthread_cleanup_push(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">pthread_cleanup_push(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pthread_cleanup_push, pthread_cleanup_pop - push and pop thread
+    cancelation clean-up handlers</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">POSIX threads library (<i>libpthread</i>, <i>-lpthread</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;pthread.h&gt;</b></pre>
+<pre><b>void pthread_cleanup_push(void (*</b><i>routine</i><b>)(void *), void *</b><i>arg</i><b>);</b>
+<b>void pthread_cleanup_pop(int </b><i>execute</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">These functions manipulate the calling thread's stack of
+    thread-cancelation clean-up handlers. A clean-up handler is a function that
+    is automatically executed when a thread is canceled (or in various other
+    circumstances described below); it might, for example, unlock a mutex so
+    that it becomes available to other threads in the process.</p>
+<p class="Pp">The <b>pthread_cleanup_push</b>() function pushes <i>routine</i>
+    onto the top of the stack of clean-up handlers. When <i>routine</i> is later
+    invoked, it will be given <i>arg</i> as its argument.</p>
+<p class="Pp">The <b>pthread_cleanup_pop</b>() function removes the routine at
+    the top of the stack of clean-up handlers, and optionally executes it if
+    <i>execute</i> is nonzero.</p>
+<p class="Pp">A cancelation clean-up handler is popped from the stack and
+    executed in the following circumstances:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>When a thread is canceled, all of the stacked clean-up handlers are popped
+      and executed in the reverse of the order in which they were pushed onto
+      the stack.</dd>
+  <dt>•</dt>
+  <dd>When a thread terminates by calling <b>pthread_exit</b>(3), all clean-up
+      handlers are executed as described in the preceding point. (Clean-up
+      handlers are <i>not</i> called if the thread terminates by performing a
+      <i>return</i> from the thread start function.)</dd>
+  <dt>•</dt>
+  <dd>When a thread calls <b>pthread_cleanup_pop</b>() with a nonzero
+      <i>execute</i> argument, the top-most clean-up handler is popped and
+      executed.</dd>
+</dl>
+<p class="Pp">POSIX.1 permits <b>pthread_cleanup_push</b>() and
+    <b>pthread_cleanup_pop</b>() to be implemented as macros that expand to text
+    containing '<b>{</b>' and '<b>}</b>', respectively. For this reason, the
+    caller must ensure that calls to these functions are paired within the same
+    function, and at the same lexical nesting level. (In other words, a clean-up
+    handler is established only during the execution of a specified section of
+    code.)</p>
+<p class="Pp">Calling <b>longjmp</b>(3) (<b>siglongjmp</b>(3)) produces
+    undefined results if any call has been made to <b>pthread_cleanup_push</b>()
+    or <b>pthread_cleanup_pop</b>() without the matching call of the pair since
+    the jump buffer was filled by <b>setjmp</b>(3) (<b>sigsetjmp</b>(3)).
+    Likewise, calling <b>longjmp</b>(3) (<b>siglongjmp</b>(3)) from inside a
+    clean-up handler produces undefined results unless the jump buffer was also
+    filled by <b>setjmp</b>(3) (<b>sigsetjmp</b>(3)) inside the handler.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">These functions do not return a value.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">There are no errors.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>pthread_cleanup_push (), pthread_cleanup_pop ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">On Linux, the <b>pthread_cleanup_push</b>() and
+    <b>pthread_cleanup_pop</b>() functions <i>are</i> implemented as macros that
+    expand to text containing '<b>{</b>' and '<b>}</b>', respectively. This
+    means that variables declared within the scope of paired calls to these
+    functions will be visible within only that scope.</p>
+<p class="Pp">POSIX.1 says that the effect of using <i>return</i>, <i>break</i>,
+    <i>continue</i>, or <i>goto</i> to prematurely leave a block bracketed
+    <b>pthread_cleanup_push</b>() and <b>pthread_cleanup_pop</b>() is undefined.
+    Portable applications should avoid doing this.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below provides a simple example of the use of the
+    functions described in this page. The program creates a thread that executes
+    a loop bracketed by <b>pthread_cleanup_push</b>() and
+    <b>pthread_cleanup_pop</b>(). This loop increments a global variable,
+    <i>cnt</i>, once each second. Depending on what command-line arguments are
+    supplied, the main thread sends the other thread a cancelation request, or
+    sets a global variable that causes the other thread to exit its loop and
+    terminate normally (by doing a <i>return</i>).</p>
+<p class="Pp">In the following shell session, the main thread sends a
+    cancelation request to the other thread:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>./a.out</b>
+New thread started
+cnt = 0
+cnt = 1
+Canceling thread
+Called clean-up handler
+Thread was canceled; cnt = 0
+</pre>
+<br>
+<p class="Pp">From the above, we see that the thread was canceled, and that the
+    cancelation clean-up handler was called and it reset the value of the global
+    variable <i>cnt</i> to 0.</p>
+<p class="Pp">In the next run, the main program sets a global variable that
+    causes other thread to terminate normally:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>./a.out x</b>
+New thread started
+cnt = 0
+cnt = 1
+Thread terminated normally; cnt = 2
+</pre>
+<br>
+<p class="Pp">From the above, we see that the clean-up handler was not executed
+    (because <i>cleanup_pop_arg</i> was 0), and therefore the value of
+    <i>cnt</i> was not reset.</p>
+<p class="Pp">In the next run, the main program sets a global variable that
+    causes the other thread to terminate normally, and supplies a nonzero value
+    for <i>cleanup_pop_arg</i>:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>./a.out x 1</b>
+New thread started
+cnt = 0
+cnt = 1
+Called clean-up handler
+Thread terminated normally; cnt = 0
+</pre>
+<br>
+<p class="Pp">In the above, we see that although the thread was not canceled,
+    the clean-up handler was executed, because the argument given to
+    <b>pthread_cleanup_pop</b>() was nonzero.</p>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#include &lt;errno.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;unistd.h&gt;
+#define handle_error_en(en, msg) \
+<br>
+        do { errno = en; perror(msg); exit(EXIT_FAILURE); } while (0)
+static int done = 0;
+static int cleanup_pop_arg = 0;
+static int cnt = 0;
+static void
+cleanup_handler(void *arg)
+{
+<br>
+    printf("Called clean-up handler\n");
+<br>
+    cnt = 0;
+}
+static void *
+thread_start(void *arg)
+{
+<br>
+    time_t curr;
+<br>
+    printf("New thread started\n");
+<br>
+    pthread_cleanup_push(cleanup_handler, NULL);
+<br>
+    curr = time(NULL);
+<br>
+    while (!done) {
+<br>
+        pthread_testcancel();           /* A cancelation point */
+<br>
+        if (curr &lt; time(NULL)) {
+<br>
+            curr = time(NULL);
+<br>
+            printf("cnt = %d\n", cnt);  /* A cancelation point */
+<br>
+            cnt++;
+<br>
+        }
+<br>
+    }
+<br>
+    pthread_cleanup_pop(cleanup_pop_arg);
+<br>
+    return NULL;
+}
+int
+main(int argc, char *argv[])
+{
+<br>
+    pthread_t thr;
+<br>
+    int s;
+<br>
+    void *res;
+<br>
+    s = pthread_create(&amp;thr, NULL, thread_start, NULL);
+<br>
+    if (s != 0)
+<br>
+        handle_error_en(s, "pthread_create");
+<br>
+    sleep(2);           /* Allow new thread to run a while */
+<br>
+    if (argc &gt; 1) {
+<br>
+        if (argc &gt; 2)
+<br>
+            cleanup_pop_arg = atoi(argv[2]);
+<br>
+        done = 1;
+<br>
+    } else {
+<br>
+        printf("Canceling thread\n");
+<br>
+        s = pthread_cancel(thr);
+<br>
+        if (s != 0)
+<br>
+            handle_error_en(s, "pthread_cancel");
+<br>
+    }
+<br>
+    s = pthread_join(thr, &amp;res);
+<br>
+    if (s != 0)
+<br>
+        handle_error_en(s, "pthread_join");
+<br>
+    if (res == PTHREAD_CANCELED)
+<br>
+        printf("Thread was canceled; cnt = %d\n", cnt);
+<br>
+    else
+<br>
+        printf("Thread terminated normally; cnt = %d\n", cnt);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>pthread_cancel</b>(3), <b>pthread_cleanup_push_defer_np</b>(3),
+    <b>pthread_setcancelstate</b>(3), <b>pthread_testcancel</b>(3),
+    <b>pthreads</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

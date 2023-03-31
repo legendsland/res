@@ -1,0 +1,173 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (C) 2001 Andries Brouwer <aeb@cwi.nl>.
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   FIXME . There are a lot of other process termination actions that
+   could be listed on this page. See, for example, the list in the
+   POSIX exit(3p) page.
+   --><head>
+<meta name="dc.identifier" content="res/ef175b86d51859036b1ba89963d184d206964bea">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>exit(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">exit(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">exit(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">exit - cause normal process termination</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;stdlib.h&gt;</b></pre>
+<pre><b>[[noreturn]] void exit(int </b><i>status</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>exit</b>() function causes normal process termination and
+    the least significant byte of <i>status</i> (i.e., <i>status &amp; 0xFF</i>)
+    is returned to the parent (see <b>wait</b>(2)).</p>
+<p class="Pp">All functions registered with <b>atexit</b>(3) and
+    <b>on_exit</b>(3) are called, in the reverse order of their registration.
+    (It is possible for one of these functions to use <b>atexit</b>(3) or
+    <b>on_exit</b>(3) to register an additional function to be executed during
+    exit processing; the new registration is added to the front of the list of
+    functions that remain to be called.) If one of these functions does not
+    return (e.g., it calls <b>_exit</b>(2), or kills itself with a signal), then
+    none of the remaining functions is called, and further exit processing (in
+    particular, flushing of <b>stdio</b>(3) streams) is abandoned. If a function
+    has been registered multiple times using <b>atexit</b>(3) or
+    <b>on_exit</b>(3), then it is called as many times as it was registered.</p>
+<p class="Pp">All open <b>stdio</b>(3) streams are flushed and closed. Files
+    created by <b>tmpfile</b>(3) are removed.</p>
+<p class="Pp">The C standard specifies two constants, <b>EXIT_SUCCESS</b> and
+    <b>EXIT_FAILURE</b>, that may be passed to <b>exit</b>() to indicate
+    successful or unsuccessful termination, respectively.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <b>exit</b>() function does not return.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>exit ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race:exit</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+<p class="Pp">The <b>exit</b>() function uses a global variable that is not
+    protected, so it is not thread-safe.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, C89, C99, SVr4, 4.3BSD.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The behavior is undefined if one of the functions registered using
+    <b>atexit</b>(3) and <b>on_exit</b>(3) calls either <b>exit</b>() or
+    <b>longjmp</b>(3). Note that a call to <b>execve</b>(2) removes
+    registrations created using <b>atexit</b>(3) and <b>on_exit</b>(3).</p>
+<p class="Pp">The use of <b>EXIT_SUCCESS</b> and <b>EXIT_FAILURE</b> is slightly
+    more portable (to non-UNIX environments) than the use of 0 and some nonzero
+    value like 1 or -1. In particular, VMS uses a different convention.</p>
+<p class="Pp">BSD has attempted to standardize exit codes (which some C
+    libraries such as the GNU C library have also adopted); see the file
+    <i>&lt;sysexits.h&gt;</i>.</p>
+<p class="Pp">After <b>exit</b>(), the exit status must be transmitted to the
+    parent process. There are three cases:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>If the parent has set <b>SA_NOCLDWAIT</b>, or has set the <b>SIGCHLD</b>
+      handler to <b>SIG_IGN</b>, the status is discarded and the child dies
+      immediately.</dd>
+  <dt>•</dt>
+  <dd>If the parent was waiting on the child, it is notified of the exit status
+      and the child dies immediately.</dd>
+  <dt>•</dt>
+  <dd>Otherwise, the child becomes a "zombie" process: most of the
+      process resources are recycled, but a slot containing minimal information
+      about the child process (termination status, resource usage statistics) is
+      retained in process table. This allows the parent to subsequently use
+      <b>waitpid</b>(2) (or similar) to learn the termination status of the
+      child; at that point the zombie process slot is released.</dd>
+</dl>
+<p class="Pp">If the implementation supports the <b>SIGCHLD</b> signal, this
+    signal is sent to the parent. If the parent has set <b>SA_NOCLDWAIT</b>, it
+    is undefined whether a <b>SIGCHLD</b> signal is sent.</p>
+<section class="Ss">
+<h2 class="Ss" id="Signals_sent_to_other_processes"><a class="permalink" href="#Signals_sent_to_other_processes">Signals
+  sent to other processes</a></h2>
+<p class="Pp">If the exiting process is a session leader and its controlling
+    terminal is the controlling terminal of the session, then each process in
+    the foreground process group of this controlling terminal is sent a
+    <b>SIGHUP</b> signal, and the terminal is disassociated from this session,
+    allowing it to be acquired by a new controlling process.</p>
+<p class="Pp">If the exit of the process causes a process group to become
+    orphaned, and if any member of the newly orphaned process group is stopped,
+    then a <b>SIGHUP</b> signal followed by a <b>SIGCONT</b> signal will be sent
+    to each process in this process group. See <b>setpgid</b>(2) for an
+    explanation of orphaned process groups.</p>
+<p class="Pp">Except in the above cases, where the signalled processes may be
+    children of the terminating process, termination of a process does
+    <i>not</i> in general cause a signal to be sent to children of that process.
+    However, a process can use the <b>prctl</b>(2) <b>PR_SET_PDEATHSIG</b>
+    operation to arrange that it receives a signal if its parent terminates.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>_exit</b>(2), <b>get_robust_list</b>(2), <b>setpgid</b>(2),
+    <b>wait</b>(2), <b>atexit</b>(3), <b>on_exit</b>(3), <b>tmpfile</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

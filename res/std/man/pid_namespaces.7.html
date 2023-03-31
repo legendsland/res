@@ -1,0 +1,275 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2013 by Michael Kerrisk <mtk.manpages@gmail.com>
+   and Copyright (c) 2012 by Eric W. Biederman <ebiederm@xmission.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/519cc3b67a7c5fb1525020f8f63d1ebec86ae02f">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>pid_namespaces(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">pid_namespaces(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">pid_namespaces(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pid_namespaces - overview of Linux PID namespaces</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">For an overview of namespaces, see <b>namespaces</b>(7).</p>
+<p class="Pp">PID namespaces isolate the process ID number space, meaning that
+    processes in different PID namespaces can have the same PID. PID namespaces
+    allow containers to provide functionality such as suspending/resuming the
+    set of processes in the container and migrating the container to a new host
+    while the processes inside the container maintain the same PIDs.</p>
+<p class="Pp">PIDs in a new PID namespace start at 1, somewhat like a standalone
+    system, and calls to <b>fork</b>(2), <b>vfork</b>(2), or <b>clone</b>(2)
+    will produce processes with PIDs that are unique within the namespace.</p>
+<p class="Pp">Use of PID namespaces requires a kernel that is configured with
+    the <b>CONFIG_PID_NS</b> option.</p>
+<section class="Ss">
+<h2 class="Ss" id="The_namespace_init_process"><a class="permalink" href="#The_namespace_init_process">The
+  namespace init process</a></h2>
+<p class="Pp">The first process created in a new namespace (i.e., the process
+    created using <b>clone</b>(2) with the <b>CLONE_NEWPID</b> flag, or the
+    first child created by a process after a call to <b>unshare</b>(2) using the
+    <b>CLONE_NEWPID</b> flag) has the PID 1, and is the "init" process
+    for the namespace (see <b>init</b>(1)). This process becomes the parent of
+    any child processes that are orphaned because a process that resides in this
+    PID namespace terminated (see below for further details).</p>
+<p class="Pp">If the "init" process of a PID namespace terminates, the
+    kernel terminates all of the processes in the namespace via a <b>SIGKILL</b>
+    signal. This behavior reflects the fact that the "init" process is
+    essential for the correct operation of a PID namespace. In this case, a
+    subsequent <b>fork</b>(2) into this PID namespace fail with the error
+    <b>ENOMEM</b>; it is not possible to create a new process in a PID namespace
+    whose "init" process has terminated. Such scenarios can occur
+    when, for example, a process uses an open file descriptor for a
+    <i>/proc/</i>pid<i>/ns/pid</i> file corresponding to a process that was in a
+    namespace to <b>setns</b>(2) into that namespace after the "init"
+    process has terminated. Another possible scenario can occur after a call to
+    <b>unshare</b>(2): if the first child subsequently created by a
+    <b>fork</b>(2) terminates, then subsequent calls to <b>fork</b>(2) fail with
+    <b>ENOMEM</b>.</p>
+<p class="Pp">Only signals for which the "init" process has
+    established a signal handler can be sent to the "init" process by
+    other members of the PID namespace. This restriction applies even to
+    privileged processes, and prevents other members of the PID namespace from
+    accidentally killing the "init" process.</p>
+<p class="Pp">Likewise, a process in an ancestor namespace can—subject to
+    the usual permission checks described in <b>kill</b>(2)—send signals
+    to the "init" process of a child PID namespace only if the
+    "init" process has established a handler for that signal. (Within
+    the handler, the <i>siginfo_t</i> <i>si_pid</i> field described in
+    <b>sigaction</b>(2) will be zero.) <b>SIGKILL</b> or <b>SIGSTOP</b> are
+    treated exceptionally: these signals are forcibly delivered when sent from
+    an ancestor PID namespace. Neither of these signals can be caught by the
+    "init" process, and so will result in the usual actions associated
+    with those signals (respectively, terminating and stopping the process).</p>
+<p class="Pp">Starting with Linux 3.4, the <b>reboot</b>(2) system call causes a
+    signal to be sent to the namespace "init" process. See
+    <b>reboot</b>(2) for more details.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Nesting_PID_namespaces"><a class="permalink" href="#Nesting_PID_namespaces">Nesting
+  PID namespaces</a></h2>
+<p class="Pp">PID namespaces can be nested: each PID namespace has a parent,
+    except for the initial ("root") PID namespace. The parent of a PID
+    namespace is the PID namespace of the process that created the namespace
+    using <b>clone</b>(2) or <b>unshare</b>(2). PID namespaces thus form a tree,
+    with all namespaces ultimately tracing their ancestry to the root namespace.
+    Since Linux 3.7, the kernel limits the maximum nesting depth for PID
+    namespaces to 32.</p>
+<p class="Pp">A process is visible to other processes in its PID namespace, and
+    to the processes in each direct ancestor PID namespace going back to the
+    root PID namespace. In this context, "visible" means that one
+    process can be the target of operations by another process using system
+    calls that specify a process ID. Conversely, the processes in a child PID
+    namespace can't see processes in the parent and further removed ancestor
+    namespaces. More succinctly: a process can see (e.g., send signals with
+    <b>kill</b>(2), set nice values with <b>setpriority</b>(2), etc.) only
+    processes contained in its own PID namespace and in descendants of that
+    namespace.</p>
+<p class="Pp">A process has one process ID in each of the layers of the PID
+    namespace hierarchy in which is visible, and walking back though each direct
+    ancestor namespace through to the root PID namespace. System calls that
+    operate on process IDs always operate using the process ID that is visible
+    in the PID namespace of the caller. A call to <b>getpid</b>(2) always
+    returns the PID associated with the namespace in which the process was
+    created.</p>
+<p class="Pp">Some processes in a PID namespace may have parents that are
+    outside of the namespace. For example, the parent of the initial process in
+    the namespace (i.e., the <b>init</b>(1) process with PID 1) is necessarily
+    in another namespace. Likewise, the direct children of a process that uses
+    <b>setns</b>(2) to cause its children to join a PID namespace are in a
+    different PID namespace from the caller of <b>setns</b>(2). Calls to
+    <b>getppid</b>(2) for such processes return 0.</p>
+<p class="Pp">While processes may freely descend into child PID namespaces
+    (e.g., using <b>setns</b>(2) with a PID namespace file descriptor), they may
+    not move in the other direction. That is to say, processes may not enter any
+    ancestor namespaces (parent, grandparent, etc.). Changing PID namespaces is
+    a one-way operation.</p>
+<p class="Pp">The <b>NS_GET_PARENT</b> <b>ioctl</b>(2) operation can be used to
+    discover the parental relationship between PID namespaces; see
+    <b>ioctl_ns</b>(2).</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="setns(2)_and_unshare(2)_semantics"><a class="permalink" href="#setns(2)_and_unshare(2)_semantics">setns(2)
+  and unshare(2) semantics</a></h2>
+<p class="Pp">Calls to <b>setns</b>(2) that specify a PID namespace file
+    descriptor and calls to <b>unshare</b>(2) with the <b>CLONE_NEWPID</b> flag
+    cause children subsequently created by the caller to be placed in a
+    different PID namespace from the caller. (Since Linux 4.12, that PID
+    namespace is shown via the <i>/proc/</i>pid<i>/ns/pid_for_children</i> file,
+    as described in <b>namespaces</b>(7).) These calls do not, however, change
+    the PID namespace of the calling process, because doing so would change the
+    caller's idea of its own PID (as reported by <b>getpid</b>()), which would
+    break many applications and libraries.</p>
+<p class="Pp">To put things another way: a process's PID namespace membership is
+    determined when the process is created and cannot be changed thereafter.
+    Among other things, this means that the parental relationship between
+    processes mirrors the parental relationship between PID namespaces: the
+    parent of a process is either in the same namespace or resides in the
+    immediate parent PID namespace.</p>
+<p class="Pp">A process may call <b>unshare</b>(2) with the <b>CLONE_NEWPID</b>
+    flag only once. After it has performed this operation, its
+    <i>/proc/</i>pid<i>/ns/pid_for_children</i> symbolic link will be empty
+    until the first child is created in the namespace.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Adoption_of_orphaned_children"><a class="permalink" href="#Adoption_of_orphaned_children">Adoption
+  of orphaned children</a></h2>
+<p class="Pp">When a child process becomes orphaned, it is reparented to the
+    "init" process in the PID namespace of its parent (unless one of
+    the nearer ancestors of the parent employed the <b>prctl</b>(2)
+    <b>PR_SET_CHILD_SUBREAPER</b> command to mark itself as the reaper of
+    orphaned descendant processes). Note that because of the <b>setns</b>(2) and
+    <b>unshare</b>(2) semantics described above, this may be the
+    "init" process in the PID namespace that is the <i>parent</i> of
+    the child's PID namespace, rather than the "init" process in the
+    child's own PID namespace.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Compatibility_of_CLONE_NEWPID_with_other_CLONE_*_flags"><a class="permalink" href="#Compatibility_of_CLONE_NEWPID_with_other_CLONE_*_flags">Compatibility
+  of CLONE_NEWPID with other CLONE_* flags</a></h2>
+<p class="Pp">In current versions of Linux, <b>CLONE_NEWPID</b> can't be
+    combined with <b>CLONE_THREAD</b>. Threads are required to be in the same
+    PID namespace such that the threads in a process can send signals to each
+    other. Similarly, it must be possible to see all of the threads of a process
+    in the <b>proc</b>(5) filesystem. Additionally, if two threads were in
+    different PID namespaces, the process ID of the process sending a signal
+    could not be meaningfully encoded when a signal is sent (see the description
+    of the <i>siginfo_t</i> type in <b>sigaction</b>(2)). Since this is computed
+    when a signal is enqueued, a signal queue shared by processes in multiple
+    PID namespaces would defeat that.</p>
+<p class="Pp">In earlier versions of Linux, <b>CLONE_NEWPID</b> was additionally
+    disallowed (failing with the error <b>EINVAL</b>) in combination with
+    <b>CLONE_SIGHAND</b> (before Linux 4.3) as well as <b>CLONE_VM</b> (before
+    Linux 3.12). The changes that lifted these restrictions have also been
+    ported to earlier stable kernels.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="/proc_and_PID_namespaces"><a class="permalink" href="#/proc_and_PID_namespaces">/proc
+  and PID namespaces</a></h2>
+<p class="Pp">A <i>/proc</i> filesystem shows (in the <i>/proc/</i>pid
+    directories) only processes visible in the PID namespace of the process that
+    performed the mount, even if the <i>/proc</i> filesystem is viewed from
+    processes in other namespaces.</p>
+<p class="Pp">After creating a new PID namespace, it is useful for the child to
+    change its root directory and mount a new procfs instance at <i>/proc</i> so
+    that tools such as <b>ps</b>(1) work correctly. If a new mount namespace is
+    simultaneously created by including <b>CLONE_NEWNS</b> in the <i>flags</i>
+    argument of <b>clone</b>(2) or <b>unshare</b>(2), then it isn't necessary to
+    change the root directory: a new procfs instance can be mounted directly
+    over <i>/proc</i>.</p>
+<p class="Pp">From a shell, the command to mount <i>/proc</i> is:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ mount -t proc proc /proc
+</pre>
+<br>
+<p class="Pp">Calling <b>readlink</b>(2) on the path <i>/proc/self</i> yields
+    the process ID of the caller in the PID namespace of the procfs mount (i.e.,
+    the PID namespace of the process that mounted the procfs). This can be
+    useful for introspection purposes, when a process wants to discover its PID
+    in other namespaces.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="/proc_files"><a class="permalink" href="#/proc_files">/proc
+  files</a></h2>
+<dl class="Bl-tag">
+  <dt><b>/proc/sys/kernel/ns_last_pid</b> (since Linux 3.3)</dt>
+  <dd>This file (which is virtualized per PID namespace) displays the last PID
+      that was allocated in this PID namespace. When the next PID is allocated,
+      the kernel will search for the lowest unallocated PID that is greater than
+      this value, and when this file is subsequently read it will show that
+    PID.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>This file is writable by a process that has the <b>CAP_SYS_ADMIN</b> or
+      (since Linux 5.9) <b>CAP_CHECKPOINT_RESTORE</b> capability inside the user
+      namespace that owns the PID namespace. This makes it possible to determine
+      the PID that is allocated to the next process that is created inside this
+      PID namespace.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Miscellaneous"><a class="permalink" href="#Miscellaneous">Miscellaneous</a></h2>
+<p class="Pp">When a process ID is passed over a UNIX domain socket to a process
+    in a different PID namespace (see the description of <b>SCM_CREDENTIALS</b>
+    in <b>unix</b>(7)), it is translated into the corresponding PID value in the
+    receiving process's PID namespace.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">Namespaces are a Linux-specific feature.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">See <b>user_namespaces</b>(7).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>clone</b>(2), <b>reboot</b>(2), <b>setns</b>(2),
+    <b>unshare</b>(2), <b>proc</b>(5), <b>capabilities</b>(7),
+    <b>credentials</b>(7), <b>mount_namespaces</b>(7), <b>namespaces</b>(7),
+    <b>user_namespaces</b>(7), <b>switch_root</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   This man page is Copyright (C) 1998 Alan Cox.
+  
+   %%%LICENSE_START(VERBATIM_ONE_PARA)
+   Permission is granted to distribute possibly modified copies
+   of this page provided the header is included verbatim,
+   and in case of nontrivial modification author and date
+   of the modification is added to the header.
+   %%%LICENSE_END
+  
+   $Id: ddp.7,v 1.3 1999/05/13 11:33:22 freitag Exp $
+   --><head>
+<meta name="dc.identifier" content="res/8f2d0f381814efad93f525a610d3abe4f27d6e3a">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>ddp(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">ddp(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">ddp(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">ddp - Linux AppleTalk protocol implementation</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/socket.h&gt;</b>
+<b>#include &lt;netatalk/at.h&gt;</b></pre>
+<pre><i>ddp_socket</i><b> = socket(AF_APPLETALK, SOCK_DGRAM, 0);</b>
+<i>raw_socket</i><b> = socket(AF_APPLETALK, SOCK_RAW, </b><i>protocol</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">Linux implements the AppleTalk protocols described in <i>Inside
+    AppleTalk</i>. Only the DDP layer and AARP are present in the kernel. They
+    are designed to be used via the <b>netatalk</b> protocol libraries. This
+    page documents the interface for those who wish or need to use the DDP layer
+    directly.</p>
+<p class="Pp">The communication between AppleTalk and the user program works
+    using a BSD-compatible socket interface. For more information on sockets,
+    see <b>socket</b>(7).</p>
+<p class="Pp">An AppleTalk socket is created by calling the <b>socket</b>(2)
+    function with a <b>AF_APPLETALK</b> socket family argument. Valid socket
+    types are <b>SOCK_DGRAM</b> to open a <b>ddp</b> socket or <b>SOCK_RAW</b>
+    to open a <b>raw</b> socket. <i>protocol</i> is the AppleTalk protocol to be
+    received or sent. For <b>SOCK_RAW</b> you must specify
+  <b>ATPROTO_DDP</b>.</p>
+<p class="Pp">Raw sockets may be opened only by a process with effective user ID
+    0 or when the process has the <b>CAP_NET_RAW</b> capability.</p>
+<section class="Ss">
+<h2 class="Ss" id="Address_format"><a class="permalink" href="#Address_format">Address
+  format</a></h2>
+<p class="Pp">An AppleTalk socket address is defined as a combination of a
+    network number, a node number, and a port number.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct at_addr {
+<br>
+    unsigned short s_net;
+<br>
+    unsigned char  s_node;
+};
+struct sockaddr_atalk {
+<br>
+    sa_family_t    sat_family;    /* address family */
+<br>
+    unsigned char  sat_port;      /* port */
+<br>
+    struct at_addr sat_addr;      /* net/node */
+};
+</pre>
+<br>
+<p class="Pp"><i>sat_family</i> is always set to <b>AF_APPLETALK</b>.
+    <i>sat_port</i> contains the port. The port numbers below 129 are known as
+    <i>reserved ports</i>. Only processes with the effective user ID 0 or the
+    <b>CAP_NET_BIND_SERVICE</b> capability may <b>bind</b>(2) to these sockets.
+    <i>sat_addr</i> is the host address. The <i>net</i> member of <i>struct
+    at_addr</i> contains the host network in network byte order. The value of
+    <b>AT_ANYNET</b> is a wildcard and also implies “this
+    network.” The <i>node</i> member of <i>struct at_addr</i> contains
+    the host node number. The value of <b>AT_ANYNODE</b> is a wildcard and also
+    implies “this node.” The value of <b>ATADDR_BCAST</b> is a
+    link local broadcast address.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Socket_options"><a class="permalink" href="#Socket_options">Socket
+  options</a></h2>
+<p class="Pp">No protocol-specific socket options are supported.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="/proc_interfaces"><a class="permalink" href="#/proc_interfaces">/proc
+  interfaces</a></h2>
+<p class="Pp">IP supports a set of <i>/proc</i> interfaces to configure some
+    global AppleTalk parameters. The parameters can be accessed by reading or
+    writing files in the directory <i>/proc/sys/net/atalk/</i>.</p>
+<dl class="Bl-tag">
+  <dt id="aarp"><a class="permalink" href="#aarp"><i>aarp-expiry-time</i></a></dt>
+  <dd>The time interval (in seconds) before an AARP cache entry expires.</dd>
+  <dt id="aarp~2"><a class="permalink" href="#aarp~2"><i>aarp-resolve-time</i></a></dt>
+  <dd>The time interval (in seconds) before an AARP cache entry is
+    resolved.</dd>
+  <dt id="aarp~3"><a class="permalink" href="#aarp~3"><i>aarp-retransmit-limit</i></a></dt>
+  <dd>The number of retransmissions of an AARP query before the node is declared
+      dead.</dd>
+  <dt id="aarp~4"><a class="permalink" href="#aarp~4"><i>aarp-tick-time</i></a></dt>
+  <dd>The timer rate (in seconds) for the timer driving AARP.</dd>
+</dl>
+<p class="Pp">The default values match the specification and should never need
+    to be changed.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Ioctls"><a class="permalink" href="#Ioctls">Ioctls</a></h2>
+<p class="Pp">All ioctls described in <b>socket</b>(7) apply to DDP.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>The user tried to execute an operation without the necessary permissions.
+      These include sending to a broadcast address without having the broadcast
+      flag set, and trying to bind to a reserved port without effective user ID
+      0 or <b>CAP_NET_BIND_SERVICE</b>.</dd>
+  <dt id="EADDRINUSE"><a class="permalink" href="#EADDRINUSE"><b>EADDRINUSE</b></a></dt>
+  <dd>Tried to bind to an address already in use.</dd>
+  <dt id="EADDRNOTAVAIL"><a class="permalink" href="#EADDRNOTAVAIL"><b>EADDRNOTAVAIL</b></a></dt>
+  <dd>A nonexistent interface was requested or the requested source address was
+      not local.</dd>
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>Operation on a nonblocking socket would block.</dd>
+  <dt id="EALREADY"><a class="permalink" href="#EALREADY"><b>EALREADY</b></a></dt>
+  <dd>A connection operation on a nonblocking socket is already in
+    progress.</dd>
+  <dt id="ECONNABORTED"><a class="permalink" href="#ECONNABORTED"><b>ECONNABORTED</b></a></dt>
+  <dd>A connection was closed during an <b>accept</b>(2).</dd>
+  <dt id="EHOSTUNREACH"><a class="permalink" href="#EHOSTUNREACH"><b>EHOSTUNREACH</b></a></dt>
+  <dd>No routing table entry matches the destination address.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>Invalid argument passed.</dd>
+  <dt id="EISCONN"><a class="permalink" href="#EISCONN"><b>EISCONN</b></a></dt>
+  <dd><b>connect</b>(2) was called on an already connected socket.</dd>
+  <dt id="EMSGSIZE"><a class="permalink" href="#EMSGSIZE"><b>EMSGSIZE</b></a></dt>
+  <dd>Datagram is bigger than the DDP MTU.</dd>
+  <dt id="ENODEV"><a class="permalink" href="#ENODEV"><b>ENODEV</b></a></dt>
+  <dd>Network device not available or not capable of sending IP.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd><b>SIOCGSTAMP</b> was called on a socket where no packet arrived.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b> and
+    <b>ENOBUFS</b></a></dt>
+  <dd>Not enough memory available.</dd>
+  <dt id="ENOPKG"><a class="permalink" href="#ENOPKG"><b>ENOPKG</b></a></dt>
+  <dd>A kernel subsystem was not configured.</dd>
+  <dt id="ENOPROTOOPT"><a class="permalink" href="#ENOPROTOOPT"><b>ENOPROTOOPT</b>
+    and <b>EOPNOTSUPP</b></a></dt>
+  <dd>Invalid socket option passed.</dd>
+  <dt id="ENOTCONN"><a class="permalink" href="#ENOTCONN"><b>ENOTCONN</b></a></dt>
+  <dd>The operation is defined only on a connected socket, but the socket wasn't
+      connected.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>User doesn't have permission to set high priority, make a configuration
+      change, or send signals to the requested process or group.</dd>
+  <dt id="EPIPE"><a class="permalink" href="#EPIPE"><b>EPIPE</b></a></dt>
+  <dd>The connection was unexpectedly closed or shut down by the other end.</dd>
+  <dt id="ESOCKTNOSUPPORT"><a class="permalink" href="#ESOCKTNOSUPPORT"><b>ESOCKTNOSUPPORT</b></a></dt>
+  <dd>The socket was unconfigured, or an unknown socket type was requested.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">AppleTalk is supported by Linux 2.0 or higher. The <i>/proc</i>
+    interfaces exist since Linux 2.2.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Be very careful with the <b>SO_BROADCAST</b> option; it is not
+    privileged in Linux. It is easy to overload the network with careless
+    sending to broadcast addresses.</p>
+<section class="Ss">
+<h2 class="Ss" id="Compatibility"><a class="permalink" href="#Compatibility">Compatibility</a></h2>
+<p class="Pp">The basic AppleTalk socket interface is compatible with
+    <b>netatalk</b> on BSD-derived systems. Many BSD systems fail to check
+    <b>SO_BROADCAST</b> when sending broadcast frames; this can lead to
+    compatibility problems.</p>
+<p class="Pp">The raw socket mode is unique to Linux and exists to support the
+    alternative CAP package and AppleTalk monitoring tools more easily.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">There are too many inconsistent error values.</p>
+<p class="Pp">The ioctls used to configure routing tables, devices, AARP tables,
+    and other devices are not yet described.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>recvmsg</b>(2), <b>sendmsg</b>(2), <b>capabilities</b>(7),
+    <b>socket</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

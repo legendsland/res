@@ -1,0 +1,160 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2008 by Gerrit Renker <gerrit@erg.abdn.ac.uk>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   $Id: udplite.7,v 1.12 2008/07/23 15:22:22 gerrit Exp gerrit $
+   --><head>
+<meta name="dc.identifier" content="res/1f3deb7ae027a8c63f67df5be6d647beaf5bfcd2">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>udplite(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">udplite(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">udplite(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">udplite - Lightweight User Datagram Protocol</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/socket.h&gt;</b></pre>
+<pre><b>sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDPLITE);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">This is an implementation of the Lightweight User Datagram
+    Protocol (UDP-Lite), as described in RFC&nbsp;3828.</p>
+<p class="Pp">UDP-Lite is an extension of UDP (RFC&nbsp;768) to support
+    variable-length checksums. This has advantages for some types of multimedia
+    transport that may be able to make use of slightly damaged datagrams, rather
+    than having them discarded by lower-layer protocols.</p>
+<p class="Pp">The variable-length checksum coverage is set via a
+    <b>setsockopt</b>(2) option. If this option is not set, the only difference
+    from UDP is in using a different IP protocol identifier (IANA number
+  136).</p>
+<p class="Pp">The UDP-Lite implementation is a full extension of
+    <b>udp</b>(7)—that is, it shares the same API and API behavior, and
+    in addition offers two socket options to control the checksum coverage.</p>
+<section class="Ss">
+<h2 class="Ss" id="Address_format"><a class="permalink" href="#Address_format">Address
+  format</a></h2>
+<p class="Pp">UDP-Litev4 uses the <i>sockaddr_in</i> address format described in
+    <b>ip</b>(7). UDP-Litev6 uses the <i>sockaddr_in6</i> address format
+    described in <b>ipv6</b>(7).</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Socket_options"><a class="permalink" href="#Socket_options">Socket
+  options</a></h2>
+<p class="Pp">To set or get a UDP-Lite socket option, call <b>getsockopt</b>(2)
+    to read or <b>setsockopt</b>(2) to write the option with the option level
+    argument set to <b>IPPROTO_UDPLITE</b>. In addition, all <b>IPPROTO_UDP</b>
+    socket options are valid on a UDP-Lite socket. See <b>udp</b>(7) for more
+    information.</p>
+<p class="Pp">The following two options are specific to UDP-Lite.</p>
+<dl class="Bl-tag">
+  <dt id="UDPLITE_SEND_CSCOV"><a class="permalink" href="#UDPLITE_SEND_CSCOV"><b>UDPLITE_SEND_CSCOV</b></a></dt>
+  <dd>This option sets the sender checksum coverage and takes an <i>int</i> as
+      argument, with a checksum coverage value in the range 0..2^16-1.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>A value of 0 means that the entire datagram is always covered. Values from
+      1-7 are illegal (RFC&nbsp;3828, 3.1) and are rounded up to the minimum
+      coverage of 8.</dd>
+  <dt></dt>
+  <dd>With regard to IPv6 jumbograms (RFC&nbsp;2675), the UDP-Litev6 checksum
+      coverage is limited to the first 2^16-1 octets, as per RFC&nbsp;3828,
+      3.5. Higher values are therefore silently truncated to 2^16-1. If in
+      doubt, the current coverage value can always be queried using
+      <b>getsockopt</b>(2).</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="UDPLITE_RECV_CSCOV"><a class="permalink" href="#UDPLITE_RECV_CSCOV"><b>UDPLITE_RECV_CSCOV</b></a></dt>
+  <dd>This is the receiver-side analogue and uses the same argument format and
+      value range as <b>UDPLITE_SEND_CSCOV</b>. This option is not required to
+      enable traffic with partial checksum coverage. Its function is that of a
+      traffic filter: when enabled, it instructs the kernel to drop all packets
+      which have a coverage <i>less</i> than the specified coverage value.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>When the value of <b>UDPLITE_RECV_CSCOV</b> exceeds the actual packet
+      coverage, incoming packets are silently dropped, but may generate a
+      warning message in the system log.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">All errors documented for <b>udp</b>(7) may be returned. UDP-Lite
+    does not add further errors.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FILES"><a class="permalink" href="#FILES">FILES</a></h1>
+<dl class="Bl-tag">
+  <dt><i>/proc/net/snmp</i></dt>
+  <dd>Basic UDP-Litev4 statistics counters.</dd>
+  <dt><i>/proc/net/snmp6</i></dt>
+  <dd>Basic UDP-Litev6 statistics counters.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">UDP-Litev4/v6 first appeared in Linux 2.6.20.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">Where glibc support is missing, the following definitions are
+    needed:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>#define IPPROTO_UDPLITE     136
+#define UDPLITE_SEND_CSCOV  10
+#define UDPLITE_RECV_CSCOV  11
+</pre>
+<br>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>ip</b>(7), <b>ipv6</b>(7), <b>socket</b>(7), <b>udp</b>(7)</p>
+<p class="Pp">RFC&nbsp;3828 for the Lightweight User Datagram Protocol
+    (UDP-Lite).</p>
+<p class="Pp"><i>Documentation/networking/udplite.txt</i> in the Linux kernel
+    source tree</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

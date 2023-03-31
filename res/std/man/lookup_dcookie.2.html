@@ -1,0 +1,123 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2003 John Levon <levon@movementarian.org>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Modified 2004-06-17 Michael Kerrisk <mtk.manpages@gmail.com>
+   --><head>
+<meta name="dc.identifier" content="res/de47503550fde1e4e3ecb2ef7de2f19b0a96c2a5">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>lookup_dcookie(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">lookup_dcookie(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">lookup_dcookie(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">lookup_dcookie - return a directory entry's path</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/syscall.h&gt;</b>      /* Definition of <b>SYS_*</b> constants */
+<b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int syscall(SYS_lookup_dcookie, uint64_t </b><i>cookie</i><b>, char *</b><i>buffer</i><b>,</b>
+<b>            size_t </b><i>len</i><b>);</b></pre>
+<p class="Pp"><i>Note</i>: glibc provides no wrapper for
+    <b>lookup_dcookie</b>(), necessitating the use of <b>syscall</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">Look up the full path of the directory entry specified by the
+    value <i>cookie</i>. The cookie is an opaque identifier uniquely identifying
+    a particular directory entry. The buffer given is filled in with the full
+    path of the directory entry.</p>
+<p class="Pp">For <b>lookup_dcookie</b>() to return successfully, the kernel
+    must still hold a cookie reference to the directory entry.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>lookup_dcookie</b>() returns the length of the path
+    string copied into the buffer. On error, -1 is returned, and <i>errno</i> is
+    set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>The buffer was not valid.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The kernel has no registered cookie/directory entry mappings at the time
+      of lookup, or the cookie does not refer to a valid directory entry.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd>The name could not fit in the buffer.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>The kernel could not allocate memory for the temporary buffer holding the
+      path.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The process does not have the capability <b>CAP_SYS_ADMIN</b> required to
+      look up cookie values.</dd>
+  <dt id="ERANGE"><a class="permalink" href="#ERANGE"><b>ERANGE</b></a></dt>
+  <dd>The buffer was not large enough to hold the path of the directory
+    entry.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">Available since Linux 2.5.43. The <b>ENAMETOOLONG</b> error return
+    was added in Linux 2.5.70.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>lookup_dcookie</b>() is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp"><b>lookup_dcookie</b>() is a special-purpose system call,
+    currently used only by the <b>oprofile</b>(1) profiler. It relies on a
+    kernel driver to register cookies for directory entries.</p>
+<p class="Pp">The path returned may be suffixed by the string "
+    (deleted)" if the directory entry has been removed.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>oprofile</b>(1)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

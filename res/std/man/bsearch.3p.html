@@ -1,0 +1,241 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/b4bb1e15290e3c1af4e2bbdb2a54d3520957068b">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>BSEARCH(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">BSEARCH(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">BSEARCH(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">bsearch — binary search a sorted table</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;stdlib.h&gt;</pre>
+<pre>void *bsearch(const void *<i>key</i>, const void *<i>base</i>, size_t <i>nel</i>,
+<br>
+    size_t <i>width</i>, int (*<i>compar</i>)(const void *, const void *));</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The functionality described on this reference page is aligned with
+    the ISO&nbsp;C standard. Any conflict between the requirements described
+    here and the ISO&nbsp;C standard is unintentional. This volume of
+    POSIX.1‐2017 defers to the ISO&nbsp;C standard.</p>
+<p class="Pp">The <i>bsearch</i>() function shall search an array of <i>nel</i>
+    objects, the initial element of which is pointed to by <i>base</i>, for an
+    element that matches the object pointed to by <i>key</i>. The size of each
+    element in the array is specified by <i>width</i>. If the <i>nel</i>
+    argument has the value zero, the comparison function pointed to by
+    <i>compar</i> shall not be called and no match shall be found.</p>
+<p class="Pp">The comparison function pointed to by <i>compar</i> shall be
+    called with two arguments that point to the <i>key</i> object and to an
+    array element, in that order.</p>
+<p class="Pp">The application shall ensure that the comparison function pointed
+    to by <i>compar</i> does not alter the contents of the array. The
+    implementation may reorder elements of the array between calls to the
+    comparison function, but shall not alter the contents of any individual
+    element.</p>
+<p class="Pp">The implementation shall ensure that the first argument is always
+    a pointer to the key.</p>
+<p class="Pp">When the same objects (consisting of width bytes, irrespective of
+    their current positions in the array) are passed more than once to the
+    comparison function, the results shall be consistent with one another. That
+    is, the same object shall always compare the same way with the key.</p>
+<p class="Pp">The application shall ensure that the function returns an integer
+    less than, equal to, or greater than 0 if the <i>key</i> object is
+    considered, respectively, to be less than, to match, or to be greater than
+    the array element. The application shall ensure that the array consists of
+    all the elements that compare less than, all the elements that compare equal
+    to, and all the elements that compare greater than the <i>key</i> object, in
+    that order.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <i>bsearch</i>() function shall return a pointer to a matching
+    member of the array, or a null pointer if no match is found. If two or more
+    members compare equal, which member is returned is unspecified.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">No errors are defined.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The example below searches a table containing pointers to nodes
+    consisting of a string and its length. The table is ordered alphabetically
+    on the string in the node pointed to by each entry.</p>
+<p class="Pp">The code fragment below reads in strings and either finds the
+    corresponding node and prints out the string and its length, or prints an
+    error message.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;</pre>
+<pre>#define&nbsp;TABSIZE    1000</pre>
+<pre>struct node {                  /* These are stored in the table. */
+<br>
+    char *string;
+<br>
+    int length;
+};
+struct node table[TABSIZE];    /* Table to be searched. */
+<br>
+    .
+<br>
+    .
+<br>
+    .
+{
+<br>
+    struct node *node_ptr, node;
+<br>
+    /* Routine to compare 2 nodes. */
+<br>
+    int node_compare(const void *, const void *);
+<br>
+    .
+<br>
+    .
+<br>
+    .
+<br>
+    while (scanf("%ms", &amp;node.string) != EOF) {
+<br>
+        node_ptr = (struct node *)bsearch((void *)(&amp;node),
+<br>
+               (void *)table, TABSIZE,
+<br>
+               sizeof(struct node), node_compare);
+<br>
+        if (node_ptr != NULL) {
+<br>
+            (void)printf("string = %20s, length = %d\n",
+<br>
+                node_ptr-&gt;string, node_ptr-&gt;length);
+<br>
+        } else {
+<br>
+            (void)printf("not found: %s\n", node.string);
+<br>
+        }
+<br>
+        free(node.string);
+<br>
+    }
+}
+/*
+<br>
+    This routine compares two nodes based on an
+<br>
+    alphabetical ordering of the string field.
+*/
+int
+node_compare(const void *node1, const void *node2)
+{
+<br>
+    return strcoll(((const struct node *)node1)-&gt;string,
+<br>
+        ((const struct node *)node2)-&gt;string);
+}</pre>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The pointers to the key and the element at the base of the table
+    should be of type pointer-to-element.</p>
+<p class="Pp">The comparison function need not compare every byte, so arbitrary
+    data may be contained in the elements in addition to the values being
+    compared.</p>
+<p class="Pp">In practice, the array is usually sorted according to the
+    comparison function.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The requirement that the second argument (hereafter referred to as
+    <i>p</i>) to the comparison function is a pointer to an element of the array
+    implies that for every call all of the following expressions are
+  non-zero:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>( (char *)p - (char *)base ) % width == 0
+(char *)p &gt;= (char *)base
+(char *)p &lt; (char *)base + nel * width</pre>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>hcreate</i>()</i>, <i><i>lsearch</i>()</i>,
+    <i><i>qsort</i>()</i>, <i><i>tdelete</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;stdlib.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

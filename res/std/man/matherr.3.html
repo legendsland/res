@@ -1,0 +1,758 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 2008, Linux Foundation, written by Michael Kerrisk
+       <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/16784e7d170ef47d9e48cfb607fe8ad601c91c56">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>matherr(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">matherr(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">matherr(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">matherr - SVID math library exception handling</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Math library (<i>libm</i>, <i>-lm</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;math.h&gt;</b></pre>
+<pre><b>[[deprecated]] int matherr(struct exception *</b><i>exc</i><b>);</b></pre>
+<pre><b>[[deprecated]] extern _LIB_VERSION_TYPE _LIB_VERSION;</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><i>Note</i>: the mechanism described in this page is no longer
+    supported by glibc. Before glibc 2.27, it had been marked as obsolete. Since
+    glibc 2.27, the mechanism has been removed altogether. New applications
+    should use the techniques described in <b>math_error</b>(7) and
+    <b>fenv</b>(3). This page documents the <b>matherr</b>() mechanism as an aid
+    for maintaining and porting older applications.</p>
+<p class="Pp">The System V Interface Definition (SVID) specifies that various
+    math functions should invoke a function called <b>matherr</b>() if a math
+    exception is detected. This function is called before the math function
+    returns; after <b>matherr</b>() returns, the system then returns to the math
+    function, which in turn returns to the caller.</p>
+<p class="Pp">To employ <b>matherr</b>(), the programmer must define the
+    <b>_SVID_SOURCE</b> feature test macro (before including <i>any</i> header
+    files), and assign the value <b>_SVID_</b> to the external variable
+    <b>_LIB_VERSION</b>.</p>
+<p class="Pp">The system provides a default version of <b>matherr</b>(). This
+    version does nothing, and returns zero (see below for the significance of
+    this). The default <b>matherr</b>() can be overridden by a
+    programmer-defined version, which will be invoked when an exception occurs.
+    The function is invoked with one argument, a pointer to an <i>exception</i>
+    structure, defined as follows:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct exception {
+<br>
+    int    type;      /* Exception type */
+<br>
+    char  *name;      /* Name of function causing exception */
+<br>
+    double arg1;      /* 1st argument to function */
+<br>
+    double arg2;      /* 2nd argument to function */
+<br>
+    double retval;    /* Function return value */
+}
+</pre>
+<br>
+<p class="Pp">The <i>type</i> field has one of the following values:</p>
+<dl class="Bl-tag">
+  <dt id="DOMAIN"><a class="permalink" href="#DOMAIN"><b>DOMAIN</b></a></dt>
+  <dd>A domain error occurred (the function argument was outside the range for
+      which the function is defined). The return value depends on the function;
+      <i>errno</i> is set to <b>EDOM</b>.</dd>
+  <dt id="SING"><a class="permalink" href="#SING"><b>SING</b></a></dt>
+  <dd>A pole error occurred (the function result is an infinity). The return
+      value in most cases is <b>HUGE</b> (the largest single precision
+      floating-point number), appropriately signed. In most cases, <i>errno</i>
+      is set to <b>EDOM</b>.</dd>
+  <dt id="OVERFLOW"><a class="permalink" href="#OVERFLOW"><b>OVERFLOW</b></a></dt>
+  <dd>An overflow occurred. In most cases, the value <b>HUGE</b> is returned,
+      and <i>errno</i> is set to <b>ERANGE</b>.</dd>
+  <dt id="UNDERFLOW"><a class="permalink" href="#UNDERFLOW"><b>UNDERFLOW</b></a></dt>
+  <dd>An underflow occurred. 0.0 is returned, and <i>errno</i> is set to
+      <b>ERANGE</b>.</dd>
+  <dt id="TLOSS"><a class="permalink" href="#TLOSS"><b>TLOSS</b></a></dt>
+  <dd>Total loss of significance. 0.0 is returned, and <i>errno</i> is set to
+      <b>ERANGE</b>.</dd>
+  <dt id="PLOSS"><a class="permalink" href="#PLOSS"><b>PLOSS</b></a></dt>
+  <dd>Partial loss of significance. This value is unused on glibc (and many
+      other systems).</dd>
+</dl>
+<p class="Pp">The <i>arg1</i> and <i>arg2</i> fields are the arguments supplied
+    to the function (<i>arg2</i> is undefined for functions that take only one
+    argument).</p>
+<p class="Pp">The <i>retval</i> field specifies the return value that the math
+    function will return to its caller. The programmer-defined <b>matherr</b>()
+    can modify this field to change the return value of the math function.</p>
+<p class="Pp">If the <b>matherr</b>() function returns zero, then the system
+    sets <i>errno</i> as described above, and may print an error message on
+    standard error (see below).</p>
+<p class="Pp">If the <b>matherr</b>() function returns a nonzero value, then the
+    system does not set <i>errno</i>, and doesn't print an error message.</p>
+<section class="Ss">
+<h2 class="Ss" id="Math_functions_that_employ_matherr()"><a class="permalink" href="#Math_functions_that_employ_matherr()">Math
+  functions that employ matherr()</a></h2>
+<p class="Pp">The table below lists the functions and circumstances in which
+    <b>matherr</b>() is called. The "Type" column indicates the value
+    assigned to <i>exc-&gt;type</i> when calling <b>matherr</b>(). The
+    "Result" column is the default return value assigned to
+    <i>exc-&gt;retval</i>.</p>
+<p class="Pp">The "Msg?" and "errno" columns describe the
+    default behavior if <b>matherr</b>() returns zero. If the "Msg?"
+    columns contains "y", then the system prints an error message on
+    standard error.</p>
+<p class="Pp">The table uses the following notations and abbreviations:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<table class="tbl">
+  <tbody><tr>
+    <td>x first argument to function</td>
+  </tr>
+  <tr>
+    <td>y second argument to function</td>
+  </tr>
+  <tr>
+    <td>fin finite value for argument</td>
+  </tr>
+  <tr>
+    <td>neg negative value for argument</td>
+  </tr>
+  <tr>
+    <td>int integral value for argument</td>
+  </tr>
+  <tr>
+    <td>o/f result overflowed</td>
+  </tr>
+  <tr>
+    <td>u/f result underflowed</td>
+  </tr>
+  <tr>
+    <td>|x| absolute value of x</td>
+  </tr>
+  <tr>
+    <td>X_TLOSS is a constant defined in <i>&lt;math.h&gt;</i></td>
+  </tr>
+</tbody></table>
+</div>
+<table class="tbl">
+  <tbody><tr>
+    <td><b>Function</b></td>
+    <td><b>Type</b></td>
+    <td><b>Result</b></td>
+    <td style="text-align: center;"><b>Msg?</b></td>
+    <td><b>errno</b></td>
+  </tr>
+  <tr>
+    <td>acos(|x|&gt;1)</td>
+    <td>DOMAIN</td>
+    <td>HUGE</td>
+    <td style="text-align: center;">y</td>
+    <td>EDOM</td>
+  </tr>
+  <tr>
+    <td>asin(|x|&gt;1)</td>
+    <td>DOMAIN</td>
+    <td>HUGE</td>
+    <td style="text-align: center;">y</td>
+    <td>EDOM</td>
+  </tr>
+  <tr>
+    <td>atan2(0,0)</td>
+    <td>DOMAIN</td>
+    <td>HUGE</td>
+    <td style="text-align: center;">y</td>
+    <td>EDOM</td>
+  </tr>
+  <tr>
+    <td>acosh(x&lt;1)</td>
+    <td>DOMAIN</td>
+    <td>NAN</td>
+    <td style="text-align: center;">y</td>
+    <td>EDOM</td>
+  </tr>
+  <tr>
+    <td>atanh(|x|&gt;1)</td>
+    <td>DOMAIN</td>
+    <td>NAN</td>
+    <td style="text-align: center;">y</td>
+    <td>EDOM</td>
+  </tr>
+  <tr>
+    <td>atanh(|x|==1)</td>
+    <td>SING</td>
+    <td>(x&gt;0.0)?</td>
+    <td style="text-align: center;">y</td>
+    <td>EDOM</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>HUGE_VAL :</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>-HUGE_VAL</td>
+  </tr>
+  <tr>
+    <td>cosh(fin) o/f</td>
+    <td>OVERFLOW</td>
+    <td>HUGE</td>
+    <td style="text-align: center;">n</td>
+    <td>ERANGE</td>
+  </tr>
+  <tr>
+    <td>sinh(fin) o/f</td>
+    <td>OVERFLOW</td>
+    <td>(x&gt;0.0) ?</td>
+    <td style="text-align: center;">n</td>
+    <td>ERANGE</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>HUGE : -HUGE</td>
+  </tr>
+  <tr>
+    <td>sqrt(x&lt;0)</td>
+    <td>DOMAIN</td>
+    <td>0.0</td>
+    <td style="text-align: center;">y</td>
+    <td>EDOM</td>
+  </tr>
+  <tr>
+    <td>hypot(fin,fin) o/f</td>
+    <td>OVERFLOW</td>
+    <td>HUGE</td>
+    <td style="text-align: center;">n</td>
+    <td>ERANGE</td>
+  </tr>
+  <tr>
+    <td>exp(fin) o/f</td>
+    <td>OVERFLOW</td>
+    <td>HUGE</td>
+    <td style="text-align: center;">n</td>
+    <td>ERANGE</td>
+  </tr>
+  <tr>
+    <td>exp(fin) u/f</td>
+    <td>UNDERFLOW</td>
+    <td>0.0</td>
+    <td style="text-align: center;">n</td>
+    <td>ERANGE</td>
+  </tr>
+  <tr>
+    <td>exp2(fin) o/f</td>
+    <td>OVERFLOW</td>
+    <td>HUGE</td>
+    <td style="text-align: center;">n</td>
+    <td>ERANGE</td>
+  </tr>
+  <tr>
+    <td>exp2(fin) u/f</td>
+    <td>UNDERFLOW</td>
+    <td>0.0</td>
+    <td style="text-align: center;">n</td>
+    <td>ERANGE</td>
+  </tr>
+  <tr>
+    <td>exp10(fin) o/f</td>
+    <td>OVERFLOW</td>
+    <td>HUGE</td>
+    <td style="text-align: center;">n</td>
+    <td>ERANGE</td>
+  </tr>
+  <tr>
+    <td>exp10(fin) u/f</td>
+    <td>UNDERFLOW</td>
+    <td>0.0</td>
+    <td style="text-align: center;">n</td>
+    <td>ERANGE</td>
+  </tr>
+  <tr>
+    <td>j0(|x|&gt;X_TLOSS)</td>
+    <td>TLOSS</td>
+    <td>0.0</td>
+    <td style="text-align: center;">y</td>
+    <td>ERANGE</td>
+  </tr>
+  <tr>
+    <td>j1(|x|&gt;X_TLOSS)</td>
+    <td>TLOSS</td>
+    <td>0.0</td>
+    <td style="text-align: center;">y</td>
+    <td>ERANGE</td>
+  </tr>
+  <tr>
+    <td>jn(|x|&gt;X_TLOSS)</td>
+    <td>TLOSS</td>
+    <td>0.0</td>
+    <td style="text-align: center;">y</td>
+    <td>ERANGE</td>
+  </tr>
+  <tr>
+    <td>y0(x&gt;X_TLOSS)</td>
+    <td>TLOSS</td>
+    <td>0.0</td>
+    <td style="text-align: center;">y</td>
+    <td>ERANGE</td>
+  </tr>
+  <tr>
+    <td>y1(x&gt;X_TLOSS)</td>
+    <td>TLOSS</td>
+    <td>0.0</td>
+    <td style="text-align: center;">y</td>
+    <td>ERANGE</td>
+  </tr>
+  <tr>
+    <td>yn(x&gt;X_TLOSS)</td>
+    <td>TLOSS</td>
+    <td>0.0</td>
+    <td style="text-align: center;">y</td>
+    <td>ERANGE</td>
+  </tr>
+  <tr>
+    <td>y0(0)</td>
+    <td>DOMAIN</td>
+    <td>-HUGE</td>
+    <td style="text-align: center;">y</td>
+    <td>EDOM</td>
+  </tr>
+  <tr>
+    <td>y0(x&lt;0)</td>
+    <td>DOMAIN</td>
+    <td>-HUGE</td>
+    <td style="text-align: center;">y</td>
+    <td>EDOM</td>
+  </tr>
+  <tr>
+    <td>y1(0)</td>
+    <td>DOMAIN</td>
+    <td>-HUGE</td>
+    <td style="text-align: center;">y</td>
+    <td>EDOM</td>
+  </tr>
+  <tr>
+    <td>y1(x&lt;0)</td>
+    <td>DOMAIN</td>
+    <td>-HUGE</td>
+    <td style="text-align: center;">y</td>
+    <td>EDOM</td>
+  </tr>
+  <tr>
+    <td>yn(n,0)</td>
+    <td>DOMAIN</td>
+    <td>-HUGE</td>
+    <td style="text-align: center;">y</td>
+    <td>EDOM</td>
+  </tr>
+  <tr>
+    <td>yn(x&lt;0)</td>
+    <td>DOMAIN</td>
+    <td>-HUGE</td>
+    <td style="text-align: center;">y</td>
+    <td>EDOM</td>
+  </tr>
+  <tr>
+    <td>lgamma(fin) o/f</td>
+    <td>OVERFLOW</td>
+    <td>HUGE</td>
+    <td style="text-align: center;">n</td>
+    <td>ERANGE</td>
+  </tr>
+  <tr>
+    <td>lgamma(-int) or</td>
+    <td>SING</td>
+    <td>HUGE</td>
+    <td style="text-align: center;">y</td>
+    <td>EDOM</td>
+  </tr>
+  <tr>
+    <td>&nbsp;&nbsp;lgamma(0)</td>
+  </tr>
+  <tr>
+    <td>tgamma(fin) o/f</td>
+    <td>OVERFLOW</td>
+    <td>HUGE_VAL</td>
+    <td style="text-align: center;">n</td>
+    <td>ERANGE</td>
+  </tr>
+  <tr>
+    <td>tgamma(-int)</td>
+    <td>SING</td>
+    <td>NAN</td>
+    <td style="text-align: center;">y</td>
+    <td>EDOM</td>
+  </tr>
+  <tr>
+    <td>tgamma(0)</td>
+    <td>SING</td>
+    <td>copysign(</td>
+    <td style="text-align: center;">y</td>
+    <td>ERANGE</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>HUGE_VAL,x)</td>
+  </tr>
+  <tr>
+    <td>log(0)</td>
+    <td>SING</td>
+    <td>-HUGE</td>
+    <td style="text-align: center;">y</td>
+    <td>EDOM</td>
+  </tr>
+  <tr>
+    <td>log(x&lt;0)</td>
+    <td>DOMAIN</td>
+    <td>-HUGE</td>
+    <td style="text-align: center;">y</td>
+    <td>EDOM</td>
+  </tr>
+  <tr>
+    <td>log2(0)</td>
+    <td>SING</td>
+    <td>-HUGE</td>
+    <td style="text-align: center;">n</td>
+    <td>EDOM</td>
+  </tr>
+  <tr>
+    <td>log2(x&lt;0)</td>
+    <td>DOMAIN</td>
+    <td>-HUGE</td>
+    <td style="text-align: center;">n</td>
+    <td>EDOM</td>
+  </tr>
+  <tr>
+    <td>log10(0)</td>
+    <td>SING</td>
+    <td>-HUGE</td>
+    <td style="text-align: center;">y</td>
+    <td>EDOM</td>
+  </tr>
+  <tr>
+    <td>log10(x&lt;0)</td>
+    <td>DOMAIN</td>
+    <td>-HUGE</td>
+    <td style="text-align: center;">y</td>
+    <td>EDOM</td>
+  </tr>
+  <tr>
+    <td>pow(0.0,0.0)</td>
+    <td>DOMAIN</td>
+    <td>0.0</td>
+    <td style="text-align: center;">y</td>
+    <td>EDOM</td>
+  </tr>
+  <tr>
+    <td>pow(x,y) o/f</td>
+    <td>OVERFLOW</td>
+    <td>HUGE</td>
+    <td style="text-align: center;">n</td>
+    <td>ERANGE</td>
+  </tr>
+  <tr>
+    <td>pow(x,y) u/f</td>
+    <td>UNDERFLOW</td>
+    <td>0.0</td>
+    <td style="text-align: center;">n</td>
+    <td>ERANGE</td>
+  </tr>
+  <tr>
+    <td>pow(NaN,0.0)</td>
+    <td>DOMAIN</td>
+    <td>x</td>
+    <td style="text-align: center;">n</td>
+    <td>EDOM</td>
+  </tr>
+  <tr>
+    <td>0**neg</td>
+    <td>DOMAIN</td>
+    <td>0.0</td>
+    <td style="text-align: center;">y</td>
+    <td>EDOM</td>
+  </tr>
+  <tr>
+    <td>neg**non-int</td>
+    <td>DOMAIN</td>
+    <td>0.0</td>
+    <td style="text-align: center;">y</td>
+    <td>EDOM</td>
+  </tr>
+  <tr>
+    <td>scalb() o/f</td>
+    <td>OVERFLOW</td>
+    <td>(x&gt;0.0) ?</td>
+    <td style="text-align: center;">n</td>
+    <td>ERANGE</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>HUGE_VAL :</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>-HUGE_VAL</td>
+  </tr>
+  <tr>
+    <td>scalb() u/f</td>
+    <td>UNDERFLOW</td>
+    <td>copysign(</td>
+    <td style="text-align: center;">n</td>
+    <td>ERANGE</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;&nbsp;0.0,x)</td>
+  </tr>
+  <tr>
+    <td>fmod(x,0)</td>
+    <td>DOMAIN</td>
+    <td>x</td>
+    <td style="text-align: center;">y</td>
+    <td>EDOM</td>
+  </tr>
+  <tr>
+    <td>remainder(x,0)</td>
+    <td>DOMAIN</td>
+    <td>NAN</td>
+    <td style="text-align: center;">y</td>
+    <td>EDOM</td>
+  </tr>
+</tbody></table>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>matherr ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The example program demonstrates the use of <b>matherr</b>() when
+    calling <b>log</b>(3). The program takes up to three command-line arguments.
+    The first argument is the floating-point number to be given to
+    <b>log</b>(3). If the optional second argument is provided, then
+    <b>_LIB_VERSION</b> is set to <b>_SVID_</b> so that <b>matherr</b>() is
+    called, and the integer supplied in the command-line argument is used as the
+    return value from <b>matherr</b>(). If the optional third command-line
+    argument is supplied, then it specifies an alternative return value that
+    <b>matherr</b>() should assign as the return value of the math function.</p>
+<p class="Pp">The following example run, where <b>log</b>(3) is given an
+    argument of 0.0, does not use <b>matherr</b>():</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$<b> ./a.out 0.0</b>
+errno: Numerical result out of range
+x=-inf
+</pre>
+<br>
+<p class="Pp">In the following run, <b>matherr</b>() is called, and returns
+  0:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$<b> ./a.out 0.0 0</b>
+matherr SING exception in log() function
+<br>
+        args:   0.000000, 0.000000
+<br>
+        retval: -340282346638528859811704183484516925440.000000
+log: SING error
+errno: Numerical argument out of domain
+x=-340282346638528859811704183484516925440.000000
+</pre>
+<br>
+<p class="Pp">The message "log: SING error" was printed by the C
+    library.</p>
+<p class="Pp">In the following run, <b>matherr</b>() is called, and returns a
+    nonzero value:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$<b> ./a.out 0.0 1</b>
+matherr SING exception in log() function
+<br>
+        args:   0.000000, 0.000000
+<br>
+        retval: -340282346638528859811704183484516925440.000000
+x=-340282346638528859811704183484516925440.000000
+</pre>
+<br>
+<p class="Pp">In this case, the C library did not print a message, and
+    <i>errno</i> was not set.</p>
+<p class="Pp">In the following run, <b>matherr</b>() is called, changes the
+    return value of the math function, and returns a nonzero value:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$<b> ./a.out 0.0 1 12345.0</b>
+matherr SING exception in log() function
+<br>
+        args:   0.000000, 0.000000
+<br>
+        retval: -340282346638528859811704183484516925440.000000
+x=12345.000000
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#define _SVID_SOURCE
+#include &lt;errno.h&gt;
+#include &lt;math.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+static int matherr_ret = 0;     /* Value that matherr()
+<br>
+                                   should return */
+static int change_retval = 0;   /* Should matherr() change
+<br>
+                                   function's return value? */
+static double new_retval;       /* New function return value */
+int
+matherr(struct exception *exc)
+{
+<br>
+    fprintf(stderr, "matherr %s exception in %s() function\n",
+<br>
+            (exc-&gt;type == DOMAIN) ?    "DOMAIN" :
+<br>
+            (exc-&gt;type == OVERFLOW) ?  "OVERFLOW" :
+<br>
+            (exc-&gt;type == UNDERFLOW) ? "UNDERFLOW" :
+<br>
+            (exc-&gt;type == SING) ?      "SING" :
+<br>
+            (exc-&gt;type == TLOSS) ?     "TLOSS" :
+<br>
+            (exc-&gt;type == PLOSS) ?     "PLOSS" : "???",
+<br>
+            exc-&gt;name);
+<br>
+    fprintf(stderr, "        args:   %f, %f\n",
+<br>
+            exc-&gt;arg1, exc-&gt;arg2);
+<br>
+    fprintf(stderr, "        retval: %f\n", exc-&gt;retval);
+<br>
+    if (change_retval)
+<br>
+        exc-&gt;retval = new_retval;
+<br>
+    return matherr_ret;
+}
+int
+main(int argc, char *argv[])
+{
+<br>
+    double x;
+<br>
+    if (argc &lt; 2) {
+<br>
+        fprintf(stderr, "Usage: %s &lt;argval&gt;"
+<br>
+                " [&lt;matherr-ret&gt; [&lt;new-func-retval&gt;]]\n", argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    if (argc &gt; 2) {
+<br>
+        _LIB_VERSION = _SVID_;
+<br>
+        matherr_ret = atoi(argv[2]);
+<br>
+    }
+<br>
+    if (argc &gt; 3) {
+<br>
+        change_retval = 1;
+<br>
+        new_retval = atof(argv[3]);
+<br>
+    }
+<br>
+    x = log(atof(argv[1]));
+<br>
+    if (errno != 0)
+<br>
+        perror("errno");
+<br>
+    printf("x=%f\n", x);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>fenv</b>(3), <b>math_error</b>(7), <b>standards</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/864a74728a34bf132e665aa3f58d3903635b30e5">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>GETC_UNLOCKED(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">GETC_UNLOCKED(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">GETC_UNLOCKED(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getc_unlocked, getchar_unlocked, putc_unlocked, putchar_unlocked
+    — stdio with explicit client locking</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;stdio.h&gt;</pre>
+<pre>int getc_unlocked(FILE *<i>stream</i>);
+int getchar_unlocked(void);
+int putc_unlocked(int <i>c</i>, FILE *<i>stream</i>);
+int putchar_unlocked(int <i>c</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">Versions of the functions <i>getc</i>(), <i>getchar</i>(),
+    <i>putc</i>(), and <i>putchar</i>() respectively named
+    <i>getc_unlocked</i>(), <i>getchar_unlocked</i>(), <i>putc_unlocked</i>(),
+    and <i>putchar_unlocked</i>() shall be provided which are functionally
+    equivalent to the original versions, with the exception that they are not
+    required to be implemented in a fully thread-safe manner. They shall be
+    thread-safe when used within a scope protected by <i>flockfile</i>() (or
+    <i>ftrylockfile</i>()) and <i>funlockfile</i>(). These functions can safely
+    be used in a multi-threaded program if and only if they are called while the
+    invoking thread owns the (<b>FILE *</b>) object, as is the case after a
+    successful call to the <i>flockfile</i>() or <i>ftrylockfile</i>()
+    functions.</p>
+<p class="Pp">If <i>getc_unlocked</i>() or <i>putc_unlocked</i>() are
+    implemented as macros they may evaluate <i>stream</i> more than once, so the
+    <i>stream</i> argument should never be an expression with side-effects.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">See <i><i>getc</i>()</i>, <i><i>getchar</i>()</i>,
+    <i><i>putc</i>()</i>, and <i><i>putchar</i>()</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">See <i><i>getc</i>()</i>, <i><i>getchar</i>()</i>,
+    <i><i>putc</i>()</i>, and <i><i>putchar</i>()</i>.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">Since they may be implemented as macros, <i>getc_unlocked</i>()
+    and <i>putc_unlocked</i>() may treat incorrectly a <i>stream</i> argument
+    with side-effects. In particular, <i>getc_unlocked</i>(*f++) and
+    <i>putc_unlocked</i>(c,*f++) do not necessarily work as expected. Therefore,
+    use of these functions in such situations should be preceded by the
+    following statement as appropriate:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#undef getc_unlocked
+#undef putc_unlocked</pre>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">Some I/O functions are typically implemented as macros for
+    performance reasons (for example, <i>putc</i>() and <i>getc</i>()). For
+    safety, they need to be synchronized, but it is often too expensive to
+    synchronize on every character. Nevertheless, it was felt that the safety
+    concerns were more important; consequently, the <i>getc</i>(),
+    <i>getchar</i>(), <i>putc</i>(), and <i>putchar</i>() functions are required
+    to be thread-safe. However, unlocked versions are also provided with names
+    that clearly indicate the unsafe nature of their operation but can be used
+    to exploit their higher performance. These unlocked versions can be safely
+    used only within explicitly locked program regions, using exported locking
+    primitives. In particular, a sequence such as:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>flockfile(fileptr);
+putc_unlocked('1', fileptr);
+putc_unlocked('\n', fileptr);
+fprintf(fileptr, "Line 2\n");
+funlockfile(fileptr);</pre>
+</div>
+<p class="Pp">is permissible, and results in the text sequence:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>1
+Line 2</pre>
+</div>
+<p class="Pp">being printed without being interspersed with output from other
+    threads.</p>
+<p class="Pp">It would be wrong to have the standard names such as
+    <i>getc</i>(), <i>putc</i>(), and so on, map to the ``faster, but unsafe''
+    rather than the ``slower, but safe'' versions. In either case, you would
+    still want to inspect all uses of <i>getc</i>(), <i>putc</i>(), and so on,
+    by hand when converting existing code. Choosing the safe bindings as the
+    default, at least, results in correct code and maintains the ``atomicity at
+    the function'' invariant. To do otherwise would introduce gratuitous
+    synchronization errors into converted code. Other routines that modify the
+    <i>stdio</i> (<b>FILE *</b>) structures or buffers are also safely
+    synchronized.</p>
+<p class="Pp">Note that there is no need for functions of the form
+    <i>getc_locked</i>(), <i>putc_locked</i>(), and so on, since this is the
+    functionality of <i>getc</i>(), <i>putc</i>(), <i>et al</i>. It would be
+    inappropriate to use a feature test macro to switch a macro definition of
+    <i>getc</i>() between <i>getc_locked</i>() and <i>getc_unlocked</i>(), since
+    the ISO&nbsp;C standard requires an actual function to exist, a function
+    whose behavior could not be changed by the feature test macro. Also,
+    providing both the <i>xxx_locked</i>() and <i>xxx_unlocked</i>() forms leads
+    to the confusion of whether the suffix describes the behavior of the
+    function or the circumstances under which it should be used.</p>
+<p class="Pp">Three additional routines, <i>flockfile</i>(),
+    <i>ftrylockfile</i>(), and <i>funlockfile</i>() (which may be macros), are
+    provided to allow the user to delineate a sequence of I/O statements that
+    are executed synchronously.</p>
+<p class="Pp">The <i>ungetc</i>() function is infrequently called relative to
+    the other functions/macros so no unlocked variation is needed.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i>Section 2.5</i>, <i>Standard I/O Streams</i>,
+    <i><i>flockfile</i>()</i>, <i><i>getc</i>()</i>, <i><i>getchar</i>()</i>,
+    <i><i>putc</i>()</i>, <i><i>putchar</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;stdio.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

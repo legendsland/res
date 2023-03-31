@@ -1,0 +1,237 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/2152622e027179d72da9fb7d7fc823ac100af490">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>scandir(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">scandir(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">scandir(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">scandir, scandirat, alphasort, versionsort - scan a directory for
+    matching entries</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;dirent.h&gt;</b></pre>
+<pre><b>int scandir(const char *restrict </b><i>dirp</i><b>,</b>
+<b>            struct dirent ***restrict </b><i>namelist</i><b>,</b>
+<b>            int (*</b><i>filter</i><b>)(const struct dirent *),</b>
+<b>            int (*</b><i>compar</i><b>)(const struct dirent **,</b>
+<b>                          const struct dirent **));</b></pre>
+<pre><b>int alphasort(const struct dirent **</b><i>a</i><b>, const struct dirent **</b><i>b</i><b>);</b>
+<b>int versionsort(const struct dirent **</b><i>a</i><b>, const struct dirent **</b><i>b</i><b>);</b></pre>
+<pre><b>#include &lt;fcntl.h&gt;</b>          /* Definition of AT_* constants */
+<b>#include &lt;dirent.h&gt;</b></pre>
+<pre><b>int scandirat(int </b><i>dirfd</i><b>, const char *restrict </b><i>dirp</i><b>,</b>
+<b>            struct dirent ***restrict </b><i>namelist</i><b>,</b>
+<b>            int (*</b><i>filter</i><b>)(const struct dirent *),</b>
+<b>            int (*</b><i>compar</i><b>)(const struct dirent **,</b>
+<b>                          const struct dirent **));</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>scandir</b>(), <b>alphasort</b>():</p>
+<pre><br>
+    /* Since glibc 2.10: */ _POSIX_C_SOURCE &gt;= 200809L
+<br>
+        || /* glibc &lt;= 2.19: */ _BSD_SOURCE || _SVID_SOURCE</pre>
+<p class="Pp"><b>versionsort</b>():</p>
+<pre><br>
+    _GNU_SOURCE</pre>
+<p class="Pp"><b>scandirat</b>():</p>
+<pre><br>
+    _GNU_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>scandir</b>() function scans the directory <i>dirp</i>,
+    calling <i>filter</i>() on each directory entry. Entries for which
+    <i>filter</i>() returns nonzero are stored in strings allocated via
+    <b>malloc</b>(3), sorted using <b>qsort</b>(3) with the comparison function
+    <i>compar</i>(), and collected in array <i>namelist</i> which is allocated
+    via <b>malloc</b>(3). If <i>filter</i> is NULL, all entries are
+  selected.</p>
+<p class="Pp">The <b>alphasort</b>() and <b>versionsort</b>() functions can be
+    used as the comparison function <i>compar</i>(). The former sorts directory
+    entries using <b>strcoll</b>(3), the latter using <b>strverscmp</b>(3) on
+    the strings <i>(*a)-&gt;d_name</i> and <i>(*b)-&gt;d_name</i>.</p>
+<section class="Ss">
+<h2 class="Ss" id="scandirat()"><a class="permalink" href="#scandirat()">scandirat()</a></h2>
+<p class="Pp">The <b>scandirat</b>() function operates in exactly the same way
+    as <b>scandir</b>(), except for the differences described here.</p>
+<p class="Pp">If the pathname given in <i>dirp</i> is relative, then it is
+    interpreted relative to the directory referred to by the file descriptor
+    <i>dirfd</i> (rather than relative to the current working directory of the
+    calling process, as is done by <b>scandir</b>() for a relative
+  pathname).</p>
+<p class="Pp">If <i>dirp</i> is relative and <i>dirfd</i> is the special value
+    <b>AT_FDCWD</b>, then <i>dirp</i> is interpreted relative to the current
+    working directory of the calling process (like <b>scandir</b>()).</p>
+<p class="Pp">If <i>dirp</i> is absolute, then <i>dirfd</i> is ignored.</p>
+<p class="Pp">See <b>openat</b>(2) for an explanation of the need for
+    <b>scandirat</b>().</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <b>scandir</b>() function returns the number of directory
+    entries selected. On error, -1 is returned, with <i>errno</i> set to
+    indicate the error.</p>
+<p class="Pp">The <b>alphasort</b>() and <b>versionsort</b>() functions return
+    an integer less than, equal to, or greater than zero if the first argument
+    is considered to be respectively less than, equal to, or greater than the
+    second.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>(<b>scandirat</b>()) <i>dirp</i> is relative but <i>dirfd</i> is neither
+      <b>AT_FDCWD</b> nor a valid file descriptor.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>The path in <i>dirp</i> does not exist.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient memory to complete the operation.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>The path in <i>dirp</i> is not a directory.</dd>
+  <dt id="ENOTDIR~2"><a class="permalink" href="#ENOTDIR~2"><b>ENOTDIR</b></a></dt>
+  <dd>(<b>scandirat</b>()) <i>dirp</i> is a relative pathname and <i>dirfd</i>
+      is a file descriptor referring to a file other than a directory.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>scandir (), scandirat ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+  <tr>
+    <td>alphasort (), versionsort ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe locale</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>versionsort</b>() was added in glibc 2.1.</p>
+<p class="Pp"><b>scandirat</b>() was added in glibc 2.15.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>alphasort</b>(), <b>scandir</b>(): 4.3BSD, POSIX.1-2008.</p>
+<p class="Pp"><b>versionsort</b>() and <b>scandirat</b>() are GNU
+  extensions.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Since glibc 2.1, <b>alphasort</b>() calls <b>strcoll</b>(3);
+    earlier it used <b>strcmp</b>(3).</p>
+<p class="Pp">Before glibc 2.10, the two arguments of <b>alphasort</b>() and
+    <b>versionsort</b>() were typed as <i>const void&nbsp;*</i>. When
+    <b>alphasort</b>() was standardized in POSIX.1-2008, the argument type was
+    specified as the type-safe <i>const struct dirent&nbsp;**</i>, and glibc
+    2.10 changed the definition of <b>alphasort</b>() (and the nonstandard
+    <b>versionsort</b>()) to match the standard.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below prints a list of the files in the current
+    directory in reverse order.</p>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#define _DEFAULT_SOURCE
+#include &lt;dirent.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+int
+main(void)
+{
+<br>
+    struct dirent **namelist;
+<br>
+    int n;
+<br>
+    n = scandir(".", &amp;namelist, NULL, alphasort);
+<br>
+    if (n == -1) {
+<br>
+        perror("scandir");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    while (n--) {
+<br>
+        printf("%s\n", namelist[n]-&gt;d_name);
+<br>
+        free(namelist[n]);
+<br>
+    }
+<br>
+    free(namelist);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>closedir</b>(3), <b>fnmatch</b>(3), <b>opendir</b>(3),
+    <b>readdir</b>(3), <b>rewinddir</b>(3), <b>seekdir</b>(3), <b>strcmp</b>(3),
+    <b>strcoll</b>(3), <b>strverscmp</b>(3), <b>telldir</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

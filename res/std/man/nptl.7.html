@@ -1,0 +1,127 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2015 by Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/9ac57fae2a399af0bf5bb46ca7077dc9e7c874df">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>nptl(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">nptl(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">nptl(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">nptl - Native POSIX Threads Library</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">NPTL (Native POSIX Threads Library) is the GNU C library POSIX
+    threads implementation that is used on modern Linux systems.</p>
+<section class="Ss">
+<h2 class="Ss" id="NPTL_and_signals"><a class="permalink" href="#NPTL_and_signals">NPTL
+  and signals</a></h2>
+<p class="Pp">NPTL makes internal use of the first two real-time signals (signal
+    numbers 32 and 33). One of these signals is used to support thread
+    cancelation and POSIX timers (see <b>timer_create</b>(2)); the other is used
+    as part of a mechanism that ensures all threads in a process always have the
+    same UIDs and GIDs, as required by POSIX. These signals cannot be used in
+    applications.</p>
+<p class="Pp">To prevent accidental use of these signals in applications, which
+    might interfere with the operation of the NPTL implementation, various glibc
+    library functions and system call wrapper functions attempt to hide these
+    signals from applications, as follows:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><b>SIGRTMIN</b> is defined with the value 34 (rather than 32).</dd>
+  <dt>•</dt>
+  <dd>The <b>sigwaitinfo</b>(2), <b>sigtimedwait</b>(2), and <b>sigwait</b>(3)
+      interfaces silently ignore requests to wait for these two signals if they
+      are specified in the signal set argument of these calls.</dd>
+  <dt>•</dt>
+  <dd>The <b>sigprocmask</b>(2) and <b>pthread_sigmask</b>(3) interfaces
+      silently ignore attempts to block these two signals.</dd>
+  <dt>•</dt>
+  <dd>The <b>sigaction</b>(2), <b>pthread_kill</b>(3), and
+      <b>pthread_sigqueue</b>(3) interfaces fail with the error <b>EINVAL</b>
+      (indicating an invalid signal number) if these signals are specified.</dd>
+  <dt>•</dt>
+  <dd><b>sigfillset</b>(3) does not include these two signals when it creates a
+      full signal set.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="NPTL_and_process_credential_changes"><a class="permalink" href="#NPTL_and_process_credential_changes">NPTL
+  and process credential changes</a></h2>
+<p class="Pp">At the Linux kernel level, credentials (user and group IDs) are a
+    per-thread attribute. However, POSIX requires that all of the POSIX threads
+    in a process have the same credentials. To accommodate this requirement, the
+    NPTL implementation wraps all of the system calls that change process
+    credentials with functions that, in addition to invoking the underlying
+    system call, arrange for all other threads in the process to also change
+    their credentials.</p>
+<p class="Pp">The implementation of each of these system calls involves the use
+    of a real-time signal that is sent (using <b>tgkill</b>(2)) to each of the
+    other threads that must change its credentials. Before sending these
+    signals, the thread that is changing credentials saves the new credential(s)
+    and records the system call being employed in a global buffer. A signal
+    handler in the receiving thread(s) fetches this information and then uses
+    the same system call to change its credentials.</p>
+<p class="Pp">Wrapper functions employing this technique are provided for
+    <b>setgid</b>(2), <b>setuid</b>(2), <b>setegid</b>(2), <b>seteuid</b>(2),
+    <b>setregid</b>(2), <b>setreuid</b>(2), <b>setresgid</b>(2),
+    <b>setresuid</b>(2), and <b>setgroups</b>(2).</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">For details of the conformance of NPTL to the POSIX standard, see
+    <b>pthreads</b>(7).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">POSIX says that any thread in any process with access to the
+    memory containing a process-shared (<b>PTHREAD_PROCESS_SHARED</b>) mutex can
+    operate on that mutex. However, on 64-bit x86 systems, the mutex definition
+    for x86-64 is incompatible with the mutex definition for i386, meaning that
+    32-bit and 64-bit binaries can't share mutexes on x86-64 systems.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>credentials</b>(7), <b>pthreads</b>(7), <b>signal</b>(7),
+    <b>standards</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

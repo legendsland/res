@@ -1,0 +1,248 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 1999 Andries Brouwer (aeb@cwi.nl), 1 Nov 1999
+   and Copyright 2006, 2012, 2017 Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   1999-11-10: Merged text taken from the page contributed by
+   Reed H. Petty (rhp@draper.net)
+   --><head>
+<meta name="dc.identifier" content="res/85a391d9c7ebe192ef3f9f80932e954bc23682ca">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>vfork(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">vfork(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">vfork(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">vfork - create a child process and block parent</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>pid_t vfork(void);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>vfork</b>():</p>
+<pre><br>
+    Since glibc 2.12:
+<br>
+        (_XOPEN_SOURCE &gt;= 500) &amp;&amp; ! (_POSIX_C_SOURCE &gt;= 200809L)
+<br>
+            || /* Since glibc 2.19: */ _DEFAULT_SOURCE
+<br>
+            || /* glibc &lt;= 2.19: */ _BSD_SOURCE
+<br>
+    Before glibc 2.12:
+<br>
+        _BSD_SOURCE || _XOPEN_SOURCE &gt;= 500</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Standard_description"><a class="permalink" href="#Standard_description">Standard
+  description</a></h2>
+<p class="Pp">(From POSIX.1) The <b>vfork</b>() function has the same effect as
+    <b>fork</b>(2), except that the behavior is undefined if the process created
+    by <b>vfork</b>() either modifies any data other than a variable of type
+    <i>pid_t</i> used to store the return value from <b>vfork</b>(), or returns
+    from the function in which <b>vfork</b>() was called, or calls any other
+    function before successfully calling <b>_exit</b>(2) or one of the
+    <b>exec</b>(3) family of functions.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Linux_description"><a class="permalink" href="#Linux_description">Linux
+  description</a></h2>
+<p class="Pp"><b>vfork</b>(), just like <b>fork</b>(2), creates a child process
+    of the calling process. For details and return value and errors, see
+    <b>fork</b>(2).</p>
+<p class="Pp"><b>vfork</b>() is a special case of <b>clone</b>(2). It is used to
+    create new processes without copying the page tables of the parent process.
+    It may be useful in performance-sensitive applications where a child is
+    created which then immediately issues an <b>execve</b>(2).</p>
+<p class="Pp"><b>vfork</b>() differs from <b>fork</b>(2) in that the calling
+    thread is suspended until the child terminates (either normally, by calling
+    <b>_exit</b>(2), or abnormally, after delivery of a fatal signal), or it
+    makes a call to <b>execve</b>(2). Until that point, the child shares all
+    memory with its parent, including the stack. The child must not return from
+    the current function or call <b>exit</b>(3) (which would have the effect of
+    calling exit handlers established by the parent process and flushing the
+    parent's <b>stdio</b>(3) buffers), but may call <b>_exit</b>(2).</p>
+<p class="Pp">As with <b>fork</b>(2), the child process created by
+    <b>vfork</b>() inherits copies of various of the caller's process attributes
+    (e.g., file descriptors, signal dispositions, and current working
+    directory); the <b>vfork</b>() call differs only in the treatment of the
+    virtual address space, as described above.</p>
+<p class="Pp">Signals sent to the parent arrive after the child releases the
+    parent's memory (i.e., after the child terminates or calls
+    <b>execve</b>(2)).</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Historic_description"><a class="permalink" href="#Historic_description">Historic
+  description</a></h2>
+<p class="Pp">Under Linux, <b>fork</b>(2) is implemented using copy-on-write
+    pages, so the only penalty incurred by <b>fork</b>(2) is the time and memory
+    required to duplicate the parent's page tables, and to create a unique task
+    structure for the child. However, in the bad old days a <b>fork</b>(2) would
+    require making a complete copy of the caller's data space, often needlessly,
+    since usually immediately afterward an <b>exec</b>(3) is done. Thus, for
+    greater efficiency, BSD introduced the <b>vfork</b>() system call, which did
+    not fully copy the address space of the parent process, but borrowed the
+    parent's memory and thread of control until a call to <b>execve</b>(2) or an
+    exit occurred. The parent process was suspended while the child was using
+    its resources. The use of <b>vfork</b>() was tricky: for example, not
+    modifying data in the parent process depended on knowing which variables
+    were held in a register.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">4.3BSD; POSIX.1-2001 (but marked OBSOLETE). POSIX.1-2008 removes
+    the specification of <b>vfork</b>().</p>
+<p class="Pp">The requirements put on <b>vfork</b>() by the standards are weaker
+    than those put on <b>fork</b>(2), so an implementation where the two are
+    synonymous is compliant. In particular, the programmer cannot rely on the
+    parent remaining blocked until the child either terminates or calls
+    <b>execve</b>(2), and cannot rely on any specific behavior with respect to
+    shared memory.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Some consider the semantics of <b>vfork</b>() to be an
+    architectural blemish, and the 4.2BSD man page stated: "This system
+    call will be eliminated when proper system sharing mechanisms are
+    implemented. Users should not depend on the memory sharing semantics of
+    <b>vfork</b>() as it will, in that case, be made synonymous to
+    <b>fork</b>(2)." However, even though modern memory management hardware
+    has decreased the performance difference between <b>fork</b>(2) and
+    <b>vfork</b>(), there are various reasons why Linux and other systems have
+    retained <b>vfork</b>():</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Some performance-critical applications require the small performance
+      advantage conferred by <b>vfork</b>().</dd>
+  <dt>•</dt>
+  <dd><b>vfork</b>() can be implemented on systems that lack a memory-management
+      unit (MMU), but <b>fork</b>(2) can't be implemented on such systems.
+      (POSIX.1-2008 removed <b>vfork</b>() from the standard; the POSIX
+      rationale for the <b>posix_spawn</b>(3) function notes that that function,
+      which provides functionality equivalent to <b>fork</b>(2)+<b>exec</b>(3),
+      is designed to be implementable on systems that lack an MMU.)</dd>
+  <dt>•</dt>
+  <dd>On systems where memory is constrained, <b>vfork</b>() avoids the need to
+      temporarily commit memory (see the description of
+      <i>/proc/sys/vm/overcommit_memory</i> in <b>proc</b>(5)) in order to
+      execute a new program. (This can be especially beneficial where a large
+      parent process wishes to execute a small helper program in a child
+      process.) By contrast, using <b>fork</b>(2) in this scenario requires
+      either committing an amount of memory equal to the size of the parent
+      process (if strict overcommitting is in force) or overcommitting memory
+      with the risk that a process is terminated by the out-of-memory (OOM)
+      killer.</dd>
+</dl>
+<section class="Ss">
+<h2 class="Ss" id="Caveats"><a class="permalink" href="#Caveats">Caveats</a></h2>
+<p class="Pp">The child process should take care not to modify the memory in
+    unintended ways, since such changes will be seen by the parent process once
+    the child terminates or executes another program. In this regard, signal
+    handlers can be especially problematic: if a signal handler that is invoked
+    in the child of <b>vfork</b>() changes memory, those changes may result in
+    an inconsistent process state from the perspective of the parent process
+    (e.g., memory changes would be visible in the parent, but changes to the
+    state of open file descriptors would not be visible).</p>
+<p class="Pp">When <b>vfork</b>() is called in a multithreaded process, only the
+    calling thread is suspended until the child terminates or executes a new
+    program. This means that the child is sharing an address space with other
+    running code. This can be dangerous if another thread in the parent process
+    changes credentials (using <b>setuid</b>(2) or similar), since there are now
+    two processes with different privilege levels running in the same address
+    space. As an example of the dangers, suppose that a multithreaded program
+    running as root creates a child using <b>vfork</b>(). After the
+    <b>vfork</b>(), a thread in the parent process drops the process to an
+    unprivileged user in order to run some untrusted code (e.g., perhaps via
+    plug-in opened with <b>dlopen</b>(3)). In this case, attacks are possible
+    where the parent process uses <b>mmap</b>(2) to map in code that will be
+    executed by the privileged child process.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Linux_notes"><a class="permalink" href="#Linux_notes">Linux
+  notes</a></h2>
+<p class="Pp">Fork handlers established using <b>pthread_atfork</b>(3) are not
+    called when a multithreaded program employing the NPTL threading library
+    calls <b>vfork</b>(). Fork handlers are called in this case in a program
+    using the LinuxThreads threading library. (See <b>pthreads</b>(7) for a
+    description of Linux threading libraries.)</p>
+<p class="Pp">A call to <b>vfork</b>() is equivalent to calling <b>clone</b>(2)
+    with <i>flags</i> specified as:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre><br>
+ CLONE_VM | CLONE_VFORK | SIGCHLD
+</pre>
+<br>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="History"><a class="permalink" href="#History">History</a></h2>
+<p class="Pp">The <b>vfork</b>() system call appeared in 3.0BSD. In 4.4BSD it
+    was made synonymous to <b>fork</b>(2) but NetBSD introduced it again; see
+    <a class="Lk" href="http://www.netbsd.org/Documentation/kernel/vfork.html">http://www.netbsd.org/Documentation/kernel/vfork.html</a>.
+    In Linux, it has been equivalent to <b>fork</b>(2) until Linux 2.2.0-pre6 or
+    so. Since Linux 2.2.0-pre9 (on i386, somewhat later on other architectures)
+    it is an independent system call. Support was added in glibc 2.0.112.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">Details of the signal handling are obscure and differ between
+    systems. The BSD man page states: "To avoid a possible deadlock
+    situation, processes that are children in the middle of a <b>vfork</b>() are
+    never sent <b>SIGTTOU</b> or <b>SIGTTIN</b> signals; rather, output or
+    <i>ioctl</i>s are allowed and input attempts result in an end-of-file
+    indication."</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>clone</b>(2), <b>execve</b>(2), <b>_exit</b>(2),
+    <b>fork</b>(2), <b>unshare</b>(2), <b>wait</b>(2)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

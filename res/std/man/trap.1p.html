@@ -1,0 +1,317 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/2a2affdd1aca5a178beae7db1ad4013d4cb054f5">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>TRAP(1P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">TRAP(1P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">TRAP(1P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">trap — trap signals</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>trap <i>n </i><b>[</b><i>condition</i>...<b>]</b>
+trap <b>[</b><i>action condition</i>...<b>]</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">If the first operand is an unsigned decimal integer, the shell
+    shall treat all operands as conditions, and shall reset each condition to
+    the default value. Otherwise, if there are operands, the first is treated as
+    an action and the remaining as conditions.</p>
+<p class="Pp">If <i>action</i> is <b>'-'</b>, the shell shall reset each
+    <i>condition</i> to the default value. If <i>action</i> is null
+    (<b>""</b>), the shell shall ignore each specified
+    <i>condition</i> if it arises. Otherwise, the argument <i>action</i> shall
+    be read and executed by the shell when one of the corresponding conditions
+    arises. The action of <i>trap</i> shall override a previous action (either
+    default action or one explicitly set). The value of <b>"$?"</b>
+    after the <i>trap</i> action completes shall be the value it had before
+    <i>trap</i> was invoked.</p>
+<p class="Pp">The condition can be EXIT, 0 (equivalent to EXIT), or a signal
+    specified using a symbolic name, without the SIG prefix, as listed in the
+    tables of signal names in the <i>&lt;signal.h&gt;</i> header defined in the
+    Base Definitions volume of POSIX.1‐2017, <i>Chapter 13</i>,
+    <i>Headers</i>; for example, HUP, INT, QUIT, TERM. Implementations may
+    permit names with the SIG prefix or ignore case in signal names as an
+    extension. Setting a trap for SIGKILL or SIGSTOP produces undefined
+  results.</p>
+<p class="Pp">The environment in which the shell executes a <i>trap</i> on EXIT
+    shall be identical to the environment immediately after the last command
+    executed before the <i>trap</i> on EXIT was taken.</p>
+<p class="Pp">Each time <i>trap</i> is invoked, the <i>action</i> argument shall
+    be processed in a manner equivalent to:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>eval <i>action</i></pre>
+</div>
+<p class="Pp">Signals that were ignored on entry to a non-interactive shell
+    cannot be trapped or reset, although no error need be reported when
+    attempting to do so. An interactive shell may reset or catch signals ignored
+    on entry. Traps shall remain in place for a given shell until explicitly
+    changed with another <i>trap</i> command.</p>
+<p class="Pp">When a subshell is entered, traps that are not being ignored shall
+    be set to the default actions, except in the case of a command substitution
+    containing only a single <i>trap</i> command, when the traps need not be
+    altered. Implementations may check for this case using only lexical
+    analysis; for example, if <i>`trap`</i> and <i>$( trap -- )</i> do not alter
+    the traps in the subshell, cases such as assigning <i>var=trap</i> and then
+    using <i>$($var)</i> may still alter them. This does not imply that the
+    <i>trap</i> command cannot be used within the subshell to set new traps.</p>
+<p class="Pp">The <i>trap</i> command with no operands shall write to standard
+    output a list of commands associated with each condition. If the command is
+    executed in a subshell, the implementation does not perform the optional
+    check described above for a command substitution containing only a single
+    <i>trap</i> command, and no <i>trap</i> commands with operands have been
+    executed since entry to the subshell, the list shall contain the commands
+    that were associated with each condition immediately before the subshell
+    environment was entered. Otherwise, the list shall contain the commands
+    currently associated with each condition. The format shall be:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>"trap -- %s %s ...\n", &lt;<i>action</i>&gt;, &lt;<i>condition</i>&gt; ...</pre>
+</div>
+<p class="Pp">The shell shall format the output, including the proper use of
+    quoting, so that it is suitable for reinput to the shell as commands that
+    achieve the same trapping results. For example:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>save_traps=$(trap)
+...
+eval "$save_traps"</pre>
+</div>
+<p class="Pp">XSI-conformant systems also allow numeric signal numbers for the
+    conditions corresponding to the following signal names:</p>
+<dl class="Bl-tag">
+  <dt>1</dt>
+  <dd>SIGHUP</dd>
+  <dt>2</dt>
+  <dd>SIGINT</dd>
+  <dt>3</dt>
+  <dd>SIGQUIT</dd>
+  <dt>6</dt>
+  <dd>SIGABRT</dd>
+  <dt>9</dt>
+  <dd>SIGKILL</dd>
+  <dt>14</dt>
+  <dd>SIGALRM</dd>
+  <dt>15</dt>
+  <dd>SIGTERM</dd>
+</dl>
+<p class="Pp">The <i>trap</i> special built-in shall conform to the Base
+    Definitions volume of POSIX.1‐2017, <i>Section 12.2</i>, <i>Utility
+    Syntax Guidelines</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OPTIONS"><a class="permalink" href="#OPTIONS">OPTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OPERANDS"><a class="permalink" href="#OPERANDS">OPERANDS</a></h1>
+<p class="Pp">See the DESCRIPTION.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDIN"><a class="permalink" href="#STDIN">STDIN</a></h1>
+<p class="Pp">Not used.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="INPUT_FILES"><a class="permalink" href="#INPUT_FILES">INPUT
+  FILES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ENVIRONMENT_VARIABLES"><a class="permalink" href="#ENVIRONMENT_VARIABLES">ENVIRONMENT
+  VARIABLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ASYNCHRONOUS_EVENTS"><a class="permalink" href="#ASYNCHRONOUS_EVENTS">ASYNCHRONOUS
+  EVENTS</a></h1>
+<p class="Pp">Default.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDOUT"><a class="permalink" href="#STDOUT">STDOUT</a></h1>
+<p class="Pp">See the DESCRIPTION.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDERR"><a class="permalink" href="#STDERR">STDERR</a></h1>
+<p class="Pp">The standard error shall be used only for diagnostic messages.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OUTPUT_FILES"><a class="permalink" href="#OUTPUT_FILES">OUTPUT
+  FILES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXTENDED_DESCRIPTION"><a class="permalink" href="#EXTENDED_DESCRIPTION">EXTENDED
+  DESCRIPTION</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXIT_STATUS"><a class="permalink" href="#EXIT_STATUS">EXIT
+  STATUS</a></h1>
+<p class="Pp">If the trap name or number is invalid, a non-zero exit status
+    shall be returned; otherwise, zero shall be returned. For both interactive
+    and non-interactive shells, invalid signal names or numbers shall not be
+    considered a syntax error and do not cause the shell to abort.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="CONSEQUENCES_OF_ERRORS"><a class="permalink" href="#CONSEQUENCES_OF_ERRORS">CONSEQUENCES
+  OF ERRORS</a></h1>
+<p class="Pp">Default.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">Write out a list of all traps and actions:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>trap</pre>
+</div>
+<p class="Pp">Set a trap so the <i>logout</i> utility in the directory referred
+    to by the <i>HOME</i> environment variable executes when the shell
+    terminates:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>trap '"$HOME"/logout' EXIT</pre>
+</div>
+<p class="Pp">or:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>trap '"$HOME"/logout' 0</pre>
+</div>
+<p class="Pp">Unset traps on INT, QUIT, TERM, and EXIT:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>trap - INT QUIT TERM EXIT</pre>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">Implementations may permit lowercase signal names as an extension.
+    Implementations may also accept the names with the SIG prefix; no known
+    historical shell does so. The <i>trap</i> and <i>kill</i> utilities in this
+    volume of POSIX.1‐2017 are now consistent in their omission of the
+    SIG prefix for signal names. Some <i>kill</i> implementations do not allow
+    the prefix, and <i>kill</i> <b>-l</b> lists the signals without
+  prefixes.</p>
+<p class="Pp">Trapping SIGKILL or SIGSTOP is syntactically accepted by some
+    historical implementations, but it has no effect. Portable POSIX
+    applications cannot attempt to trap these signals.</p>
+<p class="Pp">The output format is not historical practice. Since the output of
+    historical <i>trap</i> commands is not portable (because numeric signal
+    values are not portable) and had to change to become so, an opportunity was
+    taken to format the output in a way that a shell script could use to save
+    and then later reuse a trap if it wanted.</p>
+<p class="Pp">The KornShell uses an <b>ERR</b> trap that is triggered whenever
+    <i>set</i> <b>-e</b> would cause an exit. This is allowable as an extension,
+    but was not mandated, as other shells have not used it.</p>
+<p class="Pp">The text about the environment for the EXIT trap invalidates the
+    behavior of some historical versions of interactive shells which, for
+    example, close the standard input before executing a trap on 0. For example,
+    in some historical interactive shell sessions the following trap on 0 would
+    always print <b>"--"</b>:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>trap 'read foo; echo "-$foo-"' 0</pre>
+</div>
+<p class="Pp">The command:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>trap 'eval " $cmd"' 0</pre>
+</div>
+<p class="Pp">causes the contents of the shell variable <i>cmd</i> to be
+    executed as a command when the shell exits. Using:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>trap '$cmd' 0</pre>
+</div>
+<p class="Pp">does not work correctly if <i>cmd</i> contains any special
+    characters such as quoting or redirections. Using:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>trap " $cmd" 0</pre>
+</div>
+<p class="Pp">also works (the leading &lt;space&gt; character protects against
+    unlikely cases where <i>cmd</i> is a decimal integer or begins with
+    <b>'-'</b>), but it expands the <i>cmd</i> variable when the <i>trap</i>
+    command is executed, not when the exit action is executed.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i>Section 2.14</i>, <i>Special Built-In Utilities</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Section
+    12.2</i>, <i>Utility Syntax Guidelines</i>,
+  <i><b>&lt;signal.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

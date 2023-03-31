@@ -1,0 +1,613 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/35486d15fb92142151106fe937e7c29e3f95d0d8">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>posix_spawn(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">posix_spawn(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">posix_spawn(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">posix_spawn, posix_spawnp - spawn a process</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;spawn.h&gt;</b></pre>
+<pre><b>int posix_spawn(pid_t *restrict </b><i>pid</i><b>, const char *restrict </b><i>path</i><b>,</b>
+<b>                const posix_spawn_file_actions_t *restrict </b><i>file_actions</i><b>,</b>
+<b>                const posix_spawnattr_t *restrict </b><i>attrp</i><b>,</b>
+<b>                char *const </b><i>argv</i><b>[restrict],</b>
+<b>                char *const </b><i>envp</i><b>[restrict]);</b>
+<b>int posix_spawnp(pid_t *restrict </b><i>pid</i><b>, const char *restrict </b><i>file</i><b>,</b>
+<b>                const posix_spawn_file_actions_t *restrict </b><i>file_actions</i><b>,</b>
+<b>                const posix_spawnattr_t *restrict </b><i>attrp</i><b>,</b>
+<b>                char *const </b><i>argv</i><b>[restrict],</b>
+<b>                char *const </b><i>envp</i><b>[restrict]);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>posix_spawn</b>() and <b>posix_spawnp</b>() functions are
+    used to create a new child process that executes a specified file. These
+    functions were specified by POSIX to provide a standardized method of
+    creating new processes on machines that lack the capability to support the
+    <b>fork</b>(2) system call. These machines are generally small, embedded
+    systems lacking MMU support.</p>
+<p class="Pp">The <b>posix_spawn</b>() and <b>posix_spawnp</b>() functions
+    provide the functionality of a combined <b>fork</b>(2) and <b>exec</b>(3),
+    with some optional housekeeping steps in the child process before the
+    <b>exec</b>(3). These functions are not meant to replace the <b>fork</b>(2)
+    and <b>execve</b>(2) system calls. In fact, they provide only a subset of
+    the functionality that can be achieved by using the system calls.</p>
+<p class="Pp">The only difference between <b>posix_spawn</b>() and
+    <b>posix_spawnp</b>() is the manner in which they specify the file to be
+    executed by the child process. With <b>posix_spawn</b>(), the executable
+    file is specified as a pathname (which can be absolute or relative). With
+    <b>posix_spawnp</b>(), the executable file is specified as a simple
+    filename; the system searches for this file in the list of directories
+    specified by <b>PATH</b> (in the same way as for <b>execvp</b>(3)). For the
+    remainder of this page, the discussion is phrased in terms of
+    <b>posix_spawn</b>(), with the understanding that <b>posix_spawnp</b>()
+    differs only on the point just described.</p>
+<p class="Pp">The remaining arguments to these two functions are as follows:</p>
+<dl class="Bl-tag">
+  <dt id="pid"><a class="permalink" href="#pid"><i>pid</i></a></dt>
+  <dd>points to a buffer that is used to return the process ID of the new child
+      process.</dd>
+  <dt id="file_actions"><a class="permalink" href="#file_actions"><i>file_actions</i></a></dt>
+  <dd>points to a <i>spawn file actions object</i> that specifies file-related
+      actions to be performed in the child between the <b>fork</b>(2) and
+      <b>exec</b>(3) steps. This object is initialized and populated before the
+      <b>posix_spawn</b>() call using <b>posix_spawn_file_actions_init</b>(3)
+      and the <b>posix_spawn_file_actions_*</b>() functions.</dd>
+  <dt id="attrp"><a class="permalink" href="#attrp"><i>attrp</i></a></dt>
+  <dd>points to an <i>attributes objects</i> that specifies various attributes
+      of the created child process. This object is initialized and populated
+      before the <b>posix_spawn</b>() call using <b>posix_spawnattr_init</b>(3)
+      and the <b>posix_spawnattr_*</b>() functions.</dd>
+  <dt id="argv"><a class="permalink" href="#argv"><i>argv</i></a></dt>
+  <dd></dd>
+  <dt id="envp"><a class="permalink" href="#envp"><i>envp</i></a></dt>
+  <dd>specify the argument list and environment for the program that is executed
+      in the child process, as for <b>execve</b>(2).</dd>
+</dl>
+<p class="Pp">Below, the functions are described in terms of a three-step
+    process: the <b>fork</b>() step, the pre-<b>exec</b>() step (executed in the
+    child), and the <b>exec</b>() step (executed in the child).</p>
+<section class="Ss">
+<h2 class="Ss" id="fork()_step"><a class="permalink" href="#fork()_step">fork()
+  step</a></h2>
+<p class="Pp">Since glibc 2.24, the <b>posix_spawn</b>() function commences by
+    calling <b>clone</b>(2) with <b>CLONE_VM</b> and <b>CLONE_VFORK</b> flags.
+    Older implementations use <b>fork</b>(2), or possibly <b>vfork</b>(2) (see
+    below).</p>
+<p class="Pp">The PID of the new child process is placed in <i>*pid</i>. The
+    <b>posix_spawn</b>() function then returns control to the parent
+  process.</p>
+<p class="Pp">Subsequently, the parent can use one of the system calls described
+    in <b>wait</b>(2) to check the status of the child process. If the child
+    fails in any of the housekeeping steps described below, or fails to execute
+    the desired file, it exits with a status of 127.</p>
+<p class="Pp">Before glibc 2.24, the child process is created using
+    <b>vfork</b>(2) instead of <b>fork</b>(2) when either of the following is
+    true:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>the <i>spawn-flags</i> element of the attributes object pointed to by
+      <i>attrp</i> contains the GNU-specific flag <b>POSIX_SPAWN_USEVFORK</b>;
+      or</dd>
+  <dt>•</dt>
+  <dd><i>file_actions</i> is NULL and the <i>spawn-flags</i> element of the
+      attributes object pointed to by <i>attrp</i> does <i>not</i> contain
+      <b>POSIX_SPAWN_SETSIGMASK</b>, <b>POSIX_SPAWN_SETSIGDEF</b>,
+      <b>POSIX_SPAWN_SETSCHEDPARAM</b>, <b>POSIX_SPAWN_SETSCHEDULER</b>,
+      <b>POSIX_SPAWN_SETPGROUP</b>, or <b>POSIX_SPAWN_RESETIDS</b>.</dd>
+</dl>
+<p class="Pp">In other words, <b>vfork</b>(2) is used if the caller requests it,
+    or if there is no cleanup expected in the child before it <b>exec</b>(3)s
+    the requested file.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="pre-exec()_step:_housekeeping"><a class="permalink" href="#pre-exec()_step:_housekeeping">pre-exec()
+  step: housekeeping</a></h2>
+<p class="Pp">In between the <b>fork()</b> and the <b>exec()</b> steps, a child
+    process may need to perform a set of housekeeping actions. The
+    <b>posix_spawn</b>() and <b>posix_spawnp</b>() functions support a small,
+    well-defined set of system tasks that the child process can accomplish
+    before it executes the executable file. These operations are controlled by
+    the attributes object pointed to by <i>attrp</i> and the file actions object
+    pointed to by <i>file_actions</i>. In the child, processing is done in the
+    following sequence:</p>
+<dl class="Bl-tag">
+  <dt>(1)</dt>
+  <dd>Process attribute actions: signal mask, signal default handlers,
+      scheduling algorithm and parameters, process group, and effective user and
+      group IDs are changed as specified by the attributes object pointed to by
+      <i>attrp</i>.</dd>
+  <dt>(2)</dt>
+  <dd>File actions, as specified in the <i>file_actions</i> argument, are
+      performed in the order that they were specified using calls to the
+      <b>posix_spawn_file_actions_add*</b>() functions.</dd>
+  <dt>(3)</dt>
+  <dd>File descriptors with the <b>FD_CLOEXEC</b> flag set are closed.</dd>
+</dl>
+<p class="Pp">All process attributes in the child, other than those affected by
+    attributes specified in the object pointed to by <i>attrp</i> and the file
+    actions in the object pointed to by <i>file_actions</i>, will be affected as
+    though the child was created with <b>fork</b>(2) and it executed the program
+    with <b>execve</b>(2).</p>
+<p class="Pp">The process attributes actions are defined by the attributes
+    object pointed to by <i>attrp</i>. The <i>spawn-flags</i> attribute (set
+    using <b>posix_spawnattr_setflags</b>(3)) controls the general actions that
+    occur, and other attributes in the object specify values to be used during
+    those actions.</p>
+<p class="Pp">The effects of the flags that may be specified in
+    <i>spawn-flags</i> are as follows:</p>
+<dl class="Bl-tag">
+  <dt id="POSIX_SPAWN_SETSIGMASK"><a class="permalink" href="#POSIX_SPAWN_SETSIGMASK"><b>POSIX_SPAWN_SETSIGMASK</b></a></dt>
+  <dd>Set the signal mask to the signal set specified in the
+      <i>spawn-sigmask</i> attribute of the object pointed to by <i>attrp</i>.
+      If the <b>POSIX_SPAWN_SETSIGMASK</b> flag is not set, then the child
+      inherits the parent's signal mask.</dd>
+  <dt id="POSIX_SPAWN_SETSIGDEF"><a class="permalink" href="#POSIX_SPAWN_SETSIGDEF"><b>POSIX_SPAWN_SETSIGDEF</b></a></dt>
+  <dd>Reset the disposition of all signals in the set specified in the
+      <i>spawn-sigdefault</i> attribute of the object pointed to by <i>attrp</i>
+      to the default. For the treatment of the dispositions of signals not
+      specified in the <i>spawn-sigdefault</i> attribute, or the treatment when
+      <b>POSIX_SPAWN_SETSIGDEF</b> is not specified, see <b>execve</b>(2).</dd>
+  <dt id="POSIX_SPAWN_SETSCHEDPARAM"><a class="permalink" href="#POSIX_SPAWN_SETSCHEDPARAM"><b>POSIX_SPAWN_SETSCHEDPARAM</b></a></dt>
+  <dd>If this flag is set, and the <b>POSIX_SPAWN_SETSCHEDULER</b> flag is not
+      set, then set the scheduling parameters to the parameters specified in the
+      <i>spawn-schedparam</i> attribute of the object pointed to by
+      <i>attrp</i>.</dd>
+  <dt id="POSIX_SPAWN_SETSCHEDULER"><a class="permalink" href="#POSIX_SPAWN_SETSCHEDULER"><b>POSIX_SPAWN_SETSCHEDULER</b></a></dt>
+  <dd>Set the scheduling policy algorithm and parameters of the child, as
+      follows:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>The scheduling policy is set to the value specified in the
+      <i>spawn-schedpolicy</i> attribute of the object pointed to by
+      <i>attrp</i>.</dd>
+  <dt>•</dt>
+  <dd>The scheduling parameters are set to the value specified in the
+      <i>spawn-schedparam</i> attribute of the object pointed to by <i>attrp</i>
+      (but see BUGS).</dd>
+</dl>
+<p class="Pp">If the <b>POSIX_SPAWN_SETSCHEDPARAM</b> and
+    <b>POSIX_SPAWN_SETSCHEDPOLICY</b> flags are not specified, the child
+    inherits the corresponding scheduling attributes from the parent.</p>
+</div>
+<dl class="Bl-tag">
+  <dt id="POSIX_SPAWN_RESETIDS"><a class="permalink" href="#POSIX_SPAWN_RESETIDS"><b>POSIX_SPAWN_RESETIDS</b></a></dt>
+  <dd>If this flag is set, reset the effective UID and GID to the real UID and
+      GID of the parent process. If this flag is not set, then the child retains
+      the effective UID and GID of the parent. In either case, if the
+      set-user-ID and set-group-ID permission bits are enabled on the executable
+      file, their effect will override the setting of the effective UID and GID
+      (se <b>execve</b>(2)).</dd>
+  <dt id="POSIX_SPAWN_SETPGROUP"><a class="permalink" href="#POSIX_SPAWN_SETPGROUP"><b>POSIX_SPAWN_SETPGROUP</b></a></dt>
+  <dd>Set the process group to the value specified in the <i>spawn-pgroup</i>
+      attribute of the object pointed to by <i>attrp</i>. If the
+      <i>spawn-pgroup</i> attribute has the value 0, the child's process group
+      ID is made the same as its process ID. If the <b>POSIX_SPAWN_SETPGROUP</b>
+      flag is not set, the child inherits the parent's process group ID.</dd>
+  <dt id="POSIX_SPAWN_USEVFORK"><a class="permalink" href="#POSIX_SPAWN_USEVFORK"><b>POSIX_SPAWN_USEVFORK</b></a></dt>
+  <dd>Since glibc 2.24, this flag has no effect. On older implementations,
+      setting this flag forces the <b>fork()</b> step to use <b>vfork</b>(2)
+      instead of <b>fork</b>(2). The <b>_GNU_SOURCE</b> feature test macro must
+      be defined to obtain the definition of this constant.</dd>
+  <dt id="POSIX_SPAWN_SETSID"><a class="permalink" href="#POSIX_SPAWN_SETSID"><b>POSIX_SPAWN_SETSID</b>
+    (since glibc 2.26)</a></dt>
+  <dd>If this flag is set, the child process shall create a new session and
+      become the session leader. The child process shall also become the process
+      group leader of the new process group in the session (see
+      <b>setsid</b>(2)). The <b>_GNU_SOURCE</b> feature test macro must be
+      defined to obtain the definition of this constant.</dd>
+</dl>
+<p class="Pp">If <i>attrp</i> is NULL, then the default behaviors described
+    above for each flag apply.</p>
+<p class="Pp">The <i>file_actions</i> argument specifies a sequence of file
+    operations that are performed in the child process after the general
+    processing described above, and before it performs the <b>exec</b>(3). If
+    <i>file_actions</i> is NULL, then no special action is taken, and standard
+    <b>exec</b>(3) semantics apply—file descriptors open before the exec
+    remain open in the new process, except those for which the <b>FD_CLOEXEC</b>
+    flag has been set. File locks remain in place.</p>
+<p class="Pp">If <i>file_actions</i> is not NULL, then it contains an ordered
+    set of requests to <b>open</b>(2), <b>close</b>(2), and <b>dup2</b>(2)
+    files. These requests are added to the <i>file_actions</i> by
+    <b>posix_spawn_file_actions_addopen</b>(3),
+    <b>posix_spawn_file_actions_addclose</b>(3), and
+    <b>posix_spawn_file_actions_adddup2</b>(3). The requested operations are
+    performed in the order they were added to <i>file_actions</i>.</p>
+<p class="Pp">If any of the housekeeping actions fails (due to bogus values
+    being passed or other reasons why signal handling, process scheduling,
+    process group ID functions, and file descriptor operations might fail), the
+    child process exits with exit value 127.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="exec()_step"><a class="permalink" href="#exec()_step">exec()
+  step</a></h2>
+<p class="Pp">Once the child has successfully forked and performed all requested
+    pre-exec steps, the child runs the requested executable.</p>
+<p class="Pp">The child process takes its environment from the <i>envp</i>
+    argument, which is interpreted as if it had been passed to <b>execve</b>(2).
+    The arguments to the created process come from the <i>argv</i> argument,
+    which is processed as for <b>execve</b>(2).</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <b>posix_spawn</b>() and
+    <b>posix_spawnp</b>() place the PID of the child process in <i>pid</i>, and
+    return 0. If there is an error during the <b>fork()</b> step, then no child
+    is created, the contents of <i>*pid</i> are unspecified, and these functions
+    return an error number as described below.</p>
+<p class="Pp">Even when these functions return a success status, the child
+    process may still fail for a plethora of reasons related to its
+    pre-<b>exec</b>() initialization. In addition, the <b>exec</b>(3) may fail.
+    In all of these cases, the child process will exit with the exit value of
+    127.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <b>posix_spawn</b>() and <b>posix_spawnp</b>() functions fail
+    only in the case where the underlying <b>fork</b>(2), <b>vfork</b>(2), or
+    <b>clone</b>(2) call fails; in these cases, these functions return an error
+    number, which will be one of the errors described for <b>fork</b>(2),
+    <b>vfork</b>(2), or <b>clone</b>(2).</p>
+<p class="Pp">In addition, these functions fail if:</p>
+<dl class="Bl-tag">
+  <dt id="ENOSYS"><a class="permalink" href="#ENOSYS"><b>ENOSYS</b></a></dt>
+  <dd>Function not supported on this system.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>posix_spawn</b>() and <b>posix_spawnp</b>() functions are
+    available since glibc 2.2.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The housekeeping activities in the child are controlled by the
+    objects pointed to by <i>attrp</i> (for non-file actions) and
+    <i>file_actions</i> In POSIX parlance, the <i>posix_spawnattr_t</i> and
+    <i>posix_spawn_file_actions_t</i> data types are referred to as objects, and
+    their elements are not specified by name. Portable programs should
+    initialize these objects using only the POSIX-specified functions. (In other
+    words, although these objects may be implemented as structures containing
+    fields, portable programs must avoid dependence on such implementation
+    details.)</p>
+<p class="Pp">According to POSIX, it is unspecified whether fork handlers
+    established with <b>pthread_atfork</b>(3) are called when
+    <b>posix_spawn</b>() is invoked. Since glibc 2.24, the fork handlers are not
+    executed in any case. On older implementations, fork handlers are called
+    only if the child is created using <b>fork</b>(2).</p>
+<p class="Pp">There is no "posix_fspawn" function (i.e., a function
+    that is to <b>posix_spawn</b>() as <b>fexecve</b>(3) is to
+    <b>execve</b>(2)). However, this functionality can be obtained by specifying
+    the <i>path</i> argument as one of the files in the caller's
+    <i>/proc/self/fd</i> directory.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">POSIX.1 says that when <b>POSIX_SPAWN_SETSCHEDULER</b> is
+    specified in <i>spawn-flags</i>, then the <b>POSIX_SPAWN_SETSCHEDPARAM</b>
+    (if present) is ignored. However, before glibc 2.14, calls to
+    <b>posix_spawn</b>() failed with an error if <b>POSIX_SPAWN_SETSCHEDULER</b>
+    was specified without also specifying <b>POSIX_SPAWN_SETSCHEDPARAM</b>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below demonstrates the use of various functions in the
+    POSIX spawn API. The program accepts command-line attributes that can be
+    used to create file actions and attributes objects. The remaining
+    command-line arguments are used as the executable name and command-line
+    arguments of the program that is executed in the child.</p>
+<p class="Pp">In the first run, the <b>date</b>(1) command is executed in the
+    child, and the <b>posix_spawn</b>() call employs no file actions or
+    attributes objects.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>./a.out date</b>
+PID of child: 7634
+Tue Feb  1 19:47:50 CEST 2011
+Child status: exited, status=0
+</pre>
+<br>
+<p class="Pp">In the next run, the <i>-c</i> command-line option is used to
+    create a file actions object that closes standard output in the child.
+    Consequently, <b>date</b>(1) fails when trying to perform output and exits
+    with a status of 1.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>./a.out -c date</b>
+PID of child: 7636
+date: write error: Bad file descriptor
+Child status: exited, status=1
+</pre>
+<br>
+<p class="Pp">In the next run, the <i>-s</i> command-line option is used to
+    create an attributes object that specifies that all (blockable) signals in
+    the child should be blocked. Consequently, trying to kill child with the
+    default signal sent by <b>kill</b>(1) (i.e., <b>SIGTERM</b>) fails, because
+    that signal is blocked. Therefore, to kill the child, <b>SIGKILL</b> is
+    necessary (<b>SIGKILL</b> can't be blocked).</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>./a.out -s sleep 60 &amp;</b>
+[1] 7637
+$ PID of child: 7638
+$ <b>kill 7638</b>
+$ <b>kill -KILL 7638</b>
+$ Child status: killed by signal 9
+[1]+  Done                    ./a.out -s sleep 60
+</pre>
+<br>
+<p class="Pp">When we try to execute a nonexistent command in the child, the
+    <b>exec</b>(3) fails and the child exits with a status of 127.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>./a.out xxxxx</b>
+<b>PID of child: 10190</b>
+<b>Child status: exited, status=127</b>
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#include &lt;errno.h&gt;
+#include &lt;spawn.h&gt;
+#include &lt;stdint.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;wait.h&gt;
+#define errExit(msg)    do { perror(msg); \
+<br>
+                             exit(EXIT_FAILURE); } while (0)
+#define errExitEN(en, msg) \
+<br>
+                        do { errno = en; perror(msg); \
+<br>
+                             exit(EXIT_FAILURE); } while (0)
+char **environ;
+int
+main(int argc, char *argv[])
+{
+<br>
+    pid_t child_pid;
+<br>
+    int s, opt, status;
+<br>
+    sigset_t mask;
+<br>
+    posix_spawnattr_t attr;
+<br>
+    posix_spawnattr_t *attrp;
+<br>
+    posix_spawn_file_actions_t file_actions;
+<br>
+    posix_spawn_file_actions_t *file_actionsp;
+<br>
+    /* Parse command-line options, which can be used to specify an
+<br>
+       attributes object and file actions object for the child. */
+<br>
+    attrp = NULL;
+<br>
+    file_actionsp = NULL;
+<br>
+    while ((opt = getopt(argc, argv, "sc")) != -1) {
+<br>
+        switch (opt) {
+<br>
+        case 'c':       /* -c: close standard output in child */
+<br>
+            /* Create a file actions object and add a "close"
+<br>
+               action to it. */
+<br>
+            s = posix_spawn_file_actions_init(&amp;file_actions);
+<br>
+            if (s != 0)
+<br>
+                errExitEN(s, "posix_spawn_file_actions_init");
+<br>
+            s = posix_spawn_file_actions_addclose(&amp;file_actions,
+<br>
+                                                  STDOUT_FILENO);
+<br>
+            if (s != 0)
+<br>
+                errExitEN(s, "posix_spawn_file_actions_addclose");
+<br>
+            file_actionsp = &amp;file_actions;
+<br>
+            break;
+<br>
+        case 's':       /* -s: block all signals in child */
+<br>
+            /* Create an attributes object and add a "set signal mask"
+<br>
+               action to it. */
+<br>
+            s = posix_spawnattr_init(&amp;attr);
+<br>
+            if (s != 0)
+<br>
+                errExitEN(s, "posix_spawnattr_init");
+<br>
+            s = posix_spawnattr_setflags(&amp;attr, POSIX_SPAWN_SETSIGMASK);
+<br>
+            if (s != 0)
+<br>
+                errExitEN(s, "posix_spawnattr_setflags");
+<br>
+            sigfillset(&amp;mask);
+<br>
+            s = posix_spawnattr_setsigmask(&amp;attr, &amp;mask);
+<br>
+            if (s != 0)
+<br>
+                errExitEN(s, "posix_spawnattr_setsigmask");
+<br>
+            attrp = &amp;attr;
+<br>
+            break;
+<br>
+        }
+<br>
+    }
+<br>
+    /* Spawn the child. The name of the program to execute and the
+<br>
+       command-line arguments are taken from the command-line arguments
+<br>
+       of this program. The environment of the program execed in the
+<br>
+       child is made the same as the parent's environment. */
+<br>
+    s = posix_spawnp(&amp;child_pid, argv[optind], file_actionsp, attrp,
+<br>
+                     &amp;argv[optind], environ);
+<br>
+    if (s != 0)
+<br>
+        errExitEN(s, "posix_spawn");
+<br>
+    /* Destroy any objects that we created earlier. */
+<br>
+    if (attrp != NULL) {
+<br>
+        s = posix_spawnattr_destroy(attrp);
+<br>
+        if (s != 0)
+<br>
+            errExitEN(s, "posix_spawnattr_destroy");
+<br>
+    }
+<br>
+    if (file_actionsp != NULL) {
+<br>
+        s = posix_spawn_file_actions_destroy(file_actionsp);
+<br>
+        if (s != 0)
+<br>
+            errExitEN(s, "posix_spawn_file_actions_destroy");
+<br>
+    }
+<br>
+    printf("PID of child: %jd\n", (intmax_t) child_pid);
+<br>
+    /* Monitor status of the child until it terminates. */
+<br>
+    do {
+<br>
+        s = waitpid(child_pid, &amp;status, WUNTRACED | WCONTINUED);
+<br>
+        if (s == -1)
+<br>
+            errExit("waitpid");
+<br>
+        printf("Child status: ");
+<br>
+        if (WIFEXITED(status)) {
+<br>
+            printf("exited, status=%d\n", WEXITSTATUS(status));
+<br>
+        } else if (WIFSIGNALED(status)) {
+<br>
+            printf("killed by signal %d\n", WTERMSIG(status));
+<br>
+        } else if (WIFSTOPPED(status)) {
+<br>
+            printf("stopped by signal %d\n", WSTOPSIG(status));
+<br>
+        } else if (WIFCONTINUED(status)) {
+<br>
+            printf("continued\n");
+<br>
+        }
+<br>
+    } while (!WIFEXITED(status) &amp;&amp; !WIFSIGNALED(status));
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>close</b>(2), <b>dup2</b>(2), <b>execl</b>(2),
+    <b>execlp</b>(2), <b>fork</b>(2), <b>open</b>(2), <b>sched_setparam</b>(2),
+    <b>sched_setscheduler</b>(2), <b>setpgid</b>(2), <b>setuid</b>(2),
+    <b>sigaction</b>(2), <b>sigprocmask</b>(2),
+    <b>posix_spawn_file_actions_addclose</b>(3),
+    <b>posix_spawn_file_actions_adddup2</b>(3),
+    <b>posix_spawn_file_actions_addopen</b>(3),
+    <b>posix_spawn_file_actions_destroy</b>(3),
+    <b>posix_spawn_file_actions_init</b>(3), <b>posix_spawnattr_destroy</b>(3),
+    <b>posix_spawnattr_getflags</b>(3), <b>posix_spawnattr_getpgroup</b>(3),
+    <b>posix_spawnattr_getschedparam</b>(3),
+    <b>posix_spawnattr_getschedpolicy</b>(3),
+    <b>posix_spawnattr_getsigdefault</b>(3),
+    <b>posix_spawnattr_getsigmask</b>(3), <b>posix_spawnattr_init</b>(3),
+    <b>posix_spawnattr_setflags</b>(3), <b>posix_spawnattr_setpgroup</b>(3),
+    <b>posix_spawnattr_setschedparam</b>(3),
+    <b>posix_spawnattr_setschedpolicy</b>(3),
+    <b>posix_spawnattr_setsigdefault</b>(3),
+    <b>posix_spawnattr_setsigmask</b>(3), <b>pthread_atfork</b>(3),
+    <i>&lt;spawn.h&gt;</i>, Base Definitions volume of POSIX.1-2001,
+    <i>http://www.opengroup.org/unix/online.html</i></p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

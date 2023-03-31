@@ -1,0 +1,274 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/051222251a1f8582dc55082873ff91c114cc7f7d">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>mq_notify(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">mq_notify(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">mq_notify(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">mq_notify - register for notification when a message is
+  available</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Real-time library (<i>librt</i>, <i>-lrt</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;mqueue.h&gt;</b>
+<b>#include &lt;signal.h&gt;           </b>/* Definition of SIGEV_* constants */</pre>
+<pre><b>int mq_notify(mqd_t </b><i>mqdes</i><b>, const struct sigevent *</b><i>sevp</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>mq_notify</b>() allows the calling process to register or
+    unregister for delivery of an asynchronous notification when a new message
+    arrives on the empty message queue referred to by the message queue
+    descriptor <i>mqdes</i>.</p>
+<p class="Pp">The <i>sevp</i> argument is a pointer to a <i>sigevent</i>
+    structure. For the definition and general details of this structure, see
+    <b>sigevent</b>(7).</p>
+<p class="Pp">If <i>sevp</i> is a non-null pointer, then <b>mq_notify</b>()
+    registers the calling process to receive message notification. The
+    <i>sigev_notify</i> field of the <i>sigevent</i> structure to which
+    <i>sevp</i> points specifies how notification is to be performed. This field
+    has one of the following values:</p>
+<dl class="Bl-tag">
+  <dt id="SIGEV_NONE"><a class="permalink" href="#SIGEV_NONE"><b>SIGEV_NONE</b></a></dt>
+  <dd>A "null" notification: the calling process is registered as the
+      target for notification, but when a message arrives, no notification is
+      sent.</dd>
+  <dt id="SIGEV_SIGNAL"><a class="permalink" href="#SIGEV_SIGNAL"><b>SIGEV_SIGNAL</b></a></dt>
+  <dd>Notify the process by sending the signal specified in <i>sigev_signo</i>.
+      See <b>sigevent</b>(7) for general details. The <i>si_code</i> field of
+      the <i>siginfo_t</i> structure will be set to <b>SI_MESGQ</b>. In
+      addition, <i>si_pid</i> will be set to the PID of the process that sent
+      the message, and <i>si_uid</i> will be set to the real user ID of the
+      sending process.</dd>
+  <dt id="SIGEV_THREAD"><a class="permalink" href="#SIGEV_THREAD"><b>SIGEV_THREAD</b></a></dt>
+  <dd>Upon message delivery, invoke <i>sigev_notify_function</i> as if it were
+      the start function of a new thread. See <b>sigevent</b>(7) for
+    details.</dd>
+</dl>
+<p class="Pp">Only one process can be registered to receive notification from a
+    message queue.</p>
+<p class="Pp">If <i>sevp</i> is NULL, and the calling process is currently
+    registered to receive notifications for this message queue, then the
+    registration is removed; another process can then register to receive a
+    message notification for this queue.</p>
+<p class="Pp">Message notification occurs only when a new message arrives and
+    the queue was previously empty. If the queue was not empty at the time
+    <b>mq_notify</b>() was called, then a notification will occur only after the
+    queue is emptied and a new message arrives.</p>
+<p class="Pp">If another process or thread is waiting to read a message from an
+    empty queue using <b>mq_receive</b>(3), then any message notification
+    registration is ignored: the message is delivered to the process or thread
+    calling <b>mq_receive</b>(3), and the message notification registration
+    remains in effect.</p>
+<p class="Pp">Notification occurs once: after a notification is delivered, the
+    notification registration is removed, and another process can register for
+    message notification. If the notified process wishes to receive the next
+    notification, it can use <b>mq_notify</b>() to request a further
+    notification. This should be done before emptying all unread messages from
+    the queue. (Placing the queue in nonblocking mode is useful for emptying the
+    queue of messages without blocking once it is empty.)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success <b>mq_notify</b>() returns 0; on error, -1 is returned,
+    with <i>errno</i> set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The message queue descriptor specified in <i>mqdes</i> is invalid.</dd>
+  <dt id="EBUSY"><a class="permalink" href="#EBUSY"><b>EBUSY</b></a></dt>
+  <dd>Another process has already registered to receive notification for this
+      message queue.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>sevp-&gt;sigev_notify</i> is not one of the permitted values; or
+      <i>sevp-&gt;sigev_notify</i> is <b>SIGEV_SIGNAL</b> and
+      <i>sevp-&gt;sigev_signo</i> is not a valid signal number.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient memory.</dd>
+</dl>
+<p class="Pp">POSIX.1-2008 says that an implementation <i>may</i> generate an
+    <b>EINVAL</b> error if <i>sevp</i> is NULL, and the caller is not currently
+    registered to receive notifications for the queue <i>mqdes</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>mq_notify ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="C_library/kernel_differences"><a class="permalink" href="#C_library/kernel_differences">C
+  library/kernel differences</a></h2>
+<p class="Pp">In the glibc implementation, the <b>mq_notify</b>() library
+    function is implemented on top of the system call of the same name. When
+    <i>sevp</i> is NULL, or specifies a notification mechanism other than
+    <b>SIGEV_THREAD</b>, the library function directly invokes the system call.
+    For <b>SIGEV_THREAD</b>, much of the implementation resides within the
+    library, rather than the kernel. (This is necessarily so, since the thread
+    involved in handling the notification is one that must be managed by the C
+    library POSIX threads implementation.) The implementation involves the use
+    of a raw <b>netlink</b>(7) socket and creates a new thread for each
+    notification that is delivered to the process.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The following program registers a notification request for the
+    message queue named in its command-line argument. Notification is performed
+    by creating a thread. The thread executes a function which reads one message
+    from the queue and then terminates the process.</p>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<pre>#include &lt;mqueue.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;signal.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#define handle_error(msg) \
+<br>
+    do { perror(msg); exit(EXIT_FAILURE); } while (0)
+static void                     /* Thread start function */
+tfunc(union sigval sv)
+{
+<br>
+    struct mq_attr attr;
+<br>
+    ssize_t nr;
+<br>
+    void *buf;
+<br>
+    mqd_t mqdes = *((mqd_t *) sv.sival_ptr);
+<br>
+    /* Determine max. msg size; allocate buffer to receive msg */
+<br>
+    if (mq_getattr(mqdes, &amp;attr) == -1)
+<br>
+        handle_error("mq_getattr");
+<br>
+    buf = malloc(attr.mq_msgsize);
+<br>
+    if (buf == NULL)
+<br>
+        handle_error("malloc");
+<br>
+    nr = mq_receive(mqdes, buf, attr.mq_msgsize, NULL);
+<br>
+    if (nr == -1)
+<br>
+        handle_error("mq_receive");
+<br>
+    printf("Read %zd bytes from MQ\n", nr);
+<br>
+    free(buf);
+<br>
+    exit(EXIT_SUCCESS);         /* Terminate the process */
+}
+int
+main(int argc, char *argv[])
+{
+<br>
+    mqd_t mqdes;
+<br>
+    struct sigevent sev;
+<br>
+    if (argc != 2) {
+<br>
+        fprintf(stderr, "Usage: %s &lt;mq-name&gt;\n", argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    mqdes = mq_open(argv[1], O_RDONLY);
+<br>
+    if (mqdes == (mqd_t) -1)
+<br>
+        handle_error("mq_open");
+<br>
+    sev.sigev_notify = SIGEV_THREAD;
+<br>
+    sev.sigev_notify_function = tfunc;
+<br>
+    sev.sigev_notify_attributes = NULL;
+<br>
+    sev.sigev_value.sival_ptr = &amp;mqdes;   /* Arg. to thread func. */
+<br>
+    if (mq_notify(mqdes, &amp;sev) == -1)
+<br>
+        handle_error("mq_notify");
+<br>
+    pause();    /* Process will be terminated by thread function */
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>mq_close</b>(3), <b>mq_getattr</b>(3), <b>mq_open</b>(3),
+    <b>mq_receive</b>(3), <b>mq_send</b>(3), <b>mq_unlink</b>(3),
+    <b>mq_overview</b>(7), <b>sigevent</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

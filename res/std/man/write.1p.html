@@ -1,0 +1,274 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/7dcaa148b1979f390438dba10e59d1ad2a68b638">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>WRITE(1P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">WRITE(1P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">WRITE(1P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">write — write to another user</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>write <i>user_name </i><b>[</b><i>terminal</i><b>]</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>write</i> utility shall read lines from the standard input
+    and write them to the terminal of the specified user. When first invoked, it
+    shall write the message:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre><b>Message from </b><i>sender-login-id</i> (<i>sending-terminal</i>) <b>[</b><i>date</i><b>]</b>...</pre>
+</div>
+<p class="Pp">to <i>user_name</i>. When it has successfully completed the
+    connection, the sender's terminal shall be alerted twice to indicate that
+    what the sender is typing is being written to the recipient's terminal.</p>
+<p class="Pp">If the recipient wants to reply, this can be accomplished by
+    typing:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>write <i>sender-login-id </i><b>[</b><i>sending-terminal</i><b>]</b></pre>
+</div>
+<p class="Pp">upon receipt of the initial message. Whenever a line of input as
+    delimited by an NL, EOF, or EOL special character (see the Base Definitions
+    volume of POSIX.1‐2017, <i>Chapter 11</i>, <i>General Terminal
+    Interface</i>) is accumulated while in canonical input mode, the accumulated
+    data shall be written on the other user's terminal. Characters shall be
+    processed as follows:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>Typing &lt;alert&gt; shall write the &lt;alert&gt; character to the
+      recipient's terminal.</dd>
+  <dt> *</dt>
+  <dd>Typing the erase and kill characters shall affect the sender's terminal in
+      the manner described by the <b>termios</b> interface in the Base
+      Definitions volume of POSIX.1‐2017, <i>Chapter 11</i>, <i>General
+      Terminal Interface</i>.</dd>
+  <dt> *</dt>
+  <dd>Typing the interrupt or end-of-file characters shall cause <i>write</i> to
+      write an appropriate message (<b>"EOT\n"</b> in the POSIX
+      locale) to the recipient's terminal and exit.</dd>
+  <dt> *</dt>
+  <dd>Typing characters from <i>LC_CTYPE</i> classifications <b>print</b> or
+      <b>space</b> shall cause those characters to be sent to the recipient's
+      terminal.</dd>
+  <dt> *</dt>
+  <dd>When and only when the <i>stty</i> <b>iexten</b> local mode is enabled,
+      the existence and processing of additional special control characters and
+      multi-byte or single-byte functions is implementation-defined.</dd>
+  <dt> *</dt>
+  <dd>Typing other non-printable characters shall cause implementation-defined
+      sequences of printable characters to be written to the recipient's
+      terminal.</dd>
+</dl>
+<p class="Pp">To write to a user who is logged in more than once, the
+    <i>terminal</i> argument can be used to indicate which terminal to write to;
+    otherwise, the recipient's terminal is selected in an implementation-defined
+    manner and an informational message is written to the sender's standard
+    output, indicating which terminal was chosen.</p>
+<p class="Pp">Permission to be a recipient of a <i>write</i> message can be
+    denied or granted by use of the <i>mesg</i> utility. However, a user's
+    privilege may further constrain the domain of accessibility of other users'
+    terminals. The <i>write</i> utility shall fail when the user lacks
+    appropriate privileges to perform the requested action.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OPTIONS"><a class="permalink" href="#OPTIONS">OPTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OPERANDS"><a class="permalink" href="#OPERANDS">OPERANDS</a></h1>
+<p class="Pp">The following operands shall be supported:</p>
+<dl class="Bl-tag">
+  <dt id="user_name"><a class="permalink" href="#user_name"><i>user_name</i></a></dt>
+  <dd>Login name of the person to whom the message shall be written. The
+      application shall ensure that this operand is of the form returned by the
+      <i>who</i> utility.</dd>
+  <dt id="terminal"><a class="permalink" href="#terminal"><i>terminal</i></a></dt>
+  <dd>Terminal identification in the same format provided by the <i>who</i>
+      utility.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDIN"><a class="permalink" href="#STDIN">STDIN</a></h1>
+<p class="Pp">Lines to be copied to the recipient's terminal are read from
+    standard input.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="INPUT_FILES"><a class="permalink" href="#INPUT_FILES">INPUT
+  FILES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ENVIRONMENT_VARIABLES"><a class="permalink" href="#ENVIRONMENT_VARIABLES">ENVIRONMENT
+  VARIABLES</a></h1>
+<p class="Pp">The following environment variables shall affect the execution of
+    <i>write</i>:</p>
+<dl class="Bl-tag">
+  <dt id="LANG"><a class="permalink" href="#LANG"><i>LANG</i></a></dt>
+  <dd>Provide a default value for the internationalization variables that are
+      unset or null. (See the Base Definitions volume of POSIX.1‐2017,
+      <i>Section 8.2</i>, <i>Internationalization Variables</i> for the
+      precedence of internationalization variables used to determine the values
+      of locale categories.)</dd>
+  <dt id="LC_ALL"><a class="permalink" href="#LC_ALL"><i>LC_ALL</i></a></dt>
+  <dd>If set to a non-empty string value, override the values of all the other
+      internationalization variables.</dd>
+  <dt id="LC_CTYPE"><a class="permalink" href="#LC_CTYPE"><i>LC_CTYPE</i></a></dt>
+  <dd>Determine the locale for the interpretation of sequences of bytes of text
+      data as characters (for example, single-byte as opposed to multi-byte
+      characters in arguments and input files). If the recipient's locale does
+      not use an <i>LC_CTYPE</i> equivalent to the sender's, the results are
+      undefined.</dd>
+  <dt id="LC_MESSAGES"><a class="permalink" href="#LC_MESSAGES"><i>LC_MESSAGES</i></a></dt>
+  <dd>
+    <br>
+    Determine the locale that should be used to affect the format and contents
+      of diagnostic messages written to standard error and informative messages
+      written to standard output.</dd>
+  <dt id="NLSPATH"><a class="permalink" href="#NLSPATH"><i>NLSPATH</i></a></dt>
+  <dd>Determine the location of message catalogs for the processing of
+      <i>LC_MESSAGES</i>.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ASYNCHRONOUS_EVENTS"><a class="permalink" href="#ASYNCHRONOUS_EVENTS">ASYNCHRONOUS
+  EVENTS</a></h1>
+<p class="Pp">If an interrupt signal is received, <i>write</i> shall write an
+    appropriate message on the recipient's terminal and exit with a status of
+    zero. It shall take the standard action for all other signals.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDOUT"><a class="permalink" href="#STDOUT">STDOUT</a></h1>
+<p class="Pp">An informational message shall be written to standard output if a
+    recipient is logged in more than once.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDERR"><a class="permalink" href="#STDERR">STDERR</a></h1>
+<p class="Pp">The standard error shall be used only for diagnostic messages.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OUTPUT_FILES"><a class="permalink" href="#OUTPUT_FILES">OUTPUT
+  FILES</a></h1>
+<p class="Pp">The recipient's terminal is used for output.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXTENDED_DESCRIPTION"><a class="permalink" href="#EXTENDED_DESCRIPTION">EXTENDED
+  DESCRIPTION</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXIT_STATUS"><a class="permalink" href="#EXIT_STATUS">EXIT
+  STATUS</a></h1>
+<p class="Pp">The following exit values shall be returned:</p>
+<dl class="Bl-tag">
+  <dt>&nbsp;0</dt>
+  <dd>Successful completion.</dd>
+  <dt>&gt;0</dt>
+  <dd>The addressed user is not logged on or the addressed user denies
+      permission.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="CONSEQUENCES_OF_ERRORS"><a class="permalink" href="#CONSEQUENCES_OF_ERRORS">CONSEQUENCES
+  OF ERRORS</a></h1>
+<p class="Pp">Default.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The <i>talk</i> utility is considered by some users to be a more
+    usable utility on full-screen terminals.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The <i>write</i> utility was included in this volume of
+    POSIX.1‐2017 since it can be implemented on all terminal types. The
+    standard developers considered the <i>talk</i> utility, which cannot be
+    implemented on certain terminals, to be a ``better'' communications
+    interface. Both of these programs are in widespread use on historical
+    implementations. Therefore, the standard developers decided that both
+    utilities should be specified.</p>
+<p class="Pp">The format of the terminal name is unspecified, but the
+    descriptions of <i>ps</i>, <i>talk</i>, <i>who</i>, and <i>write</i> require
+    that they all use or accept the same format.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>mesg</i></i>, <i><i>talk</i></i>, <i><i>who</i></i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Chapter
+    8</i>, <i>Environment Variables</i>, <i>Chapter 11</i>, <i>General Terminal
+    Interface</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

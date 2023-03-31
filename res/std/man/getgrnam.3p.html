@@ -1,0 +1,223 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/3b114390053b4c2e103d6a5310f39b3e220f8b8e">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>GETGRNAM(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">GETGRNAM(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">GETGRNAM(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getgrnam, getgrnam_r — search group database for a name</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;grp.h&gt;</pre>
+<pre>struct group *getgrnam(const char *<i>name</i>);
+int getgrnam_r(const char *<i>name</i>, struct group *<i>grp</i>, char *<i>buffer</i>,
+<br>
+    size_t <i>bufsize</i>, struct group **<i>result</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>getgrnam</i>() function shall search the group database for
+    an entry with a matching <i>name</i>.</p>
+<p class="Pp">The <i>getgrnam</i>() function need not be thread-safe.</p>
+<p class="Pp">Applications wishing to check for error situations should set
+    <i>errno</i> to 0 before calling <i>getgrnam</i>(). If <i>getgrnam</i>()
+    returns a null pointer and <i>errno</i> is set to non-zero, an error
+    occurred.</p>
+<p class="Pp">The <i>getgrnam_r</i>() function shall update the <b>group</b>
+    structure pointed to by <i>grp</i> and store a pointer to that structure at
+    the location pointed to by <i>result</i>. The structure shall contain an
+    entry from the group database with a matching <i>name</i>. Storage
+    referenced by the <b>group</b> structure is allocated from the memory
+    provided with the <i>buffer</i> parameter, which is <i>bufsize</i> bytes in
+    size. A call to <i>sysconf</i>(_SC_GETGR_R_SIZE_MAX) returns either -1
+    without changing <i>errno</i> or an initial value suggested for the size of
+    this buffer. A null pointer is returned at the location pointed to by
+    <i>result</i> on error or if the requested entry is not found.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <i>getgrnam</i>() function shall return a pointer to a
+    <b>struct group</b> with the structure defined in <i>&lt;grp.h&gt;</i> with
+    a matching entry if one is found. The <i>getgrnam</i>() function shall
+    return a null pointer if either the requested entry was not found, or an
+    error occurred. If the requested entry was not found, <i>errno</i> shall not
+    be changed. On error, <i>errno</i> shall be set to indicate the error.</p>
+<p class="Pp">The application shall not modify the structure to which the return
+    value points, nor any storage areas pointed to by pointers within the
+    structure. The returned pointer, and pointers within the structure, might be
+    invalidated or the structure or the storage areas might be overwritten by a
+    subsequent call to <i>getgrent</i>(), <i>getgrgid</i>(), or
+    <i>getgrnam</i>(). The returned pointer, and pointers within the structure,
+    might also be invalidated if the calling thread is terminated.</p>
+<p class="Pp">The <i>getgrnam_r</i>() function shall return zero on success or
+    if the requested entry was not found and no error has occurred. If any error
+    has occurred, an error number shall be returned to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>getgrnam</i>() and <i>getgrnam_r</i>() functions may fail
+    if:</p>
+<dl class="Bl-tag">
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>An I/O error has occurred.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>A signal was caught during <i>getgrnam</i>().</dd>
+  <dt id="EMFILE"><a class="permalink" href="#EMFILE"><b>EMFILE</b></a></dt>
+  <dd>All file descriptors available to the process are currently open.</dd>
+  <dt id="ENFILE"><a class="permalink" href="#ENFILE"><b>ENFILE</b></a></dt>
+  <dd>The maximum allowable number of files is currently open in the
+    system.</dd>
+</dl>
+<p class="Pp">The <i>getgrnam_r</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="ERANGE"><a class="permalink" href="#ERANGE"><b>ERANGE</b></a></dt>
+  <dd>Insufficient storage was supplied via <i>buffer</i> and <i>bufsize</i> to
+      contain the data to be referenced by the resulting <b>group</b>
+    structure.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">Note that <i>sysconf</i>(_SC_GETGR_R_SIZE_MAX) may return -1 if
+    there is no hard limit on the size of the buffer needed to store all the
+    groups returned. This example shows how an application can allocate a buffer
+    of sufficient size to work with <i>getgrnam_r</i>().</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>long int initlen = sysconf(_SC_GETGR_R_SIZE_MAX);
+size_t len;
+if (initlen == -1)
+<br>
+    /* Default initial length. */
+<br>
+    len = 1024;
+else
+<br>
+    len = (size_t) initlen;
+struct group result;
+struct group *resultp;
+char *buffer = malloc(len);
+if (buffer == NULL)
+<br>
+    ...handle error...
+int e;
+while ((e = getgrnam_r("somegroup", &amp;result, buffer, len, &amp;resultp))
+<br>
+        == ERANGE)
+<br>
+    {
+<br>
+    size_t newlen = 2 * len;
+<br>
+    if (newlen &lt; len)
+<br>
+        ...handle error...
+<br>
+    len = newlen;
+<br>
+    char *newbuffer = realloc(buffer, len);
+<br>
+    if (newbuffer == NULL)
+<br>
+        ...handle error...
+<br>
+    buffer = newbuffer;
+<br>
+    }
+if (e != 0)
+<br>
+    ...handle error...
+free (buffer);</pre>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The <i>getgrnam_r</i>() function is thread-safe and shall return
+    values in a user-supplied buffer instead of possibly using a static data
+    area that may be overwritten by each call.</p>
+<p class="Pp">Portable applications should take into account that it is usual
+    for an implementation to return -1 from <i>sysconf</i>() indicating that
+    there is no maximum for _SC_GETGR_R_SIZE_MAX.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>endgrent</i>()</i>, <i><i>getgrgid</i>()</i>,
+    <i><i>sysconf</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;grp.h&gt;</b></i>, <i><b>&lt;sys_types.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2012 by Michael Kerrisk <mtk.manpages@gmail.com>
+   with some material from a draft by
+   Stephan Mueller <stephan.mueller@atsec.com>
+   in turn based on Andi Kleen's recvmmsg.2 page.
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/93c8c23088aa1b894e3bda434aa041d7c4ebd138">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>sendmmsg(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">sendmmsg(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">sendmmsg(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">sendmmsg - send multiple messages on a socket</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#define _GNU_SOURCE</b>         /* See feature_test_macros(7) */
+<b>#include &lt;sys/socket.h&gt;</b></pre>
+<pre><b>int sendmmsg(int </b><i>sockfd</i><b>, struct mmsghdr *</b><i>msgvec</i><b>, unsigned int </b><i>vlen</i><b>,</b>
+<b>             int </b><i>flags</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>sendmmsg</b>() system call is an extension of
+    <b>sendmsg</b>(2) that allows the caller to transmit multiple messages on a
+    socket using a single system call. (This has performance benefits for some
+    applications.)</p>
+<p class="Pp">The <i>sockfd</i> argument is the file descriptor of the socket on
+    which data is to be transmitted.</p>
+<p class="Pp">The <i>msgvec</i> argument is a pointer to an array of
+    <i>mmsghdr</i> structures. The size of this array is specified in
+    <i>vlen</i>.</p>
+<p class="Pp">The <i>mmsghdr</i> structure is defined in
+    <i>&lt;sys/socket.h&gt;</i> as:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct mmsghdr {
+<br>
+    struct msghdr msg_hdr;  /* Message header */
+<br>
+    unsigned int  msg_len;  /* Number of bytes transmitted */
+};
+</pre>
+<br>
+<p class="Pp">The <i>msg_hdr</i> field is a <i>msghdr</i> structure, as
+    described in <b>sendmsg</b>(2). The <i>msg_len</i> field is used to return
+    the number of bytes sent from the message in <i>msg_hdr</i> (i.e., the same
+    as the return value from a single <b>sendmsg</b>(2) call).</p>
+<p class="Pp">The <i>flags</i> argument contains flags ORed together. The flags
+    are the same as for <b>sendmsg</b>(2).</p>
+<p class="Pp">A blocking <b>sendmmsg</b>() call blocks until <i>vlen</i>
+    messages have been sent. A nonblocking call sends as many messages as
+    possible (up to the limit specified by <i>vlen</i>) and returns
+  immediately.</p>
+<p class="Pp">On return from <b>sendmmsg</b>(), the <i>msg_len</i> fields of
+    successive elements of <i>msgvec</i> are updated to contain the number of
+    bytes transmitted from the corresponding <i>msg_hdr</i>. The return value of
+    the call indicates the number of elements of <i>msgvec</i> that have been
+    updated.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>sendmmsg</b>() returns the number of messages sent
+    from <i>msgvec</i>; if this is less than <i>vlen</i>, the caller can retry
+    with a further <b>sendmmsg</b>() call to send the remaining messages.</p>
+<p class="Pp">On error, -1 is returned, and <i>errno</i> is set to indicate the
+    error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">Errors are as for <b>sendmsg</b>(2). An error is returned only if
+    no datagrams could be sent. See also BUGS.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>sendmmsg</b>() system call was added in Linux 3.0. Support
+    in glibc was added in Linux 2.14.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>sendmmsg</b>() is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The value specified in <i>vlen</i> is capped to <b>UIO_MAXIOV</b>
+    (1024).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">If an error occurs after at least one message has been sent, the
+    call succeeds, and returns the number of messages sent. The error code is
+    lost. The caller can retry the transmission, starting at the first failed
+    message, but there is no guarantee that, if an error is returned, it will be
+    the same as the one that was lost on the previous call.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The example below uses <b>sendmmsg</b>() to send <i>onetwo</i> and
+    <i>three</i> in two distinct UDP datagrams using one system call. The
+    contents of the first datagram originates from a pair of buffers.</p>
+<p class="Pp"></p>
+<pre>#define _GNU_SOURCE
+#include &lt;arpa/inet.h&gt;
+#include &lt;netinet/in.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;sys/socket.h&gt;
+#include &lt;sys/types.h&gt;
+int
+main(void)
+{
+<br>
+    int                 retval;
+<br>
+    int                 sockfd;
+<br>
+    struct iovec        msg1[2], msg2;
+<br>
+    struct mmsghdr      msg[2];
+<br>
+    struct sockaddr_in  addr;
+<br>
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+<br>
+    if (sockfd == -1) {
+<br>
+        perror("socket()");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    addr.sin_family = AF_INET;
+<br>
+    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+<br>
+    addr.sin_port = htons(1234);
+<br>
+    if (connect(sockfd, (struct sockaddr *) &amp;addr, sizeof(addr)) == -1) {
+<br>
+        perror("connect()");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    memset(msg1, 0, sizeof(msg1));
+<br>
+    msg1[0].iov_base = "one";
+<br>
+    msg1[0].iov_len = 3;
+<br>
+    msg1[1].iov_base = "two";
+<br>
+    msg1[1].iov_len = 3;
+<br>
+    memset(&amp;msg2, 0, sizeof(msg2));
+<br>
+    msg2.iov_base = "three";
+<br>
+    msg2.iov_len = 5;
+<br>
+    memset(msg, 0, sizeof(msg));
+<br>
+    msg[0].msg_hdr.msg_iov = msg1;
+<br>
+    msg[0].msg_hdr.msg_iovlen = 2;
+<br>
+    msg[1].msg_hdr.msg_iov = &amp;msg2;
+<br>
+    msg[1].msg_hdr.msg_iovlen = 1;
+<br>
+    retval = sendmmsg(sockfd, msg, 2, 0);
+<br>
+    if (retval == -1)
+<br>
+        perror("sendmmsg()");
+<br>
+    else
+<br>
+        printf("%d messages sent\n", retval);
+<br>
+    exit(0);
+}
+</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>recvmmsg</b>(2), <b>sendmsg</b>(2), <b>socket</b>(2),
+    <b>socket</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/f849d36eb1158b7c2dae834d2f843a15977bead1">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>PIPE(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">PIPE(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">PIPE(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pipe — create an interprocess channel</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;unistd.h&gt;</pre>
+<pre>int pipe(int <i>fildes</i>[2]);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>pipe</i>() function shall create a pipe and place two file
+    descriptors, one each into the arguments <i>fildes</i>[0] and
+    <i>fildes</i>[1], that refer to the open file descriptions for the read and
+    write ends of the pipe. The file descriptors shall be allocated as described
+    in <i>Section 2.14</i>, <i>File Descriptor Allocation</i>. The O_NONBLOCK
+    and FD_CLOEXEC flags shall be clear on both file descriptors. (The
+    <i>fcntl</i>() function can be used to set both these flags.)</p>
+<p class="Pp">Data can be written to the file descriptor <i>fildes</i>[1] and
+    read from the file descriptor <i>fildes</i>[0]. A read on the file
+    descriptor <i>fildes</i>[0] shall access data written to the file descriptor
+    <i>fildes</i>[1] on a first-in-first-out basis. It is unspecified whether
+    <i>fildes</i>[0] is also open for writing and whether <i>fildes</i>[1] is
+    also open for reading.</p>
+<p class="Pp">A process has the pipe open for reading (correspondingly writing)
+    if it has a file descriptor open that refers to the read end,
+    <i>fildes</i>[0] (write end, <i>fildes</i>[1]).</p>
+<p class="Pp">The pipe's user ID shall be set to the effective user ID of the
+    calling process.</p>
+<p class="Pp">The pipe's group ID shall be set to the effective group ID of the
+    calling process.</p>
+<p class="Pp">Upon successful completion, <i>pipe</i>() shall mark for update
+    the last data access, last data modification, and last file status change
+    timestamps of the pipe.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, 0 shall be returned; otherwise, -1
+    shall be returned and <i>errno</i> set to indicate the error, no file
+    descriptors shall be allocated and the contents of <i>fildes</i> shall be
+    left unmodified.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>pipe</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EMFILE"><a class="permalink" href="#EMFILE"><b>EMFILE</b></a></dt>
+  <dd>All, or all but one, of the file descriptors available to the process are
+      currently open.</dd>
+  <dt id="ENFILE"><a class="permalink" href="#ENFILE"><b>ENFILE</b></a></dt>
+  <dd>The number of simultaneously open files in the system would exceed a
+      system-imposed limit.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Using_a_Pipe_to_Pass_Data_Between_a_Parent_Process_and_a_Child_Process"><a class="permalink" href="#Using_a_Pipe_to_Pass_Data_Between_a_Parent_Process_and_a_Child_Process">Using
+  a Pipe to Pass Data Between a Parent Process and a Child Process</a></h2>
+<p class="Pp">The following example demonstrates the use of a pipe to transfer
+    data between a parent process and a child process. Error handling is
+    excluded, but otherwise this code demonstrates good practice when using
+    pipes: after the <i>fork</i>() the two processes close the unused ends of
+    the pipe before they commence transferring data.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+...</pre>
+<pre>int fildes[2];
+const int BSIZE = 100;
+char buf[BSIZE];
+ssize_t nbytes;
+int status;</pre>
+<pre>status = pipe(fildes);
+if (status == -1 ) {
+<br>
+    /* an error occurred */
+<br>
+    ...
+}</pre>
+<pre>switch (fork()) {
+case -1: /* Handle error */
+<br>
+    break;</pre>
+<pre>case 0:  /* Child - reads from pipe */
+<br>
+    close(fildes[1]);                       /* Write end is unused */
+<br>
+    nbytes = read(fildes[0], buf, BSIZE);   /* Get data from pipe */
+<br>
+    /* At this point, a further read would see end-of-file ... */
+<br>
+    close(fildes[0]);                       /* Finished with pipe */
+<br>
+    exit(EXIT_SUCCESS);</pre>
+<pre>default:  /* Parent - writes to pipe */
+<br>
+    close(fildes[0]);                       /* Read end is unused */
+<br>
+    write(fildes[1], "Hello world\n", 12);  /* Write data on pipe */
+<br>
+    close(fildes[1]);                       /* Child will see EOF */
+<br>
+    exit(EXIT_SUCCESS);
+}</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The wording carefully avoids using the verb ``to open'' in order
+    to avoid any implication of use of <i>open</i>(); see also
+  <i>write</i>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i>Section 2.14</i>, <i>File Descriptor Allocation</i>,
+    <i><i>fcntl</i>()</i>, <i><i>read</i>()</i>, <i><i>write</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;fcntl.h&gt;</b></i>, <i><b>&lt;unistd.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

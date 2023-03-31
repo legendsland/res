@@ -1,0 +1,374 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 2013, 2016, 2017 by Michael Kerrisk <mtk.manpages@gmail.com>
+   and Copyright (c) 2012 by Eric W. Biederman <ebiederm@xmission.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/fad5df9d2daf5b4534dc86390bc5c5b5aabc4d43">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>namespaces(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">namespaces(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">namespaces(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">namespaces - overview of Linux namespaces</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">A namespace wraps a global system resource in an abstraction that
+    makes it appear to the processes within the namespace that they have their
+    own isolated instance of the global resource. Changes to the global resource
+    are visible to other processes that are members of the namespace, but are
+    invisible to other processes. One use of namespaces is to implement
+    containers.</p>
+<p class="Pp">This page provides pointers to information on the various
+    namespace types, describes the associated <i>/proc</i> files, and summarizes
+    the APIs for working with namespaces.</p>
+<section class="Ss">
+<h2 class="Ss" id="Namespace_types"><a class="permalink" href="#Namespace_types">Namespace
+  types</a></h2>
+<p class="Pp">The following table shows the namespace types available on Linux.
+    The second column of the table shows the flag value that is used to specify
+    the namespace type in various APIs. The third column identifies the manual
+    page that provides details on the namespace type. The last column is a
+    summary of the resources that are isolated by the namespace type.</p>
+<table class="tbl">
+  <tbody><tr>
+    <td><b>Namespace</b></td>
+    <td><b>Flag</b></td>
+    <td><b>Page</b></td>
+    <td><b>Isolates</b></td>
+  </tr>
+  <tr>
+    <td>Cgroup</td>
+    <td><b>CLONE_NEWCGROUP</b></td>
+    <td><b>cgroup_namespaces</b>(7)</td>
+    <td>Cgroup root directory</td>
+  </tr>
+  <tr>
+    <td>IPC</td>
+    <td><b>CLONE_NEWIPC</b></td>
+    <td><b>ipc_namespaces</b>(7)</td>
+    <td>System V IPC, POSIX message queues</td>
+  </tr>
+  <tr>
+    <td>Network</td>
+    <td><b>CLONE_NEWNET</b></td>
+    <td><b>network_namespaces</b>(7)</td>
+    <td>Network devices, stacks, ports, etc.</td>
+  </tr>
+  <tr>
+    <td>Mount</td>
+    <td><b>CLONE_NEWNS</b></td>
+    <td><b>mount_namespaces</b>(7)</td>
+    <td>Mount points</td>
+  </tr>
+  <tr>
+    <td>PID</td>
+    <td><b>CLONE_NEWPID</b></td>
+    <td><b>pid_namespaces</b>(7)</td>
+    <td>Process IDs</td>
+  </tr>
+  <tr>
+    <td>Time</td>
+    <td><b>CLONE_NEWTIME</b></td>
+    <td><b>time_namespaces</b>(7)</td>
+    <td>Boot and monotonic clocks</td>
+  </tr>
+  <tr>
+    <td>User</td>
+    <td><b>CLONE_NEWUSER</b></td>
+    <td><b>user_namespaces</b>(7)</td>
+    <td>User and group IDs</td>
+  </tr>
+  <tr>
+    <td>UTS</td>
+    <td><b>CLONE_NEWUTS</b></td>
+    <td><b>uts_namespaces</b>(7)</td>
+    <td>Hostname and NIS domain name</td>
+  </tr>
+</tbody></table>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="The_namespaces_API"><a class="permalink" href="#The_namespaces_API">The
+  namespaces API</a></h2>
+<p class="Pp">As well as various <i>/proc</i> files described below, the
+    namespaces API includes the following system calls:</p>
+<dl class="Bl-tag">
+  <dt id="clone"><a class="permalink" href="#clone"><b>clone</b>(2)</a></dt>
+  <dd>The <b>clone</b>(2) system call creates a new process. If the <i>flags</i>
+      argument of the call specifies one or more of the <b>CLONE_NEW*</b> flags
+      listed above, then new namespaces are created for each flag, and the child
+      process is made a member of those namespaces. (This system call also
+      implements a number of features unrelated to namespaces.)</dd>
+  <dt id="setns"><a class="permalink" href="#setns"><b>setns</b>(2)</a></dt>
+  <dd>The <b>setns</b>(2) system call allows the calling process to join an
+      existing namespace. The namespace to join is specified via a file
+      descriptor that refers to one of the <i>/proc/</i>pid<i>/ns</i> files
+      described below.</dd>
+  <dt id="unshare"><a class="permalink" href="#unshare"><b>unshare</b>(2)</a></dt>
+  <dd>The <b>unshare</b>(2) system call moves the calling process to a new
+      namespace. If the <i>flags</i> argument of the call specifies one or more
+      of the <b>CLONE_NEW*</b> flags listed above, then new namespaces are
+      created for each flag, and the calling process is made a member of those
+      namespaces. (This system call also implements a number of features
+      unrelated to namespaces.)</dd>
+  <dt id="ioctl"><a class="permalink" href="#ioctl"><b>ioctl</b>(2)</a></dt>
+  <dd>Various <b>ioctl</b>(2) operations can be used to discover information
+      about namespaces. These operations are described in
+    <b>ioctl_ns</b>(2).</dd>
+</dl>
+<p class="Pp">Creation of new namespaces using <b>clone</b>(2) and
+    <b>unshare</b>(2) in most cases requires the <b>CAP_SYS_ADMIN</b>
+    capability, since, in the new namespace, the creator will have the power to
+    change global resources that are visible to other processes that are
+    subsequently created in, or join the namespace. User namespaces are the
+    exception: since Linux 3.8, no privilege is required to create a user
+    namespace.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="The_/proc/_pid_/ns/_directory"><a class="permalink" href="#The_/proc/_pid_/ns/_directory">The
+  /proc/[pid]/ns/ directory</a></h2>
+<p class="Pp">Each process has a <i>/proc/</i>pid<i>/ns/</i> subdirectory
+    containing one entry for each namespace that supports being manipulated by
+    <b>setns</b>(2):</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>ls -l /proc/$$/ns | awk '{print $1, $9, $10, $11}'</b>
+total 0
+lrwxrwxrwx. cgroup -&gt; cgroup:[4026531835]
+lrwxrwxrwx. ipc -&gt; ipc:[4026531839]
+lrwxrwxrwx. mnt -&gt; mnt:[4026531840]
+lrwxrwxrwx. net -&gt; net:[4026531969]
+lrwxrwxrwx. pid -&gt; pid:[4026531836]
+lrwxrwxrwx. pid_for_children -&gt; pid:[4026531834]
+lrwxrwxrwx. time -&gt; time:[4026531834]
+lrwxrwxrwx. time_for_children -&gt; time:[4026531834]
+lrwxrwxrwx. user -&gt; user:[4026531837]
+lrwxrwxrwx. uts -&gt; uts:[4026531838]
+</pre>
+<br>
+<p class="Pp">Bind mounting (see <b>mount</b>(2)) one of the files in this
+    directory to somewhere else in the filesystem keeps the corresponding
+    namespace of the process specified by <i>pid</i> alive even if all processes
+    currently in the namespace terminate.</p>
+<p class="Pp">Opening one of the files in this directory (or a file that is bind
+    mounted to one of these files) returns a file handle for the corresponding
+    namespace of the process specified by <i>pid</i>. As long as this file
+    descriptor remains open, the namespace will remain alive, even if all
+    processes in the namespace terminate. The file descriptor can be passed to
+    <b>setns</b>(2).</p>
+<p class="Pp">In Linux 3.7 and earlier, these files were visible as hard links.
+    Since Linux 3.8, they appear as symbolic links. If two processes are in the
+    same namespace, then the device IDs and inode numbers of their
+    <i>/proc/</i>pid<i>/ns/</i>xxx symbolic links will be the same; an
+    application can check this using the <i>stat.st_dev</i> and
+    <i>stat.st_ino</i> fields returned by <b>stat</b>(2). The content of this
+    symbolic link is a string containing the namespace type and inode number as
+    in the following example:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>readlink /proc/$$/ns/uts</b>
+uts:[4026531838]
+</pre>
+<br>
+<p class="Pp">The symbolic links in this subdirectory are as follows:</p>
+<dl class="Bl-tag">
+  <dt><i>/proc/</i>pid<i>/ns/cgroup</i> (since Linux 4.6)</dt>
+  <dd>This file is a handle for the cgroup namespace of the process.</dd>
+  <dt><i>/proc/</i>pid<i>/ns/ipc</i> (since Linux 3.0)</dt>
+  <dd>This file is a handle for the IPC namespace of the process.</dd>
+  <dt><i>/proc/</i>pid<i>/ns/mnt</i> (since Linux 3.8)</dt>
+  <dd>This file is a handle for the mount namespace of the process.</dd>
+  <dt><i>/proc/</i>pid<i>/ns/net</i> (since Linux 3.0)</dt>
+  <dd>This file is a handle for the network namespace of the process.</dd>
+  <dt><i>/proc/</i>pid<i>/ns/pid</i> (since Linux 3.8)</dt>
+  <dd>This file is a handle for the PID namespace of the process. This handle is
+      permanent for the lifetime of the process (i.e., a process's PID namespace
+      membership never changes).</dd>
+  <dt><i>/proc/</i>pid<i>/ns/pid_for_children</i> (since Linux 4.12)</dt>
+  <dd>This file is a handle for the PID namespace of child processes created by
+      this process. This can change as a consequence of calls to
+      <b>unshare</b>(2) and <b>setns</b>(2) (see <b>pid_namespaces</b>(7)), so
+      the file may differ from <i>/proc/</i>pid<i>/ns/pid</i>. The symbolic link
+      gains a value only after the first child process is created in the
+      namespace. (Beforehand, <b>readlink</b>(2) of the symbolic link will
+      return an empty buffer.)</dd>
+  <dt><i>/proc/</i>pid<i>/ns/time</i> (since Linux 5.6)</dt>
+  <dd>This file is a handle for the time namespace of the process.</dd>
+  <dt><i>/proc/</i>pid<i>/ns/time_for_children</i> (since Linux 5.6)</dt>
+  <dd>This file is a handle for the time namespace of child processes created by
+      this process. This can change as a consequence of calls to
+      <b>unshare</b>(2) and <b>setns</b>(2) (see <b>time_namespaces</b>(7)), so
+      the file may differ from <i>/proc/</i>pid<i>/ns/time</i>.</dd>
+  <dt><i>/proc/</i>pid<i>/ns/user</i> (since Linux 3.8)</dt>
+  <dd>This file is a handle for the user namespace of the process.</dd>
+  <dt><i>/proc/</i>pid<i>/ns/uts</i> (since Linux 3.0)</dt>
+  <dd>This file is a handle for the UTS namespace of the process.</dd>
+</dl>
+<p class="Pp">Permission to dereference or read (<b>readlink</b>(2)) these
+    symbolic links is governed by a ptrace access mode
+    <b>PTRACE_MODE_READ_FSCREDS</b> check; see <b>ptrace</b>(2).</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="The_"><a class="permalink" href="#The_">The
+  <i>/proc/sys/user</i> directory</a></h2>
+<p class="Pp">The files in the <i>/proc/sys/user</i> directory (which is present
+    since Linux 4.9) expose limits on the number of namespaces of various types
+    that can be created. The files are as follows:</p>
+<dl class="Bl-tag">
+  <dt id="max_cgroup_namespaces"><a class="permalink" href="#max_cgroup_namespaces"><i>max_cgroup_namespaces</i></a></dt>
+  <dd>The value in this file defines a per-user limit on the number of cgroup
+      namespaces that may be created in the user namespace.</dd>
+  <dt id="max_ipc_namespaces"><a class="permalink" href="#max_ipc_namespaces"><i>max_ipc_namespaces</i></a></dt>
+  <dd>The value in this file defines a per-user limit on the number of ipc
+      namespaces that may be created in the user namespace.</dd>
+  <dt id="max_mnt_namespaces"><a class="permalink" href="#max_mnt_namespaces"><i>max_mnt_namespaces</i></a></dt>
+  <dd>The value in this file defines a per-user limit on the number of mount
+      namespaces that may be created in the user namespace.</dd>
+  <dt id="max_net_namespaces"><a class="permalink" href="#max_net_namespaces"><i>max_net_namespaces</i></a></dt>
+  <dd>The value in this file defines a per-user limit on the number of network
+      namespaces that may be created in the user namespace.</dd>
+  <dt id="max_pid_namespaces"><a class="permalink" href="#max_pid_namespaces"><i>max_pid_namespaces</i></a></dt>
+  <dd>The value in this file defines a per-user limit on the number of PID
+      namespaces that may be created in the user namespace.</dd>
+  <dt id="max_time_namespaces"><a class="permalink" href="#max_time_namespaces"><i>max_time_namespaces</i>
+    (since Linux 5.7)</a></dt>
+  <dd>The value in this file defines a per-user limit on the number of time
+      namespaces that may be created in the user namespace.</dd>
+  <dt id="max_user_namespaces"><a class="permalink" href="#max_user_namespaces"><i>max_user_namespaces</i></a></dt>
+  <dd>The value in this file defines a per-user limit on the number of user
+      namespaces that may be created in the user namespace.</dd>
+  <dt id="max_uts_namespaces"><a class="permalink" href="#max_uts_namespaces"><i>max_uts_namespaces</i></a></dt>
+  <dd>The value in this file defines a per-user limit on the number of uts
+      namespaces that may be created in the user namespace.</dd>
+</dl>
+<p class="Pp">Note the following details about these files:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>The values in these files are modifiable by privileged processes.</dd>
+  <dt>•</dt>
+  <dd>The values exposed by these files are the limits for the user namespace in
+      which the opening process resides.</dd>
+  <dt>•</dt>
+  <dd>The limits are per-user. Each user in the same user namespace can create
+      namespaces up to the defined limit.</dd>
+  <dt>•</dt>
+  <dd>The limits apply to all users, including UID 0.</dd>
+  <dt>•</dt>
+  <dd>These limits apply in addition to any other per-namespace limits (such as
+      those for PID and user namespaces) that may be enforced.</dd>
+  <dt>•</dt>
+  <dd>Upon encountering these limits, <b>clone</b>(2) and <b>unshare</b>(2) fail
+      with the error <b>ENOSPC</b>.</dd>
+  <dt>•</dt>
+  <dd>For the initial user namespace, the default value in each of these files
+      is half the limit on the number of threads that may be created
+      (<i>/proc/sys/kernel/threads-max</i>). In all descendant user namespaces,
+      the default value in each file is <b>MAXINT</b>.</dd>
+  <dt>•</dt>
+  <dd>When a namespace is created, the object is also accounted against ancestor
+      namespaces. More precisely:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Each user namespace has a creator UID.</dd>
+  <dt>•</dt>
+  <dd>When a namespace is created, it is accounted against the creator UIDs in
+      each of the ancestor user namespaces, and the kernel ensures that the
+      corresponding namespace limit for the creator UID in the ancestor
+      namespace is not exceeded.</dd>
+  <dt>•</dt>
+  <dd>The aforementioned point ensures that creating a new user namespace cannot
+      be used as a means to escape the limits in force in the current user
+      namespace.</dd>
+</dl>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Namespace_lifetime"><a class="permalink" href="#Namespace_lifetime">Namespace
+  lifetime</a></h2>
+<p class="Pp">Absent any other factors, a namespace is automatically torn down
+    when the last process in the namespace terminates or leaves the namespace.
+    However, there are a number of other factors that may pin a namespace into
+    existence even though it has no member processes. These factors include the
+    following:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>An open file descriptor or a bind mount exists for the corresponding
+      <i>/proc/</i>pid<i>/ns/*</i> file.</dd>
+  <dt>•</dt>
+  <dd>The namespace is hierarchical (i.e., a PID or user namespace), and has a
+      child namespace.</dd>
+  <dt>•</dt>
+  <dd>It is a user namespace that owns one or more nonuser namespaces.</dd>
+  <dt>•</dt>
+  <dd>It is a PID namespace, and there is a process that refers to the namespace
+      via a <i>/proc/</i>pid<i>/ns/pid_for_children</i> symbolic link.</dd>
+  <dt>•</dt>
+  <dd>It is a time namespace, and there is a process that refers to the
+      namespace via a <i>/proc/</i>pid<i>/ns/time_for_children</i> symbolic
+      link.</dd>
+  <dt>•</dt>
+  <dd>It is an IPC namespace, and a corresponding mount of an <i>mqueue</i>
+      filesystem (see <b>mq_overview</b>(7)) refers to this namespace.</dd>
+  <dt>•</dt>
+  <dd>It is a PID namespace, and a corresponding mount of a <b>proc</b>(5)
+      filesystem refers to this namespace.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">See <b>clone</b>(2) and <b>user_namespaces</b>(7).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>nsenter</b>(1), <b>readlink</b>(1), <b>unshare</b>(1),
+    <b>clone</b>(2), <b>ioctl_ns</b>(2), <b>setns</b>(2), <b>unshare</b>(2),
+    <b>proc</b>(5), <b>capabilities</b>(7), <b>cgroup_namespaces</b>(7),
+    <b>cgroups</b>(7), <b>credentials</b>(7), <b>ipc_namespaces</b>(7),
+    <b>network_namespaces</b>(7), <b>pid_namespaces</b>(7),
+    <b>user_namespaces</b>(7), <b>uts_namespaces</b>(7), <b>lsns</b>(8),
+    <b>switch_root</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

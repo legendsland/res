@@ -1,0 +1,170 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright 1997 Nicol\[u00E1]s Lichtmaier <nick@debian.org>
+   Created Thu Aug  7 00:44:00 ART 1997
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+  
+   Added section stuff, aeb, 2002-04-22.
+   Corrected include file, drepper, 2003-06-15.
+   --><head>
+<meta name="dc.identifier" content="res/e0ec796d3ef8a221ae418328a068b3a6b950bc45">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>lockf(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">lockf(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">lockf(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">lockf - apply, test or remove a POSIX lock on an open file</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int lockf(int </b><i>fd</i><b>, int </b><i>cmd</i><b>, off_t </b><i>len</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>lockf</b>():</p>
+<pre><br>
+    _XOPEN_SOURCE &gt;= 500
+<br>
+        || /* glibc &gt;= 2.19: */ _DEFAULT_SOURCE
+<br>
+        || /* glibc &lt;= 2.19: */ _BSD_SOURCE || _SVID_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">Apply, test, or remove a POSIX lock on a section of an open file.
+    The file is specified by <i>fd</i>, a file descriptor open for writing, the
+    action by <i>cmd</i>, and the section consists of byte positions
+    <i>pos</i>..<i>pos</i>+<i>len</i>-1 if <i>len</i> is positive, and
+    <i>pos</i>-<i>len</i>..<i>pos</i>-1 if <i>len</i> is negative, where
+    <i>pos</i> is the current file position, and if <i>len</i> is zero, the
+    section extends from the current file position to infinity, encompassing the
+    present and future end-of-file positions. In all cases, the section may
+    extend past current end-of-file.</p>
+<p class="Pp">On Linux, <b>lockf</b>() is just an interface on top of
+    <b>fcntl</b>(2) locking. Many other systems implement <b>lockf</b>() in this
+    way, but note that POSIX.1 leaves the relationship between <b>lockf</b>()
+    and <b>fcntl</b>(2) locks unspecified. A portable application should
+    probably avoid mixing calls to these interfaces.</p>
+<p class="Pp">Valid operations are given below:</p>
+<dl class="Bl-tag">
+  <dt id="F_LOCK"><a class="permalink" href="#F_LOCK"><b>F_LOCK</b></a></dt>
+  <dd>Set an exclusive lock on the specified section of the file. If (part of)
+      this section is already locked, the call blocks until the previous lock is
+      released. If this section overlaps an earlier locked section, both are
+      merged. File locks are released as soon as the process holding the locks
+      closes some file descriptor for the file. A child process does not inherit
+      these locks.</dd>
+  <dt id="F_TLOCK"><a class="permalink" href="#F_TLOCK"><b>F_TLOCK</b></a></dt>
+  <dd>Same as <b>F_LOCK</b> but the call never blocks and returns an error
+      instead if the file is already locked.</dd>
+  <dt id="F_ULOCK"><a class="permalink" href="#F_ULOCK"><b>F_ULOCK</b></a></dt>
+  <dd>Unlock the indicated section of the file. This may cause a locked section
+      to be split into two locked sections.</dd>
+  <dt id="F_TEST"><a class="permalink" href="#F_TEST"><b>F_TEST</b></a></dt>
+  <dd>Test the lock: return 0 if the specified section is unlocked or locked by
+      this process; return -1, set <i>errno</i> to <b>EAGAIN</b> (<b>EACCES</b>
+      on some other systems), if another process holds a lock.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, zero is returned. On error, -1 is returned, and
+    <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b> or
+    <b>EAGAIN</b></a></dt>
+  <dd>The file is locked and <b>F_TLOCK</b> or <b>F_TEST</b> was specified, or
+      the operation is prohibited because the file has been memory-mapped by
+      another process.</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd><i>fd</i> is not an open file descriptor; or <i>cmd</i> is <b>F_LOCK</b>
+      or <b>F_TLOCK</b> and <i>fd</i> is not a writable file descriptor.</dd>
+  <dt id="EDEADLK"><a class="permalink" href="#EDEADLK"><b>EDEADLK</b></a></dt>
+  <dd>The command was <b>F_LOCK</b> and this lock operation would cause a
+      deadlock.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>While waiting to acquire a lock, the call was interrupted by delivery of a
+      signal caught by a handler; see <b>signal</b>(7).</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>An invalid operation was specified in <i>cmd</i>.</dd>
+  <dt id="ENOLCK"><a class="permalink" href="#ENOLCK"><b>ENOLCK</b></a></dt>
+  <dd>Too many segment locks open, lock table is full.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>lockf ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, SVr4.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>fcntl</b>(2), <b>flock</b>(2)</p>
+<p class="Pp"><i>locks.txt</i> and <i>mandatory-locking.txt</i> in the Linux
+    kernel source directory <i>Documentation/filesystems</i> (on older kernels,
+    these files are directly under the <i>Documentation</i> directory, and
+    <i>mandatory-locking.txt</i> is called <i>mandatory.txt</i>)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

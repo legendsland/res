@@ -1,0 +1,375 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   This manpage is Copyright (C) 1992 Drew Eckhardt;
+               and Copyright (C) 1993 Michael Haardt;
+               and Copyright (C) 1993,1995 Ian Jackson
+  		and Copyright (C) 2006, 2014 Michael Kerrisk
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Modified Sat Jul 24 00:35:52 1993 by Rik Faith <faith@cs.unc.edu>
+   Modified Thu Jun  4 12:21:13 1998 by Andries Brouwer <aeb@cwi.nl>
+   Modified Thu Mar  3 09:49:35 2005 by Michael Haardt <michael@moria.de>
+   2007-03-25, mtk, added various text to DESCRIPTION.
+   --><head>
+<meta name="dc.identifier" content="res/df4ff45e3fdbede3c0acef2915392e31312efaca">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>rename(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">rename(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">rename(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">rename, renameat, renameat2 - change the name or location of a
+    file</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;stdio.h&gt;</b></pre>
+<pre><b>int rename(const char *</b><i>oldpath</i><b>, const char *</b><i>newpath</i><b>);</b></pre>
+<pre><b>#include &lt;fcntl.h&gt;           </b>/* Definition of <b>AT_*</b> constants */
+<b>#include &lt;stdio.h&gt;</b></pre>
+<pre><b>int renameat(int </b><i>olddirfd</i><b>, const char *</b><i>oldpath</i><b>,</b>
+<b>             int </b><i>newdirfd</i><b>, const char *</b><i>newpath</i><b>);</b>
+<b>int renameat2(int </b><i>olddirfd</i><b>, const char *</b><i>oldpath</i><b>,</b>
+<b>             int </b><i>newdirfd</i><b>, const char *</b><i>newpath</i><b>, unsigned int </b><i>flags</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"></p>
+<pre><b>renameat</b>():
+<br>
+    Since glibc 2.10:
+<br>
+        _POSIX_C_SOURCE &gt;= 200809L
+<br>
+    Before glibc 2.10:
+<br>
+        _ATFILE_SOURCE</pre>
+<pre><b>renameat2</b>():
+<br>
+    _GNU_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>rename</b>() renames a file, moving it between directories if
+    required. Any other hard links to the file (as created using <b>link</b>(2))
+    are unaffected. Open file descriptors for <i>oldpath</i> are also
+    unaffected.</p>
+<p class="Pp">Various restrictions determine whether or not the rename operation
+    succeeds: see ERRORS below.</p>
+<p class="Pp">If <i>newpath</i> already exists, it will be atomically replaced,
+    so that there is no point at which another process attempting to access
+    <i>newpath</i> will find it missing. However, there will probably be a
+    window in which both <i>oldpath</i> and <i>newpath</i> refer to the file
+    being renamed.</p>
+<p class="Pp">If <i>oldpath</i> and <i>newpath</i> are existing hard links
+    referring to the same file, then <b>rename</b>() does nothing, and returns a
+    success status.</p>
+<p class="Pp">If <i>newpath</i> exists but the operation fails for some reason,
+    <b>rename</b>() guarantees to leave an instance of <i>newpath</i> in
+  place.</p>
+<p class="Pp"><i>oldpath</i> can specify a directory. In this case,
+    <i>newpath</i> must either not exist, or it must specify an empty
+  directory.</p>
+<p class="Pp">If <i>oldpath</i> refers to a symbolic link, the link is renamed;
+    if <i>newpath</i> refers to a symbolic link, the link will be
+  overwritten.</p>
+<section class="Ss">
+<h2 class="Ss" id="renameat()"><a class="permalink" href="#renameat()">renameat()</a></h2>
+<p class="Pp">The <b>renameat</b>() system call operates in exactly the same way
+    as <b>rename</b>(), except for the differences described here.</p>
+<p class="Pp">If the pathname given in <i>oldpath</i> is relative, then it is
+    interpreted relative to the directory referred to by the file descriptor
+    <i>olddirfd</i> (rather than relative to the current working directory of
+    the calling process, as is done by <b>rename</b>() for a relative
+  pathname).</p>
+<p class="Pp">If <i>oldpath</i> is relative and <i>olddirfd</i> is the special
+    value <b>AT_FDCWD</b>, then <i>oldpath</i> is interpreted relative to the
+    current working directory of the calling process (like <b>rename</b>()).</p>
+<p class="Pp">If <i>oldpath</i> is absolute, then <i>olddirfd</i> is
+  ignored.</p>
+<p class="Pp">The interpretation of <i>newpath</i> is as for <i>oldpath</i>,
+    except that a relative pathname is interpreted relative to the directory
+    referred to by the file descriptor <i>newdirfd</i>.</p>
+<p class="Pp">See <b>openat</b>(2) for an explanation of the need for
+    <b>renameat</b>().</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="renameat2()"><a class="permalink" href="#renameat2()">renameat2()</a></h2>
+<p class="Pp"><b>renameat2</b>() has an additional <i>flags</i> argument. A
+    <b>renameat2</b>() call with a zero <i>flags</i> argument is equivalent to
+    <b>renameat</b>().</p>
+<p class="Pp">The <i>flags</i> argument is a bit mask consisting of zero or more
+    of the following flags:</p>
+<dl class="Bl-tag">
+  <dt id="RENAME_EXCHANGE"><a class="permalink" href="#RENAME_EXCHANGE"><b>RENAME_EXCHANGE</b></a></dt>
+  <dd>Atomically exchange <i>oldpath</i> and <i>newpath</i>. Both pathnames must
+      exist but may be of different types (e.g., one could be a non-empty
+      directory and the other a symbolic link).</dd>
+  <dt id="RENAME_NOREPLACE"><a class="permalink" href="#RENAME_NOREPLACE"><b>RENAME_NOREPLACE</b></a></dt>
+  <dd>Don't overwrite <i>newpath</i> of the rename. Return an error if
+      <i>newpath</i> already exists.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd><b>RENAME_NOREPLACE</b> can't be employed together with
+      <b>RENAME_EXCHANGE</b>.</dd>
+  <dt></dt>
+  <dd><b>RENAME_NOREPLACE</b> requires support from the underlying filesystem.
+      Support for various filesystems was added as follows:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>ext4 (Linux 3.15);</dd>
+  <dt>•</dt>
+  <dd>btrfs, tmpfs, and cifs (Linux 3.17);</dd>
+  <dt>•</dt>
+  <dd>xfs (Linux 4.0);</dd>
+  <dt>•</dt>
+  <dd>Support for many other filesystems was added in Linux 4.9, including ext2,
+      minix, reiserfs, jfs, vfat, and bpf.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="RENAME_WHITEOUT"><a class="permalink" href="#RENAME_WHITEOUT"><b>RENAME_WHITEOUT</b>
+    (since Linux 3.18)</a></dt>
+  <dd>This operation makes sense only for overlay/union filesystem
+      implementations.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Specifying <b>RENAME_WHITEOUT</b> creates a "whiteout" object at
+      the source of the rename at the same time as performing the rename. The
+      whole operation is atomic, so that if the rename succeeds then the
+      whiteout will also have been created.</dd>
+  <dt></dt>
+  <dd>A "whiteout" is an object that has special meaning in
+      union/overlay filesystem constructs. In these constructs, multiple layers
+      exist and only the top one is ever modified. A whiteout on an upper layer
+      will effectively hide a matching file in the lower layer, making it appear
+      as if the file didn't exist.</dd>
+  <dt></dt>
+  <dd>When a file that exists on the lower layer is renamed, the file is first
+      copied up (if not already on the upper layer) and then renamed on the
+      upper, read-write layer. At the same time, the source file needs to be
+      "whiteouted" (so that the version of the source file in the
+      lower layer is rendered invisible). The whole operation needs to be done
+      atomically.</dd>
+  <dt></dt>
+  <dd>When not part of a union/overlay, the whiteout appears as a character
+      device with a {0,0} device number. (Note that other union/overlay
+      implementations may employ different methods for storing whiteout entries;
+      specifically, BSD union mount employs a separate inode type,
+      <b>DT_WHT</b>, which, while supported by some filesystems available in
+      Linux, such as CODA and XFS, is ignored by the kernel's whiteout support
+      code, as of Linux 4.19, at least.)</dd>
+  <dt></dt>
+  <dd><b>RENAME_WHITEOUT</b> requires the same privileges as creating a device
+      node (i.e., the <b>CAP_MKNOD</b> capability).</dd>
+  <dt></dt>
+  <dd><b>RENAME_WHITEOUT</b> can't be employed together with
+      <b>RENAME_EXCHANGE</b>.</dd>
+  <dt></dt>
+  <dd><b>RENAME_WHITEOUT</b> requires support from the underlying filesystem.
+      Among the filesystems that support it are tmpfs (since Linux 3.18), ext4
+      (since Linux 3.18), XFS (since Linux 4.1), f2fs (since Linux 4.2), btrfs
+      (since Linux 4.7), and ubifs (since Linux 4.9).</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, zero is returned. On error, -1 is returned, and
+    <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>Write permission is denied for the directory containing <i>oldpath</i> or
+      <i>newpath</i>, or, search permission is denied for one of the directories
+      in the path prefix of <i>oldpath</i> or <i>newpath</i>, or <i>oldpath</i>
+      is a directory and does not allow write permission (needed to update the
+      <i>..</i> entry). (See also <b>path_resolution</b>(7).)</dd>
+  <dt id="EBUSY"><a class="permalink" href="#EBUSY"><b>EBUSY</b></a></dt>
+  <dd>The rename fails because <i>oldpath</i> or <i>newpath</i> is a directory
+      that is in use by some process (perhaps as current working directory, or
+      as root directory, or because it was open for reading) or is in use by the
+      system (for example as a mount point), while the system considers this an
+      error. (Note that there is no requirement to return <b>EBUSY</b> in such
+      cases—there is nothing wrong with doing the rename
+      anyway—but it is allowed to return <b>EBUSY</b> if the system
+      cannot otherwise handle such situations.)</dd>
+  <dt id="EDQUOT"><a class="permalink" href="#EDQUOT"><b>EDQUOT</b></a></dt>
+  <dd>The user's quota of disk blocks on the filesystem has been exhausted.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>oldpath</i> or <i>newpath</i> points outside your accessible address
+      space.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The new pathname contained a path prefix of the old, or, more generally,
+      an attempt was made to make a directory a subdirectory of itself.</dd>
+  <dt id="EISDIR"><a class="permalink" href="#EISDIR"><b>EISDIR</b></a></dt>
+  <dd><i>newpath</i> is an existing directory, but <i>oldpath</i> is not a
+      directory.</dd>
+  <dt id="ELOOP"><a class="permalink" href="#ELOOP"><b>ELOOP</b></a></dt>
+  <dd>Too many symbolic links were encountered in resolving <i>oldpath</i> or
+      <i>newpath</i>.</dd>
+  <dt id="EMLINK"><a class="permalink" href="#EMLINK"><b>EMLINK</b></a></dt>
+  <dd><i>oldpath</i> already has the maximum number of links to it, or it was a
+      directory and the directory containing <i>newpath</i> has the maximum
+      number of links.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd><i>oldpath</i> or <i>newpath</i> was too long.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>The link named by <i>oldpath</i> does not exist; or, a directory component
+      in <i>newpath</i> does not exist; or, <i>oldpath</i> or <i>newpath</i> is
+      an empty string.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient kernel memory was available.</dd>
+  <dt id="ENOSPC"><a class="permalink" href="#ENOSPC"><b>ENOSPC</b></a></dt>
+  <dd>The device containing the file has no room for the new directory
+    entry.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>A component used as a directory in <i>oldpath</i> or <i>newpath</i> is
+      not, in fact, a directory. Or, <i>oldpath</i> is a directory, and
+      <i>newpath</i> exists but is not a directory.</dd>
+  <dt id="ENOTEMPTY"><a class="permalink" href="#ENOTEMPTY"><b>ENOTEMPTY</b> or
+    <b>EEXIST</b></a></dt>
+  <dd><i>newpath</i> is a nonempty directory, that is, contains entries other
+      than "." and "..".</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b> or
+    <b>EACCES</b></a></dt>
+  <dd>The directory containing <i>oldpath</i> has the sticky bit
+      (<b>S_ISVTX</b>) set and the process's effective user ID is neither the
+      user ID of the file to be deleted nor that of the directory containing it,
+      and the process is not privileged (Linux: does not have the
+      <b>CAP_FOWNER</b> capability); or <i>newpath</i> is an existing file and
+      the directory containing it has the sticky bit set and the process's
+      effective user ID is neither the user ID of the file to be replaced nor
+      that of the directory containing it, and the process is not privileged
+      (Linux: does not have the <b>CAP_FOWNER</b> capability); or the filesystem
+      containing <i>oldpath</i> does not support renaming of the type
+    requested.</dd>
+  <dt id="EROFS"><a class="permalink" href="#EROFS"><b>EROFS</b></a></dt>
+  <dd>The file is on a read-only filesystem.</dd>
+  <dt id="EXDEV"><a class="permalink" href="#EXDEV"><b>EXDEV</b></a></dt>
+  <dd><i>oldpath</i> and <i>newpath</i> are not on the same mounted filesystem.
+      (Linux permits a filesystem to be mounted at multiple points, but
+      <b>rename</b>() does not work across different mount points, even if the
+      same filesystem is mounted on both.)</dd>
+</dl>
+<p class="Pp">The following additional errors can occur for <b>renameat</b>()
+    and <b>renameat2</b>():</p>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd><i>oldpath</i> (<i>newpath</i>) is relative but <i>olddirfd</i>
+      (<i>newdirfd</i>) is not a valid file descriptor.</dd>
+  <dt id="ENOTDIR~2"><a class="permalink" href="#ENOTDIR~2"><b>ENOTDIR</b></a></dt>
+  <dd><i>oldpath</i> is relative and <i>olddirfd</i> is a file descriptor
+      referring to a file other than a directory; or similar for <i>newpath</i>
+      and <i>newdirfd</i></dd>
+</dl>
+<p class="Pp">The following additional errors can occur for
+  <b>renameat2</b>():</p>
+<dl class="Bl-tag">
+  <dt id="EEXIST"><a class="permalink" href="#EEXIST"><b>EEXIST</b></a></dt>
+  <dd><i>flags</i> contains <b>RENAME_NOREPLACE</b> and <i>newpath</i> already
+      exists.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>An invalid flag was specified in <i>flags</i>.</dd>
+  <dt id="EINVAL~3"><a class="permalink" href="#EINVAL~3"><b>EINVAL</b></a></dt>
+  <dd>Both <b>RENAME_NOREPLACE</b> and <b>RENAME_EXCHANGE</b> were specified in
+      <i>flags</i>.</dd>
+  <dt id="EINVAL~4"><a class="permalink" href="#EINVAL~4"><b>EINVAL</b></a></dt>
+  <dd>Both <b>RENAME_WHITEOUT</b> and <b>RENAME_EXCHANGE</b> were specified in
+      <i>flags</i>.</dd>
+  <dt id="EINVAL~5"><a class="permalink" href="#EINVAL~5"><b>EINVAL</b></a></dt>
+  <dd>The filesystem does not support one of the flags in <i>flags</i>.</dd>
+  <dt id="ENOENT~2"><a class="permalink" href="#ENOENT~2"><b>ENOENT</b></a></dt>
+  <dd><i>flags</i> contains <b>RENAME_EXCHANGE</b> and <i>newpath</i> does not
+      exist.</dd>
+  <dt id="EPERM~2"><a class="permalink" href="#EPERM~2"><b>EPERM</b></a></dt>
+  <dd><b>RENAME_WHITEOUT</b> was specified in <i>flags</i>, but the caller does
+      not have the <b>CAP_MKNOD</b> capability.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>renameat</b>() was added in Linux 2.6.16; library support was
+    added in glibc 2.4.</p>
+<p class="Pp"><b>renameat2</b>() was added in Linux 3.15; library support was
+    added in glibc 2.28.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>rename</b>(): 4.3BSD, C89, C99, POSIX.1-2001, POSIX.1-2008.</p>
+<p class="Pp"><b>renameat</b>(): POSIX.1-2008.</p>
+<p class="Pp"><b>renameat2</b>() is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="glibc_notes"><a class="permalink" href="#glibc_notes">glibc
+  notes</a></h2>
+<p class="Pp">On older kernels where <b>renameat</b>() is unavailable, the glibc
+    wrapper function falls back to the use of <b>rename</b>(). When
+    <i>oldpath</i> and <i>newpath</i> are relative pathnames, glibc constructs
+    pathnames based on the symbolic links in <i>/proc/self/fd</i> that
+    correspond to the <i>olddirfd</i> and <i>newdirfd</i> arguments.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">On NFS filesystems, you can not assume that if the operation
+    failed, the file was not renamed. If the server does the rename operation
+    and then crashes, the retransmitted RPC which will be processed when the
+    server is up again causes a failure. The application is expected to deal
+    with this. See <b>link</b>(2) for a similar problem.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>mv</b>(1), <b>rename</b>(1), <b>chmod</b>(2), <b>link</b>(2),
+    <b>symlink</b>(2), <b>unlink</b>(2), <b>path_resolution</b>(7),
+    <b>symlink</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

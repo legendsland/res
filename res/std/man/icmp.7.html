@@ -1,0 +1,232 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   This man page is Copyright (C) 1999 Andi Kleen <ak@muc.de>.
+  
+   %%%LICENSE_START(VERBATIM_ONE_PARA)
+   Permission is granted to distribute possibly modified copies
+   of this page provided the header is included verbatim,
+   and in case of nontrivial modification author and date
+   of the modification is added to the header.
+   %%%LICENSE_END
+  
+   $Id: icmp.7,v 1.6 2000/08/14 08:03:45 ak Exp $
+   --><head>
+<meta name="dc.identifier" content="res/0ed3b240b2e6ff45495bcfa3a61dfb8ef66c6d82">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>icmp(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">icmp(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">icmp(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">icmp - Linux IPv4 ICMP kernel module.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">This kernel protocol module implements the Internet Control
+    Message Protocol defined in RFC&nbsp;792. It is used to signal error
+    conditions and for diagnosis. The user doesn't interact directly with this
+    module; instead it communicates with the other protocols in the kernel and
+    these pass the ICMP errors to the application layers. The kernel ICMP module
+    also answers ICMP requests.</p>
+<p class="Pp">A user protocol may receive ICMP packets for all local sockets by
+    opening a raw socket with the protocol <b>IPPROTO_ICMP</b>. See
+    <b>raw</b>(7) for more information. The types of ICMP packets passed to the
+    socket can be filtered using the <b>ICMP_FILTER</b> socket option. ICMP
+    packets are always processed by the kernel too, even when passed to a user
+    socket.</p>
+<p class="Pp">Linux limits the rate of ICMP error packets to each destination.
+    <b>ICMP_REDIRECT</b> and <b>ICMP_DEST_UNREACH</b> are also limited by the
+    destination route of the incoming packets.</p>
+<section class="Ss">
+<h2 class="Ss" id="/proc_interfaces"><a class="permalink" href="#/proc_interfaces">/proc
+  interfaces</a></h2>
+<p class="Pp">ICMP supports a set of <i>/proc</i> interfaces to configure some
+    global IP parameters. The parameters can be accessed by reading or writing
+    files in the directory <i>/proc/sys/net/ipv4/</i>. Most of these parameters
+    are rate limitations for specific ICMP types. Linux 2.2 uses a token bucket
+    filter to limit ICMPs. The value is the timeout in jiffies until the token
+    bucket filter is cleared after a burst. A jiffy is a system dependent unit,
+    usually 10ms on i386 and about 1ms on alpha and ia64.</p>
+<dl class="Bl-tag">
+  <dt id="icmp_destunreach_rate"><a class="permalink" href="#icmp_destunreach_rate"><i>icmp_destunreach_rate</i>
+    (Linux 2.2 to Linux 2.4.9)</a></dt>
+  <dd>Maximum rate to send ICMP Destination Unreachable packets. This limits the
+      rate at which packets are sent to any individual route or destination. The
+      limit does not affect sending of <b>ICMP_FRAG_NEEDED</b> packets needed
+      for path MTU discovery.</dd>
+  <dt id="icmp_echo_ignore_all"><a class="permalink" href="#icmp_echo_ignore_all"><i>icmp_echo_ignore_all</i>
+    (since Linux 2.2)</a></dt>
+  <dd>If this value is nonzero, Linux will ignore all <b>ICMP_ECHO</b>
+    requests.</dd>
+  <dt id="icmp_echo_ignore_broadcasts"><a class="permalink" href="#icmp_echo_ignore_broadcasts"><i>icmp_echo_ignore_broadcasts</i>
+    (since Linux 2.2)</a></dt>
+  <dd>If this value is nonzero, Linux will ignore all <b>ICMP_ECHO</b> packets
+      sent to broadcast addresses.</dd>
+  <dt id="icmp_echoreply_rate"><a class="permalink" href="#icmp_echoreply_rate"><i>icmp_echoreply_rate</i>
+    (Linux 2.2 to Linux 2.4.9)</a></dt>
+  <dd>Maximum rate for sending <b>ICMP_ECHOREPLY</b> packets in response to
+      <b>ICMP_ECHOREQUEST</b> packets.</dd>
+  <dt id="icmp_errors_use_inbound_ifaddr"><a class="permalink" href="#icmp_errors_use_inbound_ifaddr"><i>icmp_errors_use_inbound_ifaddr</i>
+    (Boolean; default: disabled; since Linux 2.6.12)</a></dt>
+  <dd>If disabled, ICMP error messages are sent with the primary address of the
+      exiting interface.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>If enabled, the message will be sent with the primary address of the
+      interface that received the packet that caused the ICMP error. This is the
+      behavior that many network administrators will expect from a router. And
+      it can make debugging complicated network layouts much easier.</dd>
+  <dt></dt>
+  <dd>Note that if no primary address exists for the interface selected, then
+      the primary address of the first non-loopback interface that has one will
+      be used regardless of this setting.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="icmp_ignore_bogus_error_responses"><a class="permalink" href="#icmp_ignore_bogus_error_responses"><i>icmp_ignore_bogus_error_responses</i>
+    (Boolean; default: disabled; since Linux 2.2)</a></dt>
+  <dd>Some routers violate RFC1122 by sending bogus responses to broadcast
+      frames. Such violations are normally logged via a kernel warning. If this
+      parameter is enabled, the kernel will not give such warnings, which will
+      avoid log file clutter.</dd>
+  <dt id="icmp_paramprob_rate"><a class="permalink" href="#icmp_paramprob_rate"><i>icmp_paramprob_rate</i>
+    (Linux 2.2 to Linux 2.4.9)</a></dt>
+  <dd>Maximum rate for sending <b>ICMP_PARAMETERPROB</b> packets. These packets
+      are sent when a packet arrives with an invalid IP header.</dd>
+  <dt id="icmp_ratelimit"><a class="permalink" href="#icmp_ratelimit"><i>icmp_ratelimit</i>
+    (integer; default: 1000; since Linux 2.4.10)</a></dt>
+  <dd>Limit the maximum rates for sending ICMP packets whose type matches
+      <i>icmp_ratemask</i> (see below) to specific targets. 0 to disable any
+      limiting, otherwise the minimum space between responses in
+    milliseconds.</dd>
+  <dt id="icmp_ratemask"><a class="permalink" href="#icmp_ratemask"><i>icmp_ratemask</i>
+    (integer; default: see below; since Linux 2.4.10)</a></dt>
+  <dd>Mask made of ICMP types for which rates are being limited.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Significant bits: IHGFEDCBA9876543210
+    <br>
+    Default mask: 0000001100000011000 (0x1818)</dd>
+  <dt></dt>
+  <dd>Bit definitions (see the Linux kernel source file
+      <i>include/linux/icmp.h</i>):</dd>
+</dl>
+<div class="Bd-indent">
+<table class="tbl">
+  <tbody><tr>
+    <td>0 Echo Reply</td>
+  </tr>
+  <tr>
+    <td>3 Destination Unreachable *</td>
+  </tr>
+  <tr>
+    <td>4 Source Quench *</td>
+  </tr>
+  <tr>
+    <td>5 Redirect</td>
+  </tr>
+  <tr>
+    <td>8 Echo Request</td>
+  </tr>
+  <tr>
+    <td>B Time Exceeded *</td>
+  </tr>
+  <tr>
+    <td>C Parameter Problem *</td>
+  </tr>
+  <tr>
+    <td>D Timestamp Request</td>
+  </tr>
+  <tr>
+    <td>E Timestamp Reply</td>
+  </tr>
+  <tr>
+    <td>F Info Request</td>
+  </tr>
+  <tr>
+    <td>G Info Reply</td>
+  </tr>
+  <tr>
+    <td>H Address Mask Request</td>
+  </tr>
+  <tr>
+    <td>I Address Mask Reply</td>
+  </tr>
+</tbody></table>
+</div>
+<p class="Pp">The bits marked with an asterisk are rate limited by default (see
+    the default mask above).</p>
+<dl class="Bl-tag">
+  <dt id="icmp_timeexceed_rate"><a class="permalink" href="#icmp_timeexceed_rate"><i>icmp_timeexceed_rate</i>
+    (Linux 2.2 to Linux 2.4.9)</a></dt>
+  <dd>Maximum rate for sending <b>ICMP_TIME_EXCEEDED</b> packets. These packets
+      are sent to prevent loops when a packet has crossed too many hops.</dd>
+  <dt id="ping_group_range"><a class="permalink" href="#ping_group_range"><i>ping_group_range</i>
+    (two integers; default: see below; since Linux 2.6.39)</a></dt>
+  <dd>Range of the group IDs (minimum and maximum group IDs, inclusive) that are
+      allowed to create ICMP Echo sockets. The default is "1 0", which
+      means no group is allowed to create ICMP Echo sockets.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">Support for the <b>ICMP_ADDRESS</b> request was removed in Linux
+    2.2.</p>
+<p class="Pp">Support for <b>ICMP_SOURCE_QUENCH</b> was removed in Linux
+  2.2.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">As many other implementations don't support <b>IPPROTO_ICMP</b>
+    raw sockets, this feature should not be relied on in portable programs.</p>
+<p class="Pp"><b>ICMP_REDIRECT</b> packets are not sent when Linux is not acting
+    as a router. They are also accepted only from the old gateway defined in the
+    routing table and the redirect routes are expired after some time.</p>
+<p class="Pp">The 64-bit timestamp returned by <b>ICMP_TIMESTAMP</b> is in
+    milliseconds since the Epoch, 1970-01-01 00:00:00 +0000 (UTC).</p>
+<p class="Pp">Linux ICMP internally uses a raw socket to send ICMPs. This raw
+    socket may appear in <b>netstat</b>(8) output with a zero inode.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>ip</b>(7), <b>rdisc</b>(8)</p>
+<p class="Pp">RFC&nbsp;792 for a description of the ICMP protocol.</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/178b0f12868ef95db17c6bd73011441f268a11b2">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>getgrent(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">getgrent(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">getgrent(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getgrent, setgrent, endgrent - get group file entry</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/types.h&gt;</b>
+<b>#include &lt;grp.h&gt;</b></pre>
+<pre><b>struct group *getgrent(void);</b></pre>
+<pre><b>void setgrent(void);</b>
+<b>void endgrent(void);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>setgrent</b>():</p>
+<pre><br>
+    _XOPEN_SOURCE &gt;= 500
+<br>
+        || /* glibc &gt;= 2.19: */ _DEFAULT_SOURCE
+<br>
+        || /* glibc &lt;= 2.19: */ _BSD_SOURCE || _SVID_SOURCE</pre>
+<p class="Pp"><b>getgrent</b>(), <b>endgrent</b>():</p>
+<pre><br>
+    Since glibc 2.22:
+<br>
+        _XOPEN_SOURCE &gt;= 500 || _DEFAULT_SOURCE
+<br>
+    glibc 2.21 and earlier
+<br>
+        _XOPEN_SOURCE &gt;= 500
+<br>
+            || /* Since glibc 2.12: */ _POSIX_C_SOURCE &gt;= 200809L
+<br>
+            || /* glibc &lt;= 2.19: */ _BSD_SOURCE || _SVID_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>getgrent</b>() function returns a pointer to a structure
+    containing the broken-out fields of a record in the group database (e.g.,
+    the local group file <i>/etc/group</i>, NIS, and LDAP). The first time
+    <b>getgrent</b>() is called, it returns the first entry; thereafter, it
+    returns successive entries.</p>
+<p class="Pp">The <b>setgrent</b>() function rewinds to the beginning of the
+    group database, to allow repeated scans.</p>
+<p class="Pp">The <b>endgrent</b>() function is used to close the group database
+    after all processing has been performed.</p>
+<p class="Pp">The <i>group</i> structure is defined in <i>&lt;grp.h&gt;</i> as
+    follows:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct group {
+<br>
+    char   *gr_name;        /* group name */
+<br>
+    char   *gr_passwd;      /* group password */
+<br>
+    gid_t   gr_gid;         /* group ID */
+<br>
+    char  **gr_mem;         /* NULL-terminated array of pointers
+<br>
+                               to names of group members */
+};
+</pre>
+<br>
+<p class="Pp">For more information about the fields of this structure, see
+    <b>group</b>(5).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <b>getgrent</b>() function returns a pointer to a <i>group</i>
+    structure, or NULL if there are no more entries or an error occurs.</p>
+<p class="Pp">Upon error, <i>errno</i> may be set. If one wants to check
+    <i>errno</i> after the call, it should be set to zero before the call.</p>
+<p class="Pp">The return value may point to a static area, and may be
+    overwritten by subsequent calls to <b>getgrent</b>(), <b>getgrgid</b>(3), or
+    <b>getgrnam</b>(3). (Do not pass the returned pointer to
+  <b>free</b>(3).)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>The service was temporarily unavailable; try again later. For NSS backends
+      in glibc this indicates a temporary error talking to the backend. The
+      error may correct itself, retrying later is suggested.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>A signal was caught; see <b>signal</b>(7).</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>I/O error.</dd>
+  <dt id="EMFILE"><a class="permalink" href="#EMFILE"><b>EMFILE</b></a></dt>
+  <dd>The per-process limit on the number of open file descriptors has been
+      reached.</dd>
+  <dt id="ENFILE"><a class="permalink" href="#ENFILE"><b>ENFILE</b></a></dt>
+  <dd>The system-wide limit on the total number of open files has been
+    reached.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>A necessary input file cannot be found. For NSS backends in glibc this
+      indicates the backend is not correctly configured.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient memory to allocate <i>group</i> structure.</dd>
+  <dt id="ERANGE"><a class="permalink" href="#ERANGE"><b>ERANGE</b></a></dt>
+  <dd>Insufficient buffer space supplied.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FILES"><a class="permalink" href="#FILES">FILES</a></h1>
+<dl class="Bl-tag">
+  <dt><i>/etc/group</i></dt>
+  <dd>local group database file</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>getgrent ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race:grent race:grentbuf locale</td>
+  </tr>
+  <tr>
+    <td>setgrent (), endgrent ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race:grent locale</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+<p class="Pp">In the above table, <i>grent</i> in <i>race:grent</i> signifies
+    that if any of the functions <b>setgrent</b>(), <b>getgrent</b>(), or
+    <b>endgrent</b>() are used in parallel in different threads of a program,
+    then data races could occur.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, SVr4, 4.3BSD.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>fgetgrent</b>(3), <b>getgrent_r</b>(3), <b>getgrgid</b>(3),
+    <b>getgrnam</b>(3), <b>getgrouplist</b>(3), <b>putgrent</b>(3),
+    <b>group</b>(5)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

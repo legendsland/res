@@ -1,0 +1,745 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/8edd5e9edf090461498f393536019ea0548894d6">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>printf.h(3head)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">printf.h(3head)</td>
+    <td class="head-vol"></td>
+    <td class="head-rtitle">printf.h(3head)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">printf.h, register_printf_specifier, register_printf_modifier,
+    register_printf_type, printf_function, printf_arginfo_size_function,
+    printf_va_arg_function, printf_info, PA_INT, PA_CHAR, PA_WCHAR, PA_STRING,
+    PA_WSTRING, PA_POINTER, PA_FLOAT, PA_DOUBLE, PA_LAST, PA_FLAG_LONG_LONG,
+    PA_FLAG_LONG_DOUBLE, PA_FLAG_LONG, PA_FLAG_SHORT, PA_FLAG_PTR - define
+    custom behavior for printf-like functions</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;printf.h&gt;</b></pre>
+<pre><b>int register_printf_specifier(int </b><i>spec</i><b>, printf_function </b><i>func</i><b>,</b>
+<b>                              printf_arginfo_size_function </b><i>arginfo</i><b>);</b>
+<b>int register_printf_modifier(const wchar_t *</b><i>str</i><b>);</b>
+<b>int register_printf_type(printf_va_arg_function </b><i>fct</i><b>);</b></pre>
+<section class="Ss">
+<h2 class="Ss" id="Callbacks"><a class="permalink" href="#Callbacks">Callbacks</a></h2>
+<pre><b>typedef int printf_function(FILE *</b><i>stream</i><b>, const struct printf_info *</b><i>info</i><b>,</b>
+<b>                              const void *const </b><i>args</i><b>[]);</b>
+<b>typedef int printf_arginfo_size_function(const struct printf_info *</b><i>info</i><b>,</b>
+<b>                              size_t </b><i>n</i><b>, int </b><i>argtypes</i><b>[</b><i>n</i><b>], int </b><i>size</i><b>[</b><i>n</i><b>]);</b>
+<b>typedef void printf_va_arg_function(void *</b><i>mem</i><b>, va_list *</b><i>ap</i><b>);</b></pre>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Types"><a class="permalink" href="#Types">Types</a></h2>
+<pre><b>struct printf_info {</b>
+<b>    int            prec;            </b>// Precision
+<b>    int            width;           </b>// Width
+<b>    wchar_t        spec;            </b>// Format letter
+<b>    unsigned int   is_long_double:1;</b>// <b>L</b> or <b>ll</b> flag
+<b>    unsigned int   is_short:1;      </b>// <b>h</b> flag
+<b>    unsigned int   is_long:1;       </b>// <b>l</b> flag
+<b>    unsigned int   alt:1;           </b>// <b>#</b> flag
+<b>    unsigned int   space:1;         </b>// Space flag
+<b>    unsigned int   left:1;          </b>// <b>-</b> flag
+<b>    unsigned int   showsign:1;      </b>// <b>+</b> flag
+<b>    unsigned int   group:1;         </b>// <b>'</b> flag
+<b>    unsigned int   extra:1;         </b>// For special use
+<b>    unsigned int   is_char:1;       </b>// <b>hh</b> flag
+<b>    unsigned int   wide:1;          </b>// True for wide character streams
+<b>    unsigned int   i18n:1;          </b>// <b>I</b> flag
+<b>    unsigned int   is_binary128:1;  </b>/* Floating-point argument is
+<b>                                    </b>   ABI-compatible with
+<b>                                    </b>   IEC 60559 binary128 */
+<b>    unsigned short user;            </b>// Bits for user-installed modifiers
+<b>    wchar_t        pad;             </b>// Padding character
+<b>};</b>
+</pre>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Constants"><a class="permalink" href="#Constants">Constants</a></h2>
+<pre><b>#define PA_FLAG_LONG_LONG    </b>/* ... */
+<b>#define PA_FLAG_LONG_DOUBLE  </b>/* ... */
+<b>#define PA_FLAG_LONG         </b>/* ... */
+<b>#define PA_FLAG_SHORT        </b>/* ... */
+<b>#define PA_FLAG_PTR          </b>/* ... */
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">These functions serve to extend and/or modify the behavior of the
+    <b>printf</b>(3) family of functions.</p>
+<section class="Ss">
+<h2 class="Ss" id="register_printf_specifier()"><a class="permalink" href="#register_printf_specifier()">register_printf_specifier()</a></h2>
+<p class="Pp">This function registers a custom conversion specifier for the
+    <b>printf</b>(3) family of functions.</p>
+<dl class="Bl-tag">
+  <dt id="spec"><a class="permalink" href="#spec"><i>spec</i></a></dt>
+  <dd>The character which will be used as a conversion specifier in the format
+      string.</dd>
+  <dt id="func"><a class="permalink" href="#func"><i>func</i></a></dt>
+  <dd>Callback function that will be executed by the <b>printf</b>(3) family of
+      functions to format the input arguments into the output
+    <i>stream</i>.</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="stream"><a class="permalink" href="#stream"><i>stream</i></a></dt>
+  <dd>Output stream where the formatted output should be printed. This stream
+      transparently represents the output, even in the case of functions that
+      write to a string.</dd>
+  <dt id="info"><a class="permalink" href="#info"><i>info</i></a></dt>
+  <dd>Structure that holds context information, including the modifiers
+      specified in the format string. This holds the same contents as in
+      <i>arginfo</i>.</dd>
+  <dt id="args"><a class="permalink" href="#args"><i>args</i></a></dt>
+  <dd>Array of pointers to the arguments to the <b>printf</b>(3)-like
+    function.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="arginfo"><a class="permalink" href="#arginfo"><i>arginfo</i></a></dt>
+  <dd>Callback function that will be executed by the <b>printf</b>(3) family of
+      functions to know how many arguments should be parsed for the custom
+      specifier and also their types.</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="info~2"><a class="permalink" href="#info~2"><i>info</i></a></dt>
+  <dd>Structure that holds context information, including the modifiers
+      specified in the format string. This holds the same contents as in
+      <i>func</i>.</dd>
+  <dt id="n"><a class="permalink" href="#n"><i>n</i></a></dt>
+  <dd>Number of arguments remaining to be parsed.</dd>
+  <dt id="argtypes"><a class="permalink" href="#argtypes"><i>argtypes</i></a></dt>
+  <dd>This array should be set to define the type of each of the arguments that
+      will be parsed. Each element in the array represents one of the arguments
+      to be parsed, in the same order that they are passed to the
+      <b>printf</b>(3)-like function. Each element should be set to a base type
+      (<b>PA_</b>*) from the enum above, or a custom one, and optionally ORed
+      with an appropriate length modifier (<b>PA_FLAG_</b>*).</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">The type is determined by using one of the following
+  constants:</p>
+<dl class="Bl-tag">
+  <dt id="PA_INT"><a class="permalink" href="#PA_INT"><b>PA_INT</b></a></dt>
+  <dd><i>int</i>.</dd>
+  <dt id="PA_CHAR"><a class="permalink" href="#PA_CHAR"><b>PA_CHAR</b></a></dt>
+  <dd><i>int</i>, cast to <i>char</i>.</dd>
+  <dt id="PA_WCHAR"><a class="permalink" href="#PA_WCHAR"><b>PA_WCHAR</b></a></dt>
+  <dd><i>wchar_t</i>.</dd>
+  <dt id="PA_STRING"><a class="permalink" href="#PA_STRING"><b>PA_STRING</b></a></dt>
+  <dd><i>const char&nbsp;*</i>, a '\0'-terminated string.</dd>
+  <dt id="PA_WSTRING"><a class="permalink" href="#PA_WSTRING"><b>PA_WSTRING</b></a></dt>
+  <dd><i>const wchar_t&nbsp;*</i>, a wide character L'\0'-terminated
+    string.</dd>
+  <dt id="PA_POINTER"><a class="permalink" href="#PA_POINTER"><b>PA_POINTER</b></a></dt>
+  <dd><i>void&nbsp;*</i>.</dd>
+  <dt id="PA_FLOAT"><a class="permalink" href="#PA_FLOAT"><b>PA_FLOAT</b></a></dt>
+  <dd><i>float</i>.</dd>
+  <dt id="PA_DOUBLE"><a class="permalink" href="#PA_DOUBLE"><b>PA_DOUBLE</b></a></dt>
+  <dd><i>double</i>.</dd>
+  <dt id="PA_LAST"><a class="permalink" href="#PA_LAST"><b>PA_LAST</b></a></dt>
+  <dd>TODO.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="size"><a class="permalink" href="#size"><i>size</i></a></dt>
+  <dd>For user-defined types, the size of the type (in bytes) should also be
+      specified through this array. Otherwise, leave it unused.</dd>
+</dl>
+</div>
+<p class="Pp"><i>arginfo</i> is called before <i>func</i>, and prepares some
+    information needed to call <i>func</i>.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="register_printf_modifier()"><a class="permalink" href="#register_printf_modifier()">register_printf_modifier()</a></h2>
+<p class="Pp">TODO</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="register_printf_type()"><a class="permalink" href="#register_printf_type()">register_printf_type()</a></h2>
+<p class="Pp">TODO</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp"><b>register_printf_specifier</b>(),
+    <b>register_printf_modifier</b>(), and <b>register_printf_type</b>() return
+    zero on success, or -1 on error.</p>
+<section class="Ss">
+<h2 class="Ss" id="Callbacks~2"><a class="permalink" href="#Callbacks~2">Callbacks</a></h2>
+<p class="Pp">The callback of type <i>printf_function</i> should return the
+    number of characters written, or -1 on error.</p>
+<p class="Pp">The callback of type <i>printf_arginfo_size_function</i> should
+    return the number of arguments to be parsed by this specifier. It also
+    passes information about the type of those arguments to the caller through
+    <i>argtypes</i>. On error, it should return -1.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The specifier was not a valid character.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>register_printf_function</b>(3) is an older function similar to
+    <b>register_printf_specifier</b>(), and is now deprecated. That function
+    can't handle user-defined types.</p>
+<p class="Pp"><b>register_printf_specifier</b>() superseeds
+    <b>register_printf_function</b>(3).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These nonstandard functions are present in glibc.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The following example program registers the 'b' and 'B' specifiers
+    to print integers in binary format, mirroring rules for other unsigned
+    conversion specifiers like 'x' and 'u'. This can be used to print in binary
+    prior to C23.</p>
+<p class="Pp"></p>
+<pre>/* This code is in the public domain */
+#include &lt;err.h&gt;
+#include &lt;limits.h&gt;
+#include &lt;stddef.h&gt;
+#include &lt;stdint.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;sys/param.h&gt;
+#include &lt;printf.h&gt;
+#define GROUP_SEP  '\''
+struct Printf_Pad {
+<br>
+    char    ch;
+<br>
+    size_t  len;
+};
+static int b_printf(FILE *stream, const struct printf_info *info,
+<br>
+                    const void *const args[]);
+static int b_arginf_sz(const struct printf_info *info,
+<br>
+                    size_t n, int argtypes[n], int size[n]);
+static uintmax_t b_value(const struct printf_info *info,
+<br>
+                    const void *arg);
+static size_t b_bin_repr(char bin[UINTMAX_WIDTH],
+<br>
+                    const struct printf_info *info, const void *arg);
+static size_t b_bin_len(const struct printf_info *info,
+<br>
+                    ptrdiff_t min_len);
+static size_t b_pad_len(const struct printf_info *info,
+<br>
+                    ptrdiff_t bin_len);
+static ssize_t b_print_prefix(FILE *stream,
+<br>
+                    const struct printf_info *info);
+static ssize_t b_pad_zeros(FILE *stream, const struct printf_info *info,
+<br>
+                    ptrdiff_t min_len);
+static ssize_t b_print_number(FILE *stream,
+<br>
+                    const struct printf_info *info,
+<br>
+                    const char bin[UINTMAX_WIDTH],
+<br>
+                    size_t min_len, size_t bin_len);
+static char pad_ch(const struct printf_info *info);
+static ssize_t pad_spaces(FILE *stream, size_t pad_len);
+int
+main(void)
+{
+<br>
+    if (register_printf_specifier('b', b_printf, b_arginf_sz) == -1)
+<br>
+        err(EXIT_FAILURE, "register_printf_specifier('b', ...)");
+<br>
+    if (register_printf_specifier('B', b_printf, b_arginf_sz) == -1)
+<br>
+        err(EXIT_FAILURE, "register_printf_specifier('B', ...)");
+<br>
+    printf("....----....----....----....----\n");
+<br>
+    printf("%llb;\n", 0x5Ellu);
+<br>
+    printf("%lB;\n", 0x5Elu);
+<br>
+    printf("%b;\n", 0x5Eu);
+<br>
+    printf("%hB;\n", 0x5Eu);
+<br>
+    printf("%hhb;\n", 0x5Eu);
+<br>
+    printf("%jb;\n", (uintmax_t)0x5E);
+<br>
+    printf("%zb;\n", (size_t)0x5E);
+<br>
+    printf("....----....----....----....----\n");
+<br>
+    printf("%#b;\n", 0x5Eu);
+<br>
+    printf("%#B;\n", 0x5Eu);
+<br>
+    printf("....----....----....----....----\n");
+<br>
+    printf("%10b;\n", 0x5Eu);
+<br>
+    printf("%010b;\n", 0x5Eu);
+<br>
+    printf("%.10b;\n", 0x5Eu);
+<br>
+    printf("....----....----....----....----\n");
+<br>
+    printf("%-10B;\n", 0x5Eu);
+<br>
+    printf("....----....----....----....----\n");
+<br>
+    printf("%'B;\n", 0x5Eu);
+<br>
+    printf("....----....----....----....----\n");
+<br>
+    printf("....----....----....----....----\n");
+<br>
+    printf("%#16.12b;\n", 0xAB);
+<br>
+    printf("%-#'20.12b;\n", 0xAB);
+<br>
+    printf("%#'020B;\n", 0xAB);
+<br>
+    printf("....----....----....----....----\n");
+<br>
+    printf("%#020B;\n", 0xAB);
+<br>
+    printf("%'020B;\n", 0xAB);
+<br>
+    printf("%020B;\n", 0xAB);
+<br>
+    printf("....----....----....----....----\n");
+<br>
+    printf("%#021B;\n", 0xAB);
+<br>
+    printf("%'021B;\n", 0xAB);
+<br>
+    printf("%021B;\n", 0xAB);
+<br>
+    printf("....----....----....----....----\n");
+<br>
+    printf("%#022B;\n", 0xAB);
+<br>
+    printf("%'022B;\n", 0xAB);
+<br>
+    printf("%022B;\n", 0xAB);
+<br>
+    printf("....----....----....----....----\n");
+<br>
+    printf("%#023B;\n", 0xAB);
+<br>
+    printf("%'023B;\n", 0xAB);
+<br>
+    printf("%023B;\n", 0xAB);
+<br>
+    printf("....----....----....----....----\n");
+<br>
+    printf("%-#'19.11b;\n", 0xAB);
+<br>
+    printf("%#'019B;\n", 0xAB);
+<br>
+    printf("%#019B;\n", 0xAB);
+<br>
+    printf("....----....----....----....----\n");
+<br>
+    printf("%'019B;\n", 0xAB);
+<br>
+    printf("%019B;\n", 0xAB);
+<br>
+    printf("%#016b;\n", 0xAB);
+<br>
+    printf("....----....----....----....----\n");
+<br>
+    return 0;
+}
+static int
+b_printf(FILE *stream, const struct printf_info *info,
+<br>
+         const void *const args[])
+{
+<br>
+    char               bin[UINTMAX_WIDTH];
+<br>
+    size_t             min_len, bin_len;
+<br>
+    ssize_t            len, tmp;
+<br>
+    struct Printf_Pad  pad = {0};
+<br>
+    len = 0;
+<br>
+    min_len = b_bin_repr(bin, info, args[0]);
+<br>
+    bin_len = b_bin_len(info, min_len);
+<br>
+    pad.ch = pad_ch(info);
+<br>
+    if (pad.ch == ' ')
+<br>
+        pad.len = b_pad_len(info, bin_len);
+<br>
+    /* Padding with ' ' (right aligned) */
+<br>
+    if ((pad.ch == ' ') &amp;&amp; !info-&gt;left) {
+<br>
+        tmp = pad_spaces(stream, pad.len);
+<br>
+        if (tmp == EOF)
+<br>
+            return EOF;
+<br>
+        len += tmp;
+<br>
+    }
+<br>
+    /* "0b"/"0B" prefix */
+<br>
+    if (info-&gt;alt) {
+<br>
+        tmp = b_print_prefix(stream, info);
+<br>
+        if (tmp == EOF)
+<br>
+            return EOF;
+<br>
+        len += tmp;
+<br>
+    }
+<br>
+    /* Padding with '0' */
+<br>
+    if (pad.ch == '0') {
+<br>
+        tmp = b_pad_zeros(stream, info, min_len);
+<br>
+        if (tmp == EOF)
+<br>
+            return EOF;
+<br>
+        len += tmp;
+<br>
+    }
+<br>
+    /* Print number (including leading 0s to fill precision) */
+<br>
+    tmp = b_print_number(stream, info, bin, min_len, bin_len);
+<br>
+    if (tmp == EOF)
+<br>
+        return EOF;
+<br>
+    len += tmp;
+<br>
+    /* Padding with ' ' (left aligned) */
+<br>
+    if (info-&gt;left) {
+<br>
+        tmp = pad_spaces(stream, pad.len);
+<br>
+        if (tmp == EOF)
+<br>
+            return EOF;
+<br>
+        len += tmp;
+<br>
+    }
+<br>
+    return len;
+}
+static int
+b_arginf_sz(const struct printf_info *info, size_t n, int argtypes[n],
+<br>
+            [[maybe_unused]] int size[n])
+{
+<br>
+    if (n &lt; 1)
+<br>
+        return -1;
+<br>
+    if (info-&gt;is_long_double)
+<br>
+        argtypes[0] = PA_INT | PA_FLAG_LONG_LONG;
+<br>
+    else if (info-&gt;is_long)
+<br>
+        argtypes[0] = PA_INT | PA_FLAG_LONG;
+<br>
+    else
+<br>
+        argtypes[0] = PA_INT;
+<br>
+    return 1;
+}
+static uintmax_t
+b_value(const struct printf_info *info, const void *arg)
+{
+<br>
+    if (info-&gt;is_long_double)
+<br>
+        return *(const unsigned long long *)arg;
+<br>
+    if (info-&gt;is_long)
+<br>
+        return *(const unsigned long *)arg;
+<br>
+    /* short and char are both promoted to int */
+<br>
+    return *(const unsigned int *)arg;
+}
+static size_t
+b_bin_repr(char bin[UINTMAX_WIDTH],
+<br>
+           const struct printf_info *info, const void *arg)
+{
+<br>
+    size_t     min_len;
+<br>
+    uintmax_t  val;
+<br>
+    val = b_value(info, arg);
+<br>
+    bin[0] = '0';
+<br>
+    for (min_len = 0; val; min_len++) {
+<br>
+        bin[min_len] = '0' + (val % 2);
+<br>
+        val &gt;&gt;= 1;
+<br>
+    }
+<br>
+    return MAX(min_len, 1);
+}
+static size_t
+b_bin_len(const struct printf_info *info, ptrdiff_t min_len)
+{
+<br>
+    return MAX(info-&gt;prec, min_len);
+}
+static size_t
+b_pad_len(const struct printf_info *info, ptrdiff_t bin_len)
+{
+<br>
+    ptrdiff_t  pad_len;
+<br>
+    pad_len = info-&gt;width - bin_len;
+<br>
+    if (info-&gt;alt)
+<br>
+        pad_len -= 2;
+<br>
+    if (info-&gt;group)
+<br>
+        pad_len -= (bin_len - 1) / 4;
+<br>
+    return MAX(pad_len, 0);
+}
+static ssize_t
+b_print_prefix(FILE *stream, const struct printf_info *info)
+{
+<br>
+    ssize_t len;
+<br>
+    len = 0;
+<br>
+    if (fputc('0', stream) == EOF)
+<br>
+        return EOF;
+<br>
+    len++;
+<br>
+    if (fputc(info-&gt;spec, stream) == EOF)
+<br>
+        return EOF;
+<br>
+    len++;
+<br>
+    return len;
+}
+static ssize_t
+b_pad_zeros(FILE *stream, const struct printf_info *info,
+<br>
+            ptrdiff_t min_len)
+{
+<br>
+    ssize_t    len;
+<br>
+    ptrdiff_t  tmp;
+<br>
+    len = 0;
+<br>
+    tmp = info-&gt;width - (info-&gt;alt * 2);
+<br>
+    if (info-&gt;group)
+<br>
+        tmp -= tmp / 5 - !(tmp % 5);
+<br>
+    for (ptrdiff_t i = tmp - 1; i &gt; min_len - 1; i--) {
+<br>
+        if (fputc('0', stream) == EOF)
+<br>
+            return EOF;
+<br>
+        len++;
+<br>
+        if (!info-&gt;group || (i % 4))
+<br>
+            continue;
+<br>
+        if (fputc(GROUP_SEP, stream) == EOF)
+<br>
+            return EOF;
+<br>
+        len++;
+<br>
+    }
+<br>
+    return len;
+}
+static ssize_t
+b_print_number(FILE *stream, const struct printf_info *info,
+<br>
+               const char bin[UINTMAX_WIDTH],
+<br>
+               size_t min_len, size_t bin_len)
+{
+<br>
+    ssize_t  len;
+<br>
+    len = 0;
+<br>
+    /* Print leading zeros to fill precision */
+<br>
+    for (size_t i = bin_len - 1; i &gt; min_len - 1; i--) {
+<br>
+        if (fputc('0', stream) == EOF)
+<br>
+            return EOF;
+<br>
+        len++;
+<br>
+        if (!info-&gt;group || (i % 4))
+<br>
+            continue;
+<br>
+        if (fputc(GROUP_SEP, stream) == EOF)
+<br>
+            return EOF;
+<br>
+        len++;
+<br>
+    }
+<br>
+    /* Print number */
+<br>
+    for (size_t i = min_len - 1; i &lt; min_len; i--) {
+<br>
+        if (fputc(bin[i], stream) == EOF)
+<br>
+            return EOF;
+<br>
+        len++;
+<br>
+        if (!info-&gt;group || (i % 4) || !i)
+<br>
+            continue;
+<br>
+        if (fputc(GROUP_SEP, stream) == EOF)
+<br>
+            return EOF;
+<br>
+        len++;
+<br>
+    }
+<br>
+    return len;
+}
+static char
+pad_ch(const struct printf_info *info)
+{
+<br>
+    if ((info-&gt;prec != -1) || (info-&gt;pad == ' ') || info-&gt;left)
+<br>
+        return ' ';
+<br>
+    return '0';
+}
+static ssize_t
+pad_spaces(FILE *stream, size_t pad_len)
+{
+<br>
+    ssize_t  len;
+<br>
+    len = 0;
+<br>
+    for (size_t i = pad_len - 1; i &lt; pad_len; i--) {
+<br>
+        if (fputc(' ', stream) == EOF)
+<br>
+            return EOF;
+<br>
+        len++;
+<br>
+    }
+<br>
+    return len;
+}
+</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>asprintf</b>(3), <b>printf</b>(3), <b>wprintf</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2022-09-18</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

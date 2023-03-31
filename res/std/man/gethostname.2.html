@@ -1,0 +1,162 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright 1993 Rickard E. Faith (faith@cs.unc.edu)
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Modified 1995-07-22 by Michael Chastain <mec@duracef.shout.net>:
+     'gethostname' is real system call on Linux/Alpha.
+   Modified 1997-01-31 by Eric S. Raymond <esr@thyrsus.com>
+   Modified 2000-06-04, 2001-12-15 by aeb
+   Modified 2004-06-17 by mtk
+   Modified 2008-11-27 by mtk
+   --><head>
+<meta name="dc.identifier" content="res/33c667d2cc38a303c9b8f3a226ba3a8731e15afc">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>gethostname(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">gethostname(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">gethostname(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">gethostname, sethostname - get/set hostname</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int gethostname(char *</b><i>name</i><b>, size_t </b><i>len</i><b>);</b>
+<b>int sethostname(const char *</b><i>name</i><b>, size_t </b><i>len</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>gethostname</b>():</p>
+<pre><br>
+    _XOPEN_SOURCE &gt;= 500 || _POSIX_C_SOURCE &gt;= 200112L
+<br>
+        || /* glibc 2.19 and earlier */ _BSD_SOURCE</pre>
+<p class="Pp"><b>sethostname</b>():</p>
+<pre><br>
+    Since glibc 2.21:
+<br>
+        _DEFAULT_SOURCE
+<br>
+    In glibc 2.19 and 2.20:
+<br>
+        _DEFAULT_SOURCE || (_XOPEN_SOURCE &amp;&amp; _XOPEN_SOURCE &lt; 500)
+<br>
+    Up to and including glibc 2.19:
+<br>
+        _BSD_SOURCE || (_XOPEN_SOURCE &amp;&amp; _XOPEN_SOURCE &lt; 500)</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">These system calls are used to access or to change the system
+    hostname. More precisely, they operate on the hostname associated with the
+    calling process's UTS namespace.</p>
+<p class="Pp"><b>sethostname</b>() sets the hostname to the value given in the
+    character array <i>name</i>. The <i>len</i> argument specifies the number of
+    bytes in <i>name</i>. (Thus, <i>name</i> does not require a terminating null
+    byte.)</p>
+<p class="Pp"><b>gethostname</b>() returns the null-terminated hostname in the
+    character array <i>name</i>, which has a length of <i>len</i> bytes. If the
+    null-terminated hostname is too large to fit, then the name is truncated,
+    and no error is returned (but see NOTES below). POSIX.1 says that if such
+    truncation occurs, then it is unspecified whether the returned buffer
+    includes a terminating null byte.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, zero is returned. On error, -1 is returned, and
+    <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>name</i> is an invalid address.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>len</i> is negative or, for <b>sethostname</b>(), <i>len</i> is larger
+      than the maximum allowed size.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd>(glibc <b>gethostname</b>()) <i>len</i> is smaller than the actual size.
+      (Before glibc 2.1, glibc uses <b>EINVAL</b> for this case.)</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>For <b>sethostname</b>(), the caller did not have the <b>CAP_SYS_ADMIN</b>
+      capability in the user namespace associated with its UTS namespace (see
+      <b>namespaces</b>(7)).</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">SVr4, 4.4BSD (these interfaces first appeared in 4.2BSD).
+    POSIX.1-2001 and POSIX.1-2008 specify <b>gethostname</b>() but not
+    <b>sethostname</b>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">SUSv2 guarantees that "Host names are limited to 255
+    bytes". POSIX.1 guarantees that "Host names (not including the
+    terminating null byte) are limited to <b>HOST_NAME_MAX</b> bytes". On
+    Linux, <b>HOST_NAME_MAX</b> is defined with the value 64, which has been the
+    limit since Linux 1.0 (earlier kernels imposed a limit of 8 bytes).</p>
+<section class="Ss">
+<h2 class="Ss" id="C_library/kernel_differences"><a class="permalink" href="#C_library/kernel_differences">C
+  library/kernel differences</a></h2>
+<p class="Pp">The GNU C library does not employ the <b>gethostname</b>() system
+    call; instead, it implements <b>gethostname</b>() as a library function that
+    calls <b>uname</b>(2) and copies up to <i>len</i> bytes from the returned
+    <i>nodename</i> field into <i>name</i>. Having performed the copy, the
+    function then checks if the length of the <i>nodename</i> was greater than
+    or equal to <i>len</i>, and if it is, then the function returns -1 with
+    <i>errno</i> set to <b>ENAMETOOLONG</b>; in this case, a terminating null
+    byte is not included in the returned <i>name</i>.</p>
+<p class="Pp">Versions of glibc before glibc 2.2 handle the case where the
+    length of the <i>nodename</i> was greater than or equal to <i>len</i>
+    differently: nothing is copied into <i>name</i> and the function returns -1
+    with <i>errno</i> set to <b>ENAMETOOLONG</b>.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>hostname</b>(1), <b>getdomainname</b>(2),
+    <b>setdomainname</b>(2), <b>uname</b>(2), <b>uts_namespaces</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

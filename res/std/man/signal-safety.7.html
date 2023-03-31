@@ -1,0 +1,804 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 2016 Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/269655acf96f0d94b5ff620d2526a28d9e619c32">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>signal-safety(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">signal-safety(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">signal-safety(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">signal-safety - async-signal-safe functions</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">An <i>async-signal-safe</i> function is one that can be safely
+    called from within a signal handler. Many functions are <i>not</i>
+    async-signal-safe. In particular, nonreentrant functions are generally
+    unsafe to call from a signal handler.</p>
+<p class="Pp">The kinds of issues that render a function unsafe can be quickly
+    understood when one considers the implementation of the <i>stdio</i>
+    library, all of whose functions are not async-signal-safe.</p>
+<p class="Pp">When performing buffered I/O on a file, the <i>stdio</i> functions
+    must maintain a statically allocated data buffer along with associated
+    counters and indexes (or pointers) that record the amount of data and the
+    current position in the buffer. Suppose that the main program is in the
+    middle of a call to a <i>stdio</i> function such as <b>printf</b>(3) where
+    the buffer and associated variables have been partially updated. If, at that
+    moment, the program is interrupted by a signal handler that also calls
+    <b>printf</b>(3), then the second call to <b>printf</b>(3) will operate on
+    inconsistent data, with unpredictable results.</p>
+<p class="Pp">To avoid problems with unsafe functions, there are two possible
+    choices:</p>
+<dl class="Bl-tag">
+  <dt>(a)</dt>
+  <dd>Ensure that (1) the signal handler calls only async-signal-safe functions,
+      and (2) the signal handler itself is reentrant with respect to global
+      variables in the main program.</dd>
+  <dt>(b)</dt>
+  <dd>Block signal delivery in the main program when calling functions that are
+      unsafe or operating on global data that is also accessed by the signal
+      handler.</dd>
+</dl>
+<p class="Pp">Generally, the second choice is difficult in programs of any
+    complexity, so the first choice is taken.</p>
+<p class="Pp">POSIX.1 specifies a set of functions that an implementation must
+    make async-signal-safe. (An implementation may provide safe implementations
+    of additional functions, but this is not required by the standard and other
+    implementations may not provide the same guarantees.)</p>
+<p class="Pp">In general, a function is async-signal-safe either because it is
+    reentrant or because it is atomic with respect to signals (i.e., its
+    execution can't be interrupted by a signal handler).</p>
+<p class="Pp">The set of functions required to be async-signal-safe by POSIX.1
+    is shown in the following table. The functions not otherwise noted were
+    required to be async-signal-safe in POSIX.1-2001; the table details changes
+    in the subsequent standards.</p>
+<p class="Pp"></p>
+<table class="tbl">
+  <tbody><tr>
+    <td><b>Function</b></td>
+    <td><b>Notes</b></td>
+  </tr>
+  <tr>
+    <td><b>abort</b>(3)</td>
+    <td>Added in POSIX.1-2001 TC1</td>
+  </tr>
+  <tr>
+    <td><b>accept</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>access</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>aio_error</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>aio_return</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>aio_suspend</b>(3)</td>
+    <td>See notes below</td>
+  </tr>
+  <tr>
+    <td><b>alarm</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>bind</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>cfgetispeed</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>cfgetospeed</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>cfsetispeed</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>cfsetospeed</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>chdir</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>chmod</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>chown</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>clock_gettime</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>close</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>connect</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>creat</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>dup</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>dup2</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>execl</b>(3)</td>
+    <td>Added in POSIX.1-2008; see notes below</td>
+  </tr>
+  <tr>
+    <td><b>execle</b>(3)</td>
+    <td>See notes below</td>
+  </tr>
+  <tr>
+    <td><b>execv</b>(3)</td>
+    <td>Added in POSIX.1-2008</td>
+  </tr>
+  <tr>
+    <td><b>execve</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>_exit</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>_Exit</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>faccessat</b>(2)</td>
+    <td>Added in POSIX.1-2008</td>
+  </tr>
+  <tr>
+    <td><b>fchdir</b>(2)</td>
+    <td>Added in POSIX.1-2008 TC1</td>
+  </tr>
+  <tr>
+    <td><b>fchmod</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>fchmodat</b>(2)</td>
+    <td>Added in POSIX.1-2008</td>
+  </tr>
+  <tr>
+    <td><b>fchown</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>fchownat</b>(2)</td>
+    <td>Added in POSIX.1-2008</td>
+  </tr>
+  <tr>
+    <td><b>fcntl</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>fdatasync</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>fexecve</b>(3)</td>
+    <td>Added in POSIX.1-2008</td>
+  </tr>
+  <tr>
+    <td><b>ffs</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>fork</b>(2)</td>
+    <td>See notes below</td>
+  </tr>
+  <tr>
+    <td><b>fstat</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>fstatat</b>(2)</td>
+    <td>Added in POSIX.1-2008</td>
+  </tr>
+  <tr>
+    <td><b>fsync</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>ftruncate</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>futimens</b>(3)</td>
+    <td>Added in POSIX.1-2008</td>
+  </tr>
+  <tr>
+    <td><b>getegid</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>geteuid</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>getgid</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>getgroups</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>getpeername</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>getpgrp</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>getpid</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>getppid</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>getsockname</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>getsockopt</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>getuid</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>htonl</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>htons</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>kill</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>link</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>linkat</b>(2)</td>
+    <td>Added in POSIX.1-2008</td>
+  </tr>
+  <tr>
+    <td><b>listen</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>longjmp</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2; see notes below</td>
+  </tr>
+  <tr>
+    <td><b>lseek</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>lstat</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>memccpy</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>memchr</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>memcmp</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>memcpy</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>memmove</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>memset</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>mkdir</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>mkdirat</b>(2)</td>
+    <td>Added in POSIX.1-2008</td>
+  </tr>
+  <tr>
+    <td><b>mkfifo</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>mkfifoat</b>(3)</td>
+    <td>Added in POSIX.1-2008</td>
+  </tr>
+  <tr>
+    <td><b>mknod</b>(2)</td>
+    <td>Added in POSIX.1-2008</td>
+  </tr>
+  <tr>
+    <td><b>mknodat</b>(2)</td>
+    <td>Added in POSIX.1-2008</td>
+  </tr>
+  <tr>
+    <td><b>ntohl</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>ntohs</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>open</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>openat</b>(2)</td>
+    <td>Added in POSIX.1-2008</td>
+  </tr>
+  <tr>
+    <td><b>pause</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>pipe</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>poll</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>posix_trace_event</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>pselect</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>pthread_kill</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC1</td>
+  </tr>
+  <tr>
+    <td><b>pthread_self</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC1</td>
+  </tr>
+  <tr>
+    <td><b>pthread_sigmask</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC1</td>
+  </tr>
+  <tr>
+    <td><b>raise</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>read</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>readlink</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>readlinkat</b>(2)</td>
+    <td>Added in POSIX.1-2008</td>
+  </tr>
+  <tr>
+    <td><b>recv</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>recvfrom</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>recvmsg</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>rename</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>renameat</b>(2)</td>
+    <td>Added in POSIX.1-2008</td>
+  </tr>
+  <tr>
+    <td><b>rmdir</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>select</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>sem_post</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>send</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>sendmsg</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>sendto</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>setgid</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>setpgid</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>setsid</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>setsockopt</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>setuid</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>shutdown</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>sigaction</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>sigaddset</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>sigdelset</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>sigemptyset</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>sigfillset</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>sigismember</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>siglongjmp</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2; see notes below</td>
+  </tr>
+  <tr>
+    <td><b>signal</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>sigpause</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>sigpending</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>sigprocmask</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>sigqueue</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>sigset</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>sigsuspend</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>sleep</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>sockatmark</b>(3)</td>
+    <td>Added in POSIX.1-2001 TC2</td>
+  </tr>
+  <tr>
+    <td><b>socket</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>socketpair</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>stat</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>stpcpy</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>stpncpy</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>strcat</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>strchr</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>strcmp</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>strcpy</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>strcspn</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>strlen</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>strncat</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>strncmp</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>strncpy</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>strnlen</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>strpbrk</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>strrchr</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>strspn</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>strstr</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>strtok_r</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>symlink</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>symlinkat</b>(2)</td>
+    <td>Added in POSIX.1-2008</td>
+  </tr>
+  <tr>
+    <td><b>tcdrain</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>tcflow</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>tcflush</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>tcgetattr</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>tcgetpgrp</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>tcsendbreak</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>tcsetattr</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>tcsetpgrp</b>(3)</td>
+  </tr>
+  <tr>
+    <td><b>time</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>timer_getoverrun</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>timer_gettime</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>timer_settime</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>times</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>umask</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>uname</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>unlink</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>unlinkat</b>(2)</td>
+    <td>Added in POSIX.1-2008</td>
+  </tr>
+  <tr>
+    <td><b>utime</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>utimensat</b>(2)</td>
+    <td>Added in POSIX.1-2008</td>
+  </tr>
+  <tr>
+    <td><b>utimes</b>(2)</td>
+    <td>Added in POSIX.1-2008</td>
+  </tr>
+  <tr>
+    <td><b>wait</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>waitpid</b>(2)</td>
+  </tr>
+  <tr>
+    <td><b>wcpcpy</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>wcpncpy</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>wcscat</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>wcschr</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>wcscmp</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>wcscpy</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>wcscspn</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>wcslen</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>wcsncat</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>wcsncmp</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>wcsncpy</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>wcsnlen</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>wcspbrk</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>wcsrchr</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>wcsspn</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>wcsstr</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>wcstok</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>wmemchr</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>wmemcmp</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>wmemcpy</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>wmemmove</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>wmemset</b>(3)</td>
+    <td>Added in POSIX.1-2008 TC2</td>
+  </tr>
+  <tr>
+    <td><b>write</b>(2)</td>
+  </tr>
+</tbody></table>
+<p class="Pp">Notes:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>POSIX.1-2001 and POSIX.1-2001 TC2 required the functions
+      <b>fpathconf</b>(3), <b>pathconf</b>(3), and <b>sysconf</b>(3) to be
+      async-signal-safe, but this requirement was removed in POSIX.1-2008.</dd>
+  <dt>•</dt>
+  <dd>If a signal handler interrupts the execution of an unsafe function, and
+      the handler terminates via a call to <b>longjmp</b>(3) or
+      <b>siglongjmp</b>(3) and the program subsequently calls an unsafe
+      function, then the behavior of the program is undefined.</dd>
+  <dt>•</dt>
+  <dd>POSIX.1-2001 TC1 clarified that if an application calls <b>fork</b>(2)
+      from a signal handler and any of the fork handlers registered by
+      <b>pthread_atfork</b>(3) calls a function that is not async-signal-safe,
+      the behavior is undefined. A future revision of the standard is likely to
+      remove <b>fork</b>(2) from the list of async-signal-safe functions.</dd>
+  <dt>•</dt>
+  <dd>Asynchronous signal handlers that call functions which are cancelation
+      points and nest over regions of deferred cancelation may trigger
+      cancelation whose behavior is as if asynchronous cancelation had occurred
+      and may cause application state to become inconsistent.</dd>
+</dl>
+<section class="Ss">
+<h2 class="Ss" id="errno"><a class="permalink" href="#errno">errno</a></h2>
+<p class="Pp">Fetching and setting the value of <i>errno</i> is
+    async-signal-safe provided that the signal handler saves <i>errno</i> on
+    entry and restores its value before returning.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Deviations_in_the_GNU_C_library"><a class="permalink" href="#Deviations_in_the_GNU_C_library">Deviations
+  in the GNU C library</a></h2>
+<p class="Pp">The following known deviations from the standard occur in the GNU
+    C library:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Before glibc 2.24, <b>execl</b>(3) and <b>execle</b>(3) employed
+      <b>realloc</b>(3) internally and were consequently not async-signal-safe.
+      This was fixed in glibc 2.24.</dd>
+  <dt>•</dt>
+  <dd>The glibc implementation of <b>aio_suspend</b>(3) is not async-signal-safe
+      because it uses <b>pthread_mutex_lock</b>(3) internally.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>sigaction</b>(2), <b>signal</b>(7), <b>standards</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,1413 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2002 by Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   6 Aug 2002 - Initial Creation
+   Modified 2003-05-23, Michael Kerrisk, <mtk.manpages@gmail.com>
+   Modified 2004-05-27, Michael Kerrisk, <mtk.manpages@gmail.com>
+   2004-12-08, mtk Added O_NOATIME for CAP_FOWNER
+   2005-08-16, mtk, Added CAP_AUDIT_CONTROL and CAP_AUDIT_WRITE
+   2008-07-15, Serge Hallyn <serue@us.bbm.com>
+       Document file capabilities, per-process capability
+       bounding set, changed semantics for CAP_SETPCAP,
+       and other changes in Linux 2.6.2[45].
+       Add CAP_MAC_ADMIN, CAP_MAC_OVERRIDE, CAP_SETFCAP.
+   2008-07-15, mtk
+       Add text describing circumstances in which CAP_SETPCAP
+       (theoretically) permits a thread to change the
+       capability sets of another thread.
+       Add section describing rules for programmatically
+       adjusting thread capability sets.
+       Describe rationale for capability bounding set.
+       Document "securebits" flags.
+       Add text noting that if we set the effective flag for one file
+       capability, then we must also set the effective flag for all
+       other capabilities where the permitted or inheritable bit is set.
+   2011-09-07, mtk/Serge hallyn: Add CAP_SYSLOG
+   --><head>
+<meta name="dc.identifier" content="res/903bab902b3ef6f3853fb9f5f1263e30a8d7062a">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>Capabilities(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">Capabilities(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">Capabilities(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">capabilities - overview of Linux capabilities</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">For the purpose of performing permission checks, traditional UNIX
+    implementations distinguish two categories of processes: <i>privileged</i>
+    processes (whose effective user ID is 0, referred to as superuser or root),
+    and <i>unprivileged</i> processes (whose effective UID is nonzero).
+    Privileged processes bypass all kernel permission checks, while unprivileged
+    processes are subject to full permission checking based on the process's
+    credentials (usually: effective UID, effective GID, and supplementary group
+    list).</p>
+<p class="Pp">Starting with Linux 2.2, Linux divides the privileges
+    traditionally associated with superuser into distinct units, known as
+    <i>capabilities</i>, which can be independently enabled and disabled.
+    Capabilities are a per-thread attribute.</p>
+<section class="Ss">
+<h2 class="Ss" id="Capabilities_list"><a class="permalink" href="#Capabilities_list">Capabilities
+  list</a></h2>
+<p class="Pp">The following list shows the capabilities implemented on Linux,
+    and the operations or behaviors that each capability permits:</p>
+<dl class="Bl-tag">
+  <dt id="CAP_AUDIT_CONTROL"><a class="permalink" href="#CAP_AUDIT_CONTROL"><b>CAP_AUDIT_CONTROL</b>
+    (since Linux 2.6.11)</a></dt>
+  <dd>Enable and disable kernel auditing; change auditing filter rules; retrieve
+      auditing status and filtering rules.</dd>
+  <dt id="CAP_AUDIT_READ"><a class="permalink" href="#CAP_AUDIT_READ"><b>CAP_AUDIT_READ</b>
+    (since Linux 3.16)</a></dt>
+  <dd>Allow reading the audit log via a multicast netlink socket.</dd>
+  <dt id="CAP_AUDIT_WRITE"><a class="permalink" href="#CAP_AUDIT_WRITE"><b>CAP_AUDIT_WRITE</b>
+    (since Linux 2.6.11)</a></dt>
+  <dd>Write records to kernel auditing log.</dd>
+  <dt id="CAP_BLOCK_SUSPEND"><a class="permalink" href="#CAP_BLOCK_SUSPEND"><b>CAP_BLOCK_SUSPEND</b>
+    (since Linux 3.5)</a></dt>
+  <dd>Employ features that can block system suspend (<b>epoll</b>(7)
+      <b>EPOLLWAKEUP</b>, <i>/proc/sys/wake_lock</i>).</dd>
+  <dt id="CAP_BPF"><a class="permalink" href="#CAP_BPF"><b>CAP_BPF</b> (since
+    Linux 5.8)</a></dt>
+  <dd>Employ privileged BPF operations; see <b>bpf</b>(2) and
+      <b>bpf-helpers</b>(7).</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>This capability was added in Linux 5.8 to separate out BPF functionality
+      from the overloaded <b>CAP_SYS_ADMIN</b> capability.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="CAP_CHECKPOINT_RESTORE"><a class="permalink" href="#CAP_CHECKPOINT_RESTORE"><b>CAP_CHECKPOINT_RESTORE</b>
+    (since Linux 5.9)</a></dt>
+  <dd></dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Update <i>/proc/sys/kernel/ns_last_pid</i> (see
+    <b>pid_namespaces</b>(7));</dd>
+  <dt>•</dt>
+  <dd>employ the <i>set_tid</i> feature of <b>clone3</b>(2);</dd>
+  <dt>•</dt>
+  <dd>read the contents of the symbolic links in
+      <i>/proc/</i>pid<i>/map_files</i> for other processes.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>This capability was added in Linux 5.9 to separate out checkpoint/restore
+      functionality from the overloaded <b>CAP_SYS_ADMIN</b> capability.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="CAP_CHOWN"><a class="permalink" href="#CAP_CHOWN"><b>CAP_CHOWN</b></a></dt>
+  <dd>Make arbitrary changes to file UIDs and GIDs (see <b>chown</b>(2)).</dd>
+  <dt id="CAP_DAC_OVERRIDE"><a class="permalink" href="#CAP_DAC_OVERRIDE"><b>CAP_DAC_OVERRIDE</b></a></dt>
+  <dd>Bypass file read, write, and execute permission checks. (DAC is an
+      abbreviation of "discretionary access control".)</dd>
+  <dt id="CAP_DAC_READ_SEARCH"><a class="permalink" href="#CAP_DAC_READ_SEARCH"><b>CAP_DAC_READ_SEARCH</b></a></dt>
+  <dd></dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Bypass file read permission checks and directory read and execute
+      permission checks;</dd>
+  <dt>•</dt>
+  <dd>invoke <b>open_by_handle_at</b>(2);</dd>
+  <dt>•</dt>
+  <dd>use the <b>linkat</b>(2) <b>AT_EMPTY_PATH</b> flag to create a link to a
+      file referred to by a file descriptor.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="CAP_FOWNER"><a class="permalink" href="#CAP_FOWNER"><b>CAP_FOWNER</b></a></dt>
+  <dd></dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Bypass permission checks on operations that normally require the
+      filesystem UID of the process to match the UID of the file (e.g.,
+      <b>chmod</b>(2), <b>utime</b>(2)), excluding those operations covered by
+      <b>CAP_DAC_OVERRIDE</b> and <b>CAP_DAC_READ_SEARCH</b>;</dd>
+  <dt>•</dt>
+  <dd>set inode flags (see <b>ioctl_iflags</b>(2)) on arbitrary files;</dd>
+  <dt>•</dt>
+  <dd>set Access Control Lists (ACLs) on arbitrary files;</dd>
+  <dt>•</dt>
+  <dd>ignore directory sticky bit on file deletion;</dd>
+  <dt>•</dt>
+  <dd>modify <i>user</i> extended attributes on sticky directory owned by any
+      user;</dd>
+  <dt>•</dt>
+  <dd>specify <b>O_NOATIME</b> for arbitrary files in <b>open</b>(2) and
+      <b>fcntl</b>(2).</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="CAP_FSETID"><a class="permalink" href="#CAP_FSETID"><b>CAP_FSETID</b></a></dt>
+  <dd></dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Don't clear set-user-ID and set-group-ID mode bits when a file is
+      modified;</dd>
+  <dt>•</dt>
+  <dd>set the set-group-ID bit for a file whose GID does not match the
+      filesystem or any of the supplementary GIDs of the calling process.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="CAP_IPC_LOCK"><a class="permalink" href="#CAP_IPC_LOCK"><b>CAP_IPC_LOCK</b></a></dt>
+  <dd></dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Lock memory (<b>mlock</b>(2), <b>mlockall</b>(2), <b>mmap</b>(2),
+      <b>shmctl</b>(2));</dd>
+  <dt>•</dt>
+  <dd>Allocate memory using huge pages (<b>memfd_create</b>(2), <b>mmap</b>(2),
+      <b>shmctl</b>(2)).</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="CAP_IPC_OWNER"><a class="permalink" href="#CAP_IPC_OWNER"><b>CAP_IPC_OWNER</b></a></dt>
+  <dd>Bypass permission checks for operations on System V IPC objects.</dd>
+  <dt id="CAP_KILL"><a class="permalink" href="#CAP_KILL"><b>CAP_KILL</b></a></dt>
+  <dd>Bypass permission checks for sending signals (see <b>kill</b>(2)). This
+      includes use of the <b>ioctl</b>(2) <b>KDSIGACCEPT</b> operation.</dd>
+  <dt id="CAP_LEASE"><a class="permalink" href="#CAP_LEASE"><b>CAP_LEASE</b>
+    (since Linux 2.4)</a></dt>
+  <dd>Establish leases on arbitrary files (see <b>fcntl</b>(2)).</dd>
+  <dt id="CAP_LINUX_IMMUTABLE"><a class="permalink" href="#CAP_LINUX_IMMUTABLE"><b>CAP_LINUX_IMMUTABLE</b></a></dt>
+  <dd>Set the <b>FS_APPEND_FL</b> and <b>FS_IMMUTABLE_FL</b> inode flags (see
+      <b>ioctl_iflags</b>(2)).</dd>
+  <dt id="CAP_MAC_ADMIN"><a class="permalink" href="#CAP_MAC_ADMIN"><b>CAP_MAC_ADMIN</b>
+    (since Linux 2.6.25)</a></dt>
+  <dd>Allow MAC configuration or state changes. Implemented for the Smack Linux
+      Security Module (LSM).</dd>
+  <dt id="CAP_MAC_OVERRIDE"><a class="permalink" href="#CAP_MAC_OVERRIDE"><b>CAP_MAC_OVERRIDE</b>
+    (since Linux 2.6.25)</a></dt>
+  <dd>Override Mandatory Access Control (MAC). Implemented for the Smack
+    LSM.</dd>
+  <dt id="CAP_MKNOD"><a class="permalink" href="#CAP_MKNOD"><b>CAP_MKNOD</b>
+    (since Linux 2.4)</a></dt>
+  <dd>Create special files using <b>mknod</b>(2).</dd>
+  <dt id="CAP_NET_ADMIN"><a class="permalink" href="#CAP_NET_ADMIN"><b>CAP_NET_ADMIN</b></a></dt>
+  <dd>Perform various network-related operations:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>interface configuration;</dd>
+  <dt>•</dt>
+  <dd>administration of IP firewall, masquerading, and accounting;</dd>
+  <dt>•</dt>
+  <dd>modify routing tables;</dd>
+  <dt>•</dt>
+  <dd>bind to any address for transparent proxying;</dd>
+  <dt>•</dt>
+  <dd>set type-of-service (TOS);</dd>
+  <dt>•</dt>
+  <dd>clear driver statistics;</dd>
+  <dt>•</dt>
+  <dd>set promiscuous mode;</dd>
+  <dt>•</dt>
+  <dd>enabling multicasting;</dd>
+  <dt>•</dt>
+  <dd>use <b>setsockopt</b>(2) to set the following socket options:
+      <b>SO_DEBUG</b>, <b>SO_MARK</b>, <b>SO_PRIORITY</b> (for a priority
+      outside the range 0 to 6), <b>SO_RCVBUFFORCE</b>, and
+      <b>SO_SNDBUFFORCE</b>.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="CAP_NET_BIND_SERVICE"><a class="permalink" href="#CAP_NET_BIND_SERVICE"><b>CAP_NET_BIND_SERVICE</b></a></dt>
+  <dd>Bind a socket to Internet domain privileged ports (port numbers less than
+      1024).</dd>
+  <dt id="CAP_NET_BROADCAST"><a class="permalink" href="#CAP_NET_BROADCAST"><b>CAP_NET_BROADCAST</b></a></dt>
+  <dd>(Unused) Make socket broadcasts, and listen to multicasts.</dd>
+  <dt id="CAP_NET_RAW"><a class="permalink" href="#CAP_NET_RAW"><b>CAP_NET_RAW</b></a></dt>
+  <dd></dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Use RAW and PACKET sockets;</dd>
+  <dt>•</dt>
+  <dd>bind to any address for transparent proxying.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="CAP_PERFMON"><a class="permalink" href="#CAP_PERFMON"><b>CAP_PERFMON</b>
+    (since Linux 5.8)</a></dt>
+  <dd>Employ various performance-monitoring mechanisms, including:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>call <b>perf_event_open</b>(2);</dd>
+  <dt>•</dt>
+  <dd>employ various BPF operations that have performance implications.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>This capability was added in Linux 5.8 to separate out performance
+      monitoring functionality from the overloaded <b>CAP_SYS_ADMIN</b>
+      capability. See also the kernel source file
+      <i>Documentation/admin-guide/perf-security.rst</i>.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="CAP_SETGID"><a class="permalink" href="#CAP_SETGID"><b>CAP_SETGID</b></a></dt>
+  <dd></dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Make arbitrary manipulations of process GIDs and supplementary GID
+    list;</dd>
+  <dt>•</dt>
+  <dd>forge GID when passing socket credentials via UNIX domain sockets;</dd>
+  <dt>•</dt>
+  <dd>write a group ID mapping in a user namespace (see
+      <b>user_namespaces</b>(7)).</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="CAP_SETFCAP"><a class="permalink" href="#CAP_SETFCAP"><b>CAP_SETFCAP</b>
+    (since Linux 2.6.24)</a></dt>
+  <dd>Set arbitrary capabilities on a file.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Since Linux 5.12, this capability is also needed to map user ID 0 in a new
+      user namespace; see <b>user_namespaces</b>(7) for details.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="CAP_SETPCAP"><a class="permalink" href="#CAP_SETPCAP"><b>CAP_SETPCAP</b></a></dt>
+  <dd>If file capabilities are supported (i.e., since Linux 2.6.24): add any
+      capability from the calling thread's bounding set to its inheritable set;
+      drop capabilities from the bounding set (via <b>prctl</b>(2)
+      <b>PR_CAPBSET_DROP</b>); make changes to the <i>securebits</i> flags.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>If file capabilities are not supported (i.e., before Linux 2.6.24): grant
+      or remove any capability in the caller's permitted capability set to or
+      from any other process. (This property of <b>CAP_SETPCAP</b> is not
+      available when the kernel is configured to support file capabilities,
+      since <b>CAP_SETPCAP</b> has entirely different semantics for such
+      kernels.)</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="CAP_SETUID"><a class="permalink" href="#CAP_SETUID"><b>CAP_SETUID</b></a></dt>
+  <dd></dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Make arbitrary manipulations of process UIDs (<b>setuid</b>(2),
+      <b>setreuid</b>(2), <b>setresuid</b>(2), <b>setfsuid</b>(2));</dd>
+  <dt>•</dt>
+  <dd>forge UID when passing socket credentials via UNIX domain sockets;</dd>
+  <dt>•</dt>
+  <dd>write a user ID mapping in a user namespace (see
+      <b>user_namespaces</b>(7)).</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="CAP_SYS_ADMIN"><a class="permalink" href="#CAP_SYS_ADMIN"><b>CAP_SYS_ADMIN</b></a></dt>
+  <dd><i>Note</i>: this capability is overloaded; see <i>Notes to kernel
+      developers</i> below.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd></dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Perform a range of system administration operations including:
+      <b>quotactl</b>(2), <b>mount</b>(2), <b>umount</b>(2),
+      <b>pivot_root</b>(2), <b>swapon</b>(2), <b>swapoff</b>(2),
+      <b>sethostname</b>(2), and <b>setdomainname</b>(2);</dd>
+  <dt>•</dt>
+  <dd>perform privileged <b>syslog</b>(2) operations (since Linux 2.6.37,
+      <b>CAP_SYSLOG</b> should be used to permit such operations);</dd>
+  <dt>•</dt>
+  <dd>perform <b>VM86_REQUEST_IRQ</b> <b>vm86</b>(2) command;</dd>
+  <dt>•</dt>
+  <dd>access the same checkpoint/restore functionality that is governed by
+      <b>CAP_CHECKPOINT_RESTORE</b> (but the latter, weaker capability is
+      preferred for accessing that functionality).</dd>
+  <dt>•</dt>
+  <dd>perform the same BPF operations as are governed by <b>CAP_BPF</b> (but the
+      latter, weaker capability is preferred for accessing that
+    functionality).</dd>
+  <dt>•</dt>
+  <dd>employ the same performance monitoring mechanisms as are governed by
+      <b>CAP_PERFMON</b> (but the latter, weaker capability is preferred for
+      accessing that functionality).</dd>
+  <dt>•</dt>
+  <dd>perform <b>IPC_SET</b> and <b>IPC_RMID</b> operations on arbitrary System
+      V IPC objects;</dd>
+  <dt>•</dt>
+  <dd>override <b>RLIMIT_NPROC</b> resource limit;</dd>
+  <dt>•</dt>
+  <dd>perform operations on <i>trusted</i> and <i>security</i> extended
+      attributes (see <b>xattr</b>(7));</dd>
+  <dt>•</dt>
+  <dd>use <b>lookup_dcookie</b>(2);</dd>
+  <dt>•</dt>
+  <dd>use <b>ioprio_set</b>(2) to assign <b>IOPRIO_CLASS_RT</b> and (before
+      Linux 2.6.25) <b>IOPRIO_CLASS_IDLE</b> I/O scheduling classes;</dd>
+  <dt>•</dt>
+  <dd>forge PID when passing socket credentials via UNIX domain sockets;</dd>
+  <dt>•</dt>
+  <dd>exceed <i>/proc/sys/fs/file-max</i>, the system-wide limit on the number
+      of open files, in system calls that open files (e.g., <b>accept</b>(2),
+      <b>execve</b>(2), <b>open</b>(2), <b>pipe</b>(2));</dd>
+  <dt>•</dt>
+  <dd>employ <b>CLONE_*</b> flags that create new namespaces with
+      <b>clone</b>(2) and <b>unshare</b>(2) (but, since Linux 3.8, creating user
+      namespaces does not require any capability);</dd>
+  <dt>•</dt>
+  <dd>access privileged <i>perf</i> event information;</dd>
+  <dt>•</dt>
+  <dd>call <b>setns</b>(2) (requires <b>CAP_SYS_ADMIN</b> in the <i>target</i>
+      namespace);</dd>
+  <dt>•</dt>
+  <dd>call <b>fanotify_init</b>(2);</dd>
+  <dt>•</dt>
+  <dd>perform privileged <b>KEYCTL_CHOWN</b> and <b>KEYCTL_SETPERM</b>
+      <b>keyctl</b>(2) operations;</dd>
+  <dt>•</dt>
+  <dd>perform <b>madvise</b>(2) <b>MADV_HWPOISON</b> operation;</dd>
+  <dt>•</dt>
+  <dd>employ the <b>TIOCSTI</b> <b>ioctl</b>(2) to insert characters into the
+      input queue of a terminal other than the caller's controlling
+    terminal;</dd>
+  <dt>•</dt>
+  <dd>employ the obsolete <b>nfsservctl</b>(2) system call;</dd>
+  <dt>•</dt>
+  <dd>employ the obsolete <b>bdflush</b>(2) system call;</dd>
+  <dt>•</dt>
+  <dd>perform various privileged block-device <b>ioctl</b>(2) operations;</dd>
+  <dt>•</dt>
+  <dd>perform various privileged filesystem <b>ioctl</b>(2) operations;</dd>
+  <dt>•</dt>
+  <dd>perform privileged <b>ioctl</b>(2) operations on the <i>/dev/random</i>
+      device (see <b>random</b>(4));</dd>
+  <dt>•</dt>
+  <dd>install a <b>seccomp</b>(2) filter without first having to set the
+      <i>no_new_privs</i> thread attribute;</dd>
+  <dt>•</dt>
+  <dd>modify allow/deny rules for device control groups;</dd>
+  <dt>•</dt>
+  <dd>employ the <b>ptrace</b>(2) <b>PTRACE_SECCOMP_GET_FILTER</b> operation to
+      dump tracee's seccomp filters;</dd>
+  <dt>•</dt>
+  <dd>employ the <b>ptrace</b>(2) <b>PTRACE_SETOPTIONS</b> operation to suspend
+      the tracee's seccomp protections (i.e., the
+      <b>PTRACE_O_SUSPEND_SECCOMP</b> flag);</dd>
+  <dt>•</dt>
+  <dd>perform administrative operations on many device drivers;</dd>
+  <dt>•</dt>
+  <dd>modify autogroup nice values by writing to
+      <i>/proc/</i>pid<i>/autogroup</i> (see <b>sched</b>(7)).</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="CAP_SYS_BOOT"><a class="permalink" href="#CAP_SYS_BOOT"><b>CAP_SYS_BOOT</b></a></dt>
+  <dd>Use <b>reboot</b>(2) and <b>kexec_load</b>(2).</dd>
+  <dt id="CAP_SYS_CHROOT"><a class="permalink" href="#CAP_SYS_CHROOT"><b>CAP_SYS_CHROOT</b></a></dt>
+  <dd></dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Use <b>chroot</b>(2);</dd>
+  <dt>•</dt>
+  <dd>change mount namespaces using <b>setns</b>(2).</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="CAP_SYS_MODULE"><a class="permalink" href="#CAP_SYS_MODULE"><b>CAP_SYS_MODULE</b></a></dt>
+  <dd></dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Load and unload kernel modules (see <b>init_module</b>(2) and
+      <b>delete_module</b>(2));</dd>
+  <dt>•</dt>
+  <dd>before Linux 2.6.25: drop capabilities from the system-wide capability
+      bounding set.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="CAP_SYS_NICE"><a class="permalink" href="#CAP_SYS_NICE"><b>CAP_SYS_NICE</b></a></dt>
+  <dd></dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Lower the process nice value (<b>nice</b>(2), <b>setpriority</b>(2)) and
+      change the nice value for arbitrary processes;</dd>
+  <dt>•</dt>
+  <dd>set real-time scheduling policies for calling process, and set scheduling
+      policies and priorities for arbitrary processes
+      (<b>sched_setscheduler</b>(2), <b>sched_setparam</b>(2),
+      <b>sched_setattr</b>(2));</dd>
+  <dt>•</dt>
+  <dd>set CPU affinity for arbitrary processes
+    (<b>sched_setaffinity</b>(2));</dd>
+  <dt>•</dt>
+  <dd>set I/O scheduling class and priority for arbitrary processes
+      (<b>ioprio_set</b>(2));</dd>
+  <dt>•</dt>
+  <dd>apply <b>migrate_pages</b>(2) to arbitrary processes and allow processes
+      to be migrated to arbitrary nodes;</dd>
+  <dt>•</dt>
+  <dd>apply <b>move_pages</b>(2) to arbitrary processes;</dd>
+  <dt>•</dt>
+  <dd>use the <b>MPOL_MF_MOVE_ALL</b> flag with <b>mbind</b>(2) and
+      <b>move_pages</b>(2).</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="CAP_SYS_PACCT"><a class="permalink" href="#CAP_SYS_PACCT"><b>CAP_SYS_PACCT</b></a></dt>
+  <dd>Use <b>acct</b>(2).</dd>
+  <dt id="CAP_SYS_PTRACE"><a class="permalink" href="#CAP_SYS_PTRACE"><b>CAP_SYS_PTRACE</b></a></dt>
+  <dd></dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Trace arbitrary processes using <b>ptrace</b>(2);</dd>
+  <dt>•</dt>
+  <dd>apply <b>get_robust_list</b>(2) to arbitrary processes;</dd>
+  <dt>•</dt>
+  <dd>transfer data to or from the memory of arbitrary processes using
+      <b>process_vm_readv</b>(2) and <b>process_vm_writev</b>(2);</dd>
+  <dt>•</dt>
+  <dd>inspect processes using <b>kcmp</b>(2).</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="CAP_SYS_RAWIO"><a class="permalink" href="#CAP_SYS_RAWIO"><b>CAP_SYS_RAWIO</b></a></dt>
+  <dd></dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Perform I/O port operations (<b>iopl</b>(2) and <b>ioperm</b>(2));</dd>
+  <dt>•</dt>
+  <dd>access <i>/proc/kcore</i>;</dd>
+  <dt>•</dt>
+  <dd>employ the <b>FIBMAP</b> <b>ioctl</b>(2) operation;</dd>
+  <dt>•</dt>
+  <dd>open devices for accessing x86 model-specific registers (MSRs, see
+      <b>msr</b>(4));</dd>
+  <dt>•</dt>
+  <dd>update <i>/proc/sys/vm/mmap_min_addr</i>;</dd>
+  <dt>•</dt>
+  <dd>create memory mappings at addresses below the value specified by
+      <i>/proc/sys/vm/mmap_min_addr</i>;</dd>
+  <dt>•</dt>
+  <dd>map files in <i>/proc/bus/pci</i>;</dd>
+  <dt>•</dt>
+  <dd>open <i>/dev/mem</i> and <i>/dev/kmem</i>;</dd>
+  <dt>•</dt>
+  <dd>perform various SCSI device commands;</dd>
+  <dt>•</dt>
+  <dd>perform certain operations on <b>hpsa</b>(4) and <b>cciss</b>(4)
+    devices;</dd>
+  <dt>•</dt>
+  <dd>perform a range of device-specific operations on other devices.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="CAP_SYS_RESOURCE"><a class="permalink" href="#CAP_SYS_RESOURCE"><b>CAP_SYS_RESOURCE</b></a></dt>
+  <dd></dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Use reserved space on ext2 filesystems;</dd>
+  <dt>•</dt>
+  <dd>make <b>ioctl</b>(2) calls controlling ext3 journaling;</dd>
+  <dt>•</dt>
+  <dd>override disk quota limits;</dd>
+  <dt>•</dt>
+  <dd>increase resource limits (see <b>setrlimit</b>(2));</dd>
+  <dt>•</dt>
+  <dd>override <b>RLIMIT_NPROC</b> resource limit;</dd>
+  <dt>•</dt>
+  <dd>override maximum number of consoles on console allocation;</dd>
+  <dt>•</dt>
+  <dd>override maximum number of keymaps;</dd>
+  <dt>•</dt>
+  <dd>allow more than 64hz interrupts from the real-time clock;</dd>
+  <dt>•</dt>
+  <dd>raise <i>msg_qbytes</i> limit for a System V message queue above the limit
+      in <i>/proc/sys/kernel/msgmnb</i> (see <b>msgop</b>(2) and
+      <b>msgctl</b>(2));</dd>
+  <dt>•</dt>
+  <dd>allow the <b>RLIMIT_NOFILE</b> resource limit on the number of
+      "in-flight" file descriptors to be bypassed when passing file
+      descriptors to another process via a UNIX domain socket (see
+      <b>unix</b>(7));</dd>
+  <dt>•</dt>
+  <dd>override the <i>/proc/sys/fs/pipe-size-max</i> limit when setting the
+      capacity of a pipe using the <b>F_SETPIPE_SZ</b> <b>fcntl</b>(2)
+    command;</dd>
+  <dt>•</dt>
+  <dd>use <b>F_SETPIPE_SZ</b> to increase the capacity of a pipe above the limit
+      specified by <i>/proc/sys/fs/pipe-max-size</i>;</dd>
+  <dt>•</dt>
+  <dd>override <i>/proc/sys/fs/mqueue/queues_max</i>,
+      <i>/proc/sys/fs/mqueue/msg_max</i>, and
+      <i>/proc/sys/fs/mqueue/msgsize_max</i> limits when creating POSIX message
+      queues (see <b>mq_overview</b>(7));</dd>
+  <dt>•</dt>
+  <dd>employ the <b>prctl</b>(2) <b>PR_SET_MM</b> operation;</dd>
+  <dt>•</dt>
+  <dd>set <i>/proc/</i>pid<i>/oom_score_adj</i> to a value lower than the value
+      last set by a process with <b>CAP_SYS_RESOURCE</b>.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="CAP_SYS_TIME"><a class="permalink" href="#CAP_SYS_TIME"><b>CAP_SYS_TIME</b></a></dt>
+  <dd>Set system clock (<b>settimeofday</b>(2), <b>stime</b>(2),
+      <b>adjtimex</b>(2)); set real-time (hardware) clock.</dd>
+  <dt id="CAP_SYS_TTY_CONFIG"><a class="permalink" href="#CAP_SYS_TTY_CONFIG"><b>CAP_SYS_TTY_CONFIG</b></a></dt>
+  <dd>Use <b>vhangup</b>(2); employ various privileged <b>ioctl</b>(2)
+      operations on virtual terminals.</dd>
+  <dt id="CAP_SYSLOG"><a class="permalink" href="#CAP_SYSLOG"><b>CAP_SYSLOG</b>
+    (since Linux 2.6.37)</a></dt>
+  <dd></dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Perform privileged <b>syslog</b>(2) operations. See <b>syslog</b>(2) for
+      information on which operations require privilege.</dd>
+  <dt>•</dt>
+  <dd>View kernel addresses exposed via <i>/proc</i> and other interfaces when
+      <i>/proc/sys/kernel/kptr_restrict</i> has the value 1. (See the discussion
+      of the <i>kptr_restrict</i> in <b>proc</b>(5).)</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="CAP_WAKE_ALARM"><a class="permalink" href="#CAP_WAKE_ALARM"><b>CAP_WAKE_ALARM</b>
+    (since Linux 3.0)</a></dt>
+  <dd>Trigger something that will wake up the system (set
+      <b>CLOCK_REALTIME_ALARM</b> and <b>CLOCK_BOOTTIME_ALARM</b> timers).</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Past_and_current_implementation"><a class="permalink" href="#Past_and_current_implementation">Past
+  and current implementation</a></h2>
+<p class="Pp">A full implementation of capabilities requires that:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>For all privileged operations, the kernel must check whether the thread
+      has the required capability in its effective set.</dd>
+  <dt>•</dt>
+  <dd>The kernel must provide system calls allowing a thread's capability sets
+      to be changed and retrieved.</dd>
+  <dt>•</dt>
+  <dd>The filesystem must support attaching capabilities to an executable file,
+      so that a process gains those capabilities when the file is executed.</dd>
+</dl>
+<p class="Pp">Before Linux 2.6.24, only the first two of these requirements are
+    met; since Linux 2.6.24, all three requirements are met.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Notes_to_kernel_developers"><a class="permalink" href="#Notes_to_kernel_developers">Notes
+  to kernel developers</a></h2>
+<p class="Pp">When adding a new kernel feature that should be governed by a
+    capability, consider the following points.</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>The goal of capabilities is divide the power of superuser into pieces,
+      such that if a program that has one or more capabilities is compromised,
+      its power to do damage to the system would be less than the same program
+      running with root privilege.</dd>
+  <dt>•</dt>
+  <dd>You have the choice of either creating a new capability for your new
+      feature, or associating the feature with one of the existing capabilities.
+      In order to keep the set of capabilities to a manageable size, the latter
+      option is preferable, unless there are compelling reasons to take the
+      former option. (There is also a technical limit: the size of capability
+      sets is currently limited to 64 bits.)</dd>
+  <dt>•</dt>
+  <dd>To determine which existing capability might best be associated with your
+      new feature, review the list of capabilities above in order to find a
+      "silo" into which your new feature best fits. One approach to
+      take is to determine if there are other features requiring capabilities
+      that will always be used along with the new feature. If the new feature is
+      useless without these other features, you should use the same capability
+      as the other features.</dd>
+  <dt>•</dt>
+  <dd><i>Don't</i> choose <b>CAP_SYS_ADMIN</b> if you can possibly avoid it! A
+      vast proportion of existing capability checks are associated with this
+      capability (see the partial list above). It can plausibly be called
+      "the new root", since on the one hand, it confers a wide range
+      of powers, and on the other hand, its broad scope means that this is the
+      capability that is required by many privileged programs. Don't make the
+      problem worse. The only new features that should be associated with
+      <b>CAP_SYS_ADMIN</b> are ones that <i>closely</i> match existing uses in
+      that silo.</dd>
+  <dt>•</dt>
+  <dd>If you have determined that it really is necessary to create a new
+      capability for your feature, don't make or name it as a
+      "single-use" capability. Thus, for example, the addition of the
+      highly specific <b>CAP_SYS_PACCT</b> was probably a mistake. Instead, try
+      to identify and name your new capability as a broader silo into which
+      other related future use cases might fit.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Thread_capability_sets"><a class="permalink" href="#Thread_capability_sets">Thread
+  capability sets</a></h2>
+<p class="Pp">Each thread has the following capability sets containing zero or
+    more of the above capabilities:</p>
+<dl class="Bl-tag">
+  <dt id="Permitted"><a class="permalink" href="#Permitted"><i>Permitted</i></a></dt>
+  <dd>This is a limiting superset for the effective capabilities that the thread
+      may assume. It is also a limiting superset for the capabilities that may
+      be added to the inheritable set by a thread that does not have the
+      <b>CAP_SETPCAP</b> capability in its effective set.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>If a thread drops a capability from its permitted set, it can never
+      reacquire that capability (unless it <b>execve</b>(2)s either a
+      set-user-ID-root program, or a program whose associated file capabilities
+      grant that capability).</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="Inheritable"><a class="permalink" href="#Inheritable"><i>Inheritable</i></a></dt>
+  <dd>This is a set of capabilities preserved across an <b>execve</b>(2).
+      Inheritable capabilities remain inheritable when executing any program,
+      and inheritable capabilities are added to the permitted set when executing
+      a program that has the corresponding bits set in the file inheritable
+    set.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Because inheritable capabilities are not generally preserved across
+      <b>execve</b>(2) when running as a non-root user, applications that wish
+      to run helper programs with elevated capabilities should consider using
+      ambient capabilities, described below.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="Effective"><a class="permalink" href="#Effective"><i>Effective</i></a></dt>
+  <dd>This is the set of capabilities used by the kernel to perform permission
+      checks for the thread.</dd>
+  <dt id="Bounding"><a class="permalink" href="#Bounding"><i>Bounding</i>
+    (per-thread since Linux 2.6.25)</a></dt>
+  <dd>The capability bounding set is a mechanism that can be used to limit the
+      capabilities that are gained during <b>execve</b>(2).</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Since Linux 2.6.25, this is a per-thread capability set. In older kernels,
+      the capability bounding set was a system wide attribute shared by all
+      threads on the system.</dd>
+  <dt></dt>
+  <dd>For more details, see <i>Capability bounding set</i> below.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="Ambient"><a class="permalink" href="#Ambient"><i>Ambient</i> (since
+    Linux 4.3)</a></dt>
+  <dd>This is a set of capabilities that are preserved across an
+      <b>execve</b>(2) of a program that is not privileged. The ambient
+      capability set obeys the invariant that no capability can ever be ambient
+      if it is not both permitted and inheritable.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The ambient capability set can be directly modified using <b>prctl</b>(2).
+      Ambient capabilities are automatically lowered if either of the
+      corresponding permitted or inheritable capabilities is lowered.</dd>
+  <dt></dt>
+  <dd>Executing a program that changes UID or GID due to the set-user-ID or
+      set-group-ID bits or executing a program that has any file capabilities
+      set will clear the ambient set. Ambient capabilities are added to the
+      permitted set and assigned to the effective set when <b>execve</b>(2) is
+      called. If ambient capabilities cause a process's permitted and effective
+      capabilities to increase during an <b>execve</b>(2), this does not trigger
+      the secure-execution mode described in <b>ld.so</b>(8).</dd>
+</dl>
+<p class="Pp">A child created via <b>fork</b>(2) inherits copies of its parent's
+    capability sets. For details on how <b>execve</b>(2) affects capabilities,
+    see <i>Transformation of capabilities during execve()</i> below.</p>
+<p class="Pp">Using <b>capset</b>(2), a thread may manipulate its own capability
+    sets; see <i>Programmatically adjusting capability sets</i> below.</p>
+<p class="Pp">Since Linux 3.2, the file <i>/proc/sys/kernel/cap_last_cap</i>
+    exposes the numerical value of the highest capability supported by the
+    running kernel; this can be used to determine the highest bit that may be
+    set in a capability set.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="File_capabilities"><a class="permalink" href="#File_capabilities">File
+  capabilities</a></h2>
+<p class="Pp">Since Linux 2.6.24, the kernel supports associating capability
+    sets with an executable file using <b>setcap</b>(8). The file capability
+    sets are stored in an extended attribute (see <b>setxattr</b>(2) and
+    <b>xattr</b>(7)) named <i>security.capability</i>. Writing to this extended
+    attribute requires the <b>CAP_SETFCAP</b> capability. The file capability
+    sets, in conjunction with the capability sets of the thread, determine the
+    capabilities of a thread after an <b>execve</b>(2).</p>
+<p class="Pp">The three file capability sets are:</p>
+<dl class="Bl-tag">
+  <dt id="Permitted~2"><a class="permalink" href="#Permitted~2"><i>Permitted</i>
+    (formerly known as <i>forced</i>):</a></dt>
+  <dd>These capabilities are automatically permitted to the thread, regardless
+      of the thread's inheritable capabilities.</dd>
+  <dt id="Inheritable~2"><a class="permalink" href="#Inheritable~2"><i>Inheritable</i>
+    (formerly known as <i>allowed</i>):</a></dt>
+  <dd>This set is ANDed with the thread's inheritable set to determine which
+      inheritable capabilities are enabled in the permitted set of the thread
+      after the <b>execve</b>(2).</dd>
+  <dt id="Effective~2"><a class="permalink" href="#Effective~2"><i>Effective</i>:</a></dt>
+  <dd>This is not a set, but rather just a single bit. If this bit is set, then
+      during an <b>execve</b>(2) all of the new permitted capabilities for the
+      thread are also raised in the effective set. If this bit is not set, then
+      after an <b>execve</b>(2), none of the new permitted capabilities is in
+      the new effective set.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Enabling the file effective capability bit implies that any file permitted
+      or inheritable capability that causes a thread to acquire the
+      corresponding permitted capability during an <b>execve</b>(2) (see
+      <i>Transformation of capabilities during execve()</i> below) will also
+      acquire that capability in its effective set. Therefore, when assigning
+      capabilities to a file (<b>setcap</b>(8), <b>cap_set_file</b>(3),
+      <b>cap_set_fd</b>(3)), if we specify the effective flag as being enabled
+      for any capability, then the effective flag must also be specified as
+      enabled for all other capabilities for which the corresponding permitted
+      or inheritable flag is enabled.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="File_capability_extended_attribute_versioning"><a class="permalink" href="#File_capability_extended_attribute_versioning">File
+  capability extended attribute versioning</a></h2>
+<p class="Pp">To allow extensibility, the kernel supports a scheme to encode a
+    version number inside the <i>security.capability</i> extended attribute that
+    is used to implement file capabilities. These version numbers are internal
+    to the implementation, and not directly visible to user-space applications.
+    To date, the following versions are supported:</p>
+<dl class="Bl-tag">
+  <dt id="VFS_CAP_REVISION_1"><a class="permalink" href="#VFS_CAP_REVISION_1"><b>VFS_CAP_REVISION_1</b></a></dt>
+  <dd>This was the original file capability implementation, which supported
+      32-bit masks for file capabilities.</dd>
+  <dt id="VFS_CAP_REVISION_2"><a class="permalink" href="#VFS_CAP_REVISION_2"><b>VFS_CAP_REVISION_2</b>
+    (since Linux 2.6.25)</a></dt>
+  <dd>This version allows for file capability masks that are 64 bits in size,
+      and was necessary as the number of supported capabilities grew beyond 32.
+      The kernel transparently continues to support the execution of files that
+      have 32-bit version 1 capability masks, but when adding capabilities to
+      files that did not previously have capabilities, or modifying the
+      capabilities of existing files, it automatically uses the version 2 scheme
+      (or possibly the version 3 scheme, as described below).</dd>
+  <dt id="VFS_CAP_REVISION_3"><a class="permalink" href="#VFS_CAP_REVISION_3"><b>VFS_CAP_REVISION_3</b>
+    (since Linux 4.14)</a></dt>
+  <dd>Version 3 file capabilities are provided to support namespaced file
+      capabilities (described below).</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>As with version 2 file capabilities, version 3 capability masks are 64
+      bits in size. But in addition, the root user ID of namespace is encoded in
+      the <i>security.capability</i> extended attribute. (A namespace's root
+      user ID is the value that user ID 0 inside that namespace maps to in the
+      initial user namespace.)</dd>
+  <dt></dt>
+  <dd>Version 3 file capabilities are designed to coexist with version 2
+      capabilities; that is, on a modern Linux system, there may be some files
+      with version 2 capabilities while others have version 3 capabilities.</dd>
+</dl>
+<p class="Pp">Before Linux 4.14, the only kind of file capability extended
+    attribute that could be attached to a file was a <b>VFS_CAP_REVISION_2</b>
+    attribute. Since Linux 4.14, the version of the <i>security.capability</i>
+    extended attribute that is attached to a file depends on the circumstances
+    in which the attribute was created.</p>
+<p class="Pp">Starting with Linux 4.14, a <i>security.capability</i> extended
+    attribute is automatically created as (or converted to) a version 3
+    (<b>VFS_CAP_REVISION_3</b>) attribute if both of the following are true:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>The thread writing the attribute resides in a noninitial user namespace.
+      (More precisely: the thread resides in a user namespace other than the one
+      from which the underlying filesystem was mounted.)</dd>
+  <dt>•</dt>
+  <dd>The thread has the <b>CAP_SETFCAP</b> capability over the file inode,
+      meaning that (a) the thread has the <b>CAP_SETFCAP</b> capability in its
+      own user namespace; and (b) the UID and GID of the file inode have
+      mappings in the writer's user namespace.</dd>
+</dl>
+<p class="Pp">When a <b>VFS_CAP_REVISION_3</b> <i>security.capability</i>
+    extended attribute is created, the root user ID of the creating thread's
+    user namespace is saved in the extended attribute.</p>
+<p class="Pp">By contrast, creating or modifying a <i>security.capability</i>
+    extended attribute from a privileged (<b>CAP_SETFCAP</b>) thread that
+    resides in the namespace where the underlying filesystem was mounted (this
+    normally means the initial user namespace) automatically results in the
+    creation of a version 2 (<b>VFS_CAP_REVISION_2</b>) attribute.</p>
+<p class="Pp">Note that the creation of a version 3 <i>security.capability</i>
+    extended attribute is automatic. That is to say, when a user-space
+    application writes (<b>setxattr</b>(2)) a <i>security.capability</i>
+    attribute in the version 2 format, the kernel will automatically create a
+    version 3 attribute if the attribute is created in the circumstances
+    described above. Correspondingly, when a version 3
+    <i>security.capability</i> attribute is retrieved (<b>getxattr</b>(2)) by a
+    process that resides inside a user namespace that was created by the root
+    user ID (or a descendant of that user namespace), the returned attribute is
+    (automatically) simplified to appear as a version 2 attribute (i.e., the
+    returned value is the size of a version 2 attribute and does not include the
+    root user ID). These automatic translations mean that no changes are
+    required to user-space tools (e.g., <b>setcap</b>(1) and <b>getcap</b>(1))
+    in order for those tools to be used to create and retrieve version 3
+    <i>security.capability</i> attributes.</p>
+<p class="Pp">Note that a file can have either a version 2 or a version 3
+    <i>security.capability</i> extended attribute associated with it, but not
+    both: creation or modification of the <i>security.capability</i> extended
+    attribute will automatically modify the version according to the
+    circumstances in which the extended attribute is created or modified.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Transformation_of_capabilities_during_execve()"><a class="permalink" href="#Transformation_of_capabilities_during_execve()">Transformation
+  of capabilities during execve()</a></h2>
+<p class="Pp">During an <b>execve</b>(2), the kernel calculates the new
+    capabilities of the process using the following algorithm:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>P'(ambient)     = (file is privileged) ? 0 : P(ambient)
+P'(permitted)   = (P(inheritable) &amp; F(inheritable)) |
+<br>
+                  (F(permitted) &amp; P(bounding)) | P'(ambient)
+P'(effective)   = F(effective) ? P'(permitted) : P'(ambient)
+P'(inheritable) = P(inheritable)    [i.e., unchanged]
+P'(bounding)    = P(bounding)       [i.e., unchanged]
+</pre>
+<br>
+<p class="Pp">where:</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="P()"><a class="permalink" href="#P()">P()</a></dt>
+  <dd>denotes the value of a thread capability set before the
+    <b>execve</b>(2)</dd>
+  <dt id="P'()"><a class="permalink" href="#P'()">P'()</a></dt>
+  <dd>denotes the value of a thread capability set after the
+    <b>execve</b>(2)</dd>
+  <dt id="F()"><a class="permalink" href="#F()">F()</a></dt>
+  <dd>denotes a file capability set</dd>
+</dl>
+</div>
+<p class="Pp">Note the following details relating to the above capability
+    transformation rules:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>The ambient capability set is present only since Linux 4.3. When
+      determining the transformation of the ambient set during <b>execve</b>(2),
+      a privileged file is one that has capabilities or has the set-user-ID or
+      set-group-ID bit set.</dd>
+  <dt>•</dt>
+  <dd>Prior to Linux 2.6.25, the bounding set was a system-wide attribute shared
+      by all threads. That system-wide value was employed to calculate the new
+      permitted set during <b>execve</b>(2) in the same manner as shown above
+      for <i>P(bounding)</i>.</dd>
+</dl>
+<p class="Pp"><i>Note</i>: during the capability transitions described above,
+    file capabilities may be ignored (treated as empty) for the same reasons
+    that the set-user-ID and set-group-ID bits are ignored; see
+    <b>execve</b>(2). File capabilities are similarly ignored if the kernel was
+    booted with the <i>no_file_caps</i> option.</p>
+<p class="Pp"><i>Note</i>: according to the rules above, if a process with
+    nonzero user IDs performs an <b>execve</b>(2) then any capabilities that are
+    present in its permitted and effective sets will be cleared. For the
+    treatment of capabilities when a process with a user ID of zero performs an
+    <b>execve</b>(2), see <i>Capabilities and execution of programs by root</i>
+    below.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Safety_checking_for_capability-dumb_binaries"><a class="permalink" href="#Safety_checking_for_capability-dumb_binaries">Safety
+  checking for capability-dumb binaries</a></h2>
+<p class="Pp">A capability-dumb binary is an application that has been marked to
+    have file capabilities, but has not been converted to use the
+    <b>libcap</b>(3) API to manipulate its capabilities. (In other words, this
+    is a traditional set-user-ID-root program that has been switched to use file
+    capabilities, but whose code has not been modified to understand
+    capabilities.) For such applications, the effective capability bit is set on
+    the file, so that the file permitted capabilities are automatically enabled
+    in the process effective set when executing the file. The kernel recognizes
+    a file which has the effective capability bit set as capability-dumb for the
+    purpose of the check described here.</p>
+<p class="Pp">When executing a capability-dumb binary, the kernel checks if the
+    process obtained all permitted capabilities that were specified in the file
+    permitted set, after the capability transformations described above have
+    been performed. (The typical reason why this might <i>not</i> occur is that
+    the capability bounding set masked out some of the capabilities in the file
+    permitted set.) If the process did not obtain the full set of file permitted
+    capabilities, then <b>execve</b>(2) fails with the error <b>EPERM</b>. This
+    prevents possible security risks that could arise when a capability-dumb
+    application is executed with less privilege than it needs. Note that, by
+    definition, the application could not itself recognize this problem, since
+    it does not employ the <b>libcap</b>(3) API.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Capabilities_and_execution_of_programs_by_root"><a class="permalink" href="#Capabilities_and_execution_of_programs_by_root">Capabilities
+  and execution of programs by root</a></h2>
+<p class="Pp">In order to mirror traditional UNIX semantics, the kernel performs
+    special treatment of file capabilities when a process with UID 0 (root)
+    executes a program and when a set-user-ID-root program is executed.</p>
+<p class="Pp">After having performed any changes to the process effective ID
+    that were triggered by the set-user-ID mode bit of the binary—e.g.,
+    switching the effective user ID to 0 (root) because a set-user-ID-root
+    program was executed—the kernel calculates the file capability sets
+    as follows:</p>
+<dl class="Bl-tag">
+  <dt>(1)</dt>
+  <dd>If the real or effective user ID of the process is 0 (root), then the file
+      inheritable and permitted sets are ignored; instead they are notionally
+      considered to be all ones (i.e., all capabilities enabled). (There is one
+      exception to this behavior, described in <i>Set-user-ID-root programs that
+      have file capabilities</i> below.)</dd>
+  <dt>(2)</dt>
+  <dd>If the effective user ID of the process is 0 (root) or the file effective
+      bit is in fact enabled, then the file effective bit is notionally defined
+      to be one (enabled).</dd>
+</dl>
+<p class="Pp">These notional values for the file's capability sets are then used
+    as described above to calculate the transformation of the process's
+    capabilities during <b>execve</b>(2).</p>
+<p class="Pp">Thus, when a process with nonzero UIDs <b>execve</b>(2)s a
+    set-user-ID-root program that does not have capabilities attached, or when a
+    process whose real and effective UIDs are zero <b>execve</b>(2)s a program,
+    the calculation of the process's new permitted capabilities simplifies
+  to:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>P'(permitted)   = P(inheritable) | P(bounding)
+P'(effective)   = P'(permitted)
+</pre>
+<br>
+<p class="Pp">Consequently, the process gains all capabilities in its permitted
+    and effective capability sets, except those masked out by the capability
+    bounding set. (In the calculation of P'(permitted), the P'(ambient) term can
+    be simplified away because it is by definition a proper subset of
+    P(inheritable).)</p>
+<p class="Pp">The special treatments of user ID 0 (root) described in this
+    subsection can be disabled using the securebits mechanism described
+  below.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Set-user-ID-root_programs_that_have_file_capabilities"><a class="permalink" href="#Set-user-ID-root_programs_that_have_file_capabilities">Set-user-ID-root
+  programs that have file capabilities</a></h2>
+<p class="Pp">There is one exception to the behavior described in
+    <i>Capabilities and execution of programs by root</i> above. If (a) the
+    binary that is being executed has capabilities attached and (b) the real
+    user ID of the process is <i>not</i> 0 (root) and (c) the effective user ID
+    of the process <i>is</i> 0 (root), then the file capability bits are honored
+    (i.e., they are not notionally considered to be all ones). The usual way in
+    which this situation can arise is when executing a set-UID-root program that
+    also has file capabilities. When such a program is executed, the process
+    gains just the capabilities granted by the program (i.e., not all
+    capabilities, as would occur when executing a set-user-ID-root program that
+    does not have any associated file capabilities).</p>
+<p class="Pp">Note that one can assign empty capability sets to a program file,
+    and thus it is possible to create a set-user-ID-root program that changes
+    the effective and saved set-user-ID of the process that executes the program
+    to 0, but confers no capabilities to that process.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Capability_bounding_set"><a class="permalink" href="#Capability_bounding_set">Capability
+  bounding set</a></h2>
+<p class="Pp">The capability bounding set is a security mechanism that can be
+    used to limit the capabilities that can be gained during an
+    <b>execve</b>(2). The bounding set is used in the following ways:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>During an <b>execve</b>(2), the capability bounding set is ANDed with the
+      file permitted capability set, and the result of this operation is
+      assigned to the thread's permitted capability set. The capability bounding
+      set thus places a limit on the permitted capabilities that may be granted
+      by an executable file.</dd>
+  <dt>•</dt>
+  <dd>(Since Linux 2.6.25) The capability bounding set acts as a limiting
+      superset for the capabilities that a thread can add to its inheritable set
+      using <b>capset</b>(2). This means that if a capability is not in the
+      bounding set, then a thread can't add this capability to its inheritable
+      set, even if it was in its permitted capabilities, and thereby cannot have
+      this capability preserved in its permitted set when it <b>execve</b>(2)s a
+      file that has the capability in its inheritable set.</dd>
+</dl>
+<p class="Pp">Note that the bounding set masks the file permitted capabilities,
+    but not the inheritable capabilities. If a thread maintains a capability in
+    its inheritable set that is not in its bounding set, then it can still gain
+    that capability in its permitted set by executing a file that has the
+    capability in its inheritable set.</p>
+<p class="Pp">Depending on the kernel version, the capability bounding set is
+    either a system-wide attribute, or a per-process attribute.</p>
+<p class="Pp"><b>Capability bounding set from Linux 2.6.25 onward</b></p>
+<p class="Pp">From Linux 2.6.25, the <i>capability bounding set</i> is a
+    per-thread attribute. (The system-wide capability bounding set described
+    below no longer exists.)</p>
+<p class="Pp">The bounding set is inherited at <b>fork</b>(2) from the thread's
+    parent, and is preserved across an <b>execve</b>(2).</p>
+<p class="Pp">A thread may remove capabilities from its capability bounding set
+    using the <b>prctl</b>(2) <b>PR_CAPBSET_DROP</b> operation, provided it has
+    the <b>CAP_SETPCAP</b> capability. Once a capability has been dropped from
+    the bounding set, it cannot be restored to that set. A thread can determine
+    if a capability is in its bounding set using the <b>prctl</b>(2)
+    <b>PR_CAPBSET_READ</b> operation.</p>
+<p class="Pp">Removing capabilities from the bounding set is supported only if
+    file capabilities are compiled into the kernel. Before Linux 2.6.33, file
+    capabilities were an optional feature configurable via the
+    <b>CONFIG_SECURITY_FILE_CAPABILITIES</b> option. Since Linux 2.6.33, the
+    configuration option has been removed and file capabilities are always part
+    of the kernel. When file capabilities are compiled into the kernel, the
+    <b>init</b> process (the ancestor of all processes) begins with a full
+    bounding set. If file capabilities are not compiled into the kernel, then
+    <b>init</b> begins with a full bounding set minus <b>CAP_SETPCAP</b>,
+    because this capability has a different meaning when there are no file
+    capabilities.</p>
+<p class="Pp">Removing a capability from the bounding set does not remove it
+    from the thread's inheritable set. However it does prevent the capability
+    from being added back into the thread's inheritable set in the future.</p>
+<p class="Pp"><b>Capability bounding set prior to Linux 2.6.25</b></p>
+<p class="Pp">Before Linux 2.6.25, the capability bounding set is a system-wide
+    attribute that affects all threads on the system. The bounding set is
+    accessible via the file <i>/proc/sys/kernel/cap-bound</i>. (Confusingly,
+    this bit mask parameter is expressed as a signed decimal number in
+    <i>/proc/sys/kernel/cap-bound</i>.)</p>
+<p class="Pp">Only the <b>init</b> process may set capabilities in the
+    capability bounding set; other than that, the superuser (more precisely: a
+    process with the <b>CAP_SYS_MODULE</b> capability) may only clear
+    capabilities from this set.</p>
+<p class="Pp">On a standard system the capability bounding set always masks out
+    the <b>CAP_SETPCAP</b> capability. To remove this restriction (dangerous!),
+    modify the definition of <b>CAP_INIT_EFF_SET</b> in
+    <i>include/linux/capability.h</i> and rebuild the kernel.</p>
+<p class="Pp">The system-wide capability bounding set feature was added to Linux
+    2.2.11.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Effect_of_user_ID_changes_on_capabilities"><a class="permalink" href="#Effect_of_user_ID_changes_on_capabilities">Effect
+  of user ID changes on capabilities</a></h2>
+<p class="Pp">To preserve the traditional semantics for transitions between 0
+    and nonzero user IDs, the kernel makes the following changes to a thread's
+    capability sets on changes to the thread's real, effective, saved set, and
+    filesystem user IDs (using <b>setuid</b>(2), <b>setresuid</b>(2), or
+    similar):</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>If one or more of the real, effective, or saved set user IDs was
+      previously 0, and as a result of the UID changes all of these IDs have a
+      nonzero value, then all capabilities are cleared from the permitted,
+      effective, and ambient capability sets.</dd>
+  <dt>•</dt>
+  <dd>If the effective user ID is changed from 0 to nonzero, then all
+      capabilities are cleared from the effective set.</dd>
+  <dt>•</dt>
+  <dd>If the effective user ID is changed from nonzero to 0, then the permitted
+      set is copied to the effective set.</dd>
+  <dt>•</dt>
+  <dd>If the filesystem user ID is changed from 0 to nonzero (see
+      <b>setfsuid</b>(2)), then the following capabilities are cleared from the
+      effective set: <b>CAP_CHOWN</b>, <b>CAP_DAC_OVERRIDE</b>,
+      <b>CAP_DAC_READ_SEARCH</b>, <b>CAP_FOWNER</b>, <b>CAP_FSETID</b>,
+      <b>CAP_LINUX_IMMUTABLE</b> (since Linux 2.6.30), <b>CAP_MAC_OVERRIDE</b>,
+      and <b>CAP_MKNOD</b> (since Linux 2.6.30). If the filesystem UID is
+      changed from nonzero to 0, then any of these capabilities that are enabled
+      in the permitted set are enabled in the effective set.</dd>
+</dl>
+<p class="Pp">If a thread that has a 0 value for one or more of its user IDs
+    wants to prevent its permitted capability set being cleared when it resets
+    all of its user IDs to nonzero values, it can do so using the
+    <b>SECBIT_KEEP_CAPS</b> securebits flag described below.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Programmatically_adjusting_capability_sets"><a class="permalink" href="#Programmatically_adjusting_capability_sets">Programmatically
+  adjusting capability sets</a></h2>
+<p class="Pp">A thread can retrieve and change its permitted, effective, and
+    inheritable capability sets using the <b>capget</b>(2) and <b>capset</b>(2)
+    system calls. However, the use of <b>cap_get_proc</b>(3) and
+    <b>cap_set_proc</b>(3), both provided in the <i>libcap</i> package, is
+    preferred for this purpose. The following rules govern changes to the thread
+    capability sets:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>If the caller does not have the <b>CAP_SETPCAP</b> capability, the new
+      inheritable set must be a subset of the combination of the existing
+      inheritable and permitted sets.</dd>
+  <dt>•</dt>
+  <dd>(Since Linux 2.6.25) The new inheritable set must be a subset of the
+      combination of the existing inheritable set and the capability bounding
+      set.</dd>
+  <dt>•</dt>
+  <dd>The new permitted set must be a subset of the existing permitted set
+      (i.e., it is not possible to acquire permitted capabilities that the
+      thread does not currently have).</dd>
+  <dt>•</dt>
+  <dd>The new effective set must be a subset of the new permitted set.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="The_securebits_flags:_establishing_a_capabilities-only_environment"><a class="permalink" href="#The_securebits_flags:_establishing_a_capabilities-only_environment">The
+  securebits flags: establishing a capabilities-only environment</a></h2>
+<p class="Pp">Starting with Linux 2.6.26, and with a kernel in which file
+    capabilities are enabled, Linux implements a set of per-thread
+    <i>securebits</i> flags that can be used to disable special handling of
+    capabilities for UID 0 (<i>root</i>). These flags are as follows:</p>
+<dl class="Bl-tag">
+  <dt id="SECBIT_KEEP_CAPS"><a class="permalink" href="#SECBIT_KEEP_CAPS"><b>SECBIT_KEEP_CAPS</b></a></dt>
+  <dd>Setting this flag allows a thread that has one or more 0 UIDs to retain
+      capabilities in its permitted set when it switches all of its UIDs to
+      nonzero values. If this flag is not set, then such a UID switch causes the
+      thread to lose all permitted capabilities. This flag is always cleared on
+      an <b>execve</b>(2).</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Note that even with the <b>SECBIT_KEEP_CAPS</b> flag set, the effective
+      capabilities of a thread are cleared when it switches its effective UID to
+      a nonzero value. However, if the thread has set this flag and its
+      effective UID is already nonzero, and the thread subsequently switches all
+      other UIDs to nonzero values, then the effective capabilities will not be
+      cleared.</dd>
+  <dt></dt>
+  <dd>The setting of the <b>SECBIT_KEEP_CAPS</b> flag is ignored if the
+      <b>SECBIT_NO_SETUID_FIXUP</b> flag is set. (The latter flag provides a
+      superset of the effect of the former flag.)</dd>
+  <dt></dt>
+  <dd>This flag provides the same functionality as the older <b>prctl</b>(2)
+      <b>PR_SET_KEEPCAPS</b> operation.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="SECBIT_NO_SETUID_FIXUP"><a class="permalink" href="#SECBIT_NO_SETUID_FIXUP"><b>SECBIT_NO_SETUID_FIXUP</b></a></dt>
+  <dd>Setting this flag stops the kernel from adjusting the process's permitted,
+      effective, and ambient capability sets when the thread's effective and
+      filesystem UIDs are switched between zero and nonzero values. See
+      <i>Effect of user ID changes on capabilities</i> above.</dd>
+  <dt id="SECBIT_NOROOT"><a class="permalink" href="#SECBIT_NOROOT"><b>SECBIT_NOROOT</b></a></dt>
+  <dd>If this bit is set, then the kernel does not grant capabilities when a
+      set-user-ID-root program is executed, or when a process with an effective
+      or real UID of 0 calls <b>execve</b>(2). (See <i>Capabilities and
+      execution of programs by root</i> above.)</dd>
+  <dt id="SECBIT_NO_CAP_AMBIENT_RAISE"><a class="permalink" href="#SECBIT_NO_CAP_AMBIENT_RAISE"><b>SECBIT_NO_CAP_AMBIENT_RAISE</b></a></dt>
+  <dd>Setting this flag disallows raising ambient capabilities via the
+      <b>prctl</b>(2) <b>PR_CAP_AMBIENT_RAISE</b> operation.</dd>
+</dl>
+<p class="Pp">Each of the above "base" flags has a companion
+    "locked" flag. Setting any of the "locked" flags is
+    irreversible, and has the effect of preventing further changes to the
+    corresponding "base" flag. The locked flags are:
+    <b>SECBIT_KEEP_CAPS_LOCKED</b>, <b>SECBIT_NO_SETUID_FIXUP_LOCKED</b>,
+    <b>SECBIT_NOROOT_LOCKED</b>, and
+  <b>SECBIT_NO_CAP_AMBIENT_RAISE_LOCKED</b>.</p>
+<p class="Pp">The <i>securebits</i> flags can be modified and retrieved using
+    the <b>prctl</b>(2) <b>PR_SET_SECUREBITS</b> and <b>PR_GET_SECUREBITS</b>
+    operations. The <b>CAP_SETPCAP</b> capability is required to modify the
+    flags. Note that the <b>SECBIT_*</b> constants are available only after
+    including the <i>&lt;linux/securebits.h&gt;</i> header file.</p>
+<p class="Pp">The <i>securebits</i> flags are inherited by child processes.
+    During an <b>execve</b>(2), all of the flags are preserved, except
+    <b>SECBIT_KEEP_CAPS</b> which is always cleared.</p>
+<p class="Pp">An application can use the following call to lock itself, and all
+    of its descendants, into an environment where the only way of gaining
+    capabilities is by executing a program with associated file
+  capabilities:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>prctl(PR_SET_SECUREBITS,
+<br>
+        /* SECBIT_KEEP_CAPS off */
+<br>
+        SECBIT_KEEP_CAPS_LOCKED |
+<br>
+        SECBIT_NO_SETUID_FIXUP |
+<br>
+        SECBIT_NO_SETUID_FIXUP_LOCKED |
+<br>
+        SECBIT_NOROOT |
+<br>
+        SECBIT_NOROOT_LOCKED);
+<br>
+        /* Setting/locking SECBIT_NO_CAP_AMBIENT_RAISE
+<br>
+           is not required */
+</pre>
+<br>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Per-user-namespace__set-user-ID-root__programs"><a class="permalink" href="#Per-user-namespace__set-user-ID-root__programs">Per-user-namespace
+  "set-user-ID-root" programs</a></h2>
+<p class="Pp">A set-user-ID program whose UID matches the UID that created a
+    user namespace will confer capabilities in the process's permitted and
+    effective sets when executed by any process inside that namespace or any
+    descendant user namespace.</p>
+<p class="Pp">The rules about the transformation of the process's capabilities
+    during the <b>execve</b>(2) are exactly as described in <i>Transformation of
+    capabilities during execve()</i> and <i>Capabilities and execution of
+    programs by root</i> above, with the difference that, in the latter
+    subsection, "root" is the UID of the creator of the user
+    namespace.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Namespaced_file_capabilities"><a class="permalink" href="#Namespaced_file_capabilities">Namespaced
+  file capabilities</a></h2>
+<p class="Pp">Traditional (i.e., version 2) file capabilities associate only a
+    set of capability masks with a binary executable file. When a process
+    executes a binary with such capabilities, it gains the associated
+    capabilities (within its user namespace) as per the rules described in
+    <i>Transformation of capabilities during execve()</i> above.</p>
+<p class="Pp">Because version 2 file capabilities confer capabilities to the
+    executing process regardless of which user namespace it resides in, only
+    privileged processes are permitted to associate capabilities with a file.
+    Here, "privileged" means a process that has the <b>CAP_SETFCAP</b>
+    capability in the user namespace where the filesystem was mounted (normally
+    the initial user namespace). This limitation renders file capabilities
+    useless for certain use cases. For example, in user-namespaced containers,
+    it can be desirable to be able to create a binary that confers capabilities
+    only to processes executed inside that container, but not to processes that
+    are executed outside the container.</p>
+<p class="Pp">Linux 4.14 added so-called namespaced file capabilities to support
+    such use cases. Namespaced file capabilities are recorded as version 3
+    (i.e., <b>VFS_CAP_REVISION_3</b>) <i>security.capability</i> extended
+    attributes. Such an attribute is automatically created in the circumstances
+    described in <i>File capability extended attribute versioning</i> above.
+    When a version 3 <i>security.capability</i> extended attribute is created,
+    the kernel records not just the capability masks in the extended attribute,
+    but also the namespace root user ID.</p>
+<p class="Pp">As with a binary that has <b>VFS_CAP_REVISION_2</b> file
+    capabilities, a binary with <b>VFS_CAP_REVISION_3</b> file capabilities
+    confers capabilities to a process during <b>execve</b>(). However,
+    capabilities are conferred only if the binary is executed by a process that
+    resides in a user namespace whose UID 0 maps to the root user ID that is
+    saved in the extended attribute, or when executed by a process that resides
+    in a descendant of such a namespace.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Interaction_with_user_namespaces"><a class="permalink" href="#Interaction_with_user_namespaces">Interaction
+  with user namespaces</a></h2>
+<p class="Pp">For further information on the interaction of capabilities and
+    user namespaces, see <b>user_namespaces</b>(7).</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">No standards govern capabilities, but the Linux capability
+    implementation is based on the withdrawn
+    <a class="Lk" href="https://archive.org/details/posix_1003.1e-990310">POSIX.1e
+    draft standard</a>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">When attempting to <b>strace</b>(1) binaries that have
+    capabilities (or set-user-ID-root binaries), you may find the <i>-u
+    &lt;username&gt;</i> option useful. Something like:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>sudo strace -o trace.log -u ceci ./myprivprog</b>
+</pre>
+<br>
+<p class="Pp">From Linux 2.5.27 to Linux 2.6.26, capabilities were an optional
+    kernel component, and could be enabled/disabled via the
+    <b>CONFIG_SECURITY_CAPABILITIES</b> kernel configuration option.</p>
+<p class="Pp">The <i>/proc/</i>pid<i>/task/TID/status</i> file can be used to
+    view the capability sets of a thread. The <i>/proc/</i>pid<i>/status</i>
+    file shows the capability sets of a process's main thread. Before Linux 3.8,
+    nonexistent capabilities were shown as being enabled (1) in these sets.
+    Since Linux 3.8, all nonexistent capabilities (above <b>CAP_LAST_CAP</b>)
+    are shown as disabled (0).</p>
+<p class="Pp">The <i>libcap</i> package provides a suite of routines for setting
+    and getting capabilities that is more comfortable and less likely to change
+    than the interface provided by <b>capset</b>(2) and <b>capget</b>(2). This
+    package also provides the <b>setcap</b>(8) and <b>getcap</b>(8) programs. It
+    can be found at
+  <br>
+  <a class="Lk" href="https://git.kernel.org/pub/scm/libs/libcap/libcap.git/refs/">https://git.kernel.org/pub/scm/libs/libcap/libcap.git/refs/</a>.</p>
+<p class="Pp">Before Linux 2.6.24, and from Linux 2.6.24 to Linux 2.6.32 if file
+    capabilities are not enabled, a thread with the <b>CAP_SETPCAP</b>
+    capability can manipulate the capabilities of threads other than itself.
+    However, this is only theoretically possible, since no thread ever has
+    <b>CAP_SETPCAP</b> in either of these cases:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>In the pre-2.6.25 implementation the system-wide capability bounding set,
+      <i>/proc/sys/kernel/cap-bound</i>, always masks out the <b>CAP_SETPCAP</b>
+      capability, and this can not be changed without modifying the kernel
+      source and rebuilding the kernel.</dd>
+  <dt>•</dt>
+  <dd>If file capabilities are disabled (i.e., the kernel
+      <b>CONFIG_SECURITY_FILE_CAPABILITIES</b> option is disabled), then
+      <b>init</b> starts out with the <b>CAP_SETPCAP</b> capability removed from
+      its per-process bounding set, and that bounding set is inherited by all
+      other processes created on the system.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>capsh</b>(1), <b>setpriv</b>(1), <b>prctl</b>(2),
+    <b>setfsuid</b>(2), <b>cap_clear</b>(3), <b>cap_copy_ext</b>(3),
+    <b>cap_from_text</b>(3), <b>cap_get_file</b>(3), <b>cap_get_proc</b>(3),
+    <b>cap_init</b>(3), <b>capgetp</b>(3), <b>capsetp</b>(3), <b>libcap</b>(3),
+    <b>proc</b>(5), <b>credentials</b>(7), <b>pthreads</b>(7),
+    <b>user_namespaces</b>(7), <b>captest</b>(8), <b>filecap</b>(8),
+    <b>getcap</b>(8), <b>getpcaps</b>(8), <b>netcap</b>(8), <b>pscap</b>(8),
+    <b>setcap</b>(8)</p>
+<p class="Pp"><i>include/linux/capability.h</i> in the Linux kernel source
+  tree</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

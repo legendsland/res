@@ -1,0 +1,244 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/54b3e37ffeb5fc86816c191b3975a3c63ac168bd">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>SLIST(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">SLIST(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">SLIST(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">SLIST_EMPTY, SLIST_ENTRY, SLIST_FIRST, SLIST_FOREACH, SLIST_HEAD,
+    SLIST_HEAD_INITIALIZER, SLIST_INIT, SLIST_INSERT_AFTER, SLIST_INSERT_HEAD,
+    SLIST_NEXT, SLIST_REMOVE, SLIST_REMOVE_HEAD - implementation of a singly
+    linked list</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/queue.h&gt;</b></pre>
+<pre><b>SLIST_ENTRY(TYPE);</b></pre>
+<pre><b>SLIST_HEAD(HEADNAME, TYPE);</b>
+<b>SLIST_HEAD SLIST_HEAD_INITIALIZER(SLIST_HEAD </b><i>head</i><b>);</b>
+<b>void SLIST_INIT(SLIST_HEAD *</b><i>head</i><b>);</b></pre>
+<pre><b>int SLIST_EMPTY(SLIST_HEAD *</b><i>head</i><b>);</b></pre>
+<pre><b>void SLIST_INSERT_HEAD(SLIST_HEAD *</b><i>head</i><b>,</b>
+<b>                        struct TYPE *</b><i>elm</i><b>, SLIST_ENTRY </b><i>NAME</i><b>);</b>
+<b>void SLIST_INSERT_AFTER(struct TYPE *</b><i>listelm</i><b>,</b>
+<b>                        struct TYPE *</b><i>elm</i><b>, SLIST_ENTRY </b><i>NAME</i><b>);</b></pre>
+<pre><b>struct TYPE *SLIST_FIRST(SLIST_HEAD *</b><i>head</i><b>);</b>
+<b>struct TYPE *SLIST_NEXT(struct TYPE *</b><i>elm</i><b>, SLIST_ENTRY </b><i>NAME</i><b>);</b></pre>
+<pre><b>SLIST_FOREACH(struct TYPE *</b><i>var</i><b>, SLIST_HEAD *</b><i>head</i><b>, SLIST_ENTRY </b><i>NAME</i><b>);</b></pre>
+<pre><b>void SLIST_REMOVE(SLIST_HEAD *</b><i>head</i><b>, struct TYPE *</b><i>elm</i><b>,</b>
+<b>                        SLIST_ENTRY </b><i>NAME</i><b>);</b>
+<b>void SLIST_REMOVE_HEAD(SLIST_HEAD *</b><i>head</i><b>,</b>
+<b>                        SLIST_ENTRY </b><i>NAME</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">These macros define and operate on doubly linked lists.</p>
+<p class="Pp">In the macro definitions, <i>TYPE</i> is the name of a
+    user-defined structure, that must contain a field of type
+    <i>SLIST_ENTRY</i>, named <i>NAME</i>. The argument <i>HEADNAME</i> is the
+    name of a user-defined structure that must be declared using the macro
+    <b>SLIST_HEAD</b>().</p>
+<section class="Ss">
+<h2 class="Ss" id="Creation"><a class="permalink" href="#Creation">Creation</a></h2>
+<p class="Pp">A singly linked list is headed by a structure defined by the
+    <b>SLIST_HEAD</b>() macro. This structure contains a single pointer to the
+    first element on the list. The elements are singly linked for minimum space
+    and pointer manipulation overhead at the expense of O(n) removal for
+    arbitrary elements. New elements can be added to the list after an existing
+    element or at the head of the list. An <i>SLIST_HEAD</i> structure is
+    declared as follows:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>SLIST_HEAD(HEADNAME, TYPE) head;
+</pre>
+<br>
+<p class="Pp">where <i>struct HEADNAME</i> is the structure to be defined, and
+    <i>struct TYPE</i> is the type of the elements to be linked into the list. A
+    pointer to the head of the list can later be declared as:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct HEADNAME *headp;
+</pre>
+<br>
+<p class="Pp">(The names <i>head</i> and <i>headp</i> are user selectable.)</p>
+<p class="Pp"><b>SLIST_ENTRY</b>() declares a structure that connects the
+    elements in the list.</p>
+<p class="Pp"><b>SLIST_HEAD_INITIALIZER</b>() evaluates to an initializer for
+    the list <i>head</i>.</p>
+<p class="Pp"><b>SLIST_INIT</b>() initializes the list referenced by
+    <i>head</i>.</p>
+<p class="Pp"><b>SLIST_EMPTY</b>() evaluates to true if there are no elements in
+    the list.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Insertion"><a class="permalink" href="#Insertion">Insertion</a></h2>
+<p class="Pp"><b>SLIST_INSERT_HEAD</b>() inserts the new element <i>elm</i> at
+    the head of the list.</p>
+<p class="Pp"><b>SLIST_INSERT_AFTER</b>() inserts the new element <i>elm</i>
+    after the element <i>listelm</i>.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Traversal"><a class="permalink" href="#Traversal">Traversal</a></h2>
+<p class="Pp"><b>SLIST_FIRST</b>() returns the first element in the list, or
+    NULL if the list is empty.</p>
+<p class="Pp"><b>SLIST_NEXT</b>() returns the next element in the list.</p>
+<p class="Pp"><b>SLIST_FOREACH</b>() traverses the list referenced by
+    <i>head</i> in the forward direction, assigning each element in turn to
+    <i>var</i>.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Removal"><a class="permalink" href="#Removal">Removal</a></h2>
+<p class="Pp"><b>SLIST_REMOVE</b>() removes the element <i>elm</i> from the
+    list.</p>
+<p class="Pp"><b>SLIST_REMOVE_HEAD</b>() removes the element <i>elm</i> from the
+    head of the list. For optimum efficiency, elements being removed from the
+    head of the list should explicitly use this macro instead of the generic
+    <b>SLIST_REMOVE</b>().</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp"><b>SLIST_EMPTY</b>() returns nonzero if the list is empty, and
+    zero if the list contains at least one entry.</p>
+<p class="Pp"><b>SLIST_FIRST</b>(), and <b>SLIST_NEXT</b>() return a pointer to
+    the first or next <i>TYPE</i> structure, respectively.</p>
+<p class="Pp"><b>SLIST_HEAD_INITIALIZER</b>() returns an initializer that can be
+    assigned to the list <i>head</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">Not in POSIX.1, POSIX.1-2001, or POSIX.1-2008. Present on the BSDs
+    (SLIST macros first appeared in 4.4BSD).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp"><b>SLIST_FOREACH</b>() doesn't allow <i>var</i> to be removed or
+    freed within the loop, as it would interfere with the traversal.
+    <b>SLIST_FOREACH_SAFE</b>(), which is present on the BSDs but is not present
+    in glibc, fixes this limitation by allowing <i>var</i> to safely be removed
+    from the list and freed from within the loop without interfering with the
+    traversal.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<pre>#include &lt;stddef.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;sys/queue.h&gt;
+struct entry {
+<br>
+    int data;
+<br>
+    SLIST_ENTRY(entry) entries;             /* Singly linked list */
+};
+SLIST_HEAD(slisthead, entry);
+int
+main(void)
+{
+<br>
+    struct entry *n1, *n2, *n3, *np;
+<br>
+    struct slisthead head;                  /* Singly linked list
+<br>
+                                               head */
+<br>
+    SLIST_INIT(&amp;head);                      /* Initialize the queue */
+<br>
+    n1 = malloc(sizeof(struct entry));      /* Insert at the head */
+<br>
+    SLIST_INSERT_HEAD(&amp;head, n1, entries);
+<br>
+    n2 = malloc(sizeof(struct entry));      /* Insert after */
+<br>
+    SLIST_INSERT_AFTER(n1, n2, entries);
+<br>
+    SLIST_REMOVE(&amp;head, n2, entry, entries);/* Deletion */
+<br>
+    free(n2);
+<br>
+    n3 = SLIST_FIRST(&amp;head);
+<br>
+    SLIST_REMOVE_HEAD(&amp;head, entries);      /* Deletion from the head */
+<br>
+    free(n3);
+<br>
+    for (unsigned int i = 0; i &lt; 5; i++) {
+<br>
+        n1 = malloc(sizeof(struct entry));
+<br>
+        SLIST_INSERT_HEAD(&amp;head, n1, entries);
+<br>
+        n1-&gt;data = i;
+<br>
+    }
+<br>
+                                            /* Forward traversal */
+<br>
+    SLIST_FOREACH(np, &amp;head, entries)
+<br>
+        printf("%i\n", np-&gt;data);
+<br>
+    while (!SLIST_EMPTY(&amp;head)) {           /* List deletion */
+<br>
+        n1 = SLIST_FIRST(&amp;head);
+<br>
+        SLIST_REMOVE_HEAD(&amp;head, entries);
+<br>
+        free(n1);
+<br>
+    }
+<br>
+    SLIST_INIT(&amp;head);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>insque</b>(3), <b>queue</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

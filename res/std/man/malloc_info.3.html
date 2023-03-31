@@ -1,0 +1,316 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 2012 by Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/3897f9a8cb765449f200899a995bdf8d5aff163c">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>malloc_info(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">malloc_info(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">malloc_info(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">malloc_info - export malloc state to a stream</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;malloc.h&gt;</b></pre>
+<pre><b>int malloc_info(int </b><i>options</i><b>, FILE *</b><i>stream</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>malloc_info</b>() function exports an XML string that
+    describes the current state of the memory-allocation implementation in the
+    caller. The string is printed on the file stream <i>stream</i>. The exported
+    string includes information about all arenas (see <b>malloc</b>(3)).</p>
+<p class="Pp">As currently implemented, <i>options</i> must be zero.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>malloc_info</b>() returns 0. On failure, it returns
+    -1, and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>options</i> was nonzero.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>malloc_info ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>malloc_info</b>() was added in glibc 2.10.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This function is a GNU extension.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The memory-allocation information is provided as an XML string
+    (rather than a C structure) because the information may change over time
+    (according to changes in the underlying implementation). The output XML
+    string includes a version field.</p>
+<p class="Pp">The <b>open_memstream</b>(3) function can be used to send the
+    output of <b>malloc_info</b>() directly into a buffer in memory, rather than
+    to a file.</p>
+<p class="Pp">The <b>malloc_info</b>() function is designed to address
+    deficiencies in <b>malloc_stats</b>(3) and <b>mallinfo</b>(3).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below takes up to four command-line arguments, of
+    which the first three are mandatory. The first argument specifies the number
+    of threads that the program should create. All of the threads, including the
+    main thread, allocate the number of blocks of memory specified by the second
+    argument. The third argument controls the size of the blocks to be
+    allocated. The main thread creates blocks of this size, the second thread
+    created by the program allocates blocks of twice this size, the third thread
+    allocates blocks of three times this size, and so on.</p>
+<p class="Pp">The program calls <b>malloc_info</b>() twice to display the
+    memory-allocation state. The first call takes place before any threads are
+    created or memory allocated. The second call is performed after all threads
+    have allocated memory.</p>
+<p class="Pp">In the following example, the command-line arguments specify the
+    creation of one additional thread, and both the main thread and the
+    additional thread allocate 10000 blocks of memory. After the blocks of
+    memory have been allocated, <b>malloc_info</b>() shows the state of two
+    allocation arenas.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>getconf GNU_LIBC_VERSION</b>
+glibc 2.13
+$ <b>./a.out 1 10000 100</b>
+============ Before allocating blocks ============
+&lt;malloc version="1"&gt;
+&lt;heap nr="0"&gt;
+&lt;sizes&gt;
+&lt;/sizes&gt;
+&lt;total type="fast" count="0" size="0"/&gt;
+&lt;total type="rest" count="0" size="0"/&gt;
+&lt;system type="current" size="135168"/&gt;
+&lt;system type="max" size="135168"/&gt;
+&lt;aspace type="total" size="135168"/&gt;
+&lt;aspace type="mprotect" size="135168"/&gt;
+&lt;/heap&gt;
+&lt;total type="fast" count="0" size="0"/&gt;
+&lt;total type="rest" count="0" size="0"/&gt;
+&lt;system type="current" size="135168"/&gt;
+&lt;system type="max" size="135168"/&gt;
+&lt;aspace type="total" size="135168"/&gt;
+&lt;aspace type="mprotect" size="135168"/&gt;
+&lt;/malloc&gt;
+============ After allocating blocks ============
+&lt;malloc version="1"&gt;
+&lt;heap nr="0"&gt;
+&lt;sizes&gt;
+&lt;/sizes&gt;
+&lt;total type="fast" count="0" size="0"/&gt;
+&lt;total type="rest" count="0" size="0"/&gt;
+&lt;system type="current" size="1081344"/&gt;
+&lt;system type="max" size="1081344"/&gt;
+&lt;aspace type="total" size="1081344"/&gt;
+&lt;aspace type="mprotect" size="1081344"/&gt;
+&lt;/heap&gt;
+&lt;heap nr="1"&gt;
+&lt;sizes&gt;
+&lt;/sizes&gt;
+&lt;total type="fast" count="0" size="0"/&gt;
+&lt;total type="rest" count="0" size="0"/&gt;
+&lt;system type="current" size="1032192"/&gt;
+&lt;system type="max" size="1032192"/&gt;
+&lt;aspace type="total" size="1032192"/&gt;
+&lt;aspace type="mprotect" size="1032192"/&gt;
+&lt;/heap&gt;
+&lt;total type="fast" count="0" size="0"/&gt;
+&lt;total type="rest" count="0" size="0"/&gt;
+&lt;system type="current" size="2113536"/&gt;
+&lt;system type="max" size="2113536"/&gt;
+&lt;aspace type="total" size="2113536"/&gt;
+&lt;aspace type="mprotect" size="2113536"/&gt;
+&lt;/malloc&gt;
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<pre>#include &lt;err.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;malloc.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+static size_t        blockSize;
+static size_t        numThreads;
+static unsigned int  numBlocks;
+static void *
+thread_func(void *arg)
+{
+<br>
+    int tn = (int) arg;
+<br>
+    /* The multiplier '(2 + tn)' ensures that each thread (including
+<br>
+       the main thread) allocates a different amount of memory. */
+<br>
+    for (unsigned int j = 0; j &lt; numBlocks; j++)
+<br>
+        if (malloc(blockSize * (2 + tn)) == NULL)
+<br>
+            err(EXIT_FAILURE, "malloc-thread");
+<br>
+    sleep(100);         /* Sleep until main thread terminates. */
+<br>
+    return NULL;
+}
+int
+main(int argc, char *argv[])
+{
+<br>
+    int        sleepTime;
+<br>
+    pthread_t  *thr;
+<br>
+    if (argc &lt; 4) {
+<br>
+        fprintf(stderr,
+<br>
+                "%s num-threads num-blocks block-size [sleep-time]\n",
+<br>
+                argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    numThreads = atoi(argv[1]);
+<br>
+    numBlocks = atoi(argv[2]);
+<br>
+    blockSize = atoi(argv[3]);
+<br>
+    sleepTime = (argc &gt; 4) ? atoi(argv[4]) : 0;
+<br>
+    thr = calloc(numThreads, sizeof(*thr));
+<br>
+    if (thr == NULL)
+<br>
+        err(EXIT_FAILURE, "calloc");
+<br>
+    printf("============ Before allocating blocks ============\n");
+<br>
+    malloc_info(0, stdout);
+<br>
+    /* Create threads that allocate different amounts of memory. */
+<br>
+    for (size_t tn = 0; tn &lt; numThreads; tn++) {
+<br>
+        errno = pthread_create(&amp;thr[tn], NULL, thread_func,
+<br>
+                               (void *) tn);
+<br>
+        if (errno != 0)
+<br>
+            err(EXIT_FAILURE, "pthread_create");
+<br>
+        /* If we add a sleep interval after the start-up of each
+<br>
+           thread, the threads likely won't contend for malloc
+<br>
+           mutexes, and therefore additional arenas won't be
+<br>
+           allocated (see malloc(3)). */
+<br>
+        if (sleepTime &gt; 0)
+<br>
+            sleep(sleepTime);
+<br>
+    }
+<br>
+    /* The main thread also allocates some memory. */
+<br>
+    for (unsigned int j = 0; j &lt; numBlocks; j++)
+<br>
+        if (malloc(blockSize) == NULL)
+<br>
+            err(EXIT_FAILURE, "malloc");
+<br>
+    sleep(2);           /* Give all threads a chance to
+<br>
+                           complete allocations. */
+<br>
+    printf("\n============ After allocating blocks ============\n");
+<br>
+    malloc_info(0, stdout);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>mallinfo</b>(3), <b>malloc</b>(3), <b>malloc_stats</b>(3),
+    <b>mallopt</b>(3), <b>open_memstream</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

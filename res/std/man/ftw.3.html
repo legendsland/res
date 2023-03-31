@@ -1,0 +1,402 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 1993 Michael Haardt (michael@moria.de)
+   and copyright (c) 1999 Andries Brouwer (aeb@cwi.nl)
+   and copyright (c) 2006 Justin Pryzby <justinpryzby@users.sf.net>
+   and copyright (c) 2006 Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+  
+   Modified Sun Jul 25 11:02:22 1993 by Rik Faith (faith@cs.unc.edu)
+   2006-05-24, Justin Pryzby <justinpryzby@users.sf.net>
+    	document FTW_ACTIONRETVAL; include .SH RETURN VALUE;
+   2006-05-24, Justin Pryzby <justinpryzby@users.sf.net> and
+  	Michael Kerrisk <mtk.manpages@gmail.com>
+   	reorganized and rewrote much of the page
+   2006-05-24, Michael Kerrisk <mtk.manpages@gmail.com>
+  	Added an example program.
+   --><head>
+<meta name="dc.identifier" content="res/5361a10f6a013bff0eab3cababe6fb6ad1c1b4f1">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>ftw(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">ftw(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">ftw(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">ftw, nftw - file tree walk</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;ftw.h&gt;</b></pre>
+<pre><b>int nftw(const char *</b><i>dirpath</i><b>,</b>
+<b>        int (*</b><i>fn</i><b>)(const char *</b><i>fpath</i><b>, const struct stat *</b><i>sb</i><b>,</b>
+<b>                  int </b><i>typeflag</i><b>, struct FTW *</b><i>ftwbuf</i><b>),</b>
+<b>        int </b><i>nopenfd</i><b>, int </b><i>flags</i><b>);</b></pre>
+<pre><b>[[deprecated]]</b>
+<b>int ftw(const char *</b><i>dirpath</i><b>,</b>
+<b>        int (*</b><i>fn</i><b>)(const char *</b><i>fpath</i><b>, const struct stat *</b><i>sb</i><b>,</b>
+<b>                  int </b><i>typeflag</i><b>),</b>
+<b>        int </b><i>nopenfd</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>nftw</b>():</p>
+<pre><br>
+    _XOPEN_SOURCE &gt;= 500</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>nftw</b>() walks through the directory tree that is located
+    under the directory <i>dirpath</i>, and calls <i>fn</i>() once for each
+    entry in the tree. By default, directories are handled before the files and
+    subdirectories they contain (preorder traversal).</p>
+<p class="Pp">To avoid using up all of the calling process's file descriptors,
+    <i>nopenfd</i> specifies the maximum number of directories that
+    <b>nftw</b>() will hold open simultaneously. When the search depth exceeds
+    this, <b>nftw</b>() will become slower because directories have to be closed
+    and reopened. <b>nftw</b>() uses at most one file descriptor for each level
+    in the directory tree.</p>
+<p class="Pp">For each entry found in the tree, <b>nftw</b>() calls <i>fn</i>()
+    with four arguments: <i>fpath</i>, <i>sb</i>, <i>typeflag</i>, and
+    <i>ftwbuf</i>. <i>fpath</i> is the pathname of the entry, and is expressed
+    either as a pathname relative to the calling process's current working
+    directory at the time of the call to <b>nftw</b>(), if <i>dirpath</i> was
+    expressed as a relative pathname, or as an absolute pathname, if
+    <i>dirpath</i> was expressed as an absolute pathname. <i>sb</i> is a pointer
+    to the <i>stat</i> structure returned by a call to <b>stat</b>(2) for
+    <i>fpath</i>.</p>
+<p class="Pp">The <i>typeflag</i> argument passed to <i>fn</i>() is an integer
+    that has one of the following values:</p>
+<dl class="Bl-tag">
+  <dt id="FTW_F"><a class="permalink" href="#FTW_F"><b>FTW_F</b></a></dt>
+  <dd><i>fpath</i> is a regular file.</dd>
+  <dt id="FTW_D"><a class="permalink" href="#FTW_D"><b>FTW_D</b></a></dt>
+  <dd><i>fpath</i> is a directory.</dd>
+  <dt id="FTW_DNR"><a class="permalink" href="#FTW_DNR"><b>FTW_DNR</b></a></dt>
+  <dd><i>fpath</i> is a directory which can't be read.</dd>
+  <dt id="FTW_DP"><a class="permalink" href="#FTW_DP"><b>FTW_DP</b></a></dt>
+  <dd><i>fpath</i> is a directory, and <b>FTW_DEPTH</b> was specified in
+      <i>flags</i>. (If <b>FTW_DEPTH</b> was not specified in <i>flags</i>, then
+      directories will always be visited with <i>typeflag</i> set to
+      <b>FTW_D</b>.) All of the files and subdirectories within <i>fpath</i>
+      have been processed.</dd>
+  <dt id="FTW_NS"><a class="permalink" href="#FTW_NS"><b>FTW_NS</b></a></dt>
+  <dd>The <b>stat</b>(2) call failed on <i>fpath</i>, which is not a symbolic
+      link. The probable cause for this is that the caller had read permission
+      on the parent directory, so that the filename <i>fpath</i> could be seen,
+      but did not have execute permission, so that the file could not be reached
+      for <b>stat</b>(2). The contents of the buffer pointed to by <i>sb</i> are
+      undefined.</dd>
+  <dt id="FTW_SL"><a class="permalink" href="#FTW_SL"><b>FTW_SL</b></a></dt>
+  <dd><i>fpath</i> is a symbolic link, and <b>FTW_PHYS</b> was set in
+      <i>flags</i>.</dd>
+  <dt id="FTW_SLN"><a class="permalink" href="#FTW_SLN"><b>FTW_SLN</b></a></dt>
+  <dd><i>fpath</i> is a symbolic link pointing to a nonexistent file. (This
+      occurs only if <b>FTW_PHYS</b> is not set.) In this case the <i>sb</i>
+      argument passed to <i>fn</i>() contains information returned by performing
+      <b>lstat</b>(2) on the "dangling" symbolic link. (But see
+    BUGS.)</dd>
+</dl>
+<p class="Pp">The fourth argument (<i>ftwbuf</i>) that <b>nftw</b>() supplies
+    when calling <i>fn</i>() is a pointer to a structure of type <i>FTW</i>:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct FTW {
+<br>
+    int base;
+<br>
+    int level;
+};
+</pre>
+<br>
+<p class="Pp"><i>base</i> is the offset of the filename (i.e., basename
+    component) in the pathname given in <i>fpath</i>. <i>level</i> is the depth
+    of <i>fpath</i> in the directory tree, relative to the root of the tree
+    (<i>dirpath</i>, which has depth 0).</p>
+<p class="Pp">To stop the tree walk, <i>fn</i>() returns a nonzero value; this
+    value will become the return value of <b>nftw</b>(). As long as <i>fn</i>()
+    returns 0, <b>nftw</b>() will continue either until it has traversed the
+    entire tree, in which case it will return zero, or until it encounters an
+    error (such as a <b>malloc</b>(3) failure), in which case it will return
+  -1.</p>
+<p class="Pp">Because <b>nftw</b>() uses dynamic data structures, the only safe
+    way to exit out of a tree walk is to return a nonzero value from
+    <i>fn</i>(). To allow a signal to terminate the walk without causing a
+    memory leak, have the handler set a global flag that is checked by
+    <i>fn</i>(). <i>Don't</i> use <b>longjmp</b>(3) unless the program is going
+    to terminate.</p>
+<p class="Pp">The <i>flags</i> argument of <b>nftw</b>() is formed by ORing zero
+    or more of the following flags:</p>
+<dl class="Bl-tag">
+  <dt id="FTW_ACTIONRETVAL"><a class="permalink" href="#FTW_ACTIONRETVAL"><b>FTW_ACTIONRETVAL</b>
+    (since glibc 2.3.3)</a></dt>
+  <dd>If this glibc-specific flag is set, then <b>nftw</b>() handles the return
+      value from <i>fn</i>() differently. <i>fn</i>() should return one of the
+      following values:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="FTW_CONTINUE"><a class="permalink" href="#FTW_CONTINUE"><b>FTW_CONTINUE</b></a></dt>
+  <dd>Instructs <b>nftw</b>() to continue normally.</dd>
+  <dt id="FTW_SKIP_SIBLINGS"><a class="permalink" href="#FTW_SKIP_SIBLINGS"><b>FTW_SKIP_SIBLINGS</b></a></dt>
+  <dd>If <i>fn</i>() returns this value, then siblings of the current entry will
+      be skipped, and processing continues in the parent.</dd>
+  <dt id="FTW_SKIP_SUBTREE"><a class="permalink" href="#FTW_SKIP_SUBTREE"><b>FTW_SKIP_SUBTREE</b></a></dt>
+  <dd>If <i>fn</i>() is called with an entry that is a directory
+      (<i>typeflag</i> is <b>FTW_D</b>), this return value will prevent objects
+      within that directory from being passed as arguments to <i>fn</i>().
+      <b>nftw</b>() continues processing with the next sibling of the
+    directory.</dd>
+  <dt id="FTW_STOP"><a class="permalink" href="#FTW_STOP"><b>FTW_STOP</b></a></dt>
+  <dd>Causes <b>nftw</b>() to return immediately with the return value
+      <b>FTW_STOP</b>.</dd>
+</dl>
+<p class="Pp">Other return values could be associated with new actions in the
+    future; <i>fn</i>() should not return values other than those listed
+  above.</p>
+<p class="Pp">The feature test macro <b>_GNU_SOURCE</b> must be defined (before
+    including <i>any</i> header files) in order to obtain the definition of
+    <b>FTW_ACTIONRETVAL</b> from <i>&lt;ftw.h&gt;</i>.</p>
+</div>
+<dl class="Bl-tag">
+  <dt id="FTW_CHDIR"><a class="permalink" href="#FTW_CHDIR"><b>FTW_CHDIR</b></a></dt>
+  <dd>If set, do a <b>chdir</b>(2) to each directory before handling its
+      contents. This is useful if the program needs to perform some action in
+      the directory in which <i>fpath</i> resides. (Specifying this flag has no
+      effect on the pathname that is passed in the <i>fpath</i> argument of
+      <i>fn</i>.)</dd>
+  <dt id="FTW_DEPTH"><a class="permalink" href="#FTW_DEPTH"><b>FTW_DEPTH</b></a></dt>
+  <dd>If set, do a post-order traversal, that is, call <i>fn</i>() for the
+      directory itself <i>after</i> handling the contents of the directory and
+      its subdirectories. (By default, each directory is handled <i>before</i>
+      its contents.)</dd>
+  <dt id="FTW_MOUNT"><a class="permalink" href="#FTW_MOUNT"><b>FTW_MOUNT</b></a></dt>
+  <dd>If set, stay within the same filesystem (i.e., do not cross mount
+    points).</dd>
+  <dt id="FTW_PHYS"><a class="permalink" href="#FTW_PHYS"><b>FTW_PHYS</b></a></dt>
+  <dd>If set, do not follow symbolic links. (This is what you want.) If not set,
+      symbolic links are followed, but no file is reported twice.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>If <b>FTW_PHYS</b> is not set, but <b>FTW_DEPTH</b> is set, then the
+      function <i>fn</i>() is never called for a directory that would be a
+      descendant of itself.</dd>
+</dl>
+<section class="Ss">
+<h2 class="Ss" id="ftw()"><a class="permalink" href="#ftw()">ftw()</a></h2>
+<p class="Pp"><b>ftw</b>() is an older function that offers a subset of the
+    functionality of <b>nftw</b>(). The notable differences are as follows:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><b>ftw</b>() has no <i>flags</i> argument. It behaves the same as when
+      <b>nftw</b>() is called with <i>flags</i> specified as zero.</dd>
+  <dt>•</dt>
+  <dd>The callback function, <i>fn</i>(), is not supplied with a fourth
+      argument.</dd>
+  <dt>•</dt>
+  <dd>The range of values that is passed via the <i>typeflag</i> argument
+      supplied to <i>fn</i>() is smaller: just <b>FTW_F</b>, <b>FTW_D</b>,
+      <b>FTW_DNR</b>, <b>FTW_NS</b>, and (possibly) <b>FTW_SL</b>.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">These functions return 0 on success, and -1 if an error
+  occurs.</p>
+<p class="Pp">If <i>fn</i>() returns nonzero, then the tree walk is terminated
+    and the value returned by <i>fn</i>() is returned as the result of
+    <b>ftw</b>() or <b>nftw</b>().</p>
+<p class="Pp">If <b>nftw</b>() is called with the <b>FTW_ACTIONRETVAL</b> flag,
+    then the only nonzero value that should be used by <i>fn</i>() to terminate
+    the tree walk is <b>FTW_STOP</b>, and that value is returned as the result
+    of <b>nftw</b>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>nftw ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe cwd</td>
+  </tr>
+  <tr>
+    <td>ftw ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>nftw</b>() is available since glibc 2.1.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, SVr4, SUSv1. POSIX.1-2008 marks
+    <b>ftw</b>() as obsolete.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">POSIX.1-2008 notes that the results are unspecified if <i>fn</i>
+    does not preserve the current working directory.</p>
+<p class="Pp">The function <b>nftw</b>() and the use of <b>FTW_SL</b> with
+    <b>ftw</b>() were introduced in SUSv1.</p>
+<p class="Pp">In some implementations (e.g., glibc), <b>ftw</b>() will never use
+    <b>FTW_SL</b>, on other systems <b>FTW_SL</b> occurs only for symbolic links
+    that do not point to an existing file, and again on other systems
+    <b>ftw</b>() will use <b>FTW_SL</b> for each symbolic link. If <i>fpath</i>
+    is a symbolic link and <b>stat</b>(2) failed, POSIX.1-2008 states that it is
+    undefined whether <b>FTW_NS</b> or <b>FTW_SL</b> is passed in
+    <i>typeflag</i>. For predictable results, use <b>nftw</b>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">According to POSIX.1-2008, when the <i>typeflag</i> argument
+    passed to <i>fn</i>() contains <b>FTW_SLN</b>, the buffer pointed to by
+    <i>sb</i> should contain information about the dangling symbolic link
+    (obtained by calling <b>lstat</b>(2) on the link). Early glibc versions
+    correctly followed the POSIX specification on this point. However, as a
+    result of a regression introduced in glibc 2.4, the contents of the buffer
+    pointed to by <i>sb</i> were undefined when <b>FTW_SLN</b> is passed in
+    <i>typeflag</i>. (More precisely, the contents of the buffer were left
+    unchanged in this case.) This regression was eventually fixed in glibc 2.30,
+    so that the glibc implementation (once more) follows the POSIX
+    specification.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The following program traverses the directory tree under the path
+    named in its first command-line argument, or under the current directory if
+    no argument is supplied. It displays various information about each file.
+    The second command-line argument can be used to specify characters that
+    control the value assigned to the <i>flags</i> argument when calling
+    <b>nftw</b>().</p>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#define _XOPEN_SOURCE 500
+#include &lt;ftw.h&gt;
+#include &lt;stdint.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+static int
+display_info(const char *fpath, const struct stat *sb,
+<br>
+             int tflag, struct FTW *ftwbuf)
+{
+<br>
+    printf("%-3s %2d ",
+<br>
+           (tflag == FTW_D) ?   "d"   : (tflag == FTW_DNR) ? "dnr" :
+<br>
+           (tflag == FTW_DP) ?  "dp"  : (tflag == FTW_F) ?   "f" :
+<br>
+           (tflag == FTW_NS) ?  "ns"  : (tflag == FTW_SL) ?  "sl" :
+<br>
+           (tflag == FTW_SLN) ? "sln" : "???",
+<br>
+           ftwbuf-&gt;level);
+<br>
+    if (tflag == FTW_NS)
+<br>
+        printf("-------");
+<br>
+    else
+<br>
+        printf("%7jd", (intmax_t) sb-&gt;st_size);
+<br>
+    printf("   %-40s %d %s\n",
+<br>
+           fpath, ftwbuf-&gt;base, fpath + ftwbuf-&gt;base);
+<br>
+    return 0;           /* To tell nftw() to continue */
+}
+int
+main(int argc, char *argv[])
+{
+<br>
+    int flags = 0;
+<br>
+    if (argc &gt; 2 &amp;&amp; strchr(argv[2], 'd') != NULL)
+<br>
+        flags |= FTW_DEPTH;
+<br>
+    if (argc &gt; 2 &amp;&amp; strchr(argv[2], 'p') != NULL)
+<br>
+        flags |= FTW_PHYS;
+<br>
+    if (nftw((argc &lt; 2) ? "." : argv[1], display_info, 20, flags)
+<br>
+        == -1)
+<br>
+    {
+<br>
+        perror("nftw");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>stat</b>(2), <b>fts</b>(3), <b>readdir</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

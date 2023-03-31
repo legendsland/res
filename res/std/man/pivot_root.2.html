@@ -1,0 +1,380 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2019 Michael Kerrisk <mtk.manpages@gmail.com>
+   A very few fragments remain from an earlier page written by
+   Werner Almesberger in 2000
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/efec3b4690f5d0da165b211fca739d6a5dad6f74">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>pivot_root(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">pivot_root(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">pivot_root(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pivot_root - change the root mount</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/syscall.h&gt;</b>      /* Definition of <b>SYS_*</b> constants */
+<b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int syscall(SYS_pivot_root, const char *</b><i>new_root</i><b>, const char *</b><i>put_old</i><b>);</b></pre>
+<p class="Pp"><i>Note</i>: glibc provides no wrapper for <b>pivot_root</b>(),
+    necessitating the use of <b>syscall</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>pivot_root</b>() changes the root mount in the mount namespace
+    of the calling process. More precisely, it moves the root mount to the
+    directory <i>put_old</i> and makes <i>new_root</i> the new root mount. The
+    calling process must have the <b>CAP_SYS_ADMIN</b> capability in the user
+    namespace that owns the caller's mount namespace.</p>
+<p class="Pp"><b>pivot_root</b>() changes the root directory and the current
+    working directory of each process or thread in the same mount namespace to
+    <i>new_root</i> if they point to the old root directory. (See also NOTES.)
+    On the other hand, <b>pivot_root</b>() does not change the caller's current
+    working directory (unless it is on the old root directory), and thus it
+    should be followed by a <b>chdir("/")</b> call.</p>
+<p class="Pp">The following restrictions apply:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><i>new_root</i> and <i>put_old</i> must be directories.</dd>
+  <dt>•</dt>
+  <dd><i>new_root</i> and <i>put_old</i> must not be on the same mount as the
+      current root.</dd>
+  <dt>•</dt>
+  <dd><i>put_old</i> must be at or underneath <i>new_root</i>; that is, adding
+      some nonnegative number of "<i>/..</i>" suffixes to the pathname
+      pointed to by <i>put_old</i> must yield the same directory as
+      <i>new_root</i>.</dd>
+  <dt>•</dt>
+  <dd><i>new_root</i> must be a path to a mount point, but can't be
+      <i>"/"</i>. A path that is not already a mount point can be
+      converted into one by bind mounting the path onto itself.</dd>
+  <dt>•</dt>
+  <dd>The propagation type of the parent mount of <i>new_root</i> and the parent
+      mount of the current root directory must not be <b>MS_SHARED</b>;
+      similarly, if <i>put_old</i> is an existing mount point, its propagation
+      type must not be <b>MS_SHARED</b>. These restrictions ensure that
+      <b>pivot_root</b>() never propagates any changes to another mount
+      namespace.</dd>
+  <dt>•</dt>
+  <dd>The current root directory must be a mount point.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, zero is returned. On error, -1 is returned, and
+    <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp"><b>pivot_root</b>() may fail with any of the same errors as
+    <b>stat</b>(2). Additionally, it may fail with the following errors:</p>
+<dl class="Bl-tag">
+  <dt id="EBUSY"><a class="permalink" href="#EBUSY"><b>EBUSY</b></a></dt>
+  <dd><i>new_root</i> or <i>put_old</i> is on the current root mount. (This
+      error covers the pathological case where <i>new_root</i> is
+      <i>"/"</i>.)</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>new_root</i> is not a mount point.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd><i>put_old</i> is not at or underneath <i>new_root</i>.</dd>
+  <dt id="EINVAL~3"><a class="permalink" href="#EINVAL~3"><b>EINVAL</b></a></dt>
+  <dd>The current root directory is not a mount point (because of an earlier
+      <b>chroot</b>(2)).</dd>
+  <dt id="EINVAL~4"><a class="permalink" href="#EINVAL~4"><b>EINVAL</b></a></dt>
+  <dd>The current root is on the rootfs (initial ramfs) mount; see NOTES.</dd>
+  <dt id="EINVAL~5"><a class="permalink" href="#EINVAL~5"><b>EINVAL</b></a></dt>
+  <dd>Either the mount point at <i>new_root</i>, or the parent mount of that
+      mount point, has propagation type <b>MS_SHARED</b>.</dd>
+  <dt id="EINVAL~6"><a class="permalink" href="#EINVAL~6"><b>EINVAL</b></a></dt>
+  <dd><i>put_old</i> is a mount point and has the propagation type
+      <b>MS_SHARED</b>.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd><i>new_root</i> or <i>put_old</i> is not a directory.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The calling process does not have the <b>CAP_SYS_ADMIN</b>
+    capability.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>pivot_root</b>() was introduced in Linux 2.3.41.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>pivot_root</b>() is Linux-specific and hence is not
+  portable.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">A command-line interface for this system call is provided by
+    <b>pivot_root</b>(8).</p>
+<p class="Pp"><b>pivot_root</b>() allows the caller to switch to a new root
+    filesystem while at the same time placing the old root mount at a location
+    under <i>new_root</i> from where it can subsequently be unmounted. (The fact
+    that it moves all processes that have a root directory or current working
+    directory on the old root directory to the new root frees the old root
+    directory of users, allowing the old root mount to be unmounted more
+    easily.)</p>
+<p class="Pp">One use of <b>pivot_root</b>() is during system startup, when the
+    system mounts a temporary root filesystem (e.g., an <b>initrd</b>(4)), then
+    mounts the real root filesystem, and eventually turns the latter into the
+    root directory of all relevant processes and threads. A modern use is to set
+    up a root filesystem during the creation of a container.</p>
+<p class="Pp">The fact that <b>pivot_root</b>() modifies process root and
+    current working directories in the manner noted in DESCRIPTION is necessary
+    in order to prevent kernel threads from keeping the old root mount busy with
+    their root and current working directories, even if they never access the
+    filesystem in any way.</p>
+<p class="Pp">The rootfs (initial ramfs) cannot be <b>pivot_root</b>()ed. The
+    recommended method of changing the root filesystem in this case is to delete
+    everything in rootfs, overmount rootfs with the new root, attach
+    <i>stdin</i>/<i>stdout</i>/<i>stderr</i> to the new <i>/dev/console</i>, and
+    exec the new <b>init</b>(1). Helper programs for this process exist; see
+    <b>switch_root</b>(8).</p>
+<section class="Ss">
+<h2 class="Ss" id="pivot_root("><a class="permalink" href="#pivot_root(">pivot_root(".",
+  ".")</a></h2>
+<p class="Pp"><i>new_root</i> and <i>put_old</i> may be the same directory. In
+    particular, the following sequence allows a pivot-root operation without
+    needing to create and remove a temporary directory:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>chdir(new_root);
+pivot_root(".", ".");
+umount2(".", MNT_DETACH);
+</pre>
+<br>
+<p class="Pp">This sequence succeeds because the <b>pivot_root</b>() call stacks
+    the old root mount point on top of the new root mount point at <i>/</i>. At
+    that point, the calling process's root directory and current working
+    directory refer to the new root mount point (<i>new_root</i>). During the
+    subsequent <b>umount</b>() call, resolution of <i>"."</i> starts
+    with <i>new_root</i> and then moves up the list of mounts stacked at
+    <i>/</i>, with the result that old root mount point is unmounted.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Historical_notes"><a class="permalink" href="#Historical_notes">Historical
+  notes</a></h2>
+<p class="Pp">For many years, this manual page carried the following text:</p>
+<div class="Bd-indent">
+<p class="Pp"><b>pivot_root</b>() may or may not change the current root and the
+    current working directory of any processes or threads which use the old root
+    directory. The caller of <b>pivot_root</b>() must ensure that processes with
+    root or current working directory at the old root operate correctly in
+    either case. An easy way to ensure this is to change their root and current
+    working directory to <i>new_root</i> before invoking
+  <b>pivot_root</b>().</p>
+</div>
+<p class="Pp">This text, written before the system call implementation was even
+    finalized in the kernel, was probably intended to warn users at that time
+    that the implementation might change before final release. However, the
+    behavior stated in DESCRIPTION has remained consistent since this system
+    call was first implemented and will not change now.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below demonstrates the use of <b>pivot_root</b>()
+    inside a mount namespace that is created using <b>clone</b>(2). After
+    pivoting to the root directory named in the program's first command-line
+    argument, the child created by <b>clone</b>(2) then executes the program
+    named in the remaining command-line arguments.</p>
+<p class="Pp">We demonstrate the program by creating a directory that will serve
+    as the new root filesystem and placing a copy of the (statically linked)
+    <b>busybox</b>(1) executable in that directory.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>mkdir /tmp/rootfs</b>
+$ <b>ls -id /tmp/rootfs</b>    # Show inode number of new root directory
+319459 /tmp/rootfs
+$ <b>cp $(which busybox) /tmp/rootfs</b>
+$ <b>PS1='bbsh$ ' sudo ./pivot_root_demo /tmp/rootfs /busybox sh</b>
+bbsh$ <b>PATH=/</b>
+bbsh$ <b>busybox ln busybox ln</b>
+bbsh$ <b>ln busybox echo</b>
+bbsh$ <b>ln busybox ls</b>
+bbsh$ <b>ls</b>
+busybox  echo     ln       ls
+bbsh$ <b>ls -id /</b>          # Compare with inode number above
+319459 /
+bbsh$ <b>echo 'hello world'</b>
+hello world
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<p class="Pp"></p>
+<pre>/* pivot_root_demo.c */
+#define _GNU_SOURCE
+#include &lt;err.h&gt;
+#include &lt;limits.h&gt;
+#include &lt;sched.h&gt;
+#include &lt;signal.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;sys/mman.h&gt;
+#include &lt;sys/mount.h&gt;
+#include &lt;sys/stat.h&gt;
+#include &lt;sys/syscall.h&gt;
+#include &lt;sys/wait.h&gt;
+#include &lt;unistd.h&gt;
+static int
+pivot_root(const char *new_root, const char *put_old)
+{
+<br>
+    return syscall(SYS_pivot_root, new_root, put_old);
+}
+#define STACK_SIZE (1024 * 1024)
+static int              /* Startup function for cloned child */
+child(void *arg)
+{
+<br>
+    char        path[PATH_MAX];
+<br>
+    char        **args = arg;
+<br>
+    char        *new_root = args[0];
+<br>
+    const char  *put_old = "/oldrootfs";
+<br>
+    /* Ensure that 'new_root' and its parent mount don't have
+<br>
+       shared propagation (which would cause pivot_root() to
+<br>
+       return an error), and prevent propagation of mount
+<br>
+       events to the initial mount namespace. */
+<br>
+    if (mount(NULL, "/", NULL, MS_REC | MS_PRIVATE, NULL) == -1)
+<br>
+        err(EXIT_FAILURE, "mount-MS_PRIVATE");
+<br>
+    /* Ensure that 'new_root' is a mount point. */
+<br>
+    if (mount(new_root, new_root, NULL, MS_BIND, NULL) == -1)
+<br>
+        err(EXIT_FAILURE, "mount-MS_BIND");
+<br>
+    /* Create directory to which old root will be pivoted. */
+<br>
+    snprintf(path, sizeof(path), "%s/%s", new_root, put_old);
+<br>
+    if (mkdir(path, 0777) == -1)
+<br>
+        err(EXIT_FAILURE, "mkdir");
+<br>
+    /* And pivot the root filesystem. */
+<br>
+    if (pivot_root(new_root, path) == -1)
+<br>
+        err(EXIT_FAILURE, "pivot_root");
+<br>
+    /* Switch the current working directory to "/". */
+<br>
+    if (chdir("/") == -1)
+<br>
+        err(EXIT_FAILURE, "chdir");
+<br>
+    /* Unmount old root and remove mount point. */
+<br>
+    if (umount2(put_old, MNT_DETACH) == -1)
+<br>
+        perror("umount2");
+<br>
+    if (rmdir(put_old) == -1)
+<br>
+        perror("rmdir");
+<br>
+    /* Execute the command specified in argv[1]... */
+<br>
+    execv(args[1], &amp;args[1]);
+<br>
+    err(EXIT_FAILURE, "execv");
+}
+int
+main(int argc, char *argv[])
+{
+<br>
+    char *stack;
+<br>
+    /* Create a child process in a new mount namespace. */
+<br>
+    stack = mmap(NULL, STACK_SIZE, PROT_READ | PROT_WRITE,
+<br>
+                 MAP_PRIVATE | MAP_ANONYMOUS | MAP_STACK, -1, 0);
+<br>
+    if (stack == MAP_FAILED)
+<br>
+        err(EXIT_FAILURE, "mmap");
+<br>
+    if (clone(child, stack + STACK_SIZE,
+<br>
+              CLONE_NEWNS | SIGCHLD, &amp;argv[1]) == -1)
+<br>
+        err(EXIT_FAILURE, "clone");
+<br>
+    /* Parent falls through to here; wait for child. */
+<br>
+    if (wait(NULL) == -1)
+<br>
+        err(EXIT_FAILURE, "wait");
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>chdir</b>(2), <b>chroot</b>(2), <b>mount</b>(2),
+    <b>stat</b>(2), <b>initrd</b>(4), <b>mount_namespaces</b>(7),
+    <b>pivot_root</b>(8), <b>switch_root</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/1fce90773b2d8678a0d839ff416511285a9e517c">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>timeradd(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">timeradd(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">timeradd(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">timeradd, timersub, timercmp, timerclear, timerisset - timeval
+    operations</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/time.h&gt;</b></pre>
+<pre><b>void timeradd(struct timeval *</b><i>a</i><b>, struct timeval *</b><i>b</i><b>,</b>
+<b>              struct timeval *</b><i>res</i><b>);</b>
+<b>void timersub(struct timeval *</b><i>a</i><b>, struct timeval *</b><i>b</i><b>,</b>
+<b>              struct timeval *</b><i>res</i><b>);</b></pre>
+<pre><b>void timerclear(struct timeval *</b><i>tvp</i><b>);</b>
+<b>int timerisset(struct timeval *</b><i>tvp</i><b>);</b></pre>
+<pre><b>int timercmp(struct timeval *</b><i>a</i><b>, struct timeval *</b><i>b</i><b>, </b><i>CMP</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp">All functions shown above:</p>
+<pre><br>
+    Since glibc 2.19:
+<br>
+        _DEFAULT_SOURCE
+<br>
+    glibc 2.19 and earlier:
+<br>
+        _BSD_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The macros are provided to operate on <i>timeval</i> structures,
+    defined in <i>&lt;sys/time.h&gt;</i> as:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct timeval {
+<br>
+    time_t      tv_sec;     /* seconds */
+<br>
+    suseconds_t tv_usec;    /* microseconds */
+};
+</pre>
+<br>
+<p class="Pp"><b>timeradd</b>() adds the time values in <i>a</i> and <i>b</i>,
+    and places the sum in the <i>timeval</i> pointed to by <i>res</i>. The
+    result is normalized such that <i>res-&gt;tv_usec</i> has a value in the
+    range 0 to 999,999.</p>
+<p class="Pp"><b>timersub</b>() subtracts the time value in <i>b</i> from the
+    time value in <i>a</i>, and places the result in the <i>timeval</i> pointed
+    to by <i>res</i>. The result is normalized such that <i>res-&gt;tv_usec</i>
+    has a value in the range 0 to 999,999.</p>
+<p class="Pp"><b>timerclear</b>() zeros out the <i>timeval</i> structure pointed
+    to by <i>tvp</i>, so that it represents the Epoch: 1970-01-01 00:00:00 +0000
+    (UTC).</p>
+<p class="Pp"><b>timerisset</b>() returns true (nonzero) if either field of the
+    <i>timeval</i> structure pointed to by <i>tvp</i> contains a nonzero
+  value.</p>
+<p class="Pp"><b>timercmp</b>() compares the timer values in <i>a</i> and
+    <i>b</i> using the comparison operator <i>CMP</i>, and returns true
+    (nonzero) or false (0) depending on the result of the comparison. Some
+    systems (but not Linux/glibc), have a broken <b>timercmp</b>()
+    implementation, in which <i>CMP</i> of <i>&gt;=</i>, <i>&lt;=</i>, and
+    <i>==</i> do not work; portable applications can instead use</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>!timercmp(..., &lt;)
+!timercmp(..., &gt;)
+!timercmp(..., !=)
+</pre>
+<br>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp"><b>timerisset</b>() and <b>timercmp</b>() return true (nonzero) or
+    false (0).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">No errors are defined.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">Not in POSIX.1. Present on most BSD derivatives.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>gettimeofday</b>(2), <b>time</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

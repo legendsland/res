@@ -1,0 +1,127 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2000 lars brinkhoff <lars@nocrew.org>
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+  
+   Modified, Thu Jan 27 19:16:19 CET 2000, lars@nocrew.org
+   --><head>
+<meta name="dc.identifier" content="res/f3448e3cb62aab53e3735d14a04187feda162356">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>dsp56k(4)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">dsp56k(4)</td>
+    <td class="head-vol">Device Drivers Manual</td>
+    <td class="head-rtitle">dsp56k(4)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">dsp56k - DSP56001 interface device</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;asm/dsp56k.h&gt;</b></pre>
+<pre><b>ssize_t read(int </b><i>fd</i><b>, void *</b><i>data</i><b>, size_t </b><i>length</i><b>);</b>
+<b>ssize_t write(int </b><i>fd</i><b>, void *</b><i>data</i><b>, size_t </b><i>length</i><b>);</b></pre>
+<pre><b>int ioctl(int </b><i>fd</i><b>, DSP56K_UPLOAD, struct dsp56k_upload *</b><i>program</i><b>);</b>
+<b>int ioctl(int </b><i>fd</i><b>, DSP56K_SET_TX_WSIZE, int </b><i>wsize</i><b>);</b>
+<b>int ioctl(int </b><i>fd</i><b>, DSP56K_SET_RX_WSIZE, int </b><i>wsize</i><b>);</b>
+<b>int ioctl(int </b><i>fd</i><b>, DSP56K_HOST_FLAGS, struct dsp56k_host_flags *</b><i>flags</i><b>);</b>
+<b>int ioctl(int </b><i>fd</i><b>, DSP56K_HOST_CMD, int </b><i>cmd</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="CONFIGURATION"><a class="permalink" href="#CONFIGURATION">CONFIGURATION</a></h1>
+<p class="Pp">The <i>dsp56k</i> device is a character device with major number
+    55 and minor number 0.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The Motorola DSP56001 is a fully programmable 24-bit digital
+    signal processor found in Atari Falcon030-compatible computers. The
+    <i>dsp56k</i> special file is used to control the DSP56001, and to send and
+    receive data using the bidirectional handshaked host port.</p>
+<p class="Pp">To send a data stream to the signal processor, use <b>write</b>(2)
+    to the device, and <b>read</b>(2) to receive processed data. The data can be
+    sent or received in 8, 16, 24, or 32-bit quantities on the host side, but
+    will always be seen as 24-bit quantities in the DSP56001.</p>
+<p class="Pp">The following <b>ioctl</b>(2) calls are used to control the
+    <i>dsp56k</i> device:</p>
+<dl class="Bl-tag">
+  <dt id="DSP56K_UPLOAD"><a class="permalink" href="#DSP56K_UPLOAD"><b>DSP56K_UPLOAD</b></a></dt>
+  <dd>resets the DSP56001 and uploads a program. The third <b>ioctl</b>(2)
+      argument must be a pointer to a <i>struct dsp56k_upload</i> with members
+      <i>bin</i> pointing to a DSP56001 binary program, and <i>len</i> set to
+      the length of the program, counted in 24-bit words.</dd>
+  <dt id="DSP56K_SET_TX_WSIZE"><a class="permalink" href="#DSP56K_SET_TX_WSIZE"><b>DSP56K_SET_TX_WSIZE</b></a></dt>
+  <dd>sets the transmit word size. Allowed values are in the range 1 to 4, and
+      is the number of bytes that will be sent at a time to the DSP56001. These
+      data quantities will either be padded with bytes containing zero, or
+      truncated to fit the native 24-bit data format of the DSP56001.</dd>
+  <dt id="DSP56K_SET_RX_WSIZE"><a class="permalink" href="#DSP56K_SET_RX_WSIZE"><b>DSP56K_SET_RX_WSIZE</b></a></dt>
+  <dd>sets the receive word size. Allowed values are in the range 1 to 4, and is
+      the number of bytes that will be received at a time from the DSP56001.
+      These data quantities will either truncated, or padded with a null byte
+      ('\0'), to fit the native 24-bit data format of the DSP56001.</dd>
+  <dt id="DSP56K_HOST_FLAGS"><a class="permalink" href="#DSP56K_HOST_FLAGS"><b>DSP56K_HOST_FLAGS</b></a></dt>
+  <dd>read and write the host flags. The host flags are four general-purpose
+      bits that can be read by both the hosting computer and the DSP56001. Bits
+      0 and 1 can be written by the host, and bits 2 and 3 can be written by the
+      DSP56001.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>To access the host flags, the third <b>ioctl</b>(2) argument must be a
+      pointer to a <i>struct dsp56k_host_flags</i>. If bit 0 or 1 is set in the
+      <i>dir</i> member, the corresponding bit in <i>out</i> will be written to
+      the host flags. The state of all host flags will be returned in the lower
+      four bits of the <i>status</i> member.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="DSP56K_HOST_CMD"><a class="permalink" href="#DSP56K_HOST_CMD"><b>DSP56K_HOST_CMD</b></a></dt>
+  <dd>sends a host command. Allowed values are in the range 0 to 31, and is a
+      user-defined command handled by the program running in the DSP56001.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FILES"><a class="permalink" href="#FILES">FILES</a></h1>
+<p class="Pp"><i>/dev/dsp56k</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i>linux/include/asm-m68k/dsp56k.h</i>,
+    <i>linux/drivers/char/dsp56k.c</i>,
+    <a class="Lk" href="http://dsp56k.nocrew.org/">http://dsp56k.nocrew.org/</a>,
+    DSP56000/DSP56001 Digital Signal Processor User's Manual</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

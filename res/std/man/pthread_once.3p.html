@@ -1,0 +1,195 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/33a6d2c0d3331b4f2d4546f3d2d9f6c0180ed454">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>PTHREAD_ONCE(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">PTHREAD_ONCE(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">PTHREAD_ONCE(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pthread_once — dynamic package initialization</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;pthread.h&gt;</pre>
+<pre>int pthread_once(pthread_once_t *<i>once_control</i>,
+<br>
+    void (*<i>init_routine</i>)(void));
+pthread_once_t <i>once_control</i> = PTHREAD_ONCE_INIT;</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The first call to <i>pthread_once</i>() by any thread in a
+    process, with a given <i>once_control</i>, shall call the
+    <i>init_routine</i> with no arguments. Subsequent calls of
+    <i>pthread_once</i>() with the same <i>once_control</i> shall not call the
+    <i>init_routine</i>. On return from <i>pthread_once</i>(),
+    <i>init_routine</i> shall have completed. The <i>once_control</i> parameter
+    shall determine whether the associated initialization routine has been
+    called.</p>
+<p class="Pp">The <i>pthread_once</i>() function is not a cancellation point.
+    However, if <i>init_routine</i> is a cancellation point and is canceled, the
+    effect on <i>once_control</i> shall be as if <i>pthread_once</i>() was never
+    called.</p>
+<p class="Pp">If the call to <i>init_routine</i> is terminated by a call to
+    <i>longjmp</i>(), <i>_longjmp</i>(), or <i>siglongjmp</i>(), the behavior is
+    undefined.</p>
+<p class="Pp">The constant PTHREAD_ONCE_INIT is defined in the
+    <i>&lt;pthread.h&gt;</i> header.</p>
+<p class="Pp">The behavior of <i>pthread_once</i>() is undefined if
+    <i>once_control</i> has automatic storage duration or is not initialized by
+    PTHREAD_ONCE_INIT.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>pthread_once</i>() shall return
+    zero; otherwise, an error number shall be returned to indicate the
+  error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>pthread_once</i>() function shall not return an error code
+    of <b>[EINTR]</b>.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">If <i>init_routine</i> recursively calls <i>pthread_once</i>()
+    with the same <i>once_control</i>, the recursive call will not call the
+    specified <i>init_routine</i>, and thus the specified <i>init_routine</i>
+    will not complete, and thus the recursive call to <i>pthread_once</i>() will
+    not return. Use of <i>longjmp</i>(), <i>_longjmp</i>(), or
+    <i>siglongjmp</i>() within an <i>init_routine</i> to jump to a point outside
+    of <i>init_routine</i> prevents <i>init_routine</i> from returning.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">Some C libraries are designed for dynamic initialization. That is,
+    the global initialization for the library is performed when the first
+    procedure in the library is called. In a single-threaded program, this is
+    normally implemented using a static variable whose value is checked on entry
+    to a routine, as follows:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>static int random_is_initialized = 0;
+extern void initialize_random(void);</pre>
+<pre>int random_function()
+{
+<br>
+    if (random_is_initialized == 0) {
+<br>
+        initialize_random();
+<br>
+        random_is_initialized = 1;
+<br>
+    }
+<br>
+    ... /* Operations performed after initialization. */
+}</pre>
+</div>
+<p class="Pp">To keep the same structure in a multi-threaded program, a new
+    primitive is needed. Otherwise, library initialization has to be
+    accomplished by an explicit call to a library-exported initialization
+    function prior to any use of the library.</p>
+<p class="Pp">For dynamic library initialization in a multi-threaded process, if
+    an initialization flag is used the flag needs to be protected against
+    modification by multiple threads simultaneously calling into the library.
+    This can be done by using a mutex (initialized by assigning
+    PTHREAD_MUTEX_INITIALIZER). However, the better solution is to use
+    <i>pthread_once</i>() which is designed for exactly this purpose, as
+    follows:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;pthread.h&gt;
+static pthread_once_t random_is_initialized = PTHREAD_ONCE_INIT;
+extern void initialize_random(void);</pre>
+<pre>int random_function()
+{
+<br>
+    (void) pthread_once(&amp;random_is_initialized, initialize_random);
+<br>
+    ... /* Operations performed after initialization. */
+}</pre>
+</div>
+<p class="Pp">If an implementation detects that the value specified by the
+    <i>once_control</i> argument to <i>pthread_once</i>() does not refer to a
+    <b>pthread_once_t</b> object initialized by PTHREAD_ONCE_INIT, it is
+    recommended that the function should fail and report an <b>[EINVAL]</b>
+    error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;pthread.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

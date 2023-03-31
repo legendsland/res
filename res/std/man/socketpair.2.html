@@ -1,0 +1,129 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 1983, 1991 The Regents of the University of California.
+   All rights reserved.
+  
+   SPDX-License-Identifier: BSD-4-Clause-UC
+  
+       @(#)socketpair.2	6.4 (Berkeley) 3/10/91
+  
+   Modified 1993-07-24 by Rik Faith <faith@cs.unc.edu>
+   Modified 1996-10-22 by Eric S. Raymond <esr@thyrsus.com>
+   Modified 2002-07-22 by Michael Kerrisk <mtk.manpages@gmail.com>
+   Modified 2004-06-17 by Michael Kerrisk <mtk.manpages@gmail.com>
+   2008-10-11, mtk: Add description of SOCK_NONBLOCK and SOCK_CLOEXEC
+   --><head>
+<meta name="dc.identifier" content="res/47212fe97e920dbc418a0fc1a8a3e8a72030e57b">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>socketpair(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">socketpair(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">socketpair(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">socketpair - create a pair of connected sockets</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/socket.h&gt;</b></pre>
+<pre><b>int socketpair(int </b><i>domain</i><b>, int </b><i>type</i><b>, int </b><i>protocol</i><b>, int </b><i>sv</i><b>[2]);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>socketpair</b>() call creates an unnamed pair of connected
+    sockets in the specified <i>domain</i>, of the specified <i>type</i>, and
+    using the optionally specified <i>protocol</i>. For further details of these
+    arguments, see <b>socket</b>(2).</p>
+<p class="Pp">The file descriptors used in referencing the new sockets are
+    returned in <i>sv[0]</i> and <i>sv[1]</i>. The two sockets are
+    indistinguishable.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, zero is returned. On error, -1 is returned,
+    <i>errno</i> is set to indicate the error, and <i>sv</i> is left
+  unchanged</p>
+<p class="Pp">On Linux (and other systems), <b>socketpair</b>() does not modify
+    <i>sv</i> on failure. A requirement standardizing this behavior was added in
+    POSIX.1-2008 TC2.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EAFNOSUPPORT"><a class="permalink" href="#EAFNOSUPPORT"><b>EAFNOSUPPORT</b></a></dt>
+  <dd>The specified address family is not supported on this machine.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>The address <i>sv</i> does not specify a valid part of the process address
+      space.</dd>
+  <dt id="EMFILE"><a class="permalink" href="#EMFILE"><b>EMFILE</b></a></dt>
+  <dd>The per-process limit on the number of open file descriptors has been
+      reached.</dd>
+  <dt id="ENFILE"><a class="permalink" href="#ENFILE"><b>ENFILE</b></a></dt>
+  <dd>The system-wide limit on the total number of open files has been
+    reached.</dd>
+  <dt id="EOPNOTSUPP"><a class="permalink" href="#EOPNOTSUPP"><b>EOPNOTSUPP</b></a></dt>
+  <dd>The specified protocol does not support creation of socket pairs.</dd>
+  <dt id="EPROTONOSUPPORT"><a class="permalink" href="#EPROTONOSUPPORT"><b>EPROTONOSUPPORT</b></a></dt>
+  <dd>The specified protocol is not supported on this machine.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, 4.4BSD. <b>socketpair</b>() first
+    appeared in 4.2BSD. It is generally portable to/from non-BSD systems
+    supporting clones of the BSD socket layer (including System&nbsp;V
+    variants).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">On Linux, the only supported domains for this call are
+    <b>AF_UNIX</b> (or synonymously, <b>AF_LOCAL</b>) and <b>AF_TIPC</b> (since
+    Linux 4.12).</p>
+<p class="Pp">Since Linux 2.6.27, <b>socketpair</b>() supports the
+    <b>SOCK_NONBLOCK</b> and <b>SOCK_CLOEXEC</b> flags in the <i>type</i>
+    argument, as described in <b>socket</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>pipe</b>(2), <b>read</b>(2), <b>socket</b>(2), <b>write</b>(2),
+    <b>socket</b>(7), <b>unix</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

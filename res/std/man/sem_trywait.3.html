@@ -1,0 +1,269 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/7c56bff5aee99493cab05d90cae2fd0186520f85">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>sem_wait(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">sem_wait(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">sem_wait(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">sem_wait, sem_timedwait, sem_trywait - lock a semaphore</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">POSIX threads library (<i>libpthread</i>, <i>-lpthread</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;semaphore.h&gt;</b></pre>
+<pre><b>int sem_wait(sem_t *</b><i>sem</i><b>);</b>
+<b>int sem_trywait(sem_t *</b><i>sem</i><b>);</b>
+<b>int sem_timedwait(sem_t *restrict </b><i>sem</i><b>,</b>
+<b>                  const struct timespec *restrict </b><i>abs_timeout</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>sem_timedwait</b>():</p>
+<pre><br>
+    _POSIX_C_SOURCE &gt;= 200112L</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>sem_wait</b>() decrements (locks) the semaphore pointed to by
+    <i>sem</i>. If the semaphore's value is greater than zero, then the
+    decrement proceeds, and the function returns, immediately. If the semaphore
+    currently has the value zero, then the call blocks until either it becomes
+    possible to perform the decrement (i.e., the semaphore value rises above
+    zero), or a signal handler interrupts the call.</p>
+<p class="Pp"><b>sem_trywait</b>() is the same as <b>sem_wait</b>(), except that
+    if the decrement cannot be immediately performed, then call returns an error
+    (<i>errno</i> set to <b>EAGAIN</b>) instead of blocking.</p>
+<p class="Pp"><b>sem_timedwait</b>() is the same as <b>sem_wait</b>(), except
+    that <i>abs_timeout</i> specifies a limit on the amount of time that the
+    call should block if the decrement cannot be immediately performed. The
+    <i>abs_timeout</i> argument points to a <b>timespec</b>(3) structure that
+    specifies an absolute timeout in seconds and nanoseconds since the Epoch,
+    1970-01-01 00:00:00 +0000 (UTC).</p>
+<p class="Pp">If the timeout has already expired by the time of the call, and
+    the semaphore could not be locked immediately, then <b>sem_timedwait</b>()
+    fails with a timeout error (<i>errno</i> set to <b>ETIMEDOUT</b>).</p>
+<p class="Pp">If the operation can be performed immediately, then
+    <b>sem_timedwait</b>() never fails with a timeout error, regardless of the
+    value of <i>abs_timeout</i>. Furthermore, the validity of <i>abs_timeout</i>
+    is not checked in this case.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">All of these functions return 0 on success; on error, the value of
+    the semaphore is left unchanged, -1 is returned, and <i>errno</i> is set to
+    indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>(<b>sem_trywait</b>()) The operation could not be performed without
+      blocking (i.e., the semaphore currently has the value zero).</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The call was interrupted by a signal handler; see <b>signal</b>(7).</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>sem</i> is not a valid semaphore.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>(<b>sem_timedwait</b>()) The value of <i>abs_timeout.tv_nsecs</i> is less
+      than 0, or greater than or equal to 1000 million.</dd>
+  <dt id="ETIMEDOUT"><a class="permalink" href="#ETIMEDOUT"><b>ETIMEDOUT</b></a></dt>
+  <dd>(<b>sem_timedwait</b>()) The call timed out before the semaphore could be
+      locked.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>sem_wait (), sem_trywait (), sem_timedwait ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The (somewhat trivial) program shown below operates on an unnamed
+    semaphore. The program expects two command-line arguments. The first
+    argument specifies a seconds value that is used to set an alarm timer to
+    generate a <b>SIGALRM</b> signal. This handler performs a <b>sem_post</b>(3)
+    to increment the semaphore that is being waited on in <i>main()</i> using
+    <b>sem_timedwait</b>(). The second command-line argument specifies the
+    length of the timeout, in seconds, for <b>sem_timedwait</b>(). The following
+    shows what happens on two different runs of the program:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$<b> ./a.out 2 3</b>
+About to call sem_timedwait()
+sem_post() from handler
+sem_timedwait() succeeded
+$<b> ./a.out 2 1</b>
+About to call sem_timedwait()
+sem_timedwait() timed out
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#include &lt;errno.h&gt;
+#include &lt;semaphore.h&gt;
+#include &lt;signal.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;time.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;assert.h&gt;
+sem_t sem;
+#define handle_error(msg) \
+<br>
+    do { perror(msg); exit(EXIT_FAILURE); } while (0)
+static void
+handler(int sig)
+{
+<br>
+    write(STDOUT_FILENO, "sem_post() from handler\n", 24);
+<br>
+    if (sem_post(&amp;sem) == -1) {
+<br>
+        write(STDERR_FILENO, "sem_post() failed\n", 18);
+<br>
+        _exit(EXIT_FAILURE);
+<br>
+    }
+}
+int
+main(int argc, char *argv[])
+{
+<br>
+    struct sigaction sa;
+<br>
+    struct timespec ts;
+<br>
+    int s;
+<br>
+    if (argc != 3) {
+<br>
+        fprintf(stderr, "Usage: %s &lt;alarm-secs&gt; &lt;wait-secs&gt;\n",
+<br>
+                argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    if (sem_init(&amp;sem, 0, 0) == -1)
+<br>
+        handle_error("sem_init");
+<br>
+    /* Establish SIGALRM handler; set alarm timer using argv[1]. */
+<br>
+    sa.sa_handler = handler;
+<br>
+    sigemptyset(&amp;sa.sa_mask);
+<br>
+    sa.sa_flags = 0;
+<br>
+    if (sigaction(SIGALRM, &amp;sa, NULL) == -1)
+<br>
+        handle_error("sigaction");
+<br>
+    alarm(atoi(argv[1]));
+<br>
+    /* Calculate relative interval as current time plus
+<br>
+       number of seconds given argv[2]. */
+<br>
+    if (clock_gettime(CLOCK_REALTIME, &amp;ts) == -1)
+<br>
+        handle_error("clock_gettime");
+<br>
+    ts.tv_sec += atoi(argv[2]);
+<br>
+    printf("%s() about to call sem_timedwait()\n", __func__);
+<br>
+    while ((s = sem_timedwait(&amp;sem, &amp;ts)) == -1 &amp;&amp; errno == EINTR)
+<br>
+        continue;       /* Restart if interrupted by handler. */
+<br>
+    /* Check what happened. */
+<br>
+    if (s == -1) {
+<br>
+        if (errno == ETIMEDOUT)
+<br>
+            printf("sem_timedwait() timed out\n");
+<br>
+        else
+<br>
+            perror("sem_timedwait");
+<br>
+    } else
+<br>
+        printf("sem_timedwait() succeeded\n");
+<br>
+    exit((s == 0) ? EXIT_SUCCESS : EXIT_FAILURE);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>clock_gettime</b>(2), <b>sem_getvalue</b>(3),
+    <b>sem_post</b>(3), <b>timespec</b>(3), <b>sem_overview</b>(7),
+    <b>time</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

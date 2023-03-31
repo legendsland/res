@@ -1,0 +1,154 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (C) 2006 Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/c9a6957c2cf790d761444c0217f488c101d3dded">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>sem_open(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">sem_open(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">sem_open(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">sem_open - initialize and open a named semaphore</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">POSIX threads library (<i>libpthread</i>, <i>-lpthread</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;fcntl.h&gt;</b>           /* For O_* constants */
+<b>#include &lt;sys/stat.h&gt;</b>        /* For mode constants */
+<b>#include &lt;semaphore.h&gt;</b></pre>
+<pre><b>sem_t *sem_open(const char *</b><i>name</i><b>, int </b><i>oflag</i><b>);</b>
+<b>sem_t *sem_open(const char *</b><i>name</i><b>, int </b><i>oflag</i><b>,</b>
+<b>                mode_t </b><i>mode</i><b>, unsigned int </b><i>value</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>sem_open</b>() creates a new POSIX semaphore or opens an
+    existing semaphore. The semaphore is identified by <i>name</i>. For details
+    of the construction of <i>name</i>, see <b>sem_overview</b>(7).</p>
+<p class="Pp">The <i>oflag</i> argument specifies flags that control the
+    operation of the call. (Definitions of the flags values can be obtained by
+    including <i>&lt;fcntl.h&gt;</i>.) If <b>O_CREAT</b> is specified in
+    <i>oflag</i>, then the semaphore is created if it does not already exist.
+    The owner (user ID) of the semaphore is set to the effective user ID of the
+    calling process. The group ownership (group ID) is set to the effective
+    group ID of the calling process. If both <b>O_CREAT</b> and <b>O_EXCL</b>
+    are specified in <i>oflag</i>, then an error is returned if a semaphore with
+    the given <i>name</i> already exists.</p>
+<p class="Pp">If <b>O_CREAT</b> is specified in <i>oflag</i>, then two
+    additional arguments must be supplied. The <i>mode</i> argument specifies
+    the permissions to be placed on the new semaphore, as for <b>open</b>(2).
+    (Symbolic definitions for the permissions bits can be obtained by including
+    <i>&lt;sys/stat.h&gt;</i>.) The permissions settings are masked against the
+    process umask. Both read and write permission should be granted to each
+    class of user that will access the semaphore. The <i>value</i> argument
+    specifies the initial value for the new semaphore. If <b>O_CREAT</b> is
+    specified, and a semaphore with the given <i>name</i> already exists, then
+    <i>mode</i> and <i>value</i> are ignored.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>sem_open</b>() returns the address of the new
+    semaphore; this address is used when calling other semaphore-related
+    functions. On error, <b>sem_open</b>() returns <b>SEM_FAILED</b>, with
+    <i>errno</i> set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>The semaphore exists, but the caller does not have permission to open
+    it.</dd>
+  <dt id="EEXIST"><a class="permalink" href="#EEXIST"><b>EEXIST</b></a></dt>
+  <dd>Both <b>O_CREAT</b> and <b>O_EXCL</b> were specified in <i>oflag</i>, but
+      a semaphore with this <i>name</i> already exists.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>value</i> was greater than <b>SEM_VALUE_MAX</b>.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd><i>name</i> consists of just "/", followed by no other
+      characters.</dd>
+  <dt id="EMFILE"><a class="permalink" href="#EMFILE"><b>EMFILE</b></a></dt>
+  <dd>The per-process limit on the number of open file descriptors has been
+      reached.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd><i>name</i> was too long.</dd>
+  <dt id="ENFILE"><a class="permalink" href="#ENFILE"><b>ENFILE</b></a></dt>
+  <dd>The system-wide limit on the total number of open files has been
+    reached.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>The <b>O_CREAT</b> flag was not specified in <i>oflag</i> and no semaphore
+      with this <i>name</i> exists; or, <b>O_CREAT</b> was specified, but
+      <i>name</i> wasn't well formed.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient memory.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>sem_open ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>sem_close</b>(3), <b>sem_getvalue</b>(3), <b>sem_post</b>(3),
+    <b>sem_unlink</b>(3), <b>sem_wait</b>(3), <b>sem_overview</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

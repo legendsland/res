@@ -1,0 +1,148 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2006, 2008, Michael Kerrisk <mtk.manpages@gmail.com>
+   (A few fragments remain from an earlier (1992) version written in
+   1992 by Drew Eckhardt <drew@cs.colorado.edu>.)
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Modified by Michael Haardt <michael@moria.de>
+   Modified Sat Jul 24 12:51:53 1993 by Rik Faith <faith@cs.unc.edu>
+   Modified Tue Oct 22 22:39:04 1996 by Eric S. Raymond <esr@thyrsus.com>
+   Modified Thu May  1 06:05:54 UTC 1997 by Nicol\[u00E1]s Lichtmaier
+    <nick@debian.com> with Lars Wirzenius <liw@iki.fi> suggestion
+   2006-05-13, mtk, substantial rewrite of description of 'mask'
+   2008-01-09, mtk, a few rewrites and additions.
+ --><head>
+<meta name="dc.identifier" content="res/f000e16c5540be9a6c26fe66ce1a5ee2845e89a9">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>umask(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">umask(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">umask(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">umask - set file mode creation mask</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/stat.h&gt;</b></pre>
+<pre><b>mode_t umask(mode_t </b><i>mask</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>umask</b>() sets the calling process's file mode creation mask
+    (umask) to <i>mask</i> &amp; 0777 (i.e., only the file permission bits of
+    <i>mask</i> are used), and returns the previous value of the mask.</p>
+<p class="Pp">The umask is used by <b>open</b>(2), <b>mkdir</b>(2), and other
+    system calls that create files to modify the permissions placed on newly
+    created files or directories. Specifically, permissions in the umask are
+    turned off from the <i>mode</i> argument to <b>open</b>(2) and
+    <b>mkdir</b>(2).</p>
+<p class="Pp">Alternatively, if the parent directory has a default ACL (see
+    <b>acl</b>(5)), the umask is ignored, the default ACL is inherited, the
+    permission bits are set based on the inherited ACL, and permission bits
+    absent in the <i>mode</i> argument are turned off. For example, the
+    following default ACL is equivalent to a umask of 022:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>u::rwx,g::r-x,o::r-x
+</pre>
+<br>
+<p class="Pp">Combining the effect of this default ACL with a <i>mode</i>
+    argument of 0666 (rw-rw-rw-), the resulting file permissions would be 0644
+    (rw-r--r--).</p>
+<p class="Pp">The constants that should be used to specify <i>mask</i> are
+    described in <b>inode</b>(7).</p>
+<p class="Pp">The typical default value for the process umask is <b>S_IWGRP</b>
+    | <b>S_IWOTH</b> (octal 022). In the usual case where the <i>mode</i>
+    argument to <b>open</b>(2) is specified as:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre><b>S_IRUSR</b> | <b>S_IWUSR</b> | <b>S_IRGRP</b> | <b>S_IWGRP</b> | <b>S_IROTH</b> | <b>S_IWOTH</b>
+</pre>
+<br>
+<p class="Pp">(octal 0666) when creating a new file, the permissions on the
+    resulting file will be:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre><b>S_IRUSR</b> | <b>S_IWUSR</b> | <b>S_IRGRP</b> | <b>S_IROTH</b>
+</pre>
+<br>
+<p class="Pp">(because 0666 &amp; ~022 = 0644; i.e. rw-r--r--).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">This system call always succeeds and the previous value of the
+    mask is returned.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, SVr4, 4.3BSD.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">A child process created via <b>fork</b>(2) inherits its parent's
+    umask. The umask is left unchanged by <b>execve</b>(2).</p>
+<p class="Pp">It is impossible to use <b>umask</b>() to fetch a process's umask
+    without at the same time changing it. A second call to <b>umask</b>() would
+    then be needed to restore the umask. The nonatomicity of these two steps
+    provides the potential for races in multithreaded programs.</p>
+<p class="Pp">Since Linux 4.7, the umask of any process can be viewed via the
+    <i>Umask</i> field of <i>/proc/</i>pid<i>/status</i>. Inspecting this field
+    in <i>/proc/self/status</i> allows a process to retrieve its umask without
+    at the same time changing it.</p>
+<p class="Pp">The umask setting also affects the permissions assigned to POSIX
+    IPC objects (<b>mq_open</b>(3), <b>sem_open</b>(3), <b>shm_open</b>(3)),
+    FIFOs (<b>mkfifo</b>(3)), and UNIX domain sockets (<b>unix</b>(7)) created
+    by the process. The umask does not affect the permissions assigned to
+    System&nbsp;V IPC objects created by the process (using <b>msgget</b>(2),
+    <b>semget</b>(2), <b>shmget</b>(2)).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>chmod</b>(2), <b>mkdir</b>(2), <b>open</b>(2), <b>stat</b>(2),
+    <b>acl</b>(5)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

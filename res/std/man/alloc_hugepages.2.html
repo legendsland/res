@@ -1,0 +1,128 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright 2003 Andries E. Brouwer (aeb@cwi.nl)
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/00ad337043770694bbdcbe965e5ee9cab98b1529">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>alloc_hugepages(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">alloc_hugepages(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">alloc_hugepages(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">alloc_hugepages, free_hugepages - allocate or free huge pages</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>void *syscall(SYS_alloc_hugepages, int </b><i>key</i><b>, void </b><i>addr</i><b>[.</b><i>len</i><b>], size_t </b><i>len</i><b>,</b>
+<b>              int </b><i>prot</i><b>, int </b><i>flag</i><b>);</b>
+<b>int syscall(SYS_free_hugepages, void *</b><i>addr</i><b>);</b></pre>
+<p class="Pp"><i>Note</i>: glibc provides no wrappers for these system calls,
+    necessitating the use of <b>syscall</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The system calls <b>alloc_hugepages</b>() and
+    <b>free_hugepages</b>() were introduced in Linux 2.5.36 and removed again in
+    Linux 2.5.54. They existed only on i386 and ia64 (when built with
+    <b>CONFIG_HUGETLB_PAGE</b>). In Linux 2.4.20, the syscall numbers exist, but
+    the calls fail with the error <b>ENOSYS</b>.</p>
+<p class="Pp">On i386 the memory management hardware knows about ordinary pages
+    (4&nbsp;KiB) and huge pages (2 or 4&nbsp;MiB). Similarly ia64 knows
+    about huge pages of several sizes. These system calls serve to map huge
+    pages into the process's memory or to free them again. Huge pages are locked
+    into memory, and are not swapped.</p>
+<p class="Pp">The <i>key</i> argument is an identifier. When zero the pages are
+    private, and not inherited by children. When positive the pages are shared
+    with other applications using the same <i>key</i>, and inherited by child
+    processes.</p>
+<p class="Pp">The <i>addr</i> argument of <b>free_hugepages</b>() tells which
+    page is being freed: it was the return value of a call to
+    <b>alloc_hugepages</b>(). (The memory is first actually freed when all users
+    have released it.) The <i>addr</i> argument of <b>alloc_hugepages</b>() is a
+    hint, that the kernel may or may not follow. Addresses must be properly
+    aligned.</p>
+<p class="Pp">The <i>len</i> argument is the length of the required segment. It
+    must be a multiple of the huge page size.</p>
+<p class="Pp">The <i>prot</i> argument specifies the memory protection of the
+    segment. It is one of <b>PROT_READ</b>, <b>PROT_WRITE</b>,
+  <b>PROT_EXEC</b>.</p>
+<p class="Pp">The <i>flag</i> argument is ignored, unless <i>key</i> is
+    positive. In that case, if <i>flag</i> is <b>IPC_CREAT</b>, then a new huge
+    page segment is created when none with the given key existed. If this flag
+    is not set, then <b>ENOENT</b> is returned when no segment with the given
+    key exists.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>alloc_hugepages</b>() returns the allocated virtual
+    address, and <b>free_hugepages</b>() returns zero. On error, -1 is returned,
+    and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="ENOSYS"><a class="permalink" href="#ENOSYS"><b>ENOSYS</b></a></dt>
+  <dd>The system call is not supported on this kernel.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FILES"><a class="permalink" href="#FILES">FILES</a></h1>
+<dl class="Bl-tag">
+  <dt><i>/proc/sys/vm/nr_hugepages</i></dt>
+  <dd>Number of configured hugetlb pages. This can be read and written.</dd>
+  <dt><i>/proc/meminfo</i></dt>
+  <dd>Gives info on the number of configured hugetlb pages and on their size in
+      the three variables HugePages_Total, HugePages_Free, Hugepagesize.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These extinct system calls were specific to Linux on Intel
+    processors.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">These system calls are gone; they existed only in Linux 2.5.36
+    through to Linux 2.5.54. Now the hugetlbfs filesystem can be used instead.
+    Memory backed by huge pages (if the CPU supports them) is obtained by using
+    <b>mmap</b>(2) to map files in this virtual filesystem.</p>
+<p class="Pp">The maximal number of huge pages can be specified using the
+    <b>hugepages=</b> boot parameter.</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

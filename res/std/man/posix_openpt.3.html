@@ -1,0 +1,148 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (C) 2004 Michael Kerrisk
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/a016b50c981b130d665fd965bbbaadeae21e852a">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>posix_openpt(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">posix_openpt(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">posix_openpt(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">posix_openpt - open a pseudoterminal device</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;stdlib.h&gt;</b>
+<b>#include &lt;fcntl.h&gt;</b></pre>
+<pre><b>int posix_openpt(int </b><i>flags</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>posix_openpt</b>():</p>
+<pre><br>
+    _XOPEN_SOURCE &gt;= 600</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>posix_openpt</b>() function opens an unused pseudoterminal
+    master device, returning a file descriptor that can be used to refer to that
+    device.</p>
+<p class="Pp">The <i>flags</i> argument is a bit mask that ORs together zero or
+    more of the following flags:</p>
+<dl class="Bl-tag">
+  <dt id="O_RDWR"><a class="permalink" href="#O_RDWR"><b>O_RDWR</b></a></dt>
+  <dd>Open the device for both reading and writing. It is usual to specify this
+      flag.</dd>
+  <dt id="O_NOCTTY"><a class="permalink" href="#O_NOCTTY"><b>O_NOCTTY</b></a></dt>
+  <dd>Do not make this device the controlling terminal for the process.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>posix_openpt</b>() returns a file descriptor (a
+    nonnegative integer) which is the lowest numbered unused file descriptor. On
+    failure, -1 is returned, and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">See <b>open</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>posix_openpt ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">glibc support for <b>posix_openpt</b>() has been provided since
+    glibc 2.2.1.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+<p class="Pp"><b>posix_openpt</b>() is part of the UNIX 98 pseudoterminal
+    support (see <b>pts</b>(4)).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Some older UNIX implementations that support System V (aka UNIX
+    98) pseudoterminals don't have this function, but it can be easily
+    implemented by opening the pseudoterminal multiplexor device:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>int
+posix_openpt(int flags)
+{
+<br>
+    return open("/dev/ptmx", flags);
+}
+</pre>
+<br>
+<p class="Pp">Calling <b>posix_openpt</b>() creates a pathname for the
+    corresponding pseudoterminal slave device. The pathname of the slave device
+    can be obtained using <b>ptsname</b>(3). The slave device pathname exists
+    only as long as the master device is open.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>open</b>(2), <b>getpt</b>(3), <b>grantpt</b>(3),
+    <b>ptsname</b>(3), <b>unlockpt</b>(3), <b>pts</b>(4), <b>pty</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

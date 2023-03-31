@@ -1,0 +1,147 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/3805b88f2d7adac895bd9dd6de1e8f441183aad7">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>setxattr(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">setxattr(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">setxattr(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">setxattr, lsetxattr, fsetxattr - set an extended attribute
+  value</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/xattr.h&gt;</b></pre>
+<pre><b>int setxattr(const char *</b><i>path</i><b>, const char *</b><i>name</i><b>,</b>
+<b>              const void </b><i>value</i><b>[.</b><i>size</i><b>], size_t </b><i>size</i><b>, int </b><i>flags</i><b>);</b>
+<b>int lsetxattr(const char *</b><i>path</i><b>, const char *</b><i>name</i><b>,</b>
+<b>              const void </b><i>value</i><b>[.</b><i>size</i><b>], size_t </b><i>size</i><b>, int </b><i>flags</i><b>);</b>
+<b>int fsetxattr(int </b><i>fd</i><b>, const char *</b><i>name</i><b>,</b>
+<b>              const void </b><i>value</i><b>[.</b><i>size</i><b>], size_t </b><i>size</i><b>, int </b><i>flags</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">Extended attributes are <i>name</i>:<i>value</i> pairs associated
+    with inodes (files, directories, symbolic links, etc.). They are extensions
+    to the normal attributes which are associated with all inodes in the system
+    (i.e., the <b>stat</b>(2) data). A complete overview of extended attributes
+    concepts can be found in <b>xattr</b>(7).</p>
+<p class="Pp"><b>setxattr</b>() sets the <i>value</i> of the extended attribute
+    identified by <i>name</i> and associated with the given <i>path</i> in the
+    filesystem. The <i>size</i> argument specifies the size (in bytes) of
+    <i>value</i>; a zero-length value is permitted.</p>
+<p class="Pp"><b>lsetxattr</b>() is identical to <b>setxattr</b>(), except in
+    the case of a symbolic link, where the extended attribute is set on the link
+    itself, not the file that it refers to.</p>
+<p class="Pp"><b>fsetxattr</b>() is identical to <b>setxattr</b>(), only the
+    extended attribute is set on the open file referred to by <i>fd</i> (as
+    returned by <b>open</b>(2)) in place of <i>path</i>.</p>
+<p class="Pp">An extended attribute name is a null-terminated string. The
+    <i>name</i> includes a namespace prefix; there may be several, disjoint
+    namespaces associated with an individual inode. The <i>value</i> of an
+    extended attribute is a chunk of arbitrary textual or binary data of
+    specified length.</p>
+<p class="Pp">By default (i.e., <i>flags</i> is zero), the extended attribute
+    will be created if it does not exist, or the value will be replaced if the
+    attribute already exists. To modify these semantics, one of the following
+    values can be specified in <i>flags</i>:</p>
+<dl class="Bl-tag">
+  <dt id="XATTR_CREATE"><a class="permalink" href="#XATTR_CREATE"><b>XATTR_CREATE</b></a></dt>
+  <dd>Perform a pure create, which fails if the named attribute exists
+    already.</dd>
+  <dt id="XATTR_REPLACE"><a class="permalink" href="#XATTR_REPLACE"><b>XATTR_REPLACE</b></a></dt>
+  <dd>Perform a pure replace operation, which fails if the named attribute does
+      not already exist.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, zero is returned. On failure, -1 is returned and
+    <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EDQUOT"><a class="permalink" href="#EDQUOT"><b>EDQUOT</b></a></dt>
+  <dd>Disk quota limits meant that there is insufficient space remaining to
+      store the extended attribute.</dd>
+  <dt id="EEXIST"><a class="permalink" href="#EEXIST"><b>EEXIST</b></a></dt>
+  <dd><b>XATTR_CREATE</b> was specified, and the attribute exists already.</dd>
+  <dt id="ENODATA"><a class="permalink" href="#ENODATA"><b>ENODATA</b></a></dt>
+  <dd><b>XATTR_REPLACE</b> was specified, and the attribute does not exist.</dd>
+  <dt id="ENOSPC"><a class="permalink" href="#ENOSPC"><b>ENOSPC</b></a></dt>
+  <dd>There is insufficient space remaining to store the extended
+    attribute.</dd>
+  <dt id="ENOTSUP"><a class="permalink" href="#ENOTSUP"><b>ENOTSUP</b></a></dt>
+  <dd>The namespace prefix of <i>name</i> is not valid.</dd>
+  <dt id="ENOTSUP~2"><a class="permalink" href="#ENOTSUP~2"><b>ENOTSUP</b></a></dt>
+  <dd>Extended attributes are not supported by the filesystem, or are
+    disabled,</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The file is marked immutable or append-only. (See
+    <b>ioctl_iflags</b>(2).)</dd>
+</dl>
+<p class="Pp">In addition, the errors documented in <b>stat</b>(2) can also
+    occur.</p>
+<dl class="Bl-tag">
+  <dt id="ERANGE"><a class="permalink" href="#ERANGE"><b>ERANGE</b></a></dt>
+  <dd>The size of <i>name</i> or <i>value</i> exceeds a filesystem-specific
+      limit.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">These system calls have been available since Linux 2.4; glibc
+    support is provided since glibc 2.3.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These system calls are Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>getfattr</b>(1), <b>setfattr</b>(1), <b>getxattr</b>(2),
+    <b>listxattr</b>(2), <b>open</b>(2), <b>removexattr</b>(2), <b>stat</b>(2),
+    <b>symlink</b>(7), <b>xattr</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

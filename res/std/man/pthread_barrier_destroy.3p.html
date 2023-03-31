@@ -1,0 +1,172 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/88e1d38714477e58ebc7a1a97e54c677a1fda51a">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>PTHREAD_BARRIER_DESTROY(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">PTHREAD_BARRIER_DESTROY(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">PTHREAD_BARRIER_DESTROY(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pthread_barrier_destroy, pthread_barrier_init — destroy and
+    initialize a barrier object</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;pthread.h&gt;</pre>
+<pre>int pthread_barrier_destroy(pthread_barrier_t *<i>barrier</i>);
+int pthread_barrier_init(pthread_barrier_t *restrict <i>barrier</i>,
+<br>
+    const pthread_barrierattr_t *restrict <i>attr</i>, unsigned <i>count</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>pthread_barrier_destroy</i>() function shall destroy the
+    barrier referenced by <i>barrier</i> and release any resources used by the
+    barrier. The effect of subsequent use of the barrier is undefined until the
+    barrier is reinitialized by another call to <i>pthread_barrier_init</i>().
+    An implementation may use this function to set <i>barrier</i> to an invalid
+    value. The results are undefined if <i>pthread_barrier_destroy</i>() is
+    called when any thread is blocked on the barrier, or if this function is
+    called with an uninitialized barrier.</p>
+<p class="Pp">The <i>pthread_barrier_init</i>() function shall allocate any
+    resources required to use the barrier referenced by <i>barrier</i> and shall
+    initialize the barrier with attributes referenced by <i>attr</i>. If
+    <i>attr</i> is NULL, the default barrier attributes shall be used; the
+    effect is the same as passing the address of a default barrier attributes
+    object. The results are undefined if <i>pthread_barrier_init</i>() is called
+    when any thread is blocked on the barrier (that is, has not returned from
+    the <i>pthread_barrier_wait</i>() call). The results are undefined if a
+    barrier is used without first being initialized. The results are undefined
+    if <i>pthread_barrier_init</i>() is called specifying an already initialized
+    barrier.</p>
+<p class="Pp">The <i>count</i> argument specifies the number of threads that
+    must call <i>pthread_barrier_wait</i>() before any of them successfully
+    return from the call. The value specified by <i>count</i> must be greater
+    than zero.</p>
+<p class="Pp">If the <i>pthread_barrier_init</i>() function fails, the barrier
+    shall not be initialized and the contents of <i>barrier</i> are
+  undefined.</p>
+<p class="Pp">See <i>Section 2.9.9</i>, <i>Synchronization Object Copies and
+    Alternative Mappings</i> for further requirements.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, these functions shall return zero;
+    otherwise, an error number shall be returned to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>pthread_barrier_init</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>The system lacks the necessary resources to initialize another
+    barrier.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The value specified by <i>count</i> is equal to zero.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient memory exists to initialize the barrier.</dd>
+</dl>
+<p class="Pp">These functions shall not return an error code of
+  <b>[EINTR]</b>.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">If an implementation detects that the value specified by the
+    <i>barrier</i> argument to <i>pthread_barrier_destroy</i>() does not refer
+    to an initialized barrier object, it is recommended that the function should
+    fail and report an <b>[EINVAL]</b> error.</p>
+<p class="Pp">If an implementation detects that the value specified by the
+    <i>attr</i> argument to <i>pthread_barrier_init</i>() does not refer to an
+    initialized barrier attributes object, it is recommended that the function
+    should fail and report an <b>[EINVAL]</b> error.</p>
+<p class="Pp">If an implementation detects that the value specified by the
+    <i>barrier</i> argument to <i>pthread_barrier_destroy</i>() or
+    <i>pthread_barrier_init</i>() refers to a barrier that is in use (for
+    example, in a <i>pthread_barrier_wait</i>() call) by another thread, or
+    detects that the value specified by the <i>barrier</i> argument to
+    <i>pthread_barrier_init</i>() refers to an already initialized barrier
+    object, it is recommended that the function should fail and report an
+    <b>[EBUSY]</b> error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>pthread_barrier_wait</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;pthread.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

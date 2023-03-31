@@ -1,0 +1,201 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/906a9ff2756fd5ce01b7faeee0af686cbe691406">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>GETENV(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">GETENV(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">GETENV(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getenv — get value of an environment variable</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;stdlib.h&gt;</pre>
+<pre>char *getenv(const char *<i>name</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The functionality described on this reference page is aligned with
+    the ISO&nbsp;C standard. Any conflict between the requirements described
+    here and the ISO&nbsp;C standard is unintentional. This volume of
+    POSIX.1‐2017 defers to the ISO&nbsp;C standard.</p>
+<p class="Pp">The <i>getenv</i>() function shall search the environment of the
+    calling process (see the Base Definitions volume of POSIX.1‐2017,
+    <i>Chapter 8</i>, <i>Environment Variables</i>) for the environment variable
+    <i>name</i> if it exists and return a pointer to the value of the
+    environment variable. If the specified environment variable cannot be found,
+    a null pointer shall be returned. The application shall ensure that it does
+    not modify the string pointed to by the <i>getenv</i>() function.</p>
+<p class="Pp">The returned string pointer might be invalidated or the string
+    content might be overwritten by a subsequent call to <i>getenv</i>(),
+    <i>setenv</i>(), <i>unsetenv</i>(),
+  <br>
+  or (if supported) <i>putenv</i>() but they shall not be affected by a call to
+    any other function in this volume of POSIX.1‐2017.</p>
+<p class="Pp">The returned string pointer might also be invalidated if the
+    calling thread is terminated.</p>
+<p class="Pp">The <i>getenv</i>() function need not be thread-safe.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>getenv</i>() shall return a pointer
+    to a string containing the <i>value</i> for the specified <i>name</i>. If
+    the specified <i>name</i> cannot be found in the environment of the calling
+    process, a null pointer shall be returned.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">No errors are defined.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Getting_the_Value_of_an_Environment_Variable"><a class="permalink" href="#Getting_the_Value_of_an_Environment_Variable">Getting
+  the Value of an Environment Variable</a></h2>
+<p class="Pp">The following example gets the value of the <i>HOME</i>
+    environment variable.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;stdlib.h&gt;
+...
+const char *name = "HOME";
+char *value;</pre>
+<pre>value = getenv(name);</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The <i>clearenv</i>() function was considered but rejected. The
+    <i>putenv</i>() function has now been included for alignment with the Single
+    UNIX Specification.</p>
+<p class="Pp">The <i>getenv</i>() function is inherently not thread-safe because
+    it returns a value pointing to static data.</p>
+<p class="Pp">Conforming applications are required not to directly modify the
+    pointers to which <i>environ</i> points, but to use only the
+    <i>setenv</i>(), <i>unsetenv</i>(), and <i>putenv</i>() functions, or
+    assignment to <i>environ</i> itself, to manipulate the process environment.
+    This constraint allows the implementation to properly manage the memory it
+    allocates. This enables the implementation to free any space it has
+    allocated to strings (and perhaps the pointers to them) stored in
+    <i>environ</i> when <i>unsetenv</i>() is called. A C runtime start-up
+    procedure (that which invokes <i>main</i>() and perhaps initializes
+    <i>environ</i>) can also initialize a flag indicating that none of the
+    environment has yet been copied to allocated storage, or that the separate
+    table has not yet been initialized. If the application switches to a
+    complete new environment by assigning a new value to <i>environ</i>, this
+    can be detected by <i>getenv</i>(), <i>setenv</i>(), <i>unsetenv</i>(), or
+    <i>putenv</i>() and the implementation can at that point reinitialize based
+    on the new environment. (This may include copying the environment strings
+    into a new array and assigning <i>environ</i> to point to it.)</p>
+<p class="Pp">In fact, for higher performance of <i>getenv</i>(),
+    implementations that do not provide <i>putenv</i>() could also maintain a
+    separate copy of the environment in a data structure that could be searched
+    much more quickly (such as an indexed hash table, or a binary tree), and
+    update both it and the linear list at <i>environ</i> when <i>setenv</i>() or
+    <i>unsetenv</i>() is invoked. On implementations that do provide
+    <i>putenv</i>(), such a copy might still be worthwhile but would need to
+    allow for the fact that applications can directly modify the content of
+    environment strings added with <i>putenv</i>(). For example, if an
+    environment string found by searching the copy is one that was added using
+    <i>putenv</i>(), the implementation would need to check that the string in
+    <i>environ</i> still has the same name (and value, if the copy includes
+    values), and whenever searching the copy produces no match the
+    implementation would then need to search each environment string in
+    <i>environ</i> that was added using <i>putenv</i>() in case any of them have
+    changed their names and now match. Thus, each use of <i>putenv</i>() to add
+    to the environment would reduce the speed advantage of having the copy.</p>
+<p class="Pp">Performance of <i>getenv</i>() can be important for applications
+    which have large numbers of environment variables. Typically, applications
+    like this use the environment as a resource database of user-configurable
+    parameters. The fact that these variables are in the user's shell
+    environment usually means that any other program that uses environment
+    variables (such as <i>ls</i>, which attempts to use <i>COLUMNS</i>), or
+    really almost any utility (<i>LANG</i>, <i>LC_ALL</i>, and so on) is
+    similarly slowed down by the linear search through the variables.</p>
+<p class="Pp">An implementation that maintains separate data structures, or even
+    one that manages the memory it consumes, is not currently required as it was
+    thought it would reduce consensus among implementors who do not want to
+    change their historical implementations.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">A future version may add one or more functions to access and
+    modify the environment in a thread-safe manner.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>exec</i></i>, <i><i>putenv</i>()</i>,
+    <i><i>setenv</i>()</i>, <i><i>unsetenv</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Chapter
+    8</i>, <i>Environment Variables</i>, <i><b>&lt;stdlib.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

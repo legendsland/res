@@ -1,0 +1,340 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/962dcd12dba5691dd89ca52f3f13608f901f49d5">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>LINK(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">LINK(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">LINK(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">link, linkat — link one file to another file</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;unistd.h&gt;</pre>
+<pre>int link(const char *<i>path1</i>, const char *<i>path2</i>);</pre>
+<pre>#include &lt;fcntl.h&gt;</pre>
+<pre>int linkat(int <i>fd1</i>, const char *<i>path1</i>, int <i>fd2</i>,
+<br>
+    const char *<i>path2</i>, int <i>flag</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>link</i>() function shall create a new link (directory
+    entry) for the existing file, <i>path1</i>.</p>
+<p class="Pp">The <i>path1</i> argument points to a pathname naming an existing
+    file. The <i>path2</i> argument points to a pathname naming the new
+    directory entry to be created. The <i>link</i>() function shall atomically
+    create a new link for the existing file and the link count of the file shall
+    be incremented by one.</p>
+<p class="Pp">If <i>path1</i> names a directory, <i>link</i>() shall fail unless
+    the process has appropriate privileges and the implementation supports using
+    <i>link</i>() on directories.</p>
+<p class="Pp">If <i>path1</i> names a symbolic link, it is
+    implementation-defined whether <i>link</i>() follows the symbolic link, or
+    creates a new link to the symbolic link itself.</p>
+<p class="Pp">Upon successful completion, <i>link</i>() shall mark for update
+    the last file status change timestamp of the file. Also, the last data
+    modification and last file status change timestamps of the directory that
+    contains the new entry shall be marked for update.</p>
+<p class="Pp">If <i>link</i>() fails, no link shall be created and the link
+    count of the file shall remain unchanged.</p>
+<p class="Pp">The implementation may require that the calling process has
+    permission to access the existing file.</p>
+<p class="Pp">The <i>linkat</i>() function shall be equivalent to the
+    <i>link</i>() function except that symbolic links shall be handled as
+    specified by the value of <i>flag</i> (see below) and except in the case
+    where either <i>path1</i> or <i>path2</i> or both are relative paths. In
+    this case a relative path <i>path1</i> is interpreted relative to the
+    directory associated with the file descriptor <i>fd1</i> instead of the
+    current working directory and similarly for <i>path2</i> and the file
+    descriptor <i>fd2</i>. If the access mode of the open file description
+    associated with the file descriptor is not O_SEARCH, the function shall
+    check whether directory searches are permitted using the current permissions
+    of the directory underlying the file descriptor. If the access mode is
+    O_SEARCH, the function shall not perform the check.</p>
+<p class="Pp">Values for <i>flag</i> are constructed by a bitwise-inclusive OR
+    of flags from the following list, defined in <i>&lt;fcntl.h&gt;</i>:</p>
+<dl class="Bl-tag">
+  <dt id="AT_SYMLINK_FOLLOW"><a class="permalink" href="#AT_SYMLINK_FOLLOW">AT_SYMLINK_FOLLOW</a></dt>
+  <dd>
+    <br>
+    If <i>path1</i> names a symbolic link, a new link for the target of the
+      symbolic link is created.</dd>
+</dl>
+<p class="Pp">If <i>linkat</i>() is passed the special value AT_FDCWD in the
+    <i>fd1</i> or <i>fd2</i> parameter, the current working directory shall be
+    used for the respective <i>path</i> argument. If both <i>fd1</i> and
+    <i>fd2</i> have value AT_FDCWD, the behavior shall be identical to a call to
+    <i>link</i>(), except that symbolic links shall be handled as specified by
+    the value of <i>flag</i>.</p>
+<p class="Pp">If the AT_SYMLINK_FOLLOW flag is clear in the <i>flag</i> argument
+    and the <i>path1</i> argument names a symbolic link, a new link is created
+    for the symbolic link <i>path1</i> and not its target.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, these functions shall return 0.
+    Otherwise, these functions shall return -1 and set <i>errno</i> to indicate
+    the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">These functions shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>A component of either path prefix denies search permission, or the
+      requested link requires writing in a directory that denies write
+      permission, or the calling process does not have permission to access the
+      existing file and this is required by the implementation.</dd>
+  <dt id="EEXIST"><a class="permalink" href="#EEXIST"><b>EEXIST</b></a></dt>
+  <dd>The <i>path2</i> argument resolves to an existing directory entry or
+      refers to a symbolic link.</dd>
+  <dt id="ELOOP"><a class="permalink" href="#ELOOP"><b>ELOOP</b></a></dt>
+  <dd>A loop exists in symbolic links encountered during resolution of the
+      <i>path1</i> or <i>path2</i> argument.</dd>
+  <dt id="EMLINK"><a class="permalink" href="#EMLINK"><b>EMLINK</b></a></dt>
+  <dd>The number of links to the file named by <i>path1</i> would exceed
+      {LINK_MAX}.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of a component of a pathname is longer than {NAME_MAX}.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>A component of either path prefix does not exist; the file named by
+      <i>path1</i> does not exist; or <i>path1</i> or <i>path2</i> points to an
+      empty string.</dd>
+  <dt id="ENOENT~2"><a class="permalink" href="#ENOENT~2"><b>ENOENT</b> or
+    <b>ENOTDIR</b></a></dt>
+  <dd>
+    <br>
+    The <i>path1</i> argument names an existing non-directory file, and the
+      <i>path2</i> argument contains at least one non-&lt;slash&gt; character
+      and ends with one or more trailing &lt;slash&gt; characters. If
+      <i>path2</i> without the trailing &lt;slash&gt; characters would name an
+      existing file, an <b>[ENOENT]</b> error shall not occur.</dd>
+  <dt id="ENOSPC"><a class="permalink" href="#ENOSPC"><b>ENOSPC</b></a></dt>
+  <dd>The directory to contain the link cannot be extended.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>A component of either path prefix names an existing file that is neither a
+      directory nor a symbolic link to a directory, or the <i>path1</i> argument
+      contains at least one non-&lt;slash&gt; character and ends with one or
+      more trailing &lt;slash&gt; characters and the last pathname component
+      names an existing file that is neither a directory nor a symbolic link to
+      a directory, or the <i>path1</i> argument names an existing non-directory
+      file and the <i>path2</i> argument names a nonexistent file, contains at
+      least one non-&lt;slash&gt; character, and ends with one or more trailing
+      &lt;slash&gt; characters.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The file named by <i>path1</i> is a directory and either the calling
+      process does not have appropriate privileges or the implementation
+      prohibits using <i>link</i>() on directories.</dd>
+  <dt id="EROFS"><a class="permalink" href="#EROFS"><b>EROFS</b></a></dt>
+  <dd>The requested link requires writing in a directory on a read-only file
+      system.</dd>
+  <dt id="EXDEV"><a class="permalink" href="#EXDEV"><b>EXDEV</b></a></dt>
+  <dd>The link named by <i>path2</i> and the file named by <i>path1</i> are on
+      different file systems and the implementation does not support links
+      between file systems.</dd>
+  <dt id="EXDEV~2"><a class="permalink" href="#EXDEV~2"><b>EXDEV</b></a></dt>
+  <dd><i>path1</i> refers to a named STREAM.</dd>
+</dl>
+<p class="Pp">The <i>linkat</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES~2"><a class="permalink" href="#EACCES~2"><b>EACCES</b></a></dt>
+  <dd>The access mode of the open file description associated with <i>fd1</i> or
+      <i>fd2</i> is not O_SEARCH and the permissions of the directory underlying
+      <i>fd1</i> or <i>fd2</i>, respectively, do not permit directory
+    searches.</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The <i>path1</i> or <i>path2</i> argument does not specify an absolute
+      path and the <i>fd1</i> or <i>fd2</i> argument, respectively, is neither
+      AT_FDCWD nor a valid file descriptor open for reading or searching.</dd>
+  <dt id="ENOTDIR~2"><a class="permalink" href="#ENOTDIR~2"><b>ENOTDIR</b></a></dt>
+  <dd>The <i>path1</i> or <i>path2</i> argument is not an absolute path and
+      <i>fd1</i> or <i>fd2</i>, respectively, is a file descriptor associated
+      with a non-directory file.</dd>
+</dl>
+<p class="Pp">These functions may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="ELOOP~2"><a class="permalink" href="#ELOOP~2"><b>ELOOP</b></a></dt>
+  <dd>More than {SYMLOOP_MAX} symbolic links were encountered during resolution
+      of the <i>path1</i> or <i>path2</i> argument.</dd>
+  <dt id="ENAMETOOLONG~2"><a class="permalink" href="#ENAMETOOLONG~2"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of a pathname exceeds {PATH_MAX}, or pathname resolution of a
+      symbolic link produced an intermediate result with a length that exceeds
+      {PATH_MAX}.
+    <br>
+  </dd>
+</dl>
+<p class="Pp">The <i>linkat</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The value of the <i>flag</i> argument is not valid.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Creating_a_Link_to_a_File"><a class="permalink" href="#Creating_a_Link_to_a_File">Creating
+  a Link to a File</a></h2>
+<p class="Pp">The following example shows how to create a link to a file named
+    <b>/home/cnd/mod1</b> by creating a new directory entry named
+    <b>/modules/pass1</b>.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;unistd.h&gt;</pre>
+<pre>char *path1 = "/home/cnd/mod1";
+char *path2 = "/modules/pass1";
+int   status;
+...
+status = link (path1, path2);</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Creating_a_Link_to_a_File_Within_a_Program"><a class="permalink" href="#Creating_a_Link_to_a_File_Within_a_Program">Creating
+  a Link to a File Within a Program</a></h2>
+<p class="Pp">In the following program example, the <i>link</i>() function links
+    the <b>/etc/passwd</b> file (defined as <b>PASSWDFILE</b>) to a file named
+    <b>/etc/opasswd</b> (defined as <b>SAVEFILE</b>), which is used to save the
+    current password file. Then, after removing the current password file
+    (defined as <b>PASSWDFILE</b>), the new password file is saved as the
+    current password file using the <i>link</i>() function again.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;unistd.h&gt;</pre>
+<pre>#define LOCKFILE "/etc/ptmp"
+#define PASSWDFILE "/etc/passwd"
+#define SAVEFILE "/etc/opasswd"
+...
+/* Save current password file */
+link (PASSWDFILE, SAVEFILE);</pre>
+<pre>/* Remove current password file. */
+unlink (PASSWDFILE);</pre>
+<pre>/* Save new password file as current password file. */
+link (LOCKFILE,PASSWDFILE);</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">Some implementations do allow links between file systems.</p>
+<p class="Pp">If <i>path1</i> refers to a symbolic link, application developers
+    should use <i>linkat</i>() with appropriate flags to select whether or not
+    the symbolic link should be resolved.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">Linking to a directory is restricted to the superuser in most
+    historical implementations because this capability may produce loops in the
+    file hierarchy or otherwise corrupt the file system. This volume of
+    POSIX.1‐2017 continues that philosophy by prohibiting <i>link</i>()
+    and <i>unlink</i>() from doing this. Other functions could do it if the
+    implementor designed such an extension.</p>
+<p class="Pp">Some historical implementations allow linking of files on
+    different file systems. Wording was added to explicitly allow this optional
+    behavior.</p>
+<p class="Pp">The exception for cross-file system links is intended to apply
+    only to links that are programmatically indistinguishable from ``hard''
+    links.</p>
+<p class="Pp">The purpose of the <i>linkat</i>() function is to link files in
+    directories other than the current working directory without exposure to
+    race conditions. Any part of the path of a file could be changed in parallel
+    to a call to <i>link</i>(), resulting in unspecified behavior. By opening a
+    file descriptor for the directory of both the existing file and the target
+    location and using the <i>linkat</i>() function it can be guaranteed that
+    the both filenames are in the desired directories.</p>
+<p class="Pp">The AT_SYMLINK_FOLLOW flag allows for implementing both common
+    behaviors of the <i>link</i>() function. The POSIX specification requires
+    that if <i>path1</i> is a symbolic link, a new link for the target of the
+    symbolic link is created. Many systems by default or as an alternative
+    provide a mechanism to avoid the implicit symbolic link lookup and create a
+    new link for the symbolic link itself.</p>
+<p class="Pp">Earlier versions of this standard specified only the <i>link</i>()
+    function, and required it to behave like <i>linkat</i>() with the
+    AT_SYMLINK_FOLLOW flag. However, historical practice from SVR4 and Linux
+    kernels had <i>link</i>() behaving like <i>linkat</i>() with no flags, and
+    many systems that attempted to provide a conforming <i>link</i>() function
+    did so in a way that was rarely used, and when it was used did not conform
+    to the standard (e.g., by not being atomic, or by dereferencing the symbolic
+    link incorrectly). Since applications could not rely on <i>link</i>()
+    following links in practice, the <i>linkat</i>() function was added taking a
+    flag to specify the desired behavior for the application.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>rename</i>()</i>, <i><i>symlink</i>()</i>,
+    <i><i>unlink</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;fcntl.h&gt;</b></i>, <i><b>&lt;unistd.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

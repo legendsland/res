@@ -1,0 +1,187 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2006 by Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   2008-06-24, mtk: added some details about where jiffies come into
+       play; added section on high-resolution timers.
+   --><head>
+<meta name="dc.identifier" content="res/3440feb0d0ae02ad603c1011c439e3fc6dbe286f">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>time(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">time(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">time(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">time - overview of time and timers</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Real_time_and_process_time"><a class="permalink" href="#Real_time_and_process_time">Real
+  time and process time</a></h2>
+<p class="Pp"><i>Real time</i> is defined as time measured from some fixed
+    point, either from a standard point in the past (see the description of the
+    Epoch and calendar time below), or from some point (e.g., the start) in the
+    life of a process (<i>elapsed time</i>).</p>
+<p class="Pp"><i>Process time</i> is defined as the amount of CPU time used by a
+    process. This is sometimes divided into <i>user</i> and <i>system</i>
+    components. User CPU time is the time spent executing code in user mode.
+    System CPU time is the time spent by the kernel executing in system mode on
+    behalf of the process (e.g., executing system calls). The <b>time</b>(1)
+    command can be used to determine the amount of CPU time consumed during the
+    execution of a program. A program can determine the amount of CPU time it
+    has consumed using <b>times</b>(2), <b>getrusage</b>(2), or
+  <b>clock</b>(3).</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="The_hardware_clock"><a class="permalink" href="#The_hardware_clock">The
+  hardware clock</a></h2>
+<p class="Pp">Most computers have a (battery-powered) hardware clock which the
+    kernel reads at boot time in order to initialize the software clock. For
+    further details, see <b>rtc</b>(4) and <b>hwclock</b>(8).</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="The_software_clock,_HZ,_and_jiffies"><a class="permalink" href="#The_software_clock,_HZ,_and_jiffies">The
+  software clock, HZ, and jiffies</a></h2>
+<p class="Pp">The accuracy of various system calls that set timeouts, (e.g.,
+    <b>select</b>(2), <b>sigtimedwait</b>(2)) and measure CPU time (e.g.,
+    <b>getrusage</b>(2)) is limited by the resolution of the <i>software
+    clock</i>, a clock maintained by the kernel which measures time in
+    <i>jiffies</i>. The size of a jiffy is determined by the value of the kernel
+    constant <i>HZ</i>.</p>
+<p class="Pp">The value of <i>HZ</i> varies across kernel versions and hardware
+    platforms. On i386 the situation is as follows: on kernels up to and
+    including Linux 2.4.x, HZ was 100, giving a jiffy value of 0.01 seconds;
+    starting with Linux 2.6.0, HZ was raised to 1000, giving a jiffy of 0.001
+    seconds. Since Linux 2.6.13, the HZ value is a kernel configuration
+    parameter and can be 100, 250 (the default) or 1000, yielding a jiffies
+    value of, respectively, 0.01, 0.004, or 0.001 seconds. Since Linux 2.6.20, a
+    further frequency is available: 300, a number that divides evenly for the
+    common video frame rates (PAL, 25 Hz; NTSC, 30 Hz).</p>
+<p class="Pp">The <b>times</b>(2) system call is a special case. It reports
+    times with a granularity defined by the kernel constant <i>USER_HZ</i>.
+    User-space applications can determine the value of this constant using
+    <i>sysconf(_SC_CLK_TCK)</i>.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="System_and_process_clocks;_time_namespaces"><a class="permalink" href="#System_and_process_clocks;_time_namespaces">System
+  and process clocks; time namespaces</a></h2>
+<p class="Pp">The kernel supports a range of clocks that measure various kinds
+    of elapsed and virtual (i.e., consumed CPU) time. These clocks are described
+    in <b>clock_gettime</b>(2). A few of the clocks are settable using
+    <b>clock_settime</b>(2). The values of certain clocks are virtualized by
+    time namespaces; see <b>time_namespaces</b>(7).</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="High-resolution_timers"><a class="permalink" href="#High-resolution_timers">High-resolution
+  timers</a></h2>
+<p class="Pp">Before Linux 2.6.21, the accuracy of timer and sleep system calls
+    (see below) was also limited by the size of the jiffy.</p>
+<p class="Pp">Since Linux 2.6.21, Linux supports high-resolution timers (HRTs),
+    optionally configurable via <b>CONFIG_HIGH_RES_TIMERS</b>. On a system that
+    supports HRTs, the accuracy of sleep and timer system calls is no longer
+    constrained by the jiffy, but instead can be as accurate as the hardware
+    allows (microsecond accuracy is typical of modern hardware). You can
+    determine whether high-resolution timers are supported by checking the
+    resolution returned by a call to <b>clock_getres</b>(2) or looking at the
+    "resolution" entries in <i>/proc/timer_list</i>.</p>
+<p class="Pp">HRTs are not supported on all hardware architectures. (Support is
+    provided on x86, ARM, and PowerPC, among others.)</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="The_Epoch"><a class="permalink" href="#The_Epoch">The
+  Epoch</a></h2>
+<p class="Pp">UNIX systems represent time in seconds since the <i>Epoch</i>,
+    1970-01-01 00:00:00 +0000 (UTC).</p>
+<p class="Pp">A program can determine the <i>calendar time</i> via the
+    <b>clock_gettime</b>(2) <b>CLOCK_REALTIME</b> clock, which returns time (in
+    seconds and nanoseconds) that have elapsed since the Epoch; <b>time</b>(2)
+    provides similar information, but only with accuracy to the nearest second.
+    The system time can be changed using <b>clock_settime</b>(2).</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Broken-down_time"><a class="permalink" href="#Broken-down_time">Broken-down
+  time</a></h2>
+<p class="Pp">Certain library functions use a structure of type <i>tm</i> to
+    represent <i>broken-down time</i>, which stores time value separated out
+    into distinct components (year, month, day, hour, minute, second, etc.).
+    This structure is described in <b>tm</b>(3type), which also describes
+    functions that convert between calendar time and broken-down time. Functions
+    for converting between broken-down time and printable string representations
+    of the time are described in <b>ctime</b>(3), <b>strftime</b>(3), and
+    <b>strptime</b>(3).</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Sleeping_and_setting_timers"><a class="permalink" href="#Sleeping_and_setting_timers">Sleeping
+  and setting timers</a></h2>
+<p class="Pp">Various system calls and functions allow a program to sleep
+    (suspend execution) for a specified period of time; see <b>nanosleep</b>(2),
+    <b>clock_nanosleep</b>(2), and <b>sleep</b>(3).</p>
+<p class="Pp">Various system calls allow a process to set a timer that expires
+    at some point in the future, and optionally at repeated intervals; see
+    <b>alarm</b>(2), <b>getitimer</b>(2), <b>timerfd_create</b>(2), and
+    <b>timer_create</b>(2).</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Timer_slack"><a class="permalink" href="#Timer_slack">Timer
+  slack</a></h2>
+<p class="Pp">Since Linux 2.6.28, it is possible to control the "timer
+    slack" value for a thread. The timer slack is the length of time by
+    which the kernel may delay the wake-up of certain system calls that block
+    with a timeout. Permitting this delay allows the kernel to coalesce wake-up
+    events, thus possibly reducing the number of system wake-ups and saving
+    power. For more details, see the description of <b>PR_SET_TIMERSLACK</b> in
+    <b>prctl</b>(2).</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>date</b>(1), <b>time</b>(1), <b>timeout</b>(1),
+    <b>adjtimex</b>(2), <b>alarm</b>(2), <b>clock_gettime</b>(2),
+    <b>clock_nanosleep</b>(2), <b>getitimer</b>(2), <b>getrlimit</b>(2),
+    <b>getrusage</b>(2), <b>gettimeofday</b>(2), <b>nanosleep</b>(2),
+    <b>stat</b>(2), <b>time</b>(2), <b>timer_create</b>(2),
+    <b>timerfd_create</b>(2), <b>times</b>(2), <b>utime</b>(2),
+    <b>adjtime</b>(3), <b>clock</b>(3), <b>clock_getcpuclockid</b>(3),
+    <b>ctime</b>(3), <b>ntp_adjtime</b>(3), <b>ntp_gettime</b>(3),
+    <b>pthread_getcpuclockid</b>(3), <b>sleep</b>(3), <b>strftime</b>(3),
+    <b>strptime</b>(3), <b>timeradd</b>(3), <b>usleep</b>(3), <b>rtc</b>(4),
+    <b>time_namespaces</b>(7), <b>hwclock</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

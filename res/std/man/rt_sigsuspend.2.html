@@ -1,0 +1,128 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/f4f35a2e244b0243a1e4b23a8beefa8af8ce7ef8">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>sigsuspend(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">sigsuspend(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">sigsuspend(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">sigsuspend, rt_sigsuspend - wait for a signal</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;signal.h&gt;</b></pre>
+<pre><b>int sigsuspend(const sigset_t *</b><i>mask</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>sigsuspend</b>():</p>
+<pre><br>
+    _POSIX_C_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>sigsuspend</b>() temporarily replaces the signal mask of the
+    calling thread with the mask given by <i>mask</i> and then suspends the
+    thread until delivery of a signal whose action is to invoke a signal handler
+    or to terminate a process.</p>
+<p class="Pp">If the signal terminates the process, then <b>sigsuspend</b>()
+    does not return. If the signal is caught, then <b>sigsuspend</b>() returns
+    after the signal handler returns, and the signal mask is restored to the
+    state before the call to <b>sigsuspend</b>().</p>
+<p class="Pp">It is not possible to block <b>SIGKILL</b> or <b>SIGSTOP</b>;
+    specifying these signals in <i>mask</i>, has no effect on the thread's
+    signal mask.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp"><b>sigsuspend</b>() always returns -1, with <i>errno</i> set to
+    indicate the error (normally, <b>EINTR</b>).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>mask</i> points to memory which is not a valid part of the process
+      address space.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The call was interrupted by a signal; <b>signal</b>(7).</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Normally, <b>sigsuspend</b>() is used in conjunction with
+    <b>sigprocmask</b>(2) in order to prevent delivery of a signal during the
+    execution of a critical code section. The caller first blocks the signals
+    with <b>sigprocmask</b>(2). When the critical code has completed, the caller
+    then waits for the signals by calling <b>sigsuspend</b>() with the signal
+    mask that was returned by <b>sigprocmask</b>(2) (in the <i>oldset</i>
+    argument).</p>
+<p class="Pp">See <b>sigsetops</b>(3) for details on manipulating signal
+  sets.</p>
+<section class="Ss">
+<h2 class="Ss" id="C_library/kernel_differences"><a class="permalink" href="#C_library/kernel_differences">C
+  library/kernel differences</a></h2>
+<p class="Pp">The original Linux system call was named <b>sigsuspend</b>().
+    However, with the addition of real-time signals in Linux 2.2, the
+    fixed-size, 32-bit <i>sigset_t</i> type supported by that system call was no
+    longer fit for purpose. Consequently, a new system call,
+    <b>rt_sigsuspend</b>(), was added to support an enlarged <i>sigset_t</i>
+    type. The new system call takes a second argument, <i>size_t sigsetsize</i>,
+    which specifies the size in bytes of the signal set in <i>mask</i>. This
+    argument is currently required to have the value <i>sizeof(sigset_t)</i> (or
+    the error <b>EINVAL</b> results). The glibc <b>sigsuspend</b>() wrapper
+    function hides these details from us, transparently calling
+    <b>rt_sigsuspend</b>() when the kernel provides it.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>kill</b>(2), <b>pause</b>(2), <b>sigaction</b>(2),
+    <b>signal</b>(2), <b>sigprocmask</b>(2), <b>sigwaitinfo</b>(2),
+    <b>sigsetops</b>(3), <b>sigwait</b>(3), <b>signal</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

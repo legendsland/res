@@ -1,0 +1,458 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   This man page is Copyright (C) 1999 Andi Kleen <ak@muc.de>.
+  
+   %%%LICENSE_START(VERBATIM_ONE_PARA)
+   Permission is granted to distribute possibly modified copies
+   of this page provided the header is included verbatim,
+   and in case of nontrivial modification author and date
+   of the modification is added to the header.
+   %%%LICENSE_END
+  
+   $Id: netdevice.7,v 1.10 2000/08/17 10:09:54 ak Exp $
+  
+   Modified, 2004-11-25, mtk, formatting and a few wording fixes
+  
+   Modified, 2011-11-02, <bidulock@openss7.org>, added many basic
+    but missing ioctls, such as SIOCGIFADDR.
+   --><head>
+<meta name="dc.identifier" content="res/fb86fb68d0f0b21af5007537d9132a407e376c71">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>netdevice(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">netdevice(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">netdevice(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">netdevice - low-level access to Linux network devices</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/ioctl.h&gt;</b>
+<b>#include &lt;net/if.h&gt;</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">This man page describes the sockets interface which is used to
+    configure network devices.</p>
+<p class="Pp">Linux supports some standard ioctls to configure network devices.
+    They can be used on any socket's file descriptor regardless of the family or
+    type. Most of them pass an <i>ifreq</i> structure:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct ifreq {
+<br>
+    char ifr_name[IFNAMSIZ]; /* Interface name */
+<br>
+    union {
+<br>
+        struct sockaddr ifr_addr;
+<br>
+        struct sockaddr ifr_dstaddr;
+<br>
+        struct sockaddr ifr_broadaddr;
+<br>
+        struct sockaddr ifr_netmask;
+<br>
+        struct sockaddr ifr_hwaddr;
+<br>
+        short           ifr_flags;
+<br>
+        int             ifr_ifindex;
+<br>
+        int             ifr_metric;
+<br>
+        int             ifr_mtu;
+<br>
+        struct ifmap    ifr_map;
+<br>
+        char            ifr_slave[IFNAMSIZ];
+<br>
+        char            ifr_newname[IFNAMSIZ];
+<br>
+        char           *ifr_data;
+<br>
+    };
+};
+</pre>
+<br>
+<p class="Pp"><b>AF_INET6</b> is an exception. It passes an <i>in6_ifreq</i>
+    structure:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct in6_ifreq {
+<br>
+    struct in6_addr     ifr6_addr;
+<br>
+    u32                 ifr6_prefixlen;
+<br>
+    int                 ifr6_ifindex; /* Interface index */
+};
+</pre>
+<br>
+<p class="Pp">Normally, the user specifies which device to affect by setting
+    <i>ifr_name</i> to the name of the interface or <i>ifr6_ifindex</i> to the
+    index of the interface. All other members of the structure may share
+  memory.</p>
+<section class="Ss">
+<h2 class="Ss" id="Ioctls"><a class="permalink" href="#Ioctls">Ioctls</a></h2>
+<p class="Pp">If an ioctl is marked as privileged, then using it requires an
+    effective user ID of 0 or the <b>CAP_NET_ADMIN</b> capability. If this is
+    not the case, <b>EPERM</b> will be returned.</p>
+<dl class="Bl-tag">
+  <dt id="SIOCGIFNAME"><a class="permalink" href="#SIOCGIFNAME"><b>SIOCGIFNAME</b></a></dt>
+  <dd>Given the <i>ifr_ifindex</i>, return the name of the interface in
+      <i>ifr_name</i>. This is the only ioctl which returns its result in
+      <i>ifr_name</i>.</dd>
+  <dt id="SIOCGIFINDEX"><a class="permalink" href="#SIOCGIFINDEX"><b>SIOCGIFINDEX</b></a></dt>
+  <dd>Retrieve the interface index of the interface into
+    <i>ifr_ifindex</i>.</dd>
+  <dt id="SIOCGIFFLAGS"><a class="permalink" href="#SIOCGIFFLAGS"><b>SIOCGIFFLAGS</b>,
+    <b>SIOCSIFFLAGS</b></a></dt>
+  <dd>Get or set the active flag word of the device. <i>ifr_flags</i> contains a
+      bit mask of the following values:
+    <table class="tbl">
+      <tbody><tr>
+        <td colspan="2" style="text-align: center;">Device flags</td>
+      </tr>
+      <tr>
+        <td>IFF_UP</td>
+        <td>Interface is running.</td>
+      </tr>
+      <tr>
+        <td>IFF_BROADCAST</td>
+        <td>Valid broadcast address set.</td>
+      </tr>
+      <tr>
+        <td>IFF_DEBUG</td>
+        <td>Internal debugging flag.</td>
+      </tr>
+      <tr>
+        <td>IFF_LOOPBACK</td>
+        <td>Interface is a loopback interface.</td>
+      </tr>
+      <tr>
+        <td>IFF_POINTOPOINT</td>
+        <td>Interface is a point-to-point link.</td>
+      </tr>
+      <tr>
+        <td>IFF_RUNNING</td>
+        <td>Resources allocated.</td>
+      </tr>
+      <tr>
+        <td>IFF_NOARP</td>
+        <td>No arp protocol, L2 destination address not set.</td>
+      </tr>
+      <tr>
+        <td>IFF_PROMISC</td>
+        <td>Interface is in promiscuous mode.</td>
+      </tr>
+      <tr>
+        <td>IFF_NOTRAILERS</td>
+        <td>Avoid use of trailers.</td>
+      </tr>
+      <tr>
+        <td>IFF_ALLMULTI</td>
+        <td>Receive all multicast packets.</td>
+      </tr>
+      <tr>
+        <td>IFF_MASTER</td>
+        <td>Master of a load balancing bundle.</td>
+      </tr>
+      <tr>
+        <td>IFF_SLAVE</td>
+        <td>Slave of a load balancing bundle.</td>
+      </tr>
+      <tr>
+        <td>IFF_MULTICAST</td>
+        <td>Supports multicast</td>
+      </tr>
+      <tr>
+        <td>IFF_PORTSEL</td>
+        <td>Is able to select media type via ifmap.</td>
+      </tr>
+      <tr>
+        <td>IFF_AUTOMEDIA</td>
+        <td>Auto media selection active.</td>
+      </tr>
+      <tr>
+        <td>IFF_DYNAMIC</td>
+        <td>The addresses are lost when the interface goes down.</td>
+      </tr>
+      <tr>
+        <td>IFF_LOWER_UP</td>
+        <td>Driver signals L1 up (since Linux 2.6.17)</td>
+      </tr>
+      <tr>
+        <td>IFF_DORMANT</td>
+        <td>Driver signals dormant (since Linux 2.6.17)</td>
+      </tr>
+      <tr>
+        <td>IFF_ECHO</td>
+        <td>Echo sent packets (since Linux 2.6.25)</td>
+      </tr>
+    </tbody></table>
+  </dd>
+</dl>
+<p class="Pp">Setting the active flag word is a privileged operation, but any
+    process may read it.</p>
+<dl class="Bl-tag">
+  <dt id="SIOCGIFPFLAGS"><a class="permalink" href="#SIOCGIFPFLAGS"><b>SIOCGIFPFLAGS</b>,
+    <b>SIOCSIFPFLAGS</b></a></dt>
+  <dd>Get or set extended (private) flags for the device. <i>ifr_flags</i>
+      contains a bit mask of the following values:
+    <table class="tbl">
+      <tbody><tr>
+        <td colspan="2" style="text-align: center;">Private flags</td>
+      </tr>
+      <tr>
+        <td>IFF_802_1Q_VLAN</td>
+        <td>Interface is 802.1Q VLAN device.</td>
+      </tr>
+      <tr>
+        <td>IFF_EBRIDGE</td>
+        <td>Interface is Ethernet bridging device.</td>
+      </tr>
+      <tr>
+        <td>IFF_SLAVE_INACTIVE</td>
+        <td>Interface is inactive bonding slave.</td>
+      </tr>
+      <tr>
+        <td>IFF_MASTER_8023AD</td>
+        <td>Interface is 802.3ad bonding master.</td>
+      </tr>
+      <tr>
+        <td>IFF_MASTER_ALB</td>
+        <td>Interface is balanced-alb bonding master.</td>
+      </tr>
+      <tr>
+        <td>IFF_BONDING</td>
+        <td>Interface is a bonding master or slave.</td>
+      </tr>
+      <tr>
+        <td>IFF_SLAVE_NEEDARP</td>
+        <td>Interface needs ARPs for validation.</td>
+      </tr>
+      <tr>
+        <td>IFF_ISATAP</td>
+        <td>Interface is RFC4214 ISATAP interface.</td>
+      </tr>
+    </tbody></table>
+  </dd>
+</dl>
+<p class="Pp">Setting the extended (private) interface flags is a privileged
+    operation.</p>
+<dl class="Bl-tag">
+  <dt id="SIOCGIFADDR"><a class="permalink" href="#SIOCGIFADDR"><b>SIOCGIFADDR</b>,
+    <b>SIOCSIFADDR</b>, <b>SIOCDIFADDR</b></a></dt>
+  <dd>Get, set, or delete the address of the device using <i>ifr_addr</i>, or
+      <i>ifr6_addr</i> with <i>ifr6_prefixlen</i>. Setting or deleting the
+      interface address is a privileged operation. For compatibility,
+      <b>SIOCGIFADDR</b> returns only <b>AF_INET</b> addresses,
+      <b>SIOCSIFADDR</b> accepts <b>AF_INET</b> and <b>AF_INET6</b> addresses,
+      and <b>SIOCDIFADDR</b> deletes only <b>AF_INET6</b> addresses. A
+      <b>AF_INET</b> address can be deleted by setting it to zero via
+      <b>SIOCSIFADDR</b>.</dd>
+  <dt id="SIOCGIFDSTADDR"><a class="permalink" href="#SIOCGIFDSTADDR"><b>SIOCGIFDSTADDR</b>,
+    <b>SIOCSIFDSTADDR</b></a></dt>
+  <dd>Get or set the destination address of a point-to-point device using
+      <i>ifr_dstaddr</i>. For compatibility, only <b>AF_INET</b> addresses are
+      accepted or returned. Setting the destination address is a privileged
+      operation.</dd>
+  <dt id="SIOCGIFBRDADDR"><a class="permalink" href="#SIOCGIFBRDADDR"><b>SIOCGIFBRDADDR</b>,
+    <b>SIOCSIFBRDADDR</b></a></dt>
+  <dd>Get or set the broadcast address for a device using <i>ifr_brdaddr</i>.
+      For compatibility, only <b>AF_INET</b> addresses are accepted or returned.
+      Setting the broadcast address is a privileged operation.</dd>
+  <dt id="SIOCGIFNETMASK"><a class="permalink" href="#SIOCGIFNETMASK"><b>SIOCGIFNETMASK</b>,
+    <b>SIOCSIFNETMASK</b></a></dt>
+  <dd>Get or set the network mask for a device using <i>ifr_netmask</i>. For
+      compatibility, only <b>AF_INET</b> addresses are accepted or returned.
+      Setting the network mask is a privileged operation.</dd>
+  <dt id="SIOCGIFMETRIC"><a class="permalink" href="#SIOCGIFMETRIC"><b>SIOCGIFMETRIC</b>,
+    <b>SIOCSIFMETRIC</b></a></dt>
+  <dd>Get or set the metric of the device using <i>ifr_metric</i>. This is
+      currently not implemented; it sets <i>ifr_metric</i> to 0 if you attempt
+      to read it and returns <b>EOPNOTSUPP</b> if you attempt to set it.</dd>
+  <dt id="SIOCGIFMTU"><a class="permalink" href="#SIOCGIFMTU"><b>SIOCGIFMTU</b>,
+    <b>SIOCSIFMTU</b></a></dt>
+  <dd>Get or set the MTU (Maximum Transfer Unit) of a device using
+      <i>ifr_mtu</i>. Setting the MTU is a privileged operation. Setting the MTU
+      to too small values may cause kernel crashes.</dd>
+  <dt id="SIOCGIFHWADDR"><a class="permalink" href="#SIOCGIFHWADDR"><b>SIOCGIFHWADDR</b>,
+    <b>SIOCSIFHWADDR</b></a></dt>
+  <dd>Get or set the hardware address of a device using <i>ifr_hwaddr</i>. The
+      hardware address is specified in a struct <i>sockaddr</i>.
+      <i>sa_family</i> contains the ARPHRD_* device type, <i>sa_data</i> the L2
+      hardware address starting from byte 0. Setting the hardware address is a
+      privileged operation.</dd>
+  <dt id="SIOCSIFHWBROADCAST"><a class="permalink" href="#SIOCSIFHWBROADCAST"><b>SIOCSIFHWBROADCAST</b></a></dt>
+  <dd>Set the hardware broadcast address of a device from <i>ifr_hwaddr</i>.
+      This is a privileged operation.</dd>
+  <dt id="SIOCGIFMAP"><a class="permalink" href="#SIOCGIFMAP"><b>SIOCGIFMAP</b>,
+    <b>SIOCSIFMAP</b></a></dt>
+  <dd>Get or set the interface's hardware parameters using <i>ifr_map</i>.
+      Setting the parameters is a privileged operation.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct ifmap {
+<br>
+    unsigned long   mem_start;
+<br>
+    unsigned long   mem_end;
+<br>
+    unsigned short  base_addr;
+<br>
+    unsigned char   irq;
+<br>
+    unsigned char   dma;
+<br>
+    unsigned char   port;
+};
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>The interpretation of the ifmap structure depends on the device driver and
+      the architecture.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="SIOCADDMULTI"><a class="permalink" href="#SIOCADDMULTI"><b>SIOCADDMULTI</b>,
+    <b>SIOCDELMULTI</b></a></dt>
+  <dd>Add an address to or delete an address from the device's link layer
+      multicast filters using <i>ifr_hwaddr</i>. These are privileged
+      operations. See also <b>packet</b>(7) for an alternative.</dd>
+  <dt id="SIOCGIFTXQLEN"><a class="permalink" href="#SIOCGIFTXQLEN"><b>SIOCGIFTXQLEN</b>,
+    <b>SIOCSIFTXQLEN</b></a></dt>
+  <dd>Get or set the transmit queue length of a device using <i>ifr_qlen</i>.
+      Setting the transmit queue length is a privileged operation.</dd>
+  <dt id="SIOCSIFNAME"><a class="permalink" href="#SIOCSIFNAME"><b>SIOCSIFNAME</b></a></dt>
+  <dd>Changes the name of the interface specified in <i>ifr_name</i> to
+      <i>ifr_newname</i>. This is a privileged operation. It is allowed only
+      when the interface is not up.</dd>
+  <dt id="SIOCGIFCONF"><a class="permalink" href="#SIOCGIFCONF"><b>SIOCGIFCONF</b></a></dt>
+  <dd>Return a list of interface (network layer) addresses. This currently means
+      only addresses of the <b>AF_INET</b> (IPv4) family for compatibility.
+      Unlike the others, this ioctl passes an <i>ifconf</i> structure:</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct ifconf {
+<br>
+    int               ifc_len; /* size of buffer */
+<br>
+    union {
+<br>
+        char         *ifc_buf; /* buffer address */
+<br>
+        struct ifreq *ifc_req; /* array of structures */
+<br>
+    };
+};
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd>If <i>ifc_req</i> is NULL, <b>SIOCGIFCONF</b> returns the necessary buffer
+      size in bytes for receiving all available addresses in <i>ifc_len</i>.
+      Otherwise, <i>ifc_req</i> contains a pointer to an array of <i>ifreq</i>
+      structures to be filled with all currently active L3 interface addresses.
+      <i>ifc_len</i> contains the size of the array in bytes. Within each
+      <i>ifreq</i> structure, <i>ifr_name</i> will receive the interface name,
+      and <i>ifr_addr</i> the address. The actual number of bytes transferred is
+      returned in <i>ifc_len</i>.</dd>
+  <dt></dt>
+  <dd>If the size specified by <i>ifc_len</i> is insufficient to store all the
+      addresses, the kernel will skip the exceeding ones and return success.
+      There is no reliable way of detecting this condition once it has occurred.
+      It is therefore recommended to either determine the necessary buffer size
+      beforehand by calling <b>SIOCGIFCONF</b> with <i>ifc_req</i> set to NULL,
+      or to retry the call with a bigger buffer whenever <i>ifc_len</i> upon
+      return differs by less than <i>sizeof(struct ifreq)</i> from its original
+      value.</dd>
+  <dt></dt>
+  <dd>If an error occurs accessing the <i>ifconf</i> or <i>ifreq</i> structures,
+      <b>EFAULT</b> will be returned.</dd>
+</dl>
+<p class="Pp">Most protocols support their own ioctls to configure
+    protocol-specific interface options. See the protocol man pages for a
+    description. For configuring IP addresses, see <b>ip</b>(7).</p>
+<p class="Pp">In addition, some devices support private ioctls. These are not
+    described here.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp"><b>SIOCGIFCONF</b> and the other ioctls that accept or return only
+    <b>AF_INET</b> socket addresses are IP-specific and perhaps should rather be
+    documented in <b>ip</b>(7).</p>
+<p class="Pp">The names of interfaces with no addresses or that don't have the
+    <b>IFF_RUNNING</b> flag set can be found via <i>/proc/net/dev</i>.</p>
+<p class="Pp"><b>AF_INET6</b> IPv6 addresses can be read from
+    <i>/proc/net/if_inet6</i> or via <b>rtnetlink</b>(7). Adding a new IPv6
+    address and deleting an existing IPv6 address can be done via
+    <b>SIOCSIFADDR</b> and <b>SIOCDIFADDR</b> or via <b>rtnetlink</b>(7).
+    Retrieving or changing destination IPv6 addresses of a point-to-point
+    interface is possible only via <b>rtnetlink</b>(7).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">glibc 2.1 is missing the <i>ifr_newname</i> macro in
+    <i>&lt;net/if.h&gt;</i>. Add the following to your program as a
+  workaround:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>#ifndef ifr_newname
+#define ifr_newname     ifr_ifru.ifru_slave
+#endif
+</pre>
+<br>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>proc</b>(5), <b>capabilities</b>(7), <b>ip</b>(7),
+    <b>rtnetlink</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

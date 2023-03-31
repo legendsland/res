@@ -1,0 +1,199 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 1990, 1993
+  	The Regents of the University of California.  All rights reserved.
+  
+   SPDX-License-Identifier: BSD-4-Clause-UC
+  
+  	@(#)recno.3	8.5 (Berkeley) 8/18/94
+   --><head>
+<meta name="dc.identifier" content="res/3d86a730ee6b1774f15910845597fcc50fa98b9a">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>recno(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">recno(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">recno(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">recno - record number database access method</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/types.h&gt;</b>
+<b>#include &lt;db.h&gt;</b>
+</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><i>Note well</i>: This page documents interfaces provided up until
+    glibc 2.1. Since glibc 2.2, glibc no longer provides these interfaces.
+    Probably, you are looking for the APIs provided by the <i>libdb</i> library
+    instead.</p>
+<p class="Pp">The routine <b>dbopen</b>(3) is the library interface to database
+    files. One of the supported file formats is record number files. The general
+    description of the database access methods is in <b>dbopen</b>(3), this
+    manual page describes only the recno-specific information.</p>
+<p class="Pp">The record number data structure is either variable or
+    fixed-length records stored in a flat-file format, accessed by the logical
+    record number. The existence of record number five implies the existence of
+    records one through four, and the deletion of record number one causes
+    record number five to be renumbered to record number four, as well as the
+    cursor, if positioned after record number one, to shift down one record.</p>
+<p class="Pp">The recno access-method-specific data structure provided to
+    <b>dbopen</b>(3) is defined in the <i>&lt;db.h&gt;</i> include file as
+    follows:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>typedef struct {
+<br>
+    unsigned long flags;
+<br>
+    unsigned int  cachesize;
+<br>
+    unsigned int  psize;
+<br>
+    int           lorder;
+<br>
+    size_t        reclen;
+<br>
+    unsigned char bval;
+<br>
+    char         *bfname;
+} RECNOINFO;
+</pre>
+<br>
+<p class="Pp">The elements of this structure are defined as follows:</p>
+<dl class="Bl-tag">
+  <dt id="flags"><a class="permalink" href="#flags"><i>flags</i></a></dt>
+  <dd>The flag value is specified by ORing any of the following values:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="R_FIXEDLEN"><a class="permalink" href="#R_FIXEDLEN"><b>R_FIXEDLEN</b></a></dt>
+  <dd>The records are fixed-length, not byte delimited. The structure element
+      <i>reclen</i> specifies the length of the record, and the structure
+      element <i>bval</i> is used as the pad character. Any records, inserted
+      into the database, that are less than <i>reclen</i> bytes long are
+      automatically padded.</dd>
+  <dt id="R_NOKEY"><a class="permalink" href="#R_NOKEY"><b>R_NOKEY</b></a></dt>
+  <dd>In the interface specified by <b>dbopen</b>(3), the sequential record
+      retrieval fills in both the caller's key and data structures. If the
+      <b>R_NOKEY</b> flag is specified, the <i>cursor</i> routines are not
+      required to fill in the key structure. This permits applications to
+      retrieve records at the end of files without reading all of the
+      intervening records.</dd>
+  <dt id="R_SNAPSHOT"><a class="permalink" href="#R_SNAPSHOT"><b>R_SNAPSHOT</b></a></dt>
+  <dd>This flag requires that a snapshot of the file be taken when
+      <b>dbopen</b>(3) is called, instead of permitting any unmodified records
+      to be read from the original file.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="cachesize"><a class="permalink" href="#cachesize"><i>cachesize</i></a></dt>
+  <dd>A suggested maximum size, in bytes, of the memory cache. This value is
+      <b>only</b> advisory, and the access method will allocate more memory
+      rather than fail. If <i>cachesize</i> is 0 (no size is specified), a
+      default cache is used.</dd>
+  <dt id="psize"><a class="permalink" href="#psize"><i>psize</i></a></dt>
+  <dd>The recno access method stores the in-memory copies of its records in a
+      btree. This value is the size (in bytes) of the pages used for nodes in
+      that tree. If <i>psize</i> is 0 (no page size is specified), a page size
+      is chosen based on the underlying filesystem I/O block size. See
+      <b>btree</b>(3) for more information.</dd>
+  <dt id="lorder"><a class="permalink" href="#lorder"><i>lorder</i></a></dt>
+  <dd>The byte order for integers in the stored database metadata. The number
+      should represent the order as an integer; for example, big endian order
+      would be the number 4,321. If <i>lorder</i> is 0 (no order is specified),
+      the current host order is used.</dd>
+  <dt id="reclen"><a class="permalink" href="#reclen"><i>reclen</i></a></dt>
+  <dd>The length of a fixed-length record.</dd>
+  <dt id="bval"><a class="permalink" href="#bval"><i>bval</i></a></dt>
+  <dd>The delimiting byte to be used to mark the end of a record for
+      variable-length records, and the pad character for fixed-length records.
+      If no value is specified, newlines ("\n") are used to mark the
+      end of variable-length records and fixed-length records are padded with
+      spaces.</dd>
+  <dt id="bfname"><a class="permalink" href="#bfname"><i>bfname</i></a></dt>
+  <dd>The recno access method stores the in-memory copies of its records in a
+      btree. If <i>bfname</i> is non-NULL, it specifies the name of the btree
+      file, as if specified as the filename for a <b>dbopen</b>(3) of a btree
+      file.</dd>
+</dl>
+<p class="Pp">The data part of the key/data pair used by the <i>recno</i> access
+    method is the same as other access methods. The key is different. The
+    <i>data</i> field of the key should be a pointer to a memory location of
+    type <i>recno_t</i>, as defined in the <i>&lt;db.h&gt;</i> include file.
+    This type is normally the largest unsigned integral type available to the
+    implementation. The <i>size</i> field of the key should be the size of that
+    type.</p>
+<p class="Pp">Because there can be no metadata associated with the underlying
+    recno access method files, any changes made to the default values (e.g.,
+    fixed record length or byte separator value) must be explicitly specified
+    each time the file is opened.</p>
+<p class="Pp">In the interface specified by <b>dbopen</b>(3), using the
+    <i>put</i> interface to create a new record will cause the creation of
+    multiple, empty records if the record number is more than one greater than
+    the largest record currently in the database.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>recno</i> access method routines may fail and set
+    <i>errno</i> for any of the errors specified for the library routine
+    <b>dbopen</b>(3) or the following:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>An attempt was made to add a record to a fixed-length database that was
+      too large to fit.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">Only big and little endian byte order is supported.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>btree</b>(3), <b>dbopen</b>(3), <b>hash</b>(3),
+  <b>mpool</b>(3)</p>
+<p class="Pp"><i>Document Processing in a Relational Database System</i>,
+    Michael Stonebraker, Heidi Stettner, Joseph Kalash, Antonin Guttman, Nadene
+    Lynn, Memorandum No. UCB/ERL M82/32, May 1982.</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">4.4 Berkeley Distribution</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

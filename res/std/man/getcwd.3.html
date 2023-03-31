@@ -1,0 +1,244 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 1993 by Thomas Koenig (ig25@rz.uni-karlsruhe.de)
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Modified Wed Jul 21 22:35:42 1993 by Rik Faith (faith@cs.unc.edu)
+   Modified 18 Mar 1996 by Martin Schulze (joey@infodrom.north.de):
+     Corrected description of getwd().
+   Modified Sat Aug 21 12:32:12 MET 1999 by aeb - applied fix by aj
+   Modified Mon Dec 11 13:32:51 MET 2000 by aeb
+   Modified Thu Apr 22 03:49:15 CEST 2002 by Roger Luethi <rl@hellgate.ch>
+   --><head>
+<meta name="dc.identifier" content="res/bf043d01482218847414d7eb1af68a5585a9092a">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>getcwd(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">getcwd(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">getcwd(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getcwd, getwd, get_current_dir_name - get current working
+    directory</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>char *getcwd(char </b><i>buf</i><b>[.</b><i>size</i><b>], size_t </b><i>size</i><b>);</b>
+<b>char *get_current_dir_name(void);</b></pre>
+<pre><b>[[deprecated]] char *getwd(char </b><i>buf</i><b>[PATH_MAX]);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>get_current_dir_name</b>():</p>
+<pre><br>
+    _GNU_SOURCE</pre>
+<p class="Pp"><b>getwd</b>():</p>
+<pre><br>
+    Since glibc 2.12:
+<br>
+        (_XOPEN_SOURCE &gt;= 500) &amp;&amp; ! (_POSIX_C_SOURCE &gt;= 200809L)
+<br>
+            || /* glibc &gt;= 2.19: */ _DEFAULT_SOURCE
+<br>
+            || /* glibc &lt;= 2.19: */ _BSD_SOURCE
+<br>
+    Before glibc 2.12:
+<br>
+        _BSD_SOURCE || _XOPEN_SOURCE &gt;= 500</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">These functions return a null-terminated string containing an
+    absolute pathname that is the current working directory of the calling
+    process. The pathname is returned as the function result and via the
+    argument <i>buf</i>, if present.</p>
+<p class="Pp">The <b>getcwd</b>() function copies an absolute pathname of the
+    current working directory to the array pointed to by <i>buf</i>, which is of
+    length <i>size</i>.</p>
+<p class="Pp">If the length of the absolute pathname of the current working
+    directory, including the terminating null byte, exceeds <i>size</i> bytes,
+    NULL is returned, and <i>errno</i> is set to <b>ERANGE</b>; an application
+    should check for this error, and allocate a larger buffer if necessary.</p>
+<p class="Pp">As an extension to the POSIX.1-2001 standard, glibc's
+    <b>getcwd</b>() allocates the buffer dynamically using <b>malloc</b>(3) if
+    <i>buf</i> is NULL. In this case, the allocated buffer has the length
+    <i>size</i> unless <i>size</i> is zero, when <i>buf</i> is allocated as big
+    as necessary. The caller should <b>free</b>(3) the returned buffer.</p>
+<p class="Pp"><b>get_current_dir_name</b>() will <b>malloc</b>(3) an array big
+    enough to hold the absolute pathname of the current working directory. If
+    the environment variable <b>PWD</b> is set, and its value is correct, then
+    that value will be returned. The caller should <b>free</b>(3) the returned
+    buffer.</p>
+<p class="Pp"><b>getwd</b>() does not <b>malloc</b>(3) any memory. The
+    <i>buf</i> argument should be a pointer to an array at least <b>PATH_MAX</b>
+    bytes long. If the length of the absolute pathname of the current working
+    directory, including the terminating null byte, exceeds <b>PATH_MAX</b>
+    bytes, NULL is returned, and <i>errno</i> is set to <b>ENAMETOOLONG</b>.
+    (Note that on some systems, <b>PATH_MAX</b> may not be a compile-time
+    constant; furthermore, its value may depend on the filesystem, see
+    <b>pathconf</b>(3).) For portability and security reasons, use of
+    <b>getwd</b>() is deprecated.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, these functions return a pointer to a string
+    containing the pathname of the current working directory. In the case of
+    <b>getcwd</b>() and <b>getwd</b>() this is the same value as <i>buf</i>.</p>
+<p class="Pp">On failure, these functions return NULL, and <i>errno</i> is set
+    to indicate the error. The contents of the array pointed to by <i>buf</i>
+    are undefined on error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>Permission to read or search a component of the filename was denied.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>buf</i> points to a bad address.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The <i>size</i> argument is zero and <i>buf</i> is not a null
+    pointer.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd><b>getwd</b>(): <i>buf</i> is NULL.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd><b>getwd</b>(): The size of the null-terminated absolute pathname string
+      exceeds <b>PATH_MAX</b> bytes.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>The current working directory has been unlinked.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Out of memory.</dd>
+  <dt id="ERANGE"><a class="permalink" href="#ERANGE"><b>ERANGE</b></a></dt>
+  <dd>The <i>size</i> argument is less than the length of the absolute pathname
+      of the working directory, including the terminating null byte. You need to
+      allocate a bigger array and try again.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>getcwd (), getwd ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+  <tr>
+    <td>get_current_dir_name ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe env</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>getcwd</b>() conforms to POSIX.1-2001. Note however that
+    POSIX.1-2001 leaves the behavior of <b>getcwd</b>() unspecified if
+    <i>buf</i> is NULL.</p>
+<p class="Pp"><b>getwd</b>() is present in POSIX.1-2001, but marked LEGACY.
+    POSIX.1-2008 removes the specification of <b>getwd</b>(). Use
+    <b>getcwd</b>() instead. POSIX.1-2001 does not define any errors for
+    <b>getwd</b>().</p>
+<p class="Pp"><b>get_current_dir_name</b>() is a GNU extension.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Under Linux, these functions make use of the <b>getcwd</b>()
+    system call (available since Linux 2.1.92). On older systems they would
+    query <i>/proc/self/cwd</i>. If both system call and proc filesystem are
+    missing, a generic implementation is called. Only in that case can these
+    calls fail under Linux with <b>EACCES</b>.</p>
+<p class="Pp">These functions are often used to save the location of the current
+    working directory for the purpose of returning to it later. Opening the
+    current directory (".") and calling <b>fchdir</b>(2) to return is
+    usually a faster and more reliable alternative when sufficiently many file
+    descriptors are available, especially on platforms other than Linux.</p>
+<section class="Ss">
+<h2 class="Ss" id="C_library/kernel_differences"><a class="permalink" href="#C_library/kernel_differences">C
+  library/kernel differences</a></h2>
+<p class="Pp">On Linux, the kernel provides a <b>getcwd</b>() system call, which
+    the functions described in this page will use if possible. The system call
+    takes the same arguments as the library function of the same name, but is
+    limited to returning at most <b>PATH_MAX</b> bytes. (Before Linux 3.12, the
+    limit on the size of the returned pathname was the system page size. On many
+    architectures, <b>PATH_MAX</b> and the system page size are both 4096 bytes,
+    but a few architectures have a larger page size.) If the length of the
+    pathname of the current working directory exceeds this limit, then the
+    system call fails with the error <b>ENAMETOOLONG</b>. In this case, the
+    library functions fall back to a (slower) alternative implementation that
+    returns the full pathname.</p>
+<p class="Pp">Following a change in Linux 2.6.36, the pathname returned by the
+    <b>getcwd</b>() system call will be prefixed with the string
+    "(unreachable)" if the current directory is not below the root
+    directory of the current process (e.g., because the process set a new
+    filesystem root using <b>chroot</b>(2) without changing its current
+    directory into the new root). Such behavior can also be caused by an
+    unprivileged user by changing the current directory into another mount
+    namespace. When dealing with pathname from untrusted sources, callers of the
+    functions described in this page should consider checking whether the
+    returned pathname starts with '/' or '(' to avoid misinterpreting an
+    unreachable path as a relative pathname.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">Since the Linux 2.6.36 change that added "(unreachable)"
+    in the circumstances described above, the glibc implementation of
+    <b>getcwd</b>() has failed to conform to POSIX and returned a relative
+    pathname when the API contract requires an absolute pathname. With glibc
+    2.27 onwards this is corrected; calling <b>getcwd</b>() from such a pathname
+    will now result in failure with <b>ENOENT</b>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>pwd</b>(1), <b>chdir</b>(2), <b>fchdir</b>(2), <b>open</b>(2),
+    <b>unlink</b>(2), <b>free</b>(3), <b>malloc</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

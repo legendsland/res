@@ -1,0 +1,187 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Extended attributes manual page
+  
+   Copyright (C) 2000, 2002, 2007  Andreas Gruenbacher <agruen@suse.de>
+   Copyright (C) 2001, 2002, 2004, 2007 Silicon Graphics, Inc.
+   All rights reserved.
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+   --><head>
+<meta name="dc.identifier" content="res/a3a5e38a7b04affe29e27b8035a8c49b81d77a49">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>xattr(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">xattr(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">xattr(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">xattr - Extended attributes</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">Extended attributes are name:value pairs associated permanently
+    with files and directories, similar to the environment strings associated
+    with a process. An attribute may be defined or undefined. If it is defined,
+    its value may be empty or non-empty.</p>
+<p class="Pp">Extended attributes are extensions to the normal attributes which
+    are associated with all inodes in the system (i.e., the <b>stat</b>(2)
+    data). They are often used to provide additional functionality to a
+    filesystem—for example, additional security features such as Access
+    Control Lists (ACLs) may be implemented using extended attributes.</p>
+<p class="Pp">Users with search access to a file or directory may use
+    <b>listxattr</b>(2) to retrieve a list of attribute names defined for that
+    file or directory.</p>
+<p class="Pp">Extended attributes are accessed as atomic objects. Reading
+    (<b>getxattr</b>(2)) retrieves the whole value of an attribute and stores it
+    in a buffer. Writing (<b>setxattr</b>(2)) replaces any previous value with
+    the new value.</p>
+<p class="Pp">Space consumed for extended attributes may be counted towards the
+    disk quotas of the file owner and file group.</p>
+<section class="Ss">
+<h2 class="Ss" id="Extended_attribute_namespaces"><a class="permalink" href="#Extended_attribute_namespaces">Extended
+  attribute namespaces</a></h2>
+<p class="Pp">Attribute names are null-terminated strings. The attribute name is
+    always specified in the fully qualified <i>namespace.attribute</i> form, for
+    example, <i>user.mime_type</i>, <i>trusted.md5sum</i>,
+    <i>system.posix_acl_access</i>, or <i>security.selinux</i>.</p>
+<p class="Pp">The namespace mechanism is used to define different classes of
+    extended attributes. These different classes exist for several reasons; for
+    example, the permissions and capabilities required for manipulating extended
+    attributes of one namespace may differ to another.</p>
+<p class="Pp">Currently, the <i>security</i>, <i>system</i>, <i>trusted</i>, and
+    <i>user</i> extended attribute classes are defined as described below.
+    Additional classes may be added in the future.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Extended_security_attributes"><a class="permalink" href="#Extended_security_attributes">Extended
+  security attributes</a></h2>
+<p class="Pp">The security attribute namespace is used by kernel security
+    modules, such as Security Enhanced Linux, and also to implement file
+    capabilities (see <b>capabilities</b>(7)). Read and write access permissions
+    to security attributes depend on the policy implemented for each security
+    attribute by the security module. When no security module is loaded, all
+    processes have read access to extended security attributes, and write access
+    is limited to processes that have the <b>CAP_SYS_ADMIN</b> capability.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="System_extended_attributes"><a class="permalink" href="#System_extended_attributes">System
+  extended attributes</a></h2>
+<p class="Pp">System extended attributes are used by the kernel to store system
+    objects such as Access Control Lists. Read and write access permissions to
+    system attributes depend on the policy implemented for each system attribute
+    implemented by filesystems in the kernel.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Trusted_extended_attributes"><a class="permalink" href="#Trusted_extended_attributes">Trusted
+  extended attributes</a></h2>
+<p class="Pp">Trusted extended attributes are visible and accessible only to
+    processes that have the <b>CAP_SYS_ADMIN</b> capability. Attributes in this
+    class are used to implement mechanisms in user space (i.e., outside the
+    kernel) which keep information in extended attributes to which ordinary
+    processes should not have access.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="User_extended_attributes"><a class="permalink" href="#User_extended_attributes">User
+  extended attributes</a></h2>
+<p class="Pp">User extended attributes may be assigned to files and directories
+    for storing arbitrary additional information such as the mime type,
+    character set or encoding of a file. The access permissions for user
+    attributes are defined by the file permission bits: read permission is
+    required to retrieve the attribute value, and writer permission is required
+    to change it.</p>
+<p class="Pp">The file permission bits of regular files and directories are
+    interpreted differently from the file permission bits of special files and
+    symbolic links. For regular files and directories the file permission bits
+    define access to the file's contents, while for device special files they
+    define access to the device described by the special file. The file
+    permissions of symbolic links are not used in access checks. These
+    differences would allow users to consume filesystem resources in a way not
+    controllable by disk quotas for group or world writable special files and
+    directories.</p>
+<p class="Pp">For this reason, user extended attributes are allowed only for
+    regular files and directories, and access to user extended attributes is
+    restricted to the owner and to users with appropriate capabilities for
+    directories with the sticky bit set (see the <b>chmod</b>(1) manual page for
+    an explanation of the sticky bit).</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Filesystem_differences"><a class="permalink" href="#Filesystem_differences">Filesystem
+  differences</a></h2>
+<p class="Pp">The kernel and the filesystem may place limits on the maximum
+    number and size of extended attributes that can be associated with a file.
+    The VFS-imposed limits on attribute names and values are 255 bytes and
+    64&nbsp;kB, respectively. The list of attribute names that can be returned
+    is also limited to 64&nbsp;kB (see BUGS in <b>listxattr</b>(2)).</p>
+<p class="Pp">Some filesystems, such as Reiserfs (and, historically, ext2 and
+    ext3), require the filesystem to be mounted with the <b>user_xattr</b> mount
+    option in order for user extended attributes to be used.</p>
+<p class="Pp">In the current ext2, ext3, and ext4 filesystem implementations,
+    the total bytes used by the names and values of all of a file's extended
+    attributes must fit in a single filesystem block (1024, 2048 or 4096 bytes,
+    depending on the block size specified when the filesystem was created).</p>
+<p class="Pp">In the Btrfs, XFS, and Reiserfs filesystem implementations, there
+    is no practical limit on the number of extended attributes associated with a
+    file, and the algorithms used to store extended attribute information on
+    disk are scalable.</p>
+<p class="Pp">In the JFS, XFS, and Reiserfs filesystem implementations, the
+    limit on bytes used in an EA value is the ceiling imposed by the VFS.</p>
+<p class="Pp">In the Btrfs filesystem implementation, the total bytes used for
+    the name, value, and implementation overhead bytes is limited to the
+    filesystem <i>nodesize</i> value (16&nbsp;kB by default).</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">Extended attributes are not specified in POSIX.1, but some other
+    systems (e.g., the BSDs and Solaris) provide a similar feature.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Since the filesystems on which extended attributes are stored
+    might also be used on architectures with a different byte order and machine
+    word size, care should be taken to store attribute values in an
+    architecture-independent format.</p>
+<p class="Pp">This page was formerly named <b>attr</b>(5).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>attr</b>(1), <b>getfattr</b>(1), <b>setfattr</b>(1),
+    <b>getxattr</b>(2), <b>ioctl_iflags</b>(2), <b>listxattr</b>(2),
+    <b>removexattr</b>(2), <b>setxattr</b>(2), <b>acl</b>(5),
+    <b>capabilities</b>(7), <b>selinux</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

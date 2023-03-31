@@ -1,0 +1,243 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/bb198f15de3ecf56461924cddf3b86469a8932e2">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>RAND(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">RAND(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">RAND(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">rand, rand_r, srand — pseudo-random number generator</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;stdlib.h&gt;</pre>
+<pre>int rand(void);
+int rand_r(unsigned *<i>seed</i>);
+void srand(unsigned <i>seed</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">For <i>rand</i>() and <i>srand</i>(): The functionality described
+    on this reference page is aligned with the ISO&nbsp;C standard. Any
+    conflict between the requirements described here and the ISO&nbsp;C
+    standard is unintentional. This volume of POSIX.1‐2017 defers to the
+    ISO&nbsp;C standard.</p>
+<p class="Pp">The <i>rand</i>() function shall compute a sequence of
+    pseudo-random integers in the range [0,{RAND_MAX}] with a period of at least
+    232.</p>
+<p class="Pp">The <i>rand</i>() function need not be thread-safe.</p>
+<p class="Pp">The <i>rand_r</i>() function shall compute a sequence of
+    pseudo-random integers in the range [0,{RAND_MAX}]. (The value of the
+    {RAND_MAX} macro shall be at least 32767.)</p>
+<p class="Pp">If <i>rand_r</i>() is called with the same initial value for the
+    object pointed to by <i>seed</i> and that object is not modified between
+    successive returns and calls to <i>rand_r</i>(), the same sequence shall be
+    generated.</p>
+<p class="Pp">The <i>srand</i>() function uses the argument as a seed for a new
+    sequence of pseudo-random numbers to be returned by subsequent calls to
+    <i>rand</i>(). If <i>srand</i>() is then called with the same seed value,
+    the sequence of pseudo-random numbers shall be repeated. If <i>rand</i>() is
+    called before any calls to <i>srand</i>() are made, the same sequence shall
+    be generated as when <i>srand</i>() is first called with a seed value of
+  1.</p>
+<p class="Pp">The implementation shall behave as if no function defined in this
+    volume of POSIX.1‐2017 calls <i>rand</i>() or <i>srand</i>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <i>rand</i>() function shall return the next pseudo-random
+    number in the sequence.</p>
+<p class="Pp">The <i>rand_r</i>() function shall return a pseudo-random
+  integer.</p>
+<p class="Pp">The <i>srand</i>() function shall not return a value.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">No errors are defined.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Generating_a_Pseudo-Random_Number_Sequence"><a class="permalink" href="#Generating_a_Pseudo-Random_Number_Sequence">Generating
+  a Pseudo-Random Number Sequence</a></h2>
+<p class="Pp">The following example demonstrates how to generate a sequence of
+    pseudo-random numbers.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+...
+<br>
+    long count, i;
+<br>
+    char *keystr;
+<br>
+    int elementlen, len;
+<br>
+    char c;
+...
+/* Initial random number generator. */
+<br>
+    srand(1);</pre>
+<pre><br>
+    /* Create keys using only lowercase characters */
+<br>
+    len = 0;
+<br>
+    for (i=0; i&lt;count; i++) {
+<br>
+        while (len &lt; elementlen) {
+<br>
+            c = (char) (rand() % 128);
+<br>
+            if (islower(c))
+<br>
+                keystr[len++] = c;
+<br>
+        }</pre>
+<pre><br>
+        keystr[len] = '\0';
+<br>
+        printf("%s Element%0*ld\n", keystr, elementlen, i);
+<br>
+        len = 0;
+<br>
+    }</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Generating_the_Same_Sequence_on_Different_Machines"><a class="permalink" href="#Generating_the_Same_Sequence_on_Different_Machines">Generating
+  the Same Sequence on Different Machines</a></h2>
+<p class="Pp">The following code defines a pair of functions that could be
+    incorporated into applications wishing to ensure that the same sequence of
+    numbers is generated across different machines.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>static unsigned long next = 1;
+int myrand(void)  /* RAND_MAX assumed to be 32767. */
+{
+<br>
+    next = next * 1103515245 + 12345;
+<br>
+    return((unsigned)(next/65536) % 32768);
+}</pre>
+<pre>void mysrand(unsigned seed)
+{
+<br>
+    next = seed;
+}</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The <i>drand48</i>() and <i>random</i>() functions provide much
+    more elaborate pseudo-random number generators.</p>
+<p class="Pp">The limitations on the amount of state that can be carried between
+    one function call and another mean the <i>rand_r</i>() function can never be
+    implemented in a way which satisfies all of the requirements on a
+    pseudo-random number generator.</p>
+<p class="Pp">These functions should be avoided whenever non-trivial
+    requirements (including safety) have to be fulfilled.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The ISO&nbsp;C standard <i>rand</i>() and <i>srand</i>()
+    functions allow per-process pseudo-random streams shared by all threads.
+    Those two functions need not change, but there has to be mutual-exclusion
+    that prevents interference between two threads concurrently accessing the
+    random number generator.</p>
+<p class="Pp">With regard to <i>rand</i>(), there are two different behaviors
+    that may be wanted in a multi-threaded program:</p>
+<dl class="Bl-tag">
+  <dt> 1.</dt>
+  <dd>A single per-process sequence of pseudo-random numbers that is shared by
+      all threads that call <i>rand</i>()</dd>
+  <dt> 2.</dt>
+  <dd>A different sequence of pseudo-random numbers for each thread that calls
+      <i>rand</i>()</dd>
+</dl>
+<p class="Pp">This is provided by the modified thread-safe function based on
+    whether the seed value is global to the entire process or local to each
+    thread.</p>
+<p class="Pp">This does not address the known deficiencies of the <i>rand</i>()
+    function implementations, which have been approached by maintaining more
+    state. In effect, this specifies new thread-safe forms of a deficient
+    function.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">The <i>rand_r</i>() function may be removed in a future
+  version.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>drand48</i>()</i>, <i><i>initstate</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;stdlib.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

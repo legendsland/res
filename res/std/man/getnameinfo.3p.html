@@ -1,0 +1,240 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/52983c613e3e24a2a863fba93a11c09951bc2037">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>GETNAMEINFO(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">GETNAMEINFO(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">GETNAMEINFO(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getnameinfo — get name information</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;sys/socket.h&gt;
+#include &lt;netdb.h&gt;</pre>
+<pre>int getnameinfo(const struct sockaddr *restrict <i>sa</i>, socklen_t <i>salen</i>,
+<br>
+    char *restrict <i>node</i>, socklen_t <i>nodelen</i>, char *restrict <i>service</i>,
+<br>
+    socklen_t <i>servicelen</i>, int <i>flags</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>getnameinfo</i>() function shall translate a socket address
+    to a node name and service location, all of which are defined as in
+    <i><i>freeaddrinfo</i>()</i>.</p>
+<p class="Pp">The <i>sa</i> argument points to a socket address structure to be
+    translated. The <i>salen</i> argument contains the length of the address
+    pointed to by <i>sa</i>.</p>
+<p class="Pp">If the socket address structure contains an IPv4-mapped IPv6
+    address or an IPv4-compatible IPv6 address, the implementation shall extract
+    the embedded IPv4 address and lookup the node name for that IPv4
+  address.</p>
+<p class="Pp">If the address is the IPv6 unspecified address
+    (<b>"::"</b>), a lookup shall not be performed and the behavior
+    shall be the same as when the node's name cannot be located.</p>
+<p class="Pp">If the <i>node</i> argument is non-NULL and the <i>nodelen</i>
+    argument is non-zero, then the <i>node</i> argument points to a buffer able
+    to contain up to <i>nodelen</i> bytes that receives the node name as a
+    null-terminated string. If the <i>node</i> argument is NULL or the
+    <i>nodelen</i> argument is zero, the node name shall not be returned. If the
+    node's name cannot be located, the numeric form of the address contained in
+    the socket address structure pointed to by the <i>sa</i> argument is
+    returned instead of its name.</p>
+<p class="Pp">If the <i>service</i> argument is non-NULL and the
+    <i>servicelen</i> argument is non-zero, then the <i>service</i> argument
+    points to a buffer able to contain up to <i>servicelen</i> bytes that
+    receives the service name as a null-terminated string. If the <i>service</i>
+    argument is NULL or the <i>servicelen</i> argument is zero, the service name
+    shall not be returned. If the service's name cannot be located, the numeric
+    form of the service address (for example, its port number) shall be returned
+    instead of its name.</p>
+<p class="Pp">The <i>flags</i> argument is a flag that changes the default
+    actions of the function. By default the fully-qualified domain name (FQDN)
+    for the host shall be returned, but:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>If the flag bit NI_NOFQDN is set, only the node name portion of the FQDN
+      shall be returned for local hosts.</dd>
+  <dt> *</dt>
+  <dd>If the flag bit NI_NUMERICHOST is set, the numeric form of the address
+      contained in the socket address structure pointed to by the <i>sa</i>
+      argument shall be returned instead of its name.</dd>
+  <dt> *</dt>
+  <dd>If the flag bit NI_NAMEREQD is set, an error shall be returned if the
+      host's name cannot be located.</dd>
+  <dt> *</dt>
+  <dd>If the flag bit NI_NUMERICSERV is set, the numeric form of the service
+      address shall be returned (for example, its port number) instead of its
+      name.</dd>
+  <dt> *</dt>
+  <dd>If the flag bit NI_NUMERICSCOPE is set, the numeric form of the scope
+      identifier shall be returned (for example, interface index) instead of its
+      name. This flag shall be ignored if the <i>sa</i> argument is not an IPv6
+      address.</dd>
+  <dt> *</dt>
+  <dd>If the flag bit NI_DGRAM is set, this indicates that the service is a
+      datagram service (SOCK_DGRAM). The default behavior shall assume that the
+      service is a stream service (SOCK_STREAM).</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="Notes:"><a class="permalink" href="#Notes:"><b>Notes:</b></a></dt>
+  <dd></dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt> 1.</dt>
+  <dd>The two NI_NUMERICxxx flags are required to support the <b>-n</b> flag
+      that many commands provide.</dd>
+  <dt> 2.</dt>
+  <dd>The NI_DGRAM flag is required for the few AF_INET and AF_INET6 port
+      numbers (for example, [512,514]) that represent different services for UDP
+      and TCP.</dd>
+</dl>
+</div>
+<p class="Pp">The <i>getnameinfo</i>() function shall be thread-safe.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">A zero return value for <i>getnameinfo</i>() indicates successful
+    completion; a non-zero return value indicates failure. The possible values
+    for the failures are listed in the ERRORS section.</p>
+<p class="Pp">Upon successful completion, <i>getnameinfo</i>() shall return the
+    <i>node</i> and <i>service</i> names, if requested, in the buffers provided.
+    The returned names are always null-terminated strings.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>getnameinfo</i>() function shall fail and return the
+    corresponding value if:</p>
+<dl class="Bl-tag">
+  <dt>[EAI_AGAIN]</dt>
+  <dd>The name could not be resolved at this time. Future attempts may
+    succeed.</dd>
+  <dt>[EAI_BADFLAGS]</dt>
+  <dd>
+    <br>
+    The <i>flags</i> had an invalid value.</dd>
+  <dt>[EAI_FAIL]</dt>
+  <dd>A non-recoverable error occurred.</dd>
+  <dt>[EAI_FAMILY]</dt>
+  <dd>The address family was not recognized or the address length was invalid
+      for the specified family.</dd>
+  <dt>[EAI_MEMORY]</dt>
+  <dd>There was a memory allocation failure.</dd>
+  <dt>[EAI_NONAME]</dt>
+  <dd>The name does not resolve for the supplied parameters.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">NI_NAMEREQD is set and the host's name cannot be located, or both
+    <i>nodename</i> and <i>servname</i> were null.</p>
+</div>
+<dl class="Bl-tag">
+  <dt>[EAI_OVERFLOW]</dt>
+  <dd>
+    <br>
+    An argument buffer overflowed. The buffer pointed to by the <i>node</i>
+      argument or the <i>service</i> argument was too small.</dd>
+  <dt>[EAI_SYSTEM]</dt>
+  <dd>A system error occurred. The error code can be found in <i>errno</i>.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">If the returned values are to be used as part of any further name
+    resolution (for example, passed to <i>getaddrinfo</i>()), applications
+    should provide buffers large enough to store any result possible on the
+    system.</p>
+<p class="Pp">Given the IPv4-mapped IPv6 address
+    <b>"::ffff:1.2.3.4"</b>, the implementation performs a lookup as
+    if the socket address structure contains the IPv4 address
+    <b>"1.2.3.4"</b>.</p>
+<p class="Pp">The IPv6 unspecified address (<b>"::"</b>) and the IPv6
+    loopback address (<b>"::1"</b>) are not IPv4-compatible
+  addresses.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>endservent</i>()</i>, <i><i>freeaddrinfo</i>()</i>,
+    <i><i>gai_strerror</i>()</i>, <i><i>inet_ntop</i>()</i>,
+    <i><i>socket</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;netdb.h&gt;</b></i>, <i><b>&lt;sys_socket.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

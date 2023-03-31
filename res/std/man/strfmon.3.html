@@ -1,0 +1,198 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 2000 Andries Brouwer (aeb@cwi.nl)
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+   --><head>
+<meta name="dc.identifier" content="res/d264cb177d19b4f87e9e6fae09fdd528236d3328">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>strfmon(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">strfmon(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">strfmon(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">strfmon, strfmon_l - convert monetary value to a string</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;monetary.h&gt;</b></pre>
+<pre><b>ssize_t strfmon(char </b><i>s</i><b>[restrict .</b><i>max</i><b>], size_t </b><i>max</i><b>,</b>
+<b>                const char *restrict </b><i>format</i><b>, ...);</b>
+<b>ssize_t strfmon_l(char </b><i>s</i><b>[restrict .</b><i>max</i><b>], size_t </b><i>max</i><b>, locale_t </b><i>locale</i><b>,</b>
+<b>                const char *restrict </b><i>format</i><b>, ...);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>strfmon</b>() function formats the specified monetary
+    amount according to the current locale and format specification
+    <i>format</i> and places the result in the character array <i>s</i> of size
+    <i>max</i>.</p>
+<p class="Pp">The <b>strfmon_l</b>() function performs the same task, but uses
+    the locale specified by <i>locale</i>. The behavior of <b>strfmon_l</b>() is
+    undefined if <i>locale</i> is the special locale object
+    <b>LC_GLOBAL_LOCALE</b> (see <b>duplocale</b>(3)) or is not a valid locale
+    object handle.</p>
+<p class="Pp">Ordinary characters in <i>format</i> are copied to <i>s</i>
+    without conversion. Conversion specifiers are introduced by a '%' character.
+    Immediately following it there can be zero or more of the following
+  flags:</p>
+<dl class="Bl-tag">
+  <dt><b>=</b><i>f</i></dt>
+  <dd>The single-byte character <i>f</i> is used as the numeric fill character
+      (to be used with a left precision, see below). When not specified, the
+      space character is used.</dd>
+  <dt><b>^</b></dt>
+  <dd>Do not use any grouping characters that might be defined for the current
+      locale. By default, grouping is enabled.</dd>
+  <dt><b>(</b> or <b>+</b></dt>
+  <dd>The ( flag indicates that negative amounts should be enclosed between
+      parentheses. The + flag indicates that signs should be handled in the
+      default way, that is, amounts are preceded by the locale's sign
+      indication, for example, nothing for positive, "-" for
+    negative.</dd>
+  <dt><b>!</b></dt>
+  <dd>Omit the currency symbol.</dd>
+  <dt><b>-</b></dt>
+  <dd>Left justify all fields. The default is right justification.</dd>
+</dl>
+<p class="Pp">Next, there may be a field width: a decimal digit string
+    specifying a minimum field width in bytes. The default is 0. A result
+    smaller than this width is padded with spaces (on the left, unless the
+    left-justify flag was given).</p>
+<p class="Pp">Next, there may be a left precision of the form "#"
+    followed by a decimal digit string. If the number of digits left of the
+    radix character is smaller than this, the representation is padded on the
+    left with the numeric fill character. Grouping characters are not counted in
+    this field width.</p>
+<p class="Pp">Next, there may be a right precision of the form "."
+    followed by a decimal digit string. The amount being formatted is rounded to
+    the specified number of digits prior to formatting. The default is specified
+    in the <i>frac_digits</i> and <i>int_frac_digits</i> items of the current
+    locale. If the right precision is 0, no radix character is printed. (The
+    radix character here is determined by <b>LC_MONETARY</b>, and may differ
+    from that specified by <b>LC_NUMERIC</b>.)</p>
+<p class="Pp">Finally, the conversion specification must be ended with a
+    conversion character. The three conversion characters are</p>
+<dl class="Bl-tag">
+  <dt><b>%</b></dt>
+  <dd>(In this case, the entire specification must be exactly "%%".)
+      Put a '%' character in the result string.</dd>
+  <dt id="i"><a class="permalink" href="#i"><b>i</b></a></dt>
+  <dd>One argument of type <i>double</i> is converted using the locale's
+      international currency format.</dd>
+  <dt id="n"><a class="permalink" href="#n"><b>n</b></a></dt>
+  <dd>One argument of type <i>double</i> is converted using the locale's
+      national currency format.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <b>strfmon</b>() function returns the number of characters
+    placed in the array <i>s</i>, not including the terminating null byte,
+    provided the string, including the terminating null byte, fits. Otherwise,
+    it sets <i>errno</i> to <b>E2BIG</b>, returns -1, and the contents of the
+    array is undefined.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>strfmon ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe locale</td>
+  </tr>
+  <tr>
+    <td>strfmon_l ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The call</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>strfmon(buf, sizeof(buf), "[%^=*#6n] [%=*#6i]",
+<br>
+        1234.567, 1234.567);
+</pre>
+<br>
+<p class="Pp">outputs</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>[€ **1234,57] [EUR **1 234,57]
+</pre>
+<br>
+<p class="Pp">in the <i>nl_NL</i> locale. The <i>de_DE</i>, <i>de_CH</i>,
+    <i>en_AU</i>, and <i>en_GB</i> locales yield</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>[ **1234,57 €] [ **1.234,57 EUR]
+[ Fr. **1234.57] [ CHF **1'234.57]
+[ $**1234.57] [ AUD**1,234.57]
+[ £**1234.57] [ GBP**1,234.57]
+</pre>
+<br>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>duplocale</b>(3), <b>setlocale</b>(3), <b>sprintf</b>(3),
+    <b>locale</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,285 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/b69770a82e55a9b30bd9f2ef08e07a1f1abbffb9">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>CHOWN(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">CHOWN(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">CHOWN(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">chown, fchownat — change owner and group of a file</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;unistd.h&gt;</pre>
+<pre>int chown(const char *<i>path</i>, uid_t <i>owner</i>, gid_t <i>group</i>);</pre>
+<pre>#include &lt;fcntl.h&gt;</pre>
+<pre>int fchownat(int <i>fd</i>, const char *<i>path</i>, uid_t <i>owner</i>, gid_t <i>group</i>,
+<br>
+    int <i>flag</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>chown</i>() function shall change the user and group
+    ownership of a file.</p>
+<p class="Pp">The <i>path</i> argument points to a pathname naming a file. The
+    user ID and group ID of the named file shall be set to the numeric values
+    contained in <i>owner</i> and <i>group</i>, respectively.</p>
+<p class="Pp">Only processes with an effective user ID equal to the user ID of
+    the file or with appropriate privileges may change the ownership of a file.
+    If _POSIX_CHOWN_RESTRICTED is in effect for <i>path</i>:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>Changing the user ID is restricted to processes with appropriate
+      privileges.</dd>
+  <dt> *</dt>
+  <dd>Changing the group ID is permitted to a process with an effective user ID
+      equal to the user ID of the file, but without appropriate privileges, if
+      and only if <i>owner</i> is equal to the file's user ID or
+      (<b>uid_t</b>)-1 and <i>group</i> is equal either to the calling process'
+      effective group ID or to one of its supplementary group IDs.</dd>
+</dl>
+<p class="Pp">If the specified file is a regular file, one or more of the
+    S_IXUSR, S_IXGRP, or S_IXOTH bits of the file mode are set, and the process
+    does not have appropriate privileges, the set-user-ID (S_ISUID) and
+    set-group-ID (S_ISGID) bits of the file mode shall be cleared upon
+    successful return from <i>chown</i>(). If the specified file is a regular
+    file, one or more of the S_IXUSR, S_IXGRP, or S_IXOTH bits of the file mode
+    are set, and the process has appropriate privileges, it is
+    implementation-defined whether the set-user-ID and set-group-ID bits are
+    altered. If the <i>chown</i>() function is successfully invoked on a file
+    that is not a regular file and one or more of the S_IXUSR, S_IXGRP, or
+    S_IXOTH bits of the file mode are set, the set-user-ID and set-group-ID bits
+    may be cleared.</p>
+<p class="Pp">If <i>owner</i> or <i>group</i> is specified as (<b>uid_t</b>)-1
+    or (<b>gid_t</b>)-1, respectively, the corresponding ID of the file shall
+    not be changed.</p>
+<p class="Pp">Upon successful completion, <i>chown</i>() shall mark for update
+    the last file status change timestamp of the file, except that if
+    <i>owner</i> is (<b>uid_t</b>)-1 and <i>group</i> is (<b>gid_t</b>)-1, the
+    file status change timestamp need not be marked for update.</p>
+<p class="Pp">The <i>fchownat</i>() function shall be equivalent to the
+    <i>chown</i>() and <i>lchown</i>() functions except in the case where
+    <i>path</i> specifies a relative path. In this case the file to be changed
+    is determined relative to the directory associated with the file descriptor
+    <i>fd</i> instead of the current working directory. If the access mode of
+    the open file description associated with the file descriptor is not
+    O_SEARCH, the function shall check whether directory searches are permitted
+    using the current permissions of the directory underlying the file
+    descriptor. If the access mode is O_SEARCH, the function shall not perform
+    the check.</p>
+<p class="Pp">Values for <i>flag</i> are constructed by a bitwise-inclusive OR
+    of flags from the following list, defined in <i>&lt;fcntl.h&gt;</i>:</p>
+<dl class="Bl-tag">
+  <dt id="AT_SYMLINK_NOFOLLOW"><a class="permalink" href="#AT_SYMLINK_NOFOLLOW">AT_SYMLINK_NOFOLLOW</a></dt>
+  <dd>
+    <br>
+    If <i>path</i> names a symbolic link, ownership of the symbolic link is
+      changed.</dd>
+</dl>
+<p class="Pp">If <i>fchownat</i>() is passed the special value AT_FDCWD in the
+    <i>fd</i> parameter, the current working directory shall be used and the
+    behavior shall be identical to a call to <i>chown</i>() or <i>lchown</i>()
+    respectively, depending on whether or not the AT_SYMLINK_NOFOLLOW bit is set
+    in the <i>flag</i> argument.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, these functions shall return 0.
+    Otherwise, these functions shall return -1 and set <i>errno</i> to indicate
+    the error. If -1 is returned, no changes are made in the user ID and group
+    ID of the file.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">These functions shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>Search permission is denied on a component of the path prefix.</dd>
+  <dt id="ELOOP"><a class="permalink" href="#ELOOP"><b>ELOOP</b></a></dt>
+  <dd>A loop exists in symbolic links encountered during resolution of the
+      <i>path</i> argument.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of a component of a pathname is longer than {NAME_MAX}.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>A component of <i>path</i> does not name an existing file or <i>path</i>
+      is an empty string.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>A component of the path prefix names an existing file that is neither a
+      directory nor a symbolic link to a directory, or the <i>path</i> argument
+      contains at least one non-&lt;slash&gt; character and ends with one or
+      more trailing &lt;slash&gt; characters and the last pathname component
+      names an existing file that is neither a directory nor a symbolic link to
+      a directory.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The effective user ID does not match the owner of the file, or the calling
+      process does not have appropriate privileges and _POSIX_CHOWN_RESTRICTED
+      indicates that such privilege is required.</dd>
+  <dt id="EROFS"><a class="permalink" href="#EROFS"><b>EROFS</b></a></dt>
+  <dd>The named file resides on a read-only file system.</dd>
+</dl>
+<p class="Pp">The <i>fchownat</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES~2"><a class="permalink" href="#EACCES~2"><b>EACCES</b></a></dt>
+  <dd>The access mode of the open file description associated with <i>fd</i> is
+      not O_SEARCH and the permissions of the directory underlying <i>fd</i> do
+      not permit directory searches.</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The <i>path</i> argument does not specify an absolute path and the
+      <i>fd</i> argument is neither AT_FDCWD nor a valid file descriptor open
+      for reading or searching.</dd>
+  <dt id="ENOTDIR~2"><a class="permalink" href="#ENOTDIR~2"><b>ENOTDIR</b></a></dt>
+  <dd>The <i>path</i> argument is not an absolute path and <i>fd</i> is a file
+      descriptor associated with a non-directory file.</dd>
+</dl>
+<p class="Pp">These functions may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>An I/O error occurred while reading or writing to the file system.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The <i>chown</i>() function was interrupted by a signal which was
+    caught.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The owner or group ID supplied is not a value supported by the
+      implementation.</dd>
+  <dt id="ELOOP~2"><a class="permalink" href="#ELOOP~2"><b>ELOOP</b></a></dt>
+  <dd>More than {SYMLOOP_MAX} symbolic links were encountered during resolution
+      of the <i>path</i> argument.</dd>
+  <dt id="ENAMETOOLONG~2"><a class="permalink" href="#ENAMETOOLONG~2"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of a pathname exceeds {PATH_MAX}, or pathname resolution of a
+      symbolic link produced an intermediate result with a length that exceeds
+      {PATH_MAX}.
+    <br>
+  </dd>
+</dl>
+<p class="Pp">The <i>fchownat</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>The value of the <i>flag</i> argument is not valid.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">Although <i>chown</i>() can be used on some implementations by the
+    file owner to change the owner and group to any desired values, the only
+    portable use of this function is to change the group of a file to the
+    effective GID of the calling process or to a member of its group set.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">System III and System V allow a user to give away files; that is,
+    the owner of a file may change its user ID to anything. This is a serious
+    problem for implementations that are intended to meet government security
+    regulations. Version 7 and 4.3 BSD permit only the superuser to change the
+    user ID of a file. Some government agencies (usually not ones concerned
+    directly with security) find this limitation too confining. This volume of
+    POSIX.1‐2017 uses <i>may</i> to permit secure implementations while
+    not disallowing System V.</p>
+<p class="Pp">System III and System V allow the owner of a file to change the
+    group ID to anything. Version 7 permits only the superuser to change the
+    group ID of a file. 4.3 BSD permits the owner to change the group ID of a
+    file to its effective group ID or to any of the groups in the list of
+    supplementary group IDs, but to no others.</p>
+<p class="Pp">The POSIX.1‐1990 standard requires that the <i>chown</i>()
+    function invoked by a non-appropriate privileged process clear the S_ISGID
+    and the S_ISUID bits for regular files, and permits them to be cleared for
+    other types of files. This is so that changes in accessibility do not
+    accidentally cause files to become security holes. Unfortunately, requiring
+    these bits to be cleared on non-executable data files also clears the
+    mandatory file locking bit (shared with S_ISGID), which is an extension on
+    many implementations (it first appeared in System V). These bits should only
+    be required to be cleared on regular files that have one or more of their
+    execute bits set.</p>
+<p class="Pp">The purpose of the <i>fchownat</i>() function is to enable
+    changing ownership of files in directories other than the current working
+    directory without exposure to race conditions. Any part of the path of a
+    file could be changed in parallel to a call to <i>chown</i>() or
+    <i>lchown</i>(), resulting in unspecified behavior. By opening a file
+    descriptor for the target directory and using the <i>fchownat</i>() function
+    it can be guaranteed that the changed file is located relative to the
+    desired directory.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>chmod</i>()</i>, <i><i>fpathconf</i>()</i>,
+    <i><i>lchown</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;fcntl.h&gt;</b></i>, <i><b>&lt;sys_types.h&gt;</b></i>,
+    <i><b>&lt;unistd.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

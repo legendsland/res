@@ -1,0 +1,496 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright 2015-2017 Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/f0ae0da6a2fb36fa1f743ab3c8bbb0cda133e4eb">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>membarrier(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">membarrier(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">membarrier(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">membarrier - issue memory barriers on a set of threads</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;linux/membarrier.h&gt;</b> /* Definition of <b>MEMBARRIER_*</b> constants */
+<b>#include &lt;sys/syscall.h&gt;</b>      /* Definition of <b>SYS_*</b> constants */
+<b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int syscall(SYS_membarrier, int </b><i>cmd</i><b>, unsigned int </b><i>flags</i><b>, int </b><i>cpu_id</i><b>);</b></pre>
+<p class="Pp"><i>Note</i>: glibc provides no wrapper for <b>membarrier</b>(),
+    necessitating the use of <b>syscall</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>membarrier</b>() system call helps reducing the overhead of
+    the memory barrier instructions required to order memory accesses on
+    multi-core systems. However, this system call is heavier than a memory
+    barrier, so using it effectively is <i>not</i> as simple as replacing memory
+    barriers with this system call, but requires understanding of the details
+    below.</p>
+<p class="Pp">Use of memory barriers needs to be done taking into account that a
+    memory barrier always needs to be either matched with its memory barrier
+    counterparts, or that the architecture's memory model doesn't require the
+    matching barriers.</p>
+<p class="Pp">There are cases where one side of the matching barriers (which we
+    will refer to as "fast side") is executed much more often than the
+    other (which we will refer to as "slow side"). This is a prime
+    target for the use of <b>membarrier</b>(). The key idea is to replace, for
+    these matching barriers, the fast-side memory barriers by simple compiler
+    barriers, for example:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>asm volatile ("" : : : "memory")
+</pre>
+<br>
+<p class="Pp">and replace the slow-side memory barriers by calls to
+    <b>membarrier</b>().</p>
+<p class="Pp">This will add overhead to the slow side, and remove overhead from
+    the fast side, thus resulting in an overall performance increase as long as
+    the slow side is infrequent enough that the overhead of the
+    <b>membarrier</b>() calls does not outweigh the performance gain on the fast
+    side.</p>
+<p class="Pp">The <i>cmd</i> argument is one of the following:</p>
+<dl class="Bl-tag">
+  <dt id="MEMBARRIER_CMD_QUERY"><a class="permalink" href="#MEMBARRIER_CMD_QUERY"><b>MEMBARRIER_CMD_QUERY</b>
+    (since Linux 4.3)</a></dt>
+  <dd>Query the set of supported commands. The return value of the call is a bit
+      mask of supported commands. <b>MEMBARRIER_CMD_QUERY</b>, which has the
+      value 0, is not itself included in this bit mask. This command is always
+      supported (on kernels where <b>membarrier</b>() is provided).</dd>
+  <dt id="MEMBARRIER_CMD_GLOBAL"><a class="permalink" href="#MEMBARRIER_CMD_GLOBAL"><b>MEMBARRIER_CMD_GLOBAL</b>
+    (since Linux 4.16)</a></dt>
+  <dd>Ensure that all threads from all processes on the system pass through a
+      state where all memory accesses to user-space addresses match program
+      order between entry to and return from the <b>membarrier</b>() system
+      call. All threads on the system are targeted by this command.</dd>
+  <dt id="MEMBARRIER_CMD_GLOBAL_EXPEDITED"><a class="permalink" href="#MEMBARRIER_CMD_GLOBAL_EXPEDITED"><b>MEMBARRIER_CMD_GLOBAL_EXPEDITED</b>
+    (since Linux 4.16)</a></dt>
+  <dd>Execute a memory barrier on all running threads of all processes that
+      previously registered with
+      <b>MEMBARRIER_CMD_REGISTER_GLOBAL_EXPEDITED</b>.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Upon return from the system call, the calling thread has a guarantee that
+      all running threads have passed through a state where all memory accesses
+      to user-space addresses match program order between entry to and return
+      from the system call (non-running threads are de facto in such a state).
+      This guarantee is provided only for the threads of processes that
+      previously registered with
+      <b>MEMBARRIER_CMD_REGISTER_GLOBAL_EXPEDITED</b>.</dd>
+  <dt></dt>
+  <dd>Given that registration is about the intent to receive the barriers, it is
+      valid to invoke <b>MEMBARRIER_CMD_GLOBAL_EXPEDITED</b> from a process that
+      has not employed <b>MEMBARRIER_CMD_REGISTER_GLOBAL_EXPEDITED</b>.</dd>
+  <dt></dt>
+  <dd>The "expedited" commands complete faster than the non-expedited
+      ones; they never block, but have the downside of causing extra
+    overhead.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="MEMBARRIER_CMD_REGISTER_GLOBAL_EXPEDITED"><a class="permalink" href="#MEMBARRIER_CMD_REGISTER_GLOBAL_EXPEDITED"><b>MEMBARRIER_CMD_REGISTER_GLOBAL_EXPEDITED</b>
+    (since Linux 4.16)</a></dt>
+  <dd>Register the process's intent to receive
+      <b>MEMBARRIER_CMD_GLOBAL_EXPEDITED</b> memory barriers.</dd>
+  <dt id="MEMBARRIER_CMD_PRIVATE_EXPEDITED"><a class="permalink" href="#MEMBARRIER_CMD_PRIVATE_EXPEDITED"><b>MEMBARRIER_CMD_PRIVATE_EXPEDITED</b>
+    (since Linux 4.14)</a></dt>
+  <dd>Execute a memory barrier on each running thread belonging to the same
+      process as the calling thread.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Upon return from the system call, the calling thread has a guarantee that
+      all its running thread siblings have passed through a state where all
+      memory accesses to user-space addresses match program order between entry
+      to and return from the system call (non-running threads are de facto in
+      such a state). This guarantee is provided only for threads in the same
+      process as the calling thread.</dd>
+  <dt></dt>
+  <dd>The "expedited" commands complete faster than the non-expedited
+      ones; they never block, but have the downside of causing extra
+    overhead.</dd>
+  <dt></dt>
+  <dd>A process must register its intent to use the private expedited command
+      prior to using it.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED"><a class="permalink" href="#MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED"><b>MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED</b>
+    (since Linux 4.14)</a></dt>
+  <dd>Register the process's intent to use
+      <b>MEMBARRIER_CMD_PRIVATE_EXPEDITED</b>.</dd>
+  <dt id="MEMBARRIER_CMD_PRIVATE_EXPEDITED_SYNC_CORE"><a class="permalink" href="#MEMBARRIER_CMD_PRIVATE_EXPEDITED_SYNC_CORE"><b>MEMBARRIER_CMD_PRIVATE_EXPEDITED_SYNC_CORE</b>
+    (since Linux 4.16)</a></dt>
+  <dd>In addition to providing the memory ordering guarantees described in
+      <b>MEMBARRIER_CMD_PRIVATE_EXPEDITED</b>, upon return from system call the
+      calling thread has a guarantee that all its running thread siblings have
+      executed a core serializing instruction. This guarantee is provided only
+      for threads in the same process as the calling thread.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The "expedited" commands complete faster than the non-expedited
+      ones, they never block, but have the downside of causing extra
+    overhead.</dd>
+  <dt></dt>
+  <dd>A process must register its intent to use the private expedited sync core
+      command prior to using it.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_SYNC_CORE"><a class="permalink" href="#MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_SYNC_CORE"><b>MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_SYNC_CORE</b>
+    (since Linux 4.16)</a></dt>
+  <dd>Register the process's intent to use
+      <b>MEMBARRIER_CMD_PRIVATE_EXPEDITED_SYNC_CORE</b>.</dd>
+  <dt id="MEMBARRIER_CMD_PRIVATE_EXPEDITED_RSEQ"><a class="permalink" href="#MEMBARRIER_CMD_PRIVATE_EXPEDITED_RSEQ"><b>MEMBARRIER_CMD_PRIVATE_EXPEDITED_RSEQ</b>
+    (since Linux 5.10)</a></dt>
+  <dd>Ensure the caller thread, upon return from system call, that all its
+      running thread siblings have any currently running rseq critical sections
+      restarted if <i>flags</i> parameter is 0; if <i>flags</i> parameter is
+      <b>MEMBARRIER_CMD_FLAG_CPU</b>, then this operation is performed only on
+      CPU indicated by <i>cpu_id</i>. This guarantee is provided only for
+      threads in the same process as the calling thread.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>RSEQ membarrier is only available in the "private expedited"
+      form.</dd>
+  <dt></dt>
+  <dd>A process must register its intent to use the private expedited rseq
+      command prior to using it.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_RSEQ"><a class="permalink" href="#MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_RSEQ"><b>MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_RSEQ</b>
+    (since Linux 5.10)</a></dt>
+  <dd>Register the process's intent to use
+      <b>MEMBARRIER_CMD_PRIVATE_EXPEDITED_RSEQ</b>.</dd>
+  <dt id="MEMBARRIER_CMD_SHARED"><a class="permalink" href="#MEMBARRIER_CMD_SHARED"><b>MEMBARRIER_CMD_SHARED</b>
+    (since Linux 4.3)</a></dt>
+  <dd>This is an alias for <b>MEMBARRIER_CMD_GLOBAL</b> that exists for header
+      backward compatibility.</dd>
+</dl>
+<p class="Pp">The <i>flags</i> argument must be specified as 0 unless the
+    command is <b>MEMBARRIER_CMD_PRIVATE_EXPEDITED_RSEQ</b>, in which case
+    <i>flags</i> can be either 0 or <b>MEMBARRIER_CMD_FLAG_CPU</b>.</p>
+<p class="Pp">The <i>cpu_id</i> argument is ignored unless <i>flags</i> is
+    <b>MEMBARRIER_CMD_FLAG_CPU</b>, in which case it must specify the CPU
+    targeted by this membarrier command.</p>
+<p class="Pp">All memory accesses performed in program order from each targeted
+    thread are guaranteed to be ordered with respect to <b>membarrier</b>().</p>
+<p class="Pp">If we use the semantic <i>barrier()</i> to represent a compiler
+    barrier forcing memory accesses to be performed in program order across the
+    barrier, and <i>smp_mb()</i> to represent explicit memory barriers forcing
+    full memory ordering across the barrier, we have the following ordering
+    table for each pairing of <i>barrier()</i>, <b>membarrier</b>(), and
+    <i>smp_mb()</i>. The pair ordering is detailed as (O: ordered, X: not
+    ordered):</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<table class="tbl">
+  <tbody><tr>
+    <td></td>
+    <td style="text-align: center;">barrier()</td>
+    <td style="text-align: center;">smp_mb()</td>
+    <td style="text-align: center;">membarrier()</td>
+  </tr>
+  <tr>
+    <td>barrier()</td>
+    <td style="text-align: center;">X</td>
+    <td style="text-align: center;">X</td>
+    <td style="text-align: center;">O</td>
+  </tr>
+  <tr>
+    <td>smp_mb()</td>
+    <td style="text-align: center;">X</td>
+    <td style="text-align: center;">O</td>
+    <td style="text-align: center;">O</td>
+  </tr>
+  <tr>
+    <td>membarrier()</td>
+    <td style="text-align: center;">O</td>
+    <td style="text-align: center;">O</td>
+    <td style="text-align: center;">O</td>
+  </tr>
+</tbody></table>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, the <b>MEMBARRIER_CMD_QUERY</b> operation returns a
+    bit mask of supported commands, and the <b>MEMBARRIER_CMD_GLOBAL</b>,
+    <b>MEMBARRIER_CMD_GLOBAL_EXPEDITED</b>,
+    <b>MEMBARRIER_CMD_REGISTER_GLOBAL_EXPEDITED</b>,
+    <b>MEMBARRIER_CMD_PRIVATE_EXPEDITED</b>,
+    <b>MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED</b>,
+    <b>MEMBARRIER_CMD_PRIVATE_EXPEDITED_SYNC_CORE</b>, and
+    <b>MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_SYNC_CORE</b> operations return
+    zero. On error, -1 is returned, and <i>errno</i> is set to indicate the
+    error.</p>
+<p class="Pp">For a given command, with <i>flags</i> set to 0, this system call
+    is guaranteed to always return the same value until reboot. Further calls
+    with the same arguments will lead to the same result. Therefore, with
+    <i>flags</i> set to 0, error handling is required only for the first call to
+    <b>membarrier</b>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>cmd</i> is invalid, or <i>flags</i> is nonzero, or the
+      <b>MEMBARRIER_CMD_GLOBAL</b> command is disabled because the
+      <i>nohz_full</i> CPU parameter has been set, or the
+      <b>MEMBARRIER_CMD_PRIVATE_EXPEDITED_SYNC_CORE</b> and
+      <b>MEMBARRIER_CMD_REGISTER_PRIVATE_EXPEDITED_SYNC_CORE</b> commands are
+      not implemented by the architecture.</dd>
+  <dt id="ENOSYS"><a class="permalink" href="#ENOSYS"><b>ENOSYS</b></a></dt>
+  <dd>The <b>membarrier</b>() system call is not implemented by this
+    kernel.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The current process was not registered prior to using private expedited
+      commands.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>membarrier</b>() system call was added in Linux 4.3.</p>
+<p class="Pp">Before Linux 5.10, the prototype for <b>membarrier</b>() was:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre><b>int membarrier(int </b><i>cmd</i><b>, int </b><i>flags</i><b>);</b>
+</pre>
+<br>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>membarrier</b>() is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">A memory barrier instruction is part of the instruction set of
+    architectures with weakly ordered memory models. It orders memory accesses
+    prior to the barrier and after the barrier with respect to matching barriers
+    on other cores. For instance, a load fence can order loads prior to and
+    following that fence with respect to stores ordered by store fences.</p>
+<p class="Pp">Program order is the order in which instructions are ordered in
+    the program assembly code.</p>
+<p class="Pp">Examples where <b>membarrier</b>() can be useful include
+    implementations of Read-Copy-Update libraries and garbage collectors.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">Assuming a multithreaded application where "fast_path()"
+    is executed very frequently, and where "slow_path()" is executed
+    infrequently, the following code (x86) can be transformed using
+    <b>membarrier</b>():</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>#include &lt;stdlib.h&gt;
+static volatile int a, b;
+static void
+fast_path(int *read_b)
+{
+<br>
+    a = 1;
+<br>
+    asm volatile ("mfence" : : : "memory");
+<br>
+    *read_b = b;
+}
+static void
+slow_path(int *read_a)
+{
+<br>
+    b = 1;
+<br>
+    asm volatile ("mfence" : : : "memory");
+<br>
+    *read_a = a;
+}
+int
+main(void)
+{
+<br>
+    int read_a, read_b;
+<br>
+    /*
+<br>
+     * Real applications would call fast_path() and slow_path()
+<br>
+     * from different threads. Call those from main() to keep
+<br>
+     * this example short.
+<br>
+     */
+<br>
+    slow_path(&amp;read_a);
+<br>
+    fast_path(&amp;read_b);
+<br>
+    /*
+<br>
+     * read_b == 0 implies read_a == 1 and
+<br>
+     * read_a == 0 implies read_b == 1.
+<br>
+     */
+<br>
+    if (read_b == 0 &amp;&amp; read_a == 0)
+<br>
+        abort();
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+<br>
+<p class="Pp">The code above transformed to use <b>membarrier</b>() becomes:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>#define _GNU_SOURCE
+#include &lt;stdlib.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/syscall.h&gt;
+#include &lt;linux/membarrier.h&gt;
+static volatile int a, b;
+static int
+membarrier(int cmd, unsigned int flags, int cpu_id)
+{
+<br>
+    return syscall(__NR_membarrier, cmd, flags, cpu_id);
+}
+static int
+init_membarrier(void)
+{
+<br>
+    int ret;
+<br>
+    /* Check that membarrier() is supported. */
+<br>
+    ret = membarrier(MEMBARRIER_CMD_QUERY, 0, 0);
+<br>
+    if (ret &lt; 0) {
+<br>
+        perror("membarrier");
+<br>
+        return -1;
+<br>
+    }
+<br>
+    if (!(ret &amp; MEMBARRIER_CMD_GLOBAL)) {
+<br>
+        fprintf(stderr,
+<br>
+            "membarrier does not support MEMBARRIER_CMD_GLOBAL\n");
+<br>
+        return -1;
+<br>
+    }
+<br>
+    return 0;
+}
+static void
+fast_path(int *read_b)
+{
+<br>
+    a = 1;
+<br>
+    asm volatile ("" : : : "memory");
+<br>
+    *read_b = b;
+}
+static void
+slow_path(int *read_a)
+{
+<br>
+    b = 1;
+<br>
+    membarrier(MEMBARRIER_CMD_GLOBAL, 0, 0);
+<br>
+    *read_a = a;
+}
+int
+main(int argc, char *argv[])
+{
+<br>
+    int read_a, read_b;
+<br>
+    if (init_membarrier())
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    /*
+<br>
+     * Real applications would call fast_path() and slow_path()
+<br>
+     * from different threads. Call those from main() to keep
+<br>
+     * this example short.
+<br>
+     */
+<br>
+    slow_path(&amp;read_a);
+<br>
+    fast_path(&amp;read_b);
+<br>
+    /*
+<br>
+     * read_b == 0 implies read_a == 1 and
+<br>
+     * read_a == 0 implies read_b == 1.
+<br>
+     */
+<br>
+    if (read_b == 0 &amp;&amp; read_a == 0)
+<br>
+        abort();
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+<br>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

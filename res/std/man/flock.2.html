@@ -1,0 +1,204 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright 1993 Rickard E. Faith (faith@cs.unc.edu) and
+   and Copyright 2002 Michael Kerrisk
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Modified Fri Jan 31 16:26:07 1997 by Eric S. Raymond <esr@thyrsus.com>
+   Modified Fri Dec 11 17:57:27 1998 by Jamie Lokier <jamie@imbolc.ucc.ie>
+   Modified 24 Apr 2002 by Michael Kerrisk <mtk.manpages@gmail.com>
+  	Substantial rewrites and additions
+   2005-05-10 mtk, noted that lock conversions are not atomic.
+  
+   FIXME Maybe document LOCK_MAND, LOCK_RW, LOCK_READ, LOCK_WRITE
+   which only have effect for SAMBA.
+   --><head>
+<meta name="dc.identifier" content="res/505ffc3b5d0c62b089b5036551615a2072aa83c6">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>flock(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">flock(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">flock(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">flock - apply or remove an advisory lock on an open file</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/file.h&gt;</b></pre>
+<pre><b>int flock(int </b><i>fd</i><b>, int </b><i>operation</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">Apply or remove an advisory lock on the open file specified by
+    <i>fd</i>. The argument <i>operation</i> is one of the following:</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="LOCK_SH"><a class="permalink" href="#LOCK_SH"><b>LOCK_SH</b></a></dt>
+  <dd>Place a shared lock. More than one process may hold a shared lock for a
+      given file at a given time.</dd>
+  <dt id="LOCK_EX"><a class="permalink" href="#LOCK_EX"><b>LOCK_EX</b></a></dt>
+  <dd>Place an exclusive lock. Only one process may hold an exclusive lock for a
+      given file at a given time.</dd>
+  <dt id="LOCK_UN"><a class="permalink" href="#LOCK_UN"><b>LOCK_UN</b></a></dt>
+  <dd>Remove an existing lock held by this process.</dd>
+</dl>
+</div>
+<p class="Pp">A call to <b>flock</b>() may block if an incompatible lock is held
+    by another process. To make a nonblocking request, include <b>LOCK_NB</b>
+    (by ORing) with any of the above operations.</p>
+<p class="Pp">A single file may not simultaneously have both shared and
+    exclusive locks.</p>
+<p class="Pp">Locks created by <b>flock</b>() are associated with an open file
+    description (see <b>open</b>(2)). This means that duplicate file descriptors
+    (created by, for example, <b>fork</b>(2) or <b>dup</b>(2)) refer to the same
+    lock, and this lock may be modified or released using any of these file
+    descriptors. Furthermore, the lock is released either by an explicit
+    <b>LOCK_UN</b> operation on any of these duplicate file descriptors, or when
+    all such file descriptors have been closed.</p>
+<p class="Pp">If a process uses <b>open</b>(2) (or similar) to obtain more than
+    one file descriptor for the same file, these file descriptors are treated
+    independently by <b>flock</b>(). An attempt to lock the file using one of
+    these file descriptors may be denied by a lock that the calling process has
+    already placed via another file descriptor.</p>
+<p class="Pp">A process may hold only one type of lock (shared or exclusive) on
+    a file. Subsequent <b>flock</b>() calls on an already locked file will
+    convert an existing lock to the new lock mode.</p>
+<p class="Pp">Locks created by <b>flock</b>() are preserved across an
+    <b>execve</b>(2).</p>
+<p class="Pp">A shared or exclusive lock can be placed on a file regardless of
+    the mode in which the file was opened.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, zero is returned. On error, -1 is returned, and
+    <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd><i>fd</i> is not an open file descriptor.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>While waiting to acquire a lock, the call was interrupted by delivery of a
+      signal caught by a handler; see <b>signal</b>(7).</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>operation</i> is invalid.</dd>
+  <dt id="ENOLCK"><a class="permalink" href="#ENOLCK"><b>ENOLCK</b></a></dt>
+  <dd>The kernel ran out of memory for allocating lock records.</dd>
+  <dt id="EWOULDBLOCK"><a class="permalink" href="#EWOULDBLOCK"><b>EWOULDBLOCK</b></a></dt>
+  <dd>The file is locked and the <b>LOCK_NB</b> flag was selected.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">4.4BSD (the <b>flock</b>() call first appeared in 4.2BSD). A
+    version of <b>flock</b>(), possibly implemented in terms of <b>fcntl</b>(2),
+    appears on most UNIX systems.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Since Linux 2.0, <b>flock</b>() is implemented as a system call in
+    its own right rather than being emulated in the GNU C library as a call to
+    <b>fcntl</b>(2). With this implementation, there is no interaction between
+    the types of lock placed by <b>flock</b>() and <b>fcntl</b>(2), and
+    <b>flock</b>() does not detect deadlock. (Note, however, that on some
+    systems, such as the modern BSDs, <b>flock</b>() and <b>fcntl</b>(2) locks
+    <i>do</i> interact with one another.)</p>
+<p class="Pp"><b>flock</b>() places advisory locks only; given suitable
+    permissions on a file, a process is free to ignore the use of <b>flock</b>()
+    and perform I/O on the file.</p>
+<p class="Pp"><b>flock</b>() and <b>fcntl</b>(2) locks have different semantics
+    with respect to forked processes and <b>dup</b>(2). On systems that
+    implement <b>flock</b>() using <b>fcntl</b>(2), the semantics of
+    <b>flock</b>() will be different from those described in this manual
+  page.</p>
+<p class="Pp">Converting a lock (shared to exclusive, or vice versa) is not
+    guaranteed to be atomic: the existing lock is first removed, and then a new
+    lock is established. Between these two steps, a pending lock request by
+    another process may be granted, with the result that the conversion either
+    blocks, or fails if <b>LOCK_NB</b> was specified. (This is the original BSD
+    behavior, and occurs on many other implementations.)</p>
+<section class="Ss">
+<h2 class="Ss" id="NFS_details"><a class="permalink" href="#NFS_details">NFS
+  details</a></h2>
+<p class="Pp">Up to Linux 2.6.11, <b>flock</b>() does not lock files over NFS
+    (i.e., the scope of locks was limited to the local system). Instead, one
+    could use <b>fcntl</b>(2) byte-range locking, which does work over NFS,
+    given a sufficiently recent version of Linux and a server which supports
+    locking.</p>
+<p class="Pp">Since Linux 2.6.12, NFS clients support <b>flock</b>() locks by
+    emulating them as <b>fcntl</b>(2) byte-range locks on the entire file. This
+    means that <b>fcntl</b>(2) and <b>flock</b>() locks <i>do</i> interact with
+    one another over NFS. It also means that in order to place an exclusive
+    lock, the file must be opened for writing.</p>
+<p class="Pp">Since Linux 2.6.37, the kernel supports a compatibility mode that
+    allows <b>flock</b>() locks (and also <b>fcntl</b>(2) byte region locks) to
+    be treated as local; see the discussion of the <i>local_lock</i> option in
+    <b>nfs</b>(5).</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="CIFS_details"><a class="permalink" href="#CIFS_details">CIFS
+  details</a></h2>
+<p class="Pp">Up to Linux 5.4, <b>flock</b>() is not propagated over SMB. A file
+    with such locks will not appear locked for remote clients.</p>
+<p class="Pp">Since Linux 5.5, <b>flock</b>() locks are emulated with SMB
+    byte-range locks on the entire file. Similarly to NFS, this means that
+    <b>fcntl</b>(2) and <b>flock</b>() locks interact with one another. Another
+    important side-effect is that the locks are not advisory anymore: any IO on
+    a locked file will always fail with <b>EACCES</b> when done from a separate
+    file descriptor. This difference originates from the design of locks in the
+    SMB protocol, which provides mandatory locking semantics.</p>
+<p class="Pp">Remote and mandatory locking semantics may vary with SMB protocol,
+    mount options and server type. See <b>mount.cifs</b>(8) for additional
+    information.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>flock</b>(1), <b>close</b>(2), <b>dup</b>(2), <b>execve</b>(2),
+    <b>fcntl</b>(2), <b>fork</b>(2), <b>open</b>(2), <b>lockf</b>(3),
+    <b>lslocks</b>(8)</p>
+<p class="Pp"><i>Documentation/filesystems/locks.txt</i> in the Linux kernel
+    source tree (<i>Documentation/locks.txt</i> in older kernels)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

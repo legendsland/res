@@ -1,0 +1,205 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/aedf13e65347be0ac0c14dda1573f9c246e0e958">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>pthread_setcancelstate(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">pthread_setcancelstate(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">pthread_setcancelstate(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pthread_setcancelstate, pthread_setcanceltype - set cancelability
+    state and type</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">POSIX threads library (<i>libpthread</i>, <i>-lpthread</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;pthread.h&gt;</b></pre>
+<pre><b>int pthread_setcancelstate(int </b><i>state</i><b>, int *</b><i>oldstate</i><b>);</b>
+<b>int pthread_setcanceltype(int </b><i>type</i><b>, int *</b><i>oldtype</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>pthread_setcancelstate</b>() sets the cancelability state
+    of the calling thread to the value given in <i>state</i>. The previous
+    cancelability state of the thread is returned in the buffer pointed to by
+    <i>oldstate</i>. The <i>state</i> argument must have one of the following
+    values:</p>
+<dl class="Bl-tag">
+  <dt id="PTHREAD_CANCEL_ENABLE"><a class="permalink" href="#PTHREAD_CANCEL_ENABLE"><b>PTHREAD_CANCEL_ENABLE</b></a></dt>
+  <dd>The thread is cancelable. This is the default cancelability state in all
+      new threads, including the initial thread. The thread's cancelability type
+      determines when a cancelable thread will respond to a cancelation
+    request.</dd>
+  <dt id="PTHREAD_CANCEL_DISABLE"><a class="permalink" href="#PTHREAD_CANCEL_DISABLE"><b>PTHREAD_CANCEL_DISABLE</b></a></dt>
+  <dd>The thread is not cancelable. If a cancelation request is received, it is
+      blocked until cancelability is enabled.</dd>
+</dl>
+<p class="Pp">The <b>pthread_setcanceltype</b>() sets the cancelability type of
+    the calling thread to the value given in <i>type</i>. The previous
+    cancelability type of the thread is returned in the buffer pointed to by
+    <i>oldtype</i>. The <i>type</i> argument must have one of the following
+    values:</p>
+<dl class="Bl-tag">
+  <dt id="PTHREAD_CANCEL_DEFERRED"><a class="permalink" href="#PTHREAD_CANCEL_DEFERRED"><b>PTHREAD_CANCEL_DEFERRED</b></a></dt>
+  <dd>A cancelation request is deferred until the thread next calls a function
+      that is a cancelation point (see <b>pthreads</b>(7)). This is the default
+      cancelability type in all new threads, including the initial thread.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Even with deferred cancelation, a cancelation point in an asynchronous
+      signal handler may still be acted upon and the effect is as if it was an
+      asynchronous cancelation.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="PTHREAD_CANCEL_ASYNCHRONOUS"><a class="permalink" href="#PTHREAD_CANCEL_ASYNCHRONOUS"><b>PTHREAD_CANCEL_ASYNCHRONOUS</b></a></dt>
+  <dd>The thread can be canceled at any time. (Typically, it will be canceled
+      immediately upon receiving a cancelation request, but the system doesn't
+      guarantee this.)</dd>
+</dl>
+<p class="Pp">The set-and-get operation performed by each of these functions is
+    atomic with respect to other threads in the process calling the same
+    function.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, these functions return 0; on error, they return a
+    nonzero error number.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <b>pthread_setcancelstate</b>() can fail with the following
+    error:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>Invalid value for <i>state</i>.</dd>
+</dl>
+<p class="Pp">The <b>pthread_setcanceltype</b>() can fail with the following
+    error:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>Invalid value for <i>type</i>.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>pthread_setcancelstate (), pthread_setcanceltype ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+  <tr>
+    <td>pthread_setcancelstate (), pthread_setcanceltype ()</td>
+    <td>Async-cancel safety</td>
+    <td>AC-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">For details of what happens when a thread is canceled, see
+    <b>pthread_cancel</b>(3).</p>
+<p class="Pp">Briefly disabling cancelability is useful if a thread performs
+    some critical action that must not be interrupted by a cancelation request.
+    Beware of disabling cancelability for long periods, or around operations
+    that may block for long periods, since that will render the thread
+    unresponsive to cancelation requests.</p>
+<section class="Ss">
+<h2 class="Ss" id="Asynchronous_cancelability"><a class="permalink" href="#Asynchronous_cancelability">Asynchronous
+  cancelability</a></h2>
+<p class="Pp">Setting the cancelability type to
+    <b>PTHREAD_CANCEL_ASYNCHRONOUS</b> is rarely useful. Since the thread could
+    be canceled at <i>any</i> time, it cannot safely reserve resources (e.g.,
+    allocating memory with <b>malloc</b>(3)), acquire mutexes, semaphores, or
+    locks, and so on. Reserving resources is unsafe because the application has
+    no way of knowing what the state of these resources is when the thread is
+    canceled; that is, did cancelation occur before the resources were reserved,
+    while they were reserved, or after they were released? Furthermore, some
+    internal data structures (e.g., the linked list of free blocks managed by
+    the <b>malloc</b>(3) family of functions) may be left in an inconsistent
+    state if cancelation occurs in the middle of the function call.
+    Consequently, clean-up handlers cease to be useful.</p>
+<p class="Pp">Functions that can be safely asynchronously canceled are called
+    <i>async-cancel-safe functions</i>. POSIX.1-2001 and POSIX.1-2008 require
+    only that <b>pthread_cancel</b>(3), <b>pthread_setcancelstate</b>(), and
+    <b>pthread_setcanceltype</b>() be async-cancel-safe. In general, other
+    library functions can't be safely called from an asynchronously cancelable
+    thread.</p>
+<p class="Pp">One of the few circumstances in which asynchronous cancelability
+    is useful is for cancelation of a thread that is in a pure compute-bound
+    loop.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Portability_notes"><a class="permalink" href="#Portability_notes">Portability
+  notes</a></h2>
+<p class="Pp">The Linux threading implementations permit the <i>oldstate</i>
+    argument of <b>pthread_setcancelstate</b>() to be NULL, in which case the
+    information about the previous cancelability state is not returned to the
+    caller. Many other implementations also permit a NULL <i>oldstat</i>
+    argument, but POSIX.1 does not specify this point, so portable applications
+    should always specify a non-NULL value in <i>oldstate</i>. A precisely
+    analogous set of statements applies for the <i>oldtype</i> argument of
+    <b>pthread_setcanceltype</b>().</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">See <b>pthread_cancel</b>(3).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>pthread_cancel</b>(3), <b>pthread_cleanup_push</b>(3),
+    <b>pthread_testcancel</b>(3), <b>pthreads</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,246 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/fbee727054ba604aae487da6b0954b51970d7602">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>POSIX_TYPED_MEM_OPEN(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">POSIX_TYPED_MEM_OPEN(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">POSIX_TYPED_MEM_OPEN(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">posix_typed_mem_open — open a typed memory object
+    (<b>ADVANCED REALTIME</b>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;sys/mman.h&gt;</pre>
+<pre>int posix_typed_mem_open(const char *<i>name</i>, int <i>oflag</i>, int <i>tflag</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>posix_typed_mem_open</i>() function shall establish a
+    connection between the typed memory object specified by the string pointed
+    to by <i>name</i> and a file descriptor. It shall create an open file
+    description that refers to the typed memory object and a file descriptor
+    that refers to that open file description. The file descriptor shall be
+    allocated as described in <i>Section 2.14</i>, <i>File Descriptor
+    Allocation</i> and can be used by other functions to refer to that typed
+    memory object. It is unspecified whether the name appears in the file system
+    and is visible to other functions that take pathnames as arguments. The
+    <i>name</i> argument conforms to the construction rules for a pathname,
+    except that the interpretation of &lt;slash&gt; characters other than the
+    leading &lt;slash&gt; character in <i>name</i> is implementation-defined,
+    and that the length limits for the <i>name</i> argument are
+    implementation-defined and need not be the same as the pathname limits
+    {PATH_MAX} and {NAME_MAX}. If <i>name</i> begins with the &lt;slash&gt;
+    character, then processes calling <i>posix_typed_mem_open</i>() with the
+    same value of <i>name</i> shall refer to the same typed memory object. If
+    <i>name</i> does not begin with the &lt;slash&gt; character, the effect is
+    implementation-defined.</p>
+<p class="Pp">Each typed memory object supported in a system shall be identified
+    by a name which specifies not only its associated typed memory pool, but
+    also the path or port by which it is accessed. That is, the same typed
+    memory pool accessed via several different ports shall have several
+    different corresponding names. The binding between names and typed memory
+    objects is established in an implementation-defined manner. Unlike shared
+    memory objects, there is no way within POSIX.1‐2008 for a program to
+    create a typed memory object.</p>
+<p class="Pp">The value of <i>tflag</i> shall determine how the typed memory
+    object behaves when subsequently mapped by calls to <i>mmap</i>(). At most,
+    one of the following flags defined in <i>&lt;sys/mman.h&gt;</i> may be
+    specified:</p>
+<dl class="Bl-tag">
+  <dt id="POSIX_TYPED_MEM_ALLOCATE"><a class="permalink" href="#POSIX_TYPED_MEM_ALLOCATE">POSIX_TYPED_MEM_ALLOCATE</a></dt>
+  <dd>
+    <br>
+    Allocate on <i>mmap</i>().</dd>
+  <dt id="POSIX_TYPED_MEM_ALLOCATE_CONTIG"><a class="permalink" href="#POSIX_TYPED_MEM_ALLOCATE_CONTIG">POSIX_TYPED_MEM_ALLOCATE_CONTIG</a></dt>
+  <dd>
+    <br>
+    Allocate contiguously on <i>mmap</i>().</dd>
+  <dt id="POSIX_TYPED_MEM_MAP_ALLOCATABLE"><a class="permalink" href="#POSIX_TYPED_MEM_MAP_ALLOCATABLE">POSIX_TYPED_MEM_MAP_ALLOCATABLE</a></dt>
+  <dd>
+    <br>
+    Map on <i>mmap</i>(), without affecting allocatability.</dd>
+</dl>
+<p class="Pp">If <i>tflag</i> has the flag POSIX_TYPED_MEM_ALLOCATE specified,
+    any subsequent call to <i>mmap</i>() using the returned file descriptor
+    shall result in allocation and mapping of typed memory from the specified
+    typed memory pool. The allocated memory may be a contiguous previously
+    unallocated area of the typed memory pool or several non-contiguous
+    previously unallocated areas (mapped to a contiguous portion of the process
+    address space). If <i>tflag</i> has the flag POSIX_TYPED_MEM_ALLOCATE_CONTIG
+    specified, any subsequent call to <i>mmap</i>() using the returned file
+    descriptor shall result in allocation and mapping of a single contiguous
+    previously unallocated area of the typed memory pool (also mapped to a
+    contiguous portion of the process address space). If <i>tflag</i> has none
+    of the flags POSIX_TYPED_MEM_ALLOCATE or POSIX_TYPED_MEM_ALLOCATE_CONTIG
+    specified, any subsequent call to <i>mmap</i>() using the returned file
+    descriptor shall map an application-chosen area from the specified typed
+    memory pool such that this mapped area becomes unavailable for allocation
+    until unmapped by all processes. If <i>tflag</i> has the flag
+    POSIX_TYPED_MEM_MAP_ALLOCATABLE specified, any subsequent call to
+    <i>mmap</i>() using the returned file descriptor shall map an
+    application-chosen area from the specified typed memory pool without an
+    effect on the availability of that area for allocation; that is, mapping
+    such an object leaves each byte of the mapped area unallocated if it was
+    unallocated prior to the mapping or allocated if it was allocated prior to
+    the mapping. Appropriate privileges to specify the
+    POSIX_TYPED_MEM_MAP_ALLOCATABLE flag are implementation-defined.</p>
+<p class="Pp">If successful, <i>posix_typed_mem_open</i>() shall return a file
+    descriptor for the typed memory object. The open file description is new,
+    and therefore the file descriptor shall not share it with any other
+    processes. It is unspecified whether the file offset is set. The FD_CLOEXEC
+    file descriptor flag associated with the new file descriptor shall be
+    cleared.</p>
+<p class="Pp">The behavior of <i>msync</i>(), <i>ftruncate</i>(), and all file
+    operations other than <i>mmap</i>(), <i>posix_mem_offset</i>(),
+    <i>posix_typed_mem_get_info</i>(), <i>fstat</i>(), <i>dup</i>(),
+    <i>dup2</i>(), and <i>close</i>(), is unspecified when passed a file
+    descriptor connected to a typed memory object by this function.</p>
+<p class="Pp">The file status flags of the open file description shall be set
+    according to the value of <i>oflag</i>. Applications shall specify exactly
+    one of the three access mode values described below and defined in the
+    <i>&lt;fcntl.h&gt;</i> header, as the value of <i>oflag</i>.</p>
+<dl class="Bl-tag">
+  <dt id="O_RDONLY"><a class="permalink" href="#O_RDONLY">O_RDONLY</a></dt>
+  <dd>Open for read access only.</dd>
+  <dt id="O_WRONLY"><a class="permalink" href="#O_WRONLY">O_WRONLY</a></dt>
+  <dd>Open for write access only.</dd>
+  <dt id="O_RDWR"><a class="permalink" href="#O_RDWR">O_RDWR</a></dt>
+  <dd>Open for read or write access.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, the <i>posix_typed_mem_open</i>()
+    function shall return a non-negative integer representing the file
+    descriptor. Otherwise, it shall return -1 and set <i>errno</i> to indicate
+    the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>posix_typed_mem_open</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>The typed memory object exists and the permissions specified by
+      <i>oflag</i> are denied.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The <i>posix_typed_mem_open</i>() operation was interrupted by a
+    signal.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The flags specified in <i>tflag</i> are invalid (more than one of
+      POSIX_TYPED_MEM_ALLOCATE, POSIX_TYPED_MEM_ALLOCATE_CONTIG, or
+      POSIX_TYPED_MEM_MAP_ALLOCATABLE is specified).</dd>
+  <dt id="EMFILE"><a class="permalink" href="#EMFILE"><b>EMFILE</b></a></dt>
+  <dd>All file descriptors available to the process are currently open.</dd>
+  <dt id="ENFILE"><a class="permalink" href="#ENFILE"><b>ENFILE</b></a></dt>
+  <dd>Too many file descriptors are currently open in the system.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>The named typed memory object does not exist.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The caller lacks appropriate privileges to specify the
+      POSIX_TYPED_MEM_MAP_ALLOCATABLE flag in the <i>tflag</i> argument.</dd>
+</dl>
+<p class="Pp">The <i>posix_typed_mem_open</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of the <i>name</i> argument exceeds {_POSIX_PATH_MAX} on systems
+      that do not support the XSI option or exceeds {_XOPEN_PATH_MAX} on XSI
+      systems, or has a pathname component that is longer than {_POSIX_NAME_MAX}
+      on systems that do not support the XSI option or longer than
+      {_XOPEN_NAME_MAX} on XSI systems.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i>Section 2.14</i>, <i>File Descriptor Allocation</i>,
+    <i><i>close</i>()</i>, <i><i>dup</i>()</i>, <i><i>exec</i></i>,
+    <i><i>fcntl</i>()</i>, <i><i>fstat</i>()</i>, <i><i>ftruncate</i>()</i>,
+    <i><i>mmap</i>()</i>, <i><i>msync</i>()</i>,
+    <i><i>posix_mem_offset</i>()</i>, <i><i>posix_typed_mem_get_info</i>()</i>,
+    <i><i>umask</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;fcntl.h&gt;</b></i>, <i><b>&lt;sys_mman.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/ea68a458495b78424406fbb6c3d7db4753938270">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>WCSTOUL(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">WCSTOUL(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">WCSTOUL(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">wcstoul, wcstoull — convert a wide-character string to an
+    unsigned long</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;wchar.h&gt;</pre>
+<pre>unsigned long wcstoul(const wchar_t *restrict <i>nptr</i>,
+<br>
+    wchar_t **restrict <i>endptr</i>, int <i>base</i>);
+unsigned long long wcstoull(const wchar_t *restrict <i>nptr</i>,
+<br>
+    wchar_t **restrict <i>endptr</i>, int <i>base</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The functionality described on this reference page is aligned with
+    the ISO&nbsp;C standard. Any conflict between the requirements described
+    here and the ISO&nbsp;C standard is unintentional. This volume of
+    POSIX.1‐2017 defers to the ISO&nbsp;C standard.</p>
+<p class="Pp">The <i>wcstoul</i>() and <i>wcstoull</i>() functions shall convert
+    the initial portion of the wide-character string pointed to by <i>nptr</i>
+    to <b>unsigned long</b> and <b>unsigned long long</b> representation,
+    respectively. First, they shall decompose the input wide-character string
+    into three parts:</p>
+<dl class="Bl-tag">
+  <dt> 1.</dt>
+  <dd>An initial, possibly empty, sequence of white-space wide-character codes
+      (as specified by <i>iswspace</i>())</dd>
+  <dt> 2.</dt>
+  <dd>A subject sequence interpreted as an integer represented in some radix
+      determined by the value of <i>base</i></dd>
+  <dt> 3.</dt>
+  <dd>A final wide-character string of one or more unrecognized wide-character
+      codes, including the terminating null wide-character code of the input
+      wide-character string</dd>
+</dl>
+<p class="Pp">Then they shall attempt to convert the subject sequence to an
+    unsigned integer, and return the result.</p>
+<p class="Pp">If <i>base</i> is 0, the expected form of the subject sequence is
+    that of a decimal constant, octal constant, or hexadecimal constant, any of
+    which may be preceded by a <b>'+'</b> or <b>'-'</b> sign. A decimal constant
+    begins with a non-zero digit, and consists of a sequence of decimal digits.
+    An octal constant consists of the prefix <b>'0'</b> optionally followed by a
+    sequence of the digits <b>'0'</b> to <b>'7'</b> only. A hexadecimal constant
+    consists of the prefix 0x or 0X followed by a sequence of the decimal digits
+    and letters <b>'a'</b> (or <b>'A'</b>) to <b>'f'</b> (or <b>'F'</b>) with
+    values 10 to 15 respectively.</p>
+<p class="Pp">If the value of <i>base</i> is between 2 and 36, the expected form
+    of the subject sequence is a sequence of letters and digits representing an
+    integer with the radix specified by <i>base</i>, optionally preceded by a
+    <b>'+'</b> or <b>'-'</b> sign, but not including an integer suffix. The
+    letters from <b>'a'</b> (or <b>'A'</b>) to <b>'z'</b> (or <b>'Z'</b>)
+    inclusive are ascribed the values 10 to 35; only letters whose ascribed
+    values are less than that of <i>base</i> shall be permitted. If the value of
+    <i>base</i> is 16, the wide-character codes 0x or 0X may optionally precede
+    the sequence of letters and digits, following the sign if present.</p>
+<p class="Pp">The subject sequence is defined as the longest initial subsequence
+    of the input wide-character string, starting with the first wide-character
+    code that is not white space and is of the expected form. The subject
+    sequence contains no wide-character codes if the input wide-character string
+    is empty or consists entirely of white-space wide-character codes, or if the
+    first wide-character code that is not white space is other than a sign or a
+    permissible letter or digit.</p>
+<p class="Pp">If the subject sequence has the expected form and <i>base</i> is
+    0, the sequence of wide-character codes starting with the first digit shall
+    be interpreted as an integer constant. If the subject sequence has the
+    expected form and the value of <i>base</i> is between 2 and 36, it shall be
+    used as the base for conversion, ascribing to each letter its value as given
+    above. If the subject sequence begins with a &lt;hyphen-minus&gt;, the value
+    resulting from the conversion shall be negated. A pointer to the final
+    wide-character string shall be stored in the object pointed to by
+    <i>endptr</i>, provided that <i>endptr</i> is not a null pointer.</p>
+<p class="Pp">In other than the C or POSIX locale, additional locale-specific
+    subject sequence forms may be accepted.</p>
+<p class="Pp">If the subject sequence is empty or does not have the expected
+    form, no conversion shall be performed; the value of <i>nptr</i> shall be
+    stored in the object pointed to by <i>endptr</i>, provided that
+    <i>endptr</i> is not a null pointer.</p>
+<p class="Pp">These functions shall not change the setting of <i>errno</i> if
+    successful.</p>
+<p class="Pp">Since 0, {ULONG_MAX}, and {ULLONG_MAX} are returned on error and 0
+    is also a valid return on success, an application wishing to check for error
+    situations should set <i>errno</i> to 0, then call <i>wcstoul</i>() or
+    <i>wcstoull</i>(), then check <i>errno</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, the <i>wcstoul</i>() and
+    <i>wcstoull</i>() functions shall return the converted value, if any. If no
+    conversion could be performed, 0 shall be returned and <i>errno</i> may be
+    set to indicate the error. If the correct value is outside the range of
+    representable values, {ULONG_MAX} or {ULLONG_MAX} respectively shall be
+    returned and <i>errno</i> set to <b>[ERANGE]</b>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">These functions shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The value of <i>base</i> is not supported.</dd>
+  <dt id="ERANGE"><a class="permalink" href="#ERANGE"><b>ERANGE</b></a></dt>
+  <dd>The value to be returned is not representable.</dd>
+</dl>
+<p class="Pp">These functions may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>No conversion could be performed.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>fscanf</i>()</i>, <i><i>iswalpha</i>()</i>,
+    <i><i>wcstod</i>()</i>, <i><i>wcstol</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;wchar.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

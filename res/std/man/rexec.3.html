@@ -1,0 +1,164 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 1983, 1991, 1993
+       The Regents of the University of California.  All rights reserved.
+  
+   SPDX-License-Identifier: BSD-4-Clause-UC
+  
+       @(#)rexec.3     8.1 (Berkeley) 6/4/93
+   $FreeBSD: src/lib/libcompat/4.3/rexec.3,v 1.12 2004/07/02 23:52:14 ru Exp $
+  
+   Taken from FreeBSD 5.4; not checked against Linux reality (mtk)
+  
+   2013-06-21, mtk, Converted from mdoc to man macros
+   --><head>
+<meta name="dc.identifier" content="res/d5c9c879865fc5da18ee6123f4a726e9813cef30">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>rexec(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">rexec(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">rexec(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">rexec, rexec_af - return stream to a remote command</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;netdb.h&gt;</b></pre>
+<pre><b>[[deprecated]]</b>
+<b>int rexec(char **restrict </b><i>ahost</i><b>, int </b><i>inport</i><b>,</b>
+<b>          const char *restrict </b><i>user</i><b>, const char *restrict </b><i>passwd</i><b>,</b>
+<b>          const char *restrict </b><i>cmd</i><b>, int *restrict </b><i>fd2p</i><b>);</b></pre>
+<pre><b>[[deprecated]]</b>
+<b>int rexec_af(char **restrict </b><i>ahost</i><b>, int </b><i>inport</i><b>,</b>
+<b>          const char *restrict </b><i>user</i><b>, const char *restrict </b><i>passwd</i><b>,</b>
+<b>          const char *restrict </b><i>cmd</i><b>, int *restrict </b><i>fd2p</i><b>,</b>
+<b>          sa_family_t </b><i>af</i><b>);</b></pre>
+<p class="Pp"><b>rexec</b>(), <b>rexec_af</b>():</p>
+<pre><br>
+    Since glibc 2.19:
+<br>
+        _DEFAULT_SOURCE
+<br>
+    In glibc up to and including 2.19:
+<br>
+        _BSD_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">This interface is obsoleted by <b>rcmd</b>(3).</p>
+<p class="Pp">The <b>rexec</b>() function looks up the host <i>*ahost</i> using
+    <b>gethostbyname</b>(3), returning -1 if the host does not exist. Otherwise,
+    <i>*ahost</i> is set to the standard name of the host. If a username and
+    password are both specified, then these are used to authenticate to the
+    foreign host; otherwise the environment and then the <i>.netrc</i> file in
+    user's home directory are searched for appropriate information. If all this
+    fails, the user is prompted for the information.</p>
+<p class="Pp">The port <i>inport</i> specifies which well-known DARPA Internet
+    port to use for the connection; the call <i>getservbyname("exec",
+    "tcp")</i> (see <b>getservent</b>(3)) will return a pointer to a
+    structure that contains the necessary port. The protocol for connection is
+    described in detail in <b>rexecd</b>(8).</p>
+<p class="Pp">If the connection succeeds, a socket in the Internet domain of
+    type <b>SOCK_STREAM</b> is returned to the caller, and given to the remote
+    command as <i>stdin</i> and <i>stdout</i>. If <i>fd2p</i> is nonzero, then
+    an auxiliary channel to a control process will be setup, and a file
+    descriptor for it will be placed in <i>*fd2p</i>. The control process will
+    return diagnostic output from the command (unit 2) on this channel, and will
+    also accept bytes on this channel as being UNIX signal numbers, to be
+    forwarded to the process group of the command. The diagnostic information
+    returned does not include remote authorization failure, as the secondary
+    connection is set up after authorization has been verified. If <i>fd2p</i>
+    is 0, then the <i>stderr</i> (unit 2 of the remote command) will be made the
+    same as the <i>stdout</i> and no provision is made for sending arbitrary
+    signals to the remote process, although you may be able to get its attention
+    by using out-of-band data.</p>
+<section class="Ss">
+<h2 class="Ss" id="rexec_af()"><a class="permalink" href="#rexec_af()">rexec_af()</a></h2>
+<p class="Pp">The <b>rexec</b>() function works over IPv4 (<b>AF_INET</b>). By
+    contrast, the <b>rexec_af</b>() function provides an extra argument,
+    <i>af</i>, that allows the caller to select the protocol. This argument can
+    be specified as <b>AF_INET</b>, <b>AF_INET6</b>, or <b>AF_UNSPEC</b> (to
+    allow the implementation to select the protocol).</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>rexec (), rexec_af ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>rexec_af</b>() function was added in glibc 2.2.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These functions are not in POSIX.1. The <b>rexec</b>() function
+    first appeared in 4.2BSD, and is present on the BSDs, Solaris, and many
+    other systems. The <b>rexec_af</b>() function is more recent, and less
+    widespread.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">The <b>rexec</b>() function sends the unencrypted password across
+    the network.</p>
+<p class="Pp">The underlying service is considered a big security hole and
+    therefore not enabled on many sites; see <b>rexecd</b>(8) for
+  explanations.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>rcmd</b>(3), <b>rexecd</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

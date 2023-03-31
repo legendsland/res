@@ -1,0 +1,275 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/ed9f12b3367e0abf7ce4abfaa7de972f16c448a6">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>fenv.h(0P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">fenv.h(0P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">fenv.h(0P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">fenv.h — floating-point environment</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;fenv.h&gt;</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The functionality described on this reference page is aligned with
+    the ISO&nbsp;C standard. Any conflict between the requirements described
+    here and the ISO&nbsp;C standard is unintentional. This volume of
+    POSIX.1‐2017 defers to the ISO&nbsp;C standard.</p>
+<p class="Pp">The <i>&lt;fenv.h&gt;</i> header shall define the following data
+    types through <b>typedef</b>:</p>
+<dl class="Bl-tag">
+  <dt id="fenv_t"><a class="permalink" href="#fenv_t"><b>fenv_t</b></a></dt>
+  <dd>Represents the entire floating-point environment. The floating-point
+      environment refers collectively to any floating-point status flags and
+      control modes supported by the implementation.</dd>
+  <dt id="fexcept_t"><a class="permalink" href="#fexcept_t"><b>fexcept_t</b></a></dt>
+  <dd>Represents the floating-point status flags collectively, including any
+      status the implementation associates with the flags. A floating-point
+      status flag is a system variable whose value is set (but never cleared)
+      when a floating-point exception is raised, which occurs as a side-effect
+      of exceptional floating-point arithmetic to provide auxiliary information.
+      A floating-point control mode is a system variable whose value may be set
+      by the user to affect the subsequent behavior of floating-point
+      arithmetic.</dd>
+</dl>
+<p class="Pp">The <i>&lt;fenv.h&gt;</i> header shall define each of the
+    following macros if and only if the implementation supports the
+    floating-point exception by means of the floating-point functions
+    <i>feclearexcept</i>(), <i>fegetexceptflag</i>(), <i>feraiseexcept</i>(),
+    <i>fesetexceptflag</i>(), and <i>fetestexcept</i>(). The defined macros
+    shall expand to integer constant expressions with values that are
+    bitwise-distinct.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">FE_DIVBYZERO FE_INEXACT FE_INVALID FE_OVERFLOW
+  FE_UNDERFLOW</div>
+<p class="Pp">If the implementation supports the IEC 60559 Floating-Point
+    option, all five macros shall be defined. Additional implementation-defined
+    floating-point exceptions with macros beginning with FE_ and an uppercase
+    letter may also be specified by the implementation.</p>
+<p class="Pp">The <i>&lt;fenv.h&gt;</i> header shall define the macro
+    FE_ALL_EXCEPT as the bitwise-inclusive OR of all floating-point exception
+    macros defined by the implementation, if any. If no such macros are defined,
+    then the macro FE_ALL_EXCEPT shall be defined as zero.</p>
+<p class="Pp">The <i>&lt;fenv.h&gt;</i> header shall define each of the
+    following macros if and only if the implementation supports getting and
+    setting the represented rounding direction by means of the
+    <i>fegetround</i>() and <i>fesetround</i>() functions. The defined macros
+    shall expand to integer constant expressions whose values are distinct
+    non-negative values.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">FE_DOWNWARD FE_TONEAREST FE_TOWARDZERO FE_UPWARD</div>
+<p class="Pp">If the implementation supports the IEC 60559 Floating-Point
+    option, all four macros shall be defined. Additional implementation-defined
+    rounding directions with macros beginning with FE_ and an uppercase letter
+    may also be specified by the implementation.</p>
+<p class="Pp">The <i>&lt;fenv.h&gt;</i> header shall define the following macro,
+    which represents the default floating-point environment (that is, the one
+    installed at program startup) and has type pointer to const-qualified
+    <b>fenv_t</b>. It can be used as an argument to the functions within the
+    <i>&lt;fenv.h&gt;</i> header that manage the floating-point environment.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">FE_DFL_ENV</div>
+<p class="Pp">The following shall be declared as functions and may also be
+    defined as macros. Function prototypes shall be provided.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>int  feclearexcept(int);
+int  fegetenv(fenv_t *);
+int  fegetexceptflag(fexcept_t *, int);
+int  fegetround(void);
+int  feholdexcept(fenv_t *);
+int  feraiseexcept(int);
+int  fesetenv(const fenv_t *);
+int  fesetexceptflag(const fexcept_t *, int);
+int  fesetround(int);
+int  fetestexcept(int);
+int  feupdateenv(const fenv_t *);</pre>
+</div>
+<p class="Pp">The FENV_ACCESS pragma provides a means to inform the
+    implementation when an application might access the floating-point
+    environment to test floating-point status flags or run under non-default
+    floating-point control modes. The pragma shall occur either outside external
+    declarations or preceding all explicit declarations and statements inside a
+    compound statement. When outside external declarations, the pragma takes
+    effect from its occurrence until another FENV_ACCESS pragma is encountered,
+    or until the end of the translation unit. When inside a compound statement,
+    the pragma takes effect from its occurrence until another FENV_ACCESS pragma
+    is encountered (including within a nested compound statement), or until the
+    end of the compound statement; at the end of a compound statement the state
+    for the pragma is restored to its condition just before the compound
+    statement. If this pragma is used in any other context, the behavior is
+    undefined. If part of an application tests floating-point status flags, sets
+    floating-point control modes, or runs under non-default mode settings, but
+    was translated with the state for the FENV_ACCESS pragma off, the behavior
+    is undefined. The default state (on or off) for the pragma is
+    implementation-defined. (When execution passes from a part of the
+    application translated with FENV_ACCESS off to a part translated with
+    FENV_ACCESS on, the state of the floating-point status flags is unspecified
+    and the floating-point control modes have their default settings.)</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">This header is designed to support the floating-point exception
+    status flags and directed-rounding control modes required by the
+    IEC&nbsp;60559:1989 standard, and other similar floating-point state
+    information. Also it is designed to facilitate code portability among all
+    systems.</p>
+<p class="Pp">Certain application programming conventions support the intended
+    model of use for the floating-point environment:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>A function call does not alter its caller's floating-point control modes,
+      clear its caller's floating-point status flags, nor depend on the state of
+      its caller's floating-point status flags unless the function is so
+      documented.</dd>
+  <dt> *</dt>
+  <dd>A function call is assumed to require default floating-point control
+      modes, unless its documentation promises otherwise.</dd>
+  <dt> *</dt>
+  <dd>A function call is assumed to have the potential for raising
+      floating-point exceptions, unless its documentation promises
+    otherwise.</dd>
+</dl>
+<p class="Pp">With these conventions, an application can safely assume default
+    floating-point control modes (or be unaware of them). The responsibilities
+    associated with accessing the floating-point environment fall on the
+    application that does so explicitly.</p>
+<p class="Pp">Even though the rounding direction macros may expand to constants
+    corresponding to the values of FLT_ROUNDS, they are not required to do
+  so.</p>
+<p class="Pp">For example:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;fenv.h&gt;
+void f(double x)
+{
+<br>
+    #pragma STDC FENV_ACCESS ON
+<br>
+    void g(double);
+<br>
+    void h(double);
+<br>
+    /* ... */
+<br>
+    g(x + 1);
+<br>
+    h(x + 1);
+<br>
+    /* ... */
+}</pre>
+</div>
+<p class="Pp">If the function <i>g</i>() might depend on status flags set as a
+    side-effect of the first <i>x</i>+1, or if the second <i>x</i>+1 might
+    depend on control modes set as a side-effect of the call to function
+    <i>g</i>(), then the application shall contain an appropriately placed
+    invocation as follows:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#pragma STDC FENV_ACCESS ON</pre>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="The_fexcept_t_Type"><a class="permalink" href="#The_fexcept_t_Type">The
+  fexcept_t Type</a></h2>
+<p class="Pp"><b>fexcept_t</b> does not have to be an integer type. Its values
+    must be obtained by a call to <i>fegetexceptflag</i>(), and cannot be
+    created by logical operations from the exception macros. An implementation
+    might simply implement <b>fexcept_t</b> as an <b>int</b> and use the
+    representations reflected by the exception macros, but is not required to;
+    other representations might contain extra information about the exceptions.
+    <b>fexcept_t</b> might be a <b>struct</b> with a member for each exception
+    (that might hold the address of the first or last floating-point instruction
+    that caused that exception). The ISO/IEC&nbsp;9899:1999 standard makes no
+    claims about the internals of an <b>fexcept_t</b>, and so the user cannot
+    inspect it.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Exception_and_Rounding_Macros"><a class="permalink" href="#Exception_and_Rounding_Macros">Exception
+  and Rounding Macros</a></h2>
+<p class="Pp">Macros corresponding to unsupported modes and rounding directions
+    are not defined by the implementation and must not be defined by the
+    application. An application might use <b>#ifdef</b> to test for this.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp">The System Interfaces volume of POSIX.1‐2017,
+    <i><i>feclearexcept</i>()</i>, <i><i>fegetenv</i>()</i>,
+    <i><i>fegetexceptflag</i>()</i>, <i><i>fegetround</i>()</i>,
+    <i><i>feholdexcept</i>()</i>, <i><i>feraiseexcept</i>()</i>,
+    <i><i>fetestexcept</i>()</i>, <i><i>feupdateenv</i>()</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

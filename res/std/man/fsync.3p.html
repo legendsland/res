@@ -1,0 +1,175 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/790b7c123918e7dfcc46041249665193614df9a1">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>FSYNC(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">FSYNC(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">FSYNC(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">fsync — synchronize changes to a file</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;unistd.h&gt;</pre>
+<pre>int fsync(int <i>fildes</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>fsync</i>() function shall request that all data for the
+    open file descriptor named by <i>fildes</i> is to be transferred to the
+    storage device associated with the file described by <i>fildes</i>. The
+    nature of the transfer is implementation-defined. The <i>fsync</i>()
+    function shall not return until the system has completed that action or
+    until an error is detected.</p>
+<p class="Pp">If _POSIX_SYNCHRONIZED_IO is defined, the <i>fsync</i>() function
+    shall force all currently queued I/O operations associated with the file
+    indicated by file descriptor <i>fildes</i> to the synchronized I/O
+    completion state. All I/O operations shall be completed as defined for
+    synchronized I/O file integrity completion.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>fsync</i>() shall return 0.
+    Otherwise, -1 shall be returned and <i>errno</i> set to indicate the error.
+    If the <i>fsync</i>() function fails, outstanding I/O operations are not
+    guaranteed to have been completed.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>fsync</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The <i>fildes</i> argument is not a valid descriptor.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The <i>fsync</i>() function was interrupted by a signal.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The <i>fildes</i> argument does not refer to a file on which this
+      operation is possible.</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>An I/O error occurred while reading from or writing to the file
+    system.</dd>
+</dl>
+<p class="Pp">In the event that any of the queued I/O operations fail,
+    <i>fsync</i>() shall return the error conditions defined for <i>read</i>()
+    and <i>write</i>().</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The <i>fsync</i>() function should be used by programs which
+    require modifications to a file to be completed before continuing; for
+    example, a program which contains a simple transaction facility might use it
+    to ensure that all modifications to a file or files caused by a transaction
+    are recorded.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The <i>fsync</i>() function is intended to force a physical write
+    of data from the buffer cache, and to assure that after a system crash or
+    other failure that all data up to the time of the <i>fsync</i>() call is
+    recorded on the disk. Since the concepts of ``buffer cache'', ``system
+    crash'', ``physical write'', and ``non-volatile storage'' are not defined
+    here, the wording has to be more abstract.</p>
+<p class="Pp">If _POSIX_SYNCHRONIZED_IO is not defined, the wording relies
+    heavily on the conformance document to tell the user what can be expected
+    from the system. It is explicitly intended that a null implementation is
+    permitted. This could be valid in the case where the system cannot assure
+    non-volatile storage under any circumstances or when the system is highly
+    fault-tolerant and the functionality is not required. In the middle ground
+    between these extremes, <i>fsync</i>() might or might not actually cause
+    data to be written where it is safe from a power failure. The conformance
+    document should identify at least that one configuration exists (and how to
+    obtain that configuration) where this can be assured for at least some files
+    that the user can select to use for critical data. It is not intended that
+    an exhaustive list is required, but rather sufficient information is
+    provided so that if critical data needs to be saved, the user can determine
+    how the system is to be configured to allow the data to be written to
+    non-volatile storage.</p>
+<p class="Pp">It is reasonable to assert that the key aspects of <i>fsync</i>()
+    are unreasonable to test in a test suite. That does not make the function
+    any less valuable, just more difficult to test. A formal conformance test
+    should probably force a system crash (power shutdown) during the test for
+    this condition, but it needs to be done in such a way that automated testing
+    does not require this to be done except when a formal record of the results
+    is being made. It would also not be unreasonable to omit testing for
+    <i>fsync</i>(), allowing it to be treated as a quality-of-implementation
+    issue.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>sync</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;unistd.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/940e6ab5db8f19554313797e32e52f15282cc1ef">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>SETENV(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">SETENV(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">SETENV(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">setenv — add or change environment variable</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;stdlib.h&gt;</pre>
+<pre>int setenv(const char *<i>envname</i>, const char *<i>envval</i>, int <i>overwrite</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>setenv</i>() function shall update or add a variable in the
+    environment of the calling process. The <i>envname</i> argument points to a
+    string containing the name of an environment variable to be added or
+    altered. The environment variable shall be set to the value to which
+    <i>envval</i> points. The function shall fail if <i>envname</i> points to a
+    string which contains an <b>'='</b> character. If the environment variable
+    named by <i>envname</i> already exists and the value of <i>overwrite</i> is
+    non-zero, the function shall return success and the environment shall be
+    updated. If the environment variable named by <i>envname</i> already exists
+    and the value of <i>overwrite</i> is zero, the function shall return success
+    and the environment shall remain unchanged.</p>
+<p class="Pp">The <i>setenv</i>() function shall update the list of pointers to
+    which <i>environ</i> points.</p>
+<p class="Pp">The strings described by <i>envname</i> and <i>envval</i> are
+    copied by this function.</p>
+<p class="Pp">The <i>setenv</i>() function need not be thread-safe.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, zero shall be returned. Otherwise, -1
+    shall be returned, <i>errno</i> set to indicate the error, and the
+    environment shall be unchanged.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>setenv</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The <i>envname</i> argument points to an empty string or points to a
+      string containing an <b>'='</b> character.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient memory was available to add a variable or its value to the
+      environment.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">See <i>exec</i>() for restrictions on changing the environment in
+    multi-threaded applications.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">Unanticipated results may occur if <i>setenv</i>() changes the
+    external variable <i>environ</i>. In particular, if the optional <i>envp</i>
+    argument to <i>main</i>() is present, it is not changed, and thus may point
+    to an obsolete copy of the environment (as may any other copy of
+    <i>environ</i>). However, other than the aforementioned restriction, the
+    standard developers intended that the traditional method of walking through
+    the environment by way of the <i>environ</i> pointer must be supported.</p>
+<p class="Pp">It was decided that <i>setenv</i>() should be required by this
+    version because it addresses a piece of missing functionality, and does not
+    impose a significant burden on the implementor.</p>
+<p class="Pp">There was considerable debate as to whether the System V
+    <i>putenv</i>() function or the BSD <i>setenv</i>() function should be
+    required as a mandatory function. The <i>setenv</i>() function was chosen
+    because it permitted the implementation of the <i>unsetenv</i>() function to
+    delete environmental variables, without specifying an additional interface.
+    The <i>putenv</i>() function is available as part of the XSI option.</p>
+<p class="Pp">The standard developers considered requiring that <i>setenv</i>()
+    indicate an error when a call to it would result in exceeding {ARG_MAX}. The
+    requirement was rejected since the condition might be temporary, with the
+    application eventually reducing the environment size. The ultimate success
+    or failure depends on the size at the time of a call to <i>exec</i>, which
+    returns an indication of this error condition.</p>
+<p class="Pp">See also the RATIONALE section in <i><i>getenv</i>()</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>exec</i></i>, <i><i>getenv</i>()</i>,
+    <i><i>putenv</i>()</i>, <i><i>unsetenv</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;stdlib.h&gt;</b></i>, <i><b>&lt;sys_types.h&gt;</b></i>,
+    <i><b>&lt;unistd.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

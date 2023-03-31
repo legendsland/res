@@ -1,0 +1,158 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/3cf93bbc108fb0f02f72327b5833150c594ac82f">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>PTHREAD_CANCEL(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">PTHREAD_CANCEL(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">PTHREAD_CANCEL(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pthread_cancel — cancel execution of a thread</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;pthread.h&gt;</pre>
+<pre>int pthread_cancel(pthread_t <i>thread</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>pthread_cancel</i>() function shall request that
+    <i>thread</i> be canceled. The target thread's cancelability state and type
+    determines when the cancellation takes effect. When the cancellation is
+    acted on, the cancellation cleanup handlers for <i>thread</i> shall be
+    called. When the last cancellation cleanup handler returns, the
+    thread-specific data destructor functions shall be called for <i>thread</i>.
+    When the last destructor function returns, <i>thread</i> shall be
+    terminated.</p>
+<p class="Pp">The cancellation processing in the target thread shall run
+    asynchronously with respect to the calling thread returning from
+    <i>pthread_cancel</i>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">If successful, the <i>pthread_cancel</i>() function shall return
+    zero; otherwise, an error number shall be returned to indicate the
+  error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>pthread_cancel</i>() function shall not return an error
+    code of <b>[EINTR]</b>.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">Two alternative functions were considered for sending the
+    cancellation notification to a thread. One would be to define a new
+    SIGCANCEL signal that had the cancellation semantics when delivered; the
+    other was to define the new <i>pthread_cancel</i>() function, which would
+    trigger the cancellation semantics.</p>
+<p class="Pp">The advantage of a new signal was that so much of the delivery
+    criteria were identical to that used when trying to deliver a signal that
+    making cancellation notification a signal was seen as consistent. Indeed,
+    many implementations implement cancellation using a special signal. On the
+    other hand, there would be no signal functions that could be used with this
+    signal except <i>pthread_kill</i>(), and the behavior of the delivered
+    cancellation signal would be unlike any previously existing defined
+  signal.</p>
+<p class="Pp">The benefits of a special function include the recognition that
+    this signal would be defined because of the similar delivery criteria and
+    that this is the only common behavior between a cancellation request and a
+    signal. In addition, the cancellation delivery mechanism does not have to be
+    implemented as a signal. There are also strong, if not stronger, parallels
+    with language exception mechanisms than with signals that are potentially
+    obscured if the delivery mechanism is visibly closer to signals.</p>
+<p class="Pp">In the end, it was considered that as there were so many
+    exceptions to the use of the new signal with existing signals functions it
+    would be misleading. A special function has resolved this problem. This
+    function was carefully defined so that an implementation wishing to provide
+    the cancellation functions on top of signals could do so. The special
+    function also means that implementations are not obliged to implement
+    cancellation with signals.</p>
+<p class="Pp">If an implementation detects use of a thread ID after the end of
+    its lifetime, it is recommended that the function should fail and report an
+    <b>[ESRCH]</b> error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>pthread_exit</i>()</i>,
+    <i><i>pthread_cond_timedwait</i>()</i>, <i><i>pthread_join</i>()</i>,
+    <i><i>pthread_setcancelstate</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;pthread.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

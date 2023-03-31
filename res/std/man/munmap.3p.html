@@ -1,0 +1,161 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/62f0d6e6ed0cbfee8dc95e9ae8e1703417a3b390">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>MUNMAP(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">MUNMAP(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">MUNMAP(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">munmap — unmap pages of memory</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;sys/mman.h&gt;</pre>
+<pre>int munmap(void *<i>addr</i>, size_t <i>len</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>munmap</i>() function shall remove any mappings for those
+    entire pages containing any part of the address space of the process
+    starting at <i>addr</i> and continuing for <i>len</i> bytes. Further
+    references to these pages shall result in the generation of a SIGSEGV signal
+    to the process. If there are no mappings in the specified address range,
+    then <i>munmap</i>() has no effect.</p>
+<p class="Pp">The implementation may require that <i>addr</i> be a multiple of
+    the page size as returned by <i>sysconf</i>().</p>
+<p class="Pp">If a mapping to be removed was private, any modifications made in
+    this address range shall be discarded.</p>
+<p class="Pp">Any memory locks (see <i><i>mlock</i>()</i> and
+    <i><i>mlockall</i>()</i>) associated with this address range shall be
+    removed, as if by an appropriate call to <i>munlock</i>().</p>
+<p class="Pp">If a mapping removed from a typed memory object causes the
+    corresponding address range of the memory pool to be inaccessible by any
+    process in the system except through allocatable mappings (that is, mappings
+    of typed memory objects opened with the POSIX_TYPED_MEM_MAP_ALLOCATABLE
+    flag), then that range of the memory pool shall become deallocated and may
+    become available to satisfy future typed memory allocation requests.</p>
+<p class="Pp">A mapping removed from a typed memory object opened with the
+    POSIX_TYPED_MEM_MAP_ALLOCATABLE flag shall not affect in any way the
+    availability of that typed memory for allocation.</p>
+<p class="Pp">The behavior of this function is unspecified if the mapping was
+    not established by a call to <i>mmap</i>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>munmap</i>() shall return 0;
+    otherwise, it shall return -1 and set <i>errno</i> to indicate the
+  error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>munmap</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>Addresses in the range [<i>addr</i>,<i>addr</i>+<i>len</i>) are outside
+      the valid range for the address space of a process.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>The <i>len</i> argument is 0.</dd>
+</dl>
+<p class="Pp">The <i>munmap</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~3"><a class="permalink" href="#EINVAL~3"><b>EINVAL</b></a></dt>
+  <dd>The <i>addr</i> argument is not a multiple of the page size as returned by
+      <i>sysconf</i>().</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The <i>munmap</i>() function corresponds to SVR4, just as the
+    <i>mmap</i>() function does.</p>
+<p class="Pp">It is possible that an application has applied process memory
+    locking to a region that contains shared memory. If this has occurred, the
+    <i>munmap</i>() call ignores those locks and, if necessary, causes those
+    locks to be removed.</p>
+<p class="Pp">Most implementations require that <i>addr</i> is a multiple of the
+    page size as returned by <i>sysconf</i>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>mlock</i>()</i>, <i><i>mlockall</i>()</i>,
+    <i><i>mmap</i>()</i>, <i><i>posix_typed_mem_open</i>()</i>,
+    <i><i>sysconf</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;sys_mman.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

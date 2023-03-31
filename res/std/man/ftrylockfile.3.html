@@ -1,0 +1,134 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/499c9e8e3fb05c37a1439091405a0306b116f053">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>flockfile(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">flockfile(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">flockfile(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">flockfile, ftrylockfile, funlockfile - lock FILE for stdio</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;stdio.h&gt;</b></pre>
+<pre><b>void flockfile(FILE *</b><i>filehandle</i><b>);</b>
+<b>int ftrylockfile(FILE *</b><i>filehandle</i><b>);</b>
+<b>void funlockfile(FILE *</b><i>filehandle</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp">All functions shown above:</p>
+<pre><br>
+    /* Since glibc 2.24: */ _POSIX_C_SOURCE &gt;= 199309L
+<br>
+        || /* glibc &lt;= 2.23: */ _POSIX_C_SOURCE
+<br>
+        || /* glibc &lt;= 2.19: */ _BSD_SOURCE || _SVID_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The stdio functions are thread-safe. This is achieved by assigning
+    to each <i>FILE</i> object a lockcount and (if the lockcount is nonzero) an
+    owning thread. For each library call, these functions wait until the
+    <i>FILE</i> object is no longer locked by a different thread, then lock it,
+    do the requested I/O, and unlock the object again.</p>
+<p class="Pp">(Note: this locking has nothing to do with the file locking done
+    by functions like <b>flock</b>(2) and <b>lockf</b>(3).)</p>
+<p class="Pp">All this is invisible to the C-programmer, but there may be two
+    reasons to wish for more detailed control. On the one hand, maybe a series
+    of I/O actions by one thread belongs together, and should not be interrupted
+    by the I/O of some other thread. On the other hand, maybe the locking
+    overhead should be avoided for greater efficiency.</p>
+<p class="Pp">To this end, a thread can explicitly lock the <i>FILE</i> object,
+    then do its series of I/O actions, then unlock. This prevents other threads
+    from coming in between. If the reason for doing this was to achieve greater
+    efficiency, one does the I/O with the nonlocking versions of the stdio
+    functions: with <b>getc_unlocked</b>(3) and <b>putc_unlocked</b>(3) instead
+    of <b>getc</b>(3) and <b>putc</b>(3).</p>
+<p class="Pp">The <b>flockfile</b>() function waits for <i>*filehandle</i> to be
+    no longer locked by a different thread, then makes the current thread owner
+    of <i>*filehandle</i>, and increments the lockcount.</p>
+<p class="Pp">The <b>funlockfile</b>() function decrements the lock count.</p>
+<p class="Pp">The <b>ftrylockfile</b>() function is a nonblocking version of
+    <b>flockfile</b>(). It does nothing in case some other thread owns
+    <i>*filehandle</i>, and it obtains ownership and increments the lockcount
+    otherwise.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <b>ftrylockfile</b>() function returns zero for success (the
+    lock was obtained), and nonzero for failure.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>flockfile (), ftrylockfile (), funlockfile ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+<p class="Pp">These functions are available when
+    <b>_POSIX_THREAD_SAFE_FUNCTIONS</b> is defined.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>unlocked_stdio</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) Bruno Haible <haible@clisp.cons.org>
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+  
+   References consulted:
+     GNU glibc-2 source code and manual
+     Dinkumware C library reference http://www.dinkumware.com/
+     OpenGroup's Single UNIX specification http://www.UNIX-systems.org/online.html
+     ISO/IEC 9899:1999
+   --><head>
+<meta name="dc.identifier" content="res/35eb682f73214c5b18cd6d036831f9a0a0fc5942">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>mbtowc(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">mbtowc(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">mbtowc(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">mbtowc - convert a multibyte sequence to a wide character</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;stdlib.h&gt;</b></pre>
+<pre><b>int mbtowc(wchar_t *restrict </b><i>pwc</i><b>, const char </b><i>s</i><b>[restrict .</b><i>n</i><b>], size_t </b><i>n</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The main case for this function is when <i>s</i> is not NULL and
+    <i>pwc</i> is not NULL. In this case, the <b>mbtowc</b>() function inspects
+    at most <i>n</i> bytes of the multibyte string starting at <i>s</i>,
+    extracts the next complete multibyte character, converts it to a wide
+    character and stores it at <i>*pwc</i>. It updates an internal shift state
+    known only to the <b>mbtowc</b>() function. If <i>s</i> does not point to a
+    null byte ('\0'), it returns the number of bytes that were consumed from
+    <i>s</i>, otherwise it returns 0.</p>
+<p class="Pp">If the <i>n</i> bytes starting at <i>s</i> do not contain a
+    complete multibyte character, or if they contain an invalid multibyte
+    sequence, <b>mbtowc</b>() returns -1. This can happen even if <i>n</i> &gt;=
+    <i>MB_CUR_MAX</i>, if the multibyte string contains redundant shift
+    sequences.</p>
+<p class="Pp">A different case is when <i>s</i> is not NULL but <i>pwc</i> is
+    NULL. In this case, the <b>mbtowc</b>() function behaves as above, except
+    that it does not store the converted wide character in memory.</p>
+<p class="Pp">A third case is when <i>s</i> is NULL. In this case, <i>pwc</i>
+    and <i>n</i> are ignored. The <b>mbtowc</b>() function resets the shift
+    state, only known to this function, to the initial state, and returns
+    nonzero if the encoding has nontrivial shift state, or zero if the encoding
+    is stateless.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">If <i>s</i> is not NULL, the <b>mbtowc</b>() function returns the
+    number of consumed bytes starting at <i>s</i>, or 0 if <i>s</i> points to a
+    null byte, or -1 upon failure.</p>
+<p class="Pp">If <i>s</i> is NULL, the <b>mbtowc</b>() function returns nonzero
+    if the encoding has nontrivial shift state, or zero if the encoding is
+    stateless.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>mbtowc ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, C99.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The behavior of <b>mbtowc</b>() depends on the <b>LC_CTYPE</b>
+    category of the current locale.</p>
+<p class="Pp">This function is not multithread safe. The function
+    <b>mbrtowc</b>(3) provides a better interface to the same functionality.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>MB_CUR_MAX</b>(3), <b>mblen</b>(3), <b>mbrtowc</b>(3),
+    <b>mbstowcs</b>(3), <b>wcstombs</b>(3), <b>wctomb</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 2008 Linux Foundation, written by Michael Kerrisk
+       <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/588a9f877d1d47b14e724d94ec528ac8d7dfa2b1">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>pthread_cancel(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">pthread_cancel(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">pthread_cancel(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pthread_cancel - send a cancelation request to a thread</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">POSIX threads library (<i>libpthread</i>, <i>-lpthread</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;pthread.h&gt;</b></pre>
+<pre><b>int pthread_cancel(pthread_t </b><i>thread</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>pthread_cancel</b>() function sends a cancelation request
+    to the thread <i>thread</i>. Whether and when the target thread reacts to
+    the cancelation request depends on two attributes that are under the control
+    of that thread: its cancelability <i>state</i> and <i>type</i>.</p>
+<p class="Pp">A thread's cancelability state, determined by
+    <b>pthread_setcancelstate</b>(3), can be <i>enabled</i> (the default for new
+    threads) or <i>disabled</i>. If a thread has disabled cancelation, then a
+    cancelation request remains queued until the thread enables cancelation. If
+    a thread has enabled cancelation, then its cancelability type determines
+    when cancelation occurs.</p>
+<p class="Pp">A thread's cancelation type, determined by
+    <b>pthread_setcanceltype</b>(3), may be either <i>asynchronous</i> or
+    <i>deferred</i> (the default for new threads). Asynchronous cancelability
+    means that the thread can be canceled at any time (usually immediately, but
+    the system does not guarantee this). Deferred cancelability means that
+    cancelation will be delayed until the thread next calls a function that is a
+    <i>cancelation point</i>. A list of functions that are or may be cancelation
+    points is provided in <b>pthreads</b>(7).</p>
+<p class="Pp">When a cancelation requested is acted on, the following steps
+    occur for <i>thread</i> (in this order):</p>
+<dl class="Bl-tag">
+  <dt>(1)</dt>
+  <dd>Cancelation clean-up handlers are popped (in the reverse of the order in
+      which they were pushed) and called. (See
+    <b>pthread_cleanup_push</b>(3).)</dd>
+  <dt>(2)</dt>
+  <dd>Thread-specific data destructors are called, in an unspecified order. (See
+      <b>pthread_key_create</b>(3).)</dd>
+  <dt>(3)</dt>
+  <dd>The thread is terminated. (See <b>pthread_exit</b>(3).)</dd>
+</dl>
+<p class="Pp">The above steps happen asynchronously with respect to the
+    <b>pthread_cancel</b>() call; the return status of <b>pthread_cancel</b>()
+    merely informs the caller whether the cancelation request was successfully
+    queued.</p>
+<p class="Pp">After a canceled thread has terminated, a join with that thread
+    using <b>pthread_join</b>(3) obtains <b>PTHREAD_CANCELED</b> as the thread's
+    exit status. (Joining with a thread is the only way to know that cancelation
+    has completed.)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>pthread_cancel</b>() returns 0; on error, it
+    returns a nonzero error number.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="ESRCH"><a class="permalink" href="#ESRCH"><b>ESRCH</b></a></dt>
+  <dd>No thread with the ID <i>thread</i> could be found.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>pthread_cancel ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">On Linux, cancelation is implemented using signals. Under the NPTL
+    threading implementation, the first real-time signal (i.e., signal 32) is
+    used for this purpose. On LinuxThreads, the second real-time signal is used,
+    if real-time signals are available, otherwise <b>SIGUSR2</b> is used.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below creates a thread and then cancels it. The main
+    thread joins with the canceled thread to check that its exit status was
+    <b>PTHREAD_CANCELED</b>. The following shell session shows what happens when
+    we run the program:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ ./a.out
+thread_func(): started; cancelation disabled
+main(): sending cancelation request
+thread_func(): about to enable cancelation
+main(): thread was canceled
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#include &lt;errno.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#define handle_error_en(en, msg) \
+<br>
+        do { errno = en; perror(msg); exit(EXIT_FAILURE); } while (0)
+static void *
+thread_func(void *ignored_argument)
+{
+<br>
+    int s;
+<br>
+    /* Disable cancelation for a while, so that we don't
+<br>
+       immediately react to a cancelation request. */
+<br>
+    s = pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+<br>
+    if (s != 0)
+<br>
+        handle_error_en(s, "pthread_setcancelstate");
+<br>
+    printf("%s(): started; cancelation disabled\n", __func__);
+<br>
+    sleep(5);
+<br>
+    printf("%s(): about to enable cancelation\n", __func__);
+<br>
+    s = pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+<br>
+    if (s != 0)
+<br>
+        handle_error_en(s, "pthread_setcancelstate");
+<br>
+    /* sleep() is a cancelation point. */
+<br>
+    sleep(1000);        /* Should get canceled while we sleep */
+<br>
+    /* Should never get here. */
+<br>
+    printf("%s(): not canceled!\n", __func__);
+<br>
+    return NULL;
+}
+int
+main(void)
+{
+<br>
+    pthread_t thr;
+<br>
+    void *res;
+<br>
+    int s;
+<br>
+    /* Start a thread and then send it a cancelation request. */
+<br>
+    s = pthread_create(&amp;thr, NULL, &amp;thread_func, NULL);
+<br>
+    if (s != 0)
+<br>
+        handle_error_en(s, "pthread_create");
+<br>
+    sleep(2);           /* Give thread a chance to get started */
+<br>
+    printf("%s(): sending cancelation request\n", __func__);
+<br>
+    s = pthread_cancel(thr);
+<br>
+    if (s != 0)
+<br>
+        handle_error_en(s, "pthread_cancel");
+<br>
+    /* Join with thread to see what its exit status was. */
+<br>
+    s = pthread_join(thr, &amp;res);
+<br>
+    if (s != 0)
+<br>
+        handle_error_en(s, "pthread_join");
+<br>
+    if (res == PTHREAD_CANCELED)
+<br>
+        printf("%s(): thread was canceled\n", __func__);
+<br>
+    else
+<br>
+        printf("%s(): thread wasn't canceled (shouldn't happen!)\n",
+<br>
+               __func__);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>pthread_cleanup_push</b>(3), <b>pthread_create</b>(3),
+    <b>pthread_exit</b>(3), <b>pthread_join</b>(3),
+    <b>pthread_key_create</b>(3), <b>pthread_setcancelstate</b>(3),
+    <b>pthread_setcanceltype</b>(3), <b>pthread_testcancel</b>(3),
+    <b>pthreads</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

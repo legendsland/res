@@ -1,0 +1,901 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/7b5825abf4e6fbbdf9b20e5ba1011aa672fd66cd">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>EXEC(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">EXEC(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">EXEC(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">environ, execl, execle, execlp, execv, execve, execvp, fexecve
+    — execute a file</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;unistd.h&gt;</pre>
+<pre>extern char **environ;
+int execl(const char *<i>path</i>, const char *<i>arg0</i>, ... /*, (char *)0 */);
+int execle(const char *<i>path</i>, const char *<i>arg0</i>, ... /*,
+<br>
+    (char *)0, char *const <i>envp</i>[]*/);
+int execlp(const char *<i>file</i>, const char *<i>arg0</i>, ... /*, (char *)0 */);
+int execv(const char *<i>path</i>, char *const <i>argv</i>[]);
+int execve(const char *<i>path</i>, char *const <i>argv</i>[], char *const <i>envp</i>[]);
+int execvp(const char *<i>file</i>, char *const <i>argv</i>[]);
+int fexecve(int <i>fd</i>, char *const <i>argv</i>[], char *const <i>envp</i>[]);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>exec</i> family of functions shall replace the current
+    process image with a new process image. The new image shall be constructed
+    from a regular, executable file called the <i>new process image file</i>.
+    There shall be no return from a successful <i>exec</i>, because the calling
+    process image is overlaid by the new process image.</p>
+<p class="Pp">The <i>fexecve</i>() function shall be equivalent to the
+    <i>execve</i>() function except that the file to be executed is determined
+    by the file descriptor <i>fd</i> instead of a pathname. The file offset of
+    <i>fd</i> is ignored.</p>
+<p class="Pp">When a C-language program is executed as a result of a call to one
+    of the <i>exec</i> family of functions, it shall be entered as a C-language
+    function call as follows:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>int main (<i>int argc, char *argv</i>[]);</pre>
+</div>
+<p class="Pp">where <i>argc</i> is the argument count and <i>argv</i> is an
+    array of character pointers to the arguments themselves. In addition, the
+    following variable, which must be declared by the user if it is to be used
+    directly:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>extern char **environ;</pre>
+</div>
+<p class="Pp">is initialized as a pointer to an array of character pointers to
+    the environment strings. The <i>argv</i> and <i>environ</i> arrays are each
+    terminated by a null pointer. The null pointer terminating the <i>argv</i>
+    array is not counted in <i>argc</i>.</p>
+<p class="Pp">Applications can change the entire environment in a single
+    operation by assigning the <i>environ</i> variable to point to an array of
+    character pointers to the new environment strings. After assigning a new
+    value to <i>environ</i>, applications should not rely on the new environment
+    strings remaining part of the environment, as a call to <i>getenv</i>(),
+    <i>putenv</i>(), <i>setenv</i>(), <i>unsetenv</i>(), or any function that is
+    dependent on an environment variable may, on noticing that <i>environ</i>
+    has changed, copy the environment strings to a new array and assign
+    <i>environ</i> to point to it.</p>
+<p class="Pp">Any application that directly modifies the pointers to which the
+    <i>environ</i> variable points has undefined behavior.</p>
+<p class="Pp">Conforming multi-threaded applications shall not use the
+    <i>environ</i> variable to access or modify any environment variable while
+    any other thread is concurrently modifying any environment variable. A call
+    to any function dependent on any environment variable shall be considered a
+    use of the <i>environ</i> variable to access that environment variable.</p>
+<p class="Pp">The arguments specified by a program with one of the <i>exec</i>
+    functions shall be passed on to the new process image in the corresponding
+    <i>main</i>() arguments.</p>
+<p class="Pp">The argument <i>path</i> points to a pathname that identifies the
+    new process image file.</p>
+<p class="Pp">The argument <i>file</i> is used to construct a pathname that
+    identifies the new process image file. If the <i>file</i> argument contains
+    a &lt;slash&gt; character, the <i>file</i> argument shall be used as the
+    pathname for this file. Otherwise, the path prefix for this file is obtained
+    by a search of the directories passed as the environment variable
+    <i>PATH</i> (see the Base Definitions volume of POSIX.1‐2017,
+    <i>Chapter 8</i>, <i>Environment Variables</i>). If this environment
+    variable is not present, the results of the search are
+    implementation-defined.</p>
+<p class="Pp">There are two distinct ways in which the contents of the process
+    image file may cause the execution to fail, distinguished by the setting of
+    <i>errno</i> to either <b>[ENOEXEC]</b> or <b>[EINVAL]</b> (see the ERRORS
+    section). In the cases where the other members of the <i>exec</i> family of
+    functions would fail and set <i>errno</i> to <b>[ENOEXEC]</b>, the
+    <i>execlp</i>() and <i>execvp</i>() functions shall execute a command
+    interpreter and the environment of the executed command shall be as if the
+    process invoked the <i>sh</i> utility using <i>execl</i>() as follows:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>execl(&lt;shell path&gt;, arg0, file, arg1, ..., (char *)0);</pre>
+</div>
+<p class="Pp">where &lt;<i>shell&nbsp;path</i>&gt; is an unspecified pathname
+    for the <i>sh</i> utility, <i>file</i> is the process image file, and for
+    <i>execvp</i>(), where <i>arg</i>0, <i>arg</i>1, and so on correspond to the
+    values passed to <i>execvp</i>() in <i>argv</i>[0], <i>argv</i>[1], and so
+    on.</p>
+<p class="Pp">The arguments represented by <i>arg0</i>,... are pointers to
+    null-terminated character strings. These strings shall constitute the
+    argument list available to the new process image. The list is terminated by
+    a null pointer. The argument <i>arg0</i> should point to a filename string
+    that is associated with the process being started by one of the <i>exec</i>
+    functions.</p>
+<p class="Pp">The argument <i>argv</i> is an array of character pointers to
+    null-terminated strings. The application shall ensure that the last member
+    of this array is a null pointer. These strings shall constitute the argument
+    list available to the new process image. The value in <i>argv</i>[0] should
+    point to a filename string that is associated with the process being started
+    by one of the <i>exec</i> functions.</p>
+<p class="Pp">The argument <i>envp</i> is an array of character pointers to
+    null-terminated strings. These strings shall constitute the environment for
+    the new process image. The <i>envp</i> array is terminated by a null
+    pointer.</p>
+<p class="Pp">For those forms not containing an <i>envp</i> pointer
+    (<i>execl</i>(), <i>execv</i>(), <i>execlp</i>(), and <i>execvp</i>()), the
+    environment for the new process image shall be taken from the external
+    variable <i>environ</i> in the calling process.</p>
+<p class="Pp">The number of bytes available for the new process' combined
+    argument and environment lists is {ARG_MAX}. It is implementation-defined
+    whether null terminators, pointers, and/or any alignment bytes are included
+    in this total.</p>
+<p class="Pp">File descriptors open in the calling process image shall remain
+    open in the new process image, except for those whose close-on-<i>exec</i>
+    flag FD_CLOEXEC is set. For those file descriptors that remain open, all
+    attributes of the open file description remain unchanged. For any file
+    descriptor that is closed for this reason, file locks are removed as a
+    result of the close as described in <i>close</i>(). Locks that are not
+    removed by closing of file descriptors remain unchanged.</p>
+<p class="Pp">If file descriptor 0, 1, or 2 would otherwise be closed after a
+    successful call to one of the <i>exec</i> family of functions,
+    implementations may open an unspecified file for the file descriptor in the
+    new process image. If a standard utility or a conforming application is
+    executed with file descriptor 0 not open for reading or with file descriptor
+    1 or 2 not open for writing, the environment in which the utility or
+    application is executed shall be deemed non-conforming, and consequently the
+    utility or application might not behave as described in this standard.</p>
+<p class="Pp">Directory streams open in the calling process image shall be
+    closed in the new process image.</p>
+<p class="Pp">The state of the floating-point environment in the initial thread
+    of the new process image shall be set to the default.</p>
+<p class="Pp">The state of conversion descriptors and message catalog
+    descriptors in the new process image is undefined.</p>
+<p class="Pp">For the new process image, the equivalent of:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>setlocale(LC_ALL, "C")</pre>
+</div>
+<p class="Pp">shall be executed at start-up.</p>
+<p class="Pp">Signals set to the default action (SIG_DFL) in the calling process
+    image shall be set to the default action in the new process image. Except
+    for SIGCHLD, signals set to be ignored (SIG_IGN) by the calling process
+    image shall be set to be ignored by the new process image. Signals set to be
+    caught by the calling process image shall be set to the default action in
+    the new process image (see <i>&lt;signal.h&gt;</i>).</p>
+<p class="Pp">If the SIGCHLD signal is set to be ignored by the calling process
+    image, it is unspecified whether the SIGCHLD signal is set to be ignored or
+    to the default action in the new process image.</p>
+<p class="Pp">After a successful call to any of the <i>exec</i> functions,
+    alternate signal stacks are not preserved and the SA_ONSTACK flag shall be
+    cleared for all signals.</p>
+<p class="Pp">After a successful call to any of the <i>exec</i> functions, any
+    functions previously registered by the <i>atexit</i>() or
+    <i>pthread_atfork</i>() functions are no longer registered.</p>
+<p class="Pp">If the ST_NOSUID bit is set for the file system containing the new
+    process image file, then the effective user ID, effective group ID, saved
+    set-user-ID, and saved set-group-ID are unchanged in the new process image.
+    Otherwise, if the set-user-ID mode bit of the new process image file is set,
+    the effective user ID of the new process image shall be set to the user ID
+    of the new process image file. Similarly, if the set-group-ID mode bit of
+    the new process image file is set, the effective group ID of the new process
+    image shall be set to the group ID of the new process image file. The real
+    user ID, real group ID, and supplementary group IDs of the new process image
+    shall remain the same as those of the calling process image. The effective
+    user ID and effective group ID of the new process image shall be saved (as
+    the saved set-user-ID and the saved set-group-ID) for use by
+    <i>setuid</i>().</p>
+<p class="Pp">Any shared memory segments attached to the calling process image
+    shall not be attached to the new process image.</p>
+<p class="Pp">Any named semaphores open in the calling process shall be closed
+    as if by appropriate calls to <i>sem_close</i>().</p>
+<p class="Pp">Any blocks of typed memory that were mapped in the calling process
+    are unmapped, as if <i>munmap</i>() was implicitly called to unmap them.</p>
+<p class="Pp">Memory locks established by the calling process via calls to
+    <i>mlockall</i>() or <i>mlock</i>() shall be removed. If locked pages in the
+    address space of the calling process are also mapped into the address spaces
+    of other processes and are locked by those processes, the locks established
+    by the other processes shall be unaffected by the call by this process to
+    the <i>exec</i> function. If the <i>exec</i> function fails, the effect on
+    memory locks is unspecified.</p>
+<p class="Pp">Memory mappings created in the process are unmapped before the
+    address space is rebuilt for the new process image.</p>
+<p class="Pp">When the calling process image does not use the SCHED_FIFO,
+    SCHED_RR, or SCHED_SPORADIC scheduling policies, the scheduling policy and
+    parameters of the new process image and the initial thread in that new
+    process image are implementation-defined.</p>
+<p class="Pp">When the calling process image uses the SCHED_FIFO, SCHED_RR, or
+    SCHED_SPORADIC scheduling policies, the process policy and scheduling
+    parameter settings shall not be changed by a call to an <i>exec</i>
+    function. The initial thread in the new process image shall inherit the
+    process scheduling policy and parameters. It shall have the default system
+    contention scope, but shall inherit its allocation domain from the calling
+    process image.</p>
+<p class="Pp">Per-process timers created by the calling process shall be deleted
+    before replacing the current process image with the new process image.</p>
+<p class="Pp">All open message queue descriptors in the calling process shall be
+    closed, as described in <i>mq_close</i>().</p>
+<p class="Pp">Any outstanding asynchronous I/O operations may be canceled. Those
+    asynchronous I/O operations that are not canceled shall complete as if the
+    <i>exec</i> function had not yet occurred, but any associated signal
+    notifications shall be suppressed. It is unspecified whether the <i>exec</i>
+    function itself blocks awaiting such I/O completion. In no event, however,
+    shall the new process image created by the <i>exec</i> function be affected
+    by the presence of outstanding asynchronous I/O operations at the time the
+    <i>exec</i> function is called. Whether any I/O is canceled, and which I/O
+    may be canceled upon <i>exec</i>, is implementation-defined.</p>
+<p class="Pp">The new process image shall inherit the CPU-time clock of the
+    calling process image. This inheritance means that the process CPU-time
+    clock of the process being <i>exec</i>-ed shall not be reinitialized or
+    altered as a result of the <i>exec</i> function other than to reflect the
+    time spent by the process executing the <i>exec</i> function itself.</p>
+<p class="Pp">The initial value of the CPU-time clock of the initial thread of
+    the new process image shall be set to zero.</p>
+<p class="Pp">If the calling process is being traced, the new process image
+    shall continue to be traced into the same trace stream as the original
+    process image, but the new process image shall not inherit the mapping of
+    trace event names to trace event type identifiers that was defined by calls
+    to the <i>posix_trace_eventid_open</i>() or the
+    <i>posix_trace_trid_eventid_open</i>() functions in the calling process
+    image.</p>
+<p class="Pp">If the calling process is a trace controller process, any trace
+    streams that were created by the calling process shall be shut down as
+    described in the <i>posix_trace_shutdown</i>() function.</p>
+<p class="Pp">The thread ID of the initial thread in the new process image is
+    unspecified.</p>
+<p class="Pp">The size and location of the stack on which the initial thread in
+    the new process image runs is unspecified.</p>
+<p class="Pp">The initial thread in the new process image shall have its
+    cancellation type set to PTHREAD_CANCEL_DEFERRED and its cancellation state
+    set to PTHREAD_CANCEL_ENABLED.</p>
+<p class="Pp">The initial thread in the new process image shall have all
+    thread-specific data values set to NULL and all thread-specific data keys
+    shall be removed by the call to <i>exec</i> without running destructors.</p>
+<p class="Pp">The initial thread in the new process image shall be joinable, as
+    if created with the <i>detachstate</i> attribute set to
+    PTHREAD_CREATE_JOINABLE.</p>
+<p class="Pp">The new process shall inherit at least the following attributes
+    from the calling process image:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>Nice value (see <i>nice</i>())</dd>
+  <dt> *</dt>
+  <dd><i>semadj</i> values (see <i>semop</i>())</dd>
+  <dt> *</dt>
+  <dd>Process ID</dd>
+  <dt> *</dt>
+  <dd>Parent process ID</dd>
+  <dt> *</dt>
+  <dd>Process group ID</dd>
+  <dt> *</dt>
+  <dd>Session membership</dd>
+  <dt> *</dt>
+  <dd>Real user ID</dd>
+  <dt> *</dt>
+  <dd>Real group ID</dd>
+  <dt> *</dt>
+  <dd>Supplementary group IDs</dd>
+  <dt> *</dt>
+  <dd>Time left until an alarm clock signal (see <i>alarm</i>())</dd>
+  <dt> *</dt>
+  <dd>Current working directory</dd>
+  <dt> *</dt>
+  <dd>Root directory</dd>
+  <dt> *</dt>
+  <dd>File mode creation mask (see <i>umask</i>())</dd>
+  <dt> *</dt>
+  <dd>File size limit (see <i>getrlimit</i>() and <i>setrlimit</i>())</dd>
+  <dt> *</dt>
+  <dd>Process signal mask (see <i>pthread_sigmask</i>())</dd>
+  <dt> *</dt>
+  <dd>Pending signal (see <i>sigpending</i>())</dd>
+  <dt> *</dt>
+  <dd><i>tms_utime</i>, <i>tms_stime</i>, <i>tms_cutime</i>, and
+      <i>tms_cstime</i> (see <i>times</i>())</dd>
+  <dt> *</dt>
+  <dd>Resource limits</dd>
+  <dt> *</dt>
+  <dd>Controlling terminal</dd>
+  <dt> *</dt>
+  <dd>Interval timers</dd>
+</dl>
+<p class="Pp">The initial thread of the new process shall inherit at least the
+    following attributes from the calling thread:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>Signal mask (see <i>sigprocmask</i>() and <i>pthread_sigmask</i>())</dd>
+  <dt> *</dt>
+  <dd>Pending signals (see <i>sigpending</i>())</dd>
+</dl>
+<p class="Pp">All other process attributes defined in this volume of
+    POSIX.1‐2017 shall be inherited in the new process image from the old
+    process image. All other thread attributes defined in this volume of
+    POSIX.1‐2017 shall be inherited in the initial thread in the new
+    process image from the calling thread in the old process image. The
+    inheritance of process or thread attributes not defined by this volume of
+    POSIX.1‐2017 is implementation-defined.</p>
+<p class="Pp">A call to any <i>exec</i> function from a process with more than
+    one thread shall result in all threads being terminated and the new
+    executable image being loaded and executed. No destructor functions or
+    cleanup handlers shall be called.</p>
+<p class="Pp">Upon successful completion, the <i>exec</i> functions shall mark
+    for update the last data access timestamp of the file. If an <i>exec</i>
+    function failed but was able to locate the process image file, whether the
+    last data access timestamp is marked for update is unspecified. Should the
+    <i>exec</i> function succeed, the process image file shall be considered to
+    have been opened with <i>open</i>(). The corresponding <i>close</i>() shall
+    be considered to occur at a time after this open, but before process
+    termination or successful completion of a subsequent call to one of the
+    <i>exec</i> functions, <i>posix_spawn</i>(), or <i>posix_spawnp</i>(). The
+    <i>argv</i>[] and <i>envp</i>[] arrays of pointers and the strings to which
+    those arrays point shall not be modified by a call to one of the <i>exec</i>
+    functions, except as a consequence of replacing the process image.</p>
+<p class="Pp">The saved resource limits in the new process image are set to be a
+    copy of the process' corresponding hard and soft limits.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">If one of the <i>exec</i> functions returns to the calling process
+    image, an error has occurred; the return value shall be -1, and <i>errno</i>
+    shall be set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>exec</i> functions shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="E2BIG"><a class="permalink" href="#E2BIG"><b>E2BIG</b></a></dt>
+  <dd>The number of bytes used by the new process image's argument list and
+      environment list is greater than the system-imposed limit of {ARG_MAX}
+      bytes.</dd>
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>The new process image file is not a regular file and the implementation
+      does not support execution of files of its type.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The new process image file has appropriate privileges and has a recognized
+      executable binary format, but the system does not support execution of a
+      file with this format.</dd>
+</dl>
+<p class="Pp">The <i>exec</i> functions, except for <i>fexecve</i>(), shall fail
+    if:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES~2"><a class="permalink" href="#EACCES~2"><b>EACCES</b></a></dt>
+  <dd>Search permission is denied for a directory listed in the new process
+      image file's path prefix, or the new process image file denies execution
+      permission.</dd>
+  <dt id="ELOOP"><a class="permalink" href="#ELOOP"><b>ELOOP</b></a></dt>
+  <dd>A loop exists in symbolic links encountered during resolution of the
+      <i>path</i> or <i>file</i> argument.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of a component of a pathname is longer than {NAME_MAX}.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>A component of <i>path</i> or <i>file</i> does not name an existing file
+      or <i>path</i> or <i>file</i> is an empty string.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>A component of the new process image file's path prefix names an existing
+      file that is neither a directory nor a symbolic link to a directory, or
+      the new process image file's pathname contains at least one
+      non-&lt;slash&gt; character and ends with one or more trailing
+      &lt;slash&gt; characters and the last pathname component names an existing
+      file that is neither a directory nor a symbolic link to a directory.</dd>
+</dl>
+<p class="Pp">The <i>exec</i> functions, except for <i>execlp</i>() and
+    <i>execvp</i>(), shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="ENOEXEC"><a class="permalink" href="#ENOEXEC"><b>ENOEXEC</b></a></dt>
+  <dd>The new process image file has the appropriate access permission but has
+      an unrecognized format.</dd>
+</dl>
+<p class="Pp">The <i>fexecve</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The <i>fd</i> argument is not a valid file descriptor open for
+    executing.</dd>
+</dl>
+<p class="Pp">The <i>exec</i> functions may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>The new process image requires more memory than is allowed by the hardware
+      or system-imposed memory management constraints.</dd>
+</dl>
+<p class="Pp">The <i>exec</i> functions, except for <i>fexecve</i>(), may fail
+    if:</p>
+<dl class="Bl-tag">
+  <dt id="ELOOP~2"><a class="permalink" href="#ELOOP~2"><b>ELOOP</b></a></dt>
+  <dd>More than {SYMLOOP_MAX} symbolic links were encountered during resolution
+      of the <i>path</i> or <i>file</i> argument.</dd>
+  <dt id="ENAMETOOLONG~2"><a class="permalink" href="#ENAMETOOLONG~2"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of the <i>path</i> argument or the length of the pathname
+      constructed from the <i>file</i> argument exceeds {PATH_MAX}, or pathname
+      resolution of a symbolic link produced an intermediate result with a
+      length that exceeds {PATH_MAX}.</dd>
+  <dt id="ETXTBSY"><a class="permalink" href="#ETXTBSY"><b>ETXTBSY</b></a></dt>
+  <dd>The new process image file is a pure procedure (shared text) file that is
+      currently open for writing by some process.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Using_execl("><a class="permalink" href="#Using_execl(">Using
+  execl()</a></h2>
+<p class="Pp">The following example executes the <i>ls</i> command, specifying
+    the pathname of the executable (<b>/bin/ls</b>) and using arguments supplied
+    directly to the command to produce single-column output.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;unistd.h&gt;</pre>
+<pre>int ret;
+...
+ret = execl ("/bin/ls", "ls", "-1", (char *)0);</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Using_execle("><a class="permalink" href="#Using_execle(">Using
+  execle()</a></h2>
+<p class="Pp">The following example is similar to <i>Using execl()</i>. In
+    addition, it specifies the environment for the new process image using the
+    <i>env</i> argument.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;unistd.h&gt;</pre>
+<pre>int ret;
+char *env[] = { "HOME=/usr/home", "LOGNAME=home", (char *)0 };
+...
+ret = execle ("/bin/ls", "ls", "-l", (char *)0, env);</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Using_execlp("><a class="permalink" href="#Using_execlp(">Using
+  execlp()</a></h2>
+<p class="Pp">The following example searches for the location of the <i>ls</i>
+    command among the directories specified by the <i>PATH</i> environment
+    variable.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;unistd.h&gt;</pre>
+<pre>int ret;
+...
+ret = execlp ("ls", "ls", "-l", (char *)0);</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Using_execv("><a class="permalink" href="#Using_execv(">Using
+  execv()</a></h2>
+<p class="Pp">The following example passes arguments to the <i>ls</i> command in
+    the <i>cmd</i> array.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;unistd.h&gt;</pre>
+<pre>int ret;
+char *cmd[] = { "ls", "-l", (char *)0 };
+...
+ret = execv ("/bin/ls", cmd);</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Using_execve("><a class="permalink" href="#Using_execve(">Using
+  execve()</a></h2>
+<p class="Pp">The following example passes arguments to the <i>ls</i> command in
+    the <i>cmd</i> array, and specifies the environment for the new process
+    image using the <i>env</i> argument.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;unistd.h&gt;</pre>
+<pre>int ret;
+char *cmd[] = { "ls", "-l", (char *)0 };
+char *env[] = { "HOME=/usr/home", "LOGNAME=home", (char *)0 };
+...
+ret = execve ("/bin/ls", cmd, env);</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Using_execvp("><a class="permalink" href="#Using_execvp(">Using
+  execvp()</a></h2>
+<p class="Pp">The following example searches for the location of the <i>ls</i>
+    command among the directories specified by the <i>PATH</i> environment
+    variable, and passes arguments to the <i>ls</i> command in the <i>cmd</i>
+    array.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;unistd.h&gt;</pre>
+<pre>int ret;
+char *cmd[] = { "ls", "-l", (char *)0 };
+...
+ret = execvp ("ls", cmd);</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">As the state of conversion descriptors and message catalog
+    descriptors in the new process image is undefined, conforming applications
+    should not rely on their use and should close them prior to calling one of
+    the <i>exec</i> functions.</p>
+<p class="Pp">Applications that require other than the default POSIX locale as
+    the global locale in the new process image should call <i>setlocale</i>()
+    with the appropriate parameters.</p>
+<p class="Pp">When assigning a new value to the <i>environ</i> variable,
+    applications should ensure that the environment to which it will point
+    contains at least the following:</p>
+<dl class="Bl-tag">
+  <dt> 1.</dt>
+  <dd>Any implementation-defined variables required by the implementation to
+      provide a conforming environment. See the _CS_V7_ENV entry in
+      <i>&lt;unistd.h&gt;</i> and <i>confstr</i>() for details.</dd>
+  <dt> 2.</dt>
+  <dd>A value for <i>PATH</i> which finds conforming versions of all standard
+      utilities before any other versions.</dd>
+</dl>
+<p class="Pp">The same constraint applies to the <i>envp</i> array passed to
+    <i>execle</i>() or <i>execve</i>(), in order to ensure that the new process
+    image is invoked in a conforming environment.</p>
+<p class="Pp">Applications should not execute programs with file descriptor 0
+    not open for reading or with file descriptor 1 or 2 not open for writing, as
+    this might cause the executed program to misbehave. In order not to pass on
+    these file descriptors to an executed program, applications should not just
+    close them but should reopen them on, for example, <b>/dev/null</b>. Some
+    implementations may reopen them automatically, but applications should not
+    rely on this being done.</p>
+<p class="Pp">If an application wants to perform a checksum test of the file
+    being executed before executing it, the file will need to be opened with
+    read permission to perform the checksum test.</p>
+<p class="Pp">Since execute permission is checked by <i>fexecve</i>(), the file
+    description <i>fd</i> need not have been opened with the O_EXEC flag.
+    However, if the file to be executed denies read and write permission for the
+    process preparing to do the <i>exec</i>, the only way to provide the
+    <i>fd</i> to <i>fexecve</i>() will be to use the O_EXEC flag when opening
+    <i>fd</i>. In this case, the application will not be able to perform a
+    checksum test since it will not be able to read the contents of the
+  file.</p>
+<p class="Pp">Note that when a file descriptor is opened with O_RDONLY, O_RDWR,
+    or O_WRONLY mode, the file descriptor can be used to read, read and write,
+    or write the file, respectively, even if the mode of the file changes after
+    the file was opened. Using the O_EXEC open mode is different;
+    <i>fexecve</i>() will ignore the mode that was used when the file descriptor
+    was opened and the <i>exec</i> will fail if the mode of the file associated
+    with <i>fd</i> does not grant execute permission to the calling process at
+    the time <i>fexecve</i>() is called.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">Early proposals required that the value of <i>argc</i> passed to
+    <i>main</i>() be ``one or greater''. This was driven by the same requirement
+    in drafts of the ISO&nbsp;C standard. In fact, historical implementations
+    have passed a value of zero when no arguments are supplied to the caller of
+    the <i>exec</i> functions. This requirement was removed from the
+    ISO&nbsp;C standard and subsequently removed from this volume of
+    POSIX.1‐2017 as well. The wording, in particular the use of the word
+    <i>should</i>, requires a Strictly Conforming POSIX Application to pass at
+    least one argument to the <i>exec</i> function, thus guaranteeing that
+    <i>argc</i> be one or greater when invoked by such an application. In fact,
+    this is good practice, since many existing applications reference
+    <i>argv</i>[0] without first checking the value of <i>argc</i>.</p>
+<p class="Pp">The requirement on a Strictly Conforming POSIX Application also
+    states that the value passed as the first argument be a filename string
+    associated with the process being started. Although some existing
+    applications pass a pathname rather than a filename string in some
+    circumstances, a filename string is more generally useful, since the common
+    usage of <i>argv</i>[0] is in printing diagnostics. In some cases the
+    filename passed is not the actual filename of the file; for example, many
+    implementations of the <i>login</i> utility use a convention of prefixing a
+    &lt;hyphen-minus&gt; (<b>'‐'</b>) to the actual filename, which
+    indicates to the command interpreter being invoked that it is a ``login
+    shell''.</p>
+<p class="Pp">Also, note that the <i>test</i> and <i>[</i> utilities require
+    specific strings for the <i>argv</i>[0] argument to have deterministic
+    behavior across all implementations.</p>
+<p class="Pp">Historically, there have been two ways that implementations can
+    <i>exec</i> shell scripts.</p>
+<p class="Pp">One common historical implementation is that the <i>execl</i>(),
+    <i>execv</i>(), <i>execle</i>(), and <i>execve</i>() functions return an
+    <b>[ENOEXEC]</b> error for any file not recognizable as executable,
+    including a shell script. When the <i>execlp</i>() and <i>execvp</i>()
+    functions encounter such a file, they assume the file to be a shell script
+    and invoke a known command interpreter to interpret such files. This is now
+    required by POSIX.1‐2008. These implementations of <i>execvp</i>()
+    and <i>execlp</i>() only give the <b>[ENOEXEC]</b> error in the rare case of
+    a problem with the command interpreter's executable file. Because of these
+    implementations, the <b>[ENOEXEC]</b> error is not mentioned for
+    <i>execlp</i>() or <i>execvp</i>(), although implementations can still give
+    it.</p>
+<p class="Pp">Another way that some historical implementations handle shell
+    scripts is by recognizing the first two bytes of the file as the character
+    string <b>"#!"</b> and using the remainder of the first line of
+    the file as the name of the command interpreter to execute.</p>
+<p class="Pp">One potential source of confusion noted by the standard developers
+    is over how the contents of a process image file affect the behavior of the
+    <i>exec</i> family of functions. The following is a description of the
+    actions taken:</p>
+<dl class="Bl-tag">
+  <dt> 1.</dt>
+  <dd>If the process image file is a valid executable (in a format that is
+      executable and valid and having appropriate privileges) for this system,
+      then the system executes the file.</dd>
+  <dt> 2.</dt>
+  <dd>If the process image file has appropriate privileges and is in a format
+      that is executable but not valid for this system (such as a recognized
+      binary for another architecture), then this is an error and <i>errno</i>
+      is set to <b>[EINVAL]</b> (see later RATIONALE on <b>[EINVAL]</b>).</dd>
+  <dt> 3.</dt>
+  <dd>If the process image file has appropriate privileges but is not otherwise
+      recognized:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="a."><a class="permalink" href="#a."> a.</a></dt>
+  <dd>If this is a call to <i>execlp</i>() or <i>execvp</i>(), then they invoke
+      a command interpreter assuming that the process image file is a shell
+      script.</dd>
+  <dt id="b."><a class="permalink" href="#b."> b.</a></dt>
+  <dd>If this is not a call to <i>execlp</i>() or <i>execvp</i>(), then an error
+      occurs and <i>errno</i> is set to <b>[ENOEXEC]</b>.</dd>
+</dl>
+</div>
+<p class="Pp">Applications that do not require to access their arguments may use
+    the form:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>main(void)</pre>
+</div>
+<p class="Pp">as specified in the ISO&nbsp;C standard. However, the
+    implementation will always provide the two arguments <i>argc</i> and
+    <i>argv</i>, even if they are not used.</p>
+<p class="Pp">Some implementations provide a third argument to <i>main</i>()
+    called <i>envp</i>. This is defined as a pointer to the environment. The
+    ISO&nbsp;C standard specifies invoking <i>main</i>() with two arguments,
+    so implementations must support applications written this way. Since this
+    volume of POSIX.1‐2017 defines the global variable <i>environ</i>,
+    which is also provided by historical implementations and can be used
+    anywhere that <i>envp</i> could be used, there is no functional need for the
+    <i>envp</i> argument. Applications should use the <i>getenv</i>() function
+    rather than accessing the environment directly via either <i>envp</i> or
+    <i>environ</i>. Implementations are required to support the two-argument
+    calling sequence, but this does not prohibit an implementation from
+    supporting <i>envp</i> as an optional third argument.</p>
+<p class="Pp">This volume of POSIX.1‐2017 specifies that signals set to
+    SIG_IGN remain set to SIG_IGN, and that the new process image inherits the
+    signal mask of the thread that called <i>exec</i> in the old process image.
+    This is consistent with historical implementations, and it permits some
+    useful functionality, such as the <i>nohup</i> command. However, it should
+    be noted that many existing applications wrongly assume that they start with
+    certain signals set to the default action and/or unblocked. In particular,
+    applications written with a simpler signal model that does not include
+    blocking of signals, such as the one in the ISO&nbsp;C standard, may not
+    behave properly if invoked with some signals blocked. Therefore, it is best
+    not to block or ignore signals across <i>exec</i>s without explicit reason
+    to do so, and especially not to block signals across <i>exec</i>s of
+    arbitrary (not closely cooperating) programs.</p>
+<p class="Pp">The <i>exec</i> functions always save the value of the effective
+    user ID and effective group ID of the process at the completion of the
+    <i>exec</i>, whether or not the set-user-ID or the set-group-ID bit of the
+    process image file is set.</p>
+<p class="Pp">The statement about <i>argv</i>[] and <i>envp</i>[] being
+    constants is included to make explicit to future writers of language
+    bindings that these objects are completely constant. Due to a limitation of
+    the ISO&nbsp;C standard, it is not possible to state that idea in standard
+    C. Specifying two levels of <i>const</i>-<i>qualification</i> for the
+    <i>argv</i>[] and <i>envp</i>[] parameters for the <i>exec</i> functions may
+    seem to be the natural choice, given that these functions do not modify
+    either the array of pointers or the characters to which the function points,
+    but this would disallow existing correct code. Instead, only the array of
+    pointers is noted as constant. The table of assignment compatibility for
+    <i>dst</i>=<i>src</i> derived from the ISO&nbsp;C standard summarizes the
+    compatibility:</p>
+<table class="tbl" style="border-style: solid;">
+  <tbody><tr style="border-bottom-style: solid;">
+    <td style="text-align: right; border-right-style: solid;"><i>dst</i>:</td>
+    <td style="border-right-style: solid;"><b>char *[]</b></td>
+    <td style="border-right-style: solid;"><b>const char *[]</b></td>
+    <td style="border-right-style: solid;"><b>char *const[]</b></td>
+    <td><b>const char *const[]</b></td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"><b></b><i>src</i><b>:</b></td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"><b>char *[]</b></td>
+    <td style="text-align: center; border-right-style: solid;">VALID</td>
+    <td style="text-align: center; border-right-style: solid;">—</td>
+    <td style="text-align: center; border-right-style: solid;">VALID</td>
+    <td style="text-align: center;">—</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"><b>const char *[]</b></td>
+    <td style="text-align: center; border-right-style: solid;">—</td>
+    <td style="text-align: center; border-right-style: solid;">VALID</td>
+    <td style="text-align: center; border-right-style: solid;">—</td>
+    <td style="text-align: center;">VALID</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"><b>char * const []</b></td>
+    <td style="text-align: center; border-right-style: solid;">—</td>
+    <td style="text-align: center; border-right-style: solid;">—</td>
+    <td style="text-align: center; border-right-style: solid;">VALID</td>
+    <td style="text-align: center;">—</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"><b>const char *const[]</b></td>
+    <td style="text-align: center; border-right-style: solid;">—</td>
+    <td style="text-align: center; border-right-style: solid;">—</td>
+    <td style="text-align: center; border-right-style: solid;">—</td>
+    <td style="text-align: center;">VALID</td>
+  </tr>
+</tbody></table>
+<p class="Pp">Since all existing code has a source type matching the first row,
+    the column that gives the most valid combinations is the third column. The
+    only other possibility is the fourth column, but using it would require a
+    cast on the <i>argv</i> or <i>envp</i> arguments. It is unfortunate that the
+    fourth column cannot be used, because the declaration a non-expert would
+    naturally use would be that in the second row.</p>
+<p class="Pp">The ISO&nbsp;C standard and this volume of POSIX.1‐2017
+    do not conflict on the use of <i>environ</i>, but some historical
+    implementations of <i>environ</i> may cause a conflict. As long as
+    <i>environ</i> is treated in the same way as an entry point (for example,
+    <i>fork</i>()), it conforms to both standards. A library can contain
+    <i>fork</i>(), but if there is a user-provided <i>fork</i>(), that
+    <i>fork</i>() is given precedence and no problem ensues. The situation is
+    similar for <i>environ</i>: the definition in this volume of
+    POSIX.1‐2017 is to be used if there is no user-provided
+    <i>environ</i> to take precedence. At least three implementations are known
+    to exist that solve this problem.</p>
+<dl class="Bl-tag">
+  <dt id="E2BIG~2"><a class="permalink" href="#E2BIG~2"><b>E2BIG</b></a></dt>
+  <dd>The limit {ARG_MAX} applies not just to the size of the argument list, but
+      to the sum of that and the size of the environment list.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>Some historical systems return <b>[EFAULT]</b> rather than
+      <b>[ENOEXEC]</b> when the new process image file is corrupted. They are
+      non-conforming.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>This error condition was added to POSIX.1‐2008 to allow an
+      implementation to detect executable files generated for different
+      architectures, and indicate this situation to the application. Historical
+      implementations of shells, <i>execvp</i>(), and <i>execlp</i>() that
+      encounter an <b>[ENOEXEC]</b> error will execute a shell on the assumption
+      that the file is a shell script. This will not produce the desired effect
+      when the file is a valid executable for a different architecture. An
+      implementation may now choose to avoid this problem by returning
+      <b>[EINVAL]</b> when a valid executable for a different architecture is
+      encountered. Some historical implementations return <b>[EINVAL]</b> to
+      indicate that the <i>path</i> argument contains a character with the high
+      order bit set. The standard developers chose to deviate from historical
+      practice for the following reasons:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt> 1.</dt>
+  <dd>The new utilization of <b>[EINVAL]</b> will provide some measure of
+      utility to the user community.</dd>
+  <dt> 2.</dt>
+  <dd>Historical use of <b>[EINVAL]</b> is not acceptable in an
+      internationalized operating environment.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt id="ENAMETOOLONG~3"><a class="permalink" href="#ENAMETOOLONG~3"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    Since the file pathname may be constructed by taking elements in the
+      <i>PATH</i> variable and putting them together with the filename, the
+      <b>[ENAMETOOLONG]</b> error condition could also be reached this way.</dd>
+  <dt id="ETXTBSY~2"><a class="permalink" href="#ETXTBSY~2"><b>ETXTBSY</b></a></dt>
+  <dd>System V returns this error when the executable file is currently open for
+      writing by some process. This volume of POSIX.1‐2017 neither
+      requires nor prohibits this behavior.</dd>
+</dl>
+<p class="Pp">Other systems (such as System V) may return <b>[EINTR]</b> from
+    <i>exec</i>. This is not addressed by this volume of POSIX.1‐2017,
+    but implementations may have a window between the call to <i>exec</i> and
+    the time that a signal could cause one of the <i>exec</i> calls to return
+    with <b>[EINTR]</b>.</p>
+<p class="Pp">An explicit statement regarding the floating-point environment (as
+    defined in the <i>&lt;fenv.h&gt;</i> header) was added to make it clear that
+    the floating-point environment is set to its default when a call to one of
+    the <i>exec</i> functions succeeds. The requirements for inheritance or
+    setting to the default for other process and thread start-up functions is
+    covered by more generic statements in their descriptions and can be
+    summarized as follows:</p>
+<dl class="Bl-tag">
+  <dt id="posix_spawn"><a class="permalink" href="#posix_spawn"><i>posix_spawn</i>()</a></dt>
+  <dd>Set to default.</dd>
+  <dt id="fork"><a class="permalink" href="#fork"><i>fork</i>()</a></dt>
+  <dd>Inherit.</dd>
+  <dt id="pthread_create"><a class="permalink" href="#pthread_create"><i>pthread_create</i>()</a></dt>
+  <dd>Inherit.</dd>
+</dl>
+<p class="Pp">The purpose of the <i>fexecve</i>() function is to enable
+    executing a file which has been verified to be the intended file. It is
+    possible to actively check the file by reading from the file descriptor and
+    be sure that the file is not exchanged for another between the reading and
+    the execution. Alternatively, a function like <i>openat</i>() can be used to
+    open a file which has been found by reading the content of a directory using
+    <i>readdir</i>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>alarm</i>()</i>, <i><i>atexit</i>()</i>,
+    <i><i>chmod</i>()</i>, <i><i>close</i>()</i>, <i><i>confstr</i>()</i>,
+    <i><i>exit</i>()</i>, <i><i>fcntl</i>()</i>, <i><i>fork</i>()</i>,
+    <i><i>fstatvfs</i>()</i>, <i><i>getenv</i>()</i>, <i><i>getitimer</i>()</i>,
+    <i><i>getrlimit</i>()</i>, <i><i>mknod</i>()</i>, <i><i>mmap</i>()</i>,
+    <i><i>nice</i>()</i>, <i><i>open</i>()</i>, <i><i>posix_spawn</i>()</i>,
+    <i><i>posix_trace_create</i>()</i>, <i><i>posix_trace_event</i>()</i>,
+    <i><i>posix_trace_eventid_equal</i>()</i>, <i><i>pthread_atfork</i>()</i>,
+    <i><i>pthread_sigmask</i>()</i>, <i><i>putenv</i>()</i>,
+    <i><i>readdir</i>()</i>, <i><i>semop</i>()</i>, <i><i>setlocale</i>()</i>,
+    <i><i>shmat</i>()</i>, <i><i>sigaction</i>()</i>,
+    <i><i>sigaltstack</i>()</i>, <i><i>sigpending</i>()</i>,
+    <i><i>system</i>()</i>, <i><i>times</i>()</i>, <i><i>ulimit</i>()</i>,
+    <i><i>umask</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Chapter
+    8</i>, <i>Environment Variables</i>, <i><b>&lt;unistd.h&gt;</b></i></p>
+<p class="Pp">The Shell and Utilities volume of POSIX.1‐2017,
+    <i><i>test</i></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

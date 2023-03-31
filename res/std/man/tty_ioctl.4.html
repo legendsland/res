@@ -1,0 +1,966 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/724c57bfbe9d3c8b8ba60025b6268498181a4a1c">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>ioctl_tty(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">ioctl_tty(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">ioctl_tty(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">ioctl_tty - ioctls for terminals and serial lines</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/ioctl.h&gt;</b>
+<b>#include &lt;asm/termbits.h&gt;</b>   /* Definition of <b>struct termios</b>,
+<b>                               struct termios2</b>, and
+<b>                               Bnnn</b>, <b>BOTHER</b>, <b>CBAUD</b>, <b>CLOCAL</b>,
+<b>                               TC*</b>{<b>FLUSH</b>,<b>ON</b>,<b>OFF</b>} and other constants */</pre>
+<pre><b>int ioctl(int </b><i>fd</i><b>, int </b><i>cmd</i><b>, ...);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>ioctl</b>(2) call for terminals and serial ports accepts
+    many possible command arguments. Most require a third argument, of varying
+    type, here called <i>argp</i> or <i>arg</i>.</p>
+<p class="Pp">Use of <b>ioctl</b>() makes for nonportable programs. Use the
+    POSIX interface described in <b>termios</b>(3) whenever possible.</p>
+<p class="Pp">Please note that <b>struct termios</b> from
+    <i>&lt;asm/termbits.h&gt;</i> is different and incompatible with <b>struct
+    termios</b> from <i>&lt;termios.h&gt;</i>. These ioctl calls require
+    <b>struct termios</b> from <i>&lt;asm/termbits.h&gt;</i>.</p>
+<section class="Ss">
+<h2 class="Ss" id="Get_and_set_terminal_attributes"><a class="permalink" href="#Get_and_set_terminal_attributes">Get
+  and set terminal attributes</a></h2>
+<dl class="Bl-tag">
+  <dt id="TCGETS"><a class="permalink" href="#TCGETS"><b>TCGETS</b></a></dt>
+  <dd>Argument: <b>struct termios&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Equivalent to <i>tcgetattr(fd, argp)</i>.</dd>
+  <dt></dt>
+  <dd>Get the current serial port settings.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TCSETS"><a class="permalink" href="#TCSETS"><b>TCSETS</b></a></dt>
+  <dd>Argument: <b>const struct termios&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Equivalent to <i>tcsetattr(fd, TCSANOW, argp)</i>.</dd>
+  <dt></dt>
+  <dd>Set the current serial port settings.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TCSETSW"><a class="permalink" href="#TCSETSW"><b>TCSETSW</b></a></dt>
+  <dd>Argument: <b>const struct termios&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Equivalent to <i>tcsetattr(fd, TCSADRAIN, argp)</i>.</dd>
+  <dt></dt>
+  <dd>Allow the output buffer to drain, and set the current serial port
+      settings.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TCSETSF"><a class="permalink" href="#TCSETSF"><b>TCSETSF</b></a></dt>
+  <dd>Argument: <b>const struct termios&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Equivalent to <i>tcsetattr(fd, TCSAFLUSH, argp)</i>.</dd>
+  <dt></dt>
+  <dd>Allow the output buffer to drain, discard pending input, and set the
+      current serial port settings.</dd>
+</dl>
+<p class="Pp">The following four ioctls, added in Linux 2.6.20, are just like
+    <b>TCGETS</b>, <b>TCSETS</b>, <b>TCSETSW</b>, <b>TCSETSF</b>, except that
+    they take a <i>struct termios2&nbsp;*</i> instead of a <i>struct
+    termios&nbsp;*</i>. If the structure member <b>c_cflag</b> contains the
+    flag <b>BOTHER</b>, then the baud rate is stored in the structure members
+    <b>c_ispeed</b> and <b>c_ospeed</b> as integer values. These ioctls are not
+    supported on all architectures.</p>
+<div class="Bd-indent">
+<table class="tbl">
+  <tbody><tr>
+    <td><b>TCGETS2</b></td>
+    <td><b>struct termios2 *</b>argp</td>
+  </tr>
+  <tr>
+    <td><b>TCSETS2</b></td>
+    <td><b>const struct termios2 *</b>argp</td>
+  </tr>
+  <tr>
+    <td><b>TCSETSW2</b></td>
+    <td><b>const struct termios2 *</b>argp</td>
+  </tr>
+  <tr>
+    <td><b>TCSETSF2</b></td>
+    <td><b>const struct termios2 *</b>argp</td>
+  </tr>
+</tbody></table>
+</div>
+<p class="Pp">The following four ioctls are just like <b>TCGETS</b>,
+    <b>TCSETS</b>, <b>TCSETSW</b>, <b>TCSETSF</b>, except that they take a
+    <i>struct termio&nbsp;*</i> instead of a <i>struct
+  termios&nbsp;*</i>.</p>
+<div class="Bd-indent">
+<table class="tbl">
+  <tbody><tr>
+    <td><b>TCGETA</b></td>
+    <td><b>struct termio *</b>argp</td>
+  </tr>
+  <tr>
+    <td><b>TCSETA</b></td>
+    <td><b>const struct termio *</b>argp</td>
+  </tr>
+  <tr>
+    <td><b>TCSETAW</b></td>
+    <td><b>const struct termio *</b>argp</td>
+  </tr>
+  <tr>
+    <td><b>TCSETAF</b></td>
+    <td><b>const struct termio *</b>argp</td>
+  </tr>
+</tbody></table>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Locking_the_termios_structure"><a class="permalink" href="#Locking_the_termios_structure">Locking
+  the termios structure</a></h2>
+<p class="Pp">The <i>termios</i> structure of a terminal can be locked. The lock
+    is itself a <i>termios</i> structure, with nonzero bits or fields indicating
+    a locked value.</p>
+<dl class="Bl-tag">
+  <dt id="TIOCGLCKTRMIOS"><a class="permalink" href="#TIOCGLCKTRMIOS"><b>TIOCGLCKTRMIOS</b></a></dt>
+  <dd>Argument: <b>struct termios&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Gets the locking status of the <i>termios</i> structure of the
+    terminal.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TIOCSLCKTRMIOS"><a class="permalink" href="#TIOCSLCKTRMIOS"><b>TIOCSLCKTRMIOS</b></a></dt>
+  <dd>Argument: <b>const struct termios&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Sets the locking status of the <i>termios</i> structure of the terminal.
+      Only a process with the <b>CAP_SYS_ADMIN</b> capability can do this.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Get_and_set_window_size"><a class="permalink" href="#Get_and_set_window_size">Get
+  and set window size</a></h2>
+<p class="Pp">Window sizes are kept in the kernel, but not used by the kernel
+    (except in the case of virtual consoles, where the kernel will update the
+    window size when the size of the virtual console changes, for example, by
+    loading a new font).</p>
+<dl class="Bl-tag">
+  <dt id="TIOCGWINSZ"><a class="permalink" href="#TIOCGWINSZ"><b>TIOCGWINSZ</b></a></dt>
+  <dd>Argument: <b>struct winsize&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Get window size.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TIOCSWINSZ"><a class="permalink" href="#TIOCSWINSZ"><b>TIOCSWINSZ</b></a></dt>
+  <dd>Argument: <b>const struct winsize&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Set window size.</dd>
+</dl>
+<p class="Pp">The struct used by these ioctls is defined as</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct winsize {
+<br>
+    unsigned short ws_row;
+<br>
+    unsigned short ws_col;
+<br>
+    unsigned short ws_xpixel;   /* unused */
+<br>
+    unsigned short ws_ypixel;   /* unused */
+};
+</pre>
+<br>
+<p class="Pp">When the window size changes, a <b>SIGWINCH</b> signal is sent to
+    the foreground process group.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Sending_a_break"><a class="permalink" href="#Sending_a_break">Sending
+  a break</a></h2>
+<dl class="Bl-tag">
+  <dt id="TCSBRK"><a class="permalink" href="#TCSBRK"><b>TCSBRK</b></a></dt>
+  <dd>Argument: <b>int </b><i>arg</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Equivalent to <i>tcsendbreak(fd, arg)</i>.</dd>
+  <dt></dt>
+  <dd>If the terminal is using asynchronous serial data transmission, and
+      <i>arg</i> is zero, then send a break (a stream of zero bits) for between
+      0.25 and 0.5 seconds. If the terminal is not using asynchronous serial
+      data transmission, then either a break is sent, or the function returns
+      without doing anything. When <i>arg</i> is nonzero, nobody knows what will
+      happen.</dd>
+  <dt></dt>
+  <dd>(SVr4, UnixWare, Solaris, and Linux treat <i>tcsendbreak(fd,arg)</i> with
+      nonzero <i>arg</i> like <i>tcdrain(fd)</i>. SunOS treats <i>arg</i> as a
+      multiplier, and sends a stream of bits <i>arg</i> times as long as done
+      for zero <i>arg</i>. DG/UX and AIX treat <i>arg</i> (when nonzero) as a
+      time interval measured in milliseconds. HP-UX ignores <i>arg</i>.)</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TCSBRKP"><a class="permalink" href="#TCSBRKP"><b>TCSBRKP</b></a></dt>
+  <dd>Argument: <b>int </b><i>arg</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>So-called "POSIX version" of <b>TCSBRK</b>. It treats nonzero
+      <i>arg</i> as a time interval measured in deciseconds, and does nothing
+      when the driver does not support breaks.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TIOCSBRK"><a class="permalink" href="#TIOCSBRK"><b>TIOCSBRK</b></a></dt>
+  <dd>Argument: <b>void</b></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Turn break on, that is, start sending zero bits.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TIOCCBRK"><a class="permalink" href="#TIOCCBRK"><b>TIOCCBRK</b></a></dt>
+  <dd>Argument: <b>void</b></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Turn break off, that is, stop sending zero bits.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Software_flow_control"><a class="permalink" href="#Software_flow_control">Software
+  flow control</a></h2>
+<dl class="Bl-tag">
+  <dt id="TCXONC"><a class="permalink" href="#TCXONC"><b>TCXONC</b></a></dt>
+  <dd>Argument: <b>int </b><i>arg</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Equivalent to <i>tcflow(fd, arg)</i>.</dd>
+  <dt></dt>
+  <dd>See <b>tcflow</b>(3) for the argument values <b>TCOOFF</b>, <b>TCOON</b>,
+      <b>TCIOFF</b>, <b>TCION</b>.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Buffer_count_and_flushing"><a class="permalink" href="#Buffer_count_and_flushing">Buffer
+  count and flushing</a></h2>
+<dl class="Bl-tag">
+  <dt id="FIONREAD"><a class="permalink" href="#FIONREAD"><b>FIONREAD</b></a></dt>
+  <dd>Argument: <b>int&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Get the number of bytes in the input buffer.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TIOCINQ"><a class="permalink" href="#TIOCINQ"><b>TIOCINQ</b></a></dt>
+  <dd>Argument: <b>int&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Same as <b>FIONREAD</b>.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TIOCOUTQ"><a class="permalink" href="#TIOCOUTQ"><b>TIOCOUTQ</b></a></dt>
+  <dd>Argument: <b>int&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Get the number of bytes in the output buffer.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TCFLSH"><a class="permalink" href="#TCFLSH"><b>TCFLSH</b></a></dt>
+  <dd>Argument: <b>int </b><i>arg</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Equivalent to <i>tcflush(fd, arg)</i>.</dd>
+  <dt></dt>
+  <dd>See <b>tcflush</b>(3) for the argument values <b>TCIFLUSH</b>,
+      <b>TCOFLUSH</b>, <b>TCIOFLUSH</b>.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TIOCSERGETLSR"><a class="permalink" href="#TIOCSERGETLSR"><b>TIOCSERGETLSR</b></a></dt>
+  <dd>Argument: <b>int&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Get line status register. Status register has <b>TIOCSER_TEMT</b> bit set
+      when output buffer is empty and also hardware transmitter is physically
+      empty.</dd>
+  <dt></dt>
+  <dd>Does not have to be supported by all serial tty drivers.</dd>
+  <dt></dt>
+  <dd><b>tcdrain</b>(3) does not wait and returns immediately when
+      <b>TIOCSER_TEMT</b> bit is set.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Faking_input"><a class="permalink" href="#Faking_input">Faking
+  input</a></h2>
+<dl class="Bl-tag">
+  <dt id="TIOCSTI"><a class="permalink" href="#TIOCSTI"><b>TIOCSTI</b></a></dt>
+  <dd>Argument: <b>const char&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Insert the given byte in the input queue.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Redirecting_console_output"><a class="permalink" href="#Redirecting_console_output">Redirecting
+  console output</a></h2>
+<dl class="Bl-tag">
+  <dt id="TIOCCONS"><a class="permalink" href="#TIOCCONS"><b>TIOCCONS</b></a></dt>
+  <dd>Argument: <b>void</b></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Redirect output that would have gone to <i>/dev/console</i> or
+      <i>/dev/tty0</i> to the given terminal. If that was a pseudoterminal
+      master, send it to the slave. Before Linux 2.6.10, anybody can do this as
+      long as the output was not redirected yet; since Linux 2.6.10, only a
+      process with the <b>CAP_SYS_ADMIN</b> capability may do this. If output
+      was redirected already, then <b>EBUSY</b> is returned, but redirection can
+      be stopped by using this ioctl with <i>fd</i> pointing at
+      <i>/dev/console</i> or <i>/dev/tty0</i>.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Controlling_terminal"><a class="permalink" href="#Controlling_terminal">Controlling
+  terminal</a></h2>
+<dl class="Bl-tag">
+  <dt id="TIOCSCTTY"><a class="permalink" href="#TIOCSCTTY"><b>TIOCSCTTY</b></a></dt>
+  <dd>Argument: <b>int </b><i>arg</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Make the given terminal the controlling terminal of the calling process.
+      The calling process must be a session leader and not have a controlling
+      terminal already. For this case, <i>arg</i> should be specified as
+    zero.</dd>
+  <dt></dt>
+  <dd>If this terminal is already the controlling terminal of a different
+      session group, then the ioctl fails with <b>EPERM</b>, unless the caller
+      has the <b>CAP_SYS_ADMIN</b> capability and <i>arg</i> equals 1, in which
+      case the terminal is stolen, and all processes that had it as controlling
+      terminal lose it.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TIOCNOTTY"><a class="permalink" href="#TIOCNOTTY"><b>TIOCNOTTY</b></a></dt>
+  <dd>Argument: <b>void</b></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>If the given terminal was the controlling terminal of the calling process,
+      give up this controlling terminal. If the process was session leader, then
+      send <b>SIGHUP</b> and <b>SIGCONT</b> to the foreground process group and
+      all processes in the current session lose their controlling terminal.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Process_group_and_session_ID"><a class="permalink" href="#Process_group_and_session_ID">Process
+  group and session ID</a></h2>
+<dl class="Bl-tag">
+  <dt id="TIOCGPGRP"><a class="permalink" href="#TIOCGPGRP"><b>TIOCGPGRP</b></a></dt>
+  <dd>Argument: <b>pid_t&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>When successful, equivalent to <i>*argp = tcgetpgrp(fd)</i>.</dd>
+  <dt></dt>
+  <dd>Get the process group ID of the foreground process group on this
+    terminal.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TIOCSPGRP"><a class="permalink" href="#TIOCSPGRP"><b>TIOCSPGRP</b></a></dt>
+  <dd>Argument: <b>const pid_t&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Equivalent to <i>tcsetpgrp(fd, *argp)</i>.</dd>
+  <dt></dt>
+  <dd>Set the foreground process group ID of this terminal.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TIOCGSID"><a class="permalink" href="#TIOCGSID"><b>TIOCGSID</b></a></dt>
+  <dd>Argument: <b>pid_t&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>When successful, equivalent to <i>*argp = tcgetsid(fd)</i>.</dd>
+  <dt></dt>
+  <dd>Get the session ID of the given terminal. This fails with the error
+      <b>ENOTTY</b> if the terminal is not a master pseudoterminal and not our
+      controlling terminal. Strange.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Exclusive_mode"><a class="permalink" href="#Exclusive_mode">Exclusive
+  mode</a></h2>
+<dl class="Bl-tag">
+  <dt id="TIOCEXCL"><a class="permalink" href="#TIOCEXCL"><b>TIOCEXCL</b></a></dt>
+  <dd>Argument: <b>void</b></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Put the terminal into exclusive mode. No further <b>open</b>(2) operations
+      on the terminal are permitted. (They fail with <b>EBUSY</b>, except for a
+      process with the <b>CAP_SYS_ADMIN</b> capability.)</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TIOCGEXCL"><a class="permalink" href="#TIOCGEXCL"><b>TIOCGEXCL</b></a></dt>
+  <dd>Argument: <b>int&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>(since Linux 3.8) If the terminal is currently in exclusive mode, place a
+      nonzero value in the location pointed to by <i>argp</i>; otherwise, place
+      zero in <i>*argp</i>.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TIOCNXCL"><a class="permalink" href="#TIOCNXCL"><b>TIOCNXCL</b></a></dt>
+  <dd>Argument: <b>void</b></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Disable exclusive mode.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Line_discipline"><a class="permalink" href="#Line_discipline">Line
+  discipline</a></h2>
+<dl class="Bl-tag">
+  <dt id="TIOCGETD"><a class="permalink" href="#TIOCGETD"><b>TIOCGETD</b></a></dt>
+  <dd>Argument: <b>int&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Get the line discipline of the terminal.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TIOCSETD"><a class="permalink" href="#TIOCSETD"><b>TIOCSETD</b></a></dt>
+  <dd>Argument: <b>const int&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Set the line discipline of the terminal.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Pseudoterminal_ioctls"><a class="permalink" href="#Pseudoterminal_ioctls">Pseudoterminal
+  ioctls</a></h2>
+<dl class="Bl-tag">
+  <dt id="TIOCPKT"><a class="permalink" href="#TIOCPKT"><b>TIOCPKT</b></a></dt>
+  <dd>Argument: <b>const int&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Enable (when *<i>argp</i> is nonzero) or disable packet mode. Can be
+      applied to the master side of a pseudoterminal only (and will return
+      <b>ENOTTY</b> otherwise). In packet mode, each subsequent <b>read</b>(2)
+      will return a packet that either contains a single nonzero control byte,
+      or has a single byte containing zero ('\0') followed by data written on
+      the slave side of the pseudoterminal. If the first byte is not
+      <b>TIOCPKT_DATA</b> (0), it is an OR of one or more of the following
+    bits:</dd>
+  <dt></dt>
+  <dd>
+    <table class="tbl">
+      <tbody><tr>
+        <td><b>TIOCPKT_FLUSHREAD</b></td>
+        <td>The read queue for the terminal is flushed.</td>
+      </tr>
+      <tr>
+        <td><b>TIOCPKT_FLUSHWRITE</b></td>
+        <td>The write queue for the terminal is flushed.</td>
+      </tr>
+      <tr>
+        <td><b>TIOCPKT_STOP</b></td>
+        <td>Output to the terminal is stopped.</td>
+      </tr>
+      <tr>
+        <td><b>TIOCPKT_START</b></td>
+        <td>Output to the terminal is restarted.</td>
+      </tr>
+      <tr>
+        <td><b>TIOCPKT_DOSTOP</b></td>
+        <td>The start and stop characters are <b>^S</b>/<b>^Q</b>.</td>
+      </tr>
+      <tr>
+        <td><b>TIOCPKT_NOSTOP</b></td>
+        <td>The start and stop characters are not <b>^S</b>/<b>^Q</b>.</td>
+      </tr>
+    </tbody></table>
+  </dd>
+  <dt></dt>
+  <dd>While packet mode is in use, the presence of control status information to
+      be read from the master side may be detected by a <b>select</b>(2) for
+      exceptional conditions or a <b>poll</b>(2) for the <b>POLLPRI</b>
+    event.</dd>
+  <dt></dt>
+  <dd>This mode is used by <b>rlogin</b>(1) and <b>rlogind</b>(8) to implement a
+      remote-echoed, locally <b>^S</b>/<b>^Q</b> flow-controlled remote
+    login.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TIOCGPKT"><a class="permalink" href="#TIOCGPKT"><b>TIOCGPKT</b></a></dt>
+  <dd>Argument: <b>const int&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>(since Linux 3.8) Return the current packet mode setting in the integer
+      pointed to by <i>argp</i>.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TIOCSPTLCK"><a class="permalink" href="#TIOCSPTLCK"><b>TIOCSPTLCK</b></a></dt>
+  <dd>Argument: <b>int&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Set (if <i>*argp</i> is nonzero) or remove (if <i>*argp</i> is zero) the
+      lock on the pseudoterminal slave device. (See also
+    <b>unlockpt</b>(3).)</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TIOCGPTLCK"><a class="permalink" href="#TIOCGPTLCK"><b>TIOCGPTLCK</b></a></dt>
+  <dd>Argument: <b>int&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>(since Linux 3.8) Place the current lock state of the pseudoterminal slave
+      device in the location pointed to by <i>argp</i>.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TIOCGPTPEER"><a class="permalink" href="#TIOCGPTPEER"><b>TIOCGPTPEER</b></a></dt>
+  <dd>Argument: <b>int </b><i>flags</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>(since Linux 4.13) Given a file descriptor in <i>fd</i> that refers to a
+      pseudoterminal master, open (with the given <b>open</b>(2)-style
+      <i>flags</i>) and return a new file descriptor that refers to the peer
+      pseudoterminal slave device. This operation can be performed regardless of
+      whether the pathname of the slave device is accessible through the calling
+      process's mount namespace.</dd>
+  <dt></dt>
+  <dd>Security-conscious programs interacting with namespaces may wish to use
+      this operation rather than <b>open</b>(2) with the pathname returned by
+      <b>ptsname</b>(3), and similar library functions that have insecure APIs.
+      (For example, confusion can occur in some cases using <b>ptsname</b>(3)
+      with a pathname where a devpts filesystem has been mounted in a different
+      mount namespace.)</dd>
+</dl>
+<p class="Pp">The BSD ioctls <b>TIOCSTOP</b>, <b>TIOCSTART</b>,
+    <b>TIOCUCNTL</b>, and <b>TIOCREMOTE</b> have not been implemented under
+    Linux.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Modem_control"><a class="permalink" href="#Modem_control">Modem
+  control</a></h2>
+<dl class="Bl-tag">
+  <dt id="TIOCMGET"><a class="permalink" href="#TIOCMGET"><b>TIOCMGET</b></a></dt>
+  <dd>Argument: <b>int&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Get the status of modem bits.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TIOCMSET"><a class="permalink" href="#TIOCMSET"><b>TIOCMSET</b></a></dt>
+  <dd>Argument: <b>const int&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Set the status of modem bits.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TIOCMBIC"><a class="permalink" href="#TIOCMBIC"><b>TIOCMBIC</b></a></dt>
+  <dd>Argument: <b>const int&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Clear the indicated modem bits.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TIOCMBIS"><a class="permalink" href="#TIOCMBIS"><b>TIOCMBIS</b></a></dt>
+  <dd>Argument: <b>const int&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Set the indicated modem bits.</dd>
+</dl>
+<p class="Pp">The following bits are used by the above ioctls:</p>
+<p class="Pp"></p>
+<table class="tbl">
+  <tbody><tr>
+    <td><b>TIOCM_LE</b></td>
+    <td>DSR (data set ready/line enable)</td>
+  </tr>
+  <tr>
+    <td><b>TIOCM_DTR</b></td>
+    <td>DTR (data terminal ready)</td>
+  </tr>
+  <tr>
+    <td><b>TIOCM_RTS</b></td>
+    <td>RTS (request to send)</td>
+  </tr>
+  <tr>
+    <td><b>TIOCM_ST</b></td>
+    <td>Secondary TXD (transmit)</td>
+  </tr>
+  <tr>
+    <td><b>TIOCM_SR</b></td>
+    <td>Secondary RXD (receive)</td>
+  </tr>
+  <tr>
+    <td><b>TIOCM_CTS</b></td>
+    <td>CTS (clear to send)</td>
+  </tr>
+  <tr>
+    <td><b>TIOCM_CAR</b></td>
+    <td>DCD (data carrier detect)</td>
+  </tr>
+  <tr>
+    <td><b>TIOCM_CD</b></td>
+    <td>see TIOCM_CAR</td>
+  </tr>
+  <tr>
+    <td><b>TIOCM_RNG</b></td>
+    <td>RNG (ring)</td>
+  </tr>
+  <tr>
+    <td><b>TIOCM_RI</b></td>
+    <td>see TIOCM_RNG</td>
+  </tr>
+  <tr>
+    <td><b>TIOCM_DSR</b></td>
+    <td>DSR (data set ready)</td>
+  </tr>
+</tbody></table>
+<dl class="Bl-tag">
+  <dt id="TIOCMIWAIT"><a class="permalink" href="#TIOCMIWAIT"><b>TIOCMIWAIT</b></a></dt>
+  <dd>Argument: <b>int </b><i>arg</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Wait for any of the 4 modem bits (DCD, RI, DSR, CTS) to change. The bits
+      of interest are specified as a bit mask in <i>arg</i>, by ORing together
+      any of the bit values, <b>TIOCM_RNG</b>, <b>TIOCM_DSR</b>,
+      <b>TIOCM_CD</b>, and <b>TIOCM_CTS</b>. The caller should use
+      <b>TIOCGICOUNT</b> to see which bit has changed.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TIOCGICOUNT"><a class="permalink" href="#TIOCGICOUNT"><b>TIOCGICOUNT</b></a></dt>
+  <dd>Argument: <b>struct serial_icounter_struct&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Get counts of input serial line interrupts (DCD, RI, DSR, CTS). The counts
+      are written to the <i>serial_icounter_struct</i> structure pointed to by
+      <i>argp</i>.</dd>
+  <dt></dt>
+  <dd>Note: both 1-&gt;0 and 0-&gt;1 transitions are counted, except for RI,
+      where only 0-&gt;1 transitions are counted.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Marking_a_line_as_local"><a class="permalink" href="#Marking_a_line_as_local">Marking
+  a line as local</a></h2>
+<dl class="Bl-tag">
+  <dt id="TIOCGSOFTCAR"><a class="permalink" href="#TIOCGSOFTCAR"><b>TIOCGSOFTCAR</b></a></dt>
+  <dd>Argument: <b>int&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>("Get software carrier flag") Get the status of the CLOCAL flag
+      in the c_cflag field of the <i>termios</i> structure.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="TIOCSSOFTCAR"><a class="permalink" href="#TIOCSSOFTCAR"><b>TIOCSSOFTCAR</b></a></dt>
+  <dd>Argument: <b>const int&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>("Set software carrier flag") Set the CLOCAL flag in the
+      <i>termios</i> structure when *<i>argp</i> is nonzero, and clear it
+      otherwise.</dd>
+</dl>
+<p class="Pp">If the <b>CLOCAL</b> flag for a line is off, the hardware carrier
+    detect (DCD) signal is significant, and an <b>open</b>(2) of the
+    corresponding terminal will block until DCD is asserted, unless the
+    <b>O_NONBLOCK</b> flag is given. If <b>CLOCAL</b> is set, the line behaves
+    as if DCD is always asserted. The software carrier flag is usually turned on
+    for local devices, and is off for lines with modems.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Linux-specific"><a class="permalink" href="#Linux-specific">Linux-specific</a></h2>
+<p class="Pp">For the <b>TIOCLINUX</b> ioctl, see <b>ioctl_console</b>(2).</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Kernel_debugging"><a class="permalink" href="#Kernel_debugging">Kernel
+  debugging</a></h2>
+<p class="Pp"><b>#include &lt;linux/tty.h&gt;</b></p>
+<dl class="Bl-tag">
+  <dt id="TIOCTTYGSTRUCT"><a class="permalink" href="#TIOCTTYGSTRUCT"><b>TIOCTTYGSTRUCT</b></a></dt>
+  <dd>Argument: <b>struct tty_struct&nbsp;*</b><i>argp</i></dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Get the <i>tty_struct</i> corresponding to <i>fd</i>. This command was
+      removed in Linux 2.5.67.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <b>ioctl</b>(2) system call returns 0 on success. On error, it
+    returns -1 and sets <i>errno</i> to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>Invalid command parameter.</dd>
+  <dt id="ENOIOCTLCMD"><a class="permalink" href="#ENOIOCTLCMD"><b>ENOIOCTLCMD</b></a></dt>
+  <dd>Unknown command.</dd>
+  <dt id="ENOTTY"><a class="permalink" href="#ENOTTY"><b>ENOTTY</b></a></dt>
+  <dd>Inappropriate <i>fd</i>.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>Insufficient permission.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">Check the condition of DTR on the serial port.</p>
+<p class="Pp"></p>
+<pre>#include &lt;fcntl.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;sys/ioctl.h&gt;
+#include &lt;unistd.h&gt;
+int
+main(void)
+{
+<br>
+    int fd, serial;
+<br>
+    fd = open("/dev/ttyS0", O_RDONLY);
+<br>
+    ioctl(fd, TIOCMGET, &amp;serial);
+<br>
+    if (serial &amp; TIOCM_DTR)
+<br>
+        puts("TIOCM_DTR is set");
+<br>
+    else
+<br>
+        puts("TIOCM_DTR is not set");
+<br>
+    close(fd);
+}
+</pre>
+<p class="Pp">Get or set arbitrary baudrate on the serial port.</p>
+<p class="Pp"></p>
+<pre>/* SPDX-License-Identifier: GPL-2.0-or-later */
+#include &lt;asm/termbits.h&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;sys/ioctl.h&gt;
+#include &lt;unistd.h&gt;
+int
+main(int argc, char *argv[])
+{
+#if !defined BOTHER
+<br>
+    fprintf(stderr, "BOTHER is unsupported\n");
+<br>
+    /* Program may fallback to TCGETS/TCSETS with Bnnn constants */
+<br>
+    exit(EXIT_FAILURE);
+#else
+<br>
+    /* Declare tio structure, its type depends on supported ioctl */
+# if defined TCGETS2
+<br>
+    struct termios2 tio;
+# else
+<br>
+    struct termios tio;
+# endif
+<br>
+    int fd, rc;
+<br>
+    if (argc != 2 &amp;&amp; argc != 3 &amp;&amp; argc != 4) {
+<br>
+        fprintf(stderr, "Usage: %s device [output [input] ]\n", argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    fd = open(argv[1], O_RDWR | O_NONBLOCK | O_NOCTTY);
+<br>
+    if (fd &lt; 0) {
+<br>
+        perror("open");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    /* Get the current serial port settings via supported ioctl */
+# if defined TCGETS2
+<br>
+    rc = ioctl(fd, TCGETS2, &amp;tio);
+# else
+<br>
+    rc = ioctl(fd, TCGETS, &amp;tio);
+# endif
+<br>
+    if (rc) {
+<br>
+        perror("TCGETS");
+<br>
+        close(fd);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    /* Change baud rate when more arguments were provided */
+<br>
+    if (argc == 3 || argc == 4) {
+<br>
+        /* Clear the current output baud rate and fill a new value */
+<br>
+        tio.c_cflag &amp;= ~CBAUD;
+<br>
+        tio.c_cflag |= BOTHER;
+<br>
+        tio.c_ospeed = atoi(argv[2]);
+<br>
+        /* Clear the current input baud rate and fill a new value */
+<br>
+        tio.c_cflag &amp;= ~(CBAUD &lt;&lt; IBSHIFT);
+<br>
+        tio.c_cflag |= BOTHER &lt;&lt; IBSHIFT;
+<br>
+        /* When 4th argument is not provided reuse output baud rate */
+<br>
+        tio.c_ispeed = (argc == 4) ? atoi(argv[3]) : atoi(argv[2]);
+<br>
+        /* Set new serial port settings via supported ioctl */
+# if defined TCSETS2
+<br>
+        rc = ioctl(fd, TCSETS2, &amp;tio);
+# else
+<br>
+        rc = ioctl(fd, TCSETS, &amp;tio);
+# endif
+<br>
+        if (rc) {
+<br>
+            perror("TCSETS");
+<br>
+            close(fd);
+<br>
+            exit(EXIT_FAILURE);
+<br>
+        }
+<br>
+        /* And get new values which were really configured */
+# if defined TCGETS2
+<br>
+        rc = ioctl(fd, TCGETS2, &amp;tio);
+# else
+<br>
+        rc = ioctl(fd, TCGETS, &amp;tio);
+# endif
+<br>
+        if (rc) {
+<br>
+            perror("TCGETS");
+<br>
+            close(fd);
+<br>
+            exit(EXIT_FAILURE);
+<br>
+        }
+<br>
+    }
+<br>
+    close(fd);
+<br>
+    printf("output baud rate: %u\n", tio.c_ospeed);
+<br>
+    printf("input baud rate: %u\n", tio.c_ispeed);
+<br>
+    exit(EXIT_SUCCESS);
+#endif
+}
+</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>ldattach</b>(8), <b>ioctl</b>(2), <b>ioctl_console</b>(2),
+    <b>termios</b>(3), <b>pty</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/d1d22bddbec863b8d629a35738f2a4f5d0ceff1a">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>AIO_FSYNC(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">AIO_FSYNC(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">AIO_FSYNC(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">aio_fsync — asynchronous file synchronization</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;aio.h&gt;</pre>
+<pre>int aio_fsync(int <i>op</i>, struct aiocb *<i>aiocbp</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>aio_fsync</i>() function shall asynchronously perform a
+    file synchronization operation, as specified by the <i>op</i> argument, for
+    I/O operations associated with the file indicated by the file descriptor
+    <i>aio_fildes</i> member of the <b>aiocb</b> structure referenced by the
+    <i>aiocbp</i> argument and queued at the time of the call to
+    <i>aio_fsync</i>(). The function call shall return when the synchronization
+    request has been initiated or queued to the file or device (even when the
+    data cannot be synchronized immediately).</p>
+<p class="Pp">If <i>op</i> is O_DSYNC, all currently queued I/O operations shall
+    be completed as if by a call to <i>fdatasync</i>(); that is, as defined for
+    synchronized I/O data integrity completion.</p>
+<p class="Pp">If <i>op</i> is O_SYNC, all currently queued I/O operations shall
+    be completed as if by a call to <i>fsync</i>(); that is, as defined for
+    synchronized I/O file integrity completion. If the <i>aio_fsync</i>()
+    function fails, or if the operation queued by <i>aio_fsync</i>() fails, then
+    outstanding I/O operations are not guaranteed to have been completed.</p>
+<p class="Pp">If <i>aio_fsync</i>() succeeds, then it is only the I/O that was
+    queued at the time of the call to <i>aio_fsync</i>() that is guaranteed to
+    be forced to the relevant completion state. The completion of subsequent I/O
+    on the file descriptor is not guaranteed to be completed in a synchronized
+    fashion.</p>
+<p class="Pp">The <i>aiocbp</i> argument refers to an asynchronous I/O control
+    block. The <i>aiocbp</i> value may be used as an argument to
+    <i>aio_error</i>() and <i>aio_return</i>() in order to determine the error
+    status and return status, respectively, of the asynchronous operation while
+    it is proceeding. When the request is queued, the error status for the
+    operation is <b>[EINPROGRESS]</b>. When all data has been successfully
+    transferred, the error status shall be reset to reflect the success or
+    failure of the operation. If the operation does not complete successfully,
+    the error status for the operation shall be set to indicate the error. The
+    <i>aio_sigevent</i> member determines the asynchronous notification to occur
+    as specified in <i>Section 2.4.1</i>, <i>Signal Generation and Delivery</i>
+    when all operations have achieved synchronized I/O completion. All other
+    members of the structure referenced by <i>aiocbp</i> are ignored. If the
+    control block referenced by <i>aiocbp</i> becomes an illegal address prior
+    to asynchronous I/O completion, then the behavior is undefined.</p>
+<p class="Pp">If the <i>aio_fsync</i>() function fails or <i>aiocbp</i>
+    indicates an error condition, data is not guaranteed to have been
+    successfully transferred.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <i>aio_fsync</i>() function shall return the value 0 if the
+    I/O operation is successfully queued; otherwise, the function shall return
+    the value -1 and set <i>errno</i> to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>aio_fsync</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>The requested asynchronous operation was not queued due to temporary
+      resource limitations.</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The <i>aio_fildes</i> member of the <b>aiocb</b> structure referenced by
+      the <i>aiocbp</i> argument is not a valid file descriptor.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>This implementation does not support synchronized I/O for this file.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>The <i>aio_fildes</i> member of the <b>aiocb</b> structure refers to a
+      file on which an <i>fsync</i>() operation is not possible.</dd>
+  <dt id="EINVAL~3"><a class="permalink" href="#EINVAL~3"><b>EINVAL</b></a></dt>
+  <dd>A value of <i>op</i> other than O_DSYNC or O_SYNC was specified, or
+      O_DSYNC was specified and the implementation does not provide runtime
+      support for the Synchronized Input and Output option, or O_SYNC was
+      specified and the implementation does not provide runtime support for the
+      File Synchronization option.</dd>
+</dl>
+<p class="Pp">In the event that any of the queued I/O operations fail,
+    <i>aio_fsync</i>() shall return the error condition defined for
+    <i>read</i>() and <i>write</i>(). The error is returned in the error status
+    for the asynchronous operation, which can be retrieved using
+    <i>aio_error</i>().</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">Note that even if the file descriptor is not open for writing, if
+    there are any pending write requests on the underlying file, then that I/O
+    will be completed prior to the return of a call to <i>aio_error</i>() or
+    <i>aio_return</i>() indicating that the operation has completed.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>aio_error</i>()</i>, <i><i>aio_return</i>()</i>,
+    <i><i>fcntl</i>()</i>, <i><i>fdatasync</i>()</i>, <i><i>fsync</i>()</i>,
+    <i><i>open</i>()</i>, <i><i>read</i>()</i>, <i><i>write</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;aio.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

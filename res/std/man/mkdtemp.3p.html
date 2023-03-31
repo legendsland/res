@@ -1,0 +1,220 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/800fcedbf614c21b2587aee32e3f0412aa83aec1">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>MKDTEMP(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">MKDTEMP(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">MKDTEMP(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">mkdtemp, mkstemp — create a unique directory or file</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;stdlib.h&gt;</pre>
+<pre>char *mkdtemp(char *<i>template</i>);
+int mkstemp(char *<i>template</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>mkdtemp</i>() function shall create a directory with a
+    unique name derived from <i>template</i>. The application shall ensure that
+    the string provided in <i>template</i> is a pathname ending with at least
+    six trailing <b>'X'</b> characters. The <i>mkdtemp</i>() function shall
+    modify the contents of <i>template</i> by replacing six or more <b>'X'</b>
+    characters at the end of the pathname with the same number of characters
+    from the portable filename character set. The characters shall be chosen
+    such that the resulting pathname does not duplicate the name of an existing
+    file at the time of the call to <i>mkdtemp</i>(). The <i>mkdtemp</i>()
+    function shall use the resulting pathname to create the new directory as if
+    by a call to:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>mkdir(pathname, S_IRWXU)</pre>
+</div>
+<p class="Pp">The <i>mkstemp</i>() function shall create a regular file with a
+    unique name derived from <i>template</i> and return a file descriptor for
+    the file open for reading and writing. The application shall ensure that the
+    string provided in <i>template</i> is a pathname ending with at least six
+    trailing <b>'X'</b> characters. The <i>mkstemp</i>() function shall modify
+    the contents of <i>template</i> by replacing six or more <b>'X'</b>
+    characters at the end of the pathname with the same number of characters
+    from the portable filename character set. The characters shall be chosen
+    such that the resulting pathname does not duplicate the name of an existing
+    file at the time of the call to <i>mkstemp</i>(). The <i>mkstemp</i>()
+    function shall use the resulting pathname to create the file, and obtain a
+    file descriptor for it, as if by a call to:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>open(pathname, O_RDWR|O_CREAT|O_EXCL, S_IRUSR|S_IWUSR)</pre>
+</div>
+<p class="Pp">By behaving as if the O_EXCL flag for <i>open</i>() is set, the
+    function prevents any possible race condition between testing whether the
+    file exists and opening it for use.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, the <i>mkdtemp</i>() function shall
+    return the value of <i>template</i>. Otherwise, it shall return a null
+    pointer and shall set <i>errno</i> to indicate the error.</p>
+<p class="Pp">Upon successful completion, the <i>mkstemp</i>() function shall
+    return an open file descriptor. Otherwise, it shall return -1 and shall set
+    <i>errno</i> to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>mkdtemp</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>Search permission is denied on a component of the path prefix, or write
+      permission is denied on the parent directory of the directory to be
+      created.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The string pointed to by <i>template</i> does not end in
+      <b>"XXXXXX"</b>.</dd>
+  <dt id="ELOOP"><a class="permalink" href="#ELOOP"><b>ELOOP</b></a></dt>
+  <dd>A loop exists in symbolic links encountered during resolution of the path
+      of the directory to be created.</dd>
+  <dt id="EMLINK"><a class="permalink" href="#EMLINK"><b>EMLINK</b></a></dt>
+  <dd>The link count of the parent directory would exceed {LINK_MAX}.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of a component of a pathname is longer than {NAME_MAX}.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>A component of the path prefix specified by the <i>template</i> argument
+      does not name an existing directory.</dd>
+  <dt id="ENOSPC"><a class="permalink" href="#ENOSPC"><b>ENOSPC</b></a></dt>
+  <dd>The file system does not contain enough space to hold the contents of the
+      new directory or to extend the parent directory of the new directory.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>A component of the path prefix names an existing file that is neither a
+      directory nor a symbolic link to a directory.</dd>
+  <dt id="EROFS"><a class="permalink" href="#EROFS"><b>EROFS</b></a></dt>
+  <dd>The parent directory resides on a read-only file system.</dd>
+</dl>
+<p class="Pp">The <i>mkdtemp</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="ELOOP~2"><a class="permalink" href="#ELOOP~2"><b>ELOOP</b></a></dt>
+  <dd>More than {SYMLOOP_MAX} symbolic links were encountered during resolution
+      of the path of the directory to be created.</dd>
+  <dt id="ENAMETOOLONG~2"><a class="permalink" href="#ENAMETOOLONG~2"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of a pathname exceeds {PATH_MAX}, or pathname resolution of a
+      symbolic link produced an intermediate result with a length that exceeds
+      {PATH_MAX}.</dd>
+</dl>
+<p class="Pp">The error conditions for the <i>mkstemp</i>() function are defined
+    in <i><i>open</i>()</i>.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Generating_a_Pathname"><a class="permalink" href="#Generating_a_Pathname">Generating
+  a Pathname</a></h2>
+<p class="Pp">The following example creates a file with a 10-character name
+    beginning with the characters <b>"file"</b> and opens the file for
+    reading and writing. The value returned as the value of <i>fd</i> is a file
+    descriptor that identifies the file.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;stdlib.h&gt;
+...
+char template[] = "/tmp/fileXXXXXX";
+int fd;</pre>
+<pre>fd = mkstemp(template);</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">It is possible to run out of letters.</p>
+<p class="Pp">Portable applications should pass exactly six trailing <b>'X'</b>s
+    in the template and no more; implementations may treat any additional
+    trailing <b>'X'</b>s as either a fixed or replaceable part of the template.
+    To be sure of only passing six, a fixed string of at least one
+    non-<b>'X'</b> character should precede the six <b>'X'</b>s.</p>
+<p class="Pp">Since <b>'X'</b> is in the portable filename character set, some
+    of the replacement characters can be <b>'X'</b>s, leaving part (or even all)
+    of the template effectively unchanged.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>getpid</i>()</i>, <i><i>mkdir</i>()</i>,
+    <i><i>open</i>()</i>, <i><i>tmpfile</i>()</i>, <i><i>tmpnam</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;stdlib.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

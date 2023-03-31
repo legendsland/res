@@ -1,0 +1,563 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2014, Heinrich Schuchardt <xypron.glpk@gmx.de>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+ --><head>
+<meta name="dc.identifier" content="res/d9c98f2b0daa7701ca99667d686d2866926bcb5f">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>ioctl_fat(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">ioctl_fat(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">ioctl_fat(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">ioctl_fat - manipulating the FAT filesystem</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;linux/msdos_fs.h&gt;</b>     /* Definition of [<b>V</b>]<b>FAT_*</b> and
+<b>                                   ATTR_* </b>constants<b>*/"</b>
+<b>#include &lt;sys/ioctl.h&gt;</b></pre>
+<pre><b>int ioctl(int </b><i>fd</i><b>, FAT_IOCTL_GET_ATTRIBUTES, uint32_t *</b><i>attr</i><b>);</b>
+<b>int ioctl(int </b><i>fd</i><b>, FAT_IOCTL_SET_ATTRIBUTES, uint32_t *</b><i>attr</i><b>);</b>
+<b>int ioctl(int </b><i>fd</i><b>, FAT_IOCTL_GET_VOLUME_ID, uint32_t *</b><i>id</i><b>);</b>
+<b>int ioctl(int </b><i>fd</i><b>, VFAT_IOCTL_READDIR_BOTH,</b>
+<b>          struct __fat_dirent </b><i>entry</i><b>[2]);</b>
+<b>int ioctl(int </b><i>fd</i><b>, VFAT_IOCTL_READDIR_SHORT,</b>
+<b>          struct __fat_dirent </b><i>entry</i><b>[2]);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>ioctl</b>(2) system call can be used to read and write
+    metadata of FAT filesystems that are not accessible using other system
+    calls.</p>
+<section class="Ss">
+<h2 class="Ss" id="Reading_and_setting_file_attributes"><a class="permalink" href="#Reading_and_setting_file_attributes">Reading
+  and setting file attributes</a></h2>
+<p class="Pp">Files and directories in the FAT filesystem possess an attribute
+    bit mask that can be read with <b>FAT_IOCTL_GET_ATTRIBUTES</b> and written
+    with <b>FAT_IOCTL_SET_ATTRIBUTES</b>.</p>
+<p class="Pp">The <i>fd</i> argument contains a file descriptor for a file or
+    directory. It is sufficient to create the file descriptor by calling
+    <b>open</b>(2) with the <b>O_RDONLY</b> flag.</p>
+<p class="Pp">The <i>attr</i> argument contains a pointer to a bit mask. The
+    bits of the bit mask are:</p>
+<dl class="Bl-tag">
+  <dt id="ATTR_RO"><a class="permalink" href="#ATTR_RO"><b>ATTR_RO</b></a></dt>
+  <dd>This bit specifies that the file or directory is read-only.</dd>
+  <dt id="ATTR_HIDDEN"><a class="permalink" href="#ATTR_HIDDEN"><b>ATTR_HIDDEN</b></a></dt>
+  <dd>This bit specifies that the file or directory is hidden.</dd>
+  <dt id="ATTR_SYS"><a class="permalink" href="#ATTR_SYS"><b>ATTR_SYS</b></a></dt>
+  <dd>This bit specifies that the file is a system file.</dd>
+  <dt id="ATTR_VOLUME"><a class="permalink" href="#ATTR_VOLUME"><b>ATTR_VOLUME</b></a></dt>
+  <dd>This bit specifies that the file is a volume label. This attribute is
+      read-only.</dd>
+  <dt id="ATTR_DIR"><a class="permalink" href="#ATTR_DIR"><b>ATTR_DIR</b></a></dt>
+  <dd>This bit specifies that this is a directory. This attribute is
+    read-only.</dd>
+  <dt id="ATTR_ARCH"><a class="permalink" href="#ATTR_ARCH"><b>ATTR_ARCH</b></a></dt>
+  <dd>This bit indicates that this file or directory should be archived. It is
+      set when a file is created or modified. It is reset by an archiving
+      system.</dd>
+</dl>
+<p class="Pp">The zero value <b>ATTR_NONE</b> can be used to indicate that no
+    attribute bit is set.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss">Reading the volume ID</h2>
+<p class="Pp">FAT filesystems are identified by a volume ID. The volume ID can
+    be read with <b>FAT_IOCTL_GET_VOLUME_ID</b>.</p>
+<p class="Pp">The <i>fd</i> argument can be a file descriptor for any file or
+    directory of the filesystem. It is sufficient to create the file descriptor
+    by calling <b>open</b>(2) with the <b>O_RDONLY</b> flag.</p>
+<p class="Pp">The <i>id</i> argument is a pointer to the field that will be
+    filled with the volume ID. Typically the volume ID is displayed to the user
+    as a group of two 16-bit fields:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>printf("Volume ID %04x-%04x\n", id &gt;&gt; 16, id &amp; 0xFFFF);
+</pre>
+<br>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Reading_short_filenames_of_a_directory"><a class="permalink" href="#Reading_short_filenames_of_a_directory">Reading
+  short filenames of a directory</a></h2>
+<p class="Pp">A file or directory on a FAT filesystem always has a short
+    filename consisting of up to 8 capital letters, optionally followed by a
+    period and up to 3 capital letters for the file extension. If the actual
+    filename does not fit into this scheme, it is stored as a long filename of
+    up to 255 UTF-16 characters.</p>
+<p class="Pp">The short filenames in a directory can be read with
+    <b>VFAT_IOCTL_READDIR_SHORT</b>. <b>VFAT_IOCTL_READDIR_BOTH</b> reads both
+    the short and the long filenames.</p>
+<p class="Pp">The <i>fd</i> argument must be a file descriptor for a directory.
+    It is sufficient to create the file descriptor by calling <b>open</b>(2)
+    with the <b>O_RDONLY</b> flag. The file descriptor can be used only once to
+    iterate over the directory entries by calling <b>ioctl</b>(2)
+  repeatedly.</p>
+<p class="Pp">The <i>entry</i> argument is a two-element array of the following
+    structures:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct __fat_dirent {
+<br>
+    long            d_ino;
+<br>
+    __kernel_off_t  d_off;
+<br>
+    uint32_t short  d_reclen;
+<br>
+    char            d_name[256];
+};
+</pre>
+<br>
+<p class="Pp">The first entry in the array is for the short filename. The second
+    entry is for the long filename.</p>
+<p class="Pp">The <i>d_ino</i> and <i>d_off</i> fields are filled only for long
+    filenames. The <i>d_ino</i> field holds the inode number of the directory.
+    The <i>d_off</i> field holds the offset of the file entry in the directory.
+    As these values are not available for short filenames, the user code should
+    simply ignore them.</p>
+<p class="Pp">The field <i>d_reclen</i> contains the length of the filename in
+    the field <i>d_name</i>. To keep backward compatibility, a length of 0 for
+    the short filename signals that the end of the directory has been reached.
+    However, the preferred method for detecting the end of the directory is to
+    test the <b>ioctl</b>(2) return value. If no long filename exists, field
+    <i>d_reclen</i> is set to 0 and <i>d_name</i> is a character string of
+    length 0 for the long filename.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On error, -1 is returned, and <i>errno</i> is set to indicate the
+    error.</p>
+<p class="Pp">For <b>VFAT_IOCTL_READDIR_BOTH</b> and
+    <b>VFAT_IOCTL_READDIR_SHORT</b> a return value of 1 signals that a new
+    directory entry has been read and a return value of 0 signals that the end
+    of the directory has been reached.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>This error is returned by <b>VFAT_IOCTL_READDIR_BOTH</b> and
+      <b>VFAT_IOCTL_READDIR_SHORT</b> if the file descriptor <i>fd</i> refers to
+      a removed, but still open directory.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>This error is returned by <b>VFAT_IOCTL_READDIR_BOTH</b> and
+      <b>VFAT_IOCTL_READDIR_SHORT</b> if the file descriptor <i>fd</i> does not
+      refer to a directory.</dd>
+  <dt id="ENOTTY"><a class="permalink" href="#ENOTTY"><b>ENOTTY</b></a></dt>
+  <dd>The file descriptor <i>fd</i> does not refer to an object in a FAT
+      filesystem.</dd>
+</dl>
+<p class="Pp">For further error values, see <b>ioctl</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>VFAT_IOCTL_READDIR_BOTH</b> and <b>VFAT_IOCTL_READDIR_SHORT</b>
+    first appeared in Linux 2.0.</p>
+<p class="Pp"><b>FAT_IOCTL_GET_ATTRIBUTES</b> and
+    <b>FAT_IOCTL_SET_ATTRIBUTES</b> first appeared in Linux 2.6.12.</p>
+<p class="Pp"><b>FAT_IOCTL_GET_VOLUME_ID</b> was introduced in version 3.11 of
+    the Linux kernel.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This API is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Toggling_the_archive_flag"><a class="permalink" href="#Toggling_the_archive_flag">Toggling
+  the archive flag</a></h2>
+<p class="Pp">The following program demonstrates the usage of <b>ioctl</b>(2) to
+    manipulate file attributes. The program reads and displays the archive
+    attribute of a file. After inverting the value of the attribute, the program
+    reads and displays the attribute again.</p>
+<p class="Pp">The following was recorded when applying the program for the file
+    <i>/mnt/user/foo</i>:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre># ./toggle_fat_archive_flag /mnt/user/foo
+Archive flag is set
+Toggling archive flag
+Archive flag is not set
+</pre>
+<br>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Program_source_(toggle_fat_archive_flag.c)"><a class="permalink" href="#Program_source_(toggle_fat_archive_flag.c)">Program
+  source (toggle_fat_archive_flag.c)</a></h2>
+<p class="Pp"></p>
+<pre>#include &lt;fcntl.h&gt;
+#include &lt;linux/msdos_fs.h&gt;
+#include &lt;stdint.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;sys/ioctl.h&gt;
+#include &lt;unistd.h&gt;
+/*
+<br>
+ * Read file attributes of a file on a FAT filesystem.
+<br>
+ * Output the state of the archive flag.
+<br>
+ */
+static uint32_t
+readattr(int fd)
+{
+<br>
+    int       ret;
+<br>
+    uint32_t  attr;
+<br>
+    ret = ioctl(fd, FAT_IOCTL_GET_ATTRIBUTES, &amp;attr);
+<br>
+    if (ret == -1) {
+<br>
+        perror("ioctl");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    if (attr &amp; ATTR_ARCH)
+<br>
+        printf("Archive flag is set\n");
+<br>
+    else
+<br>
+        printf("Archive flag is not set\n");
+<br>
+    return attr;
+}
+int
+main(int argc, char *argv[])
+{
+<br>
+    int       fd;
+<br>
+    int       ret;
+<br>
+    uint32_t  attr;
+<br>
+    if (argc != 2) {
+<br>
+        printf("Usage: %s FILENAME\n", argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    fd = open(argv[1], O_RDONLY);
+<br>
+    if (fd == -1) {
+<br>
+        perror("open");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    /*
+<br>
+     * Read and display the FAT file attributes.
+<br>
+     */
+<br>
+    attr = readattr(fd);
+<br>
+    /*
+<br>
+     * Invert archive attribute.
+<br>
+     */
+<br>
+    printf("Toggling archive flag\n");
+<br>
+    attr ^= ATTR_ARCH;
+<br>
+    /*
+<br>
+     * Write the changed FAT file attributes.
+<br>
+     */
+<br>
+    ret = ioctl(fd, FAT_IOCTL_SET_ATTRIBUTES, &amp;attr);
+<br>
+    if (ret == -1) {
+<br>
+        perror("ioctl");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    /*
+<br>
+     * Read and display the FAT file attributes.
+<br>
+     */
+<br>
+    readattr(fd);
+<br>
+    close(fd);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+<section class="Ss">
+<h2 class="Ss">Reading the volume ID</h2>
+<p class="Pp">The following program demonstrates the use of <b>ioctl</b>(2) to
+    display the volume ID of a FAT filesystem.</p>
+<p class="Pp">The following output was recorded when applying the program for
+    directory <i>/mnt/user</i>:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ ./display_fat_volume_id /mnt/user
+Volume ID 6443-6241
+</pre>
+<br>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Program_source_(display_fat_volume_id.c)"><a class="permalink" href="#Program_source_(display_fat_volume_id.c)">Program
+  source (display_fat_volume_id.c)</a></h2>
+<p class="Pp"></p>
+<pre>#include &lt;fcntl.h&gt;
+#include &lt;linux/msdos_fs.h&gt;
+#include &lt;stdint.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;sys/ioctl.h&gt;
+#include &lt;unistd.h&gt;
+int
+main(int argc, char *argv[])
+{
+<br>
+    int       fd;
+<br>
+    int       ret;
+<br>
+    uint32_t  id;
+<br>
+    if (argc != 2) {
+<br>
+        printf("Usage: %s FILENAME\n", argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    fd = open(argv[1], O_RDONLY);
+<br>
+    if (fd == -1) {
+<br>
+        perror("open");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    /*
+<br>
+     * Read volume ID.
+<br>
+     */
+<br>
+    ret = ioctl(fd, FAT_IOCTL_GET_VOLUME_ID, &amp;id);
+<br>
+    if (ret == -1) {
+<br>
+        perror("ioctl");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    /*
+<br>
+     * Format the output as two groups of 16 bits each.
+<br>
+     */
+<br>
+    printf("Volume ID %04x-%04x\n", id &gt;&gt; 16, id &amp; 0xFFFF);
+<br>
+    close(fd);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Listing_a_directory"><a class="permalink" href="#Listing_a_directory">Listing
+  a directory</a></h2>
+<p class="Pp">The following program demonstrates the use of <b>ioctl</b>(2) to
+    list a directory.</p>
+<p class="Pp">The following was recorded when applying the program to the
+    directory <i>/mnt/user</i>:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>./fat_dir /mnt/user</b>
+. -&gt; ''
+.. -&gt; ''
+ALONGF~1.TXT -&gt; 'a long filename.txt'
+UPPER.TXT -&gt; ''
+LOWER.TXT -&gt; 'lower.txt'
+</pre>
+<br>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<br>
+<pre>#include &lt;fcntl.h&gt;
+#include &lt;linux/msdos_fs.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;sys/ioctl.h&gt;
+#include &lt;unistd.h&gt;
+int
+main(int argc, char *argv[])
+{
+<br>
+    int                  fd;
+<br>
+    int                  ret;
+<br>
+    struct __fat_dirent  entry[2];
+<br>
+    if (argc != 2) {
+<br>
+        printf("Usage: %s DIRECTORY\n", argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    /*
+<br>
+     * Open file descriptor for the directory.
+<br>
+     */
+<br>
+    fd = open(argv[1], O_RDONLY | O_DIRECTORY);
+<br>
+    if (fd == -1) {
+<br>
+        perror("open");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    for (;;) {
+<br>
+        /*
+<br>
+         * Read next directory entry.
+<br>
+         */
+<br>
+        ret = ioctl(fd, VFAT_IOCTL_READDIR_BOTH, entry);
+<br>
+        /*
+<br>
+         * If an error occurs, the return value is -1.
+<br>
+         * If the end of the directory list has been reached,
+<br>
+         * the return value is 0.
+<br>
+         * For backward compatibility the end of the directory
+<br>
+         * list is also signaled by d_reclen == 0.
+<br>
+         */
+<br>
+        if (ret &lt; 1)
+<br>
+            break;
+<br>
+        /*
+<br>
+         * Write both the short name and the long name.
+<br>
+         */
+<br>
+        printf("%s -&gt; '%s'\n", entry[0].d_name, entry[1].d_name);
+<br>
+    }
+<br>
+    if (ret == -1) {
+<br>
+        perror("VFAT_IOCTL_READDIR_BOTH");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    /*
+<br>
+     * Close the file descriptor.
+<br>
+     */
+<br>
+    close(fd);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+<br>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>ioctl</b>(2)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

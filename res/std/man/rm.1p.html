@@ -1,0 +1,402 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/7e185d87f2a4c7e206a8905c01842f33a9437431">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>RM(1P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">RM(1P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">RM(1P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">rm — remove directory entries</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>rm <b>[</b>-iRr<b>]</b><i> file</i>...</pre>
+<pre>rm -f <b>[</b>-iRr<b>]</b><i> </i><b>[</b><i>file</i>...<b>]</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>rm</i> utility shall remove the directory entry specified
+    by each <i>file</i> argument.</p>
+<p class="Pp">If either of the files dot or dot-dot are specified as the
+    basename portion of an operand (that is, the final pathname component) or if
+    an operand resolves to the root directory, <i>rm</i> shall write a
+    diagnostic message to standard error and do nothing more with such
+  operands.</p>
+<p class="Pp">For each <i>file</i> the following steps shall be taken:</p>
+<dl class="Bl-tag">
+  <dt> 1.</dt>
+  <dd>If the <i>file</i> does not exist:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="a."><a class="permalink" href="#a."> a.</a></dt>
+  <dd>If the <b>-f</b> option is not specified, <i>rm</i> shall write a
+      diagnostic message to standard error.</dd>
+  <dt id="b."><a class="permalink" href="#b."> b.</a></dt>
+  <dd>Go on to any remaining <i>files</i>.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt> 2.</dt>
+  <dd>If <i>file</i> is of type directory, the following steps shall be
+    taken:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="a.~2"><a class="permalink" href="#a.~2"> a.</a></dt>
+  <dd>If neither the <b>-R</b> option nor the <b>-r</b> option is specified,
+      <i>rm</i> shall write a diagnostic message to standard error, do nothing
+      more with <i>file</i>, and go on to any remaining files.</dd>
+  <dt id="b.~2"><a class="permalink" href="#b.~2"> b.</a></dt>
+  <dd>If <i>file</i> is an empty directory, <i>rm</i> may skip to step 2d. If
+      the <b>-f</b> option is not specified, and either the permissions of
+      <i>file</i> do not permit writing and the standard input is a terminal or
+      the <b>-i</b> option is specified, <i>rm</i> shall write a prompt to
+      standard error and read a line from the standard input. If the response is
+      not affirmative, <i>rm</i> shall do nothing more with the current file and
+      go on to any remaining files.</dd>
+  <dt id="c."><a class="permalink" href="#c."> c.</a></dt>
+  <dd>For each entry contained in <i>file</i>, other than dot or dot-dot, the
+      four steps listed here (1 to 4) shall be taken with the entry as if it
+      were a <i>file</i> operand. The <i>rm</i> utility shall not traverse
+      directories by following symbolic links into other parts of the hierarchy,
+      but shall remove the links themselves.</dd>
+  <dt id="d."><a class="permalink" href="#d."> d.</a></dt>
+  <dd>If the <b>-i</b> option is specified, <i>rm</i> shall write a prompt to
+      standard error and read a line from the standard input. If the response is
+      not affirmative, <i>rm</i> shall do nothing more with the current file,
+      and go on to any remaining files.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt> 3.</dt>
+  <dd>If <i>file</i> is not of type directory, the <b>-f</b> option is not
+      specified, and either the permissions of <i>file</i> do not permit writing
+      and the standard input is a terminal or the <b>-i</b> option is specified,
+      <i>rm</i> shall write a prompt to the standard error and read a line from
+      the standard input. If the response is not affirmative, <i>rm</i> shall do
+      nothing more with the current file and go on to any remaining files.</dd>
+  <dt> 4.</dt>
+  <dd>If the current file is a directory, <i>rm</i> shall perform actions
+      equivalent to the <i>rmdir</i>() function defined in the System Interfaces
+      volume of POSIX.1‐2017 called with a pathname of the current file
+      used as the <i>path</i> argument. If the current file is not a directory,
+      <i>rm</i> shall perform actions equivalent to the <i>unlink</i>() function
+      defined in the System Interfaces volume of POSIX.1‐2017 called with
+      a pathname of the current file used as the <i>path</i> argument.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">If this fails for any reason, <i>rm</i> shall write a diagnostic
+    message to standard error, do nothing more with the current file, and go on
+    to any remaining files.</p>
+</div>
+<p class="Pp">The <i>rm</i> utility shall be able to descend to arbitrary depths
+    in a file hierarchy, and shall not fail due to path length limitations
+    (unless an operand specified by the user exceeds system limitations).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OPTIONS"><a class="permalink" href="#OPTIONS">OPTIONS</a></h1>
+<p class="Pp">The <i>rm</i> utility shall conform to the Base Definitions volume
+    of POSIX.1‐2017, <i>Section 12.2</i>, <i>Utility Syntax
+    Guidelines</i>.</p>
+<p class="Pp">The following options shall be supported:</p>
+<dl class="Bl-tag">
+  <dt id="f"><a class="permalink" href="#f"><b>-f</b></a></dt>
+  <dd>Do not prompt for confirmation. Do not write diagnostic messages or modify
+      the exit status in the case of no file operands, or in the case of
+      operands that do not exist. Any previous occurrences of the <b>-i</b>
+      option shall be ignored.</dd>
+  <dt id="i"><a class="permalink" href="#i"><b>-i</b></a></dt>
+  <dd>Prompt for confirmation as described previously. Any previous occurrences
+      of the <b>-f</b> option shall be ignored.</dd>
+  <dt id="R"><a class="permalink" href="#R"><b>-R</b></a></dt>
+  <dd>Remove file hierarchies. See the DESCRIPTION.</dd>
+  <dt id="r"><a class="permalink" href="#r"><b>-r</b></a></dt>
+  <dd>Equivalent to <b>-R</b>.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OPERANDS"><a class="permalink" href="#OPERANDS">OPERANDS</a></h1>
+<p class="Pp">The following operand shall be supported:</p>
+<dl class="Bl-tag">
+  <dt id="file"><a class="permalink" href="#file"><i>file</i></a></dt>
+  <dd>A pathname of a directory entry to be removed.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDIN"><a class="permalink" href="#STDIN">STDIN</a></h1>
+<p class="Pp">The standard input shall be used to read an input line in response
+    to each prompt specified in the STDOUT section. Otherwise, the standard
+    input shall not be used.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="INPUT_FILES"><a class="permalink" href="#INPUT_FILES">INPUT
+  FILES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ENVIRONMENT_VARIABLES"><a class="permalink" href="#ENVIRONMENT_VARIABLES">ENVIRONMENT
+  VARIABLES</a></h1>
+<p class="Pp">The following environment variables shall affect the execution of
+    <i>rm</i>:</p>
+<dl class="Bl-tag">
+  <dt id="LANG"><a class="permalink" href="#LANG"><i>LANG</i></a></dt>
+  <dd>Provide a default value for the internationalization variables that are
+      unset or null. (See the Base Definitions volume of POSIX.1‐2017,
+      <i>Section 8.2</i>, <i>Internationalization Variables</i> for the
+      precedence of internationalization variables used to determine the values
+      of locale categories.)</dd>
+  <dt id="LC_ALL"><a class="permalink" href="#LC_ALL"><i>LC_ALL</i></a></dt>
+  <dd>If set to a non-empty string value, override the values of all the other
+      internationalization variables.</dd>
+  <dt id="LC_COLLATE"><a class="permalink" href="#LC_COLLATE"><i>LC_COLLATE</i></a></dt>
+  <dd>
+    <br>
+    Determine the locale for the behavior of ranges, equivalence classes, and
+      multi-character collating elements used in the extended regular expression
+      defined for the <b>yesexpr</b> locale keyword in the <i>LC_MESSAGES</i>
+      category.</dd>
+  <dt id="LC_CTYPE"><a class="permalink" href="#LC_CTYPE"><i>LC_CTYPE</i></a></dt>
+  <dd>Determine the locale for the interpretation of sequences of bytes of text
+      data as characters (for example, single-byte as opposed to multi-byte
+      characters in arguments) and the behavior of character classes within
+      regular expressions used in the extended regular expression defined for
+      the <b>yesexpr</b> locale keyword in the <i>LC_MESSAGES</i> category.</dd>
+  <dt id="LC_MESSAGES"><a class="permalink" href="#LC_MESSAGES"><i>LC_MESSAGES</i></a></dt>
+  <dd>
+    <br>
+    Determine the locale used to process affirmative responses, and the locale
+      used to affect the format and contents of diagnostic messages and prompts
+      written to standard error.</dd>
+  <dt id="NLSPATH"><a class="permalink" href="#NLSPATH"><i>NLSPATH</i></a></dt>
+  <dd>Determine the location of message catalogs for the processing of
+      <i>LC_MESSAGES</i>.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ASYNCHRONOUS_EVENTS"><a class="permalink" href="#ASYNCHRONOUS_EVENTS">ASYNCHRONOUS
+  EVENTS</a></h1>
+<p class="Pp">Default.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDOUT"><a class="permalink" href="#STDOUT">STDOUT</a></h1>
+<p class="Pp">Not used.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STDERR"><a class="permalink" href="#STDERR">STDERR</a></h1>
+<p class="Pp">Prompts shall be written to standard error under the conditions
+    specified in the DESCRIPTION and OPTIONS sections. The prompts shall contain
+    the <i>file</i> pathname, but their format is otherwise unspecified. The
+    standard error also shall be used for diagnostic messages.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OUTPUT_FILES"><a class="permalink" href="#OUTPUT_FILES">OUTPUT
+  FILES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXTENDED_DESCRIPTION"><a class="permalink" href="#EXTENDED_DESCRIPTION">EXTENDED
+  DESCRIPTION</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXIT_STATUS"><a class="permalink" href="#EXIT_STATUS">EXIT
+  STATUS</a></h1>
+<p class="Pp">The following exit values shall be returned:</p>
+<dl class="Bl-tag">
+  <dt>&nbsp;0</dt>
+  <dd>Each directory entry was successfully removed, unless its removal was
+      canceled by a non-affirmative response to a prompt for confirmation.</dd>
+  <dt>&gt;0</dt>
+  <dd>An error occurred.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="CONSEQUENCES_OF_ERRORS"><a class="permalink" href="#CONSEQUENCES_OF_ERRORS">CONSEQUENCES
+  OF ERRORS</a></h1>
+<p class="Pp">Default.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The <i>rm</i> utility is forbidden to remove the names dot and
+    dot-dot in order to avoid the consequences of inadvertently doing something
+    like:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>rm -r .*</pre>
+</div>
+<p class="Pp">Some implementations do not permit the removal of the last link to
+    an executable binary file that is being executed; see the <b>[EBUSY]</b>
+    error in the <i>unlink</i>() function defined in the System Interfaces
+    volume of POSIX.1‐2017. Thus, the <i>rm</i> utility can fail to
+    remove such files.</p>
+<p class="Pp">The <b>-i</b> option causes <i>rm</i> to prompt and read the
+    standard input even if the standard input is not a terminal, but in the
+    absence of <b>-i</b> the mode prompting is not done when the standard input
+    is not a terminal.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<dl class="Bl-tag">
+  <dt> 1.</dt>
+  <dd>The following command:</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>rm a.out core</pre>
+</div>
+<p class="Pp">removes the directory entries: <b>a.out</b> and <b>core</b>.</p>
+</div>
+<dl class="Bl-tag">
+  <dt> 2.</dt>
+  <dd>The following command:</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>rm -Rf junk</pre>
+</div>
+<p class="Pp">removes the directory <b>junk</b> and all its contents, without
+    prompting.</p>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">For absolute clarity, paragraphs (2b) and (3) in the DESCRIPTION
+    of <i>rm</i> describing the behavior when prompting for confirmation, should
+    be interpreted in the following manner:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>if ((NOT f_option) AND
+<br>
+    ((not_writable AND input_is_terminal) OR i_option))</pre>
+</div>
+<p class="Pp">The exact format of the interactive prompts is unspecified. Only
+    the general nature of the contents of prompts are specified because
+    implementations may desire more descriptive prompts than those used on
+    historical implementations. Therefore, an application not using the
+    <b>-f</b> option, or using the <b>-i</b> option, relies on the system to
+    provide the most suitable dialog directly with the user, based on the
+    behavior specified.</p>
+<p class="Pp">The <b>-r</b> option is historical practice on all known systems.
+    The synonym <b>-R</b> option is provided for consistency with the other
+    utilities in this volume of POSIX.1‐2017 that provide options
+    requesting recursive descent through the file hierarchy.</p>
+<p class="Pp">The behavior of the <b>-f</b> option in historical versions of
+    <i>rm</i> is inconsistent. In general, along with ``forcing'' the unlink
+    without prompting for permission, it always causes diagnostic messages to be
+    suppressed and the exit status to be unmodified for nonexistent operands and
+    files that cannot be unlinked. In some versions, however, the <b>-f</b>
+    option suppresses usage messages and system errors as well. Suppressing such
+    messages is not a service to either shell scripts or users.</p>
+<p class="Pp">It is less clear that error messages regarding files that cannot
+    be unlinked (removed) should be suppressed. Although this is historical
+    practice, this volume of POSIX.1‐2017 does not permit the <b>-f</b>
+    option to suppress such messages.</p>
+<p class="Pp">When given the <b>-r</b> and <b>-i</b> options, historical
+    versions of <i>rm</i> prompt the user twice for each directory, once before
+    removing its contents and once before actually attempting to delete the
+    directory entry that names it. This allows the user to ``prune'' the file
+    hierarchy walk. Historical versions of <i>rm</i> were inconsistent in that
+    some did not do the former prompt for directories named on the command line
+    and others had obscure prompting behavior when the <b>-i</b> option was
+    specified and the permissions of the file did not permit writing. The POSIX
+    Shell and Utilities <i>rm</i> differs little from historic practice, but
+    does require that prompts be consistent. Historical versions of <i>rm</i>
+    were also inconsistent in that prompts were done to both standard output and
+    standard error. This volume of POSIX.1‐2017 requires that prompts be
+    done to standard error, for consistency with <i>cp</i> and <i>mv</i>, and to
+    allow historical extensions to <i>rm</i> that provide an option to list
+    deleted files on standard output.</p>
+<p class="Pp">The <i>rm</i> utility is required to descend to arbitrary depths
+    so that any file hierarchy may be deleted. This means, for example, that the
+    <i>rm</i> utility cannot run out of file descriptors during its descent
+    (that is, if the number of file descriptors is limited, <i>rm</i> cannot be
+    implemented in the historical fashion where one file descriptor is used per
+    directory level). Also, <i>rm</i> is not permitted to fail because of path
+    length restrictions, unless an operand specified by the user is longer than
+    {PATH_MAX}.</p>
+<p class="Pp">The <i>rm</i> utility removes symbolic links themselves, not the
+    files they refer to, as a consequence of the dependence on the
+    <i>unlink</i>() functionality, per the DESCRIPTION. When removing
+    hierarchies with <b>-r</b> or <b>-R</b>, the prohibition on following
+    symbolic links has to be made explicit.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>rmdir</i></i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Chapter
+    8</i>, <i>Environment Variables</i>, <i>Section 12.2</i>, <i>Utility Syntax
+    Guidelines</i></p>
+<p class="Pp">The System Interfaces volume of POSIX.1‐2017,
+    <i><i>remove</i>()</i>, <i><i>rmdir</i>()</i>, <i><i>unlink</i>()</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/bb57a56b9f42a742a4aaa1448d99ec85ddfbd57c">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>ioctl_ficlonerange(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">ioctl_ficlonerange(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">ioctl_ficlonerange(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">ioctl_ficlonerange, ioctl_ficlone - share some the data of one
+    file with another file</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;linux/fs.h&gt;</b>        /* Definition of <b>FICLONE*</b> constants */
+<b>#include &lt;sys/ioctl.h&gt;</b></pre>
+<pre><b>int ioctl(int </b><i>dest_fd</i><b>, FICLONERANGE, struct file_clone_range *</b><i>arg</i><b>);</b>
+<b>int ioctl(int </b><i>dest_fd</i><b>, FICLONE, int </b><i>src_fd</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">If a filesystem supports files sharing physical storage between
+    multiple files ("reflink"), this <b>ioctl</b>(2) operation can be
+    used to make some of the data in the <i>src_fd</i> file appear in the
+    <i>dest_fd</i> file by sharing the underlying storage, which is faster than
+    making a separate physical copy of the data. Both files must reside within
+    the same filesystem. If a file write should occur to a shared region, the
+    filesystem must ensure that the changes remain private to the file being
+    written. This behavior is commonly referred to as "copy on
+  write".</p>
+<p class="Pp">This ioctl reflinks up to <i>src_length</i> bytes from file
+    descriptor <i>src_fd</i> at offset <i>src_offset</i> into the file
+    <i>dest_fd</i> at offset <i>dest_offset</i>, provided that both are files.
+    If <i>src_length</i> is zero, the ioctl reflinks to the end of the source
+    file. This information is conveyed in a structure of the following form:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct file_clone_range {
+<br>
+    __s64 src_fd;
+<br>
+    __u64 src_offset;
+<br>
+    __u64 src_length;
+<br>
+    __u64 dest_offset;
+};
+</pre>
+<br>
+<p class="Pp">Clones are atomic with regards to concurrent writes, so no locks
+    need to be taken to obtain a consistent cloned copy.</p>
+<p class="Pp">The <b>FICLONE</b> ioctl clones entire files.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On error, -1 is returned, and <i>errno</i> is set to indicate the
+    error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">Error codes can be one of, but are not limited to, the
+  following:</p>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd><i>src_fd</i> is not open for reading; <i>dest_fd</i> is not open for
+      writing or is open for append-only writes; or the filesystem which
+      <i>src_fd</i> resides on does not support reflink.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The filesystem does not support reflinking the ranges of the given files.
+      This error can also appear if either file descriptor represents a device,
+      FIFO, or socket. Disk filesystems generally require the offset and length
+      arguments to be aligned to the fundamental block size. XFS and Btrfs do
+      not support overlapping reflink ranges in the same file.</dd>
+  <dt id="EISDIR"><a class="permalink" href="#EISDIR"><b>EISDIR</b></a></dt>
+  <dd>One of the files is a directory and the filesystem does not support shared
+      regions in directories.</dd>
+  <dt id="EOPNOTSUPP"><a class="permalink" href="#EOPNOTSUPP"><b>EOPNOTSUPP</b></a></dt>
+  <dd>This can appear if the filesystem does not support reflinking either file
+      descriptor, or if either file descriptor refers to special inodes.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd><i>dest_fd</i> is immutable.</dd>
+  <dt id="ETXTBSY"><a class="permalink" href="#ETXTBSY"><b>ETXTBSY</b></a></dt>
+  <dd>One of the files is a swap file. Swap files cannot share storage.</dd>
+  <dt id="EXDEV"><a class="permalink" href="#EXDEV"><b>EXDEV</b></a></dt>
+  <dd><i>dest_fd</i> and <i>src_fd</i> are not on the same mounted
+    filesystem.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">These ioctl operations first appeared in Linux 4.5. They were
+    previously known as <b>BTRFS_IOC_CLONE</b> and <b>BTRFS_IOC_CLONE_RANGE</b>,
+    and were private to Btrfs.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This API is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Because a copy-on-write operation requires the allocation of new
+    storage, the <b>fallocate</b>(2) operation may unshare shared blocks to
+    guarantee that subsequent writes will not fail because of lack of disk
+    space.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>ioctl</b>(2)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

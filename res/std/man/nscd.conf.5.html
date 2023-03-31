@@ -1,0 +1,207 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 1999, 2000 SuSE GmbH Nuernberg, Germany
+   Author: Thorsten Kukuk <kukuk@suse.de>
+   Updates: Greg Banks <gbanks@linkedin.com> Copyright (c) 2021 Microsoft Corp.
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+   --><head>
+<meta name="dc.identifier" content="res/490aeb55287f63b3eba1b1184227499c703ef7e2">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>nscd.conf(5)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">nscd.conf(5)</td>
+    <td class="head-vol">File Formats Manual</td>
+    <td class="head-rtitle">nscd.conf(5)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">nscd.conf - name service cache daemon configuration file</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The file <i>/etc/nscd.conf</i> is read from <b>nscd</b>(8) at
+    startup. Each line specifies either an attribute and a value, or an
+    attribute, service, and a value. Fields are separated either by SPACE or TAB
+    characters. A '#' (number sign) indicates the beginning of a comment;
+    following characters, up to the end of the line, are not interpreted by
+    nscd.</p>
+<p class="Pp">Valid services are <i>passwd</i>, <i>group</i>, <i>hosts</i>,
+    <i>services</i>, or <i>netgroup</i>.</p>
+<p class="Pp"><b>logfile</b> <i>debug-file-name</i></p>
+<div class="Bd-indent">Specifies name of the file to which debug info should be
+  written.</div>
+<p class="Pp"><b>debug-level</b> <i>value</i></p>
+<div class="Bd-indent">Sets the desired debug level. 0 hides debug info. 1 shows
+  general debug info. 2 additionally shows data in cache dumps. 3 (and above)
+  shows all debug info. The default is 0.</div>
+<p class="Pp"><b>threads</b> <i>number</i></p>
+<div class="Bd-indent">This is the initial number of threads that are started to
+  wait for requests. At least five threads will always be created. The number of
+  threads may increase dynamically up to <b>max-threads</b> in response to
+  demand from clients, but never decreases.</div>
+<p class="Pp"><b>max-threads</b> <i>number</i></p>
+<div class="Bd-indent">Specifies the maximum number of threads. The default is
+  32.</div>
+<p class="Pp"><b>server-user</b> <i>user</i></p>
+<div class="Bd-indent">If this option is set, nscd will run as this user and not
+  as root. If a separate cache for every user is used (-S parameter), this
+  option is ignored.</div>
+<p class="Pp"><b>stat-user</b> <i>user</i></p>
+<div class="Bd-indent">Specifies the user who is allowed to request
+  statistics.</div>
+<p class="Pp"><b>reload-count</b> unlimited | <i>number</i></p>
+<div class="Bd-indent">Sets a limit on the number of times a cached entry gets
+  reloaded without being used before it gets removed. The limit can take values
+  ranging from 0 to 254; values 255 or higher behave the same as
+  <b>unlimited</b>. Limit values can be specified in either decimal or
+  hexadecimal with a "0x" prefix. The special value <b>unlimited</b>
+  is case-insensitive. The default limit is 5. A limit of 0 turns off the
+  reloading feature. See NOTES below for further discussion of reloading.</div>
+<p class="Pp"><b>paranoia</b> <i>&lt;yes|no&gt;</i></p>
+<div class="Bd-indent">Enabling paranoia mode causes nscd to restart itself
+  periodically. The default is no.</div>
+<p class="Pp"><b>restart-interval</b> <i>time</i></p>
+<div class="Bd-indent">Sets the restart interval to <i>time</i> seconds if
+  periodic restart is enabled by enabling <b>paranoia</b> mode. The default is
+  3600.</div>
+<p class="Pp"><b>enable-cache</b> <i>service</i> <i>&lt;yes|no&gt;</i></p>
+<div class="Bd-indent">Enables or disables the specified <i>service</i> cache.
+  The default is no.</div>
+<p class="Pp"><b>positive-time-to-live</b> <i>service</i> <i>value</i></p>
+<div class="Bd-indent">Sets the TTL (time-to-live) for positive entries
+  (successful queries) in the specified cache for <i>service</i>. <i>Value</i>
+  is in seconds. Larger values increase cache hit rates and reduce mean response
+  times, but increase problems with cache coherence. Note that for some name
+  services (including specifically DNS) the TTL returned from the name service
+  is used and this attribute is ignored.</div>
+<p class="Pp"><b>negative-time-to-live</b> <i>service</i> <i>value</i></p>
+<div class="Bd-indent">Sets the TTL (time-to-live) for negative entries
+  (unsuccessful queries) in the specified cache for <i>service</i>. <i>Value</i>
+  is in seconds. Can result in significant performance improvements if there are
+  several files owned by UIDs (user IDs) not in system databases (for example
+  untarring the Linux kernel sources as root); should be kept small to reduce
+  cache coherency problems.</div>
+<p class="Pp"><b>suggested-size</b> <i>service</i> <i>value</i></p>
+<div class="Bd-indent">This is the internal hash table size, <i>value</i> should
+  remain a prime number for optimum efficiency. The default is 211.</div>
+<p class="Pp"><b>check-files</b> <i>service</i> <i>&lt;yes|no&gt;</i></p>
+<div class="Bd-indent">Enables or disables checking the file belonging to the
+  specified <i>service</i> for changes. The files are <i>/etc/passwd</i>,
+  <i>/etc/group</i>, <i>/etc/hosts</i>, <i>/etc/resolv.conf</i>,
+  <i>/etc/services</i>, and <i>/etc/netgroup</i>. The default is yes.</div>
+<p class="Pp"><b>persistent</b> <i>service</i> <i>&lt;yes|no&gt;</i></p>
+<div class="Bd-indent">Keep the content of the cache for <i>service</i> over
+  server restarts; useful when <b>paranoia</b> mode is set. The default is
+  no.</div>
+<p class="Pp"><b>shared</b> <i>service</i> <i>&lt;yes|no&gt;</i></p>
+<div class="Bd-indent">The memory mapping of the nscd databases for
+  <i>service</i> is shared with the clients so that they can directly search in
+  them instead of having to ask the daemon over the socket each time a lookup is
+  performed. The default is no. Note that a cache miss will still result in
+  asking the daemon over the socket.</div>
+<p class="Pp"><b>max-db-size</b> <i>service</i> <i>bytes</i></p>
+<div class="Bd-indent">The maximum allowable size, in bytes, of the database
+  files for the <i>service</i>. The default is 33554432.</div>
+<p class="Pp"><b>auto-propagate</b> <i>service</i> <i>&lt;yes|no&gt;</i></p>
+<div class="Bd-indent">When set to <i>no</i> for <i>passwd</i> or <i>group</i>
+  service, then the <i>.byname</i> requests are not added to <i>passwd.byuid</i>
+  or <i>group.bygid</i> cache. This can help with tables containing multiple
+  records for the same ID. The default is yes. This option is valid only for
+  services <i>passwd</i> and <i>group</i>.</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The default values stated in this manual page originate from the
+    source code of <b>nscd</b>(8) and are used if not overridden in the
+    configuration file. The default values used in the configuration file of
+    your distribution might differ.</p>
+<section class="Ss">
+<h2 class="Ss" id="Reloading"><a class="permalink" href="#Reloading">Reloading</a></h2>
+<p class="Pp"><b>nscd</b>(8) has a feature called reloading, whose behavior can
+    be surprising.</p>
+<p class="Pp">Reloading is enabled when the <b>reload-count</b> attribute has a
+    non-zero value. The default value in the source code enables reloading,
+    although your distribution may differ.</p>
+<p class="Pp">When reloading is enabled, positive cached entries (the results of
+    successful queries) do not simply expire when their TTL is up. Instead, at
+    the expiry time, <b>nscd</b> will "reload", i.e., re-issue to the
+    name service the same query that created the cached entry, to get a new
+    value to cache. Depending on <i>/etc/nsswitch.conf</i> this may mean that a
+    DNS, LDAP, or NIS request is made. If the new query is successful, reloading
+    will repeat when the new value would expire, until <b>reload-count</b>
+    reloads have happened for the entry, and only then will it actually be
+    removed from the cache. A request from a client which hits the entry will
+    reset the reload counter on the entry. Purging the cache using
+    <i>nscd&nbsp;-i</i> overrides the reload logic and removes the entry.</p>
+<p class="Pp">Reloading has the effect of extending cache entry TTLs without
+    compromising on cache coherency, at the cost of additional load on the
+    backing name service. Whether this is a good idea on your system depends on
+    details of your applications' behavior, your name service, and the effective
+    TTL values of your cache entries. Note that for some name services (for
+    example, DNS), the effective TTL is the value returned from the name service
+    and <i>not</i> the value of the <b>positive-time-to-live</b> attribute.</p>
+<p class="Pp">Please consider the following advice carefully:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>If your application will make a second request for the same name, after
+      more than 1 TTL but before <b>reload-count</b> TTLs, and is sensitive to
+      the latency of a cache miss, then reloading may be a good idea for
+    you.</dd>
+  <dt>•</dt>
+  <dd>If your name service is configured to return very short TTLs, and your
+      applications only make requests rarely under normal circumstances, then
+      reloading may result in additional load on your backing name service
+      without any benefit to applications, which is probably a bad idea for
+    you.</dd>
+  <dt>•</dt>
+  <dd>If your name service capacity is limited, reloading may have the
+      surprising effect of increasing load on your name service instead of
+      reducing it, and may be a bad idea for you.</dd>
+  <dt>•</dt>
+  <dd>Setting <b>reload-count</b> to <b>unlimited</b> is almost never a good
+      idea, as it will result in a cache that never expires entries and puts
+      never-ending additional load on the backing name service.</dd>
+</dl>
+<p class="Pp">Some distributions have an init script for <b>nscd</b>(8) with a
+    <i>reload</i> command which uses <i>nscd&nbsp;-i</i> to purge the cache.
+    That use of the word "reload" is entirely different from the
+    "reloading" described here.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>nscd</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

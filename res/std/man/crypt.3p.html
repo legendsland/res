@@ -1,0 +1,200 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/e0c69911253a139901ea61bec4b1cbf84e2ceddc">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>CRYPT(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">CRYPT(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">CRYPT(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">crypt — string encoding function (<b>CRYPT</b>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;unistd.h&gt;</pre>
+<pre>char *crypt(const char *<i>key</i>, const char *<i>salt</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>crypt</i>() function is a string encoding function. The
+    algorithm is implementation-defined.</p>
+<p class="Pp">The <i>key</i> argument points to a string to be encoded. The
+    <i>salt</i> argument shall be a string of at least two bytes in length not
+    including the null character chosen from the set:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>a b c d e f g h i j k l m n o p q r s t u v w x y z
+A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+0 1 2 3 4 5 6 7 8 9 . /</pre>
+</div>
+<p class="Pp">The first two bytes of this string may be used to perturb the
+    encoding algorithm.</p>
+<p class="Pp">The return value of <i>crypt</i>() points to static data that is
+    overwritten by each call.</p>
+<p class="Pp">The <i>crypt</i>() function need not be thread-safe.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>crypt</i>() shall return a pointer
+    to the encoded string. The first two bytes of the returned value shall be
+    those of the <i>salt</i> argument. Otherwise, it shall return a null pointer
+    and set <i>errno</i> to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>crypt</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="ENOSYS"><a class="permalink" href="#ENOSYS"><b>ENOSYS</b></a></dt>
+  <dd>The functionality is not supported on this implementation.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Encoding_Passwords"><a class="permalink" href="#Encoding_Passwords">Encoding
+  Passwords</a></h2>
+<p class="Pp">The following example finds a user database entry matching a
+    particular user name and changes the current password to a new password. The
+    <i>crypt</i>() function generates an encoded version of each password. The
+    first call to <i>crypt</i>() produces an encoded version of the old
+    password; that encoded password is then compared to the password stored in
+    the user database. The second call to <i>crypt</i>() encodes the new
+    password before it is stored.</p>
+<p class="Pp">The <i>putpwent</i>() function, used in the following example, is
+    not part of POSIX.1‐2008.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;unistd.h&gt;
+#include &lt;pwd.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdio.h&gt;
+...
+int valid_change;
+int pfd;  /* Integer for file descriptor returned by open(). */
+FILE *fpfd;  /* File pointer for use in putpwent(). */
+struct passwd *p;
+char user[100];
+char oldpasswd[100];
+char newpasswd[100];
+char savepasswd[100];
+...
+valid_change = 0;
+while ((p = getpwent()) != NULL) {
+<br>
+    /* Change entry if found. */
+<br>
+    if (strcmp(p-&gt;pw_name, user) == 0) {
+<br>
+        if (strcmp(p-&gt;pw_passwd, crypt(oldpasswd, p-&gt;pw_passwd)) == 0) {
+<br>
+            strcpy(savepasswd, crypt(newpasswd, user));
+<br>
+            p-&gt;pw_passwd = savepasswd;
+<br>
+            valid_change = 1;
+<br>
+        }
+<br>
+        else {
+<br>
+            fprintf(stderr, "Old password is not valid\n");
+<br>
+        }
+<br>
+    }
+<br>
+    /* Put passwd entry into ptmp. */
+<br>
+    putpwent(p, fpfd);
+}</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The values returned by this function need not be portable among
+    XSI-conformant systems.</p>
+<p class="Pp">Several implementations offer extensions via characters outside of
+    the set specified for the <i>salt</i> argument for specifying alternative
+    algorithms; while not portable, these extensions may offer better security.
+    The use of <i>crypt</i>() for anything other than password hashing is not
+    recommended.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>encrypt</i>()</i>, <i><i>setkey</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;unistd.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

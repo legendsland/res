@@ -1,0 +1,305 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/0dc762049f2914fd0b399f058fa930fbf2d0d8d2">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>malloc(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">malloc(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">malloc(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">malloc, free, calloc, realloc, reallocarray - allocate and free
+    dynamic memory</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;stdlib.h&gt;</b></pre>
+<pre><b>void *malloc(size_t </b><i>size</i><b>);</b>
+<b>void free(void </b><i>*ptr</i><b>);</b>
+<b>void *calloc(size_t </b><i>nmemb</i><b>, size_t </b><i>size</i><b>);</b>
+<b>void *realloc(void </b><i>*ptr</i><b>, size_t </b><i>size</i><b>);</b>
+<b>void *reallocarray(void </b><i>*ptr</i><b>, size_t </b><i>nmemb</i><b>, size_t </b><i>size</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>reallocarray</b>():</p>
+<pre><br>
+    Since glibc 2.29:
+<br>
+        _DEFAULT_SOURCE
+<br>
+    glibc 2.28 and earlier:
+<br>
+        _GNU_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="malloc()"><a class="permalink" href="#malloc()">malloc()</a></h2>
+<p class="Pp">The <b>malloc</b>() function allocates <i>size</i> bytes and
+    returns a pointer to the allocated memory. <i>The memory is not
+    initialized</i>. If <i>size</i> is 0, then <b>malloc</b>() returns a unique
+    pointer value that can later be successfully passed to <b>free</b>(). (See
+    "Nonportable behavior" for portability issues.)</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="free()"><a class="permalink" href="#free()">free()</a></h2>
+<p class="Pp">The <b>free</b>() function frees the memory space pointed to by
+    <i>ptr</i>, which must have been returned by a previous call to
+    <b>malloc</b>() or related functions. Otherwise, or if <i>ptr</i> has
+    already been freed, undefined behavior occurs. If <i>ptr</i> is NULL, no
+    operation is performed.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="calloc()"><a class="permalink" href="#calloc()">calloc()</a></h2>
+<p class="Pp">The <b>calloc</b>() function allocates memory for an array of
+    <i>nmemb</i> elements of <i>size</i> bytes each and returns a pointer to the
+    allocated memory. The memory is set to zero. If <i>nmemb</i> or <i>size</i>
+    is 0, then <b>calloc</b>() returns a unique pointer value that can later be
+    successfully passed to <b>free</b>().</p>
+<p class="Pp">If the multiplication of <i>nmemb</i> and <i>size</i> would result
+    in integer overflow, then <b>calloc</b>() returns an error. By contrast, an
+    integer overflow would not be detected in the following call to
+    <b>malloc</b>(), with the result that an incorrectly sized block of memory
+    would be allocated:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>malloc(nmemb * size);
+</pre>
+<br>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="realloc()"><a class="permalink" href="#realloc()">realloc()</a></h2>
+<p class="Pp">The <b>realloc</b>() function changes the size of the memory block
+    pointed to by <i>ptr</i> to <i>size</i> bytes. The contents of the memory
+    will be unchanged in the range from the start of the region up to the
+    minimum of the old and new sizes. If the new size is larger than the old
+    size, the added memory will <i>not</i> be initialized.</p>
+<p class="Pp">If <i>ptr</i> is NULL, then the call is equivalent to
+    <i>malloc(size)</i>, for all values of <i>size</i>.</p>
+<p class="Pp">If <i>size</i> is equal to zero, and <i>ptr</i> is not NULL, then
+    the call is equivalent to <i>free(ptr)</i> (but see "Nonportable
+    behavior" for portability issues).</p>
+<p class="Pp">Unless <i>ptr</i> is NULL, it must have been returned by an
+    earlier call to <b>malloc</b> or related functions. If the area pointed to
+    was moved, a <i>free(ptr)</i> is done.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="reallocarray()"><a class="permalink" href="#reallocarray()">reallocarray()</a></h2>
+<p class="Pp">The <b>reallocarray</b>() function changes the size of (and
+    possibly moves) the memory block pointed to by <i>ptr</i> to be large enough
+    for an array of <i>nmemb</i> elements, each of which is <i>size</i> bytes.
+    It is equivalent to the call</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>realloc(ptr, nmemb * size);
+</pre>
+<br>
+<p class="Pp">However, unlike that <b>realloc</b>() call, <b>reallocarray</b>()
+    fails safely in the case where the multiplication would overflow. If such an
+    overflow occurs, <b>reallocarray</b>() returns an error.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <b>malloc</b>(), <b>calloc</b>(), <b>realloc</b>(), and
+    <b>reallocarray</b>() functions return a pointer to the allocated memory,
+    which is suitably aligned for any type that fits into the requested size or
+    less. On error, these functions return NULL and set <i>errno</i>. Attempting
+    to allocate more than <b>PTRDIFF_MAX</b> bytes is considered an error, as an
+    object that large could cause later pointer subtraction to overflow.</p>
+<p class="Pp">The <b>free</b>() function returns no value, and preserves
+    <i>errno</i>.</p>
+<p class="Pp">The <b>realloc</b>() and <b>reallocarray</b>() functions return
+    NULL if <i>ptr</i> is not NULL and the requested size is zero; this is not
+    considered an error. (See "Nonportable behavior" for portability
+    issues.) Otherwise, the returned pointer may be the same as <i>ptr</i> if
+    the allocation was not moved (e.g., there was room to expand the allocation
+    in-place), or different from <i>ptr</i> if the allocation was moved to a new
+    address. If these functions fail, the original block is left untouched; it
+    is not freed or moved.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp"><b>calloc</b>(), <b>malloc</b>(), <b>realloc</b>(), and
+    <b>reallocarray</b>() can fail with the following error:</p>
+<dl class="Bl-tag">
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Out of memory. Possibly, the application hit the <b>RLIMIT_AS</b> or
+      <b>RLIMIT_DATA</b> limit described in <b>getrlimit</b>(2).</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>malloc (), free (), calloc (), realloc ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>reallocarray</b>() was added in glibc 2.26.</p>
+<p class="Pp"><b>malloc</b>() and related functions rejected sizes greater than
+    <b>PTRDIFF_MAX</b> starting in glibc 2.30.</p>
+<p class="Pp"><b>free</b>() preserved <i>errno</i> starting in glibc 2.33.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>malloc</b>(), <b>free</b>(), <b>calloc</b>(), <b>realloc</b>():
+    POSIX.1-2001, POSIX.1-2008, C89, C99.</p>
+<p class="Pp"><b>reallocarray</b>() is a nonstandard extension that first
+    appeared in OpenBSD 5.6 and FreeBSD 11.0.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">By default, Linux follows an optimistic memory allocation
+    strategy. This means that when <b>malloc</b>() returns non-NULL there is no
+    guarantee that the memory really is available. In case it turns out that the
+    system is out of memory, one or more processes will be killed by the OOM
+    killer. For more information, see the description of
+    <i>/proc/sys/vm/overcommit_memory</i> and <i>/proc/sys/vm/oom_adj</i> in
+    <b>proc</b>(5), and the Linux kernel source file
+    <i>Documentation/vm/overcommit-accounting.rst</i>.</p>
+<p class="Pp">Normally, <b>malloc</b>() allocates memory from the heap, and
+    adjusts the size of the heap as required, using <b>sbrk</b>(2). When
+    allocating blocks of memory larger than <b>MMAP_THRESHOLD</b> bytes, the
+    glibc <b>malloc</b>() implementation allocates the memory as a private
+    anonymous mapping using <b>mmap</b>(2). <b>MMAP_THRESHOLD</b> is
+    128&nbsp;kB by default, but is adjustable using <b>mallopt</b>(3). Prior
+    to Linux 4.7 allocations performed using <b>mmap</b>(2) were unaffected by
+    the <b>RLIMIT_DATA</b> resource limit; since Linux 4.7, this limit is also
+    enforced for allocations performed using <b>mmap</b>(2).</p>
+<p class="Pp">To avoid corruption in multithreaded applications, mutexes are
+    used internally to protect the memory-management data structures employed by
+    these functions. In a multithreaded application in which threads
+    simultaneously allocate and free memory, there could be contention for these
+    mutexes. To scalably handle memory allocation in multithreaded applications,
+    glibc creates additional <i>memory allocation arenas</i> if mutex contention
+    is detected. Each arena is a large region of memory that is internally
+    allocated by the system (using <b>brk</b>(2) or <b>mmap</b>(2)), and managed
+    with its own mutexes.</p>
+<p class="Pp">If your program uses a private memory allocator, it should do so
+    by replacing <b>malloc</b>(), <b>free</b>(), <b>calloc</b>(), and
+    <b>realloc</b>(). The replacement functions must implement the documented
+    glibc behaviors, including <i>errno</i> handling, size-zero allocations, and
+    overflow checking; otherwise, other library routines may crash or operate
+    incorrectly. For example, if the replacement <i>free</i>() does not preserve
+    <i>errno</i>, then seemingly unrelated library routines may fail without
+    having a valid reason in <i>errno</i>. Private memory allocators may also
+    need to replace other glibc functions; see "Replacing malloc" in
+    the glibc manual for details.</p>
+<p class="Pp">Crashes in memory allocators are almost always related to heap
+    corruption, such as overflowing an allocated chunk or freeing the same
+    pointer twice.</p>
+<p class="Pp">The <b>malloc</b>() implementation is tunable via environment
+    variables; see <b>mallopt</b>(3) for details.</p>
+<section class="Ss">
+<h2 class="Ss" id="Nonportable_behavior"><a class="permalink" href="#Nonportable_behavior">Nonportable
+  behavior</a></h2>
+<p class="Pp">The behavior of these functions when the requested size is zero is
+    glibc specific; other implementations may return NULL without setting
+    <i>errno</i>, and portable POSIX programs should tolerate such behavior. See
+    <b>realloc</b>(3p).</p>
+<p class="Pp">POSIX requires memory allocators to set <i>errno</i> upon failure.
+    However, the C standard does not require this, and applications portable to
+    non-POSIX platforms should not assume this.</p>
+<p class="Pp">Portable programs should not use private memory allocators, as
+    POSIX and the C standard do not allow replacement of <b>malloc</b>(),
+    <b>free</b>(), <b>calloc</b>(), and <b>realloc</b>().</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<pre>#include &lt;err.h&gt;
+#include &lt;stddef.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#define MALLOCARRAY(n, type)  ((type *) my_mallocarray(n, sizeof(type)))
+#define MALLOC(type)          MALLOCARRAY(1, type)
+static inline void *my_mallocarray(size_t nmemb, size_t size);
+int
+main(void)
+{
+<br>
+    char  *p;
+<br>
+    p = MALLOCARRAY(32, char);
+<br>
+    if (p == NULL)
+<br>
+        err(EXIT_FAILURE, "malloc");
+<br>
+    strlcpy(p, "foo", 32);
+<br>
+    puts(p);
+}
+static inline void *
+my_mallocarray(size_t nmemb, size_t size)
+{
+<br>
+    return reallocarray(NULL, nmemb, size);
+}
+</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>valgrind</b>(1), <b>brk</b>(2), <b>mmap</b>(2),
+    <b>alloca</b>(3), <b>malloc_get_state</b>(3), <b>malloc_info</b>(3),
+    <b>malloc_trim</b>(3), <b>malloc_usable_size</b>(3), <b>mallopt</b>(3),
+    <b>mcheck</b>(3), <b>mtrace</b>(3), <b>posix_memalign</b>(3)</p>
+<p class="Pp">For details of the GNU C library implementation, see
+    <a class="Lk" href="https://sourceware.org/glibc/wiki/MallocInternals">https://sourceware.org/glibc/wiki/MallocInternals</a>.</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,269 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 1990, 1991 The Regents of the University of California.
+   All rights reserved.
+  
+   This code is derived from software contributed to Berkeley by
+   the American National Standards Committee X3, on Information
+   Processing Systems.
+  
+   SPDX-License-Identifier: BSD-4-Clause-UC
+  
+  	@(#)stdarg.3	6.8 (Berkeley) 6/29/91
+  
+   Converted for Linux, Mon Nov 29 15:11:11 1993, faith@cs.unc.edu
+   Additions, 2001-10-14, aeb
+   --><head>
+<meta name="dc.identifier" content="res/044233a5270c7a262bd4b8617d1602f792fefa80">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>stdarg(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">stdarg(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">stdarg(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">stdarg, va_start, va_arg, va_end, va_copy - variable argument
+    lists</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;stdarg.h&gt;</b></pre>
+<pre><b>void va_start(va_list </b><i>ap</i><b>, </b><i>last</i><b>);</b>
+<i>type</i><b> va_arg(va_list </b><i>ap</i><b>, </b><i>type</i><b>);</b>
+<b>void va_end(va_list </b><i>ap</i><b>);</b>
+<b>void va_copy(va_list </b><i>dest</i><b>, va_list </b><i>src</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">A function may be called with a varying number of arguments of
+    varying types. The include file <i>&lt;stdarg.h&gt;</i> declares a type
+    <i>va_list</i> and defines three macros for stepping through a list of
+    arguments whose number and types are not known to the called function.</p>
+<p class="Pp">The called function must declare an object of type <i>va_list</i>
+    which is used by the macros <b>va_start</b>(), <b>va_arg</b>(), and
+    <b>va_end</b>().</p>
+<section class="Ss">
+<h2 class="Ss" id="va_start()"><a class="permalink" href="#va_start()">va_start()</a></h2>
+<p class="Pp">The <b>va_start</b>() macro initializes <i>ap</i> for subsequent
+    use by <b>va_arg</b>() and <b>va_end</b>(), and must be called first.</p>
+<p class="Pp">The argument <i>last</i> is the name of the last argument before
+    the variable argument list, that is, the last argument of which the calling
+    function knows the type.</p>
+<p class="Pp">Because the address of this argument may be used in the
+    <b>va_start</b>() macro, it should not be declared as a register variable,
+    or as a function or an array type.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="va_arg()"><a class="permalink" href="#va_arg()">va_arg()</a></h2>
+<p class="Pp">The <b>va_arg</b>() macro expands to an expression that has the
+    type and value of the next argument in the call. The argument <i>ap</i> is
+    the <i>va_list</i> <i>ap</i> initialized by <b>va_start</b>(). Each call to
+    <b>va_arg</b>() modifies <i>ap</i> so that the next call returns the next
+    argument. The argument <i>type</i> is a type name specified so that the type
+    of a pointer to an object that has the specified type can be obtained simply
+    by adding a * to <i>type</i>.</p>
+<p class="Pp">The first use of the <b>va_arg</b>() macro after that of the
+    <b>va_start</b>() macro returns the argument after <i>last</i>. Successive
+    invocations return the values of the remaining arguments.</p>
+<p class="Pp">If there is no next argument, or if <i>type</i> is not compatible
+    with the type of the actual next argument (as promoted according to the
+    default argument promotions), random errors will occur.</p>
+<p class="Pp">If <i>ap</i> is passed to a function that uses
+    <b>va_arg(</b><i>ap</i><b>,</b><i>type</i><b>),</b> then the value of
+    <i>ap</i> is undefined after the return of that function.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="va_end()"><a class="permalink" href="#va_end()">va_end()</a></h2>
+<p class="Pp">Each invocation of <b>va_start</b>() must be matched by a
+    corresponding invocation of <b>va_end</b>() in the same function. After the
+    call <b>va_end(</b><i>ap</i><b>)</b> the variable <i>ap</i> is undefined.
+    Multiple traversals of the list, each bracketed by <b>va_start</b>() and
+    <b>va_end</b>() are possible. <b>va_end</b>() may be a macro or a
+  function.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="va_copy()"><a class="permalink" href="#va_copy()">va_copy()</a></h2>
+<p class="Pp">The <b>va_copy</b>() macro copies the (previously initialized)
+    variable argument list <i>src</i> to <i>dest</i>. The behavior is as if
+    <b>va_start</b>() were applied to <i>dest</i> with the same <i>last</i>
+    argument, followed by the same number of <b>va_arg</b>() invocations that
+    was used to reach the current state of <i>src</i>.</p>
+<p class="Pp">An obvious implementation would have a <i>va_list</i> be a pointer
+    to the stack frame of the variadic function. In such a setup (by far the
+    most common) there seems nothing against an assignment</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>va_list aq = ap;
+</pre>
+<br>
+<p class="Pp">Unfortunately, there are also systems that make it an array of
+    pointers (of length 1), and there one needs</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>va_list aq;
+*aq = *ap;
+</pre>
+<br>
+<p class="Pp">Finally, on systems where arguments are passed in registers, it
+    may be necessary for <b>va_start</b>() to allocate memory, store the
+    arguments there, and also an indication of which argument is next, so that
+    <b>va_arg</b>() can step through the list. Now <b>va_end</b>() can free the
+    allocated memory again. To accommodate this situation, C99 adds a macro
+    <b>va_copy</b>(), so that the above assignment can be replaced by</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>va_list aq;
+va_copy(aq, ap);
+...
+va_end(aq);
+</pre>
+<br>
+<p class="Pp">Each invocation of <b>va_copy</b>() must be matched by a
+    corresponding invocation of <b>va_end</b>() in the same function. Some
+    systems that do not supply <b>va_copy</b>() have <b>__va_copy</b> instead,
+    since that was the name used in the draft proposal.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>va_start (), va_end (), va_copy ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+  <tr>
+    <td>va_arg ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe race:ap</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">The <b>va_start</b>(), <b>va_arg</b>(), and <b>va_end</b>() macros
+    conform to C89. C99 defines the <b>va_copy</b>() macro.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">Unlike the historical <b>varargs</b> macros, the <b>stdarg</b>
+    macros do not permit programmers to code a function with no fixed arguments.
+    This problem generates work mainly when converting <b>varargs</b> code to
+    <b>stdarg</b> code, but it also creates difficulties for variadic functions
+    that wish to pass all of their arguments on to a function that takes a
+    <i>va_list</i> argument, such as <b>vfprintf</b>(3).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The function <i>foo</i> takes a string of format characters and
+    prints out the argument associated with each format character based on the
+    type.</p>
+<p class="Pp"></p>
+<pre>#include &lt;stdio.h&gt;
+#include &lt;stdarg.h&gt;
+void
+foo(char *fmt, ...)   /* '...' is C syntax for a variadic function */
+{
+<br>
+    va_list ap;
+<br>
+    int d;
+<br>
+    char c;
+<br>
+    char *s;
+<br>
+    va_start(ap, fmt);
+<br>
+    while (*fmt)
+<br>
+        switch (*fmt++) {
+<br>
+        case 's':              /* string */
+<br>
+            s = va_arg(ap, char *);
+<br>
+            printf("string %s\n", s);
+<br>
+            break;
+<br>
+        case 'd':              /* int */
+<br>
+            d = va_arg(ap, int);
+<br>
+            printf("int %d\n", d);
+<br>
+            break;
+<br>
+        case 'c':              /* char */
+<br>
+            /* need a cast here since va_arg only
+<br>
+               takes fully promoted types */
+<br>
+            c = (char) va_arg(ap, int);
+<br>
+            printf("char %c\n", c);
+<br>
+            break;
+<br>
+        }
+<br>
+    va_end(ap);
+}
+</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>vprintf</b>(3), <b>vscanf</b>(3), <b>vsyslog</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

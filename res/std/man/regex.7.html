@@ -1,0 +1,264 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   From Henry Spencer's regex package (as found in the apache
+   distribution). The package carries the following copyright:
+  
+    Copyright 1992, 1993, 1994 Henry Spencer.  All rights reserved.
+   %%%LICENSE_START(MISC)
+    This software is not subject to any license of the American Telephone
+    and Telegraph Company or of the Regents of the University of California.
+  
+    Permission is granted to anyone to use this software for any purpose
+    on any computer system, and to alter it and redistribute it, subject
+    to the following restrictions:
+  
+    1. The author is not responsible for the consequences of use of this
+       software, no matter how awful, even if they arise from flaws in it.
+  
+    2. The origin of this software must not be misrepresented, either by
+       explicit claim or by omission.  Since few users ever read sources,
+       credits must appear in the documentation.
+  
+    3. Altered versions must be plainly marked as such, and must not be
+       misrepresented as being the original software.  Since few users
+       ever read sources, credits must appear in the documentation.
+  
+    4. This notice may not be removed or altered.
+   %%%LICENSE_END
+  
+   In order to comply with `credits must appear in the documentation'
+   I added an AUTHOR paragraph below - aeb.
+  
+   In the default nroff environment there is no dagger \(dg.
+  
+   2005-05-11 Removed discussion of `[[:<:]]' and `[[:>:]]', which
+   	appear not to be in the glibc implementation of regcomp
+   --><head>
+<meta name="dc.identifier" content="res/e011ef3a2c44bccc7411a2b05129e37385a45360">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>regex(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">regex(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">regex(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">regex - POSIX.2 regular expressions</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">Regular expressions ("RE"s), as defined in POSIX.2, come
+    in two forms: modern REs (roughly those of <i>egrep</i>; POSIX.2 calls these
+    "extended" REs) and obsolete REs (roughly those of <b>ed</b>(1);
+    POSIX.2 "basic" REs). Obsolete REs mostly exist for backward
+    compatibility in some old programs; they will be discussed at the end.
+    POSIX.2 leaves some aspects of RE syntax and semantics open; "(!)"
+    marks decisions on these aspects that may not be fully portable to other
+    POSIX.2 implementations.</p>
+<p class="Pp">A (modern) RE is one(!) or more nonempty(!) <i>branches</i>,
+    separated by '|'. It matches anything that matches one of the branches.</p>
+<p class="Pp">A branch is one(!) or more <i>pieces</i>, concatenated. It matches
+    a match for the first, followed by a match for the second, and so on.</p>
+<p class="Pp">A piece is an <i>atom</i> possibly followed by a single(!) '*',
+    '+', '?', or <i>bound</i>. An atom followed by '*' matches a sequence of 0
+    or more matches of the atom. An atom followed by '+' matches a sequence of 1
+    or more matches of the atom. An atom followed by '?' matches a sequence of 0
+    or 1 matches of the atom.</p>
+<p class="Pp">A <i>bound</i> is '{' followed by an unsigned decimal integer,
+    possibly followed by ',' possibly followed by another unsigned decimal
+    integer, always followed by '}'. The integers must lie between 0 and
+    <b>RE_DUP_MAX</b> (255(!)) inclusive, and if there are two of them, the
+    first may not exceed the second. An atom followed by a bound containing one
+    integer <i>i</i> and no comma matches a sequence of exactly <i>i</i> matches
+    of the atom. An atom followed by a bound containing one integer <i>i</i> and
+    a comma matches a sequence of <i>i</i> or more matches of the atom. An atom
+    followed by a bound containing two integers <i>i</i> and <i>j</i> matches a
+    sequence of <i>i</i> through <i>j</i> (inclusive) matches of the atom.</p>
+<p class="Pp">An atom is a regular expression enclosed in "<i>()</i>"
+    (matching a match for the regular expression), an empty set of
+    "<i>()</i>" (matching the null string)(!), a <i>bracket
+    expression</i> (see below), '.' (matching any single character), '^'
+    (matching the null string at the beginning of a line), '$' (matching the
+    null string at the end of a line), a '\' followed by one of the characters
+    "<i>^.[$()|*+?{\</i>" (matching that character taken as an
+    ordinary character), a '\' followed by any other character(!) (matching that
+    character taken as an ordinary character, as if the '\' had not been
+    present(!)), or a single character with no other significance (matching that
+    character). A '{' followed by a character other than a digit is an ordinary
+    character, not the beginning of a bound(!). It is illegal to end an RE with
+    '\'.</p>
+<p class="Pp">A <i>bracket expression</i> is a list of characters enclosed in
+    "<i>[]</i>". It normally matches any single character from the
+    list (but see below). If the list begins with '^', it matches any single
+    character (but see below) <i>not</i> from the rest of the list. If two
+    characters in the list are separated by '-', this is shorthand for the full
+    <i>range</i> of characters between those two (inclusive) in the collating
+    sequence, for example, "<i>[0-9]</i>" in ASCII matches any decimal
+    digit. It is illegal(!) for two ranges to share an endpoint, for example,
+    "<i>a-c-e</i>". Ranges are very collating-sequence-dependent, and
+    portable programs should avoid relying on them.</p>
+<p class="Pp">To include a literal ']' in the list, make it the first character
+    (following a possible '^'). To include a literal '-', make it the first or
+    last character, or the second endpoint of a range. To use a literal '-' as
+    the first endpoint of a range, enclose it in "<i>[.</i>" and
+    "<i>.]</i>" to make it a collating element (see below). With the
+    exception of these and some combinations using '[' (see next paragraphs),
+    all other special characters, including '\', lose their special significance
+    within a bracket expression.</p>
+<p class="Pp">Within a bracket expression, a collating element (a character, a
+    multicharacter sequence that collates as if it were a single character, or a
+    collating-sequence name for either) enclosed in "<i>[.</i>" and
+    "<i>.]</i>" stands for the sequence of characters of that
+    collating element. The sequence is a single element of the bracket
+    expression's list. A bracket expression containing a multicharacter
+    collating element can thus match more than one character, for example, if
+    the collating sequence includes a "ch" collating element, then the
+    RE "<i>[[.ch.]]*c</i>" matches the first five characters of
+    "chchcc".</p>
+<p class="Pp">Within a bracket expression, a collating element enclosed in
+    "<i>[=</i>" and "<i>=]</i>" is an equivalence class,
+    standing for the sequences of characters of all collating elements
+    equivalent to that one, including itself. (If there are no other equivalent
+    collating elements, the treatment is as if the enclosing delimiters were
+    "<i>[.</i>" and "<i>.]</i>".) For example, if o and
+    ô are the members of an equivalence class, then
+    "<i>[[=o=]]</i>", "<i>[[=ô=]]</i>", and
+    "<i>[oô]</i>" are all synonymous. An equivalence class may
+    not(!) be an endpoint of a range.</p>
+<p class="Pp">Within a bracket expression, the name of a <i>character class</i>
+    enclosed in "<i>[:</i>" and "<i>:]</i>" stands for the
+    list of all characters belonging to that class. Standard character class
+    names are:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<table class="tbl">
+  <tbody><tr>
+    <td>alnum</td>
+    <td>digit</td>
+    <td>punct</td>
+  </tr>
+  <tr>
+    <td>alpha</td>
+    <td>graph</td>
+    <td>space</td>
+  </tr>
+  <tr>
+    <td>blank</td>
+    <td>lower</td>
+    <td>upper</td>
+  </tr>
+  <tr>
+    <td>cntrl</td>
+    <td>print</td>
+    <td>xdigit</td>
+  </tr>
+</tbody></table>
+</div>
+<p class="Pp">These stand for the character classes defined in <b>wctype</b>(3).
+    A locale may provide others. A character class may not be used as an
+    endpoint of a range.</p>
+<p class="Pp">In the event that an RE could match more than one substring of a
+    given string, the RE matches the one starting earliest in the string. If the
+    RE could match more than one substring starting at that point, it matches
+    the longest. Subexpressions also match the longest possible substrings,
+    subject to the constraint that the whole match be as long as possible, with
+    subexpressions starting earlier in the RE taking priority over ones starting
+    later. Note that higher-level subexpressions thus take priority over their
+    lower-level component subexpressions.</p>
+<p class="Pp">Match lengths are measured in characters, not collating elements.
+    A null string is considered longer than no match at all. For example,
+    "<i>bb*</i>" matches the three middle characters of
+    "abbbc", "<i>(wee|week)(knights|nights)</i>" matches all
+    ten characters of "weeknights", when "<i>(.*).*</i>" is
+    matched against "abc" the parenthesized subexpression matches all
+    three characters, and when "<i>(a*)*</i>" is matched against
+    "bc" both the whole RE and the parenthesized subexpression match
+    the null string.</p>
+<p class="Pp">If case-independent matching is specified, the effect is much as
+    if all case distinctions had vanished from the alphabet. When an alphabetic
+    that exists in multiple cases appears as an ordinary character outside a
+    bracket expression, it is effectively transformed into a bracket expression
+    containing both cases, for example, 'x' becomes "<i>[xX]</i>".
+    When it appears inside a bracket expression, all case counterparts of it are
+    added to the bracket expression, so that, for example,
+    "<i>[x]</i>" becomes "<i>[xX]</i>" and
+    "<i>[^x]</i>" becomes "<i>[^xX]</i>".</p>
+<p class="Pp">No particular limit is imposed on the length of REs(!). Programs
+    intended to be portable should not employ REs longer than 256 bytes, as an
+    implementation can refuse to accept such REs and remain POSIX-compliant.</p>
+<p class="Pp">Obsolete ("basic") regular expressions differ in several
+    respects. '|', '+', and '?' are ordinary characters and there is no
+    equivalent for their functionality. The delimiters for bounds are
+    "<i>\{</i>" and "<i>\}</i>", with '{' and '}' by
+    themselves ordinary characters. The parentheses for nested subexpressions
+    are "<i>\(</i>" and "<i>\)</i>", with '(' and ')' by
+    themselves ordinary characters. '^' is an ordinary character except at the
+    beginning of the RE or(!) the beginning of a parenthesized subexpression,
+    '$' is an ordinary character except at the end of the RE or(!) the end of a
+    parenthesized subexpression, and '*' is an ordinary character if it appears
+    at the beginning of the RE or the beginning of a parenthesized subexpression
+    (after a possible leading '^').</p>
+<p class="Pp">Finally, there is one new type of atom, a <i>back reference</i>:
+    '\' followed by a nonzero decimal digit <i>d</i> matches the same sequence
+    of characters matched by the <i>d</i>th parenthesized subexpression
+    (numbering subexpressions by the positions of their opening parentheses,
+    left to right), so that, for example, "<i>\([bc]\)\1</i>" matches
+    "bb" or "cc" but not "bc".</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">Having two kinds of REs is a botch.</p>
+<p class="Pp">The current POSIX.2 spec says that ')' is an ordinary character in
+    the absence of an unmatched '('; this was an unintentional result of a
+    wording error, and change is likely. Avoid relying on it.</p>
+<p class="Pp">Back references are a dreadful botch, posing major problems for
+    efficient implementations. They are also somewhat vaguely defined (does
+    "<i>a\(\(b\)*\2\)*d</i>" match "abbbd"?). Avoid using
+    them.</p>
+<p class="Pp">POSIX.2's specification of case-independent matching is vague. The
+    "one case implies all cases" definition given above is current
+    consensus among implementors as to the right interpretation.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="AUTHOR"><a class="permalink" href="#AUTHOR">AUTHOR</a></h1>
+<p class="Pp">This page was taken from Henry Spencer's regex package.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>grep</b>(1), <b>regex</b>(3)</p>
+<p class="Pp">POSIX.2, section 2.8 (Regular Expression Notation).</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

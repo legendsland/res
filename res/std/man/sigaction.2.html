@@ -1,0 +1,842 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 1994,1995 Mike Battersby <mib@deakin.edu.au>
+   and Copyright 2004, 2005 Michael Kerrisk <mtk.manpages@gmail.com>
+   based on work by faith@cs.unc.edu
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Modified, aeb, 960424
+   Modified Fri Jan 31 17:31:20 1997 by Eric S. Raymond <esr@thyrsus.com>
+   Modified Thu Nov 26 02:12:45 1998 by aeb - add SIGCHLD stuff.
+   Modified Sat May  8 17:40:19 1999 by Matthew Wilcox
+  	add POSIX.1b signals
+   Modified Sat Dec 29 01:44:52 2001 by Evan Jones <ejones@uwaterloo.ca>
+  	SA_ONSTACK
+   Modified 2004-11-11 by Michael Kerrisk <mtk.manpages@gmail.com>
+  	Added mention of SIGCONT under SA_NOCLDSTOP
+  	Added SA_NOCLDWAIT
+   Modified 2004-11-17 by Michael Kerrisk <mtk.manpages@gmail.com>
+  	Updated discussion for POSIX.1-2001 and SIGCHLD and sa_flags.
+  	Formatting fixes
+   2004-12-09, mtk, added SI_TKILL + other minor changes
+   2005-09-15, mtk, split sigpending(), sigprocmask(), sigsuspend()
+  	out of this page into separate pages.
+   2010-06-11 Andi Kleen, add hwpoison signal extensions
+   2010-06-11 mtk, improvements to discussion of various siginfo_t fields.
+   2015-01-17, Kees Cook <keescook@chromium.org>
+  	Added notes on ptrace SIGTRAP and SYS_SECCOMP.
+   --><head>
+<meta name="dc.identifier" content="res/fcd42ac8705b6b96312a823b0b1c31be98de4851">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>sigaction(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">sigaction(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">sigaction(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">sigaction, rt_sigaction - examine and change a signal action</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;signal.h&gt;</b></pre>
+<pre><b>int sigaction(int </b><i>signum</i><b>,</b>
+<b>              const struct sigaction *_Nullable restrict </b><i>act</i><b>,</b>
+<b>              struct sigaction *_Nullable restrict </b><i>oldact</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>sigaction</b>():</p>
+<pre><br>
+    _POSIX_C_SOURCE</pre>
+<p class="Pp"><i>siginfo_t</i>:</p>
+<pre><br>
+    _POSIX_C_SOURCE &gt;= 199309L</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>sigaction</b>() system call is used to change the action
+    taken by a process on receipt of a specific signal. (See <b>signal</b>(7)
+    for an overview of signals.)</p>
+<p class="Pp"><i>signum</i> specifies the signal and can be any valid signal
+    except <b>SIGKILL</b> and <b>SIGSTOP</b>.</p>
+<p class="Pp">If <i>act</i> is non-NULL, the new action for signal <i>signum</i>
+    is installed from <i>act</i>. If <i>oldact</i> is non-NULL, the previous
+    action is saved in <i>oldact</i>.</p>
+<p class="Pp">The <i>sigaction</i> structure is defined as something like:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct sigaction {
+<br>
+    void     (*sa_handler)(int);
+<br>
+    void     (*sa_sigaction)(int, siginfo_t *, void *);
+<br>
+    sigset_t   sa_mask;
+<br>
+    int        sa_flags;
+<br>
+    void     (*sa_restorer)(void);
+};
+</pre>
+<br>
+<p class="Pp">On some architectures a union is involved: do not assign to both
+    <i>sa_handler</i> and <i>sa_sigaction</i>.</p>
+<p class="Pp">The <i>sa_restorer</i> field is not intended for application use.
+    (POSIX does not specify a <i>sa_restorer</i> field.) Some further details of
+    the purpose of this field can be found in <b>sigreturn</b>(2).</p>
+<p class="Pp"><i>sa_handler</i> specifies the action to be associated with
+    <i>signum</i> and can be one of the following:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><b>SIG_DFL</b> for the default action.</dd>
+  <dt>•</dt>
+  <dd><b>SIG_IGN</b> to ignore this signal.</dd>
+  <dt>•</dt>
+  <dd>A pointer to a signal handling function. This function receives the signal
+      number as its only argument.</dd>
+</dl>
+<p class="Pp">If <b>SA_SIGINFO</b> is specified in <i>sa_flags</i>, then
+    <i>sa_sigaction</i> (instead of <i>sa_handler</i>) specifies the
+    signal-handling function for <i>signum</i>. This function receives three
+    arguments, as described below.</p>
+<p class="Pp"><i>sa_mask</i> specifies a mask of signals which should be blocked
+    (i.e., added to the signal mask of the thread in which the signal handler is
+    invoked) during execution of the signal handler. In addition, the signal
+    which triggered the handler will be blocked, unless the <b>SA_NODEFER</b>
+    flag is used.</p>
+<p class="Pp"><i>sa_flags</i> specifies a set of flags which modify the behavior
+    of the signal. It is formed by the bitwise OR of zero or more of the
+    following:</p>
+<dl class="Bl-tag">
+  <dt id="SA_NOCLDSTOP"><a class="permalink" href="#SA_NOCLDSTOP"><b>SA_NOCLDSTOP</b></a></dt>
+  <dd>If <i>signum</i> is <b>SIGCHLD</b>, do not receive notification when child
+      processes stop (i.e., when they receive one of <b>SIGSTOP</b>,
+      <b>SIGTSTP</b>, <b>SIGTTIN</b>, or <b>SIGTTOU</b>) or resume (i.e., they
+      receive <b>SIGCONT</b>) (see <b>wait</b>(2)). This flag is meaningful only
+      when establishing a handler for <b>SIGCHLD</b>.</dd>
+  <dt id="SA_NOCLDWAIT"><a class="permalink" href="#SA_NOCLDWAIT"><b>SA_NOCLDWAIT</b>
+    (since Linux 2.6)</a></dt>
+  <dd>If <i>signum</i> is <b>SIGCHLD</b>, do not transform children into zombies
+      when they terminate. See also <b>waitpid</b>(2). This flag is meaningful
+      only when establishing a handler for <b>SIGCHLD</b>, or when setting that
+      signal's disposition to <b>SIG_DFL</b>.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>If the <b>SA_NOCLDWAIT</b> flag is set when establishing a handler for
+      <b>SIGCHLD</b>, POSIX.1 leaves it unspecified whether a <b>SIGCHLD</b>
+      signal is generated when a child process terminates. On Linux, a
+      <b>SIGCHLD</b> signal is generated in this case; on some other
+      implementations, it is not.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="SA_NODEFER"><a class="permalink" href="#SA_NODEFER"><b>SA_NODEFER</b></a></dt>
+  <dd>Do not add the signal to the thread's signal mask while the handler is
+      executing, unless the signal is specified in <i>act.sa_mask</i>.
+      Consequently, a further instance of the signal may be delivered to the
+      thread while it is executing the handler. This flag is meaningful only
+      when establishing a signal handler.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd><b>SA_NOMASK</b> is an obsolete, nonstandard synonym for this flag.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="SA_ONSTACK"><a class="permalink" href="#SA_ONSTACK"><b>SA_ONSTACK</b></a></dt>
+  <dd>Call the signal handler on an alternate signal stack provided by
+      <b>sigaltstack</b>(2). If an alternate stack is not available, the default
+      stack will be used. This flag is meaningful only when establishing a
+      signal handler.</dd>
+  <dt id="SA_RESETHAND"><a class="permalink" href="#SA_RESETHAND"><b>SA_RESETHAND</b></a></dt>
+  <dd>Restore the signal action to the default upon entry to the signal handler.
+      This flag is meaningful only when establishing a signal handler.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd><b>SA_ONESHOT</b> is an obsolete, nonstandard synonym for this flag.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="SA_RESTART"><a class="permalink" href="#SA_RESTART"><b>SA_RESTART</b></a></dt>
+  <dd>Provide behavior compatible with BSD signal semantics by making certain
+      system calls restartable across signals. This flag is meaningful only when
+      establishing a signal handler. See <b>signal</b>(7) for a discussion of
+      system call restarting.</dd>
+  <dt id="SA_RESTORER"><a class="permalink" href="#SA_RESTORER"><b>SA_RESTORER</b></a></dt>
+  <dd><i>Not intended for application use</i>. This flag is used by C libraries
+      to indicate that the <i>sa_restorer</i> field contains the address of a
+      "signal trampoline". See <b>sigreturn</b>(2) for more
+    details.</dd>
+  <dt id="SA_SIGINFO"><a class="permalink" href="#SA_SIGINFO"><b>SA_SIGINFO</b>
+    (since Linux 2.2)</a></dt>
+  <dd>The signal handler takes three arguments, not one. In this case,
+      <i>sa_sigaction</i> should be set instead of <i>sa_handler</i>. This flag
+      is meaningful only when establishing a signal handler.</dd>
+  <dt id="SA_UNSUPPORTED"><a class="permalink" href="#SA_UNSUPPORTED"><b>SA_UNSUPPORTED</b>
+    (since Linux 5.11)</a></dt>
+  <dd>Used to dynamically probe for flag bit support.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>If an attempt to register a handler succeeds with this flag set in
+      <i>act-&gt;sa_flags</i> alongside other flags that are potentially
+      unsupported by the kernel, and an immediately subsequent
+      <b>sigaction</b>() call specifying the same signal number and with a
+      non-NULL <i>oldact</i> argument yields <b>SA_UNSUPPORTED</b> <i>clear</i>
+      in <i>oldact-&gt;sa_flags</i>, then <i>oldact-&gt;sa_flags</i> may be used
+      as a bitmask describing which of the potentially unsupported flags are, in
+      fact, supported. See the section "Dynamically probing for flag bit
+      support" below for more details.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="SA_EXPOSE_TAGBITS"><a class="permalink" href="#SA_EXPOSE_TAGBITS"><b>SA_EXPOSE_TAGBITS</b>
+    (since Linux 5.11)</a></dt>
+  <dd>Normally, when delivering a signal, an architecture-specific set of tag
+      bits are cleared from the <i>si_addr</i> field of <i>siginfo_t</i>. If
+      this flag is set, an architecture-specific subset of the tag bits will be
+      preserved in <i>si_addr</i>.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Programs that need to be compatible with Linux versions older than 5.11
+      must use <b>SA_UNSUPPORTED</b> to probe for support.</dd>
+</dl>
+<section class="Ss">
+<h2 class="Ss" id="The_siginfo_t_argument_to_a_SA_SIGINFO_handler"><a class="permalink" href="#The_siginfo_t_argument_to_a_SA_SIGINFO_handler">The
+  siginfo_t argument to a SA_SIGINFO handler</a></h2>
+<p class="Pp">When the <b>SA_SIGINFO</b> flag is specified in
+    <i>act.sa_flags</i>, the signal handler address is passed via the
+    <i>act.sa_sigaction</i> field. This handler takes three arguments, as
+    follows:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>void
+handler(int sig, siginfo_t *info, void *ucontext)
+{
+<br>
+    ...
+}
+</pre>
+<br>
+<p class="Pp">These three arguments are as follows</p>
+<dl class="Bl-tag">
+  <dt id="sig"><a class="permalink" href="#sig"><i>sig</i></a></dt>
+  <dd>The number of the signal that caused invocation of the handler.</dd>
+  <dt id="info"><a class="permalink" href="#info"><i>info</i></a></dt>
+  <dd>A pointer to a <i>siginfo_t</i>, which is a structure containing further
+      information about the signal, as described below.</dd>
+  <dt id="ucontext"><a class="permalink" href="#ucontext"><i>ucontext</i></a></dt>
+  <dd>This is a pointer to a <i>ucontext_t</i> structure, cast to
+      <i>void&nbsp;*</i>. The structure pointed to by this field contains
+      signal context information that was saved on the user-space stack by the
+      kernel; for details, see <b>sigreturn</b>(2). Further information about
+      the <i>ucontext_t</i> structure can be found in <b>getcontext</b>(3) and
+      <b>signal</b>(7). Commonly, the handler function doesn't make any use of
+      the third argument.</dd>
+</dl>
+<p class="Pp">The <i>siginfo_t</i> data type is a structure with the following
+    fields:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>siginfo_t {
+<br>
+    int      si_signo;     /* Signal number */
+<br>
+    int      si_errno;     /* An errno value */
+<br>
+    int      si_code;      /* Signal code */
+<br>
+    int      si_trapno;    /* Trap number that caused
+<br>
+                              hardware-generated signal
+<br>
+                              (unused on most architectures) */
+<br>
+    pid_t    si_pid;       /* Sending process ID */
+<br>
+    uid_t    si_uid;       /* Real user ID of sending process */
+<br>
+    int      si_status;    /* Exit value or signal */
+<br>
+    clock_t  si_utime;     /* User time consumed */
+<br>
+    clock_t  si_stime;     /* System time consumed */
+<br>
+    union sigval si_value; /* Signal value */
+<br>
+    int      si_int;       /* POSIX.1b signal */
+<br>
+    void    *si_ptr;       /* POSIX.1b signal */
+<br>
+    int      si_overrun;   /* Timer overrun count;
+<br>
+                              POSIX.1b timers */
+<br>
+    int      si_timerid;   /* Timer ID; POSIX.1b timers */
+<br>
+    void    *si_addr;      /* Memory location which caused fault */
+<br>
+    long     si_band;      /* Band event (was <i>int</i> in
+<br>
+                              glibc 2.3.2 and earlier) */
+<br>
+    int      si_fd;        /* File descriptor */
+<br>
+    short    si_addr_lsb;  /* Least significant bit of address
+<br>
+                              (since Linux 2.6.32) */
+<br>
+    void    *si_lower;     /* Lower bound when address violation
+<br>
+                              occurred (since Linux 3.19) */
+<br>
+    void    *si_upper;     /* Upper bound when address violation
+<br>
+                              occurred (since Linux 3.19) */
+<br>
+    int      si_pkey;      /* Protection key on PTE that caused
+<br>
+                              fault (since Linux 4.6) */
+<br>
+    void    *si_call_addr; /* Address of system call instruction
+<br>
+                              (since Linux 3.5) */
+<br>
+    int      si_syscall;   /* Number of attempted system call
+<br>
+                              (since Linux 3.5) */
+<br>
+    unsigned int si_arch;  /* Architecture of attempted system call
+<br>
+                              (since Linux 3.5) */
+}
+</pre>
+<br>
+<p class="Pp"><i>si_signo</i>, <i>si_errno</i> and <i>si_code</i> are defined
+    for all signals. (<i>si_errno</i> is generally unused on Linux.) The rest of
+    the struct may be a union, so that one should read only the fields that are
+    meaningful for the given signal:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Signals sent with <b>kill</b>(2) and <b>sigqueue</b>(3) fill in
+      <i>si_pid</i> and <i>si_uid</i>. In addition, signals sent with
+      <b>sigqueue</b>(3) fill in <i>si_int</i> and <i>si_ptr</i> with the values
+      specified by the sender of the signal; see <b>sigqueue</b>(3) for more
+      details.</dd>
+  <dt>•</dt>
+  <dd>Signals sent by POSIX.1b timers (since Linux 2.6) fill in
+      <i>si_overrun</i> and <i>si_timerid</i>. The <i>si_timerid</i> field is an
+      internal ID used by the kernel to identify the timer; it is not the same
+      as the timer ID returned by <b>timer_create</b>(2). The <i>si_overrun</i>
+      field is the timer overrun count; this is the same information as is
+      obtained by a call to <b>timer_getoverrun</b>(2). These fields are
+      nonstandard Linux extensions.</dd>
+  <dt>•</dt>
+  <dd>Signals sent for message queue notification (see the description of
+      <b>SIGEV_SIGNAL</b> in <b>mq_notify</b>(3)) fill in
+      <i>si_int</i>/<i>si_ptr</i>, with the <i>sigev_value</i> supplied to
+      <b>mq_notify</b>(3); <i>si_pid</i>, with the process ID of the message
+      sender; and <i>si_uid</i>, with the real user ID of the message
+    sender.</dd>
+  <dt>•</dt>
+  <dd><b>SIGCHLD</b> fills in <i>si_pid</i>, <i>si_uid</i>, <i>si_status</i>,
+      <i>si_utime</i>, and <i>si_stime</i>, providing information about the
+      child. The <i>si_pid</i> field is the process ID of the child;
+      <i>si_uid</i> is the child's real user ID. The <i>si_status</i> field
+      contains the exit status of the child (if <i>si_code</i> is
+      <b>CLD_EXITED</b>), or the signal number that caused the process to change
+      state. The <i>si_utime</i> and <i>si_stime</i> contain the user and system
+      CPU time used by the child process; these fields do not include the times
+      used by waited-for children (unlike <b>getrusage</b>(2) and
+      <b>times</b>(2)). Up to Linux 2.6, and since Linux 2.6.27, these fields
+      report CPU time in units of <i>sysconf(_SC_CLK_TCK)</i>. In Linux 2.6
+      kernels before Linux 2.6.27, a bug meant that these fields reported time
+      in units of the (configurable) system jiffy (see <b>time</b>(7)).</dd>
+  <dt>•</dt>
+  <dd><b>SIGILL</b>, <b>SIGFPE</b>, <b>SIGSEGV</b>, <b>SIGBUS</b>, and
+      <b>SIGTRAP</b> fill in <i>si_addr</i> with the address of the fault. On
+      some architectures, these signals also fill in the <i>si_trapno</i>
+    field.</dd>
+  <dt></dt>
+  <dd>Some suberrors of <b>SIGBUS</b>, in particular <b>BUS_MCEERR_AO</b> and
+      <b>BUS_MCEERR_AR</b>, also fill in <i>si_addr_lsb</i>. This field
+      indicates the least significant bit of the reported address and therefore
+      the extent of the corruption. For example, if a full page was corrupted,
+      <i>si_addr_lsb</i> contains <i>log2(sysconf(_SC_PAGESIZE))</i>. When
+      <b>SIGTRAP</b> is delivered in response to a <b>ptrace</b>(2) event
+      (PTRACE_EVENT_foo), <i>si_addr</i> is not populated, but <i>si_pid</i> and
+      <i>si_uid</i> are populated with the respective process ID and user ID
+      responsible for delivering the trap. In the case of <b>seccomp</b>(2), the
+      tracee will be shown as delivering the event. <b>BUS_MCEERR_*</b> and
+      <i>si_addr_lsb</i> are Linux-specific extensions.</dd>
+  <dt></dt>
+  <dd>The <b>SEGV_BNDERR</b> suberror of <b>SIGSEGV</b> populates
+      <i>si_lower</i> and <i>si_upper</i>.</dd>
+  <dt></dt>
+  <dd>The <b>SEGV_PKUERR</b> suberror of <b>SIGSEGV</b> populates
+      <i>si_pkey</i>.</dd>
+  <dt>•</dt>
+  <dd><b>SIGIO</b>/<b>SIGPOLL</b> (the two names are synonyms on Linux) fills in
+      <i>si_band</i> and <i>si_fd</i>. The <i>si_band</i> event is a bit mask
+      containing the same values as are filled in the <i>revents</i> field by
+      <b>poll</b>(2). The <i>si_fd</i> field indicates the file descriptor for
+      which the I/O event occurred; for further details, see the description of
+      <b>F_SETSIG</b> in <b>fcntl</b>(2).</dd>
+  <dt>•</dt>
+  <dd><b>SIGSYS</b>, generated (since Linux 3.5) when a seccomp filter returns
+      <b>SECCOMP_RET_TRAP</b>, fills in <i>si_call_addr</i>, <i>si_syscall</i>,
+      <i>si_arch</i>, <i>si_errno</i>, and other fields as described in
+      <b>seccomp</b>(2).</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="The_si_code_field"><a class="permalink" href="#The_si_code_field">The
+  si_code field</a></h2>
+<p class="Pp">The <i>si_code</i> field inside the <i>siginfo_t</i> argument that
+    is passed to a <b>SA_SIGINFO</b> signal handler is a value (not a bit mask)
+    indicating why this signal was sent. For a <b>ptrace</b>(2) event,
+    <i>si_code</i> will contain <b>SIGTRAP</b> and have the ptrace event in the
+    high byte:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>(SIGTRAP | PTRACE_EVENT_foo &lt;&lt; 8).
+</pre>
+<br>
+<p class="Pp">For a non-<b>ptrace</b>(2) event, the values that can appear in
+    <i>si_code</i> are described in the remainder of this section. Since glibc
+    2.20, the definitions of most of these symbols are obtained from
+    <i>&lt;signal.h&gt;</i> by defining feature test macros (before including
+    <i>any</i> header file) as follows:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><b>_XOPEN_SOURCE</b> with the value 500 or greater;</dd>
+  <dt>•</dt>
+  <dd><b>_XOPEN_SOURCE</b> and <b>_XOPEN_SOURCE_EXTENDED</b>; or</dd>
+  <dt>•</dt>
+  <dd><b>_POSIX_C_SOURCE</b> with the value 200809L or greater.</dd>
+</dl>
+<p class="Pp">For the <b>TRAP_*</b> constants, the symbol definitions are
+    provided only in the first two cases. Before glibc 2.20, no feature test
+    macros were required to obtain these symbols.</p>
+<p class="Pp">For a regular signal, the following list shows the values which
+    can be placed in <i>si_code</i> for any signal, along with the reason that
+    the signal was generated.</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="SI_USER"><a class="permalink" href="#SI_USER"><b>SI_USER</b></a></dt>
+  <dd><b>kill</b>(2).</dd>
+  <dt id="SI_KERNEL"><a class="permalink" href="#SI_KERNEL"><b>SI_KERNEL</b></a></dt>
+  <dd>Sent by the kernel.</dd>
+  <dt id="SI_QUEUE"><a class="permalink" href="#SI_QUEUE"><b>SI_QUEUE</b></a></dt>
+  <dd><b>sigqueue</b>(3).</dd>
+  <dt id="SI_TIMER"><a class="permalink" href="#SI_TIMER"><b>SI_TIMER</b></a></dt>
+  <dd>POSIX timer expired.</dd>
+  <dt id="SI_MESGQ"><a class="permalink" href="#SI_MESGQ"><b>SI_MESGQ</b> (since
+    Linux 2.6.6)</a></dt>
+  <dd>POSIX message queue state changed; see <b>mq_notify</b>(3).</dd>
+  <dt id="SI_ASYNCIO"><a class="permalink" href="#SI_ASYNCIO"><b>SI_ASYNCIO</b></a></dt>
+  <dd>AIO completed.</dd>
+  <dt id="SI_SIGIO"><a class="permalink" href="#SI_SIGIO"><b>SI_SIGIO</b></a></dt>
+  <dd>Queued <b>SIGIO</b> (only up to Linux 2.2; from Linux 2.4 onward
+      <b>SIGIO</b>/<b>SIGPOLL</b> fills in <i>si_code</i> as described
+    below).</dd>
+  <dt id="SI_TKILL"><a class="permalink" href="#SI_TKILL"><b>SI_TKILL</b> (since
+    Linux 2.4.19)</a></dt>
+  <dd><b>tkill</b>(2) or <b>tgkill</b>(2).</dd>
+</dl>
+</div>
+<p class="Pp">The following values can be placed in <i>si_code</i> for a
+    <b>SIGILL</b> signal:</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="ILL_ILLOPC"><a class="permalink" href="#ILL_ILLOPC"><b>ILL_ILLOPC</b></a></dt>
+  <dd>Illegal opcode.</dd>
+  <dt id="ILL_ILLOPN"><a class="permalink" href="#ILL_ILLOPN"><b>ILL_ILLOPN</b></a></dt>
+  <dd>Illegal operand.</dd>
+  <dt id="ILL_ILLADR"><a class="permalink" href="#ILL_ILLADR"><b>ILL_ILLADR</b></a></dt>
+  <dd>Illegal addressing mode.</dd>
+  <dt id="ILL_ILLTRP"><a class="permalink" href="#ILL_ILLTRP"><b>ILL_ILLTRP</b></a></dt>
+  <dd>Illegal trap.</dd>
+  <dt id="ILL_PRVOPC"><a class="permalink" href="#ILL_PRVOPC"><b>ILL_PRVOPC</b></a></dt>
+  <dd>Privileged opcode.</dd>
+  <dt id="ILL_PRVREG"><a class="permalink" href="#ILL_PRVREG"><b>ILL_PRVREG</b></a></dt>
+  <dd>Privileged register.</dd>
+  <dt id="ILL_COPROC"><a class="permalink" href="#ILL_COPROC"><b>ILL_COPROC</b></a></dt>
+  <dd>Coprocessor error.</dd>
+  <dt id="ILL_BADSTK"><a class="permalink" href="#ILL_BADSTK"><b>ILL_BADSTK</b></a></dt>
+  <dd>Internal stack error.</dd>
+</dl>
+</div>
+<p class="Pp">The following values can be placed in <i>si_code</i> for a
+    <b>SIGFPE</b> signal:</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="FPE_INTDIV"><a class="permalink" href="#FPE_INTDIV"><b>FPE_INTDIV</b></a></dt>
+  <dd>Integer divide by zero.</dd>
+  <dt id="FPE_INTOVF"><a class="permalink" href="#FPE_INTOVF"><b>FPE_INTOVF</b></a></dt>
+  <dd>Integer overflow.</dd>
+  <dt id="FPE_FLTDIV"><a class="permalink" href="#FPE_FLTDIV"><b>FPE_FLTDIV</b></a></dt>
+  <dd>Floating-point divide by zero.</dd>
+  <dt id="FPE_FLTOVF"><a class="permalink" href="#FPE_FLTOVF"><b>FPE_FLTOVF</b></a></dt>
+  <dd>Floating-point overflow.</dd>
+  <dt id="FPE_FLTUND"><a class="permalink" href="#FPE_FLTUND"><b>FPE_FLTUND</b></a></dt>
+  <dd>Floating-point underflow.</dd>
+  <dt id="FPE_FLTRES"><a class="permalink" href="#FPE_FLTRES"><b>FPE_FLTRES</b></a></dt>
+  <dd>Floating-point inexact result.</dd>
+  <dt id="FPE_FLTINV"><a class="permalink" href="#FPE_FLTINV"><b>FPE_FLTINV</b></a></dt>
+  <dd>Floating-point invalid operation.</dd>
+  <dt id="FPE_FLTSUB"><a class="permalink" href="#FPE_FLTSUB"><b>FPE_FLTSUB</b></a></dt>
+  <dd>Subscript out of range.</dd>
+</dl>
+</div>
+<p class="Pp">The following values can be placed in <i>si_code</i> for a
+    <b>SIGSEGV</b> signal:</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="SEGV_MAPERR"><a class="permalink" href="#SEGV_MAPERR"><b>SEGV_MAPERR</b></a></dt>
+  <dd>Address not mapped to object.</dd>
+  <dt id="SEGV_ACCERR"><a class="permalink" href="#SEGV_ACCERR"><b>SEGV_ACCERR</b></a></dt>
+  <dd>Invalid permissions for mapped object.</dd>
+  <dt id="SEGV_BNDERR"><a class="permalink" href="#SEGV_BNDERR"><b>SEGV_BNDERR</b>
+    (since Linux 3.19)</a></dt>
+  <dd>Failed address bound checks.</dd>
+  <dt id="SEGV_PKUERR"><a class="permalink" href="#SEGV_PKUERR"><b>SEGV_PKUERR</b>
+    (since Linux 4.6)</a></dt>
+  <dd>Access was denied by memory protection keys. See <b>pkeys</b>(7). The
+      protection key which applied to this access is available via
+      <i>si_pkey</i>.</dd>
+</dl>
+</div>
+<p class="Pp">The following values can be placed in <i>si_code</i> for a
+    <b>SIGBUS</b> signal:</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="BUS_ADRALN"><a class="permalink" href="#BUS_ADRALN"><b>BUS_ADRALN</b></a></dt>
+  <dd>Invalid address alignment.</dd>
+  <dt id="BUS_ADRERR"><a class="permalink" href="#BUS_ADRERR"><b>BUS_ADRERR</b></a></dt>
+  <dd>Nonexistent physical address.</dd>
+  <dt id="BUS_OBJERR"><a class="permalink" href="#BUS_OBJERR"><b>BUS_OBJERR</b></a></dt>
+  <dd>Object-specific hardware error.</dd>
+  <dt id="BUS_MCEERR_AR"><a class="permalink" href="#BUS_MCEERR_AR"><b>BUS_MCEERR_AR</b>
+    (since Linux 2.6.32)</a></dt>
+  <dd>Hardware memory error consumed on a machine check; action required.</dd>
+  <dt id="BUS_MCEERR_AO"><a class="permalink" href="#BUS_MCEERR_AO"><b>BUS_MCEERR_AO</b>
+    (since Linux 2.6.32)</a></dt>
+  <dd>Hardware memory error detected in process but not consumed; action
+      optional.</dd>
+</dl>
+</div>
+<p class="Pp">The following values can be placed in <i>si_code</i> for a
+    <b>SIGTRAP</b> signal:</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="TRAP_BRKPT"><a class="permalink" href="#TRAP_BRKPT"><b>TRAP_BRKPT</b></a></dt>
+  <dd>Process breakpoint.</dd>
+  <dt id="TRAP_TRACE"><a class="permalink" href="#TRAP_TRACE"><b>TRAP_TRACE</b></a></dt>
+  <dd>Process trace trap.</dd>
+  <dt id="TRAP_BRANCH"><a class="permalink" href="#TRAP_BRANCH"><b>TRAP_BRANCH</b>
+    (since Linux 2.4, IA64 only)</a></dt>
+  <dd>Process taken branch trap.</dd>
+  <dt id="TRAP_HWBKPT"><a class="permalink" href="#TRAP_HWBKPT"><b>TRAP_HWBKPT</b>
+    (since Linux 2.4, IA64 only)</a></dt>
+  <dd>Hardware breakpoint/watchpoint.</dd>
+</dl>
+</div>
+<p class="Pp">The following values can be placed in <i>si_code</i> for a
+    <b>SIGCHLD</b> signal:</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="CLD_EXITED"><a class="permalink" href="#CLD_EXITED"><b>CLD_EXITED</b></a></dt>
+  <dd>Child has exited.</dd>
+  <dt id="CLD_KILLED"><a class="permalink" href="#CLD_KILLED"><b>CLD_KILLED</b></a></dt>
+  <dd>Child was killed.</dd>
+  <dt id="CLD_DUMPED"><a class="permalink" href="#CLD_DUMPED"><b>CLD_DUMPED</b></a></dt>
+  <dd>Child terminated abnormally.</dd>
+  <dt id="CLD_TRAPPED"><a class="permalink" href="#CLD_TRAPPED"><b>CLD_TRAPPED</b></a></dt>
+  <dd>Traced child has trapped.</dd>
+  <dt id="CLD_STOPPED"><a class="permalink" href="#CLD_STOPPED"><b>CLD_STOPPED</b></a></dt>
+  <dd>Child has stopped.</dd>
+  <dt id="CLD_CONTINUED"><a class="permalink" href="#CLD_CONTINUED"><b>CLD_CONTINUED</b>
+    (since Linux 2.6.9)</a></dt>
+  <dd>Stopped child has continued.</dd>
+</dl>
+</div>
+<p class="Pp">The following values can be placed in <i>si_code</i> for a
+    <b>SIGIO</b>/<b>SIGPOLL</b> signal:</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="POLL_IN"><a class="permalink" href="#POLL_IN"><b>POLL_IN</b></a></dt>
+  <dd>Data input available.</dd>
+  <dt id="POLL_OUT"><a class="permalink" href="#POLL_OUT"><b>POLL_OUT</b></a></dt>
+  <dd>Output buffers available.</dd>
+  <dt id="POLL_MSG"><a class="permalink" href="#POLL_MSG"><b>POLL_MSG</b></a></dt>
+  <dd>Input message available.</dd>
+  <dt id="POLL_ERR"><a class="permalink" href="#POLL_ERR"><b>POLL_ERR</b></a></dt>
+  <dd>I/O error.</dd>
+  <dt id="POLL_PRI"><a class="permalink" href="#POLL_PRI"><b>POLL_PRI</b></a></dt>
+  <dd>High priority input available.</dd>
+  <dt id="POLL_HUP"><a class="permalink" href="#POLL_HUP"><b>POLL_HUP</b></a></dt>
+  <dd>Device disconnected.</dd>
+</dl>
+</div>
+<p class="Pp">The following value can be placed in <i>si_code</i> for a
+    <b>SIGSYS</b> signal:</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="SYS_SECCOMP"><a class="permalink" href="#SYS_SECCOMP"><b>SYS_SECCOMP</b>
+    (since Linux 3.5)</a></dt>
+  <dd>Triggered by a <b>seccomp</b>(2) filter rule.</dd>
+</dl>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Dynamically_probing_for_flag_bit_support"><a class="permalink" href="#Dynamically_probing_for_flag_bit_support">Dynamically
+  probing for flag bit support</a></h2>
+<p class="Pp">The <b>sigaction</b>() call on Linux accepts unknown bits set in
+    <i>act-&gt;sa_flags</i> without error. The behavior of the kernel starting
+    with Linux 5.11 is that a second <b>sigaction</b>() will clear unknown bits
+    from <i>oldact-&gt;sa_flags</i>. However, historically, a second
+    <b>sigaction</b>() call would typically leave those bits set in
+    <i>oldact-&gt;sa_flags</i>.</p>
+<p class="Pp">This means that support for new flags cannot be detected simply by
+    testing for a flag in <i>sa_flags</i>, and a program must test that
+    <b>SA_UNSUPPORTED</b> has been cleared before relying on the contents of
+    <i>sa_flags</i>.</p>
+<p class="Pp">Since the behavior of the signal handler cannot be guaranteed
+    unless the check passes, it is wise to either block the affected signal
+    while registering the handler and performing the check in this case, or
+    where this is not possible, for example if the signal is synchronous, to
+    issue the second <b>sigaction</b>() in the signal handler itself.</p>
+<p class="Pp">In kernels that do not support a specific flag, the kernel's
+    behavior is as if the flag was not set, even if the flag was set in
+    <i>act-&gt;sa_flags</i>.</p>
+<p class="Pp">The flags <b>SA_NOCLDSTOP</b>, <b>SA_NOCLDWAIT</b>,
+    <b>SA_SIGINFO</b>, <b>SA_ONSTACK</b>, <b>SA_RESTART</b>, <b>SA_NODEFER</b>,
+    <b>SA_RESETHAND</b>, and, if defined by the architecture, <b>SA_RESTORER</b>
+    may not be reliably probed for using this mechanism, because they were
+    introduced before Linux 5.11. However, in general, programs may assume that
+    these flags are supported, since they have all been supported since Linux
+    2.6, which was released in the year 2003.</p>
+<p class="Pp">See EXAMPLES below for a demonstration of the use of
+    <b>SA_UNSUPPORTED</b>.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp"><b>sigaction</b>() returns 0 on success; on error, -1 is returned,
+    and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>act</i> or <i>oldact</i> points to memory which is not a valid part of
+      the process address space.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>An invalid signal was specified. This will also be generated if an attempt
+      is made to change the action for <b>SIGKILL</b> or <b>SIGSTOP</b>, which
+      cannot be caught or ignored.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, SVr4.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">A child created via <b>fork</b>(2) inherits a copy of its parent's
+    signal dispositions. During an <b>execve</b>(2), the dispositions of handled
+    signals are reset to the default; the dispositions of ignored signals are
+    left unchanged.</p>
+<p class="Pp">According to POSIX, the behavior of a process is undefined after
+    it ignores a <b>SIGFPE</b>, <b>SIGILL</b>, or <b>SIGSEGV</b> signal that was
+    not generated by <b>kill</b>(2) or <b>raise</b>(3). Integer division by zero
+    has undefined result. On some architectures it will generate a <b>SIGFPE</b>
+    signal. (Also dividing the most negative integer by -1 may generate
+    <b>SIGFPE</b>.) Ignoring this signal might lead to an endless loop.</p>
+<p class="Pp">POSIX.1-1990 disallowed setting the action for <b>SIGCHLD</b> to
+    <b>SIG_IGN</b>. POSIX.1-2001 and later allow this possibility, so that
+    ignoring <b>SIGCHLD</b> can be used to prevent the creation of zombies (see
+    <b>wait</b>(2)). Nevertheless, the historical BSD and System&nbsp;V
+    behaviors for ignoring <b>SIGCHLD</b> differ, so that the only completely
+    portable method of ensuring that terminated children do not become zombies
+    is to catch the <b>SIGCHLD</b> signal and perform a <b>wait</b>(2) or
+    similar.</p>
+<p class="Pp">POSIX.1-1990 specified only <b>SA_NOCLDSTOP</b>. POSIX.1-2001
+    added <b>SA_NOCLDSTOP</b>, <b>SA_NOCLDWAIT</b>, <b>SA_NODEFER</b>,
+    <b>SA_ONSTACK</b>, <b>SA_RESETHAND</b>, <b>SA_RESTART</b>, and
+    <b>SA_SIGINFO</b>. Use of these latter values in <i>sa_flags</i> may be less
+    portable in applications intended for older UNIX implementations.</p>
+<p class="Pp">The <b>SA_RESETHAND</b> flag is compatible with the SVr4 flag of
+    the same name.</p>
+<p class="Pp">The <b>SA_NODEFER</b> flag is compatible with the SVr4 flag of the
+    same name under kernels 1.3.9 and later. On older kernels the Linux
+    implementation allowed the receipt of any signal, not just the one we are
+    installing (effectively overriding any <i>sa_mask</i> settings).</p>
+<p class="Pp"><b>sigaction</b>() can be called with a NULL second argument to
+    query the current signal handler. It can also be used to check whether a
+    given signal is valid for the current machine by calling it with NULL second
+    and third arguments.</p>
+<p class="Pp">It is not possible to block <b>SIGKILL</b> or <b>SIGSTOP</b> (by
+    specifying them in <i>sa_mask</i>). Attempts to do so are silently
+  ignored.</p>
+<p class="Pp">See <b>sigsetops</b>(3) for details on manipulating signal
+  sets.</p>
+<p class="Pp">See <b>signal-safety</b>(7) for a list of the async-signal-safe
+    functions that can be safely called inside from inside a signal handler.</p>
+<section class="Ss">
+<h2 class="Ss" id="C_library/kernel_differences"><a class="permalink" href="#C_library/kernel_differences">C
+  library/kernel differences</a></h2>
+<p class="Pp">The glibc wrapper function for <b>sigaction</b>() gives an error
+    (<b>EINVAL</b>) on attempts to change the disposition of the two real-time
+    signals used internally by the NPTL threading implementation. See
+    <b>nptl</b>(7) for details.</p>
+<p class="Pp">On architectures where the signal trampoline resides in the C
+    library, the glibc wrapper function for <b>sigaction</b>() places the
+    address of the trampoline code in the <i>act.sa_restorer</i> field and sets
+    the <b>SA_RESTORER</b> flag in the <i>act.sa_flags</i> field. See
+    <b>sigreturn</b>(2).</p>
+<p class="Pp">The original Linux system call was named <b>sigaction</b>().
+    However, with the addition of real-time signals in Linux 2.2, the
+    fixed-size, 32-bit <i>sigset_t</i> type supported by that system call was no
+    longer fit for purpose. Consequently, a new system call,
+    <b>rt_sigaction</b>(), was added to support an enlarged <i>sigset_t</i>
+    type. The new system call takes a fourth argument, <i>size_t sigsetsize</i>,
+    which specifies the size in bytes of the signal sets in <i>act.sa_mask</i>
+    and <i>oldact.sa_mask</i>. This argument is currently required to have the
+    value <i>sizeof(sigset_t)</i> (or the error <b>EINVAL</b> results). The
+    glibc <b>sigaction</b>() wrapper function hides these details from us,
+    transparently calling <b>rt_sigaction</b>() when the kernel provides it.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Undocumented"><a class="permalink" href="#Undocumented">Undocumented</a></h2>
+<p class="Pp">Before the introduction of <b>SA_SIGINFO</b>, it was also possible
+    to get some additional information about the signal. This was done by
+    providing an <i>sa_handler</i> signal handler with a second argument of type
+    <i>struct sigcontext</i>, which is the same structure as the one that is
+    passed in the <i>uc_mcontext</i> field of the <i>ucontext</i> structure that
+    is passed (via a pointer) in the third argument of the <i>sa_sigaction</i>
+    handler. See the relevant Linux kernel sources for details. This use is
+    obsolete now.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">When delivering a signal with a <b>SA_SIGINFO</b> handler, the
+    kernel does not always provide meaningful values for all of the fields of
+    the <i>siginfo_t</i> that are relevant for that signal.</p>
+<p class="Pp">Up to and including Linux 2.6.13, specifying <b>SA_NODEFER</b> in
+    <i>sa_flags</i> prevents not only the delivered signal from being masked
+    during execution of the handler, but also the signals specified in
+    <i>sa_mask</i>. This bug was fixed in Linux 2.6.14.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">See <b>mprotect</b>(2).</p>
+<section class="Ss">
+<h2 class="Ss" id="Probing_for_flag_support"><a class="permalink" href="#Probing_for_flag_support">Probing
+  for flag support</a></h2>
+<p class="Pp">The following example program exits with status
+    <b>EXIT_SUCCESS</b> if <b>SA_EXPOSE_TAGBITS</b> is determined to be
+    supported, and <b>EXIT_FAILURE</b> otherwise.</p>
+<p class="Pp"></p>
+<pre>#include &lt;signal.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+void
+handler(int signo, siginfo_t *info, void *context)
+{
+<br>
+    struct sigaction oldact;
+<br>
+    if (sigaction(SIGSEGV, NULL, &amp;oldact) == -1
+<br>
+        || (oldact.sa_flags &amp; SA_UNSUPPORTED)
+<br>
+        || !(oldact.sa_flags &amp; SA_EXPOSE_TAGBITS))
+<br>
+    {
+<br>
+        _exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    _exit(EXIT_SUCCESS);
+}
+int
+main(void)
+{
+<br>
+    struct sigaction act = { 0 };
+<br>
+    act.sa_flags = SA_SIGINFO | SA_UNSUPPORTED | SA_EXPOSE_TAGBITS;
+<br>
+    act.sa_sigaction = &amp;handler;
+<br>
+    if (sigaction(SIGSEGV, &amp;act, NULL) == -1) {
+<br>
+        perror("sigaction");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    raise(SIGSEGV);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>kill</b>(1), <b>kill</b>(2), <b>pause</b>(2),
+    <b>pidfd_send_signal</b>(2), <b>restart_syscall</b>(2), <b>seccomp</b>(2),
+    <b>sigaltstack</b>(2), <b>signal</b>(2), <b>signalfd</b>(2),
+    <b>sigpending</b>(2), <b>sigprocmask</b>(2), <b>sigreturn</b>(2),
+    <b>sigsuspend</b>(2), <b>wait</b>(2), <b>killpg</b>(3), <b>raise</b>(3),
+    <b>siginterrupt</b>(3), <b>sigqueue</b>(3), <b>sigsetops</b>(3),
+    <b>sigvec</b>(3), <b>core</b>(5), <b>signal</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

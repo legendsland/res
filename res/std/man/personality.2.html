@@ -1,0 +1,240 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 1995, Thomas K. Dyas <tdyas@eden.rutgers.edu>
+   and Copyright (C) 2016, Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Created   Sat Aug 21 1995     Thomas K. Dyas <tdyas@eden.rutgers.edu>
+  
+   typo corrected, aeb, 950825
+   added layout change from joey, 960722
+   changed prototype, documented 0xffffffff, aeb, 030101
+   Modified 2004-11-03 patch from Martin Schulze <joey@infodrom.org>
+   --><head>
+<meta name="dc.identifier" content="res/63ef6f4e4cc73dfa015164c6eedad5f713c2a6c1">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>personality(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">personality(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">personality(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">personality - set the process execution domain</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/personality.h&gt;</b></pre>
+<pre><b>int personality(unsigned long </b><i>persona</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">Linux supports different execution domains, or personalities, for
+    each process. Among other things, execution domains tell Linux how to map
+    signal numbers into signal actions. The execution domain system allows Linux
+    to provide limited support for binaries compiled under other UNIX-like
+    operating systems.</p>
+<p class="Pp">If <i>persona</i> is not 0xffffffff, then <b>personality</b>()
+    sets the caller's execution domain to the value specified by <i>persona</i>.
+    Specifying <i>persona</i> as 0xffffffff provides a way of retrieving the
+    current persona without changing it.</p>
+<p class="Pp">A list of the available execution domains can be found in
+    <i>&lt;sys/personality.h&gt;</i>. The execution domain is a 32-bit value in
+    which the top three bytes are set aside for flags that cause the kernel to
+    modify the behavior of certain system calls so as to emulate historical or
+    architectural quirks. The least significant byte is a value defining the
+    personality the kernel should assume. The flag values are as follows:</p>
+<dl class="Bl-tag">
+  <dt id="ADDR_COMPAT_LAYOUT"><a class="permalink" href="#ADDR_COMPAT_LAYOUT"><b>ADDR_COMPAT_LAYOUT</b>
+    (since Linux 2.6.9)</a></dt>
+  <dd>With this flag set, provide legacy virtual address space layout.</dd>
+  <dt id="ADDR_NO_RANDOMIZE"><a class="permalink" href="#ADDR_NO_RANDOMIZE"><b>ADDR_NO_RANDOMIZE</b>
+    (since Linux 2.6.12)</a></dt>
+  <dd>With this flag set, disable address-space-layout randomization.</dd>
+  <dt id="ADDR_LIMIT_32BIT"><a class="permalink" href="#ADDR_LIMIT_32BIT"><b>ADDR_LIMIT_32BIT</b>
+    (since Linux 2.2)</a></dt>
+  <dd>Limit the address space to 32 bits.</dd>
+  <dt id="ADDR_LIMIT_3GB"><a class="permalink" href="#ADDR_LIMIT_3GB"><b>ADDR_LIMIT_3GB</b>
+    (since Linux 2.4.0)</a></dt>
+  <dd>With this flag set, use 0xc0000000 as the offset at which to search a
+      virtual memory chunk on <b>mmap</b>(2); otherwise use 0xffffe000.</dd>
+  <dt id="FDPIC_FUNCPTRS"><a class="permalink" href="#FDPIC_FUNCPTRS"><b>FDPIC_FUNCPTRS</b>
+    (since Linux 2.6.11)</a></dt>
+  <dd>User-space function pointers to signal handlers point (on certain
+      architectures) to descriptors.</dd>
+  <dt id="MMAP_PAGE_ZERO"><a class="permalink" href="#MMAP_PAGE_ZERO"><b>MMAP_PAGE_ZERO</b>
+    (since Linux 2.4.0)</a></dt>
+  <dd>Map page 0 as read-only (to support binaries that depend on this SVr4
+      behavior).</dd>
+  <dt id="READ_IMPLIES_EXEC"><a class="permalink" href="#READ_IMPLIES_EXEC"><b>READ_IMPLIES_EXEC</b>
+    (since Linux 2.6.8)</a></dt>
+  <dd>With this flag set, <b>PROT_READ</b> implies <b>PROT_EXEC</b> for
+      <b>mmap</b>(2).</dd>
+  <dt id="SHORT_INODE"><a class="permalink" href="#SHORT_INODE"><b>SHORT_INODE</b>
+    (since Linux 2.4.0)</a></dt>
+  <dd>No effects(?).</dd>
+  <dt id="STICKY_TIMEOUTS"><a class="permalink" href="#STICKY_TIMEOUTS"><b>STICKY_TIMEOUTS</b>
+    (since Linux 1.2.0)</a></dt>
+  <dd>With this flag set, <b>select</b>(2), <b>pselect</b>(2), and
+      <b>ppoll</b>(2) do not modify the returned timeout argument when
+      interrupted by a signal handler.</dd>
+  <dt id="UNAME26"><a class="permalink" href="#UNAME26"><b>UNAME26</b> (since
+    Linux 3.1)</a></dt>
+  <dd>Have <b>uname</b>(2) report a 2.6.40+ version number rather than a 3.x
+      version number. Added as a stopgap measure to support broken applications
+      that could not handle the kernel version-numbering switch from Linux 2.6.x
+      to Linux 3.x.</dd>
+  <dt id="WHOLE_SECONDS"><a class="permalink" href="#WHOLE_SECONDS"><b>WHOLE_SECONDS</b>
+    (since Linux 1.2.0)</a></dt>
+  <dd>No effect.</dd>
+</dl>
+<p class="Pp">The available execution domains are:</p>
+<dl class="Bl-tag">
+  <dt id="PER_BSD"><a class="permalink" href="#PER_BSD"><b>PER_BSD</b> (since
+    Linux 1.2.0)</a></dt>
+  <dd>BSD. (No effects.)</dd>
+  <dt id="PER_HPUX"><a class="permalink" href="#PER_HPUX"><b>PER_HPUX</b> (since
+    Linux 2.4)</a></dt>
+  <dd>Support for 32-bit HP/UX. This support was never complete, and was dropped
+      so that since Linux 4.0, this value has no effect.</dd>
+  <dt id="PER_IRIX32"><a class="permalink" href="#PER_IRIX32"><b>PER_IRIX32</b>
+    (since Linux 2.2)</a></dt>
+  <dd>IRIX 5 32-bit. Never fully functional; support dropped in Linux 2.6.27.
+      Implies <b>STICKY_TIMEOUTS</b>.</dd>
+  <dt id="PER_IRIX64"><a class="permalink" href="#PER_IRIX64"><b>PER_IRIX64</b>
+    (since Linux 2.2)</a></dt>
+  <dd>IRIX 6 64-bit. Implies <b>STICKY_TIMEOUTS</b>; otherwise no effects.</dd>
+  <dt id="PER_IRIXN32"><a class="permalink" href="#PER_IRIXN32"><b>PER_IRIXN32</b>
+    (since Linux 2.2)</a></dt>
+  <dd>IRIX 6 new 32-bit. Implies <b>STICKY_TIMEOUTS</b>; otherwise no
+    effects.</dd>
+  <dt id="PER_ISCR4"><a class="permalink" href="#PER_ISCR4"><b>PER_ISCR4</b>
+    (since Linux 1.2.0)</a></dt>
+  <dd>Implies <b>STICKY_TIMEOUTS</b>; otherwise no effects.</dd>
+  <dt id="PER_LINUX"><a class="permalink" href="#PER_LINUX"><b>PER_LINUX</b>
+    (since Linux 1.2.0)</a></dt>
+  <dd>Linux.</dd>
+  <dt id="PER_LINUX32"><a class="permalink" href="#PER_LINUX32"><b>PER_LINUX32</b>
+    (since Linux 2.2)</a></dt>
+  <dd>[To be documented.]</dd>
+  <dt id="PER_LINUX32_3GB"><a class="permalink" href="#PER_LINUX32_3GB"><b>PER_LINUX32_3GB</b>
+    (since Linux 2.4)</a></dt>
+  <dd>Implies <b>ADDR_LIMIT_3GB</b>.</dd>
+  <dt id="PER_LINUX_32BIT"><a class="permalink" href="#PER_LINUX_32BIT"><b>PER_LINUX_32BIT</b>
+    (since Linux 2.0)</a></dt>
+  <dd>Implies <b>ADDR_LIMIT_32BIT</b>.</dd>
+  <dt id="PER_LINUX_FDPIC"><a class="permalink" href="#PER_LINUX_FDPIC"><b>PER_LINUX_FDPIC</b>
+    (since Linux 2.6.11)</a></dt>
+  <dd>Implies <b>FDPIC_FUNCPTRS</b>.</dd>
+  <dt id="PER_OSF4"><a class="permalink" href="#PER_OSF4"><b>PER_OSF4</b> (since
+    Linux 2.4)</a></dt>
+  <dd>OSF/1 v4. On alpha, clear top 32 bits of iov_len in the user's buffer for
+      compatibility with old versions of OSF/1 where iov_len was defined as.
+      <i>int</i>.</dd>
+  <dt id="PER_OSR5"><a class="permalink" href="#PER_OSR5"><b>PER_OSR5</b> (since
+    Linux 2.4)</a></dt>
+  <dd>Implies <b>STICKY_TIMEOUTS</b> and <b>WHOLE_SECONDS</b>; otherwise no
+      effects.</dd>
+  <dt id="PER_RISCOS"><a class="permalink" href="#PER_RISCOS"><b>PER_RISCOS</b>
+    (since Linux 2.2)</a></dt>
+  <dd>[To be documented.]</dd>
+  <dt id="PER_SCOSVR3"><a class="permalink" href="#PER_SCOSVR3"><b>PER_SCOSVR3</b>
+    (since Linux 1.2.0)</a></dt>
+  <dd>Implies <b>STICKY_TIMEOUTS</b>, <b>WHOLE_SECONDS</b>, and
+      <b>SHORT_INODE</b>; otherwise no effects.</dd>
+  <dt id="PER_SOLARIS"><a class="permalink" href="#PER_SOLARIS"><b>PER_SOLARIS</b>
+    (since Linux 2.4)</a></dt>
+  <dd>Implies <b>STICKY_TIMEOUTS</b>; otherwise no effects.</dd>
+  <dt id="PER_SUNOS"><a class="permalink" href="#PER_SUNOS"><b>PER_SUNOS</b>
+    (since Linux 2.4.0)</a></dt>
+  <dd>Implies <b>STICKY_TIMEOUTS</b>. Divert library and dynamic linker searches
+      to <i>/usr/gnemul</i>. Buggy, largely unmaintained, and almost entirely
+      unused; support was removed in Linux 2.6.26.</dd>
+  <dt id="PER_SVR3"><a class="permalink" href="#PER_SVR3"><b>PER_SVR3</b> (since
+    Linux 1.2.0)</a></dt>
+  <dd>Implies <b>STICKY_TIMEOUTS</b> and <b>SHORT_INODE</b>; otherwise no
+      effects.</dd>
+  <dt id="PER_SVR4"><a class="permalink" href="#PER_SVR4"><b>PER_SVR4</b> (since
+    Linux 1.2.0)</a></dt>
+  <dd>Implies <b>STICKY_TIMEOUTS</b> and <b>MMAP_PAGE_ZERO</b>; otherwise no
+      effects.</dd>
+  <dt id="PER_UW7"><a class="permalink" href="#PER_UW7"><b>PER_UW7</b> (since
+    Linux 2.4)</a></dt>
+  <dd>Implies <b>STICKY_TIMEOUTS</b> and <b>MMAP_PAGE_ZERO</b>; otherwise no
+      effects.</dd>
+  <dt id="PER_WYSEV386"><a class="permalink" href="#PER_WYSEV386"><b>PER_WYSEV386</b>
+    (since Linux 1.2.0)</a></dt>
+  <dd>Implies <b>STICKY_TIMEOUTS</b> and <b>SHORT_INODE</b>; otherwise no
+      effects.</dd>
+  <dt id="PER_XENIX"><a class="permalink" href="#PER_XENIX"><b>PER_XENIX</b>
+    (since Linux 1.2.0)</a></dt>
+  <dd>Implies <b>STICKY_TIMEOUTS</b> and <b>SHORT_INODE</b>; otherwise no
+      effects.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, the previous <i>persona</i> is returned. On error, -1
+    is returned, and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The kernel was unable to change the personality.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">This system call first appeared in Linux 1.1.20 (and thus first in
+    a stable kernel release with Linux 1.2.0); library support was added in
+    glibc 2.3.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>personality</b>() is Linux-specific and should not be used in
+    programs intended to be portable.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>setarch</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

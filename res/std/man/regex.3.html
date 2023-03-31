@@ -1,0 +1,336 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (C), 1995, Graeme W. Wilford. (Wilf.)
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Wed Jun 14 16:10:28 BST 1995 Wilf. (G.Wilford@ee.surrey.ac.uk)
+   Tiny change in formatting - aeb, 950812
+   Modified 8 May 1998 by Joseph S. Myers (jsm28@cam.ac.uk)
+  
+   show the synopsis section nicely
+ --><head>
+<meta name="dc.identifier" content="res/59c651a34d0896aa251af02934b64438a5e8ec4b">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>regex(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">regex(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">regex(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">regcomp, regexec, regerror, regfree - POSIX regex functions</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;regex.h&gt;</b></pre>
+<pre><b>int regcomp(regex_t *restrict </b><i>preg</i><b>, const char *restrict </b><i>regex</i><b>,</b>
+<b>            int </b><i>cflags</i><b>);</b>
+<b>int regexec(const regex_t *restrict </b><i>preg</i><b>, const char *restrict </b><i>string</i><b>,</b>
+<b>            size_t </b><i>nmatch</i><b>, regmatch_t </b><i>pmatch</i><b>[restrict .</b><i>nmatch</i><b>],</b>
+<b>            int </b><i>eflags</i><b>);</b></pre>
+<pre><b>size_t regerror(int </b><i>errcode</i><b>, const regex_t *restrict </b><i>preg</i><b>,</b>
+<b>            char </b><i>errbuf</i><b>[restrict .</b><i>errbuf_size</i><b>], size_t </b><i>errbuf_size</i><b>);</b>
+<b>void regfree(regex_t *</b><i>preg</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="POSIX_regex_compiling"><a class="permalink" href="#POSIX_regex_compiling">POSIX
+  regex compiling</a></h2>
+<p class="Pp"><b>regcomp</b>() is used to compile a regular expression into a
+    form that is suitable for subsequent <b>regexec</b>() searches.</p>
+<p class="Pp"><b>regcomp</b>() is supplied with <i>preg</i>, a pointer to a
+    pattern buffer storage area; <i>regex</i>, a pointer to the null-terminated
+    string and <i>cflags</i>, flags used to determine the type of
+  compilation.</p>
+<p class="Pp">All regular expression searching must be done via a compiled
+    pattern buffer, thus <b>regexec</b>() must always be supplied with the
+    address of a <b>regcomp</b>()-initialized pattern buffer.</p>
+<p class="Pp"><i>cflags</i> is the bitwise-<b>or</b> of zero or more of the
+    following:</p>
+<dl class="Bl-tag">
+  <dt id="REG_EXTENDED"><a class="permalink" href="#REG_EXTENDED"><b>REG_EXTENDED</b></a></dt>
+  <dd>Use <b>POSIX</b> Extended Regular Expression syntax when interpreting
+      <i>regex</i>. If not set, <b>POSIX</b> Basic Regular Expression syntax is
+      used.</dd>
+  <dt id="REG_ICASE"><a class="permalink" href="#REG_ICASE"><b>REG_ICASE</b></a></dt>
+  <dd>Do not differentiate case. Subsequent <b>regexec</b>() searches using this
+      pattern buffer will be case insensitive.</dd>
+  <dt id="REG_NOSUB"><a class="permalink" href="#REG_NOSUB"><b>REG_NOSUB</b></a></dt>
+  <dd>Do not report position of matches. The <i>nmatch</i> and <i>pmatch</i>
+      arguments to <b>regexec</b>() are ignored if the pattern buffer supplied
+      was compiled with this flag set.</dd>
+  <dt id="REG_NEWLINE"><a class="permalink" href="#REG_NEWLINE"><b>REG_NEWLINE</b></a></dt>
+  <dd>Match-any-character operators don't match a newline.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>A nonmatching list (<b>[^...]</b>) not containing a newline does not match
+      a newline.</dd>
+  <dt></dt>
+  <dd>Match-beginning-of-line operator (<b>^</b>) matches the empty string
+      immediately after a newline, regardless of whether <i>eflags</i>, the
+      execution flags of <b>regexec</b>(), contains <b>REG_NOTBOL</b>.</dd>
+  <dt></dt>
+  <dd>Match-end-of-line operator (<b>$</b>) matches the empty string immediately
+      before a newline, regardless of whether <i>eflags</i> contains
+      <b>REG_NOTEOL</b>.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="POSIX_regex_matching"><a class="permalink" href="#POSIX_regex_matching">POSIX
+  regex matching</a></h2>
+<p class="Pp"><b>regexec</b>() is used to match a null-terminated string against
+    the precompiled pattern buffer, <i>preg</i>. <i>nmatch</i> and <i>pmatch</i>
+    are used to provide information regarding the location of any matches.
+    <i>eflags</i> is the bitwise-<b>or</b> of zero or more of the following
+    flags:</p>
+<dl class="Bl-tag">
+  <dt id="REG_NOTBOL"><a class="permalink" href="#REG_NOTBOL"><b>REG_NOTBOL</b></a></dt>
+  <dd>The match-beginning-of-line operator always fails to match (but see the
+      compilation flag <b>REG_NEWLINE</b> above). This flag may be used when
+      different portions of a string are passed to <b>regexec</b>() and the
+      beginning of the string should not be interpreted as the beginning of the
+      line.</dd>
+  <dt id="REG_NOTEOL"><a class="permalink" href="#REG_NOTEOL"><b>REG_NOTEOL</b></a></dt>
+  <dd>The match-end-of-line operator always fails to match (but see the
+      compilation flag <b>REG_NEWLINE</b> above).</dd>
+  <dt id="REG_STARTEND"><a class="permalink" href="#REG_STARTEND"><b>REG_STARTEND</b></a></dt>
+  <dd>Use <i>pmatch[0]</i> on the input string, starting at byte
+      <i>pmatch[0].rm_so</i> and ending before byte <i>pmatch[0].rm_eo</i>. This
+      allows matching embedded NUL bytes and avoids a <b>strlen</b>(3) on large
+      strings. It does not use <i>nmatch</i> on input, and does not change
+      <b>REG_NOTBOL</b> or <b>REG_NEWLINE</b> processing. This flag is a BSD
+      extension, not present in POSIX.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Byte_offsets"><a class="permalink" href="#Byte_offsets">Byte
+  offsets</a></h2>
+<p class="Pp">Unless <b>REG_NOSUB</b> was set for the compilation of the pattern
+    buffer, it is possible to obtain match addressing information. <i>pmatch</i>
+    must be dimensioned to have at least <i>nmatch</i> elements. These are
+    filled in by <b>regexec</b>() with substring match addresses. The offsets of
+    the subexpression starting at the <i>i</i>th open parenthesis are stored in
+    <i>pmatch[i]</i>. The entire regular expression's match addresses are stored
+    in <i>pmatch[0]</i>. (Note that to return the offsets of <i>N</i>
+    subexpression matches, <i>nmatch</i> must be at least <i>N+1</i>.) Any
+    unused structure elements will contain the value -1.</p>
+<p class="Pp">The <i>regmatch_t</i> structure which is the type of <i>pmatch</i>
+    is defined in <i>&lt;regex.h&gt;</i>.</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>typedef struct {
+<br>
+    regoff_t rm_so;
+<br>
+    regoff_t rm_eo;
+} regmatch_t;
+</pre>
+<br>
+<p class="Pp">Each <i>rm_so</i> element that is not -1 indicates the start
+    offset of the next largest substring match within the string. The relative
+    <i>rm_eo</i> element indicates the end offset of the match, which is the
+    offset of the first character after the matching text.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="POSIX_error_reporting"><a class="permalink" href="#POSIX_error_reporting">POSIX
+  error reporting</a></h2>
+<p class="Pp"><b>regerror</b>() is used to turn the error codes that can be
+    returned by both <b>regcomp</b>() and <b>regexec</b>() into error message
+    strings.</p>
+<p class="Pp"><b>regerror</b>() is passed the error code, <i>errcode</i>, the
+    pattern buffer, <i>preg</i>, a pointer to a character string buffer,
+    <i>errbuf</i>, and the size of the string buffer, <i>errbuf_size</i>. It
+    returns the size of the <i>errbuf</i> required to contain the
+    null-terminated error message string. If both <i>errbuf</i> and
+    <i>errbuf_size</i> are nonzero, <i>errbuf</i> is filled in with the first
+    <i>errbuf_size - 1</i> characters of the error message and a terminating
+    null byte ('\0').</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="POSIX_pattern_buffer_freeing"><a class="permalink" href="#POSIX_pattern_buffer_freeing">POSIX
+  pattern buffer freeing</a></h2>
+<p class="Pp">Supplying <b>regfree</b>() with a precompiled pattern buffer,
+    <i>preg</i>, will free the memory allocated to the pattern buffer by the
+    compiling process, <b>regcomp</b>().</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp"><b>regcomp</b>() returns zero for a successful compilation or an
+    error code for failure.</p>
+<p class="Pp"><b>regexec</b>() returns zero for a successful match or
+    <b>REG_NOMATCH</b> for failure.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The following errors can be returned by <b>regcomp</b>():</p>
+<dl class="Bl-tag">
+  <dt id="REG_BADBR"><a class="permalink" href="#REG_BADBR"><b>REG_BADBR</b></a></dt>
+  <dd>Invalid use of back reference operator.</dd>
+  <dt id="REG_BADPAT"><a class="permalink" href="#REG_BADPAT"><b>REG_BADPAT</b></a></dt>
+  <dd>Invalid use of pattern operators such as group or list.</dd>
+  <dt id="REG_BADRPT"><a class="permalink" href="#REG_BADRPT"><b>REG_BADRPT</b></a></dt>
+  <dd>Invalid use of repetition operators such as using '*' as the first
+      character.</dd>
+  <dt id="REG_EBRACE"><a class="permalink" href="#REG_EBRACE"><b>REG_EBRACE</b></a></dt>
+  <dd>Un-matched brace interval operators.</dd>
+  <dt id="REG_EBRACK"><a class="permalink" href="#REG_EBRACK"><b>REG_EBRACK</b></a></dt>
+  <dd>Un-matched bracket list operators.</dd>
+  <dt id="REG_ECOLLATE"><a class="permalink" href="#REG_ECOLLATE"><b>REG_ECOLLATE</b></a></dt>
+  <dd>Invalid collating element.</dd>
+  <dt id="REG_ECTYPE"><a class="permalink" href="#REG_ECTYPE"><b>REG_ECTYPE</b></a></dt>
+  <dd>Unknown character class name.</dd>
+  <dt id="REG_EEND"><a class="permalink" href="#REG_EEND"><b>REG_EEND</b></a></dt>
+  <dd>Nonspecific error. This is not defined by POSIX.2.</dd>
+  <dt id="REG_EESCAPE"><a class="permalink" href="#REG_EESCAPE"><b>REG_EESCAPE</b></a></dt>
+  <dd>Trailing backslash.</dd>
+  <dt id="REG_EPAREN"><a class="permalink" href="#REG_EPAREN"><b>REG_EPAREN</b></a></dt>
+  <dd>Un-matched parenthesis group operators.</dd>
+  <dt id="REG_ERANGE"><a class="permalink" href="#REG_ERANGE"><b>REG_ERANGE</b></a></dt>
+  <dd>Invalid use of the range operator; for example, the ending point of the
+      range occurs prior to the starting point.</dd>
+  <dt id="REG_ESIZE"><a class="permalink" href="#REG_ESIZE"><b>REG_ESIZE</b></a></dt>
+  <dd>Compiled regular expression requires a pattern buffer larger than
+      64&nbsp;kB. This is not defined by POSIX.2.</dd>
+  <dt id="REG_ESPACE"><a class="permalink" href="#REG_ESPACE"><b>REG_ESPACE</b></a></dt>
+  <dd>The regex routines ran out of memory.</dd>
+  <dt id="REG_ESUBREG"><a class="permalink" href="#REG_ESUBREG"><b>REG_ESUBREG</b></a></dt>
+  <dd>Invalid back reference to a subexpression.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>regcomp (), regexec ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe locale</td>
+  </tr>
+  <tr>
+    <td>regerror ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe env</td>
+  </tr>
+  <tr>
+    <td>regfree ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<pre>#include &lt;stdint.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;regex.h&gt;
+#define ARRAY_SIZE(arr) (sizeof((arr)) / sizeof((arr)[0]))
+static const char *const str =
+<br>
+        "1) John Driverhacker;\n2) John Doe;\n3) John Foo;\n";
+static const char *const re = "John.*o";
+int main(void)
+{
+<br>
+    static const char *s = str;
+<br>
+    regex_t     regex;
+<br>
+    regmatch_t  pmatch[1];
+<br>
+    regoff_t    off, len;
+<br>
+    if (regcomp(&amp;regex, re, REG_NEWLINE))
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    printf("String = \"%s\"\n", str);
+<br>
+    printf("Matches:\n");
+<br>
+    for (unsigned int i = 0; ; i++) {
+<br>
+        if (regexec(&amp;regex, s, ARRAY_SIZE(pmatch), pmatch, 0))
+<br>
+            break;
+<br>
+        off = pmatch[0].rm_so + (s - str);
+<br>
+        len = pmatch[0].rm_eo - pmatch[0].rm_so;
+<br>
+        printf("#%zu:\n", i);
+<br>
+        printf("offset = %jd; length = %jd\n", (intmax_t) off,
+<br>
+                (intmax_t) len);
+<br>
+        printf("substring = \"%.*s\"\n", len, s + pmatch[0].rm_so);
+<br>
+        s += pmatch[0].rm_eo;
+<br>
+    }
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>grep</b>(1), <b>regex</b>(7)</p>
+<p class="Pp">The glibc manual section, <i>Regular Expressions</i></p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

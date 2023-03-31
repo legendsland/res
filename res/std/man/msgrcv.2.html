@@ -1,0 +1,536 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/d98b7d0e4d9ef4ead26199c67087e65c239eee84">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>MSGOP(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">MSGOP(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">MSGOP(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">msgrcv, msgsnd - System V message queue operations</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/msg.h&gt;</b></pre>
+<pre><b>int msgsnd(int </b><i>msqid</i><b>, const void </b><i>msgp</i><b>[.</b><i>msgsz</i><b>], size_t </b><i>msgsz</i><b>,</b>
+<b>               int </b><i>msgflg</i><b>);</b></pre>
+<pre><b>ssize_t msgrcv(int </b><i>msqid</i><b>, void </b><i>msgp</i><b>[.</b><i>msgsz</i><b>], size_t </b><i>msgsz</i><b>, long </b><i>msgtyp</i><b>,</b>
+<b>               int </b><i>msgflg</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>msgsnd</b>() and <b>msgrcv</b>() system calls are used to
+    send messages to, and receive messages from, a System&nbsp;V message
+    queue. The calling process must have write permission on the message queue
+    in order to send a message, and read permission to receive a message.</p>
+<p class="Pp">The <i>msgp</i> argument is a pointer to a caller-defined
+    structure of the following general form:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct msgbuf {
+<br>
+    long mtype;       /* message type, must be &gt; 0 */
+<br>
+    char mtext[1];    /* message data */
+};
+</pre>
+<br>
+<p class="Pp">The <i>mtext</i> field is an array (or other structure) whose size
+    is specified by <i>msgsz</i>, a nonnegative integer value. Messages of zero
+    length (i.e., no <i>mtext</i> field) are permitted. The <i>mtype</i> field
+    must have a strictly positive integer value. This value can be used by the
+    receiving process for message selection (see the description of
+    <b>msgrcv</b>() below).</p>
+<section class="Ss">
+<h2 class="Ss" id="msgsnd()"><a class="permalink" href="#msgsnd()">msgsnd()</a></h2>
+<p class="Pp">The <b>msgsnd</b>() system call appends a copy of the message
+    pointed to by <i>msgp</i> to the message queue whose identifier is specified
+    by <i>msqid</i>.</p>
+<p class="Pp">If sufficient space is available in the queue, <b>msgsnd</b>()
+    succeeds immediately. The queue capacity is governed by the
+    <i>msg_qbytes</i> field in the associated data structure for the message
+    queue. During queue creation this field is initialized to <b>MSGMNB</b>
+    bytes, but this limit can be modified using <b>msgctl</b>(2). A message
+    queue is considered to be full if either of the following conditions is
+    true:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>Adding a new message to the queue would cause the total number of bytes in
+      the queue to exceed the queue's maximum size (the <i>msg_qbytes</i>
+      field).</dd>
+  <dt>•</dt>
+  <dd>Adding another message to the queue would cause the total number of
+      messages in the queue to exceed the queue's maximum size (the
+      <i>msg_qbytes</i> field). This check is necessary to prevent an unlimited
+      number of zero-length messages being placed on the queue. Although such
+      messages contain no data, they nevertheless consume (locked) kernel
+      memory.</dd>
+</dl>
+<p class="Pp">If insufficient space is available in the queue, then the default
+    behavior of <b>msgsnd</b>() is to block until space becomes available. If
+    <b>IPC_NOWAIT</b> is specified in <i>msgflg</i>, then the call instead fails
+    with the error <b>EAGAIN</b>.</p>
+<p class="Pp">A blocked <b>msgsnd</b>() call may also fail if:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>the queue is removed, in which case the system call fails with
+      <i>errno</i> set to <b>EIDRM</b>; or</dd>
+  <dt>•</dt>
+  <dd>a signal is caught, in which case the system call fails with <i>errno</i>
+      set to <b>EINTR</b>;<b>see</b> <b>signal</b>(7). (<b>msgsnd</b>() is never
+      automatically restarted after being interrupted by a signal handler,
+      regardless of the setting of the <b>SA_RESTART</b> flag when establishing
+      a signal handler.)</dd>
+</dl>
+<p class="Pp">Upon successful completion the message queue data structure is
+    updated as follows:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd><i>msg_lspid</i> is set to the process ID of the calling process.</dd>
+  <dt>•</dt>
+  <dd><i>msg_qnum</i> is incremented by 1.</dd>
+  <dt>•</dt>
+  <dd><i>msg_stime</i> is set to the current time.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="msgrcv()"><a class="permalink" href="#msgrcv()">msgrcv()</a></h2>
+<p class="Pp">The <b>msgrcv</b>() system call removes a message from the queue
+    specified by <i>msqid</i> and places it in the buffer pointed to by
+    <i>msgp</i>.</p>
+<p class="Pp">The argument <i>msgsz</i> specifies the maximum size in bytes for
+    the member <i>mtext</i> of the structure pointed to by the <i>msgp</i>
+    argument. If the message text has length greater than <i>msgsz</i>, then the
+    behavior depends on whether <b>MSG_NOERROR</b> is specified in
+    <i>msgflg</i>. If <b>MSG_NOERROR</b> is specified, then the message text
+    will be truncated (and the truncated part will be lost); if
+    <b>MSG_NOERROR</b> is not specified, then the message isn't removed from the
+    queue and the system call fails returning -1 with <i>errno</i> set to
+    <b>E2BIG</b>.</p>
+<p class="Pp">Unless <b>MSG_COPY</b> is specified in <i>msgflg</i> (see below),
+    the <i>msgtyp</i> argument specifies the type of message requested, as
+    follows:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>If <i>msgtyp</i> is 0, then the first message in the queue is read.</dd>
+  <dt>•</dt>
+  <dd>If <i>msgtyp</i> is greater than 0, then the first message in the queue of
+      type <i>msgtyp</i> is read, unless <b>MSG_EXCEPT</b> was specified in
+      <i>msgflg</i>, in which case the first message in the queue of type not
+      equal to <i>msgtyp</i> will be read.</dd>
+  <dt>•</dt>
+  <dd>If <i>msgtyp</i> is less than 0, then the first message in the queue with
+      the lowest type less than or equal to the absolute value of <i>msgtyp</i>
+      will be read.</dd>
+</dl>
+<p class="Pp">The <i>msgflg</i> argument is a bit mask constructed by ORing
+    together zero or more of the following flags:</p>
+<dl class="Bl-tag">
+  <dt id="IPC_NOWAIT"><a class="permalink" href="#IPC_NOWAIT"><b>IPC_NOWAIT</b></a></dt>
+  <dd>Return immediately if no message of the requested type is in the queue.
+      The system call fails with <i>errno</i> set to <b>ENOMSG</b>.</dd>
+  <dt id="MSG_COPY"><a class="permalink" href="#MSG_COPY"><b>MSG_COPY</b> (since
+    Linux 3.8)</a></dt>
+  <dd>Nondestructively fetch a copy of the message at the ordinal position in
+      the queue specified by <i>msgtyp</i> (messages are considered to be
+      numbered starting at 0).</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>This flag must be specified in conjunction with <b>IPC_NOWAIT</b>, with
+      the result that, if there is no message available at the given position,
+      the call fails immediately with the error <b>ENOMSG</b>. Because they
+      alter the meaning of <i>msgtyp</i> in orthogonal ways, <b>MSG_COPY</b> and
+      <b>MSG_EXCEPT</b> may not both be specified in <i>msgflg</i>.</dd>
+  <dt></dt>
+  <dd>The <b>MSG_COPY</b> flag was added for the implementation of the kernel
+      checkpoint-restore facility and is available only if the kernel was built
+      with the <b>CONFIG_CHECKPOINT_RESTORE</b> option.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="MSG_EXCEPT"><a class="permalink" href="#MSG_EXCEPT"><b>MSG_EXCEPT</b></a></dt>
+  <dd>Used with <i>msgtyp</i> greater than 0 to read the first message in the
+      queue with message type that differs from <i>msgtyp</i>.</dd>
+  <dt id="MSG_NOERROR"><a class="permalink" href="#MSG_NOERROR"><b>MSG_NOERROR</b></a></dt>
+  <dd>To truncate the message text if longer than <i>msgsz</i> bytes.</dd>
+</dl>
+<p class="Pp">If no message of the requested type is available and
+    <b>IPC_NOWAIT</b> isn't specified in <i>msgflg</i>, the calling process is
+    blocked until one of the following conditions occurs:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>A message of the desired type is placed in the queue.</dd>
+  <dt>•</dt>
+  <dd>The message queue is removed from the system. In this case, the system
+      call fails with <i>errno</i> set to <b>EIDRM</b>.</dd>
+  <dt>•</dt>
+  <dd>The calling process catches a signal. In this case, the system call fails
+      with <i>errno</i> set to <b>EINTR</b>. (<b>msgrcv</b>() is never
+      automatically restarted after being interrupted by a signal handler,
+      regardless of the setting of the <b>SA_RESTART</b> flag when establishing
+      a signal handler.)</dd>
+</dl>
+<p class="Pp">Upon successful completion the message queue data structure is
+    updated as follows:</p>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd><i>msg_lrpid</i> is set to the process ID of the calling process.</dd>
+  <dt></dt>
+  <dd><i>msg_qnum</i> is decremented by 1.</dd>
+  <dt></dt>
+  <dd><i>msg_rtime</i> is set to the current time.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>msgsnd</b>() returns 0 and <b>msgrcv</b>() returns
+    the number of bytes actually copied into the <i>mtext</i> array. On failure,
+    both functions return -1, and set <i>errno</i> to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp"><b>msgsnd</b>() can fail with the following errors:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>The calling process does not have write permission on the message queue,
+      and does not have the <b>CAP_IPC_OWNER</b> capability in the user
+      namespace that governs its IPC namespace.</dd>
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>The message can't be sent due to the <i>msg_qbytes</i> limit for the queue
+      and <b>IPC_NOWAIT</b> was specified in <i>msgflg</i>.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>The address pointed to by <i>msgp</i> isn't accessible.</dd>
+  <dt id="EIDRM"><a class="permalink" href="#EIDRM"><b>EIDRM</b></a></dt>
+  <dd>The message queue was removed.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>Sleeping on a full message queue condition, the process caught a
+    signal.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>Invalid <i>msqid</i> value, or nonpositive <i>mtype</i> value, or invalid
+      <i>msgsz</i> value (less than 0 or greater than the system value
+      <b>MSGMAX</b>).</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>The system does not have enough memory to make a copy of the message
+      pointed to by <i>msgp</i>.</dd>
+</dl>
+<p class="Pp"><b>msgrcv</b>() can fail with the following errors:</p>
+<dl class="Bl-tag">
+  <dt id="E2BIG"><a class="permalink" href="#E2BIG"><b>E2BIG</b></a></dt>
+  <dd>The message text length is greater than <i>msgsz</i> and
+      <b>MSG_NOERROR</b> isn't specified in <i>msgflg</i>.</dd>
+  <dt id="EACCES~2"><a class="permalink" href="#EACCES~2"><b>EACCES</b></a></dt>
+  <dd>The calling process does not have read permission on the message queue,
+      and does not have the <b>CAP_IPC_OWNER</b> capability in the user
+      namespace that governs its IPC namespace.</dd>
+  <dt id="EFAULT~2"><a class="permalink" href="#EFAULT~2"><b>EFAULT</b></a></dt>
+  <dd>The address pointed to by <i>msgp</i> isn't accessible.</dd>
+  <dt id="EIDRM~2"><a class="permalink" href="#EIDRM~2"><b>EIDRM</b></a></dt>
+  <dd>While the process was sleeping to receive a message, the message queue was
+      removed.</dd>
+  <dt id="EINTR~2"><a class="permalink" href="#EINTR~2"><b>EINTR</b></a></dt>
+  <dd>While the process was sleeping to receive a message, the process caught a
+      signal; see <b>signal</b>(7).</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd><i>msqid</i> was invalid, or <i>msgsz</i> was less than 0.</dd>
+  <dt id="EINVAL~3"><a class="permalink" href="#EINVAL~3"><b>EINVAL</b> (since
+    Linux 3.14)</a></dt>
+  <dd><i>msgflg</i> specified <b>MSG_COPY</b>, but not <b>IPC_NOWAIT</b>.</dd>
+  <dt id="EINVAL~4"><a class="permalink" href="#EINVAL~4"><b>EINVAL</b> (since
+    Linux 3.14)</a></dt>
+  <dd><i>msgflg</i> specified both <b>MSG_COPY</b> and <b>MSG_EXCEPT</b>.</dd>
+  <dt id="ENOMSG"><a class="permalink" href="#ENOMSG"><b>ENOMSG</b></a></dt>
+  <dd><b>IPC_NOWAIT</b> was specified in <i>msgflg</i> and no message of the
+      requested type existed on the message queue.</dd>
+  <dt id="ENOMSG~2"><a class="permalink" href="#ENOMSG~2"><b>ENOMSG</b></a></dt>
+  <dd><b>IPC_NOWAIT</b> and <b>MSG_COPY</b> were specified in <i>msgflg</i> and
+      the queue contains less than <i>msgtyp</i> messages.</dd>
+  <dt id="ENOSYS"><a class="permalink" href="#ENOSYS"><b>ENOSYS</b> (since Linux
+    3.8)</a></dt>
+  <dd>Both <b>MSG_COPY</b> and <b>IPC_NOWAIT</b> were specified in
+      <i>msgflg</i>, and this kernel was configured without
+      <b>CONFIG_CHECKPOINT_RESTORE</b>.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, SVr4.</p>
+<p class="Pp">The <b>MSG_EXCEPT</b> and <b>MSG_COPY</b> flags are
+    Linux-specific; their definitions can be obtained by defining the
+    <b>_GNU_SOURCE</b> feature test macro.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The <i>msgp</i> argument is declared as <i>struct
+    msgbuf&nbsp;*</i> in glibc 2.0 and 2.1. It is declared as
+    <i>void&nbsp;*</i> in glibc 2.2 and later, as required by SUSv2 and
+  SUSv3.</p>
+<p class="Pp">The following limits on message queue resources affect the
+    <b>msgsnd</b>() call:</p>
+<dl class="Bl-tag">
+  <dt id="MSGMAX"><a class="permalink" href="#MSGMAX"><b>MSGMAX</b></a></dt>
+  <dd>Maximum size of a message text, in bytes (default value: 8192 bytes). On
+      Linux, this limit can be read and modified via
+      <i>/proc/sys/kernel/msgmax</i>.</dd>
+  <dt id="MSGMNB"><a class="permalink" href="#MSGMNB"><b>MSGMNB</b></a></dt>
+  <dd>Maximum number of bytes that can be held in a message queue (default
+      value: 16384 bytes). On Linux, this limit can be read and modified via
+      <i>/proc/sys/kernel/msgmnb</i>. A privileged process (Linux: a process
+      with the <b>CAP_SYS_RESOURCE</b> capability) can increase the size of a
+      message queue beyond <b>MSGMNB</b> using the <b>msgctl</b>(2)
+      <b>IPC_SET</b> operation.</dd>
+</dl>
+<p class="Pp">The implementation has no intrinsic system-wide limits on the
+    number of message headers (<b>MSGTQL</b>) and the number of bytes in the
+    message pool (<b>MSGPOOL</b>).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">In Linux 3.13 and earlier, if <b>msgrcv</b>() was called with the
+    <b>MSG_COPY</b> flag, but without <b>IPC_NOWAIT</b>, and the message queue
+    contained less than <i>msgtyp</i> messages, then the call would block until
+    the next message is written to the queue. At that point, the call would
+    return a copy of the message, <i>regardless</i> of whether that message was
+    at the ordinal position <i>msgtyp</i>. This bug is fixed in Linux 3.14.</p>
+<p class="Pp">Specifying both <b>MSG_COPY</b> and <b>MSC_EXCEPT</b> in
+    <i>msgflg</i> is a logical error (since these flags impose different
+    interpretations on <i>msgtyp</i>). In Linux 3.13 and earlier, this error was
+    not diagnosed by <b>msgrcv</b>(). This bug is fixed in Linux 3.14.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below demonstrates the use of <b>msgsnd</b>() and
+    <b>msgrcv</b>().</p>
+<p class="Pp">The example program is first run with the <b>-s</b> option to send
+    a message and then run again with the <b>-r</b> option to receive a
+  message.</p>
+<p class="Pp">The following shell session shows a sample run of the program:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$<b> ./a.out -s</b>
+sent: a message at Wed Mar  4 16:25:45 2015
+$<b> ./a.out -r</b>
+message received: a message at Wed Mar  4 16:25:45 2015
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#include &lt;errno.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;sys/ipc.h&gt;
+#include &lt;sys/msg.h&gt;
+#include &lt;time.h&gt;
+#include &lt;unistd.h&gt;
+struct msgbuf {
+<br>
+    long mtype;
+<br>
+    char mtext[80];
+};
+static void
+usage(char *prog_name, char *msg)
+{
+<br>
+    if (msg != NULL)
+<br>
+        fputs(msg, stderr);
+<br>
+    fprintf(stderr, "Usage: %s [options]\n", prog_name);
+<br>
+    fprintf(stderr, "Options are:\n");
+<br>
+    fprintf(stderr, "-s        send message using msgsnd()\n");
+<br>
+    fprintf(stderr, "-r        read message using msgrcv()\n");
+<br>
+    fprintf(stderr, "-t        message type (default is 1)\n");
+<br>
+    fprintf(stderr, "-k        message queue key (default is 1234)\n");
+<br>
+    exit(EXIT_FAILURE);
+}
+static void
+send_msg(int qid, int msgtype)
+{
+<br>
+    time_t         t;
+<br>
+    struct msgbuf  msg;
+<br>
+    msg.mtype = msgtype;
+<br>
+    time(&amp;t);
+<br>
+    snprintf(msg.mtext, sizeof(msg.mtext), "a message at %s",
+<br>
+             ctime(&amp;t));
+<br>
+    if (msgsnd(qid, &amp;msg, sizeof(msg.mtext),
+<br>
+               IPC_NOWAIT) == -1)
+<br>
+    {
+<br>
+        perror("msgsnd error");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    printf("sent: %s\n", msg.mtext);
+}
+static void
+get_msg(int qid, int msgtype)
+{
+<br>
+    struct msgbuf msg;
+<br>
+    if (msgrcv(qid, &amp;msg, sizeof(msg.mtext), msgtype,
+<br>
+               MSG_NOERROR | IPC_NOWAIT) == -1) {
+<br>
+        if (errno != ENOMSG) {
+<br>
+            perror("msgrcv");
+<br>
+            exit(EXIT_FAILURE);
+<br>
+        }
+<br>
+        printf("No message available for msgrcv()\n");
+<br>
+    } else {
+<br>
+        printf("message received: %s\n", msg.mtext);
+<br>
+    }
+}
+int
+main(int argc, char *argv[])
+{
+<br>
+    int  qid, opt;
+<br>
+    int  mode = 0;               /* 1 = send, 2 = receive */
+<br>
+    int  msgtype = 1;
+<br>
+    int  msgkey = 1234;
+<br>
+    while ((opt = getopt(argc, argv, "srt:k:")) != -1) {
+<br>
+        switch (opt) {
+<br>
+        case 's':
+<br>
+            mode = 1;
+<br>
+            break;
+<br>
+        case 'r':
+<br>
+            mode = 2;
+<br>
+            break;
+<br>
+        case 't':
+<br>
+            msgtype = atoi(optarg);
+<br>
+            if (msgtype &lt;= 0)
+<br>
+                usage(argv[0], "-t option must be greater than 0\n");
+<br>
+            break;
+<br>
+        case 'k':
+<br>
+            msgkey = atoi(optarg);
+<br>
+            break;
+<br>
+        default:
+<br>
+            usage(argv[0], "Unrecognized option\n");
+<br>
+        }
+<br>
+    }
+<br>
+    if (mode == 0)
+<br>
+        usage(argv[0], "must use either -s or -r option\n");
+<br>
+    qid = msgget(msgkey, IPC_CREAT | 0666);
+<br>
+    if (qid == -1) {
+<br>
+        perror("msgget");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    if (mode == 2)
+<br>
+        get_msg(qid, msgtype);
+<br>
+    else
+<br>
+        send_msg(qid, msgtype);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>msgctl</b>(2), <b>msgget</b>(2), <b>capabilities</b>(7),
+    <b>mq_overview</b>(7), <b>sysvipc</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

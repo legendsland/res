@@ -1,0 +1,210 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2000 Andries Brouwer <aeb@cwi.nl>
+   and Copyright (c) 2007 Michael Kerrisk <mtk.manpages@gmail.com>
+   and Copyright (c) 2008, Linux Foundation, written by Michael Kerrisk
+        <mtk.manpages@gmail.com>
+   based on work by Rik Faith <faith@cs.unc.edu>
+   and Mike Battersby <mike@starbug.apana.org.au>.
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Modified 2004-11-19, mtk:
+   added pointer to sigaction.2 for details of ignoring SIGCHLD
+   2007-06-03, mtk: strengthened portability warning, and rewrote
+       various sections.
+   2008-07-11, mtk: rewrote and expanded portability discussion.
+   --><head>
+<meta name="dc.identifier" content="res/7a7a8800401c58ae0e8438651f206e101f72aaba">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>signal(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">signal(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">signal(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">signal - ANSI C signal handling</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;signal.h&gt;</b></pre>
+<pre><b>typedef void (*sighandler_t)(int);</b></pre>
+<pre><b>sighandler_t signal(int </b><i>signum</i><b>, sighandler_t </b><i>handler</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>WARNING</b>: the behavior of <b>signal</b>() varies across UNIX
+    versions, and has also varied historically across different versions of
+    Linux. <b>Avoid its use</b>: use <b>sigaction</b>(2) instead. See
+    <i>Portability</i> below.</p>
+<p class="Pp"><b>signal</b>() sets the disposition of the signal <i>signum</i>
+    to <i>handler</i>, which is either <b>SIG_IGN</b>, <b>SIG_DFL</b>, or the
+    address of a programmer-defined function (a "signal handler").</p>
+<p class="Pp">If the signal <i>signum</i> is delivered to the process, then one
+    of the following happens:</p>
+<dl class="Bl-tag">
+  <dt>*</dt>
+  <dd>If the disposition is set to <b>SIG_IGN</b>, then the signal is
+    ignored.</dd>
+  <dt>*</dt>
+  <dd>If the disposition is set to <b>SIG_DFL</b>, then the default action
+      associated with the signal (see <b>signal</b>(7)) occurs.</dd>
+  <dt>*</dt>
+  <dd>If the disposition is set to a function, then first either the disposition
+      is reset to <b>SIG_DFL</b>, or the signal is blocked (see
+      <i>Portability</i> below), and then <i>handler</i> is called with argument
+      <i>signum</i>. If invocation of the handler caused the signal to be
+      blocked, then the signal is unblocked upon return from the handler.</dd>
+</dl>
+<p class="Pp">The signals <b>SIGKILL</b> and <b>SIGSTOP</b> cannot be caught or
+    ignored.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp"><b>signal</b>() returns the previous value of the signal handler.
+    On failure, it returns <b>SIG_ERR</b>, and <i>errno</i> is set to indicate
+    the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>signum</i> is invalid.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, C89, C99.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The effects of <b>signal</b>() in a multithreaded process are
+    unspecified.</p>
+<p class="Pp">According to POSIX, the behavior of a process is undefined after
+    it ignores a <b>SIGFPE</b>, <b>SIGILL</b>, or <b>SIGSEGV</b> signal that was
+    not generated by <b>kill</b>(2) or <b>raise</b>(3). Integer division by zero
+    has undefined result. On some architectures it will generate a <b>SIGFPE</b>
+    signal. (Also dividing the most negative integer by -1 may generate
+    <b>SIGFPE</b>.) Ignoring this signal might lead to an endless loop.</p>
+<p class="Pp">See <b>sigaction</b>(2) for details on what happens when the
+    disposition <b>SIGCHLD</b> is set to <b>SIG_IGN</b>.</p>
+<p class="Pp">See <b>signal-safety</b>(7) for a list of the async-signal-safe
+    functions that can be safely called from inside a signal handler.</p>
+<p class="Pp">The use of <i>sighandler_t</i> is a GNU extension, exposed if
+    <b>_GNU_SOURCE</b> is defined; glibc also defines (the BSD-derived)
+    <i>sig_t</i> if <b>_BSD_SOURCE</b> (glibc 2.19 and earlier) or
+    <b>_DEFAULT_SOURCE</b> (glibc 2.19 and later) is defined. Without use of
+    such a type, the declaration of <b>signal</b>() is the somewhat harder to
+    read:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre><b>void ( *</b><i>signal</i><b>(int </b><i>signum</i><b>, void (*</b><i>handler</i><b>)(int)) ) (int);</b>
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Portability"><a class="permalink" href="#Portability">Portability</a></h2>
+<p class="Pp">The only portable use of <b>signal</b>() is to set a signal's
+    disposition to <b>SIG_DFL</b> or <b>SIG_IGN</b>. The semantics when using
+    <b>signal</b>() to establish a signal handler vary across systems (and
+    POSIX.1 explicitly permits this variation); <b>do not use it for this
+    purpose.</b></p>
+<p class="Pp">POSIX.1 solved the portability mess by specifying
+    <b>sigaction</b>(2), which provides explicit control of the semantics when a
+    signal handler is invoked; use that interface instead of
+  <b>signal</b>().</p>
+<p class="Pp">In the original UNIX systems, when a handler that was established
+    using <b>signal</b>() was invoked by the delivery of a signal, the
+    disposition of the signal would be reset to <b>SIG_DFL</b>, and the system
+    did not block delivery of further instances of the signal. This is
+    equivalent to calling <b>sigaction</b>(2) with the following flags:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>sa.sa_flags = SA_RESETHAND | SA_NODEFER;
+</pre>
+<br>
+<p class="Pp">System&nbsp;V also provides these semantics for <b>signal</b>().
+    This was bad because the signal might be delivered again before the handler
+    had a chance to reestablish itself. Furthermore, rapid deliveries of the
+    same signal could result in recursive invocations of the handler.</p>
+<p class="Pp">BSD improved on this situation, but unfortunately also changed the
+    semantics of the existing <b>signal</b>() interface while doing so. On BSD,
+    when a signal handler is invoked, the signal disposition is not reset, and
+    further instances of the signal are blocked from being delivered while the
+    handler is executing. Furthermore, certain blocking system calls are
+    automatically restarted if interrupted by a signal handler (see
+    <b>signal</b>(7)). The BSD semantics are equivalent to calling
+    <b>sigaction</b>(2) with the following flags:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>sa.sa_flags = SA_RESTART;
+</pre>
+<br>
+<p class="Pp">The situation on Linux is as follows:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>The kernel's <b>signal</b>() system call provides System&nbsp;V
+      semantics.</dd>
+  <dt>•</dt>
+  <dd>By default, in glibc 2 and later, the <b>signal</b>() wrapper function
+      does not invoke the kernel system call. Instead, it calls
+      <b>sigaction</b>(2) using flags that supply BSD semantics. This default
+      behavior is provided as long as a suitable feature test macro is defined:
+      <b>_BSD_SOURCE</b> on glibc 2.19 and earlier or <b>_DEFAULT_SOURCE</b> in
+      glibc 2.19 and later. (By default, these macros are defined; see
+      <b>feature_test_macros</b>(7) for details.) If such a feature test macro
+      is not defined, then <b>signal</b>() provides System&nbsp;V
+    semantics.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>kill</b>(1), <b>alarm</b>(2), <b>kill</b>(2), <b>pause</b>(2),
+    <b>sigaction</b>(2), <b>signalfd</b>(2), <b>sigpending</b>(2),
+    <b>sigprocmask</b>(2), <b>sigsuspend</b>(2), <b>bsd_signal</b>(3),
+    <b>killpg</b>(3), <b>raise</b>(3), <b>siginterrupt</b>(3),
+    <b>sigqueue</b>(3), <b>sigsetops</b>(3), <b>sigvec</b>(3),
+    <b>sysv_signal</b>(3), <b>signal</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,364 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/bb9db592d46d1a4b65200bf76452103e000748fe">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>stat(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">stat(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">stat(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">stat, fstat, lstat, fstatat - get file status</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/stat.h&gt;</b></pre>
+<pre><b>int stat(const char *restrict </b><i>pathname</i><b>,</b>
+<b>         struct stat *restrict </b><i>statbuf</i><b>);</b>
+<b>int fstat(int </b><i>fd</i><b>, struct stat *</b><i>statbuf</i><b>);</b>
+<b>int lstat(const char *restrict </b><i>pathname</i><b>,</b>
+<b>         struct stat *restrict </b><i>statbuf</i><b>);</b></pre>
+<pre><b>#include &lt;fcntl.h&gt;           </b>/* Definition of <b>AT_*</b> constants */
+<b>#include &lt;sys/stat.h&gt;</b></pre>
+<pre><b>int fstatat(int </b><i>dirfd</i><b>, const char *restrict </b><i>pathname</i><b>,</b>
+<b>         struct stat *restrict </b><i>statbuf</i><b>, int </b><i>flags</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>lstat</b>():</p>
+<pre><br>
+    /* Since glibc 2.20 */ _DEFAULT_SOURCE
+<br>
+        || _XOPEN_SOURCE &gt;= 500
+<br>
+        || /* Since glibc 2.10: */ _POSIX_C_SOURCE &gt;= 200112L
+<br>
+        || /* glibc 2.19 and earlier */ _BSD_SOURCE</pre>
+<p class="Pp"><b>fstatat</b>():</p>
+<pre><br>
+    Since glibc 2.10:
+<br>
+        _POSIX_C_SOURCE &gt;= 200809L
+<br>
+    Before glibc 2.10:
+<br>
+        _ATFILE_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">These functions return information about a file, in the buffer
+    pointed to by <i>statbuf</i>. No permissions are required on the file
+    itself, but—in the case of <b>stat</b>(), <b>fstatat</b>(), and
+    <b>lstat</b>()—execute (search) permission is required on all of the
+    directories in <i>pathname</i> that lead to the file.</p>
+<p class="Pp"><b>stat</b>() and <b>fstatat</b>() retrieve information about the
+    file pointed to by <i>pathname</i>; the differences for <b>fstatat</b>() are
+    described below.</p>
+<p class="Pp"><b>lstat</b>() is identical to <b>stat</b>(), except that if
+    <i>pathname</i> is a symbolic link, then it returns information about the
+    link itself, not the file that the link refers to.</p>
+<p class="Pp"><b>fstat</b>() is identical to <b>stat</b>(), except that the file
+    about which information is to be retrieved is specified by the file
+    descriptor <i>fd</i>.</p>
+<section class="Ss">
+<h2 class="Ss" id="The_stat_structure"><a class="permalink" href="#The_stat_structure">The
+  stat structure</a></h2>
+<p class="Pp">All of these system calls return a <i>stat</i> structure (see
+    <b>stat</b>(3type)).</p>
+<p class="Pp"><i>Note</i>: for performance and simplicity reasons, different
+    fields in the <i>stat</i> structure may contain state information from
+    different moments during the execution of the system call. For example, if
+    <i>st_mode</i> or <i>st_uid</i> is changed by another process by calling
+    <b>chmod</b>(2) or <b>chown</b>(2), <b>stat</b>() might return the old
+    <i>st_mode</i> together with the new <i>st_uid</i>, or the old <i>st_uid</i>
+    together with the new <i>st_mode</i>.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="fstatat()"><a class="permalink" href="#fstatat()">fstatat()</a></h2>
+<p class="Pp">The <b>fstatat</b>() system call is a more general interface for
+    accessing file information which can still provide exactly the behavior of
+    each of <b>stat</b>(), <b>lstat</b>(), and <b>fstat</b>().</p>
+<p class="Pp">If the pathname given in <i>pathname</i> is relative, then it is
+    interpreted relative to the directory referred to by the file descriptor
+    <i>dirfd</i> (rather than relative to the current working directory of the
+    calling process, as is done by <b>stat</b>() and <b>lstat</b>() for a
+    relative pathname).</p>
+<p class="Pp">If <i>pathname</i> is relative and <i>dirfd</i> is the special
+    value <b>AT_FDCWD</b>, then <i>pathname</i> is interpreted relative to the
+    current working directory of the calling process (like <b>stat</b>() and
+    <b>lstat</b>()).</p>
+<p class="Pp">If <i>pathname</i> is absolute, then <i>dirfd</i> is ignored.</p>
+<p class="Pp"><i>flags</i> can either be 0, or include one or more of the
+    following flags ORed:</p>
+<dl class="Bl-tag">
+  <dt id="AT_EMPTY_PATH"><a class="permalink" href="#AT_EMPTY_PATH"><b>AT_EMPTY_PATH</b>
+    (since Linux 2.6.39)</a></dt>
+  <dd>If <i>pathname</i> is an empty string, operate on the file referred to by
+      <i>dirfd</i> (which may have been obtained using the <b>open</b>(2)
+      <b>O_PATH</b> flag). In this case, <i>dirfd</i> can refer to any type of
+      file, not just a directory, and the behavior of <b>fstatat</b>() is
+      similar to that of <b>fstat</b>(). If <i>dirfd</i> is <b>AT_FDCWD</b>, the
+      call operates on the current working directory. This flag is
+      Linux-specific; define <b>_GNU_SOURCE</b> to obtain its definition.</dd>
+  <dt id="AT_NO_AUTOMOUNT"><a class="permalink" href="#AT_NO_AUTOMOUNT"><b>AT_NO_AUTOMOUNT</b>
+    (since Linux 2.6.38)</a></dt>
+  <dd>Don't automount the terminal ("basename") component of
+      <i>pathname.</i> Since Linux 3.1 this flag is ignored. Since Linux 4.11
+      this flag is implied.</dd>
+  <dt id="AT_SYMLINK_NOFOLLOW"><a class="permalink" href="#AT_SYMLINK_NOFOLLOW"><b>AT_SYMLINK_NOFOLLOW</b></a></dt>
+  <dd>If <i>pathname</i> is a symbolic link, do not dereference it: instead
+      return information about the link itself, like <b>lstat</b>(). (By
+      default, <b>fstatat</b>() dereferences symbolic links, like
+      <b>stat</b>().)</dd>
+</dl>
+<p class="Pp">See <b>openat</b>(2) for an explanation of the need for
+    <b>fstatat</b>().</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, zero is returned. On error, -1 is returned, and
+    <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>Search permission is denied for one of the directories in the path prefix
+      of <i>pathname</i>. (See also <b>path_resolution</b>(7).)</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd><i>fd</i> is not a valid open file descriptor.</dd>
+  <dt id="EBADF~2"><a class="permalink" href="#EBADF~2"><b>EBADF</b></a></dt>
+  <dd>(<b>fstatat</b>()) <i>pathname</i> is relative but <i>dirfd</i> is neither
+      <b>AT_FDCWD</b> nor a valid file descriptor.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>Bad address.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>(<b>fstatat</b>()) Invalid flag specified in <i>flags</i>.</dd>
+  <dt id="ELOOP"><a class="permalink" href="#ELOOP"><b>ELOOP</b></a></dt>
+  <dd>Too many symbolic links encountered while traversing the path.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd><i>pathname</i> is too long.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>A component of <i>pathname</i> does not exist or is a dangling symbolic
+      link.</dd>
+  <dt id="ENOENT~2"><a class="permalink" href="#ENOENT~2"><b>ENOENT</b></a></dt>
+  <dd><i>pathname</i> is an empty string and <b>AT_EMPTY_PATH</b> was not
+      specified in <i>flags</i>.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Out of memory (i.e., kernel memory).</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>A component of the path prefix of <i>pathname</i> is not a directory.</dd>
+  <dt id="ENOTDIR~2"><a class="permalink" href="#ENOTDIR~2"><b>ENOTDIR</b></a></dt>
+  <dd>(<b>fstatat</b>()) <i>pathname</i> is relative and <i>dirfd</i> is a file
+      descriptor referring to a file other than a directory.</dd>
+  <dt id="EOVERFLOW"><a class="permalink" href="#EOVERFLOW"><b>EOVERFLOW</b></a></dt>
+  <dd><i>pathname</i> or <i>fd</i> refers to a file whose size, inode number, or
+      number of blocks cannot be represented in, respectively, the types
+      <i>off_t</i>, <i>ino_t</i>, or <i>blkcnt_t</i>. This error can occur when,
+      for example, an application compiled on a 32-bit platform without
+      <i>-D_FILE_OFFSET_BITS=64</i> calls <b>stat</b>() on a file whose size
+      exceeds <i>(1&lt;&lt;31)-1</i> bytes.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>fstatat</b>() was added in Linux 2.6.16; library support was
+    added in glibc 2.4.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>stat</b>(), <b>fstat</b>(), <b>lstat</b>(): SVr4, 4.3BSD,
+    POSIX.1-2001, POSIX.1.2008.</p>
+<p class="Pp"><b>fstatat</b>(): POSIX.1-2008.</p>
+<p class="Pp">According to POSIX.1-2001, <b>lstat</b>() on a symbolic link need
+    return valid information only in the <i>st_size</i> field and the file type
+    of the <i>st_mode</i> field of the <i>stat</i> structure. POSIX.1-2008
+    tightens the specification, requiring <b>lstat</b>() to return valid
+    information in all fields except the mode bits in <i>st_mode</i>.</p>
+<p class="Pp">Use of the <i>st_blocks</i> and <i>st_blksize</i> fields may be
+    less portable. (They were introduced in BSD. The interpretation differs
+    between systems, and possibly on a single system when NFS mounts are
+    involved.)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="C_library/kernel_differences"><a class="permalink" href="#C_library/kernel_differences">C
+  library/kernel differences</a></h2>
+<p class="Pp">Over time, increases in the size of the <i>stat</i> structure have
+    led to three successive versions of <b>stat</b>(): <i>sys_stat</i>() (slot
+    <i>__NR_oldstat</i>), <i>sys_newstat</i>() (slot <i>__NR_stat</i>), and
+    <i>sys_stat64()</i> (slot <i>__NR_stat64</i>) on 32-bit platforms such as
+    i386. The first two versions were already present in Linux 1.0 (albeit with
+    different names); the last was added in Linux 2.4. Similar remarks apply for
+    <b>fstat</b>() and <b>lstat</b>().</p>
+<p class="Pp">The kernel-internal versions of the <i>stat</i> structure dealt
+    with by the different versions are, respectively:</p>
+<dl class="Bl-tag">
+  <dt><i>__old_kernel_stat</i></dt>
+  <dd>The original structure, with rather narrow fields, and no padding.</dd>
+  <dt id="stat"><a class="permalink" href="#stat"><i>stat</i></a></dt>
+  <dd>Larger <i>st_ino</i> field and padding added to various parts of the
+      structure to allow for future expansion.</dd>
+  <dt id="stat64"><a class="permalink" href="#stat64"><i>stat64</i></a></dt>
+  <dd>Even larger <i>st_ino</i> field, larger <i>st_uid</i> and <i>st_gid</i>
+      fields to accommodate the Linux-2.4 expansion of UIDs and GIDs to 32 bits,
+      and various other enlarged fields and further padding in the structure.
+      (Various padding bytes were eventually consumed in Linux 2.6, with the
+      advent of 32-bit device IDs and nanosecond components for the timestamp
+      fields.)</dd>
+</dl>
+<p class="Pp">The glibc <b>stat</b>() wrapper function hides these details from
+    applications, invoking the most recent version of the system call provided
+    by the kernel, and repacking the returned information if required for old
+    binaries.</p>
+<p class="Pp">On modern 64-bit systems, life is simpler: there is a single
+    <b>stat</b>() system call and the kernel deals with a <i>stat</i> structure
+    that contains fields of a sufficient size.</p>
+<p class="Pp">The underlying system call employed by the glibc <b>fstatat</b>()
+    wrapper function is actually called <b>fstatat64</b>() or, on some
+    architectures, <b>newfstatat</b>().</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The following program calls <b>lstat</b>() and displays selected
+    fields in the returned <i>stat</i> structure.</p>
+<p class="Pp"></p>
+<pre>#include &lt;stdint.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;sys/stat.h&gt;
+#include &lt;sys/sysmacros.h&gt;
+#include &lt;time.h&gt;
+int
+main(int argc, char *argv[])
+{
+<br>
+    struct stat sb;
+<br>
+    if (argc != 2) {
+<br>
+        fprintf(stderr, "Usage: %s &lt;pathname&gt;\n", argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    if (lstat(argv[1], &amp;sb) == -1) {
+<br>
+        perror("lstat");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    printf("ID of containing device:  [%x,%x]\n",
+<br>
+           major(sb.st_dev),
+<br>
+           minor(sb.st_dev));
+<br>
+    printf("File type:                ");
+<br>
+    switch (sb.st_mode &amp; S_IFMT) {
+<br>
+    case S_IFBLK:  printf("block device\n");            break;
+<br>
+    case S_IFCHR:  printf("character device\n");        break;
+<br>
+    case S_IFDIR:  printf("directory\n");               break;
+<br>
+    case S_IFIFO:  printf("FIFO/pipe\n");               break;
+<br>
+    case S_IFLNK:  printf("symlink\n");                 break;
+<br>
+    case S_IFREG:  printf("regular file\n");            break;
+<br>
+    case S_IFSOCK: printf("socket\n");                  break;
+<br>
+    default:       printf("unknown?\n");                break;
+<br>
+    }
+<br>
+    printf("I-node number:            %ju\n", (uintmax_t) sb.st_ino);
+<br>
+    printf("Mode:                     %jo (octal)\n",
+<br>
+           (uintmax_t) sb.st_mode);
+<br>
+    printf("Link count:               %ju\n", (uintmax_t) sb.st_nlink);
+<br>
+    printf("Ownership:                UID=%ju   GID=%ju\n",
+<br>
+           (uintmax_t) sb.st_uid, (uintmax_t) sb.st_gid);
+<br>
+    printf("Preferred I/O block size: %jd bytes\n",
+<br>
+           (intmax_t) sb.st_blksize);
+<br>
+    printf("File size:                %jd bytes\n",
+<br>
+           (intmax_t) sb.st_size);
+<br>
+    printf("Blocks allocated:         %jd\n",
+<br>
+           (intmax_t) sb.st_blocks);
+<br>
+    printf("Last status change:       %s", ctime(&amp;sb.st_ctime));
+<br>
+    printf("Last file access:         %s", ctime(&amp;sb.st_atime));
+<br>
+    printf("Last file modification:   %s", ctime(&amp;sb.st_mtime));
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>ls</b>(1), <b>stat</b>(1), <b>access</b>(2), <b>chmod</b>(2),
+    <b>chown</b>(2), <b>readlink</b>(2), <b>statx</b>(2), <b>utime</b>(2),
+    <b>stat</b>(3type), <b>capabilities</b>(7), <b>inode</b>(7),
+    <b>symlink</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

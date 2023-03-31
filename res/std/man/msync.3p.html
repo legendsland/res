@@ -1,0 +1,201 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/830ff14ca20f915de3c501b83713b20fb9d2168b">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>MSYNC(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">MSYNC(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">MSYNC(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">msync — synchronize memory with physical storage</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;sys/mman.h&gt;</pre>
+<pre>int msync(void *<i>addr</i>, size_t <i>len</i>, int <i>flags</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>msync</i>() function shall write all modified data to
+    permanent storage locations, if any, in those whole pages containing any
+    part of the address space of the process starting at address <i>addr</i> and
+    continuing for <i>len</i> bytes. If no such storage exists, <i>msync</i>()
+    need not have any effect. If requested, the <i>msync</i>() function shall
+    then invalidate cached copies of data.</p>
+<p class="Pp">The implementation may require that <i>addr</i> be a multiple of
+    the page size as returned by <i>sysconf</i>().</p>
+<p class="Pp">For mappings to files, the <i>msync</i>() function shall ensure
+    that all write operations are completed as defined for synchronized I/O data
+    integrity completion. It is unspecified whether the implementation also
+    writes out other file attributes. When the <i>msync</i>() function is called
+    on MAP_PRIVATE mappings, any modified data shall not be written to the
+    underlying object and shall not cause such data to be made visible to other
+    processes. It is unspecified whether data in MAP_PRIVATE mappings has any
+    permanent storage locations. The effect of <i>msync</i>() on a shared memory
+    object or a typed memory object is unspecified. The behavior of this
+    function is unspecified if the mapping was not established by a call to
+    <i>mmap</i>().</p>
+<p class="Pp">The <i>flags</i> argument is constructed from the
+    bitwise-inclusive OR of one or more of the following flags defined in the
+    <i>&lt;sys/mman.h&gt;</i> header:</p>
+<table class="tbl" style="border-style: solid;">
+  <tbody><tr style="border-bottom-style: solid;">
+    <td style="text-align: center; border-right-style: solid;"><b>Symbolic
+      Constant</b></td>
+    <td style="text-align: center;"><b>Description</b></td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">MS_ASYNC</td>
+    <td>Perform asynchronous writes.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">MS_SYNC</td>
+    <td>Perform synchronous writes.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">MS_INVALIDATE</td>
+    <td>Invalidate cached data.</td>
+  </tr>
+</tbody></table>
+<p class="Pp">When MS_ASYNC is specified, <i>msync</i>() shall return
+    immediately once all the write operations are initiated or queued for
+    servicing; when MS_SYNC is specified, <i>msync</i>() shall not return until
+    all write operations are completed as defined for synchronized I/O data
+    integrity completion. Either MS_ASYNC or MS_SYNC shall be specified, but not
+    both.</p>
+<p class="Pp">When MS_INVALIDATE is specified, <i>msync</i>() shall invalidate
+    all cached copies of mapped data that are inconsistent with the permanent
+    storage locations such that subsequent references shall obtain data that was
+    consistent with the permanent storage locations sometime between the call to
+    <i>msync</i>() and the first subsequent memory reference to the data.</p>
+<p class="Pp">If <i>msync</i>() causes any write to a file, the file's last data
+    modification and last file status change timestamps shall be marked for
+    update.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>msync</i>() shall return 0;
+    otherwise, it shall return -1 and set <i>errno</i> to indicate the
+  error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>msync</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EBUSY"><a class="permalink" href="#EBUSY"><b>EBUSY</b></a></dt>
+  <dd>Some or all of the addresses in the range starting at <i>addr</i> and
+      continuing for <i>len</i> bytes are locked, and MS_INVALIDATE is
+      specified.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The value of <i>flags</i> is invalid.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>The addresses in the range starting at <i>addr</i> and continuing for
+      <i>len</i> bytes are outside the range allowed for the address space of a
+      process or specify one or more pages that are not mapped.</dd>
+</dl>
+<p class="Pp">The <i>msync</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>The value of <i>addr</i> is not a multiple of the page size as returned by
+      <i>sysconf</i>().</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The <i>msync</i>() function is only supported if the Synchronized
+    Input and Output option is supported, and thus need not be available on all
+    implementations.</p>
+<p class="Pp">The <i>msync</i>() function should be used by programs that
+    require a memory object to be in a known state; for example, in building
+    transaction facilities.</p>
+<p class="Pp">Normal system activity can cause pages to be written to disk.
+    Therefore, there are no guarantees that <i>msync</i>() is the only control
+    over when pages are or are not written to disk.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The <i>msync</i>() function writes out data in a mapped region to
+    the permanent storage for the underlying object. The call to <i>msync</i>()
+    ensures data integrity of the file.</p>
+<p class="Pp">After the data is written out, any cached data may be invalidated
+    if the MS_INVALIDATE flag was specified. This is useful on systems that do
+    not support read/write consistency.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>mmap</i>()</i>, <i><i>sysconf</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;sys_mman.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

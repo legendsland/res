@@ -1,0 +1,174 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2016, Michael Kerrisk <mtk.manpages@gmail.com>
+   Based on an earlier version of the page where a few pieces were
+   copyright (C) 1993 by Dan Miner (dminer@nyx.cs.du.edu) and subsequently
+   others (see old changelog below).
+   The structure definitions are taken more or less straight from the kernel
+   source files.
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Modified Sat Jul 24 12:35:12 1993 by Rik Faith <faith@cs.unc.edu>
+   Modified Tue Oct 22 22:29:51 1996 by Eric S. Raymond <esr@thyrsus.com>
+   Modified Mon Aug 25 16:06:11 1997 by Nicol\[u00E1]s Lichtmaier <nick@debian.org>
+   --><head>
+<meta name="dc.identifier" content="res/5734dcc2e5cbd6975707aa2f53a6e411cff966b7">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>sysinfo(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">sysinfo(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">sysinfo(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">sysinfo - return system information</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/sysinfo.h&gt;</b></pre>
+<pre><b>int sysinfo(struct sysinfo *</b><i>info</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>sysinfo</b>() returns certain statistics on memory and swap
+    usage, as well as the load average.</p>
+<p class="Pp">Until Linux 2.3.16, <b>sysinfo</b>() returned information in the
+    following structure:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct sysinfo {
+<br>
+    long uptime;             /* Seconds since boot */
+<br>
+    unsigned long loads[3];  /* 1, 5, and 15 minute load averages */
+<br>
+    unsigned long totalram;  /* Total usable main memory size */
+<br>
+    unsigned long freeram;   /* Available memory size */
+<br>
+    unsigned long sharedram; /* Amount of shared memory */
+<br>
+    unsigned long bufferram; /* Memory used by buffers */
+<br>
+    unsigned long totalswap; /* Total swap space size */
+<br>
+    unsigned long freeswap;  /* Swap space still available */
+<br>
+    unsigned short procs;    /* Number of current processes */
+<br>
+    char _f[22];             /* Pads structure to 64 bytes */
+};
+</pre>
+<br>
+<p class="Pp">In the above structure, the sizes of the memory and swap fields
+    are given in bytes.</p>
+<p class="Pp">Since Linux 2.3.23 (i386) and Linux 2.3.48 (all architectures) the
+    structure is:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct sysinfo {
+<br>
+    long uptime;             /* Seconds since boot */
+<br>
+    unsigned long loads[3];  /* 1, 5, and 15 minute load averages */
+<br>
+    unsigned long totalram;  /* Total usable main memory size */
+<br>
+    unsigned long freeram;   /* Available memory size */
+<br>
+    unsigned long sharedram; /* Amount of shared memory */
+<br>
+    unsigned long bufferram; /* Memory used by buffers */
+<br>
+    unsigned long totalswap; /* Total swap space size */
+<br>
+    unsigned long freeswap;  /* Swap space still available */
+<br>
+    unsigned short procs;    /* Number of current processes */
+<br>
+    unsigned long totalhigh; /* Total high memory size */
+<br>
+    unsigned long freehigh;  /* Available high memory size */
+<br>
+    unsigned int mem_unit;   /* Memory unit size in bytes */
+<br>
+    char _f[20-2*sizeof(long)-sizeof(int)];
+<br>
+                             /* Padding to 64 bytes */
+};
+</pre>
+<br>
+<p class="Pp">In the above structure, sizes of the memory and swap fields are
+    given as multiples of <i>mem_unit</i> bytes.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>sysinfo</b>() returns zero. On error, -1 is
+    returned, and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>info</i> is not a valid address.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>sysinfo</b>() first appeared in Linux 0.98.pl6.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This function is Linux-specific, and should not be used in
+    programs intended to be portable.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">All of the information provided by this system call is also
+    available via <i>/proc/meminfo</i> and <i>/proc/loadavg</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>proc</b>(5)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

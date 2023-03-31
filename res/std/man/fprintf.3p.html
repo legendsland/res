@@ -1,0 +1,953 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/13deb840d404037d4ca447ec2ec9f2fd7d29231b">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>FPRINTF(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">FPRINTF(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">FPRINTF(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">dprintf, fprintf, printf, snprintf, sprintf — print
+    formatted output</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;stdio.h&gt;</pre>
+<pre>int dprintf(int <i>fildes</i>, const char *restrict <i>format</i>, ...);
+int fprintf(FILE *restrict <i>stream</i>, const char *restrict <i>format</i>, ...);
+int printf(const char *restrict <i>format</i>, ...);
+int snprintf(char *restrict <i>s</i>, size_t <i>n</i>,
+<br>
+    const char *restrict <i>format</i>, ...);
+int sprintf(char *restrict <i>s</i>, const char *restrict <i>format</i>, ...);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">Excluding <i>dprintf</i>(): The functionality described on this
+    reference page is aligned with the ISO&nbsp;C standard. Any conflict
+    between the requirements described here and the ISO&nbsp;C standard is
+    unintentional. This volume of POSIX.1‐2017 defers to the ISO&nbsp;C
+    standard.</p>
+<p class="Pp">The <i>fprintf</i>() function shall place output on the named
+    output <i>stream</i>. The <i>printf</i>() function shall place output on the
+    standard output stream <i>stdout</i>. The <i>sprintf</i>() function shall
+    place output followed by the null byte, <b>'\0'</b>, in consecutive bytes
+    starting at *<i>s</i>; it is the user's responsibility to ensure that enough
+    space is available.</p>
+<p class="Pp">The <i>dprintf</i>() function shall be equivalent to the
+    <i>fprintf</i>() function, except that <i>dprintf</i>() shall write output
+    to the file associated with the file descriptor specified by the
+    <i>fildes</i> argument rather than place output on a stream.</p>
+<p class="Pp">The <i>snprintf</i>() function shall be equivalent to
+    <i>sprintf</i>(), with the addition of the <i>n</i> argument which states
+    the size of the buffer referred to by <i>s</i>. If <i>n</i> is zero, nothing
+    shall be written and <i>s</i> may be a null pointer. Otherwise, output bytes
+    beyond the <i>n</i>‐1st shall be discarded instead of being written
+    to the array, and a null byte is written at the end of the bytes actually
+    written into the array.</p>
+<p class="Pp">If copying takes place between objects that overlap as a result of
+    a call to <i>sprintf</i>() or <i>snprintf</i>(), the results are
+  undefined.</p>
+<p class="Pp">Each of these functions converts, formats, and prints its
+    arguments under control of the <i>format</i>. The <i>format</i> is a
+    character string, beginning and ending in its initial shift state, if any.
+    The <i>format</i> is composed of zero or more directives: <i>ordinary
+    characters</i>, which are simply copied to the output stream, and
+    <i>conversion specifications</i>, each of which shall result in the fetching
+    of zero or more arguments. The results are undefined if there are
+    insufficient arguments for the <i>format</i>. If the <i>format</i> is
+    exhausted while arguments remain, the excess arguments shall be evaluated
+    but are otherwise ignored.</p>
+<p class="Pp">Conversions can be applied to the <i>n</i>th argument after the
+    <i>format</i> in the argument list, rather than to the next unused argument.
+    In this case, the conversion specifier character <b>%</b> (see below) is
+    replaced by the sequence "%<i>n</i>$", where <i>n</i> is a decimal
+    integer in the range [1,{NL_ARGMAX}], giving the position of the argument in
+    the argument list. This feature provides for the definition of format
+    strings that select arguments in an order appropriate to specific languages
+    (see the EXAMPLES section).</p>
+<p class="Pp">The <i>format</i> can contain either numbered argument conversion
+    specifications (that is, "%<i>n</i>$" and "*<i>m</i>$"),
+    or unnumbered argument conversion specifications (that is, <b>%</b> and
+    <b>*</b>), but not both. The only exception to this is that <b>%%</b> can be
+    mixed with the "%<i>n</i>$" form. The results of mixing numbered
+    and unnumbered argument specifications in a <i>format</i> string are
+    undefined. When numbered argument specifications are used, specifying the
+    <i>N</i>th argument requires that all the leading arguments, from the first
+    to the (<i>N-1</i>)th, are specified in the format string.</p>
+<p class="Pp">In format strings containing the "%<i>n</i>$" form of
+    conversion specification, numbered arguments in the argument list can be
+    referenced from the format string as many times as required.</p>
+<p class="Pp">In format strings containing the <b>%</b> form of conversion
+    specification, each conversion specification uses the first unused argument
+    in the argument list.</p>
+<p class="Pp">All forms of the <i>fprintf</i>() functions allow for the
+    insertion of a language-dependent radix character in the output string. The
+    radix character is defined in the current locale (category
+    <i>LC_NUMERIC</i>). In the POSIX locale, or in a locale where the radix
+    character is not defined, the radix character shall default to a
+    &lt;period&gt; (<b>'.'</b>).</p>
+<p class="Pp">Each conversion specification is introduced by the <b>'%'</b>
+    character or by the character sequence "%<i>n</i>$", after which
+    the following appear in sequence:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>Zero or more <i>flags</i> (in any order), which modify the meaning of the
+      conversion specification.</dd>
+  <dt> *</dt>
+  <dd>An optional minimum <i>field width</i>. If the converted value has fewer
+      bytes than the field width, it shall be padded with &lt;space&gt;
+      characters by default on the left; it shall be padded on the right if the
+      left-adjustment flag (<b>'-'</b>), described below, is given to the field
+      width. The field width takes the form of an &lt;asterisk&gt; (<b>'*'</b>),
+      described below, or a decimal integer.</dd>
+  <dt> *</dt>
+  <dd>An optional <i>precision</i> that gives the minimum number of digits to
+      appear for the <b>d</b>, <b>i</b>, <b>o</b>, <b>u</b>, <b>x</b>, and
+      <b>X</b> conversion specifiers; the number of digits to appear after the
+      radix character for the <b>a</b>, <b>A</b>, <b>e</b>, <b>E</b>, <b>f</b>,
+      and <b>F</b> conversion specifiers; the maximum number of significant
+      digits for the <b>g</b> and <b>G</b> conversion specifiers; or the maximum
+      number of bytes to be printed from a string in the <b>s</b> and <b>S</b>
+      conversion specifiers. The precision takes the form of a &lt;period&gt;
+      (<b>'.'</b>) followed either by an &lt;asterisk&gt; (<b>'*'</b>),
+      described below, or an optional decimal digit string, where a null digit
+      string is treated as zero. If a precision appears with any other
+      conversion specifier, the behavior is undefined.</dd>
+  <dt> *</dt>
+  <dd>An optional length modifier that specifies the size of the argument.</dd>
+  <dt> *</dt>
+  <dd>A <i>conversion specifier</i> character that indicates the type of
+      conversion to be applied.</dd>
+</dl>
+<p class="Pp">A field width, or precision, or both, may be indicated by an
+    &lt;asterisk&gt; (<b>'*'</b>). In this case an argument of type <b>int</b>
+    supplies the field width or precision. Applications shall ensure that
+    arguments specifying field width, or precision, or both appear in that order
+    before the argument, if any, to be converted. A negative field width is
+    taken as a <b>'-'</b> flag followed by a positive field width. A negative
+    precision is taken as if the precision were omitted. In <i>format</i>
+    strings containing the "%<i>n</i>$" form of a conversion
+    specification, a field width or precision may be indicated by the sequence
+    "*<i>m</i>$", where <i>m</i> is a decimal integer in the range
+    [1,{NL_ARGMAX}] giving the position in the argument list (after the
+    <i>format</i> argument) of an integer argument containing the field width or
+    precision, for example:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>printf("%1$d:%2$.*3$d:%4$.*3$d\n", hour, min, precision, sec);</pre>
+</div>
+<p class="Pp">The flag characters and their meanings are:</p>
+<dl class="Bl-tag">
+  <dt>'</dt>
+  <dd>(The &lt;apostrophe&gt;.) The integer portion of the result of a decimal
+      conversion (<b>%i</b>, <b>%d</b>, <b>%u</b>, <b>%f</b>, <b>%F</b>,
+      <b>%g</b>, or <b>%G</b>) shall be formatted with thousands' grouping
+      characters. For other conversions the behavior is undefined. The
+      non-monetary grouping character is used.</dd>
+  <dt>-</dt>
+  <dd>The result of the conversion shall be left-justified within the field. The
+      conversion is right-justified if this flag is not specified.</dd>
+  <dt>+</dt>
+  <dd>The result of a signed conversion shall always begin with a sign
+      (<b>'+'</b> or <b>'-'</b>). The conversion shall begin with a sign only
+      when a negative value is converted if this flag is not specified.</dd>
+  <dt>&lt;space&gt;</dt>
+  <dd>If the first character of a signed conversion is not a sign or if a signed
+      conversion results in no characters, a &lt;space&gt; shall be prefixed to
+      the result. This means that if the &lt;space&gt; and <b>'+'</b> flags both
+      appear, the &lt;space&gt; flag shall be ignored.</dd>
+  <dt>#</dt>
+  <dd>Specifies that the value is to be converted to an alternative form. For
+      <b>o</b> conversion, it shall increase the precision, if and only if
+      necessary, to force the first digit of the result to be a zero (if the
+      value and precision are both 0, a single 0 is printed). For <b>x</b> or
+      <b>X</b> conversion specifiers, a non-zero result shall have 0x (or 0X)
+      prefixed to it. For <b>a</b>, <b>A</b>, <b>e</b>, <b>E</b>, <b>f</b>,
+      <b>F</b>, <b>g</b>, and <b>G</b> conversion specifiers, the result shall
+      always contain a radix character, even if no digits follow the radix
+      character. Without this flag, a radix character appears in the result of
+      these conversions only if a digit follows it. For <b>g</b> and <b>G</b>
+      conversion specifiers, trailing zeros shall <i>not</i> be removed from the
+      result as they normally are. For other conversion specifiers, the behavior
+      is undefined.</dd>
+  <dt>0</dt>
+  <dd>For <b>d</b>, <b>i</b>, <b>o</b>, <b>u</b>, <b>x</b>, <b>X</b>, <b>a</b>,
+      <b>A</b>, <b>e</b>, <b>E</b>, <b>f</b>, <b>F</b>, <b>g</b>, and <b>G</b>
+      conversion specifiers, leading zeros (following any indication of sign or
+      base) are used to pad to the field width rather than performing space
+      padding, except when converting an infinity or NaN. If the <b>'0'</b> and
+      <b>'-'</b> flags both appear, the <b>'0'</b> flag is ignored. For
+      <b>d</b>, <b>i</b>, <b>o</b>, <b>u</b>, <b>x</b>, and <b>X</b> conversion
+      specifiers, if a precision is specified, the <b>'0'</b> flag shall be
+      ignored. If the <b>'0'</b> and &lt;apostrophe&gt; flags both appear, the
+      grouping characters are inserted before zero padding. For other
+      conversions, the behavior is undefined.</dd>
+</dl>
+<p class="Pp">The length modifiers and their meanings are:</p>
+<dl class="Bl-tag">
+  <dt id="hh"><a class="permalink" href="#hh">hh</a></dt>
+  <dd>Specifies that a following <b>d</b>, <b>i</b>, <b>o</b>, <b>u</b>,
+      <b>x</b>, or <b>X</b> conversion specifier applies to a <b>signed char</b>
+      or <b>unsigned char</b> argument (the argument will have been promoted
+      according to the integer promotions, but its value shall be converted to
+      <b>signed char</b> or <b>unsigned char</b> before printing); or that a
+      following <b>n</b> conversion specifier applies to a pointer to a
+      <b>signed char</b> argument.</dd>
+  <dt id="h"><a class="permalink" href="#h">h</a></dt>
+  <dd>Specifies that a following <b>d</b>, <b>i</b>, <b>o</b>, <b>u</b>,
+      <b>x</b>, or <b>X</b> conversion specifier applies to a <b>short</b> or
+      <b>unsigned short</b> argument (the argument will have been promoted
+      according to the integer promotions, but its value shall be converted to
+      <b>short</b> or <b>unsigned short</b> before printing); or that a
+      following <b>n</b> conversion specifier applies to a pointer to a
+      <b>short</b> argument.</dd>
+  <dt id="l"><a class="permalink" href="#l">l&nbsp;(ell)</a></dt>
+  <dd>Specifies that a following <b>d</b>, <b>i</b>, <b>o</b>, <b>u</b>,
+      <b>x</b>, or <b>X</b> conversion specifier applies to a <b>long</b> or
+      <b>unsigned long</b> argument; that a following <b>n</b> conversion
+      specifier applies to a pointer to a <b>long</b> argument; that a following
+      <b>c</b> conversion specifier applies to a <b>wint_t</b> argument; that a
+      following <b>s</b> conversion specifier applies to a pointer to a
+      <b>wchar_t</b> argument; or has no effect on a following <b>a</b>,
+      <b>A</b>, <b>e</b>, <b>E</b>, <b>f</b>, <b>F</b>, <b>g</b>, or <b>G</b>
+      conversion specifier.</dd>
+  <dt id="ll"><a class="permalink" href="#ll">ll&nbsp;(ell-ell)</a></dt>
+  <dd>
+    <br>
+    Specifies that a following <b>d</b>, <b>i</b>, <b>o</b>, <b>u</b>, <b>x</b>,
+      or <b>X</b> conversion specifier applies to a <b>long long</b> or
+      <b>unsigned long long</b> argument; or that a following <b>n</b>
+      conversion specifier applies to a pointer to a <b>long long</b>
+    argument.</dd>
+  <dt id="j"><a class="permalink" href="#j">j</a></dt>
+  <dd>Specifies that a following <b>d</b>, <b>i</b>, <b>o</b>, <b>u</b>,
+      <b>x</b>, or <b>X</b> conversion specifier applies to an <b>intmax_t</b>
+      or <b>uintmax_t</b> argument; or that a following <b>n</b> conversion
+      specifier applies to a pointer to an <b>intmax_t</b> argument.</dd>
+  <dt id="z"><a class="permalink" href="#z">z</a></dt>
+  <dd>Specifies that a following <b>d</b>, <b>i</b>, <b>o</b>, <b>u</b>,
+      <b>x</b>, or <b>X</b> conversion specifier applies to a <b>size_t</b> or
+      the corresponding signed integer type argument; or that a following
+      <b>n</b> conversion specifier applies to a pointer to a signed integer
+      type corresponding to a <b>size_t</b> argument.</dd>
+  <dt id="t"><a class="permalink" href="#t">t</a></dt>
+  <dd>Specifies that a following <b>d</b>, <b>i</b>, <b>o</b>, <b>u</b>,
+      <b>x</b>, or <b>X</b> conversion specifier applies to a <b>ptrdiff_t</b>
+      or the corresponding <b>unsigned</b> type argument; or that a following
+      <b>n</b> conversion specifier applies to a pointer to a <b>ptrdiff_t</b>
+      argument.</dd>
+  <dt id="L"><a class="permalink" href="#L">L</a></dt>
+  <dd>Specifies that a following <b>a</b>, <b>A</b>, <b>e</b>, <b>E</b>,
+      <b>f</b>, <b>F</b>, <b>g</b>, or <b>G</b> conversion specifier applies to
+      a <b>long double</b> argument.</dd>
+</dl>
+<p class="Pp">If a length modifier appears with any conversion specifier other
+    than as specified above, the behavior is undefined.</p>
+<p class="Pp">The conversion specifiers and their meanings are:</p>
+<dl class="Bl-tag">
+  <dt id="d"><a class="permalink" href="#d">d,&nbsp;i</a></dt>
+  <dd>The <b>int</b> argument shall be converted to a signed decimal in the
+      style "[-]<i>dddd</i>". The precision specifies the minimum
+      number of digits to appear; if the value being converted can be
+      represented in fewer digits, it shall be expanded with leading zeros. The
+      default precision is 1. The result of converting zero with an explicit
+      precision of zero shall be no characters.</dd>
+  <dt id="o"><a class="permalink" href="#o">o</a></dt>
+  <dd>The <b>unsigned</b> argument shall be converted to unsigned octal format
+      in the style "<i>dddd</i>". The precision specifies the minimum
+      number of digits to appear; if the value being converted can be
+      represented in fewer digits, it shall be expanded with leading zeros. The
+      default precision is 1. The result of converting zero with an explicit
+      precision of zero shall be no characters.</dd>
+  <dt id="u"><a class="permalink" href="#u">u</a></dt>
+  <dd>The <b>unsigned</b> argument shall be converted to unsigned decimal format
+      in the style "<i>dddd</i>". The precision specifies the minimum
+      number of digits to appear; if the value being converted can be
+      represented in fewer digits, it shall be expanded with leading zeros. The
+      default precision is 1. The result of converting zero with an explicit
+      precision of zero shall be no characters.</dd>
+  <dt id="x"><a class="permalink" href="#x">x</a></dt>
+  <dd>The <b>unsigned</b> argument shall be converted to unsigned hexadecimal
+      format in the style "<i>dddd</i>"; the letters
+      <b>"abcdef"</b> are used. The precision specifies the minimum
+      number of digits to appear; if the value being converted can be
+      represented in fewer digits, it shall be expanded with leading zeros. The
+      default precision is 1. The result of converting zero with an explicit
+      precision of zero shall be no characters.</dd>
+  <dt id="X"><a class="permalink" href="#X">X</a></dt>
+  <dd>Equivalent to the <b>x</b> conversion specifier, except that letters
+      <b>"ABCDEF"</b> are used instead of
+    <b>"abcdef"</b>.</dd>
+  <dt id="f"><a class="permalink" href="#f">f,&nbsp;F</a></dt>
+  <dd>The <b>double</b> argument shall be converted to decimal notation in the
+      style "[-]<i>ddd</i>.<i>ddd</i>", where the number of digits
+      after the radix character is equal to the precision specification. If the
+      precision is missing, it shall be taken as 6; if the precision is
+      explicitly zero and no <b>'#'</b> flag is present, no radix character
+      shall appear. If a radix character appears, at least one digit appears
+      before it. The low-order digit shall be rounded in an
+      implementation-defined manner.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">A <b>double</b> argument representing an infinity shall be
+    converted in one of the styles <b>"[-]inf"</b> or
+    <b>"[-]infinity"</b>; which style is implementation-defined. A
+    <b>double</b> argument representing a NaN shall be converted in one of the
+    styles "[-]nan(<i>n-char-sequence</i>)" or
+    <b>"[-]nan"</b>; which style, and the meaning of any
+    <i>n-char-sequence</i>, is implementation-defined. The <b>F</b> conversion
+    specifier produces <b>"INF"</b>, <b>"INFINITY"</b>, or
+    <b>"NAN"</b> instead of <b>"inf"</b>,
+    <b>"infinity"</b>, or <b>"nan"</b>, respectively.</p>
+</div>
+<dl class="Bl-tag">
+  <dt id="e"><a class="permalink" href="#e">e,&nbsp;E</a></dt>
+  <dd>The <b>double</b> argument shall be converted in the style
+      "[-]<i>d</i>.<i>ddd</i>e±<i>dd</i>", where there is one
+      digit before the radix character (which is non-zero if the argument is
+      non-zero) and the number of digits after it is equal to the precision; if
+      the precision is missing, it shall be taken as 6; if the precision is zero
+      and no <b>'#'</b> flag is present, no radix character shall appear. The
+      low-order digit shall be rounded in an implementation-defined manner. The
+      <b>E</b> conversion specifier shall produce a number with <b>'E'</b>
+      instead of <b>'e'</b> introducing the exponent. The exponent shall always
+      contain at least two digits. If the value is zero, the exponent shall be
+      zero.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">A <b>double</b> argument representing an infinity or NaN shall be
+    converted in the style of an <b>f</b> or <b>F</b> conversion specifier.</p>
+</div>
+<dl class="Bl-tag">
+  <dt id="g"><a class="permalink" href="#g">g,&nbsp;G</a></dt>
+  <dd>The <b>double</b> argument representing a floating-point number shall be
+      converted in the style <b>f</b> or <b>e</b> (or in the style <b>F</b> or
+      <b>E</b> in the case of a <b>G</b> conversion specifier), depending on the
+      value converted and the precision. Let <b>P</b> equal the precision if
+      non-zero, 6 if the precision is omitted, or 1 if the precision is zero.
+      Then, if a conversion with style <b>E</b> would have an exponent of
+      <i>X</i>:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>--</dt>
+  <dd>If <b>P</b>&gt;<i>X</i>≥-4, the conversion shall be with style
+      <b>f</b> (or <b>F</b>) and precision <b>P</b>-(<i>X</i>+1).</dd>
+  <dt>--</dt>
+  <dd>Otherwise, the conversion shall be with style <b>e</b> (or <b>E</b>) and
+      precision <b>P</b>-1.</dd>
+</dl>
+<p class="Pp">Finally, unless the <b>'#'</b> flag is used, any trailing zeros
+    shall be removed from the fractional portion of the result and the
+    decimal-point character shall be removed if there is no fractional portion
+    remaining.</p>
+<p class="Pp">A <b>double</b> argument representing an infinity or NaN shall be
+    converted in the style of an <b>f</b> or <b>F</b> conversion specifier.</p>
+</div>
+<dl class="Bl-tag">
+  <dt id="a"><a class="permalink" href="#a">a,&nbsp;A</a></dt>
+  <dd>A <b>double</b> argument representing a floating-point number shall be
+      converted in the style
+      "[-]0x<i>h</i>.<i>hhhh</i>p±<i>d</i>", where there is one
+      hexadecimal digit (which shall be non-zero if the argument is a normalized
+      floating-point number and is otherwise unspecified) before the
+      decimal-point character and the number of hexadecimal digits after it is
+      equal to the precision; if the precision is missing and FLT_RADIX is a
+      power of 2, then the precision shall be sufficient for an exact
+      representation of the value; if the precision is missing and FLT_RADIX is
+      not a power of 2, then the precision shall be sufficient to distinguish
+      values of type <b>double</b>, except that trailing zeros may be omitted;
+      if the precision is zero and the <b>'#'</b> flag is not specified, no
+      decimal-point character shall appear. The letters
+      <b>"abcdef"</b> shall be used for <b>a</b> conversion and the
+      letters <b>"ABCDEF"</b> for <b>A</b> conversion. The <b>A</b>
+      conversion specifier produces a number with <b>'X'</b> and <b>'P'</b>
+      instead of <b>'x'</b> and <b>'p'</b>. The exponent shall always contain at
+      least one digit, and only as many more digits as necessary to represent
+      the decimal exponent of 2. If the value is zero, the exponent shall be
+      zero.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">A <b>double</b> argument representing an infinity or NaN shall be
+    converted in the style of an <b>f</b> or <b>F</b> conversion specifier.</p>
+</div>
+<dl class="Bl-tag">
+  <dt id="c"><a class="permalink" href="#c">c</a></dt>
+  <dd>The <b>int</b> argument shall be converted to an <b>unsigned char</b>, and
+      the resulting byte shall be written.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">If an <b>l</b> (ell) qualifier is present, the <b>wint_t</b>
+    argument shall be converted as if by an <b>ls</b> conversion specification
+    with no precision and an argument that points to a two-element array of type
+    <b>wchar_t</b>, the first element of which contains the <b>wint_t</b>
+    argument to the <b>ls</b> conversion specification and the second element
+    contains a null wide character.</p>
+</div>
+<dl class="Bl-tag">
+  <dt id="s"><a class="permalink" href="#s">s</a></dt>
+  <dd>The argument shall be a pointer to an array of <b>char</b>. Bytes from the
+      array shall be written up to (but not including) any terminating null
+      byte. If the precision is specified, no more than that many bytes shall be
+      written. If the precision is not specified or is greater than the size of
+      the array, the application shall ensure that the array contains a null
+      byte.</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">If an <b>l</b> (ell) qualifier is present, the argument shall be a
+    pointer to an array of type <b>wchar_t</b>. Wide characters from the array
+    shall be converted to characters (each as if by a call to the
+    <i>wcrtomb</i>() function, with the conversion state described by an
+    <b>mbstate_t</b> object initialized to zero before the first wide character
+    is converted) up to and including a terminating null wide character. The
+    resulting characters shall be written up to (but not including) the
+    terminating null character (byte). If no precision is specified, the
+    application shall ensure that the array contains a null wide character. If a
+    precision is specified, no more than that many characters (bytes) shall be
+    written (including shift sequences, if any), and the array shall contain a
+    null wide character if, to equal the character sequence length given by the
+    precision, the function would need to access a wide character one past the
+    end of the array. In no case shall a partial character be written.</p>
+</div>
+<dl class="Bl-tag">
+  <dt id="p"><a class="permalink" href="#p">p</a></dt>
+  <dd>The argument shall be a pointer to <b>void</b>. The value of the pointer
+      is converted to a sequence of printable characters, in an
+      implementation-defined manner.</dd>
+  <dt id="n"><a class="permalink" href="#n">n</a></dt>
+  <dd>The argument shall be a pointer to an integer into which is written the
+      number of bytes written to the output so far by this call to one of the
+      <i>fprintf</i>() functions. No argument is converted.</dd>
+  <dt id="C"><a class="permalink" href="#C">C</a></dt>
+  <dd>Equivalent to <b>lc</b>.</dd>
+  <dt id="S"><a class="permalink" href="#S">S</a></dt>
+  <dd>Equivalent to <b>ls</b>.</dd>
+  <dt>%</dt>
+  <dd>Print a <b>'%'</b> character; no argument is converted. The complete
+      conversion specification shall be <b>%%</b>.</dd>
+</dl>
+<p class="Pp">If a conversion specification does not match one of the above
+    forms, the behavior is undefined. If any argument is not the correct type
+    for the corresponding conversion specification, the behavior is
+  undefined.</p>
+<p class="Pp">In no case shall a nonexistent or small field width cause
+    truncation of a field; if the result of a conversion is wider than the field
+    width, the field shall be expanded to contain the conversion result.
+    Characters generated by <i>fprintf</i>() and <i>printf</i>() are printed as
+    if <i>fputc</i>() had been called.</p>
+<p class="Pp">For the <b>a</b> and <b>A</b> conversion specifiers, if FLT_RADIX
+    is a power of 2, the value shall be correctly rounded to a hexadecimal
+    floating number with the given precision.</p>
+<p class="Pp">For <b>a</b> and <b>A</b> conversions, if FLT_RADIX is not a power
+    of 2 and the result is not exactly representable in the given precision, the
+    result should be one of the two adjacent numbers in hexadecimal floating
+    style with the given precision, with the extra stipulation that the error
+    should have a correct sign for the current rounding direction.</p>
+<p class="Pp">For the <b>e</b>, <b>E</b>, <b>f</b>, <b>F</b>, <b>g</b>, and
+    <b>G</b> conversion specifiers, if the number of significant decimal digits
+    is at most DECIMAL_DIG, then the result should be correctly rounded. If the
+    number of significant decimal digits is more than DECIMAL_DIG but the source
+    value is exactly representable with DECIMAL_DIG digits, then the result
+    should be an exact representation with trailing zeros. Otherwise, the source
+    value is bounded by two adjacent decimal strings <i>L</i> &lt; <i>U</i>,
+    both having DECIMAL_DIG significant digits; the value of the resultant
+    decimal string <i>D</i> should satisfy <i>L</i> &lt;= <i>D</i> &lt;=
+    <i>U</i>, with the extra stipulation that the error should have a correct
+    sign for the current rounding direction.</p>
+<p class="Pp">The last data modification and last file status change timestamps
+    of the file shall be marked for update:</p>
+<dl class="Bl-tag">
+  <dt> 1.</dt>
+  <dd>Between the call to a successful execution of <i>fprintf</i>() or
+      <i>printf</i>() and the next successful completion of a call to
+      <i>fflush</i>() or <i>fclose</i>() on the same stream or a call to
+      <i>exit</i>() or <i>abort</i>()</dd>
+  <dt> 2.</dt>
+  <dd>Upon successful completion of a call to <i>dprintf</i>()</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, the <i>dprintf</i>(),
+    <i>fprintf</i>(), and <i>printf</i>() functions shall return the number of
+    bytes transmitted.</p>
+<p class="Pp">Upon successful completion, the <i>sprintf</i>() function shall
+    return the number of bytes written to <i>s</i>, excluding the terminating
+    null byte.</p>
+<p class="Pp">Upon successful completion, the <i>snprintf</i>() function shall
+    return the number of bytes that would be written to <i>s</i> had <i>n</i>
+    been sufficiently large excluding the terminating null byte.</p>
+<p class="Pp">If an output error was encountered, these functions shall return a
+    negative value and set <i>errno</i> to indicate the error.</p>
+<p class="Pp">If the value of <i>n</i> is zero on a call to <i>snprintf</i>(),
+    nothing shall be written, the number of bytes that would have been written
+    had <i>n</i> been sufficiently large excluding the terminating null shall be
+    returned, and <i>s</i> may be a null pointer.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">For the conditions under which <i>dprintf</i>(), <i>fprintf</i>(),
+    and <i>printf</i>() fail and may fail, refer to <i><i>fputc</i>()</i> or
+    <i><i>fputwc</i>()</i>.</p>
+<p class="Pp">In addition, all forms of <i>fprintf</i>() shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EILSEQ"><a class="permalink" href="#EILSEQ"><b>EILSEQ</b></a></dt>
+  <dd>A wide-character code that does not correspond to a valid character has
+      been detected.</dd>
+  <dt id="EOVERFLOW"><a class="permalink" href="#EOVERFLOW"><b>EOVERFLOW</b></a></dt>
+  <dd>The value to be returned is greater than {INT_MAX}.</dd>
+</dl>
+<p class="Pp">The <i>dprintf</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The <i>fildes</i> argument is not a valid file descriptor.</dd>
+</dl>
+<p class="Pp">The <i>dprintf</i>(), <i>fprintf</i>(), and <i>printf</i>()
+    functions may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient storage space is available.</dd>
+</dl>
+<p class="Pp">The <i>snprintf</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EOVERFLOW~2"><a class="permalink" href="#EOVERFLOW~2"><b>EOVERFLOW</b></a></dt>
+  <dd>The value of <i>n</i> is greater than {INT_MAX}.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Printing_Language-Independent_Date_and_Time"><a class="permalink" href="#Printing_Language-Independent_Date_and_Time">Printing
+  Language-Independent Date and Time</a></h2>
+<p class="Pp">The following statement can be used to print date and time using a
+    language-independent format:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>printf(format, weekday, month, day, hour, min);</pre>
+</div>
+<p class="Pp">For American usage, <i>format</i> could be a pointer to the
+    following string:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>"%s, %s %d, %d:%.2d\n"</pre>
+</div>
+<p class="Pp">This example would produce the following message:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>Sunday, July 3, 10:02</pre>
+</div>
+<p class="Pp">For German usage, <i>format</i> could be a pointer to the
+    following string:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>"%1$s, %3$d. %2$s, %4$d:%5$.2d\n"</pre>
+</div>
+<p class="Pp">This definition of <i>format</i> would produce the following
+    message:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>Sonntag, 3. Juli, 10:02</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Printing_File_Information"><a class="permalink" href="#Printing_File_Information">Printing
+  File Information</a></h2>
+<p class="Pp">The following example prints information about the type,
+    permissions, and number of links of a specific file in a directory.</p>
+<p class="Pp">The first two calls to <i>printf</i>() use data decoded from a
+    previous <i>stat</i>() call. The user-defined <i>strperm</i>() function
+    shall return a string similar to the one at the beginning of the output for
+    the following command:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>ls -l</pre>
+</div>
+<p class="Pp">The next call to <i>printf</i>() outputs the owner's name if it is
+    found using <i>getpwuid</i>(); the <i>getpwuid</i>() function shall return a
+    <b>passwd</b> structure from which the name of the user is extracted. If the
+    user name is not found, the program instead prints out the numeric value of
+    the user ID.</p>
+<p class="Pp">The next call prints out the group name if it is found using
+    <i>getgrgid</i>(); <i>getgrgid</i>() is very similar to <i>getpwuid</i>()
+    except that it shall return group information based on the group number.
+    Once again, if the group is not found, the program prints the numeric value
+    of the group for the entry.</p>
+<p class="Pp">The final call to <i>printf</i>() prints the size of the file.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;stdio.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;pwd.h&gt;
+#include &lt;grp.h&gt;</pre>
+<pre>char *strperm (mode_t);
+...
+struct stat statbuf;
+struct passwd *pwd;
+struct group *grp;
+...
+printf("%10.10s", strperm (statbuf.st_mode));
+printf("%4d", statbuf.st_nlink);</pre>
+<pre>if ((pwd = getpwuid(statbuf.st_uid)) != NULL)
+<br>
+    printf(" %-8.8s", pwd-&gt;pw_name);
+else
+<br>
+    printf(" %-8ld", (long) statbuf.st_uid);</pre>
+<pre>if ((grp = getgrgid(statbuf.st_gid)) != NULL)
+<br>
+    printf(" %-8.8s", grp-&gt;gr_name);
+else
+<br>
+    printf(" %-8ld", (long) statbuf.st_gid);</pre>
+<pre>printf("%9jd", (intmax_t) statbuf.st_size);
+...</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Printing_a_Localized_Date_String"><a class="permalink" href="#Printing_a_Localized_Date_String">Printing
+  a Localized Date String</a></h2>
+<p class="Pp">The following example gets a localized date string. The
+    <i>nl_langinfo</i>() function shall return the localized date string, which
+    specifies the order and layout of the date. The <i>strftime</i>() function
+    takes this information and, using the <b>tm</b> structure for values, places
+    the date and time information into <i>datestring</i>. The <i>printf</i>()
+    function then outputs <i>datestring</i> and the name of the entry.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;stdio.h&gt;
+#include &lt;time.h&gt;
+#include &lt;langinfo.h&gt;
+...
+struct dirent *dp;
+struct tm *tm;
+char datestring[256];
+...
+strftime(datestring, sizeof(datestring), nl_langinfo (D_T_FMT), tm);</pre>
+<pre>printf(" %s %s\n", datestring, dp-&gt;d_name);
+...</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Printing_Error_Information"><a class="permalink" href="#Printing_Error_Information">Printing
+  Error Information</a></h2>
+<p class="Pp">The following example uses <i>fprintf</i>() to write error
+    information to standard error.</p>
+<p class="Pp">In the first group of calls, the program tries to open the
+    password lock file named <b>LOCKFILE</b>. If the file already exists, this
+    is an error, as indicated by the O_EXCL flag on the <i>open</i>() function.
+    If the call fails, the program assumes that someone else is updating the
+    password file, and the program exits.</p>
+<p class="Pp">The next group of calls saves a new password file as the current
+    password file by creating a link between <b>LOCKFILE</b> and the new
+    password file <b>PASSWDFILE</b>.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;sys/types.h&gt;
+#include &lt;sys/stat.h&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;string.h&gt;
+#include &lt;errno.h&gt;</pre>
+<pre>#define LOCKFILE "/etc/ptmp"
+#define PASSWDFILE "/etc/passwd"
+...
+int pfd;
+...
+if ((pfd = open(LOCKFILE, O_WRONLY | O_CREAT | O_EXCL,
+<br>
+    S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) == -1)
+{
+<br>
+    fprintf(stderr, "Cannot open /etc/ptmp. Try again later.\n");
+<br>
+    exit(1);
+}
+...
+if (link(LOCKFILE,PASSWDFILE) == -1) {
+<br>
+    fprintf(stderr, "Link error: %s\n", strerror(errno));
+<br>
+    exit(1);
+}
+...</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Printing_Usage_Information"><a class="permalink" href="#Printing_Usage_Information">Printing
+  Usage Information</a></h2>
+<p class="Pp">The following example checks to make sure the program has the
+    necessary arguments, and uses <i>fprintf</i>() to print usage information if
+    the expected number of arguments is not present.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+...
+char *Options = "hdbtl";
+...
+if (argc &lt; 2) {
+<br>
+    fprintf(stderr, "Usage: %s -%s &lt;file\n", argv[0], Options); exit(1);
+}
+...</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Formatting_a_Decimal_String"><a class="permalink" href="#Formatting_a_Decimal_String">Formatting
+  a Decimal String</a></h2>
+<p class="Pp">The following example prints a key and data pair on <i>stdout</i>.
+    Note use of the &lt;asterisk&gt; (<b>'*'</b>) in the format string; this
+    ensures the correct number of decimal places for the element based on the
+    number of elements requested.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;stdio.h&gt;
+...
+long i;
+char *keystr;
+int elementlen, len;
+...
+while (len &lt; elementlen) {
+...
+<br>
+    printf("%s Element%0*ld\n", keystr, elementlen, i);
+...
+}</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Creating_a_Pathname"><a class="permalink" href="#Creating_a_Pathname">Creating
+  a Pathname</a></h2>
+<p class="Pp">The following example creates a pathname using information from a
+    previous <i>getpwnam</i>() function that returned the password database
+    entry of the user.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;stdint.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;unistd.h&gt;
+...
+char *pathname;
+struct passwd *pw;
+size_t len;
+...
+// digits required for pid_t is number of bits times
+// log2(10) = approx 10/33
+len = strlen(pw-&gt;pw_dir) + 1 + 1+(sizeof(pid_t)*80+32)/33 +
+<br>
+    sizeof ".out";
+pathname = malloc(len);
+if (pathname != NULL)
+{
+<br>
+    snprintf(pathname, len, "%s/%jd.out", pw-&gt;pw_dir,
+<br>
+        (intmax_t)getpid());
+<br>
+    ...
+}</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Reporting_an_Event"><a class="permalink" href="#Reporting_an_Event">Reporting
+  an Event</a></h2>
+<p class="Pp">The following example loops until an event has timed out. The
+    <i>pause</i>() function waits forever unless it receives a signal. The
+    <i>fprintf</i>() statement should never occur due to the possible return
+    values of <i>pause</i>().</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;string.h&gt;
+#include &lt;errno.h&gt;
+...
+while (!event_complete) {
+...
+<br>
+    if (pause() != -1 || errno != EINTR)
+<br>
+        fprintf(stderr, "pause: unknown error: %s\n", strerror(errno));
+}
+...</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Printing_Monetary_Information"><a class="permalink" href="#Printing_Monetary_Information">Printing
+  Monetary Information</a></h2>
+<p class="Pp">The following example uses <i>strfmon</i>() to convert a number
+    and store it as a formatted monetary string named <i>convbuf</i>. If the
+    first number is printed, the program prints the format and the description;
+    otherwise, it just prints the number.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;monetary.h&gt;
+#include &lt;stdio.h&gt;
+...
+struct tblfmt {
+<br>
+    char *format;
+<br>
+    char *description;
+};</pre>
+<pre>struct tblfmt table[] = {
+<br>
+    { "%n", "default formatting" },
+<br>
+    { "%11n", "right align within an 11 character field" },
+<br>
+    { "%#5n", "aligned columns for values up to 99999" },
+<br>
+    { "%=*#5n", "specify a fill character" },
+<br>
+    { "%=0#5n", "fill characters do not use grouping" },
+<br>
+    { "%^#5n", "disable the grouping separator" },
+<br>
+    { "%^#5.0n", "round off to whole units" },
+<br>
+    { "%^#5.4n", "increase the precision" },
+<br>
+    { "%(#5n", "use an alternative pos/neg style" },
+<br>
+    { "%!(#5n", "disable the currency symbol" },
+};
+...
+float input[3];
+int i, j;
+char convbuf[100];
+...
+strfmon(convbuf, sizeof(convbuf), table[i].format, input[j]);</pre>
+<pre>if (j == 0) {
+<br>
+    printf("%s%s%s\n", table[i].format,
+<br>
+        convbuf, table[i].description);
+}
+else {
+<br>
+    printf("%s\n", convbuf);
+}
+...</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Printing_Wide_Characters"><a class="permalink" href="#Printing_Wide_Characters">Printing
+  Wide Characters</a></h2>
+<p class="Pp">The following example prints a series of wide characters. Suppose
+    that <b>"L`@`"</b> expands to three bytes:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>wchar_t wz [3] = L"@@";       // Zero-terminated
+wchar_t wn [3] = L"@@@";      // Unterminated</pre>
+<pre>fprintf (stdout,"%ls", wz);   // Outputs 6 bytes
+fprintf (stdout,"%ls", wn);   // Undefined because wn has no terminator
+fprintf (stdout,"%4ls", wz);  // Outputs 3 bytes
+fprintf (stdout,"%4ls", wn);  // Outputs 3 bytes; no terminator needed
+fprintf (stdout,"%9ls", wz);  // Outputs 6 bytes
+fprintf (stdout,"%9ls", wn);  // Outputs 9 bytes; no terminator needed
+fprintf (stdout,"%10ls", wz); // Outputs 6 bytes
+fprintf (stdout,"%10ls", wn); // Undefined because wn has no terminator</pre>
+</div>
+<p class="Pp">In the last line of the example, after processing three
+    characters, nine bytes have been output. The fourth character must then be
+    examined to determine whether it converts to one byte or more. If it
+    converts to more than one byte, the output is only nine bytes. Since there
+    is no fourth character in the array, the behavior is undefined.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">If the application calling <i>fprintf</i>() has any objects of
+    type <b>wint_t</b> or <b>wchar_t</b>, it must also include the
+    <i>&lt;wchar.h&gt;</i> header to have these objects defined.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">If an implementation detects that there are insufficient arguments
+    for the format, it is recommended that the function should fail and report
+    an <b>[EINVAL]</b> error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i>Section 2.5</i>, <i>Standard I/O Streams</i>,
+    <i><i>fputc</i>()</i>, <i><i>fscanf</i>()</i>, <i><i>setlocale</i>()</i>,
+    <i><i>strfmon</i>()</i>, <i><i>wcrtomb</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Chapter
+    7</i>, <i>Locale</i>, <i><b>&lt;inttypes.h&gt;</b></i>,
+    <i><b>&lt;stdio.h&gt;</b></i>, <i><b>&lt;wchar.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,287 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/2f5ce80566653fd104ec472a4ba7a445dec72152">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>hsearch(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">hsearch(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">hsearch(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">hcreate, hdestroy, hsearch, hcreate_r, hdestroy_r, hsearch_r -
+    hash table management</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;search.h&gt;</b></pre>
+<pre><b>int hcreate(size_t </b><i>nel</i><b>);</b>
+<b>void hdestroy(void);</b></pre>
+<pre><b>ENTRY *hsearch(ENTRY </b><i>item</i><b>, ACTION </b><i>action</i><b>);</b></pre>
+<pre><b>#define _GNU_SOURCE</b>         /* See feature_test_macros(7) */
+<b>#include &lt;search.h&gt;</b></pre>
+<pre><b>int hcreate_r(size_t </b><i>nel</i><b>, struct hsearch_data *</b><i>htab</i><b>);</b>
+<b>void hdestroy_r(struct hsearch_data *</b><i>htab</i><b>);</b></pre>
+<pre><b>int hsearch_r(ENTRY </b><i>item</i><b>, ACTION </b><i>action</i><b>, ENTRY **</b><i>retval</i><b>,</b>
+<b>              struct hsearch_data *</b><i>htab</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The three functions <b>hcreate</b>(), <b>hsearch</b>(), and
+    <b>hdestroy</b>() allow the caller to create and manage a hash search table
+    containing entries consisting of a key (a string) and associated data. Using
+    these functions, only one hash table can be used at a time.</p>
+<p class="Pp">The three functions <b>hcreate_r</b>(), <b>hsearch_r</b>(),
+    <b>hdestroy_r</b>() are reentrant versions that allow a program to use more
+    than one hash search table at the same time. The last argument, <i>htab</i>,
+    points to a structure that describes the table on which the function is to
+    operate. The programmer should treat this structure as opaque (i.e., do not
+    attempt to directly access or modify the fields in this structure).</p>
+<p class="Pp">First a hash table must be created using <b>hcreate</b>(). The
+    argument <i>nel</i> specifies the maximum number of entries in the table.
+    (This maximum cannot be changed later, so choose it wisely.) The
+    implementation may adjust this value upward to improve the performance of
+    the resulting hash table.</p>
+<p class="Pp">The <b>hcreate_r</b>() function performs the same task as
+    <b>hcreate</b>(), but for the table described by the structure <i>*htab</i>.
+    The structure pointed to by <i>htab</i> must be zeroed before the first call
+    to <b>hcreate_r</b>().</p>
+<p class="Pp">The function <b>hdestroy</b>() frees the memory occupied by the
+    hash table that was created by <b>hcreate</b>(). After calling
+    <b>hdestroy</b>(), a new hash table can be created using <b>hcreate</b>().
+    The <b>hdestroy_r</b>() function performs the analogous task for a hash
+    table described by <i>*htab</i>, which was previously created using
+    <b>hcreate_r</b>().</p>
+<p class="Pp">The <b>hsearch</b>() function searches the hash table for an item
+    with the same key as <i>item</i> (where "the same" is determined
+    using <b>strcmp</b>(3)), and if successful returns a pointer to it.</p>
+<p class="Pp">The argument <i>item</i> is of type <i>ENTRY</i>, which is defined
+    in <i>&lt;search.h&gt;</i> as follows:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>typedef struct entry {
+<br>
+    char *key;
+<br>
+    void *data;
+} ENTRY;
+</pre>
+<br>
+<p class="Pp">The field <i>key</i> points to a null-terminated string which is
+    the search key. The field <i>data</i> points to data that is associated with
+    that key.</p>
+<p class="Pp">The argument <i>action</i> determines what <b>hsearch</b>() does
+    after an unsuccessful search. This argument must either have the value
+    <b>ENTER</b>, meaning insert a copy of <i>item</i> (and return a pointer to
+    the new hash table entry as the function result), or the value <b>FIND</b>,
+    meaning that NULL should be returned. (If <i>action</i> is <b>FIND</b>, then
+    <i>data</i> is ignored.)</p>
+<p class="Pp">The <b>hsearch_r</b>() function is like <b>hsearch</b>() but
+    operates on the hash table described by <i>*htab</i>. The <b>hsearch_r</b>()
+    function differs from <b>hsearch</b>() in that a pointer to the found item
+    is returned in <i>*retval</i>, rather than as the function result.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp"><b>hcreate</b>() and <b>hcreate_r</b>() return nonzero on success.
+    They return 0 on error, with <i>errno</i> set to indicate the error.</p>
+<p class="Pp">On success, <b>hsearch</b>() returns a pointer to an entry in the
+    hash table. <b>hsearch</b>() returns NULL on error, that is, if
+    <i>action</i> is <b>ENTER</b> and the hash table is full, or <i>action</i>
+    is <b>FIND</b> and <i>item</i> cannot be found in the hash table.
+    <b>hsearch_r</b>() returns nonzero on success, and 0 on error. In the event
+    of an error, these two functions set <i>errno</i> to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp"><b>hcreate_r</b>() and <b>hdestroy_r</b>() can fail for the
+    following reasons:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>htab</i> is NULL.</dd>
+</dl>
+<p class="Pp"><b>hsearch</b>() and <b>hsearch_r</b>() can fail for the following
+    reasons:</p>
+<dl class="Bl-tag">
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd><i>action</i> was <b>ENTER</b>, <i>key</i> was not found in the table, and
+      there was no room in the table to add a new entry.</dd>
+  <dt id="ESRCH"><a class="permalink" href="#ESRCH"><b>ESRCH</b></a></dt>
+  <dd><i>action</i> was <b>FIND</b>, and <i>key</i> was not found in the
+    table.</dd>
+</dl>
+<p class="Pp">POSIX.1 specifies only the <b>ENOMEM</b> error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>hcreate (), hsearch (), hdestroy ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race:hsearch</td>
+  </tr>
+  <tr>
+    <td>hcreate_r (), hsearch_r (), hdestroy_r ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe race:htab</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">The functions <b>hcreate</b>(), <b>hsearch</b>(), and
+    <b>hdestroy</b>() are from SVr4, and are described in POSIX.1-2001 and
+    POSIX.1-2008.</p>
+<p class="Pp">The functions <b>hcreate_r</b>(), <b>hsearch_r</b>(), and
+    <b>hdestroy_r</b>() are GNU extensions.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Hash table implementations are usually more efficient when the
+    table contains enough free space to minimize collisions. Typically, this
+    means that <i>nel</i> should be at least 25% larger than the maximum number
+    of elements that the caller expects to store in the table.</p>
+<p class="Pp">The <b>hdestroy</b>() and <b>hdestroy_r</b>() functions do not
+    free the buffers pointed to by the <i>key</i> and <i>data</i> elements of
+    the hash table entries. (It can't do this because it doesn't know whether
+    these buffers were allocated dynamically.) If these buffers need to be freed
+    (perhaps because the program is repeatedly creating and destroying hash
+    tables, rather than creating a single table whose lifetime matches that of
+    the program), then the program must maintain bookkeeping data structures
+    that allow it to free them.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">SVr4 and POSIX.1-2001 specify that <i>action</i> is significant
+    only for unsuccessful searches, so that an <b>ENTER</b> should not do
+    anything for a successful search. In libc and glibc (before glibc 2.3), the
+    implementation violates the specification, updating the <i>data</i> for the
+    given <i>key</i> in this case.</p>
+<p class="Pp">Individual hash table entries can be added, but not deleted.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The following program inserts 24 items into a hash table, then
+    prints some of them.</p>
+<p class="Pp"></p>
+<pre>#include &lt;search.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+static char *data[] = { "alpha", "bravo", "charlie", "delta",
+<br>
+     "echo", "foxtrot", "golf", "hotel", "india", "juliet",
+<br>
+     "kilo", "lima", "mike", "november", "oscar", "papa",
+<br>
+     "quebec", "romeo", "sierra", "tango", "uniform",
+<br>
+     "victor", "whisky", "x-ray", "yankee", "zulu"
+};
+int
+main(void)
+{
+<br>
+    ENTRY e;
+<br>
+    ENTRY *ep;
+<br>
+    hcreate(30);
+<br>
+    for (size_t i = 0; i &lt; 24; i++) {
+<br>
+        e.key = data[i];
+<br>
+        /* data is just an integer, instead of a
+<br>
+           pointer to something */
+<br>
+        e.data = (void *) i;
+<br>
+        ep = hsearch(e, ENTER);
+<br>
+        /* there should be no failures */
+<br>
+        if (ep == NULL) {
+<br>
+            fprintf(stderr, "entry failed\n");
+<br>
+            exit(EXIT_FAILURE);
+<br>
+        }
+<br>
+    }
+<br>
+    for (size_t i = 22; i &lt; 26; i++) {
+<br>
+        /* print two entries from the table, and
+<br>
+           show that two are not in the table */
+<br>
+        e.key = data[i];
+<br>
+        ep = hsearch(e, FIND);
+<br>
+        printf("%9.9s -&gt; %9.9s:%d\n", e.key,
+<br>
+               ep ? ep-&gt;key : "NULL", ep ? (int)(ep-&gt;data) : 0);
+<br>
+    }
+<br>
+    hdestroy();
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>bsearch</b>(3), <b>lsearch</b>(3), <b>malloc</b>(3),
+    <b>tsearch</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

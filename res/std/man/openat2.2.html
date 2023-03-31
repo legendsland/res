@@ -1,0 +1,407 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2019 Aleksa Sarai <cyphar@cyphar.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+ --><head>
+<meta name="dc.identifier" content="res/b67dcd4035b1baa62a49d0dd7bdfa116d5aa4d88">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>openat2(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">openat2(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">openat2(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">openat2 - open and possibly create a file (extended)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;fcntl.h&gt;</b>          /* Definition of <b>O_*</b> and <b>S_*</b> constants */
+<b>#include &lt;linux/openat2.h&gt;</b>  /* Definition of <b>RESOLVE_*</b> constants */
+<b>#include &lt;sys/syscall.h&gt;</b>    /* Definition of <b>SYS_*</b> constants */
+<b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>long syscall(SYS_openat2, int </b><i>dirfd</i><b>, const char *</b><i>pathname</i><b>,</b>
+<b>             struct open_how *</b><i>how</i><b>, size_t </b><i>size</i><b>);</b></pre>
+<p class="Pp"><i>Note</i>: glibc provides no wrapper for <b>openat2</b>(),
+    necessitating the use of <b>syscall</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>openat2</b>() system call is an extension of
+    <b>openat</b>(2) and provides a superset of its functionality.</p>
+<p class="Pp">The <b>openat2</b>() system call opens the file specified by
+    <i>pathname</i>. If the specified file does not exist, it may optionally (if
+    <b>O_CREAT</b> is specified in <i>how.flags</i>) be created.</p>
+<p class="Pp">As with <b>openat</b>(2), if <i>pathname</i> is a relative
+    pathname, then it is interpreted relative to the directory referred to by
+    the file descriptor <i>dirfd</i> (or the current working directory of the
+    calling process, if <i>dirfd</i> is the special value <b>AT_FDCWD</b>). If
+    <i>pathname</i> is an absolute pathname, then <i>dirfd</i> is ignored
+    (unless <i>how.resolve</i> contains <b>RESOLVE_IN_ROOT</b>, in which case
+    <i>pathname</i> is resolved relative to <i>dirfd</i>).</p>
+<p class="Pp">Rather than taking a single <i>flags</i> argument, an extensible
+    structure (<i>how</i>) is passed to allow for future extensions. The
+    <i>size</i> argument must be specified as <i>sizeof(struct
+  open_how)</i>.</p>
+<section class="Ss">
+<h2 class="Ss" id="The_open_how_structure"><a class="permalink" href="#The_open_how_structure">The
+  open_how structure</a></h2>
+<p class="Pp">The <i>how</i> argument specifies how <i>pathname</i> should be
+    opened, and acts as a superset of the <i>flags</i> and <i>mode</i> arguments
+    to <b>openat</b>(2). This argument is a pointer to an <i>open_how</i>
+    structure, described in <b>open_how</b>(2type).</p>
+<p class="Pp">Any future extensions to <b>openat2</b>() will be implemented as
+    new fields appended to the <i>open_how</i> structure, with a zero value in a
+    new field resulting in the kernel behaving as though that extension field
+    was not present. Therefore, the caller <i>must</i> zero-fill this structure
+    on initialization. (See the "Extensibility" section of the
+    <b>NOTES</b> for more detail on why this is necessary.)</p>
+<p class="Pp">The fields of the <i>open_how</i> structure are as follows:</p>
+<dl class="Bl-tag">
+  <dt id="flags"><a class="permalink" href="#flags"><i>flags</i></a></dt>
+  <dd>This field specifies the file creation and file status flags to use when
+      opening the file. All of the <b>O_*</b> flags defined for <b>openat</b>(2)
+      are valid <b>openat2</b>() flag values.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Whereas <b>openat</b>(2) ignores unknown bits in its <i>flags</i>
+      argument, <b>openat2</b>() returns an error if unknown or conflicting
+      flags are specified in <i>how.flags</i>.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="mode"><a class="permalink" href="#mode"><i>mode</i></a></dt>
+  <dd>This field specifies the mode for the new file, with identical semantics
+      to the <i>mode</i> argument of <b>openat</b>(2).</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Whereas <b>openat</b>(2) ignores bits other than those in the range
+      <i>07777</i> in its <i>mode</i> argument, <b>openat2</b>() returns an
+      error if <i>how.mode</i> contains bits other than <i>07777</i>. Similarly,
+      an error is returned if <b>openat2</b>() is called with a nonzero
+      <i>how.mode</i> and <i>how.flags</i> does not contain <b>O_CREAT</b> or
+      <b>O_TMPFILE</b>.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="resolve"><a class="permalink" href="#resolve"><i>resolve</i></a></dt>
+  <dd>This is a bit-mask of flags that modify the way in which <b>all</b>
+      components of <i>pathname</i> will be resolved. (See
+      <b>path_resolution</b>(7) for background information.)</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The primary use case for these flags is to allow trusted programs to
+      restrict how untrusted paths (or paths inside untrusted directories) are
+      resolved. The full list of <i>resolve</i> flags is as follows:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="RESOLVE_BENEATH"><a class="permalink" href="#RESOLVE_BENEATH"><b>RESOLVE_BENEATH</b></a></dt>
+  <dd>Do not permit the path resolution to succeed if any component of the
+      resolution is not a descendant of the directory indicated by <i>dirfd</i>.
+      This causes absolute symbolic links (and absolute values of
+      <i>pathname</i>) to be rejected.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Currently, this flag also disables magic-link resolution (see below).
+      However, this may change in the future. Therefore, to ensure that magic
+      links are not resolved, the caller should explicitly specify
+      <b>RESOLVE_NO_MAGICLINKS</b>.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="RESOLVE_IN_ROOT"><a class="permalink" href="#RESOLVE_IN_ROOT"><b>RESOLVE_IN_ROOT</b></a></dt>
+  <dd>Treat the directory referred to by <i>dirfd</i> as the root directory
+      while resolving <i>pathname</i>. Absolute symbolic links are interpreted
+      relative to <i>dirfd</i>. If a prefix component of <i>pathname</i> equates
+      to <i>dirfd</i>, then an immediately following <i>..</i> component
+      likewise equates to <i>dirfd</i> (just as <i>/..</i> is traditionally
+      equivalent to <i>/</i>). If <i>pathname</i> is an absolute path, it is
+      also interpreted relative to <i>dirfd</i>.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The effect of this flag is as though the calling process had used
+      <b>chroot</b>(2) to (temporarily) modify its root directory (to the
+      directory referred to by <i>dirfd</i>). However, unlike <b>chroot</b>(2)
+      (which changes the filesystem root permanently for a process),
+      <b>RESOLVE_IN_ROOT</b> allows a program to efficiently restrict path
+      resolution on a per-open basis.</dd>
+  <dt></dt>
+  <dd>Currently, this flag also disables magic-link resolution. However, this
+      may change in the future. Therefore, to ensure that magic links are not
+      resolved, the caller should explicitly specify
+      <b>RESOLVE_NO_MAGICLINKS</b>.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="RESOLVE_NO_MAGICLINKS"><a class="permalink" href="#RESOLVE_NO_MAGICLINKS"><b>RESOLVE_NO_MAGICLINKS</b></a></dt>
+  <dd>Disallow all magic-link resolution during path resolution.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Magic links are symbolic link-like objects that are most notably found in
+      <b>proc</b>(5); examples include <i>/proc/</i>pid<i>/exe</i> and
+      <i>/proc/</i>pid<i>/fd/*</i>. (See <b>symlink</b>(7) for more
+    details.)</dd>
+  <dt></dt>
+  <dd>Unknowingly opening magic links can be risky for some applications.
+      Examples of such risks include the following:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>If the process opening a pathname is a controlling process that currently
+      has no controlling terminal (see <b>credentials</b>(7)), then opening a
+      magic link inside <i>/proc/</i>pid<i>/fd</i> that happens to refer to a
+      terminal would cause the process to acquire a controlling terminal.</dd>
+  <dt>•</dt>
+  <dd>In a containerized environment, a magic link inside <i>/proc</i> may refer
+      to an object outside the container, and thus may provide a means to escape
+      from the container.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Because of such risks, an application may prefer to disable magic link
+      resolution using the <b>RESOLVE_NO_MAGICLINKS</b> flag.</dd>
+  <dt></dt>
+  <dd>If the trailing component (i.e., basename) of <i>pathname</i> is a magic
+      link, <i>how.resolve</i> contains <b>RESOLVE_NO_MAGICLINKS</b>, and
+      <i>how.flags</i> contains both <b>O_PATH</b> and <b>O_NOFOLLOW</b>, then
+      an <b>O_PATH</b> file descriptor referencing the magic link will be
+      returned.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="RESOLVE_NO_SYMLINKS"><a class="permalink" href="#RESOLVE_NO_SYMLINKS"><b>RESOLVE_NO_SYMLINKS</b></a></dt>
+  <dd>Disallow resolution of symbolic links during path resolution. This option
+      implies <b>RESOLVE_NO_MAGICLINKS</b>.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>If the trailing component (i.e., basename) of <i>pathname</i> is a
+      symbolic link, <i>how.resolve</i> contains <b>RESOLVE_NO_SYMLINKS</b>, and
+      <i>how.flags</i> contains both <b>O_PATH</b> and <b>O_NOFOLLOW</b>, then
+      an <b>O_PATH</b> file descriptor referencing the symbolic link will be
+      returned.</dd>
+  <dt></dt>
+  <dd>Note that the effect of the <b>RESOLVE_NO_SYMLINKS</b> flag, which affects
+      the treatment of symbolic links in all of the components of
+      <i>pathname</i>, differs from the effect of the <b>O_NOFOLLOW</b> file
+      creation flag (in <i>how.flags</i>), which affects the handling of
+      symbolic links only in the final component of <i>pathname</i>.</dd>
+  <dt></dt>
+  <dd>Applications that employ the <b>RESOLVE_NO_SYMLINKS</b> flag are
+      encouraged to make its use configurable (unless it is used for a specific
+      security purpose), as symbolic links are very widely used by end-users.
+      Setting this flag indiscriminately—i.e., for purposes not
+      specifically related to security—for all uses of <b>openat2</b>()
+      may result in spurious errors on previously functional systems. This may
+      occur if, for example, a system pathname that is used by an application is
+      modified (e.g., in a new distribution release) so that a pathname
+      component (now) contains a symbolic link.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="RESOLVE_NO_XDEV"><a class="permalink" href="#RESOLVE_NO_XDEV"><b>RESOLVE_NO_XDEV</b></a></dt>
+  <dd>Disallow traversal of mount points during path resolution (including all
+      bind mounts). Consequently, <i>pathname</i> must either be on the same
+      mount as the directory referred to by <i>dirfd</i>, or on the same mount
+      as the current working directory if <i>dirfd</i> is specified as
+      <b>AT_FDCWD</b>.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Applications that employ the <b>RESOLVE_NO_XDEV</b> flag are encouraged to
+      make its use configurable (unless it is used for a specific security
+      purpose), as bind mounts are widely used by end-users. Setting this flag
+      indiscriminately—i.e., for purposes not specifically related to
+      security—for all uses of <b>openat2</b>() may result in spurious
+      errors on previously functional systems. This may occur if, for example, a
+      system pathname that is used by an application is modified (e.g., in a new
+      distribution release) so that a pathname component (now) contains a bind
+      mount.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="RESOLVE_CACHED"><a class="permalink" href="#RESOLVE_CACHED"><b>RESOLVE_CACHED</b></a></dt>
+  <dd>Make the open operation fail unless all path components are already
+      present in the kernel's lookup cache. If any kind of revalidation or I/O
+      is needed to satisfy the lookup, <b>openat2</b>() fails with the error
+      <b>EAGAIN .</b> This is useful in providing a fast-path open that can be
+      performed without resorting to thread offload, or other mechanisms that an
+      application might use to offload slower operations.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>If any bits other than those listed above are set in <i>how.resolve</i>,
+      an error is returned.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, a new file descriptor is returned. On error, -1 is
+    returned, and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The set of errors returned by <b>openat2</b>() includes all of the
+    errors returned by <b>openat</b>(2), as well as the following additional
+    errors:</p>
+<dl class="Bl-tag">
+  <dt id="E2BIG"><a class="permalink" href="#E2BIG"><b>E2BIG</b></a></dt>
+  <dd>An extension that this kernel does not support was specified in
+      <i>how</i>. (See the "Extensibility" section of <b>NOTES</b> for
+      more detail on how extensions are handled.)</dd>
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd><i>how.resolve</i> contains either <b>RESOLVE_IN_ROOT</b> or
+      <b>RESOLVE_BENEATH</b>, and the kernel could not ensure that a
+      ".." component didn't escape (due to a race condition or
+      potential attack). The caller may choose to retry the <b>openat2</b>()
+      call.</dd>
+  <dt id="EAGAIN~2"><a class="permalink" href="#EAGAIN~2"><b>EAGAIN</b></a></dt>
+  <dd><b>RESOLVE_CACHED</b> was set, and the open operation cannot be performed
+      using only cached information. The caller should retry without
+      <b>RESOLVE_CACHED</b> set in <i>how.resolve .</i></dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>An unknown flag or invalid value was specified in <i>how</i>.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd><i>mode</i> is nonzero, but <i>how.flags</i> does not contain
+      <b>O_CREAT</b> or <b>O_TMPFILE</b>.</dd>
+  <dt id="EINVAL~3"><a class="permalink" href="#EINVAL~3"><b>EINVAL</b></a></dt>
+  <dd><i>size</i> was smaller than any known version of <i>struct
+    open_how</i>.</dd>
+  <dt id="ELOOP"><a class="permalink" href="#ELOOP"><b>ELOOP</b></a></dt>
+  <dd><i>how.resolve</i> contains <b>RESOLVE_NO_SYMLINKS</b>, and one of the
+      path components was a symbolic link (or magic link).</dd>
+  <dt id="ELOOP~2"><a class="permalink" href="#ELOOP~2"><b>ELOOP</b></a></dt>
+  <dd><i>how.resolve</i> contains <b>RESOLVE_NO_MAGICLINKS</b>, and one of the
+      path components was a magic link.</dd>
+  <dt id="EXDEV"><a class="permalink" href="#EXDEV"><b>EXDEV</b></a></dt>
+  <dd><i>how.resolve</i> contains either <b>RESOLVE_IN_ROOT</b> or
+      <b>RESOLVE_BENEATH</b>, and an escape from the root during path resolution
+      was detected.</dd>
+  <dt id="EXDEV~2"><a class="permalink" href="#EXDEV~2"><b>EXDEV</b></a></dt>
+  <dd><i>how.resolve</i> contains <b>RESOLVE_NO_XDEV</b>, and a path component
+      crosses a mount point.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>openat2</b>() first appeared in Linux 5.6.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This system call is Linux-specific.</p>
+<p class="Pp">The semantics of <b>RESOLVE_BENEATH</b> were modeled after
+    FreeBSD's <b>O_BENEATH</b>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Extensibility"><a class="permalink" href="#Extensibility">Extensibility</a></h2>
+<p class="Pp">In order to allow for future extensibility, <b>openat2</b>()
+    requires the user-space application to specify the size of the
+    <i>open_how</i> structure that it is passing. By providing this information,
+    it is possible for <b>openat2</b>() to provide both forwards- and
+    backwards-compatibility, with <i>size</i> acting as an implicit version
+    number. (Because new extension fields will always be appended, the structure
+    size will always increase.) This extensibility design is very similar to
+    other system calls such as <b>sched_setattr</b>(2),
+    <b>perf_event_open</b>(2), and <b>clone3</b>(2).</p>
+<p class="Pp">If we let <i>usize</i> be the size of the structure as specified
+    by the user-space application, and <i>ksize</i> be the size of the structure
+    which the kernel supports, then there are three cases to consider:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>If <i>ksize</i> equals <i>usize</i>, then there is no version mismatch and
+      <i>how</i> can be used verbatim.</dd>
+  <dt>•</dt>
+  <dd>If <i>ksize</i> is larger than <i>usize</i>, then there are some extension
+      fields that the kernel supports which the user-space application is
+      unaware of. Because a zero value in any added extension field signifies a
+      no-op, the kernel treats all of the extension fields not provided by the
+      user-space application as having zero values. This provides
+      backwards-compatibility.</dd>
+  <dt>•</dt>
+  <dd>If <i>ksize</i> is smaller than <i>usize</i>, then there are some
+      extension fields which the user-space application is aware of but which
+      the kernel does not support. Because any extension field must have its
+      zero values signify a no-op, the kernel can safely ignore the unsupported
+      extension fields if they are all-zero. If any unsupported extension fields
+      are nonzero, then -1 is returned and <i>errno</i> is set to <b>E2BIG</b>.
+      This provides forwards-compatibility.</dd>
+</dl>
+<p class="Pp">Because the definition of <i>struct open_how</i> may change in the
+    future (with new fields being added when system headers are updated),
+    user-space applications should zero-fill <i>struct open_how</i> to ensure
+    that recompiling the program with new headers will not result in spurious
+    errors at runtime. The simplest way is to use a designated initializer:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct open_how how = { .flags = O_RDWR,
+<br>
+                        .resolve = RESOLVE_IN_ROOT };
+</pre>
+<br>
+<p class="Pp">or explicitly using <b>memset</b>(3) or similar:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct open_how how;
+memset(&amp;how, 0, sizeof(how));
+how.flags = O_RDWR;
+how.resolve = RESOLVE_IN_ROOT;
+</pre>
+<br>
+<p class="Pp">A user-space application that wishes to determine which extensions
+    the running kernel supports can do so by conducting a binary search on
+    <i>size</i> with a structure which has every byte nonzero (to find the
+    largest value which doesn't produce an error of <b>E2BIG</b>).</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>openat</b>(2), <b>open_how</b>(2type),
+    <b>path_resolution</b>(7), <b>symlink</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

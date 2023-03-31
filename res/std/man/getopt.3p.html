@@ -1,0 +1,371 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/1ca160198eb512cd54508dea2283597e43030aa6">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>GETOPT(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">GETOPT(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">GETOPT(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getopt, optarg, opterr, optind, optopt — command option
+    parsing</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;unistd.h&gt;</pre>
+<pre>int getopt(int <i>argc</i>, char * const <i>argv</i>[], const char *<i>optstring</i>);
+extern char *optarg;
+extern int opterr, optind, optopt;</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>getopt</i>() function is a command-line parser that shall
+    follow Utility Syntax Guidelines 3, 4, 5, 6, 7, 9, and 10 in the Base
+    Definitions volume of POSIX.1‐2017, <i>Section 12.2</i>, <i>Utility
+    Syntax Guidelines</i>.</p>
+<p class="Pp">The parameters <i>argc</i> and <i>argv</i> are the argument count
+    and argument array as passed to <i>main</i>() (see <i>exec</i>()). The
+    argument <i>optstring</i> is a string of recognized option characters; if a
+    character is followed by a &lt;colon&gt;, the option takes an argument. All
+    option characters allowed by Utility Syntax Guideline 3 are allowed in
+    <i>optstring</i>. The implementation may accept other characters as an
+    extension.</p>
+<p class="Pp">The variable <i>optind</i> is the index of the next element of the
+    <i>argv</i>[] vector to be processed. It shall be initialized to 1 by the
+    system, and <i>getopt</i>() shall update it when it finishes with each
+    element of <i>argv</i>[]. If the application sets <i>optind</i> to zero
+    before calling <i>getopt</i>(), the behavior is unspecified. When an element
+    of <i>argv</i>[] contains multiple option characters, it is unspecified how
+    <i>getopt</i>() determines which options have already been processed.</p>
+<p class="Pp">The <i>getopt</i>() function shall return the next option
+    character (if one is found) from <i>argv</i> that matches a character in
+    <i>optstring</i>, if there is one that matches. If the option takes an
+    argument, <i>getopt</i>() shall set the variable <i>optarg</i> to point to
+    the option-argument as follows:</p>
+<dl class="Bl-tag">
+  <dt> 1.</dt>
+  <dd>If the option was the last character in the string pointed to by an
+      element of <i>argv</i>, then <i>optarg</i> shall contain the next element
+      of <i>argv</i>, and <i>optind</i> shall be incremented by 2. If the
+      resulting value of <i>optind</i> is greater than <i>argc</i>, this
+      indicates a missing option-argument, and <i>getopt</i>() shall return an
+      error indication.</dd>
+  <dt> 2.</dt>
+  <dd>Otherwise, <i>optarg</i> shall point to the string following the option
+      character in that element of <i>argv</i>, and <i>optind</i> shall be
+      incremented by 1.</dd>
+</dl>
+<p class="Pp">If, when <i>getopt</i>() is called:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre><br>
+ <i>argv</i>[optind]  is a null pointer
+*<i>argv</i>[optind]  is not the character -
+<br>
+ <i>argv</i>[optind]  points to the string "-"</pre>
+</div>
+<p class="Pp"><i>getopt</i>() shall return -1 without changing <i>optind</i>.
+    If:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre><i>argv</i>[optind]   points to the string "--"</pre>
+</div>
+<p class="Pp"><i>getopt</i>() shall return -1 after incrementing
+  <i>optind</i>.</p>
+<p class="Pp">If <i>getopt</i>() encounters an option character that is not
+    contained in <i>optstring</i>, it shall return the &lt;question-mark&gt;
+    (<b>'?'</b>) character. If it detects a missing option-argument, it shall
+    return the &lt;colon&gt; character (<b>':'</b>) if the first character of
+    <i>optstring</i> was a &lt;colon&gt;, or a &lt;question-mark&gt; character
+    (<b>'?'</b>) otherwise. In either case, <i>getopt</i>() shall set the
+    variable <i>optopt</i> to the option character that caused the error. If the
+    application has not set the variable <i>opterr</i> to 0 and the first
+    character of <i>optstring</i> is not a &lt;colon&gt;, <i>getopt</i>() shall
+    also print a diagnostic message to <i>stderr</i> in the format specified for
+    the <i>getopts</i> utility, unless the <i>stderr</i> stream has wide
+    orientation, in which case the behavior is undefined.</p>
+<p class="Pp">The <i>getopt</i>() function need not be thread-safe.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <i>getopt</i>() function shall return the next option
+    character specified on the command line.</p>
+<p class="Pp">A &lt;colon&gt; (<b>':'</b>) shall be returned if <i>getopt</i>()
+    detects a missing argument and the first character of <i>optstring</i> was a
+    &lt;colon&gt; (<b>':'</b>).</p>
+<p class="Pp">A &lt;question-mark&gt; (<b>'?'</b>) shall be returned if
+    <i>getopt</i>() encounters an option character not in <i>optstring</i> or
+    detects a missing argument and the first character of <i>optstring</i> was
+    not a &lt;colon&gt; (<b>':'</b>).</p>
+<p class="Pp">Otherwise, <i>getopt</i>() shall return -1 when all command line
+    options are parsed.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">If the application has not set the variable <i>opterr</i> to 0,
+    the first character of <i>optstring</i> is not a &lt;colon&gt;, and a write
+    error occurs while <i>getopt</i>() is printing a diagnostic message to
+    <i>stderr</i>, then the error indicator for <i>stderr</i> shall be set; but
+    <i>getopt</i>() shall still succeed and the value of <i>errno</i> after
+    <i>getopt</i>() is unspecified.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Parsing_Command_Line_Options"><a class="permalink" href="#Parsing_Command_Line_Options">Parsing
+  Command Line Options</a></h2>
+<p class="Pp">The following code fragment shows how you might process the
+    arguments for a utility that can take the mutually-exclusive options
+    <i>a</i> and <i>b</i> and the options <i>f</i> and <i>o</i>, both of which
+    require arguments:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;</pre>
+<pre>int
+main(int argc, char *argv[ ])
+{
+<br>
+    int c;
+<br>
+    int bflg = 0, aflg = 0, errflg = 0;
+<br>
+    char *ifile;
+<br>
+    char *ofile;
+<br>
+    . . .
+<br>
+    while ((c = getopt(argc, argv, ":abf:o:")) != -1) {
+<br>
+        switch(c) {
+<br>
+        case 'a':
+<br>
+            if (bflg)
+<br>
+                errflg++;
+<br>
+            else
+<br>
+                aflg++;
+<br>
+            break;
+<br>
+        case 'b':
+<br>
+            if (aflg)
+<br>
+                errflg++;
+<br>
+            else
+<br>
+                bflg++;
+<br>
+            break;
+<br>
+        case 'f':
+<br>
+            ifile = optarg;
+<br>
+            break;
+<br>
+        case 'o':
+<br>
+            ofile = optarg;
+<br>
+            break;
+<br>
+        case ':':       /* -f or -o without operand */
+<br>
+            fprintf(stderr,
+<br>
+                "Option -%c requires an operand\n", optopt);
+<br>
+            errflg++;
+<br>
+            break;
+<br>
+        case '?':
+<br>
+            fprintf(stderr,
+<br>
+                "Unrecognized option: '-%c'\n", optopt);
+<br>
+            errflg++;
+<br>
+        }
+<br>
+    }
+<br>
+    if (errflg) {
+<br>
+        fprintf(stderr, "usage: . . . ");
+<br>
+        exit(2);
+<br>
+    }
+<br>
+    for ( ; optind &lt; argc; optind++) {
+<br>
+        if (access(argv[optind], R_OK)) {
+<br>
+    . . .
+}</pre>
+</div>
+<p class="Pp">This code accepts any of the following as equivalent:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>cmd -ao arg path path
+cmd -a -o arg path path
+cmd -o arg -a path path
+cmd -a -o arg -- path path
+cmd -a -oarg path path
+cmd -aoarg path path</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Selecting_Options_from_the_Command_Line"><a class="permalink" href="#Selecting_Options_from_the_Command_Line">Selecting
+  Options from the Command Line</a></h2>
+<p class="Pp">The following example selects the type of database routines the
+    user wants to use based on the <i>Options</i> argument.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;unistd.h&gt;
+#include &lt;string.h&gt;
+...
+const char *Options = "hdbtl";
+...
+int dbtype, c;
+char *st;
+...
+dbtype = 0;
+while ((c = getopt(argc, argv, Options)) != -1) {
+<br>
+    if ((st = strchr(Options, c)) != NULL) {
+<br>
+        dbtype = st - Options;
+<br>
+        break;
+<br>
+    }
+}</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The <i>getopt</i>() function is only required to support option
+    characters included in Utility Syntax Guideline 3. Many historical
+    implementations of <i>getopt</i>() support other characters as options. This
+    is an allowed extension, but applications that use extensions are not
+    maximally portable. Note that support for multi-byte option characters is
+    only possible when such characters can be represented as type
+  <b>int</b>.</p>
+<p class="Pp">Applications which use wide-character output functions with
+    <i>stderr</i> should ensure that any calls to <i>getopt</i>() do not write
+    to <i>stderr</i>, either by setting <i>opterr</i> to 0 or by ensuring the
+    first character of <i>optstring</i> is always a &lt;colon&gt;.</p>
+<p class="Pp">While <i>ferror</i>(<i>stderr</i>) may be used to detect failures
+    to write a diagnostic to <i>stderr</i> when <i>getopt</i>() returns
+    <b>'?'</b>, the value of <i>errno</i> is unspecified in such a condition.
+    Applications desiring more control over handling write failures should set
+    <i>opterr</i> to 0 and independently perform output to <i>stderr</i>, rather
+    than relying on <i>getopt</i>() to do the output.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The <i>optopt</i> variable represents historical practice and
+    allows the application to obtain the identity of the invalid option.</p>
+<p class="Pp">The description has been written to make it clear that
+    <i>getopt</i>(), like the <i>getopts</i> utility, deals with
+    option-arguments whether separated from the option by &lt;blank&gt;
+    characters or not. Note that the requirements on <i>getopt</i>() and
+    <i>getopts</i> are more stringent than the Utility Syntax Guidelines.</p>
+<p class="Pp">The <i>getopt</i>() function shall return -1, rather than EOF, so
+    that <i>&lt;stdio.h&gt;</i> is not required.</p>
+<p class="Pp">The special significance of a &lt;colon&gt; as the first character
+    of <i>optstring</i> makes <i>getopt</i>() consistent with the <i>getopts</i>
+    utility. It allows an application to make a distinction between a missing
+    argument and an incorrect option letter without having to examine the option
+    letter. It is true that a missing argument can only be detected in one case,
+    but that is a case that has to be considered.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>exec</i></i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Section
+    12.2</i>, <i>Utility Syntax Guidelines</i>,
+  <i><b>&lt;unistd.h&gt;</b></i></p>
+<p class="Pp">The Shell and Utilities volume of POSIX.1‐2017,
+    <i><i>getopts</i></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

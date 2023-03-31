@@ -1,0 +1,359 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   This manpage is Copyright (C) 1996 Michael Haardt.
+   Updates Nov 1998, Andries Brouwer
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+ --><head>
+<meta name="dc.identifier" content="res/6ae0e4fb2e17eaf12a8d06af68168c52b2f3849d">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>mouse(4)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">mouse(4)</td>
+    <td class="head-vol">Device Drivers Manual</td>
+    <td class="head-rtitle">mouse(4)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">mouse - serial mouse interface</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="CONFIGURATION"><a class="permalink" href="#CONFIGURATION">CONFIGURATION</a></h1>
+<p class="Pp">Serial mice are connected to a serial RS232/V24 dialout line, see
+    <b>ttyS</b>(4) for a description.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Introduction"><a class="permalink" href="#Introduction">Introduction</a></h2>
+<p class="Pp">The pinout of the usual 9 pin plug as used for serial mice is:</p>
+<p class="Pp"></p>
+<table class="tbl">
+  <tbody><tr>
+    <td style="text-align: right;">pin</td>
+    <td style="text-align: center;">name</td>
+    <td>used for</td>
+  </tr>
+  <tr>
+    <td style="text-align: right;">2</td>
+    <td style="text-align: center;">RX</td>
+    <td>Data</td>
+  </tr>
+  <tr>
+    <td style="text-align: right;">3</td>
+    <td style="text-align: center;">TX</td>
+    <td>-12 V, Imax = 10 mA</td>
+  </tr>
+  <tr>
+    <td style="text-align: right;">4</td>
+    <td style="text-align: center;">DTR</td>
+    <td>+12 V, Imax = 10 mA</td>
+  </tr>
+  <tr>
+    <td style="text-align: right;">7</td>
+    <td style="text-align: center;">RTS</td>
+    <td>+12 V, Imax = 10 mA</td>
+  </tr>
+  <tr>
+    <td style="text-align: right;">5</td>
+    <td style="text-align: center;">GND</td>
+    <td>Ground</td>
+  </tr>
+</tbody></table>
+<p class="Pp">This is the specification, in fact 9 V suffices with most
+  mice.</p>
+<p class="Pp">The mouse driver can recognize a mouse by dropping RTS to low and
+    raising it again. About 14 ms later the mouse will send 0x4D ('M') on the
+    data line. After a further 63 ms, a Microsoft-compatible 3-button mouse will
+    send 0x33 ('3').</p>
+<p class="Pp">The relative mouse movement is sent as <i>dx</i> (positive means
+    right) and <i>dy</i> (positive means down). Various mice can operate at
+    different speeds. To select speeds, cycle through the speeds 9600, 4800,
+    2400, and 1200 bit/s, each time writing the two characters from the table
+    below and waiting 0.1 seconds. The following table shows available speeds
+    and the strings that select them:</p>
+<p class="Pp"></p>
+<table class="tbl">
+  <tbody><tr>
+    <td>bit/s</td>
+    <td>string</td>
+  </tr>
+  <tr>
+    <td>9600</td>
+    <td>*q</td>
+  </tr>
+  <tr>
+    <td>4800</td>
+    <td>*p</td>
+  </tr>
+  <tr>
+    <td>2400</td>
+    <td>*o</td>
+  </tr>
+  <tr>
+    <td>1200</td>
+    <td>*n</td>
+  </tr>
+</tbody></table>
+<p class="Pp">The first byte of a data packet can be used for synchronization
+    purposes.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Microsoft_protocol"><a class="permalink" href="#Microsoft_protocol">Microsoft
+  protocol</a></h2>
+<p class="Pp">The <b>Microsoft</b> protocol uses 1 start bit, 7 data bits, no
+    parity and one stop bit at the speed of 1200 bits/sec. Data is sent to RxD
+    in 3-byte packets. The <i>dx</i> and <i>dy</i> movements are sent as
+    two's-complement, <i>lb</i> (<i>rb</i>) are set when the left (right) button
+    is pressed:</p>
+<p class="Pp"></p>
+<table class="tbl">
+  <tbody><tr>
+    <td style="text-align: right;">byte</td>
+    <td style="text-align: center;">d6</td>
+    <td style="text-align: center;">d5</td>
+    <td style="text-align: center;">d4</td>
+    <td style="text-align: center;">d3</td>
+    <td style="text-align: center;">d2</td>
+    <td style="text-align: center;">d1</td>
+    <td style="text-align: center;">d0</td>
+  </tr>
+  <tr>
+    <td style="text-align: right;">1</td>
+    <td style="text-align: center;">1</td>
+    <td style="text-align: center;">lb</td>
+    <td style="text-align: center;">rb</td>
+    <td style="text-align: center;">dy7</td>
+    <td style="text-align: center;">dy6</td>
+    <td style="text-align: center;">dx7</td>
+    <td style="text-align: center;">dx6</td>
+  </tr>
+  <tr>
+    <td style="text-align: right;">2</td>
+    <td style="text-align: center;">0</td>
+    <td style="text-align: center;">dx5</td>
+    <td style="text-align: center;">dx4</td>
+    <td style="text-align: center;">dx3</td>
+    <td style="text-align: center;">dx2</td>
+    <td style="text-align: center;">dx1</td>
+    <td style="text-align: center;">dx0</td>
+  </tr>
+  <tr>
+    <td style="text-align: right;">3</td>
+    <td style="text-align: center;">0</td>
+    <td style="text-align: center;">dy5</td>
+    <td style="text-align: center;">dy4</td>
+    <td style="text-align: center;">dy3</td>
+    <td style="text-align: center;">dy2</td>
+    <td style="text-align: center;">dy1</td>
+    <td style="text-align: center;">dy0</td>
+  </tr>
+</tbody></table>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="3-button_Microsoft_protocol"><a class="permalink" href="#3-button_Microsoft_protocol">3-button
+  Microsoft protocol</a></h2>
+<p class="Pp">Original Microsoft mice only have two buttons. However, there are
+    some three button mice which also use the Microsoft protocol. Pressing or
+    releasing the middle button is reported by sending a packet with zero
+    movement and no buttons pressed. (Thus, unlike for the other two buttons,
+    the status of the middle button is not reported in each packet.)</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Logitech_protocol"><a class="permalink" href="#Logitech_protocol">Logitech
+  protocol</a></h2>
+<p class="Pp">Logitech serial 3-button mice use a different extension of the
+    Microsoft protocol: when the middle button is up, the above 3-byte packet is
+    sent. When the middle button is down a 4-byte packet is sent, where the 4th
+    byte has value 0x20 (or at least has the 0x20 bit set). In particular, a
+    press of the middle button is reported as 0,0,0,0x20 when no other buttons
+    are down.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Mousesystems_protocol"><a class="permalink" href="#Mousesystems_protocol">Mousesystems
+  protocol</a></h2>
+<p class="Pp">The <b>Mousesystems</b> protocol uses 1 start bit, 8 data bits, no
+    parity, and two stop bits at the speed of 1200 bits/sec. Data is sent to RxD
+    in 5-byte packets. <i>dx</i> is sent as the sum of the two two's-complement
+    values, <i>dy</i> is send as negated sum of the two two's-complement values.
+    <i>lb</i> (<i>mb</i>, <i>rb</i>) are cleared when the left (middle, right)
+    button is pressed:</p>
+<p class="Pp"></p>
+<table class="tbl">
+  <tbody><tr>
+    <td style="text-align: right;">byte</td>
+    <td style="text-align: center;">d7</td>
+    <td style="text-align: center;">d6</td>
+    <td style="text-align: center;">d5</td>
+    <td style="text-align: center;">d4</td>
+    <td style="text-align: center;">d3</td>
+    <td style="text-align: center;">d2</td>
+    <td style="text-align: center;">d1</td>
+    <td style="text-align: center;">d0</td>
+  </tr>
+  <tr>
+    <td style="text-align: right;">1</td>
+    <td style="text-align: center;">1</td>
+    <td style="text-align: center;">0</td>
+    <td style="text-align: center;">0</td>
+    <td style="text-align: center;">0</td>
+    <td style="text-align: center;">0</td>
+    <td style="text-align: center;">lb</td>
+    <td style="text-align: center;">mb</td>
+    <td style="text-align: center;">rb</td>
+  </tr>
+  <tr>
+    <td style="text-align: right;">2</td>
+    <td style="text-align: center;">0</td>
+    <td style="text-align: center;">dxa6</td>
+    <td style="text-align: center;">dxa5</td>
+    <td style="text-align: center;">dxa4</td>
+    <td style="text-align: center;">dxa3</td>
+    <td style="text-align: center;">dxa2</td>
+    <td style="text-align: center;">dxa1</td>
+    <td style="text-align: center;">dxa0</td>
+  </tr>
+  <tr>
+    <td style="text-align: right;">3</td>
+    <td style="text-align: center;">0</td>
+    <td style="text-align: center;">dya6</td>
+    <td style="text-align: center;">dya5</td>
+    <td style="text-align: center;">dya4</td>
+    <td style="text-align: center;">dya3</td>
+    <td style="text-align: center;">dya2</td>
+    <td style="text-align: center;">dya1</td>
+    <td style="text-align: center;">dya0</td>
+  </tr>
+  <tr>
+    <td style="text-align: right;">4</td>
+    <td style="text-align: center;">0</td>
+    <td style="text-align: center;">dxb6</td>
+    <td style="text-align: center;">dxb5</td>
+    <td style="text-align: center;">dxb4</td>
+    <td style="text-align: center;">dxb3</td>
+    <td style="text-align: center;">dxb2</td>
+    <td style="text-align: center;">dxb1</td>
+    <td style="text-align: center;">dxb0</td>
+  </tr>
+  <tr>
+    <td style="text-align: right;">5</td>
+    <td style="text-align: center;">0</td>
+    <td style="text-align: center;">dyb6</td>
+    <td style="text-align: center;">dyb5</td>
+    <td style="text-align: center;">dyb4</td>
+    <td style="text-align: center;">dyb3</td>
+    <td style="text-align: center;">dyb2</td>
+    <td style="text-align: center;">dyb1</td>
+    <td style="text-align: center;">dyb0</td>
+  </tr>
+</tbody></table>
+<p class="Pp">Bytes 4 and 5 describe the change that occurred since bytes 2 and
+    3 were transmitted.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Sun_protocol"><a class="permalink" href="#Sun_protocol">Sun
+  protocol</a></h2>
+<p class="Pp">The <b>Sun</b> protocol is the 3-byte version of the above 5-byte
+    Mousesystems protocol: the last two bytes are not sent.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="MM_protocol"><a class="permalink" href="#MM_protocol">MM
+  protocol</a></h2>
+<p class="Pp">The <b>MM</b> protocol uses 1 start bit, 8 data bits, odd parity,
+    and one stop bit at the speed of 1200 bits/sec. Data is sent to RxD in
+    3-byte packets. <i>dx</i> and <i>dy</i> are sent as single signed values,
+    the sign bit indicating a negative value. <i>lb</i> (<i>mb</i>, <i>rb</i>)
+    are set when the left (middle, right) button is pressed:</p>
+<p class="Pp"></p>
+<table class="tbl">
+  <tbody><tr>
+    <td style="text-align: right;">byte</td>
+    <td style="text-align: center;">d7</td>
+    <td style="text-align: center;">d6</td>
+    <td style="text-align: center;">d5</td>
+    <td style="text-align: center;">d4</td>
+    <td style="text-align: center;">d3</td>
+    <td style="text-align: center;">d2</td>
+    <td style="text-align: center;">d1</td>
+    <td style="text-align: center;">d0</td>
+  </tr>
+  <tr>
+    <td style="text-align: right;">1</td>
+    <td style="text-align: center;">1</td>
+    <td style="text-align: center;">0</td>
+    <td style="text-align: center;">0</td>
+    <td style="text-align: center;">dxs</td>
+    <td style="text-align: center;">dys</td>
+    <td style="text-align: center;">lb</td>
+    <td style="text-align: center;">mb</td>
+    <td style="text-align: center;">rb</td>
+  </tr>
+  <tr>
+    <td style="text-align: right;">2</td>
+    <td style="text-align: center;">0</td>
+    <td style="text-align: center;">dx6</td>
+    <td style="text-align: center;">dx5</td>
+    <td style="text-align: center;">dx4</td>
+    <td style="text-align: center;">dx3</td>
+    <td style="text-align: center;">dx2</td>
+    <td style="text-align: center;">dx1</td>
+    <td style="text-align: center;">dx0</td>
+  </tr>
+  <tr>
+    <td style="text-align: right;">3</td>
+    <td style="text-align: center;">0</td>
+    <td style="text-align: center;">dy6</td>
+    <td style="text-align: center;">dy5</td>
+    <td style="text-align: center;">dy4</td>
+    <td style="text-align: center;">dy3</td>
+    <td style="text-align: center;">dy2</td>
+    <td style="text-align: center;">dy1</td>
+    <td style="text-align: center;">dy0</td>
+  </tr>
+</tbody></table>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FILES"><a class="permalink" href="#FILES">FILES</a></h1>
+<dl class="Bl-tag">
+  <dt><i>/dev/mouse</i></dt>
+  <dd>A commonly used symbolic link pointing to a mouse device.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>ttyS</b>(4), <b>gpm</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

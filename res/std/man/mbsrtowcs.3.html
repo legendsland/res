@@ -1,0 +1,147 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) Bruno Haible <haible@clisp.cons.org>
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+  
+   References consulted:
+     GNU glibc-2 source code and manual
+     Dinkumware C library reference http://www.dinkumware.com/
+     OpenGroup's Single UNIX specification http://www.UNIX-systems.org/online.html
+     ISO/IEC 9899:1999
+   --><head>
+<meta name="dc.identifier" content="res/064ea6d81949768f55d3e166fe756e2d65acc8ea">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>mbsrtowcs(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">mbsrtowcs(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">mbsrtowcs(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">mbsrtowcs - convert a multibyte string to a wide-character
+  string</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;wchar.h&gt;</b></pre>
+<pre><b>size_t mbsrtowcs(wchar_t </b><i>dest</i><b>[restrict .</b><i>len</i><b>], const char **restrict </b><i>src</i><b>,</b>
+<b>                 size_t </b><i>len</i><b>, mbstate_t *restrict </b><i>ps</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">If <i>dest</i> is not NULL, the <b>mbsrtowcs</b>() function
+    converts the multibyte string <i>*src</i> to a wide-character string
+    starting at <i>dest</i>. At most <i>len</i> wide characters are written to
+    <i>dest</i>. The shift state <i>*ps</i> is updated. The conversion is
+    effectively performed by repeatedly calling <i>mbrtowc(dest, *src, n,
+    ps)</i> where <i>n</i> is some positive number, as long as this call
+    succeeds, and then incrementing <i>dest</i> by one and <i>*src</i> by the
+    number of bytes consumed. The conversion can stop for three reasons:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>An invalid multibyte sequence has been encountered. In this case,
+      <i>*src</i> is left pointing to the invalid multibyte sequence,
+      <i>(size_t)&nbsp;-1</i> is returned, and <i>errno</i> is set to
+      <b>EILSEQ</b>.</dd>
+  <dt>•</dt>
+  <dd><i>len</i> non-L'\0' wide characters have been stored at <i>dest</i>. In
+      this case, <i>*src</i> is left pointing to the next multibyte sequence to
+      be converted, and the number of wide characters written to <i>dest</i> is
+      returned.</dd>
+  <dt>•</dt>
+  <dd>The multibyte string has been completely converted, including the
+      terminating null wide character ('\0'), which has the side effect of
+      bringing back <i>*ps</i> to the initial state. In this case, <i>*src</i>
+      is set to NULL, and the number of wide characters written to <i>dest</i>,
+      excluding the terminating null wide character, is returned.</dd>
+</dl>
+<p class="Pp">If <i>dest</i> is NULL, <i>len</i> is ignored, and the conversion
+    proceeds as above, except that the converted wide characters are not written
+    out to memory, and that no length limit exists.</p>
+<p class="Pp">In both of the above cases, if <i>ps</i> is NULL, a static
+    anonymous state known only to the <b>mbsrtowcs</b>() function is used
+    instead.</p>
+<p class="Pp">The programmer must ensure that there is room for at least
+    <i>len</i> wide characters at <i>dest</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <b>mbsrtowcs</b>() function returns the number of wide
+    characters that make up the converted part of the wide-character string, not
+    including the terminating null wide character. If an invalid multibyte
+    sequence was encountered, <i>(size_t)&nbsp;-1</i> is returned, and
+    <i>errno</i> set to <b>EILSEQ</b>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>mbsrtowcs ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race:mbsrtowcs/!ps</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, C99.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The behavior of <b>mbsrtowcs</b>() depends on the <b>LC_CTYPE</b>
+    category of the current locale.</p>
+<p class="Pp">Passing NULL as <i>ps</i> is not multithread safe.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>iconv</b>(3), <b>mbrtowc</b>(3), <b>mbsinit</b>(3),
+    <b>mbsnrtowcs</b>(3), <b>mbstowcs</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

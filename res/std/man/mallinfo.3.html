@@ -1,0 +1,351 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 2012 by Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/ea58b125eeec72395d6ab5f4c77f83d4f50d5a5e">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>mallinfo(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">mallinfo(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">mallinfo(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">mallinfo, mallinfo2 - obtain memory allocation information</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;malloc.h&gt;</b></pre>
+<pre><b>struct mallinfo mallinfo(void);</b>
+<b>struct mallinfo2 mallinfo2(void);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">These functions return a copy of a structure containing
+    information about memory allocations performed by <b>malloc</b>(3) and
+    related functions. The structure returned by each function contains the same
+    fields. However, the older function, <b>mallinfo</b>(), is deprecated since
+    the type used for the fields is too small (see BUGS).</p>
+<p class="Pp">Note that not all allocations are visible to these functions; see
+    BUGS and consider using <b>malloc_info</b>(3) instead.</p>
+<p class="Pp">The <i>mallinfo2</i> structure returned by <b>mallinfo2</b>() is
+    defined as follows:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct mallinfo2 {
+<br>
+    size_t arena;     /* Non-mmapped space allocated (bytes) */
+<br>
+    size_t ordblks;   /* Number of free chunks */
+<br>
+    size_t smblks;    /* Number of free fastbin blocks */
+<br>
+    size_t hblks;     /* Number of mmapped regions */
+<br>
+    size_t hblkhd;    /* Space allocated in mmapped regions
+<br>
+                         (bytes) */
+<br>
+    size_t usmblks;   /* See below */
+<br>
+    size_t fsmblks;   /* Space in freed fastbin blocks (bytes) */
+<br>
+    size_t uordblks;  /* Total allocated space (bytes) */
+<br>
+    size_t fordblks;  /* Total free space (bytes) */
+<br>
+    size_t keepcost;  /* Top-most, releasable space (bytes) */
+};
+</pre>
+<br>
+<p class="Pp">The <i>mallinfo</i> structure returned by the deprecated
+    <b>mallinfo</b>() function is exactly the same, except that the fields are
+    typed as <i>int</i>.</p>
+<p class="Pp">The structure fields contain the following information:</p>
+<dl class="Bl-tag">
+  <dt id="arena"><a class="permalink" href="#arena"><i>arena</i></a></dt>
+  <dd>The total amount of memory allocated by means other than <b>mmap</b>(2)
+      (i.e., memory allocated on the heap). This figure includes both in-use
+      blocks and blocks on the free list.</dd>
+  <dt id="ordblks"><a class="permalink" href="#ordblks"><i>ordblks</i></a></dt>
+  <dd>The number of ordinary (i.e., non-fastbin) free blocks.</dd>
+  <dt id="smblks"><a class="permalink" href="#smblks"><i>smblks</i></a></dt>
+  <dd>The number of fastbin free blocks (see <b>mallopt</b>(3)).</dd>
+  <dt id="hblks"><a class="permalink" href="#hblks"><i>hblks</i></a></dt>
+  <dd>The number of blocks currently allocated using <b>mmap</b>(2). (See the
+      discussion of <b>M_MMAP_THRESHOLD</b> in <b>mallopt</b>(3).)</dd>
+  <dt id="hblkhd"><a class="permalink" href="#hblkhd"><i>hblkhd</i></a></dt>
+  <dd>The number of bytes in blocks currently allocated using
+    <b>mmap</b>(2).</dd>
+  <dt id="usmblks"><a class="permalink" href="#usmblks"><i>usmblks</i></a></dt>
+  <dd>This field is unused, and is always 0. Historically, it was the
+      "highwater mark" for allocated space—that is, the maximum
+      amount of space that was ever allocated (in bytes); this field was
+      maintained only in nonthreading environments.</dd>
+  <dt id="fsmblks"><a class="permalink" href="#fsmblks"><i>fsmblks</i></a></dt>
+  <dd>The total number of bytes in fastbin free blocks.</dd>
+  <dt id="uordblks"><a class="permalink" href="#uordblks"><i>uordblks</i></a></dt>
+  <dd>The total number of bytes used by in-use allocations.</dd>
+  <dt id="fordblks"><a class="permalink" href="#fordblks"><i>fordblks</i></a></dt>
+  <dd>The total number of bytes in free blocks.</dd>
+  <dt id="keepcost"><a class="permalink" href="#keepcost"><i>keepcost</i></a></dt>
+  <dd>The total amount of releasable free space at the top of the heap. This is
+      the maximum number of bytes that could ideally (i.e., ignoring page
+      alignment restrictions, and so on) be released by
+    <b>malloc_trim</b>(3).</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>mallinfo (), mallinfo2 ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe init const:mallopt</td>
+  </tr>
+</tbody></table>
+<p class="Pp"><b>mallinfo</b>()/ <b>mallinfo2</b>() would access some global
+    internal objects. If modify them with non-atomically, may get inconsistent
+    results. The identifier <i>mallopt</i> in <i>const:mallopt</i> mean that
+    <b>mallopt</b>() would modify the global internal objects with atomics, that
+    make sure <b>mallinfo</b>()/ <b>mallinfo2</b>() is safe enough, others
+    modify with non-atomically maybe not.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>mallinfo2</b>() function was added in glibc 2.33.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These functions are not specified by POSIX or the C standards. A
+    <b>mallinfo</b>() function exists on many System V derivatives, and was
+    specified in the SVID.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp"><b>Information is returned for only the main memory allocation
+    area.</b> Allocations in other arenas are excluded. See
+    <b>malloc_stats</b>(3) and <b>malloc_info</b>(3) for alternatives that
+    include information about other arenas.</p>
+<p class="Pp">The fields of the <i>mallinfo</i> structure that is returned by
+    the older <b>mallinfo</b>() function are typed as <i>int</i>. However,
+    because some internal bookkeeping values may be of type <i>long</i>, the
+    reported values may wrap around zero and thus be inaccurate.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below employs <b>mallinfo2</b>() to retrieve memory
+    allocation statistics before and after allocating and freeing some blocks of
+    memory. The statistics are displayed on standard output.</p>
+<p class="Pp">The first two command-line arguments specify the number and size
+    of blocks to be allocated with <b>malloc</b>(3).</p>
+<p class="Pp">The remaining three arguments specify which of the allocated
+    blocks should be freed with <b>free</b>(3). These three arguments are
+    optional, and specify (in order): the step size to be used in the loop that
+    frees blocks (the default is 1, meaning free all blocks in the range); the
+    ordinal position of the first block to be freed (default 0, meaning the
+    first allocated block); and a number one greater than the ordinal position
+    of the last block to be freed (default is one greater than the maximum block
+    number). If these three arguments are omitted, then the defaults cause all
+    allocated blocks to be freed.</p>
+<p class="Pp">In the following example run of the program, 1000 allocations of
+    100 bytes are performed, and then every second allocated block is freed:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>./a.out 1000 100 2</b>
+============== Before allocating blocks ==============
+Total non-mmapped bytes (arena):       0
+# of free chunks (ordblks):            1
+# of free fastbin blocks (smblks):     0
+# of mapped regions (hblks):           0
+Bytes in mapped regions (hblkhd):      0
+Max. total allocated space (usmblks):  0
+Free bytes held in fastbins (fsmblks): 0
+Total allocated space (uordblks):      0
+Total free space (fordblks):           0
+Topmost releasable block (keepcost):   0
+============== After allocating blocks ==============
+Total non-mmapped bytes (arena):       135168
+# of free chunks (ordblks):            1
+# of free fastbin blocks (smblks):     0
+# of mapped regions (hblks):           0
+Bytes in mapped regions (hblkhd):      0
+Max. total allocated space (usmblks):  0
+Free bytes held in fastbins (fsmblks): 0
+Total allocated space (uordblks):      104000
+Total free space (fordblks):           31168
+Topmost releasable block (keepcost):   31168
+============== After freeing blocks ==============
+Total non-mmapped bytes (arena):       135168
+# of free chunks (ordblks):            501
+# of free fastbin blocks (smblks):     0
+# of mapped regions (hblks):           0
+Bytes in mapped regions (hblkhd):      0
+Max. total allocated space (usmblks):  0
+Free bytes held in fastbins (fsmblks): 0
+Total allocated space (uordblks):      52000
+Total free space (fordblks):           83168
+Topmost releasable block (keepcost):   31168
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#include &lt;malloc.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+static void
+display_mallinfo2(void)
+{
+<br>
+    struct mallinfo2 mi;
+<br>
+    mi = mallinfo2();
+<br>
+    printf("Total non-mmapped bytes (arena):       %zu\n", mi.arena);
+<br>
+    printf("# of free chunks (ordblks):            %zu\n", mi.ordblks);
+<br>
+    printf("# of free fastbin blocks (smblks):     %zu\n", mi.smblks);
+<br>
+    printf("# of mapped regions (hblks):           %zu\n", mi.hblks);
+<br>
+    printf("Bytes in mapped regions (hblkhd):      %zu\n", mi.hblkhd);
+<br>
+    printf("Max. total allocated space (usmblks):  %zu\n", mi.usmblks);
+<br>
+    printf("Free bytes held in fastbins (fsmblks): %zu\n", mi.fsmblks);
+<br>
+    printf("Total allocated space (uordblks):      %zu\n", mi.uordblks);
+<br>
+    printf("Total free space (fordblks):           %zu\n", mi.fordblks);
+<br>
+    printf("Topmost releasable block (keepcost):   %zu\n", mi.keepcost);
+}
+int
+main(int argc, char *argv[])
+{
+#define MAX_ALLOCS 2000000
+<br>
+    char *alloc[MAX_ALLOCS];
+<br>
+    size_t blockSize, numBlocks, freeBegin, freeEnd, freeStep;
+<br>
+    if (argc &lt; 3 || strcmp(argv[1], "--help") == 0) {
+<br>
+        fprintf(stderr, "%s num-blocks block-size [free-step "
+<br>
+                "[start-free [end-free]]]\n", argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    numBlocks = atoi(argv[1]);
+<br>
+    blockSize = atoi(argv[2]);
+<br>
+    freeStep = (argc &gt; 3) ? atoi(argv[3]) : 1;
+<br>
+    freeBegin = (argc &gt; 4) ? atoi(argv[4]) : 0;
+<br>
+    freeEnd = (argc &gt; 5) ? atoi(argv[5]) : numBlocks;
+<br>
+    printf("============== Before allocating blocks ==============\n");
+<br>
+    display_mallinfo2();
+<br>
+    for (size_t j = 0; j &lt; numBlocks; j++) {
+<br>
+        if (numBlocks &gt;= MAX_ALLOCS) {
+<br>
+            fprintf(stderr, "Too many allocations\n");
+<br>
+            exit(EXIT_FAILURE);
+<br>
+        }
+<br>
+        alloc[j] = malloc(blockSize);
+<br>
+        if (alloc[j] == NULL) {
+<br>
+            perror("malloc");
+<br>
+            exit(EXIT_FAILURE);
+<br>
+        }
+<br>
+    }
+<br>
+    printf("\n============== After allocating blocks ==============\n");
+<br>
+    display_mallinfo2();
+<br>
+    for (size_t j = freeBegin; j &lt; freeEnd; j += freeStep)
+<br>
+        free(alloc[j]);
+<br>
+    printf("\n============== After freeing blocks ==============\n");
+<br>
+    display_mallinfo2();
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>mmap</b>(2), <b>malloc</b>(3), <b>malloc_info</b>(3),
+    <b>malloc_stats</b>(3), <b>malloc_trim</b>(3), <b>mallopt</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

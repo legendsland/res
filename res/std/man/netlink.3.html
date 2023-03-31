@@ -1,0 +1,113 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   This manpage copyright 1998 by Andi Kleen.
+  
+   SPDX-License-Identifier: GPL-1.0-or-later
+  
+   Based on the original comments from Alexey Kuznetsov
+   $Id: netlink.3,v 1.1 1999/05/14 17:17:24 freitag Exp $
+   --><head>
+<meta name="dc.identifier" content="res/74bea91589d9d2b7e97b294a9bad6d03294fc3a3">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>netlink(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">netlink(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">netlink(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">netlink - Netlink macros</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;asm/types.h&gt;</b>
+<b>#include &lt;linux/netlink.h&gt;</b></pre>
+<pre><b>int NLMSG_ALIGN(size_t </b><i>len</i><b>);</b>
+<b>int NLMSG_LENGTH(size_t </b><i>len</i><b>);</b>
+<b>int NLMSG_SPACE(size_t </b><i>len</i><b>);</b>
+<b>void *NLMSG_DATA(struct nlmsghdr *</b><i>nlh</i><b>);</b>
+<b>struct nlmsghdr *NLMSG_NEXT(struct nlmsghdr *</b><i>nlh</i><b>, int </b><i>len</i><b>);</b>
+<b>int NLMSG_OK(struct nlmsghdr *</b><i>nlh</i><b>, int </b><i>len</i><b>);</b>
+<b>int NLMSG_PAYLOAD(struct nlmsghdr *</b><i>nlh</i><b>, int </b><i>len</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><i>&lt;linux/netlink.h&gt;</i> defines several standard macros to
+    access or create a netlink datagram. They are similar in spirit to the
+    macros defined in <b>cmsg</b>(3) for auxiliary data. The buffer passed to
+    and from a netlink socket should be accessed using only these macros.</p>
+<dl class="Bl-tag">
+  <dt id="NLMSG_ALIGN"><a class="permalink" href="#NLMSG_ALIGN"><b>NLMSG_ALIGN</b>()</a></dt>
+  <dd>Round the length of a netlink message up to align it properly.</dd>
+  <dt id="NLMSG_LENGTH"><a class="permalink" href="#NLMSG_LENGTH"><b>NLMSG_LENGTH</b>()</a></dt>
+  <dd>Given the payload length, <i>len</i>, this macro returns the aligned
+      length to store in the <i>nlmsg_len</i> field of the <i>nlmsghdr</i>.</dd>
+  <dt id="NLMSG_SPACE"><a class="permalink" href="#NLMSG_SPACE"><b>NLMSG_SPACE</b>()</a></dt>
+  <dd>Return the number of bytes that a netlink message with payload of
+      <i>len</i> would occupy.</dd>
+  <dt id="NLMSG_DATA"><a class="permalink" href="#NLMSG_DATA"><b>NLMSG_DATA</b>()</a></dt>
+  <dd>Return a pointer to the payload associated with the passed
+      <i>nlmsghdr</i>.</dd>
+  <dt id="NLMSG_NEXT"><a class="permalink" href="#NLMSG_NEXT"><b>NLMSG_NEXT</b>()</a></dt>
+  <dd>Get the next <i>nlmsghdr</i> in a multipart message. The caller must check
+      if the current <i>nlmsghdr</i> didn't have the <b>NLMSG_DONE</b>
+      set—this function doesn't return NULL on end. The <i>len</i>
+      argument is an lvalue containing the remaining length of the message
+      buffer. This macro decrements it by the length of the message header.</dd>
+  <dt id="NLMSG_OK"><a class="permalink" href="#NLMSG_OK"><b>NLMSG_OK</b>()</a></dt>
+  <dd>Return true if the netlink message is not truncated and is in a form
+      suitable for parsing.</dd>
+  <dt id="NLMSG_PAYLOAD"><a class="permalink" href="#NLMSG_PAYLOAD"><b>NLMSG_PAYLOAD</b>()</a></dt>
+  <dd>Return the length of the payload associated with the <i>nlmsghdr</i>.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These macros are nonstandard Linux extensions.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">It is often better to use netlink via <i>libnetlink</i> than via
+    the low-level kernel interface.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>libnetlink</b>(3), <b>netlink</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

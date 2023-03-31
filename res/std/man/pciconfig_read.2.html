@@ -1,0 +1,136 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Contributed by Niki A. Rahimi, LTC Security Development
+   narahimi@us.ibm.com
+  
+   %%%LICENSE_START(FREELY_REDISTRIBUTABLE)
+   May be freely distributed and modified.
+   %%%LICENSE_END
+   --><head>
+<meta name="dc.identifier" content="res/0c4471d9b8e435c4df4cb25dfd86b7b8a7a37911">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>pciconfig_read(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">pciconfig_read(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">pciconfig_read(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pciconfig_read, pciconfig_write, pciconfig_iobase - pci device
+    information handling</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;pci.h&gt;</b></pre>
+<pre><b>int pciconfig_read(unsigned long </b><i>bus</i><b>, unsigned long </b><i>dfn</i><b>,</b>
+<b>                   unsigned long </b><i>off</i><b>, unsigned long </b><i>len</i><b>,</b>
+<b>                   unsigned char *</b><i>buf</i><b>);</b>
+<b>int pciconfig_write(unsigned long </b><i>bus</i><b>, unsigned long </b><i>dfn</i><b>,</b>
+<b>                   unsigned long </b><i>off</i><b>, unsigned long </b><i>len</i><b>,</b>
+<b>                   unsigned char *</b><i>buf</i><b>);</b>
+<b>int pciconfig_iobase(int </b><i>which</i><b>, unsigned long </b><i>bus</i><b>,</b>
+<b>                   unsigned long </b><i>devfn</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">Most of the interaction with PCI devices is already handled by the
+    kernel PCI layer, and thus these calls should not normally need to be
+    accessed from user space.</p>
+<dl class="Bl-tag">
+  <dt id="pciconfig_read"><a class="permalink" href="#pciconfig_read"><b>pciconfig_read</b>()</a></dt>
+  <dd>Reads to <i>buf</i> from device <i>dev</i> at offset <i>off</i>
+    value.</dd>
+  <dt id="pciconfig_write"><a class="permalink" href="#pciconfig_write"><b>pciconfig_write</b>()</a></dt>
+  <dd>Writes from <i>buf</i> to device <i>dev</i> at offset <i>off</i>
+    value.</dd>
+  <dt id="pciconfig_iobase"><a class="permalink" href="#pciconfig_iobase"><b>pciconfig_iobase</b>()</a></dt>
+  <dd>You pass it a bus/devfn pair and get a physical address for either the
+      memory offset (for things like prep, this is 0xc0000000), the IO base for
+      PIO cycles, or the ISA holes if any.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<dl class="Bl-tag">
+  <dt id="pciconfig_read~2"><a class="permalink" href="#pciconfig_read~2"><b>pciconfig_read</b>()</a></dt>
+  <dd>On success, zero is returned. On error, -1 is returned and <i>errno</i> is
+      set to indicate the error.</dd>
+  <dt id="pciconfig_write~2"><a class="permalink" href="#pciconfig_write~2"><b>pciconfig_write</b>()</a></dt>
+  <dd>On success, zero is returned. On error, -1 is returned and <i>errno</i> is
+      set to indicate the error.</dd>
+  <dt id="pciconfig_iobase~2"><a class="permalink" href="#pciconfig_iobase~2"><b>pciconfig_iobase</b>()</a></dt>
+  <dd>Returns information on locations of various I/O regions in physical memory
+      according to the <i>which</i> value. Values for <i>which</i> are:
+      <b>IOBASE_BRIDGE_NUMBER</b>, <b>IOBASE_MEMORY</b>, <b>IOBASE_IO</b>,
+      <b>IOBASE_ISA_IO</b>, <b>IOBASE_ISA_MEM</b>.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>len</i> value is invalid. This does not apply to
+      <b>pciconfig_iobase</b>().</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>I/O error.</dd>
+  <dt id="ENODEV"><a class="permalink" href="#ENODEV"><b>ENODEV</b></a></dt>
+  <dd>For <b>pciconfig_iobase</b>(), "hose" value is NULL. For the
+      other calls, could not find a slot.</dd>
+  <dt id="ENOSYS"><a class="permalink" href="#ENOSYS"><b>ENOSYS</b></a></dt>
+  <dd>The system has not implemented these calls (<b>CONFIG_PCI</b> not
+      defined).</dd>
+  <dt id="EOPNOTSUPP"><a class="permalink" href="#EOPNOTSUPP"><b>EOPNOTSUPP</b></a></dt>
+  <dd>This return value is valid only for <b>pciconfig_iobase</b>(). It is
+      returned if the value for <i>which</i> is invalid.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>User does not have the <b>CAP_SYS_ADMIN</b> capability. This does not
+      apply to <b>pciconfig_iobase</b>().</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These calls are Linux-specific, available since Linux
+    2.0.26/2.1.11.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>capabilities</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

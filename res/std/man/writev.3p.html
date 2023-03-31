@@ -1,0 +1,175 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/7148ae9751a6de5c9ea8b82240b26ac3732f4758">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>WRITEV(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">WRITEV(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">WRITEV(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">writev — write a vector</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;sys/uio.h&gt;</pre>
+<pre>ssize_t writev(int <i>fildes</i>, const struct iovec *<i>iov</i>, int <i>iovcnt</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>writev</i>() function shall be equivalent to
+    <i>write</i>(), except as described below. The <i>writev</i>() function
+    shall gather output data from the <i>iovcnt</i> buffers specified by the
+    members of the <i>iov</i> array: <i>iov</i>[0], <i>iov</i>[1], ...,
+    <i>iov</i>[<i>iovcnt</i>-1]. The <i>iovcnt</i> argument is valid if greater
+    than 0 and less than or equal to {IOV_MAX}, as defined in
+    <i>&lt;limits.h&gt;</i>.</p>
+<p class="Pp">Each <i>iovec</i> entry specifies the base address and length of
+    an area in memory from which data should be written. The <i>writev</i>()
+    function shall always write a complete area before proceeding to the
+  next.</p>
+<p class="Pp">If <i>fildes</i> refers to a regular file and all of the
+    <i>iov_len</i> members in the array pointed to by <i>iov</i> are 0,
+    <i>writev</i>() shall return 0 and have no other effect. For other file
+    types, the behavior is unspecified.</p>
+<p class="Pp">If the sum of the <i>iov_len</i> values is greater than
+    {SSIZE_MAX}, the operation shall fail and no data shall be transferred.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>writev</i>() shall return the
+    number of bytes actually written. Otherwise, it shall return a value of -1,
+    the file-pointer shall remain unchanged, and <i>errno</i> shall be set to
+    indicate an error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">Refer to <i><i>write</i>()</i>.</p>
+<p class="Pp">In addition, the <i>writev</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The sum of the <i>iov_len</i> values in the <i>iov</i> array would
+      overflow an <b>ssize_t</b>.</dd>
+</dl>
+<p class="Pp">The <i>writev</i>() function may fail and set <i>errno</i> to:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>The <i>iovcnt</i> argument was less than or equal to 0, or greater than
+      {IOV_MAX}.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Writing_Data_from_an_Array"><a class="permalink" href="#Writing_Data_from_an_Array">Writing
+  Data from an Array</a></h2>
+<p class="Pp">The following example writes data from the buffers specified by
+    members of the <i>iov</i> array to the file associated with the file
+    descriptor <i>fd</i>.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;sys/types.h&gt;
+#include &lt;sys/uio.h&gt;
+#include &lt;unistd.h&gt;
+...
+ssize_t bytes_written;
+int fd;
+char *buf0 = "short string\n";
+char *buf1 = "This is a longer string\n";
+char *buf2 = "This is the longest string in this example\n";
+int iovcnt;
+struct iovec iov[3];</pre>
+<pre>iov[0].iov_base = buf0;
+iov[0].iov_len = strlen(buf0);
+iov[1].iov_base = buf1;
+iov[1].iov_len = strlen(buf1);
+iov[2].iov_base = buf2;
+iov[2].iov_len = strlen(buf2);
+...
+iovcnt = sizeof(iov) / sizeof(struct iovec);</pre>
+<pre>bytes_written = writev(fd, iov, iovcnt);
+...</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">Refer to <i><i>write</i>()</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>readv</i>()</i>, <i><i>write</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;limits.h&gt;</b></i>, <i><b>&lt;sys_uio.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

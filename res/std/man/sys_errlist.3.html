@@ -1,0 +1,140 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/c58957cfc55743be1613a6118bc77f8d94124b3c">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>perror(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">perror(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">perror(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">perror - print a system error message</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;stdio.h&gt;</b></pre>
+<pre><b>void perror(const char *</b><i>s</i><b>);</b></pre>
+<pre><b>#include &lt;errno.h&gt;</b></pre>
+<pre><b>int </b><i>errno</i><b>;       /* Not really declared this way; see errno(3) */</b></pre>
+<pre><b>[[deprecated]] const char *const </b><i>sys_errlist</i><b>[];</b>
+<b>[[deprecated]] int </b><i>sys_nerr</i><b>;</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><i>sys_errlist</i>, <i>sys_nerr</i>:</p>
+<pre><br>
+    From glibc 2.19 to glibc 2.31:
+<br>
+        _DEFAULT_SOURCE
+<br>
+    glibc 2.19 and earlier:
+<br>
+        _BSD_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>perror</b>() function produces a message on standard error
+    describing the last error encountered during a call to a system or library
+    function.</p>
+<p class="Pp">First (if <i>s</i> is not NULL and <i>*s</i> is not a null byte
+    ('\0')), the argument string <i>s</i> is printed, followed by a colon and a
+    blank. Then an error message corresponding to the current value of
+    <i>errno</i> and a new-line.</p>
+<p class="Pp">To be of most use, the argument string should include the name of
+    the function that incurred the error.</p>
+<p class="Pp">The global error list <i>sys_errlist</i>[], which can be indexed
+    by <i>errno</i>, can be used to obtain the error message without the
+    newline. The largest message number provided in the table is
+    <i>sys_nerr</i>-1. Be careful when directly accessing this list, because new
+    error values may not have been added to <i>sys_errlist</i>[]. The use of
+    <i>sys_errlist</i>[] is nowadays deprecated; use <b>strerror</b>(3)
+  instead.</p>
+<p class="Pp">When a system call fails, it usually returns -1 and sets the
+    variable <i>errno</i> to a value describing what went wrong. (These values
+    can be found in <i>&lt;errno.h&gt;</i>.) Many library functions do likewise.
+    The function <b>perror</b>() serves to translate this error code into
+    human-readable form. Note that <i>errno</i> is undefined after a successful
+    system call or library function call: this call may well change this
+    variable, even though it succeeds, for example because it internally used
+    some other library function that failed. Thus, if a failing call is not
+    immediately followed by a call to <b>perror</b>(), the value of <i>errno</i>
+    should be saved.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>perror ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe race:stderr</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">Since glibc 2.32, the declarations of <i>sys_errlist</i> and
+    <i>sys_nerr</i> are no longer exposed by <i>&lt;stdio.h&gt;</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>perror</b>(), <i>errno</i>: POSIX.1-2001, POSIX.1-2008, C89,
+    C99, 4.3BSD.</p>
+<p class="Pp">The externals <i>sys_nerr</i> and <i>sys_errlist</i> derive from
+    BSD, but are not specified in POSIX.1.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The externals <i>sys_nerr</i> and <i>sys_errlist</i> are defined
+    by glibc, but in <i>&lt;stdio.h&gt;</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>err</b>(3), <b>errno</b>(3), <b>error</b>(3),
+    <b>strerror</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

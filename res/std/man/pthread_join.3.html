@@ -1,0 +1,151 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 2008 Linux Foundation, written by Michael Kerrisk
+       <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/b8c796307a39ee874dc95125130a40890accb35f">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>pthread_join(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">pthread_join(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">pthread_join(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pthread_join - join with a terminated thread</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">POSIX threads library (<i>libpthread</i>, <i>-lpthread</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;pthread.h&gt;</b></pre>
+<pre><b>int pthread_join(pthread_t </b><i>thread</i><b>, void **</b><i>retval</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>pthread_join</b>() function waits for the thread specified
+    by <i>thread</i> to terminate. If that thread has already terminated, then
+    <b>pthread_join</b>() returns immediately. The thread specified by
+    <i>thread</i> must be joinable.</p>
+<p class="Pp">If <i>retval</i> is not NULL, then <b>pthread_join</b>() copies
+    the exit status of the target thread (i.e., the value that the target thread
+    supplied to <b>pthread_exit</b>(3)) into the location pointed to by
+    <i>retval</i>. If the target thread was canceled, then
+    <b>PTHREAD_CANCELED</b> is placed in the location pointed to by
+    <i>retval</i>.</p>
+<p class="Pp">If multiple threads simultaneously try to join with the same
+    thread, the results are undefined. If the thread calling
+    <b>pthread_join</b>() is canceled, then the target thread will remain
+    joinable (i.e., it will not be detached).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>pthread_join</b>() returns 0; on error, it returns
+    an error number.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EDEADLK"><a class="permalink" href="#EDEADLK"><b>EDEADLK</b></a></dt>
+  <dd>A deadlock was detected (e.g., two threads tried to join with each other);
+      or <i>thread</i> specifies the calling thread.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>thread</i> is not a joinable thread.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>Another thread is already waiting to join with this thread.</dd>
+  <dt id="ESRCH"><a class="permalink" href="#ESRCH"><b>ESRCH</b></a></dt>
+  <dd>No thread with the ID <i>thread</i> could be found.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>pthread_join ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">After a successful call to <b>pthread_join</b>(), the caller is
+    guaranteed that the target thread has terminated. The caller may then choose
+    to do any clean-up that is required after termination of the thread (e.g.,
+    freeing memory or other resources that were allocated to the target
+  thread).</p>
+<p class="Pp">Joining with a thread that has previously been joined results in
+    undefined behavior.</p>
+<p class="Pp">Failure to join with a thread that is joinable (i.e., one that is
+    not detached), produces a "zombie thread". Avoid doing this, since
+    each zombie thread consumes some system resources, and when enough zombie
+    threads have accumulated, it will no longer be possible to create new
+    threads (or processes).</p>
+<p class="Pp">There is no pthreads analog of
+    <i>waitpid(-1,&nbsp;&amp;status,&nbsp;0)</i>, that is, "join with
+    any terminated thread". If you believe you need this functionality, you
+    probably need to rethink your application design.</p>
+<p class="Pp">All of the threads in a process are peers: any thread can join
+    with any other thread in the process.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">See <b>pthread_create</b>(3).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>pthread_cancel</b>(3), <b>pthread_create</b>(3),
+    <b>pthread_detach</b>(3), <b>pthread_exit</b>(3),
+    <b>pthread_tryjoin_np</b>(3), <b>pthreads</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

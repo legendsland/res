@@ -1,0 +1,312 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2007 Michael Kerrisk <mtk.manpages@gmail.com>
+   and Copyright (C) 1995 Michael Shields <shields@tembel.org>.
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Modified 1996-10-22 by Eric S. Raymond <esr@thyrsus.com>
+   Modified 1997-05-31 by Andries Brouwer <aeb@cwi.nl>
+   Modified 2003-08-24 by Andries Brouwer <aeb@cwi.nl>
+   Modified 2004-08-16 by Andi Kleen <ak@muc.de>
+   2007-06-02, mtk: Fairly substantial rewrites and additions, and
+   a much improved example program.
+   --><head>
+<meta name="dc.identifier" content="res/4f007093868c3bfcde17ea25955cfbe315ea231e">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>mprotect(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">mprotect(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">mprotect(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">mprotect, pkey_mprotect - set protection on a region of memory</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/mman.h&gt;</b></pre>
+<pre><b>int mprotect(void </b><i>addr</i><b>[.</b><i>len</i><b>], size_t </b><i>len</i><b>, int </b><i>prot</i><b>);</b></pre>
+<pre><b>#define _GNU_SOURCE</b>             /* See feature_test_macros(7) */
+<b>#include &lt;sys/mman.h&gt;</b></pre>
+<pre><b>int pkey_mprotect(void </b><i>addr</i><b>[.</b><i>len</i><b>], size_t </b><i>len</i><b>, int </b><i>prot</i><b>, int </b><i>pkey</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>mprotect</b>() changes the access protections for the calling
+    process's memory pages containing any part of the address range in the
+    interval [<i>addr</i>,&nbsp;<i>addr</i>+<i>len</i>-1]. <i>addr</i> must be
+    aligned to a page boundary.</p>
+<p class="Pp">If the calling process tries to access memory in a manner that
+    violates the protections, then the kernel generates a <b>SIGSEGV</b> signal
+    for the process.</p>
+<p class="Pp"><i>prot</i> is a combination of the following access flags:
+    <b>PROT_NONE</b> or a bitwise-or of the other values in the following
+  list:</p>
+<dl class="Bl-tag">
+  <dt id="PROT_NONE"><a class="permalink" href="#PROT_NONE"><b>PROT_NONE</b></a></dt>
+  <dd>The memory cannot be accessed at all.</dd>
+  <dt id="PROT_READ"><a class="permalink" href="#PROT_READ"><b>PROT_READ</b></a></dt>
+  <dd>The memory can be read.</dd>
+  <dt id="PROT_WRITE"><a class="permalink" href="#PROT_WRITE"><b>PROT_WRITE</b></a></dt>
+  <dd>The memory can be modified.</dd>
+  <dt id="PROT_EXEC"><a class="permalink" href="#PROT_EXEC"><b>PROT_EXEC</b></a></dt>
+  <dd>The memory can be executed.</dd>
+  <dt id="PROT_SEM"><a class="permalink" href="#PROT_SEM"><b>PROT_SEM</b> (since
+    Linux 2.5.7)</a></dt>
+  <dd>The memory can be used for atomic operations. This flag was introduced as
+      part of the <b>futex</b>(2) implementation (in order to guarantee the
+      ability to perform atomic operations required by commands such as
+      <b>FUTEX_WAIT</b>), but is not currently used in on any architecture.</dd>
+  <dt id="PROT_SAO"><a class="permalink" href="#PROT_SAO"><b>PROT_SAO</b> (since
+    Linux 2.6.26)</a></dt>
+  <dd>The memory should have strong access ordering. This feature is specific to
+      the PowerPC architecture (version 2.06 of the architecture specification
+      adds the SAO CPU feature, and it is available on POWER 7 or PowerPC A2,
+      for example).</dd>
+</dl>
+<p class="Pp">Additionally (since Linux 2.6.0), <i>prot</i> can have one of the
+    following flags set:</p>
+<dl class="Bl-tag">
+  <dt id="PROT_GROWSUP"><a class="permalink" href="#PROT_GROWSUP"><b>PROT_GROWSUP</b></a></dt>
+  <dd>Apply the protection mode up to the end of a mapping that grows upwards.
+      (Such mappings are created for the stack area on architectures—for
+      example, HP-PARISC—that have an upwardly growing stack.)</dd>
+  <dt id="PROT_GROWSDOWN"><a class="permalink" href="#PROT_GROWSDOWN"><b>PROT_GROWSDOWN</b></a></dt>
+  <dd>Apply the protection mode down to the beginning of a mapping that grows
+      downward (which should be a stack segment or a segment mapped with the
+      <b>MAP_GROWSDOWN</b> flag set).</dd>
+</dl>
+<p class="Pp">Like <b>mprotect</b>(), <b>pkey_mprotect</b>() changes the
+    protection on the pages specified by <i>addr</i> and <i>len</i>. The
+    <i>pkey</i> argument specifies the protection key (see <b>pkeys</b>(7)) to
+    assign to the memory. The protection key must be allocated with
+    <b>pkey_alloc</b>(2) before it is passed to <b>pkey_mprotect</b>(). For an
+    example of the use of this system call, see <b>pkeys</b>(7).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>mprotect</b>() and <b>pkey_mprotect</b>() return
+    zero. On error, these system calls return -1, and <i>errno</i> is set to
+    indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>The memory cannot be given the specified access. This can happen, for
+      example, if you <b>mmap</b>(2) a file to which you have read-only access,
+      then ask <b>mprotect</b>() to mark it <b>PROT_WRITE</b>.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>addr</i> is not a valid pointer, or not a multiple of the system page
+      size.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>(<b>pkey_mprotect</b>()) <i>pkey</i> has not been allocated with
+      <b>pkey_alloc</b>(2)</dd>
+  <dt id="EINVAL~3"><a class="permalink" href="#EINVAL~3"><b>EINVAL</b></a></dt>
+  <dd>Both <b>PROT_GROWSUP</b> and <b>PROT_GROWSDOWN</b> were specified in
+      <i>prot</i>.</dd>
+  <dt id="EINVAL~4"><a class="permalink" href="#EINVAL~4"><b>EINVAL</b></a></dt>
+  <dd>Invalid flags specified in <i>prot</i>.</dd>
+  <dt id="EINVAL~5"><a class="permalink" href="#EINVAL~5"><b>EINVAL</b></a></dt>
+  <dd>(PowerPC architecture) <b>PROT_SAO</b> was specified in <i>prot</i>, but
+      SAO hardware feature is not available.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Internal kernel structures could not be allocated.</dd>
+  <dt id="ENOMEM~2"><a class="permalink" href="#ENOMEM~2"><b>ENOMEM</b></a></dt>
+  <dd>Addresses in the range [<i>addr</i>, <i>addr</i>+<i>len</i>-1] are invalid
+      for the address space of the process, or specify one or more pages that
+      are not mapped. (Before Linux 2.4.19, the error <b>EFAULT</b> was
+      incorrectly produced for these cases.)</dd>
+  <dt id="ENOMEM~3"><a class="permalink" href="#ENOMEM~3"><b>ENOMEM</b></a></dt>
+  <dd>Changing the protection of a memory region would result in the total
+      number of mappings with distinct attributes (e.g., read versus read/write
+      protection) exceeding the allowed maximum. (For example, making the
+      protection of a range <b>PROT_READ</b> in the middle of a region currently
+      protected as <b>PROT_READ|PROT_WRITE</b> would result in three mappings:
+      two read/write mappings at each end and a read-only mapping in the
+      middle.)</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>pkey_mprotect</b>() first appeared in Linux 4.9; library
+    support was added in glibc 2.27.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>mprotect</b>(): POSIX.1-2001, POSIX.1-2008, SVr4. POSIX says
+    that the behavior of <b>mprotect</b>() is unspecified if it is applied to a
+    region of memory that was not obtained via <b>mmap</b>(2).</p>
+<p class="Pp"><b>pkey_mprotect</b>() is a nonportable Linux extension.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">On Linux, it is always permissible to call <b>mprotect</b>() on
+    any address in a process's address space (except for the kernel vsyscall
+    area). In particular, it can be used to change existing code mappings to be
+    writable.</p>
+<p class="Pp">Whether <b>PROT_EXEC</b> has any effect different from
+    <b>PROT_READ</b> depends on processor architecture, kernel version, and
+    process state. If <b>READ_IMPLIES_EXEC</b> is set in the process's
+    personality flags (see <b>personality</b>(2)), specifying <b>PROT_READ</b>
+    will implicitly add <b>PROT_EXEC</b>.</p>
+<p class="Pp">On some hardware architectures (e.g., i386), <b>PROT_WRITE</b>
+    implies <b>PROT_READ</b>.</p>
+<p class="Pp">POSIX.1 says that an implementation may permit access other than
+    that specified in <i>prot</i>, but at a minimum can allow write access only
+    if <b>PROT_WRITE</b> has been set, and must not allow any access if
+    <b>PROT_NONE</b> has been set.</p>
+<p class="Pp">Applications should be careful when mixing use of
+    <b>mprotect</b>() and <b>pkey_mprotect</b>(). On x86, when <b>mprotect</b>()
+    is used with <i>prot</i> set to <b>PROT_EXEC</b> a pkey may be allocated and
+    set on the memory implicitly by the kernel, but only when the pkey was 0
+    previously.</p>
+<p class="Pp">On systems that do not support protection keys in hardware,
+    <b>pkey_mprotect</b>() may still be used, but <i>pkey</i> must be set to -1.
+    When called this way, the operation of <b>pkey_mprotect</b>() is equivalent
+    to <b>mprotect</b>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below demonstrates the use of <b>mprotect</b>(). The
+    program allocates four pages of memory, makes the third of these pages
+    read-only, and then executes a loop that walks upward through the allocated
+    region modifying bytes.</p>
+<p class="Pp">An example of what we might see when running the program is the
+    following:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$<b> ./a.out</b>
+Start of region:        0x804c000
+Got SIGSEGV at address: 0x804e000
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#include &lt;malloc.h&gt;
+#include &lt;signal.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;sys/mman.h&gt;
+#include &lt;unistd.h&gt;
+#define handle_error(msg) \
+<br>
+    do { perror(msg); exit(EXIT_FAILURE); } while (0)
+static char *buffer;
+static void
+handler(int sig, siginfo_t *si, void *unused)
+{
+<br>
+    /* Note: calling printf() from a signal handler is not safe
+<br>
+       (and should not be done in production programs), since
+<br>
+       printf() is not async-signal-safe; see signal-safety(7).
+<br>
+       Nevertheless, we use printf() here as a simple way of
+<br>
+       showing that the handler was called. */
+<br>
+    printf("Got SIGSEGV at address: %p\n", si-&gt;si_addr);
+<br>
+    exit(EXIT_FAILURE);
+}
+int
+main(void)
+{
+<br>
+    int               pagesize;
+<br>
+    struct sigaction  sa;
+<br>
+    sa.sa_flags = SA_SIGINFO;
+<br>
+    sigemptyset(&amp;sa.sa_mask);
+<br>
+    sa.sa_sigaction = handler;
+<br>
+    if (sigaction(SIGSEGV, &amp;sa, NULL) == -1)
+<br>
+        handle_error("sigaction");
+<br>
+    pagesize = sysconf(_SC_PAGE_SIZE);
+<br>
+    if (pagesize == -1)
+<br>
+        handle_error("sysconf");
+<br>
+    /* Allocate a buffer aligned on a page boundary;
+<br>
+       initial protection is PROT_READ | PROT_WRITE. */
+<br>
+    buffer = memalign(pagesize, 4 * pagesize);
+<br>
+    if (buffer == NULL)
+<br>
+        handle_error("memalign");
+<br>
+    printf("Start of region:        %p\n", buffer);
+<br>
+    if (mprotect(buffer + pagesize * 2, pagesize,
+<br>
+                 PROT_READ) == -1)
+<br>
+        handle_error("mprotect");
+<br>
+    for (char *p = buffer ; ; )
+<br>
+        *(p++) = 'a';
+<br>
+    printf("Loop completed\n");     /* Should never happen */
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>mmap</b>(2), <b>sysconf</b>(3), <b>pkeys</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

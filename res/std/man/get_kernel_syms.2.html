@@ -1,0 +1,133 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 1996 Free Software Foundation, Inc.
+  
+   SPDX-License-Identifier: GPL-1.0-or-later
+  
+   2006-02-09, some reformatting by Luc Van Oostenryck; some
+   reformatting and rewordings by mtk
+   --><head>
+<meta name="dc.identifier" content="res/7382260d76d879afe63c29368a52b887516fe4c8">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>get_kernel_syms(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">get_kernel_syms(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">get_kernel_syms(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">get_kernel_syms - retrieve exported kernel and module symbols</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;linux/module.h&gt;</b></pre>
+<pre><b>[[deprecated]] int get_kernel_syms(struct kernel_sym *</b><i>table</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>Note</b>: This system call is present only before Linux
+  2.6.</p>
+<p class="Pp">If <i>table</i> is NULL, <b>get_kernel_syms</b>() returns the
+    number of symbols available for query. Otherwise, it fills in a table of
+    structures:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct kernel_sym {
+<br>
+    unsigned long value;
+<br>
+    char          name[60];
+};
+</pre>
+<br>
+<p class="Pp">The symbols are interspersed with magic symbols of the form
+    <b>#</b><i>module-name</i> with the kernel having an empty name. The value
+    associated with a symbol of this form is the address at which the module is
+    loaded.</p>
+<p class="Pp">The symbols exported from each module follow their magic module
+    tag and the modules are returned in the reverse of the order in which they
+    were loaded.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, returns the number of symbols copied to <i>table</i>.
+    On error, -1 is returned and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">There is only one possible error return:</p>
+<dl class="Bl-tag">
+  <dt id="ENOSYS"><a class="permalink" href="#ENOSYS"><b>ENOSYS</b></a></dt>
+  <dd><b>get_kernel_syms</b>() is not supported in this version of the
+    kernel.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">This system call is present only up until Linux 2.4; it was
+    removed in Linux 2.6.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>get_kernel_syms</b>() is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">This obsolete system call is not supported by glibc. No
+    declaration is provided in glibc headers, but, through a quirk of history,
+    glibc versions before glibc 2.23 did export an ABI for this system call.
+    Therefore, in order to employ this system call, it was sufficient to
+    manually declare the interface in your code; alternatively, you could invoke
+    the system call using <b>syscall</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">There is no way to indicate the size of the buffer allocated for
+    <i>table</i>. If symbols have been added to the kernel since the program
+    queried for the symbol table size, memory will be corrupted.</p>
+<p class="Pp">The length of exported symbol names is limited to 59
+  characters.</p>
+<p class="Pp">Because of these limitations, this system call is deprecated in
+    favor of <b>query_module</b>(2) (which is itself nowadays deprecated in
+    favor of other interfaces described on its manual page).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>create_module</b>(2), <b>delete_module</b>(2),
+    <b>init_module</b>(2), <b>query_module</b>(2)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

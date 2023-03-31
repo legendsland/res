@@ -1,0 +1,187 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 1993 Michael Haardt (michael@moria.de),
+     Fri Apr  2 11:32:09 MET DST 1993
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+  
+   Tue Jul  6 12:42:46 MDT 1993 <dminer@nyx.cs.du.edu>
+   Added "Calling Directly" and supporting paragraphs
+  
+   Modified Sat Jul 24 15:19:12 1993 by Rik Faith <faith@cs.unc.edu>
+  
+   Modified 21 Aug 1994 by Michael Chastain <mec@shell.portal.com>:
+     Added explanation of arg stacking when 6 or more args.
+  
+   Modified 10 June 1995 by Andries Brouwer <aeb@cwi.nl>
+  
+   2007-10-23 mtk: created as a new page, by taking the content
+   specific to the _syscall() macros from intro(2).
+   --><head>
+<meta name="dc.identifier" content="res/0ad6da0c29393d2b4bbf46a1e200db29d9fabd16">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>_syscall(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">_syscall(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">_syscall(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">_syscall - invoking a system call without library support
+    (OBSOLETE)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;linux/unistd.h&gt;</b></pre>
+<pre>A _syscall macro</pre>
+<pre>desired system call</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The important thing to know about a system call is its prototype.
+    You need to know how many arguments, their types, and the function return
+    type. There are seven macros that make the actual call into the system
+    easier. They have the form:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>_syscall<i>X</i>(<i>type</i>,<i>name</i>,<i>type1</i>,<i>arg1</i>,<i>type2</i>,<i>arg2</i>,...)
+</pre>
+<br>
+<p class="Pp">where</p>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd><i>X</i> is 0–6, which are the number of arguments taken by the
+      system call</dd>
+  <dt></dt>
+  <dd><i>type</i> is the return type of the system call</dd>
+  <dt></dt>
+  <dd><i>name</i> is the name of the system call</dd>
+  <dt></dt>
+  <dd><i>typeN</i> is the Nth argument's type</dd>
+  <dt></dt>
+  <dd><i>argN</i> is the name of the Nth argument</dd>
+</dl>
+<p class="Pp">These macros create a function called <i>name</i> with the
+    arguments you specify. Once you include the _syscall() in your source file,
+    you call the system call by <i>name</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FILES"><a class="permalink" href="#FILES">FILES</a></h1>
+<p class="Pp"><i>/usr/include/linux/unistd.h</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">The use of these macros is Linux-specific, and deprecated.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Starting around kernel 2.6.18, the _syscall macros were removed
+    from header files supplied to user space. Use <b>syscall</b>(2) instead.
+    (Some architectures, notably ia64, never provided the _syscall macros; on
+    those architectures, <b>syscall</b>(2) was always required.)</p>
+<p class="Pp">The _syscall() macros <i>do not</i> produce a prototype. You may
+    have to create one, especially for C++ users.</p>
+<p class="Pp">System calls are not required to return only positive or negative
+    error codes. You need to read the source to be sure how it will return
+    errors. Usually, it is the negative of a standard error code, for example,
+    -<i>EPERM</i>. The _syscall() macros will return the result <i>r</i> of the
+    system call when <i>r</i> is nonnegative, but will return -1 and set the
+    variable <i>errno</i> to -<i>r</i> when <i>r</i> is negative. For the error
+    codes, see <b>errno</b>(3).</p>
+<p class="Pp">When defining a system call, the argument types <i>must</i> be
+    passed by-value or by-pointer (for aggregates like structs).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<pre>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;linux/unistd.h&gt;       /* for _syscallX macros/related stuff */
+#include &lt;linux/kernel.h&gt;       /* for struct sysinfo */
+_syscall1(int, sysinfo, struct sysinfo *, info);
+int
+main(void)
+{
+<br>
+    struct sysinfo s_info;
+<br>
+    int error;
+<br>
+    error = sysinfo(&amp;s_info);
+<br>
+    printf("code error = %d\n", error);
+<br>
+    printf("Uptime = %lds\nLoad: 1 min %lu / 5 min %lu / 15 min %lu\n"
+<br>
+           "RAM: total %lu / free %lu / shared %lu\n"
+<br>
+           "Memory in buffers = %lu\nSwap: total %lu / free %lu\n"
+<br>
+           "Number of processes = %d\n",
+<br>
+           s_info.uptime, s_info.loads[0],
+<br>
+           s_info.loads[1], s_info.loads[2],
+<br>
+           s_info.totalram, s_info.freeram,
+<br>
+           s_info.sharedram, s_info.bufferram,
+<br>
+           s_info.totalswap, s_info.freeswap,
+<br>
+           s_info.procs);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+<section class="Ss">
+<h2 class="Ss" id="Sample_output"><a class="permalink" href="#Sample_output">Sample
+  output</a></h2>
+<pre>code error = 0
+uptime = 502034s
+Load: 1 min 13376 / 5 min 5504 / 15 min 1152
+RAM: total 15343616 / free 827392 / shared 8237056
+Memory in buffers = 5066752
+Swap: total 27881472 / free 24698880
+Number of processes = 40
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>intro</b>(2), <b>syscall</b>(2), <b>errno</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

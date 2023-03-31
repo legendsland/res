@@ -1,0 +1,153 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright \[u00A9] 2017-2020 Micka\[u00EB]l Sala\[u00FC]n <mic@digikod.net>
+   Copyright \[u00A9] 2019-2020 ANSSI
+   Copyright \[u00A9] 2021 Microsoft Corporation
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/43d2894e0c8dc3beacb0a6fd83d5aed6c7a879a9">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>landlock_add_rule(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">landlock_add_rule(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">landlock_add_rule(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">landlock_add_rule - add a new Landlock rule to a ruleset</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;linux/landlock.h&gt;</b>  /* Definition of <b>LANDLOCK_*</b> constants */
+<b>#include &lt;sys/syscall.h&gt;</b>     /* Definition of <b>SYS_*</b> constants */</pre>
+<pre><b>int syscall(SYS_landlock_add_rule, int </b><i>ruleset_fd</i><b>,</b>
+<b>            enum landlock_rule_type </b><i>rule_type</i><b>,</b>
+<b>            const void *</b><i>rule_attr</i><b>, uint32_t </b><i>flags</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">A Landlock rule describes an action on an object. An object is
+    currently a file hierarchy, and the related filesystem actions are defined
+    with a set of access rights. This <b>landlock_add_rule</b>() system call
+    enables adding a new Landlock rule to an existing ruleset created with
+    <b>landlock_create_ruleset</b>(2). See <b>landlock</b>(7) for a global
+    overview.</p>
+<p class="Pp"><i>ruleset_fd</i> is a Landlock ruleset file descriptor obtained
+    with <b>landlock_create_ruleset</b>(2).</p>
+<p class="Pp"><i>rule_type</i> identifies the structure type pointed to by
+    <i>rule_attr</i>. Currently, Linux supports the following <i>rule_type</i>
+    value:</p>
+<dl class="Bl-tag">
+  <dt id="LANDLOCK_RULE_PATH_BENEATH"><a class="permalink" href="#LANDLOCK_RULE_PATH_BENEATH"><b>LANDLOCK_RULE_PATH_BENEATH</b></a></dt>
+  <dd>This defines the object type as a file hierarchy. In this case,
+      <i>rule_attr</i> points to the following structure:</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>
+    <br>
+    <pre>struct landlock_path_beneath_attr {
+<br>
+    __u64 allowed_access;
+<br>
+    __s32 parent_fd;
+} __attribute__((packed));
+    </pre>
+    <br>
+  </dd>
+  <dt></dt>
+  <dd><i>allowed_access</i> contains a bitmask of allowed filesystem actions for
+      this file hierarchy (see <b>Filesystem actions</b> in
+    <b>landlock</b>(7)).</dd>
+  <dt></dt>
+  <dd><i>parent_fd</i> is an opened file descriptor, preferably with the
+      <i>O_PATH</i> flag, which identifies the parent directory of the file
+      hierarchy or just a file.</dd>
+</dl>
+<p class="Pp"><i>flags</i> must be 0.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>landlock_add_rule</b>() returns 0.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp"><b>landlock_add_rule</b>() can failed for the following
+  reasons:</p>
+<dl class="Bl-tag">
+  <dt id="EOPNOTSUPP"><a class="permalink" href="#EOPNOTSUPP"><b>EOPNOTSUPP</b></a></dt>
+  <dd>Landlock is supported by the kernel but disabled at boot time.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>flags</i> is not 0, or the rule accesses are inconsistent (i.e.,
+      <i>rule_attr-&gt;allowed_access</i> is not a subset of the ruleset handled
+      accesses).</dd>
+  <dt id="ENOMSG"><a class="permalink" href="#ENOMSG"><b>ENOMSG</b></a></dt>
+  <dd>Empty accesses (i.e., <i>rule_attr-&gt;allowed_access</i> is 0).</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd><i>ruleset_fd</i> is not a file descriptor for the current thread, or a
+      member of <i>rule_attr</i> is not a file descriptor as expected.</dd>
+  <dt id="EBADFD"><a class="permalink" href="#EBADFD"><b>EBADFD</b></a></dt>
+  <dd><i>ruleset_fd</i> is not a ruleset file descriptor, or a member of
+      <i>rule_attr</i> is not the expected file descriptor type.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd><i>ruleset_fd</i> has no write access to the underlying ruleset.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>rule_attr</i> was not a valid address.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">Landlock was added in Linux 5.13.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This system call is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">See <b>landlock</b>(7).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>landlock_create_ruleset</b>(2),
+    <b>landlock_restrict_self</b>(2), <b>landlock</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

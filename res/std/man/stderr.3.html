@@ -1,0 +1,124 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/c00840440a5ef1029102e19688d56d48d51361ec">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>stdin(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">stdin(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">stdin(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">stdin, stdout, stderr - standard I/O streams</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;stdio.h&gt;</b></pre>
+<pre><b>extern FILE *</b><i>stdin</i><b>;</b>
+<b>extern FILE *</b><i>stdout</i><b>;</b>
+<b>extern FILE *</b><i>stderr</i><b>;</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">Under normal circumstances every UNIX program has three streams
+    opened for it when it starts up, one for input, one for output, and one for
+    printing diagnostic or error messages. These are typically attached to the
+    user's terminal (see <b>tty</b>(4)) but might instead refer to files or
+    other devices, depending on what the parent process chose to set up. (See
+    also the "Redirection" section of <b>sh</b>(1).)</p>
+<p class="Pp">The input stream is referred to as "standard input"; the
+    output stream is referred to as "standard output"; and the error
+    stream is referred to as "standard error". These terms are
+    abbreviated to form the symbols used to refer to these files, namely
+    <i>stdin</i>, <i>stdout</i>, and <i>stderr</i>.</p>
+<p class="Pp">Each of these symbols is a <b>stdio</b>(3) macro of type pointer
+    to <i>FILE</i>, and can be used with functions like <b>fprintf</b>(3) or
+    <b>fread</b>(3).</p>
+<p class="Pp">Since <i>FILE</i>s are a buffering wrapper around UNIX file
+    descriptors, the same underlying files may also be accessed using the raw
+    UNIX file interface, that is, the functions like <b>read</b>(2) and
+    <b>lseek</b>(2).</p>
+<p class="Pp">On program startup, the integer file descriptors associated with
+    the streams <i>stdin</i>, <i>stdout</i>, and <i>stderr</i> are 0, 1, and 2,
+    respectively. The preprocessor symbols <b>STDIN_FILENO</b>,
+    <b>STDOUT_FILENO</b>, and <b>STDERR_FILENO</b> are defined with these values
+    in <i>&lt;unistd.h&gt;</i>. (Applying <b>freopen</b>(3) to one of these
+    streams can change the file descriptor number associated with the
+  stream.)</p>
+<p class="Pp">Note that mixing use of <i>FILE</i>s and raw file descriptors can
+    produce unexpected results and should generally be avoided. (For the
+    masochistic among you: POSIX.1, section 8.2.3, describes in detail how this
+    interaction is supposed to work.) A general rule is that file descriptors
+    are handled in the kernel, while stdio is just a library. This means for
+    example, that after an <b>exec</b>(3), the child inherits all open file
+    descriptors, but all old streams have become inaccessible.</p>
+<p class="Pp">Since the symbols <i>stdin</i>, <i>stdout</i>, and <i>stderr</i>
+    are specified to be macros, assigning to them is nonportable. The standard
+    streams can be made to refer to different files with help of the library
+    function <b>freopen</b>(3), specially introduced to make it possible to
+    reassign <i>stdin</i>, <i>stdout</i>, and <i>stderr</i>. The standard
+    streams are closed by a call to <b>exit</b>(3) and by normal program
+    termination.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">The <i>stdin</i>, <i>stdout</i>, and <i>stderr</i> macros conform
+    to C89 and this standard also stipulates that these three streams shall be
+    open at program startup.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The stream <i>stderr</i> is unbuffered. The stream <i>stdout</i>
+    is line-buffered when it points to a terminal. Partial lines will not appear
+    until <b>fflush</b>(3) or <b>exit</b>(3) is called, or a newline is printed.
+    This can produce unexpected results, especially with debugging output. The
+    buffering mode of the standard streams (or any other stream) can be changed
+    using the <b>setbuf</b>(3) or <b>setvbuf</b>(3) call. Note that in case
+    <i>stdin</i> is associated with a terminal, there may also be input
+    buffering in the terminal driver, entirely unrelated to stdio buffering.
+    (Indeed, normally terminal input is line buffered in the kernel.) This
+    kernel input handling can be modified using calls like <b>tcsetattr</b>(3);
+    see also <b>stty</b>(1), and <b>termios</b>(3).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>csh</b>(1), <b>sh</b>(1), <b>open</b>(2), <b>fopen</b>(3),
+    <b>stdio</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

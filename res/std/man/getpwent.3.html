@@ -1,0 +1,194 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright 1993 David Metcalfe (david@prism.demon.co.uk)
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   References consulted:
+       Linux libc source code
+       Lewine's _POSIX Programmer's Guide_ (O'Reilly & Associates, 1991)
+       386BSD man pages
+  
+   Modified Sat Jul 24 19:22:14 1993 by Rik Faith (faith@cs.unc.edu)
+   Modified Mon May 27 21:37:47 1996 by Martin Schulze (joey@linux.de)
+   --><head>
+<meta name="dc.identifier" content="res/5be838d3bcdde52400813a95b4b0f7bee15d8aec">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>getpwent(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">getpwent(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">getpwent(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getpwent, setpwent, endpwent - get password file entry</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/types.h&gt;</b>
+<b>#include &lt;pwd.h&gt;</b></pre>
+<pre><b>struct passwd *getpwent(void);</b>
+<b>void setpwent(void);</b>
+<b>void endpwent(void);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>getpwent</b>(), <b>setpwent</b>(), <b>endpwent</b>():</p>
+<pre><br>
+    _XOPEN_SOURCE &gt;= 500
+<br>
+        || /* glibc &gt;= 2.19: */ _DEFAULT_SOURCE
+<br>
+        || /* glibc &lt;= 2.19: */ _BSD_SOURCE || _SVID_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>getpwent</b>() function returns a pointer to a structure
+    containing the broken-out fields of a record from the password database
+    (e.g., the local password file <i>/etc/passwd</i>, NIS, and LDAP). The first
+    time <b>getpwent</b>() is called, it returns the first entry; thereafter, it
+    returns successive entries.</p>
+<p class="Pp">The <b>setpwent</b>() function rewinds to the beginning of the
+    password database.</p>
+<p class="Pp">The <b>endpwent</b>() function is used to close the password
+    database after all processing has been performed.</p>
+<p class="Pp">The <i>passwd</i> structure is defined in <i>&lt;pwd.h&gt;</i> as
+    follows:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct passwd {
+<br>
+    char   *pw_name;       /* username */
+<br>
+    char   *pw_passwd;     /* user password */
+<br>
+    uid_t   pw_uid;        /* user ID */
+<br>
+    gid_t   pw_gid;        /* group ID */
+<br>
+    char   *pw_gecos;      /* user information */
+<br>
+    char   *pw_dir;        /* home directory */
+<br>
+    char   *pw_shell;      /* shell program */
+};
+</pre>
+<br>
+<p class="Pp">For more information about the fields of this structure, see
+    <b>passwd</b>(5).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <b>getpwent</b>() function returns a pointer to a
+    <i>passwd</i> structure, or NULL if there are no more entries or an error
+    occurred. If an error occurs, <i>errno</i> is set to indicate the error. If
+    one wants to check <i>errno</i> after the call, it should be set to zero
+    before the call.</p>
+<p class="Pp">The return value may point to a static area, and may be
+    overwritten by subsequent calls to <b>getpwent</b>(), <b>getpwnam</b>(3), or
+    <b>getpwuid</b>(3). (Do not pass the returned pointer to
+  <b>free</b>(3).)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>A signal was caught; see <b>signal</b>(7).</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>I/O error.</dd>
+  <dt id="EMFILE"><a class="permalink" href="#EMFILE"><b>EMFILE</b></a></dt>
+  <dd>The per-process limit on the number of open file descriptors has been
+      reached.</dd>
+  <dt id="ENFILE"><a class="permalink" href="#ENFILE"><b>ENFILE</b></a></dt>
+  <dd>The system-wide limit on the total number of open files has been
+    reached.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient memory to allocate <i>passwd</i> structure.</dd>
+  <dt id="ERANGE"><a class="permalink" href="#ERANGE"><b>ERANGE</b></a></dt>
+  <dd>Insufficient buffer space supplied.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FILES"><a class="permalink" href="#FILES">FILES</a></h1>
+<dl class="Bl-tag">
+  <dt><i>/etc/passwd</i></dt>
+  <dd>local password database file</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>getpwent ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race:pwent race:pwentbuf locale</td>
+  </tr>
+  <tr>
+    <td>setpwent (), endpwent ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race:pwent locale</td>
+  </tr>
+</tbody></table>
+<p class="Pp">In the above table, <i>pwent</i> in <i>race:pwent</i> signifies
+    that if any of the functions <b>setpwent</b>(), <b>getpwent</b>(), or
+    <b>endpwent</b>() are used in parallel in different threads of a program,
+    then data races could occur.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, SVr4, 4.3BSD. The <i>pw_gecos</i>
+    field is not specified in POSIX, but is present on most implementations.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>fgetpwent</b>(3), <b>getpw</b>(3), <b>getpwent_r</b>(3),
+    <b>getpwnam</b>(3), <b>getpwuid</b>(3), <b>putpwent</b>(3),
+  <b>passwd</b>(5)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

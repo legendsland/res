@@ -1,0 +1,219 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/0c2221fa3a26b9baafe5d7b7165ef5563860b1bc">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>TIMES(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">TIMES(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">TIMES(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">times — get process and waited-for child process times</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;sys/times.h&gt;</pre>
+<pre>clock_t times(struct tms *<i>buffer</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>times</i>() function shall fill the <b>tms</b> structure
+    pointed to by <i>buffer</i> with time-accounting information. The <b>tms</b>
+    structure is defined in <i>&lt;sys/times.h&gt;</i>.</p>
+<p class="Pp">All times are measured in terms of the number of clock ticks
+  used.</p>
+<p class="Pp">The times of a terminated child process shall be included in the
+    <i>tms_cutime</i> and <i>tms_cstime</i> elements of the parent when
+    <i>wait</i>(), <i>waitid</i>(), or <i>waitpid</i>() returns the process ID
+    of this terminated child. If a child process has not waited for its
+    children, their times shall not be included in its times.</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>The <i>tms_utime</i> structure member is the CPU time charged for the
+      execution of user instructions of the calling process.</dd>
+  <dt> *</dt>
+  <dd>The <i>tms_stime</i> structure member is the CPU time charged for
+      execution by the system on behalf of the calling process.</dd>
+  <dt> *</dt>
+  <dd>The <i>tms_cutime</i> structure member is the sum of the <i>tms_utime</i>
+      and <i>tms_cutime</i> times of the child processes.</dd>
+  <dt> *</dt>
+  <dd>The <i>tms_cstime</i> structure member is the sum of the <i>tms_stime</i>
+      and <i>tms_cstime</i> times of the child processes.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>times</i>() shall return the
+    elapsed real time, in clock ticks, since an arbitrary point in the past (for
+    example, system start-up time). This point does not change from one
+    invocation of <i>times</i>() within the process to another. The return value
+    may overflow the possible range of type <b>clock_t</b>. If <i>times</i>()
+    fails, (<b>clock_t</b>)-1 shall be returned and <i>errno</i> set to indicate
+    the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>times</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EOVERFLOW"><a class="permalink" href="#EOVERFLOW"><b>EOVERFLOW</b></a></dt>
+  <dd>The return value would overflow the range of <b>clock_t</b>.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Timing_a_Database_Lookup"><a class="permalink" href="#Timing_a_Database_Lookup">Timing
+  a Database Lookup</a></h2>
+<p class="Pp">The following example defines two functions, <i>start_clock</i>()
+    and <i>end_clock</i>(), that are used to time a lookup. It also defines
+    variables of type <b>clock_t</b> and <b>tms</b> to measure the duration of
+    transactions. The <i>start_clock</i>() function saves the beginning times
+    given by the <i>times</i>() function. The <i>end_clock</i>() function gets
+    the ending times and prints the difference between the two times.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;sys/times.h&gt;
+#include &lt;stdio.h&gt;
+...
+void start_clock(void);
+void end_clock(char *msg);
+...
+static clock_t st_time;
+static clock_t en_time;
+static struct tms st_cpu;
+static struct tms en_cpu;
+...
+void
+start_clock()
+{
+<br>
+    st_time = times(&amp;st_cpu);
+}</pre>
+<pre>/* This example assumes that the result of each subtraction
+<br>
+   is within the range of values that can be represented in
+<br>
+   an integer type. */
+void
+end_clock(char *msg)
+{
+<br>
+    en_time = times(&amp;en_cpu);</pre>
+<pre><br>
+    fputs(msg,stdout);
+<br>
+    printf("Real Time: %jd, User Time %jd, System Time %jd\n",
+<br>
+        (intmax_t)(en_time - st_time),
+<br>
+        (intmax_t)(en_cpu.tms_utime - st_cpu.tms_utime),
+<br>
+        (intmax_t)(en_cpu.tms_stime - st_cpu.tms_stime));
+}</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">Applications should use <i>sysconf</i>(_SC_CLK_TCK) to determine
+    the number of clock ticks per second as it may vary from system to
+  system.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The accuracy of the times reported is intentionally left
+    unspecified to allow implementations flexibility in design, from
+    uniprocessor to multi-processor networks.</p>
+<p class="Pp">The inclusion of times of child processes is recursive, so that a
+    parent process may collect the total times of all of its descendants. But
+    the times of a child are only added to those of its parent when its parent
+    successfully waits on the child. Thus, it is not guaranteed that a parent
+    process can always see the total times of all its descendants; see also the
+    discussion of the term ``realtime'' in <i><i>alarm</i>()</i>.</p>
+<p class="Pp">If the type <b>clock_t</b> is defined to be a signed 32-bit
+    integer, it overflows in somewhat more than a year if there are 60 clock
+    ticks per second, or less than a year if there are 100. There are individual
+    systems that run continuously for longer than that. This volume of
+    POSIX.1‐2017 permits an implementation to make the reference point
+    for the returned value be the start-up time of the process, rather than
+    system start-up time.</p>
+<p class="Pp">The term ``charge'' in this context has nothing to do with billing
+    for services. The operating system accounts for time used in this way. That
+    information must be correct, regardless of how that information is used.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>alarm</i>()</i>, <i><i>exec</i></i>, <i><i>fork</i>()</i>,
+    <i><i>sysconf</i>()</i>, <i><i>time</i>()</i>, <i><i>wait</i>()</i>,
+    <i><i>waitid</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;sys_times.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

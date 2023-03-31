@@ -1,0 +1,220 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/679421688082ce46fbc13372b8d23c56604edb6a">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>FATTACH(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">FATTACH(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">FATTACH(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">fattach — attach a STREAMS-based file descriptor to a file
+    in the file system name space (<b>STREAMS</b>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;stropts.h&gt;</pre>
+<pre>int fattach(int <i>fildes</i>, const char *<i>path</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>fattach</i>() function shall attach a STREAMS-based file
+    descriptor to a file, effectively associating a pathname with <i>fildes</i>.
+    The application shall ensure that the <i>fildes</i> argument is a valid open
+    file descriptor associated with a STREAMS file. The <i>path</i> argument
+    points to a pathname of an existing file. The application shall have
+    appropriate privileges or be the owner of the file named by <i>path</i> and
+    have write permission. A successful call to <i>fattach</i>() shall cause all
+    pathnames that name the file named by <i>path</i> to name the STREAMS file
+    associated with <i>fildes</i>, until the STREAMS file is detached from the
+    file. A STREAMS file can be attached to more than one file and can have
+    several pathnames associated with it.</p>
+<p class="Pp">The attributes of the named STREAMS file shall be initialized as
+    follows: the permissions, user ID, group ID, and times are set to those of
+    the file named by <i>path</i>, the number of links is set to 1, and the size
+    and device identifier are set to those of the STREAMS file associated with
+    <i>fildes</i>. If any attributes of the named STREAMS file are subsequently
+    changed (for example, by <i>chmod</i>()), neither the attributes of the
+    underlying file nor the attributes of the STREAMS file to which
+    <i>fildes</i> refers shall be affected.</p>
+<p class="Pp">File descriptors referring to the underlying file, opened prior to
+    an <i>fattach</i>() call, shall continue to refer to the underlying
+  file.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>fattach</i>() shall return 0.
+    Otherwise, -1 shall be returned and <i>errno</i> set to indicate the
+  error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>fattach</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>Search permission is denied for a component of the path prefix, or the
+      process is the owner of <i>path</i> but does not have write permissions on
+      the file named by <i>path</i>.</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The <i>fildes</i> argument is not a valid open file descriptor.</dd>
+  <dt id="EBUSY"><a class="permalink" href="#EBUSY"><b>EBUSY</b></a></dt>
+  <dd>The file named by <i>path</i> is currently a mount point or has a STREAMS
+      file attached to it.</dd>
+  <dt id="ELOOP"><a class="permalink" href="#ELOOP"><b>ELOOP</b></a></dt>
+  <dd>A loop exists in symbolic links encountered during resolution of the
+      <i>path</i> argument.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of a component of a pathname is longer than {NAME_MAX}.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>A component of <i>path</i> does not name an existing file or <i>path</i>
+      is an empty string.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>A component of the path prefix names an existing file that is neither a
+      directory nor a symbolic link to a directory, or the <i>path</i> argument
+      contains at least one non-&lt;slash&gt; character and ends with one or
+      more trailing &lt;slash&gt; characters.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The effective user ID of the process is not the owner of the file named by
+      <i>path</i> and the process does not have appropriate privileges.
+    <br>
+  </dd>
+</dl>
+<p class="Pp">The <i>fattach</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The <i>fildes</i> argument does not refer to a STREAMS file.</dd>
+  <dt id="ELOOP~2"><a class="permalink" href="#ELOOP~2"><b>ELOOP</b></a></dt>
+  <dd>More than {SYMLOOP_MAX} symbolic links were encountered during resolution
+      of the <i>path</i> argument.</dd>
+  <dt id="ENAMETOOLONG~2"><a class="permalink" href="#ENAMETOOLONG~2"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of a pathname exceeds {PATH_MAX}, or pathname resolution of a
+      symbolic link produced an intermediate result with a length that exceeds
+      {PATH_MAX}.</dd>
+  <dt id="EXDEV"><a class="permalink" href="#EXDEV"><b>EXDEV</b></a></dt>
+  <dd>A link to a file on another file system was attempted.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Attaching_a_File_Descriptor_to_a_File"><a class="permalink" href="#Attaching_a_File_Descriptor_to_a_File">Attaching
+  a File Descriptor to a File</a></h2>
+<p class="Pp">In the following example, <i>fd</i> refers to an open STREAMS
+    file. The call to <i>fattach</i>() associates this STREAM with the file
+    <b>/tmp/named-STREAM</b>, such that any future calls to open
+    <b>/tmp/named-STREAM</b>, prior to breaking the attachment via a call to
+    <i>fdetach</i>(), will instead create a new file handle referring to the
+    STREAMS file associated with <i>fd</i>.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;stropts.h&gt;
+...
+<br>
+    int fd;
+<br>
+    char *pathname = "/tmp/named-STREAM";
+<br>
+    int ret;</pre>
+<pre><br>
+    ret = fattach(fd, pathname);</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The <i>fattach</i>() function behaves similarly to the traditional
+    <i>mount</i>() function in the way a file is temporarily replaced by the
+    root directory of the mounted file system. In the case of <i>fattach</i>(),
+    the replaced file need not be a directory and the replacing file is a
+    STREAMS file.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">The file attributes of a file which has been the subject of an
+    <i>fattach</i>() call are specifically set because of an artifact of the
+    original implementation. The internal mechanism was the same as for the
+    <i>mount</i>() function. Since <i>mount</i>() is typically only applied to
+    directories, the effects when applied to a regular file are a little
+    surprising, especially as regards the link count which rigidly remains one,
+    even if there were several links originally and despite the fact that all
+    original links refer to the STREAM as long as the <i>fattach</i>() remains
+    in effect.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">The <i>fattach</i>() function may be removed in a future
+  version.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>fdetach</i>()</i>, <i><i>isastream</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;stropts.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+    Copyright 2002 walter harms (walter.harms@informatik.uni-oldenburg.de)
+  
+   SPDX-License-Identifier: GPL-1.0-or-later
+  
+    based on glibc infopages
+   polished - aeb
+   --><head>
+<meta name="dc.identifier" content="res/cf80f65e5f9d4ece8488298aafd433c6b457002a">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>setnetgrent(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">setnetgrent(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">setnetgrent(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">setnetgrent, endnetgrent, getnetgrent, getnetgrent_r, innetgr -
+    handle network group entries</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;netdb.h&gt;</b></pre>
+<pre><b>int setnetgrent(const char *</b><i>netgroup</i><b>);</b>
+<b>void endnetgrent(void);</b></pre>
+<pre><b>int getnetgrent(char **restrict </b><i>host</i><b>,</b>
+<b>            char **restrict </b><i>user</i><b>, char **restrict </b><i>domain</i><b>);</b>
+<b>int getnetgrent_r(char **restrict </b><i>host</i><b>,</b>
+<b>            char **restrict </b><i>user</i><b>, char **restrict </b><i>domain</i><b>,</b>
+<b>            char </b><i>buf</i><b>[restrict .</b><i>buflen</i><b>], size_t </b><i>buflen</i><b>);</b></pre>
+<pre><b>int innetgr(const char *</b><i>netgroup</i><b>, const char *</b><i>host</i><b>,</b>
+<b>            const char *</b><i>user</i><b>, const char *</b><i>domain</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>setnetgrent</b>(), <b>endnetgrent</b>(), <b>getnetgrent</b>(),
+    <b>getnetgrent_r</b>(), <b>innetgr</b>():</p>
+<pre><br>
+    Since glibc 2.19:
+<br>
+        _DEFAULT_SOURCE
+<br>
+    glibc 2.19 and earlier:
+<br>
+        _BSD_SOURCE || _SVID_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>netgroup</i> is a SunOS invention. A netgroup database is a
+    list of string triples (<i>hostname</i>, <i>username</i>, <i>domainname</i>)
+    or other netgroup names. Any of the elements in a triple can be empty, which
+    means that anything matches. The functions described here allow access to
+    the netgroup databases. The file <i>/etc/nsswitch.conf</i> defines what
+    database is searched.</p>
+<p class="Pp">The <b>setnetgrent</b>() call defines the netgroup that will be
+    searched by subsequent <b>getnetgrent</b>() calls. The <b>getnetgrent</b>()
+    function retrieves the next netgroup entry, and returns pointers in
+    <i>host</i>, <i>user</i>, <i>domain</i>. A null pointer means that the
+    corresponding entry matches any string. The pointers are valid only as long
+    as there is no call to other netgroup-related functions. To avoid this
+    problem you can use the GNU function <b>getnetgrent_r</b>() that stores the
+    strings in the supplied buffer. To free all allocated buffers use
+    <b>endnetgrent</b>().</p>
+<p class="Pp">In most cases you want to check only if the triplet
+    (<i>hostname</i>, <i>username</i>, <i>domainname</i>) is a member of a
+    netgroup. The function <b>innetgr</b>() can be used for this without calling
+    the above three functions. Again, a null pointer is a wildcard and matches
+    any string. The function is thread-safe.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">These functions return 1 on success and 0 for failure.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FILES"><a class="permalink" href="#FILES">FILES</a></h1>
+<p class="Pp"><i>/etc/netgroup</i>
+  <br>
+  <i>/etc/nsswitch.conf</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>setnetgrent (), getnetgrent_r (), innetgr ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race:netgrent locale</td>
+  </tr>
+  <tr>
+    <td>endnetgrent ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race:netgrent</td>
+  </tr>
+  <tr>
+    <td>getnetgrent ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race:netgrent race:netgrentbuf locale</td>
+  </tr>
+</tbody></table>
+<p class="Pp">In the above table, <i>netgrent</i> in <i>race:netgrent</i>
+    signifies that if any of the functions <b>setnetgrent</b>(),
+    <b>getnetgrent_r</b>(), <b>innetgr</b>(), <b>getnetgrent</b>(), or
+    <b>endnetgrent</b>() are used in parallel in different threads of a program,
+    then data races could occur.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">These functions are not in POSIX.1, but <b>setnetgrent</b>(),
+    <b>endnetgrent</b>(), <b>getnetgrent</b>(), and <b>innetgr</b>() are
+    available on most UNIX systems. <b>getnetgrent_r</b>() is not widely
+    available on other systems.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">In the BSD implementation, <b>setnetgrent</b>() returns void.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>sethostent</b>(3), <b>setprotoent</b>(3),
+  <b>setservent</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

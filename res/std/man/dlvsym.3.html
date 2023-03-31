@@ -1,0 +1,163 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/4b0952894c0bbe47541ff66a67573f147cba0e50">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>dlsym(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">dlsym(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">dlsym(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">dlsym, dlvsym - obtain address of a symbol in a shared object or
+    executable</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Dynamic linking library (<i>libdl</i>, <i>-ldl</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;dlfcn.h&gt;</b></pre>
+<pre><b>void *dlsym(void *restrict </b><i>handle</i><b>, const char *restrict </b><i>symbol</i><b>);</b></pre>
+<pre><b>#define _GNU_SOURCE</b>
+<b>#include &lt;dlfcn.h&gt;</b></pre>
+<pre><b>void *dlvsym(void *restrict </b><i>handle</i><b>, const char *restrict </b><i>symbol</i><b>,</b>
+<b>             const char *restrict </b><i>version</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The function <b>dlsym</b>() takes a "handle" of a
+    dynamic loaded shared object returned by <b>dlopen</b>(3) along with a
+    null-terminated symbol name, and returns the address where that symbol is
+    loaded into memory. If the symbol is not found, in the specified object or
+    any of the shared objects that were automatically loaded by <b>dlopen</b>(3)
+    when that object was loaded, <b>dlsym</b>() returns NULL. (The search
+    performed by <b>dlsym</b>() is breadth first through the dependency tree of
+    these shared objects.)</p>
+<p class="Pp">In unusual cases (see NOTES) the value of the symbol could
+    actually be NULL. Therefore, a NULL return from <b>dlsym</b>() need not
+    indicate an error. The correct way to distinguish an error from a symbol
+    whose value is NULL is to call <b>dlerror</b>(3) to clear any old error
+    conditions, then call <b>dlsym</b>(), and then call <b>dlerror</b>(3) again,
+    saving its return value into a variable, and check whether this saved value
+    is not NULL.</p>
+<p class="Pp">There are two special pseudo-handles that may be specified in
+    <i>handle</i>:</p>
+<dl class="Bl-tag">
+  <dt id="RTLD_DEFAULT"><a class="permalink" href="#RTLD_DEFAULT"><b>RTLD_DEFAULT</b></a></dt>
+  <dd>Find the first occurrence of the desired symbol using the default shared
+      object search order. The search will include global symbols in the
+      executable and its dependencies, as well as symbols in shared objects that
+      were dynamically loaded with the <b>RTLD_GLOBAL</b> flag.</dd>
+  <dt id="RTLD_NEXT"><a class="permalink" href="#RTLD_NEXT"><b>RTLD_NEXT</b></a></dt>
+  <dd>Find the next occurrence of the desired symbol in the search order after
+      the current object. This allows one to provide a wrapper around a function
+      in another shared object, so that, for example, the definition of a
+      function in a preloaded shared object (see <b>LD_PRELOAD</b> in
+      <b>ld.so</b>(8)) can find and invoke the "real" function
+      provided in another shared object (or for that matter, the
+      "next" definition of the function in cases where there are
+      multiple layers of preloading).</dd>
+</dl>
+<p class="Pp">The <b>_GNU_SOURCE</b> feature test macro must be defined in order
+    to obtain the definitions of <b>RTLD_DEFAULT</b> and <b>RTLD_NEXT</b> from
+    <i>&lt;dlfcn.h&gt;</i>.</p>
+<p class="Pp">The function <b>dlvsym</b>() does the same as <b>dlsym</b>() but
+    takes a version string as an additional argument.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, these functions return the address associated with
+    <i>symbol</i>. On failure, they return NULL; the cause of the error can be
+    diagnosed using <b>dlerror</b>(3).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>dlsym (), dlvsym ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>dlsym</b>() is present in glibc 2.0 and later. <b>dlvsym</b>()
+    first appeared in glibc 2.1.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001 describes <b>dlsym</b>(). The <b>dlvsym</b>()
+    function is a GNU extension.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">There are several scenarios when the address of a global symbol is
+    NULL. For example, a symbol can be placed at zero address by the linker, via
+    a linker script or with <i>--defsym</i> command-line option. Undefined weak
+    symbols also have NULL value. Finally, the symbol value may be the result of
+    a GNU indirect function (IFUNC) resolver function that returns NULL as the
+    resolved value. In the latter case, <b>dlsym</b>() also returns NULL without
+    error. However, in the former two cases, the behavior of GNU dynamic linker
+    is inconsistent: relocation processing succeeds and the symbol can be
+    observed to have NULL value, but <b>dlsym</b>() fails and <b>dlerror</b>()
+    indicates a lookup error.</p>
+<section class="Ss">
+<h2 class="Ss" id="History"><a class="permalink" href="#History">History</a></h2>
+<p class="Pp">The <b>dlsym</b>() function is part of the dlopen API, derived
+    from SunOS. That system does not have <b>dlvsym</b>().</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">See <b>dlopen</b>(3).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>dl_iterate_phdr</b>(3), <b>dladdr</b>(3), <b>dlerror</b>(3),
+    <b>dlinfo</b>(3), <b>dlopen</b>(3), <b>ld.so</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

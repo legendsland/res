@@ -1,0 +1,140 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/a6031d688d9ef459c57b9fc420f76d767393595b">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>brk(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">brk(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">brk(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">brk, sbrk - change data segment size</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int brk(void *</b><i>addr</i><b>);</b>
+<b>void *sbrk(intptr_t </b><i>increment</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>brk</b>(), <b>sbrk</b>():</p>
+<pre><br>
+    Since glibc 2.19:
+<br>
+        _DEFAULT_SOURCE
+<br>
+            || ((_XOPEN_SOURCE &gt;= 500) &amp;&amp;
+<br>
+                ! (_POSIX_C_SOURCE &gt;= 200112L))
+<br>
+    From glibc 2.12 to glibc 2.19:
+<br>
+        _BSD_SOURCE || _SVID_SOURCE
+<br>
+            || ((_XOPEN_SOURCE &gt;= 500) &amp;&amp;
+<br>
+                ! (_POSIX_C_SOURCE &gt;= 200112L))
+<br>
+    Before glibc 2.12:
+<br>
+        _BSD_SOURCE || _SVID_SOURCE || _XOPEN_SOURCE &gt;= 500</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>brk</b>() and <b>sbrk</b>() change the location of the
+    <i>program break</i>, which defines the end of the process's data segment
+    (i.e., the program break is the first location after the end of the
+    uninitialized data segment). Increasing the program break has the effect of
+    allocating memory to the process; decreasing the break deallocates
+  memory.</p>
+<p class="Pp"><b>brk</b>() sets the end of the data segment to the value
+    specified by <i>addr</i>, when that value is reasonable, the system has
+    enough memory, and the process does not exceed its maximum data size (see
+    <b>setrlimit</b>(2)).</p>
+<p class="Pp"><b>sbrk</b>() increments the program's data space by
+    <i>increment</i> bytes. Calling <b>sbrk</b>() with an <i>increment</i> of 0
+    can be used to find the current location of the program break.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>brk</b>() returns zero. On error, -1 is returned,
+    and <i>errno</i> is set to <b>ENOMEM</b>.</p>
+<p class="Pp">On success, <b>sbrk</b>() returns the previous program break. (If
+    the break was increased, then this value is a pointer to the start of the
+    newly allocated memory). On error, <i>(void&nbsp;*)&nbsp;-1</i> is
+    returned, and <i>errno</i> is set to <b>ENOMEM</b>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">4.3BSD; SUSv1, marked LEGACY in SUSv2, removed in
+  POSIX.1-2001.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Avoid using <b>brk</b>() and <b>sbrk</b>(): the <b>malloc</b>(3)
+    memory allocation package is the portable and comfortable way of allocating
+    memory.</p>
+<p class="Pp">Various systems use various types for the argument of
+    <b>sbrk</b>(). Common are <i>int</i>, <i>ssize_t</i>, <i>ptrdiff_t</i>,
+    <i>intptr_t</i>.</p>
+<section class="Ss">
+<h2 class="Ss" id="C_library/kernel_differences"><a class="permalink" href="#C_library/kernel_differences">C
+  library/kernel differences</a></h2>
+<p class="Pp">The return value described above for <b>brk</b>() is the behavior
+    provided by the glibc wrapper function for the Linux <b>brk</b>() system
+    call. (On most other implementations, the return value from <b>brk</b>() is
+    the same; this return value was also specified in SUSv2.) However, the
+    actual Linux system call returns the new program break on success. On
+    failure, the system call returns the current break. The glibc wrapper
+    function does some work (i.e., checks whether the new break is less than
+    <i>addr</i>) to provide the 0 and -1 return values described above.</p>
+<p class="Pp">On Linux, <b>sbrk</b>() is implemented as a library function that
+    uses the <b>brk</b>() system call, and does some internal bookkeeping so
+    that it can return the old break value.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>execve</b>(2), <b>getrlimit</b>(2), <b>end</b>(3),
+    <b>malloc</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

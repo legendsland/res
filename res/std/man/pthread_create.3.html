@@ -1,0 +1,456 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 2008 Linux Foundation, written by Michael Kerrisk
+       <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/246afe6c9fe30f25f108910909ad3003d124ad39">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>pthread_create(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">pthread_create(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">pthread_create(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pthread_create - create a new thread</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">POSIX threads library (<i>libpthread</i>, <i>-lpthread</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;pthread.h&gt;</b></pre>
+<pre><b>int pthread_create(pthread_t *restrict </b><i>thread</i><b>,</b>
+<b>                   const pthread_attr_t *restrict </b><i>attr</i><b>,</b>
+<b>                   void *(*</b><i>start_routine</i><b>)(void *),</b>
+<b>                   void *restrict </b><i>arg</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <b>pthread_create</b>() function starts a new thread in the
+    calling process. The new thread starts execution by invoking
+    <i>start_routine</i>(); <i>arg</i> is passed as the sole argument of
+    <i>start_routine</i>().</p>
+<p class="Pp">The new thread terminates in one of the following ways:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>It calls <b>pthread_exit</b>(3), specifying an exit status value that is
+      available to another thread in the same process that calls
+      <b>pthread_join</b>(3).</dd>
+  <dt>•</dt>
+  <dd>It returns from <i>start_routine</i>(). This is equivalent to calling
+      <b>pthread_exit</b>(3) with the value supplied in the <i>return</i>
+      statement.</dd>
+  <dt>•</dt>
+  <dd>It is canceled (see <b>pthread_cancel</b>(3)).</dd>
+  <dt>•</dt>
+  <dd>Any of the threads in the process calls <b>exit</b>(3), or the main thread
+      performs a return from <i>main</i>(). This causes the termination of all
+      threads in the process.</dd>
+</dl>
+<p class="Pp">The <i>attr</i> argument points to a <i>pthread_attr_t</i>
+    structure whose contents are used at thread creation time to determine
+    attributes for the new thread; this structure is initialized using
+    <b>pthread_attr_init</b>(3) and related functions. If <i>attr</i> is NULL,
+    then the thread is created with default attributes.</p>
+<p class="Pp">Before returning, a successful call to <b>pthread_create</b>()
+    stores the ID of the new thread in the buffer pointed to by <i>thread</i>;
+    this identifier is used to refer to the thread in subsequent calls to other
+    pthreads functions.</p>
+<p class="Pp">The new thread inherits a copy of the creating thread's signal
+    mask (<b>pthread_sigmask</b>(3)). The set of pending signals for the new
+    thread is empty (<b>sigpending</b>(2)). The new thread does not inherit the
+    creating thread's alternate signal stack (<b>sigaltstack</b>(2)).</p>
+<p class="Pp">The new thread inherits the calling thread's floating-point
+    environment (<b>fenv</b>(3)).</p>
+<p class="Pp">The initial value of the new thread's CPU-time clock is 0 (see
+    <b>pthread_getcpuclockid</b>(3)).</p>
+<section class="Ss">
+<h2 class="Ss" id="Linux-specific_details"><a class="permalink" href="#Linux-specific_details">Linux-specific
+  details</a></h2>
+<p class="Pp">The new thread inherits copies of the calling thread's capability
+    sets (see <b>capabilities</b>(7)) and CPU affinity mask (see
+    <b>sched_setaffinity</b>(2)).</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>pthread_create</b>() returns 0; on error, it
+    returns an error number, and the contents of <i>*thread</i> are
+  undefined.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>Insufficient resources to create another thread.</dd>
+  <dt id="EAGAIN~2"><a class="permalink" href="#EAGAIN~2"><b>EAGAIN</b></a></dt>
+  <dd>A system-imposed limit on the number of threads was encountered. There are
+      a number of limits that may trigger this error: the <b>RLIMIT_NPROC</b>
+      soft resource limit (set via <b>setrlimit</b>(2)), which limits the number
+      of processes and threads for a real user ID, was reached; the kernel's
+      system-wide limit on the number of processes and threads,
+      <i>/proc/sys/kernel/threads-max</i>, was reached (see <b>proc</b>(5)); or
+      the maximum number of PIDs, <i>/proc/sys/kernel/pid_max</i>, was reached
+      (see <b>proc</b>(5)).</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>Invalid settings in <i>attr</i>.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>No permission to set the scheduling policy and parameters specified in
+      <i>attr</i>.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>pthread_create ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">See <b>pthread_self</b>(3) for further information on the thread
+    ID returned in <i>*thread</i> by <b>pthread_create</b>(). Unless real-time
+    scheduling policies are being employed, after a call to
+    <b>pthread_create</b>(), it is indeterminate which thread—the caller
+    or the new thread—will next execute.</p>
+<p class="Pp">A thread may either be <i>joinable</i> or <i>detached</i>. If a
+    thread is joinable, then another thread can call <b>pthread_join</b>(3) to
+    wait for the thread to terminate and fetch its exit status. Only when a
+    terminated joinable thread has been joined are the last of its resources
+    released back to the system. When a detached thread terminates, its
+    resources are automatically released back to the system: it is not possible
+    to join with the thread in order to obtain its exit status. Making a thread
+    detached is useful for some types of daemon threads whose exit status the
+    application does not need to care about. By default, a new thread is created
+    in a joinable state, unless <i>attr</i> was set to create the thread in a
+    detached state (using <b>pthread_attr_setdetachstate</b>(3)).</p>
+<p class="Pp">Under the NPTL threading implementation, if the
+    <b>RLIMIT_STACK</b> soft resource limit <i>at the time the program
+    started</i> has any value other than "unlimited", then it
+    determines the default stack size of new threads. Using
+    <b>pthread_attr_setstacksize</b>(3), the stack size attribute can be
+    explicitly set in the <i>attr</i> argument used to create a thread, in order
+    to obtain a stack size other than the default. If the <b>RLIMIT_STACK</b>
+    resource limit is set to "unlimited", a per-architecture value is
+    used for the stack size. Here is the value for a few architectures:</p>
+<div class="Bd-indent">
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Architecture</b></td>
+    <td><b>Default stack size</b></td>
+  </tr>
+  <tr>
+    <td>i386</td>
+    <td style="text-align: right;">2 MB</td>
+  </tr>
+  <tr>
+    <td>IA-64</td>
+    <td style="text-align: right;">32 MB</td>
+  </tr>
+  <tr>
+    <td>PowerPC</td>
+    <td style="text-align: right;">4 MB</td>
+  </tr>
+  <tr>
+    <td>S/390</td>
+    <td style="text-align: right;">2 MB</td>
+  </tr>
+  <tr>
+    <td>Sparc-32</td>
+    <td style="text-align: right;">2 MB</td>
+  </tr>
+  <tr>
+    <td>Sparc-64</td>
+    <td style="text-align: right;">4 MB</td>
+  </tr>
+  <tr>
+    <td>x86_64</td>
+    <td style="text-align: right;">2 MB</td>
+  </tr>
+</tbody></table>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">In the obsolete LinuxThreads implementation, each of the threads
+    in a process has a different process ID. This is in violation of the POSIX
+    threads specification, and is the source of many other nonconformances to
+    the standard; see <b>pthreads</b>(7).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below demonstrates the use of <b>pthread_create</b>(),
+    as well as a number of other functions in the pthreads API.</p>
+<p class="Pp">In the following run, on a system providing the NPTL threading
+    implementation, the stack size defaults to the value given by the
+    "stack size" resource limit:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$<b> ulimit -s</b>
+8192            # The stack size limit is 8 MB (0x800000 bytes)
+$<b> ./a.out hola salut servus</b>
+Thread 1: top of stack near 0xb7dd03b8; argv_string=hola
+Thread 2: top of stack near 0xb75cf3b8; argv_string=salut
+Thread 3: top of stack near 0xb6dce3b8; argv_string=servus
+Joined with thread 1; returned value was HOLA
+Joined with thread 2; returned value was SALUT
+Joined with thread 3; returned value was SERVUS
+</pre>
+<br>
+<p class="Pp">In the next run, the program explicitly sets a stack size of
+    1&nbsp;MB (using <b>pthread_attr_setstacksize</b>(3)) for the created
+    threads:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$<b> ./a.out -s 0x100000 hola salut servus</b>
+Thread 1: top of stack near 0xb7d723b8; argv_string=hola
+Thread 2: top of stack near 0xb7c713b8; argv_string=salut
+Thread 3: top of stack near 0xb7b703b8; argv_string=servus
+Joined with thread 1; returned value was HOLA
+Joined with thread 2; returned value was SALUT
+Joined with thread 3; returned value was SERVUS
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#include &lt;ctype.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+#define handle_error_en(en, msg) \
+<br>
+        do { errno = en; perror(msg); exit(EXIT_FAILURE); } while (0)
+#define handle_error(msg) \
+<br>
+        do { perror(msg); exit(EXIT_FAILURE); } while (0)
+struct thread_info {    /* Used as argument to thread_start() */
+<br>
+    pthread_t thread_id;        /* ID returned by pthread_create() */
+<br>
+    int       thread_num;       /* Application-defined thread # */
+<br>
+    char     *argv_string;      /* From command-line argument */
+};
+/* Thread start function: display address near top of our stack,
+<br>
+   and return upper-cased copy of argv_string. */
+static void *
+thread_start(void *arg)
+{
+<br>
+    struct thread_info *tinfo = arg;
+<br>
+    char *uargv;
+<br>
+    printf("Thread %d: top of stack near %p; argv_string=%s\n",
+<br>
+           tinfo-&gt;thread_num, (void *) &amp;tinfo, tinfo-&gt;argv_string);
+<br>
+    uargv = strdup(tinfo-&gt;argv_string);
+<br>
+    if (uargv == NULL)
+<br>
+        handle_error("strdup");
+<br>
+    for (char *p = uargv; *p != '\0'; p++)
+<br>
+        *p = toupper(*p);
+<br>
+    return uargv;
+}
+int
+main(int argc, char *argv[])
+{
+<br>
+    int                 s, opt;
+<br>
+    void                *res;
+<br>
+    size_t              num_threads;
+<br>
+    ssize_t             stack_size;
+<br>
+    pthread_attr_t      attr;
+<br>
+    struct thread_info  *tinfo;
+<br>
+    /* The "-s" option specifies a stack size for our threads. */
+<br>
+    stack_size = -1;
+<br>
+    while ((opt = getopt(argc, argv, "s:")) != -1) {
+<br>
+        switch (opt) {
+<br>
+        case 's':
+<br>
+            stack_size = strtoul(optarg, NULL, 0);
+<br>
+            break;
+<br>
+        default:
+<br>
+            fprintf(stderr, "Usage: %s [-s stack-size] arg...\n",
+<br>
+                    argv[0]);
+<br>
+            exit(EXIT_FAILURE);
+<br>
+        }
+<br>
+    }
+<br>
+    num_threads = argc - optind;
+<br>
+    /* Initialize thread creation attributes. */
+<br>
+    s = pthread_attr_init(&amp;attr);
+<br>
+    if (s != 0)
+<br>
+        handle_error_en(s, "pthread_attr_init");
+<br>
+    if (stack_size &gt; 0) {
+<br>
+        s = pthread_attr_setstacksize(&amp;attr, stack_size);
+<br>
+        if (s != 0)
+<br>
+            handle_error_en(s, "pthread_attr_setstacksize");
+<br>
+    }
+<br>
+    /* Allocate memory for pthread_create() arguments. */
+<br>
+    tinfo = calloc(num_threads, sizeof(*tinfo));
+<br>
+    if (tinfo == NULL)
+<br>
+        handle_error("calloc");
+<br>
+    /* Create one thread for each command-line argument. */
+<br>
+    for (size_t tnum = 0; tnum &lt; num_threads; tnum++) {
+<br>
+        tinfo[tnum].thread_num = tnum + 1;
+<br>
+        tinfo[tnum].argv_string = argv[optind + tnum];
+<br>
+        /* The pthread_create() call stores the thread ID into
+<br>
+           corresponding element of tinfo[]. */
+<br>
+        s = pthread_create(&amp;tinfo[tnum].thread_id, &amp;attr,
+<br>
+                           &amp;thread_start, &amp;tinfo[tnum]);
+<br>
+        if (s != 0)
+<br>
+            handle_error_en(s, "pthread_create");
+<br>
+    }
+<br>
+    /* Destroy the thread attributes object, since it is no
+<br>
+       longer needed. */
+<br>
+    s = pthread_attr_destroy(&amp;attr);
+<br>
+    if (s != 0)
+<br>
+        handle_error_en(s, "pthread_attr_destroy");
+<br>
+    /* Now join with each thread, and display its returned value. */
+<br>
+    for (size_t tnum = 0; tnum &lt; num_threads; tnum++) {
+<br>
+        s = pthread_join(tinfo[tnum].thread_id, &amp;res);
+<br>
+        if (s != 0)
+<br>
+            handle_error_en(s, "pthread_join");
+<br>
+        printf("Joined with thread %d; returned value was %s\n",
+<br>
+               tinfo[tnum].thread_num, (char *) res);
+<br>
+        free(res);      /* Free memory allocated by thread */
+<br>
+    }
+<br>
+    free(tinfo);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>getrlimit</b>(2), <b>pthread_attr_init</b>(3),
+    <b>pthread_cancel</b>(3), <b>pthread_detach</b>(3), <b>pthread_equal</b>(3),
+    <b>pthread_exit</b>(3), <b>pthread_getattr_np</b>(3),
+    <b>pthread_join</b>(3), <b>pthread_self</b>(3),
+    <b>pthread_setattr_default_np</b>(3), <b>pthreads</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

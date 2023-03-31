@@ -1,0 +1,324 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/278ddbd9630461ccc32aa21febfb092960bd5041">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>getdate(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">getdate(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">getdate(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getdate, getdate_r - convert a date-plus-time string to
+    broken-down time</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;time.h&gt;</b></pre>
+<pre><b>struct tm *getdate(const char *</b><i>string</i><b>);</b></pre>
+<pre><b>extern int getdate_err;</b></pre>
+<pre><b>int getdate_r(const char *restrict </b><i>string</i><b>, struct tm *restrict </b><i>res</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>getdate</b>():</p>
+<pre><br>
+    _XOPEN_SOURCE &gt;= 500</pre>
+<p class="Pp"><b>getdate_r</b>():</p>
+<pre><br>
+    _GNU_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The function <b>getdate</b>() converts a string representation of
+    a date and time, contained in the buffer pointed to by <i>string</i>, into a
+    broken-down time. The broken-down time is stored in a <i>tm</i> structure,
+    and a pointer to this structure is returned as the function result. This
+    <i>tm</i> structure is allocated in static storage, and consequently it will
+    be overwritten by further calls to <b>getdate</b>().</p>
+<p class="Pp">In contrast to <b>strptime</b>(3), (which has a <i>format</i>
+    argument), <b>getdate</b>() uses the formats found in the file whose full
+    pathname is given in the environment variable <b>DATEMSK</b>. The first line
+    in the file that matches the given input string is used for the
+  conversion.</p>
+<p class="Pp">The matching is done case insensitively. Superfluous whitespace,
+    either in the pattern or in the string to be converted, is ignored.</p>
+<p class="Pp">The conversion specifications that a pattern can contain are those
+    given for <b>strptime</b>(3). One more conversion specification is specified
+    in POSIX.1-2001:</p>
+<dl class="Bl-tag">
+  <dt><b>%Z</b></dt>
+  <dd>Timezone name. This is not implemented in glibc.</dd>
+</dl>
+<p class="Pp">When <b>%Z</b> is given, the structure containing the broken-down
+    time is initialized with values corresponding to the current time in the
+    given timezone. Otherwise, the structure is initialized to the broken-down
+    time corresponding to the current local time (as by a call to
+    <b>localtime</b>(3)).</p>
+<p class="Pp">When only the day of the week is given, the day is taken to be the
+    first such day on or after today.</p>
+<p class="Pp">When only the month is given (and no year), the month is taken to
+    be the first such month equal to or after the current month. If no day is
+    given, it is the first day of the month.</p>
+<p class="Pp">When no hour, minute, and second are given, the current hour,
+    minute, and second are taken.</p>
+<p class="Pp">If no date is given, but we know the hour, then that hour is taken
+    to be the first such hour equal to or after the current hour.</p>
+<p class="Pp"><b>getdate_r</b>() is a GNU extension that provides a reentrant
+    version of <b>getdate</b>(). Rather than using a global variable to report
+    errors and a static buffer to return the broken down time, it returns errors
+    via the function result value, and returns the resulting broken-down time in
+    the caller-allocated buffer pointed to by the argument <i>res</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">When successful, <b>getdate</b>() returns a pointer to a <i>struct
+    tm</i>. Otherwise, it returns NULL and sets the global variable
+    <i>getdate_err</i> to one of the error numbers shown below. Changes to
+    <i>errno</i> are unspecified.</p>
+<p class="Pp">On success <b>getdate_r</b>() returns 0; on error it returns one
+    of the error numbers shown below.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The following errors are returned via <i>getdate_err</i> (for
+    <b>getdate</b>()) or as the function result (for <b>getdate_r</b>()):</p>
+<dl class="Bl-tag">
+  <dt><b>1</b></dt>
+  <dd>The <b>DATEMSK</b> environment variable is not defined, or its value is an
+      empty string.</dd>
+  <dt><b>2</b></dt>
+  <dd>The template file specified by <b>DATEMSK</b> cannot be opened for
+      reading.</dd>
+  <dt><b>3</b></dt>
+  <dd>Failed to get file status information.</dd>
+  <dt><b>4</b></dt>
+  <dd>The template file is not a regular file.</dd>
+  <dt><b>5</b></dt>
+  <dd>An error was encountered while reading the template file.</dd>
+  <dt><b>6</b></dt>
+  <dd>Memory allocation failed (not enough memory available).</dd>
+  <dt><b>7</b></dt>
+  <dd>There is no line in the file that matches the input.</dd>
+  <dt><b>8</b></dt>
+  <dd>Invalid input specification.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ENVIRONMENT"><a class="permalink" href="#ENVIRONMENT">ENVIRONMENT</a></h1>
+<dl class="Bl-tag">
+  <dt id="DATEMSK"><a class="permalink" href="#DATEMSK"><b>DATEMSK</b></a></dt>
+  <dd>File containing format patterns.</dd>
+  <dt id="TZ"><a class="permalink" href="#TZ"><b>TZ</b>, <b>LC_TIME</b></a></dt>
+  <dd>Variables used by <b>strptime</b>(3).</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>getdate ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race:getdate env locale</td>
+  </tr>
+  <tr>
+    <td>getdate_r ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe env locale</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The POSIX.1 specification for <b>strptime</b>(3) contains
+    conversion specifications using the <b>%E</b> or <b>%O</b> modifier, while
+    such specifications are not given for <b>getdate</b>(). In glibc,
+    <b>getdate</b>() is implemented using <b>strptime</b>(3), so that precisely
+    the same conversions are supported by both.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below calls <b>getdate</b>() for each of its
+    command-line arguments, and for each call displays the values in the fields
+    of the returned <i>tm</i> structure. The following shell session
+    demonstrates the operation of the program:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$<b> TFILE=$PWD/tfile</b>
+$<b> echo '%A' &gt; $TFILE </b>      # Full name of the day of the week
+$<b> echo '%T' &gt;&gt; $TFILE</b>      # Time (HH:MM:SS)
+$<b> echo '%F' &gt;&gt; $TFILE</b>      # ISO date (YYYY-MM-DD)
+$<b> date</b>
+$<b> export DATEMSK=$TFILE</b>
+$<b> ./a.out Tuesday '2009-12-28' '12:22:33'</b>
+Sun Sep  7 06:03:36 CEST 2008
+Call 1 ("Tuesday") succeeded:
+<br>
+    tm_sec   = 36
+<br>
+    tm_min   = 3
+<br>
+    tm_hour  = 6
+<br>
+    tm_mday  = 9
+<br>
+    tm_mon   = 8
+<br>
+    tm_year  = 108
+<br>
+    tm_wday  = 2
+<br>
+    tm_yday  = 252
+<br>
+    tm_isdst = 1
+Call 2 ("2009-12-28") succeeded:
+<br>
+    tm_sec   = 36
+<br>
+    tm_min   = 3
+<br>
+    tm_hour  = 6
+<br>
+    tm_mday  = 28
+<br>
+    tm_mon   = 11
+<br>
+    tm_year  = 109
+<br>
+    tm_wday  = 1
+<br>
+    tm_yday  = 361
+<br>
+    tm_isdst = 0
+Call 3 ("12:22:33") succeeded:
+<br>
+    tm_sec   = 33
+<br>
+    tm_min   = 22
+<br>
+    tm_hour  = 12
+<br>
+    tm_mday  = 7
+<br>
+    tm_mon   = 8
+<br>
+    tm_year  = 108
+<br>
+    tm_wday  = 0
+<br>
+    tm_yday  = 250
+<br>
+    tm_isdst = 1
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#define _GNU_SOURCE
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;time.h&gt;
+int
+main(int argc, char *argv[])
+{
+<br>
+    struct tm *tmp;
+<br>
+    for (size_t j = 1; j &lt; argc; j++) {
+<br>
+        tmp = getdate(argv[j]);
+<br>
+        if (tmp == NULL) {
+<br>
+            printf("Call %zu failed; getdate_err = %d\n",
+<br>
+                   j, getdate_err);
+<br>
+            continue;
+<br>
+        }
+<br>
+        printf("Call %zu (\"%s\") succeeded:\n", j, argv[j]);
+<br>
+        printf("    tm_sec   = %d\n", tmp-&gt;tm_sec);
+<br>
+        printf("    tm_min   = %d\n", tmp-&gt;tm_min);
+<br>
+        printf("    tm_hour  = %d\n", tmp-&gt;tm_hour);
+<br>
+        printf("    tm_mday  = %d\n", tmp-&gt;tm_mday);
+<br>
+        printf("    tm_mon   = %d\n", tmp-&gt;tm_mon);
+<br>
+        printf("    tm_year  = %d\n", tmp-&gt;tm_year);
+<br>
+        printf("    tm_wday  = %d\n", tmp-&gt;tm_wday);
+<br>
+        printf("    tm_yday  = %d\n", tmp-&gt;tm_yday);
+<br>
+        printf("    tm_isdst = %d\n", tmp-&gt;tm_isdst);
+<br>
+    }
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>time</b>(2), <b>localtime</b>(3), <b>setlocale</b>(3),
+    <b>strftime</b>(3), <b>strptime</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

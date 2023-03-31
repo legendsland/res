@@ -1,0 +1,243 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/21d6e3b7e0208dbd62ddf46d38f9770746bee153">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>PTHREAD_CREATE(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">PTHREAD_CREATE(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">PTHREAD_CREATE(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pthread_create — thread creation</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;pthread.h&gt;</pre>
+<pre>int pthread_create(pthread_t *restrict <i>thread</i>,
+<br>
+    const pthread_attr_t *restrict <i>attr</i>,
+<br>
+    void *(*<i>start_routine</i>)(void*), void *restrict <i>arg</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>pthread_create</i>() function shall create a new thread,
+    with attributes specified by <i>attr</i>, within a process. If <i>attr</i>
+    is NULL, the default attributes shall be used. If the attributes specified
+    by <i>attr</i> are modified later, the thread's attributes shall not be
+    affected. Upon successful completion, <i>pthread_create</i>() shall store
+    the ID of the created thread in the location referenced by
+  <i>thread</i>.</p>
+<p class="Pp">The thread is created executing <i>start_routine</i> with
+    <i>arg</i> as its sole argument. If the <i>start_routine</i> returns, the
+    effect shall be as if there was an implicit call to <i>pthread_exit</i>()
+    using the return value of <i>start_routine</i> as the exit status. Note that
+    the thread in which <i>main</i>() was originally invoked differs from this.
+    When it returns from <i>main</i>(), the effect shall be as if there was an
+    implicit call to <i>exit</i>() using the return value of <i>main</i>() as
+    the exit status.</p>
+<p class="Pp">The signal state of the new thread shall be initialized as
+    follows:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>The signal mask shall be inherited from the creating thread.</dd>
+  <dt> *</dt>
+  <dd>The set of signals pending for the new thread shall be empty.</dd>
+</dl>
+<p class="Pp">The thread-local current locale and the alternate stack shall not
+    be inherited.</p>
+<p class="Pp">The floating-point environment shall be inherited from the
+    creating thread.</p>
+<p class="Pp">If <i>pthread_create</i>() fails, no new thread is created and the
+    contents of the location referenced by <i>thread</i> are undefined.</p>
+<p class="Pp">If _POSIX_THREAD_CPUTIME is defined, the new thread shall have a
+    CPU-time clock accessible, and the initial value of this clock shall be set
+    to zero.</p>
+<p class="Pp">The behavior is undefined if the value specified by the
+    <i>attr</i> argument to <i>pthread_create</i>() does not refer to an
+    initialized thread attributes object.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">If successful, the <i>pthread_create</i>() function shall return
+    zero; otherwise, an error number shall be returned to indicate the
+  error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>pthread_create</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>The system lacked the necessary resources to create another thread, or the
+      system-imposed limit on the total number of threads in a process
+      {PTHREAD_THREADS_MAX} would be exceeded.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The caller does not have appropriate privileges to set the required
+      scheduling parameters or scheduling policy.</dd>
+</dl>
+<p class="Pp">The <i>pthread_create</i>() function shall not return an error
+    code of <b>[EINTR]</b>.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">There is no requirement on the implementation that the ID of the
+    created thread be available before the newly created thread starts
+    executing. The calling thread can obtain the ID of the created thread
+    through the <i>thread</i> argument of the <i>pthread_create</i>() function,
+    and the newly created thread can obtain its ID by a call to
+    <i>pthread_self</i>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">A suggested alternative to <i>pthread_create</i>() would be to
+    define two separate operations: create and start. Some applications would
+    find such behavior more natural. Ada, in particular, separates the
+    ``creation'' of a task from its ``activation''.</p>
+<p class="Pp">Splitting the operation was rejected by the standard developers
+    for many reasons:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>The number of calls required to start a thread would increase from one to
+      two and thus place an additional burden on applications that do not
+      require the additional synchronization. The second call, however, could be
+      avoided by the additional complication of a start-up state attribute.</dd>
+  <dt> *</dt>
+  <dd>An extra state would be introduced: ``created but not started''. This
+      would require the standard to specify the behavior of the thread
+      operations when the target has not yet started executing.</dd>
+  <dt> *</dt>
+  <dd>For those applications that require such behavior, it is possible to
+      simulate the two separate steps with the facilities that are currently
+      provided. The <i>start_routine</i>() can synchronize by waiting on a
+      condition variable that is signaled by the start operation.</dd>
+</dl>
+<p class="Pp">An Ada implementor can choose to create the thread at either of
+    two points in the Ada program: when the task object is created, or when the
+    task is activated (generally at a ``begin''). If the first approach is
+    adopted, the <i>start_routine</i>() needs to wait on a condition variable to
+    receive the order to begin ``activation''. The second approach requires no
+    such condition variable or extra synchronization. In either approach, a
+    separate Ada task control block would need to be created when the task
+    object is created to hold rendezvous queues, and so on.</p>
+<p class="Pp">An extension of the preceding model would be to allow the state of
+    the thread to be modified between the create and start. This would allow the
+    thread attributes object to be eliminated. This has been rejected
+  because:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>All state in the thread attributes object has to be able to be set for the
+      thread. This would require the definition of functions to modify thread
+      attributes. There would be no reduction in the number of function calls
+      required to set up the thread. In fact, for an application that creates
+      all threads using identical attributes, the number of function calls
+      required to set up the threads would be dramatically increased. Use of a
+      thread attributes object permits the application to make one set of
+      attribute setting function calls. Otherwise, the set of attribute setting
+      function calls needs to be made for each thread creation.</dd>
+  <dt> *</dt>
+  <dd>Depending on the implementation architecture, functions to set thread
+      state would require kernel calls, or for other implementation reasons
+      would not be able to be implemented as macros, thereby increasing the cost
+      of thread creation.</dd>
+  <dt> *</dt>
+  <dd>The ability for applications to segregate threads by class would be
+    lost.</dd>
+</dl>
+<p class="Pp">Another suggested alternative uses a model similar to that for
+    process creation, such as ``thread fork''. The fork semantics would provide
+    more flexibility and the ``create'' function can be implemented simply by
+    doing a thread fork followed immediately by a call to the desired ``start
+    routine'' for the thread. This alternative has these problems:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>For many implementations, the entire stack of the calling thread would
+      need to be duplicated, since in many architectures there is no way to
+      determine the size of the calling frame.</dd>
+  <dt> *</dt>
+  <dd>Efficiency is reduced since at least some part of the stack has to be
+      copied, even though in most cases the thread never needs the copied
+      context, since it merely calls the desired start routine.</dd>
+</dl>
+<p class="Pp">If an implementation detects that the value specified by the
+    <i>attr</i> argument to <i>pthread_create</i>() does not refer to an
+    initialized thread attributes object, it is recommended that the function
+    should fail and report an <b>[EINVAL]</b> error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>fork</i>()</i>, <i><i>pthread_exit</i>()</i>,
+    <i><i>pthread_join</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Section
+    4.12</i>, <i>Memory Synchronization</i>, <i><b>&lt;pthread.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

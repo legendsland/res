@@ -1,0 +1,261 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/6c8115ae8c0cbfd211bd14fb929e4d3fce1c4639">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>syslog(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">syslog(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">syslog(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">closelog, openlog, syslog, vsyslog - send messages to the system
+    logger</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;syslog.h&gt;</b></pre>
+<pre><b>void openlog(const char *</b><i>ident</i><b>, int </b><i>option</i><b>, int </b><i>facility</i><b>);</b>
+<b>void syslog(int </b><i>priority</i><b>, const char *</b><i>format</i><b>, ...);</b>
+<b>void closelog(void);</b></pre>
+<pre><b>void vsyslog(int </b><i>priority</i><b>, const char *</b><i>format</i><b>, va_list </b><i>ap</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>vsyslog</b>():</p>
+<pre><br>
+    Since glibc 2.19:
+<br>
+        _DEFAULT_SOURCE
+<br>
+    glibc 2.19 and earlier:
+<br>
+        _BSD_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="openlog()"><a class="permalink" href="#openlog()">openlog()</a></h2>
+<p class="Pp"><b>openlog</b>() opens a connection to the system logger for a
+    program.</p>
+<p class="Pp">The string pointed to by <i>ident</i> is prepended to every
+    message, and is typically set to the program name. If <i>ident</i> is NULL,
+    the program name is used. (POSIX.1-2008 does not specify the behavior when
+    <i>ident</i> is NULL.)</p>
+<p class="Pp">The <i>option</i> argument specifies flags which control the
+    operation of <b>openlog</b>() and subsequent calls to <b>syslog</b>(). The
+    <i>facility</i> argument establishes a default to be used if none is
+    specified in subsequent calls to <b>syslog</b>(). The values that may be
+    specified for <i>option</i> and <i>facility</i> are described below.</p>
+<p class="Pp">The use of <b>openlog</b>() is optional; it will automatically be
+    called by <b>syslog</b>() if necessary, in which case <i>ident</i> will
+    default to NULL.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="syslog()_and_vsyslog()"><a class="permalink" href="#syslog()_and_vsyslog()">syslog()
+  and vsyslog()</a></h2>
+<p class="Pp"><b>syslog</b>() generates a log message, which will be distributed
+    by <b>syslogd</b>(8).</p>
+<p class="Pp">The <i>priority</i> argument is formed by ORing together a
+    <i>facility</i> value and a <i>level</i> value (described below). If no
+    <i>facility</i> value is ORed into <i>priority</i>, then the default value
+    set by <b>openlog</b>() is used, or, if there was no preceding
+    <b>openlog</b>() call, a default of <b>LOG_USER</b> is employed.</p>
+<p class="Pp">The remaining arguments are a <i>format</i>, as in
+    <b>printf</b>(3), and any arguments required by the <i>format</i>, except
+    that the two-character sequence <b>%m</b> will be replaced by the error
+    message string <i>strerror</i>(<i>errno</i>). The format string need not
+    include a terminating newline character.</p>
+<p class="Pp">The function <b>vsyslog</b>() performs the same task as
+    <b>syslog</b>() with the difference that it takes a set of arguments which
+    have been obtained using the <b>stdarg</b>(3) variable argument list
+  macros.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="closelog()"><a class="permalink" href="#closelog()">closelog()</a></h2>
+<p class="Pp"><b>closelog</b>() closes the file descriptor being used to write
+    to the system logger. The use of <b>closelog</b>() is optional.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss">Values for <i>option</i></h2>
+<p class="Pp">The <i>option</i> argument to <b>openlog</b>() is a bit mask
+    constructed by ORing together any of the following values:</p>
+<dl class="Bl-tag">
+  <dt id="LOG_CONS"><a class="permalink" href="#LOG_CONS"><b>LOG_CONS</b></a></dt>
+  <dd>Write directly to the system console if there is an error while sending to
+      the system logger.</dd>
+  <dt id="LOG_NDELAY"><a class="permalink" href="#LOG_NDELAY"><b>LOG_NDELAY</b></a></dt>
+  <dd>Open the connection immediately (normally, the connection is opened when
+      the first message is logged). This may be useful, for example, if a
+      subsequent <b>chroot</b>(2) would make the pathname used internally by the
+      logging facility unreachable.</dd>
+  <dt id="LOG_NOWAIT"><a class="permalink" href="#LOG_NOWAIT"><b>LOG_NOWAIT</b></a></dt>
+  <dd>Don't wait for child processes that may have been created while logging
+      the message. (The GNU C library does not create a child process, so this
+      option has no effect on Linux.)</dd>
+  <dt id="LOG_ODELAY"><a class="permalink" href="#LOG_ODELAY"><b>LOG_ODELAY</b></a></dt>
+  <dd>The converse of <b>LOG_NDELAY</b>; opening of the connection is delayed
+      until <b>syslog</b>() is called. (This is the default, and need not be
+      specified.)</dd>
+  <dt id="LOG_PERROR"><a class="permalink" href="#LOG_PERROR"><b>LOG_PERROR</b></a></dt>
+  <dd>(Not in POSIX.1-2001 or POSIX.1-2008.) Also log the message to
+      <i>stderr</i>.</dd>
+  <dt id="LOG_PID"><a class="permalink" href="#LOG_PID"><b>LOG_PID</b></a></dt>
+  <dd>Include the caller's PID with each message.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss">Values for <i>facility</i></h2>
+<p class="Pp">The <i>facility</i> argument is used to specify what type of
+    program is logging the message. This lets the configuration file specify
+    that messages from different facilities will be handled differently.</p>
+<dl class="Bl-tag">
+  <dt id="LOG_AUTH"><a class="permalink" href="#LOG_AUTH"><b>LOG_AUTH</b></a></dt>
+  <dd>security/authorization messages</dd>
+  <dt id="LOG_AUTHPRIV"><a class="permalink" href="#LOG_AUTHPRIV"><b>LOG_AUTHPRIV</b></a></dt>
+  <dd>security/authorization messages (private)</dd>
+  <dt id="LOG_CRON"><a class="permalink" href="#LOG_CRON"><b>LOG_CRON</b></a></dt>
+  <dd>clock daemon (<b>cron</b> and <b>at</b>)</dd>
+  <dt id="LOG_DAEMON"><a class="permalink" href="#LOG_DAEMON"><b>LOG_DAEMON</b></a></dt>
+  <dd>system daemons without separate facility value</dd>
+  <dt id="LOG_FTP"><a class="permalink" href="#LOG_FTP"><b>LOG_FTP</b></a></dt>
+  <dd>ftp daemon</dd>
+  <dt id="LOG_KERN"><a class="permalink" href="#LOG_KERN"><b>LOG_KERN</b></a></dt>
+  <dd>kernel messages (these can't be generated from user processes)</dd>
+  <dt id="LOG_LOCAL0"><a class="permalink" href="#LOG_LOCAL0"><b>LOG_LOCAL0</b>
+    through <b>LOG_LOCAL7</b></a></dt>
+  <dd>reserved for local use</dd>
+  <dt id="LOG_LPR"><a class="permalink" href="#LOG_LPR"><b>LOG_LPR</b></a></dt>
+  <dd>line printer subsystem</dd>
+  <dt id="LOG_MAIL"><a class="permalink" href="#LOG_MAIL"><b>LOG_MAIL</b></a></dt>
+  <dd>mail subsystem</dd>
+  <dt id="LOG_NEWS"><a class="permalink" href="#LOG_NEWS"><b>LOG_NEWS</b></a></dt>
+  <dd>USENET news subsystem</dd>
+  <dt id="LOG_SYSLOG"><a class="permalink" href="#LOG_SYSLOG"><b>LOG_SYSLOG</b></a></dt>
+  <dd>messages generated internally by <b>syslogd</b>(8)</dd>
+  <dt id="LOG_USER"><a class="permalink" href="#LOG_USER"><b>LOG_USER</b>
+    (default)</a></dt>
+  <dd>generic user-level messages</dd>
+  <dt id="LOG_UUCP"><a class="permalink" href="#LOG_UUCP"><b>LOG_UUCP</b></a></dt>
+  <dd>UUCP subsystem</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss">Values for <i>level</i></h2>
+<p class="Pp">This determines the importance of the message. The levels are, in
+    order of decreasing importance:</p>
+<dl class="Bl-tag">
+  <dt id="LOG_EMERG"><a class="permalink" href="#LOG_EMERG"><b>LOG_EMERG</b></a></dt>
+  <dd>system is unusable</dd>
+  <dt id="LOG_ALERT"><a class="permalink" href="#LOG_ALERT"><b>LOG_ALERT</b></a></dt>
+  <dd>action must be taken immediately</dd>
+  <dt id="LOG_CRIT"><a class="permalink" href="#LOG_CRIT"><b>LOG_CRIT</b></a></dt>
+  <dd>critical conditions</dd>
+  <dt id="LOG_ERR"><a class="permalink" href="#LOG_ERR"><b>LOG_ERR</b></a></dt>
+  <dd>error conditions</dd>
+  <dt id="LOG_WARNING"><a class="permalink" href="#LOG_WARNING"><b>LOG_WARNING</b></a></dt>
+  <dd>warning conditions</dd>
+  <dt id="LOG_NOTICE"><a class="permalink" href="#LOG_NOTICE"><b>LOG_NOTICE</b></a></dt>
+  <dd>normal, but significant, condition</dd>
+  <dt id="LOG_INFO"><a class="permalink" href="#LOG_INFO"><b>LOG_INFO</b></a></dt>
+  <dd>informational message</dd>
+  <dt id="LOG_DEBUG"><a class="permalink" href="#LOG_DEBUG"><b>LOG_DEBUG</b></a></dt>
+  <dd>debug-level message</dd>
+</dl>
+<p class="Pp">The function <b>setlogmask</b>(3) can be used to restrict logging
+    to specified levels only.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>openlog (), closelog ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+  <tr>
+    <td>syslog (), vsyslog ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe env locale</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">The functions <b>openlog</b>(), <b>closelog</b>(), and
+    <b>syslog</b>() (but not <b>vsyslog</b>()) are specified in SUSv2,
+    POSIX.1-2001, and POSIX.1-2008.</p>
+<p class="Pp">POSIX.1-2001 specifies only the <b>LOG_USER</b> and
+    <b>LOG_LOCAL*</b> values for <i>facility</i>. However, with the exception of
+    <b>LOG_AUTHPRIV</b> and <b>LOG_FTP</b>, the other <i>facility</i> values
+    appear on most UNIX systems.</p>
+<p class="Pp">The <b>LOG_PERROR</b> value for <i>option</i> is not specified by
+    POSIX.1-2001 or POSIX.1-2008, but is available in most versions of UNIX.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The argument <i>ident</i> in the call of <b>openlog</b>() is
+    probably stored as-is. Thus, if the string it points to is changed,
+    <b>syslog</b>() may start prepending the changed string, and if the string
+    it points to ceases to exist, the results are undefined. Most portable is to
+    use a string constant.</p>
+<p class="Pp">Never pass a string with user-supplied data as a format, use the
+    following instead:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>syslog(priority, "%s", string);
+</pre>
+<br>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>journalctl</b>(1), <b>logger</b>(1), <b>setlogmask</b>(3),
+    <b>syslog.conf</b>(5), <b>syslogd</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

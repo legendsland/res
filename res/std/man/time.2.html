@@ -1,0 +1,140 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 1992 Drew Eckhardt (drew@cs.colorado.edu), March 28, 1992
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Modified by Michael Haardt <michael@moria.de>
+   Modified Sat Jul 24 14:13:40 1993 by Rik Faith <faith@cs.unc.edu>
+   Additions by Joseph S. Myers <jsm28@cam.ac.uk>, 970909
+   --><head>
+<meta name="dc.identifier" content="res/f4d30df6ffebd56b2184054be36b460aecd501f4">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>time(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">time(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">time(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">time - get time in seconds</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;time.h&gt;</b></pre>
+<pre><b>time_t time(time_t *_Nullable </b><i>tloc</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>time</b>() returns the time as the number of seconds since the
+    Epoch, 1970-01-01 00:00:00 +0000 (UTC).</p>
+<p class="Pp">If <i>tloc</i> is non-NULL, the return value is also stored in the
+    memory pointed to by <i>tloc</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, the value of time in seconds since the Epoch is
+    returned. On error, <i>((time_t)&nbsp;-1)</i> is returned, and
+    <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>tloc</i> points outside your accessible address space (but see
+    BUGS).</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>On systems where the C library <b>time</b>() wrapper function invokes an
+      implementation provided by the <b>vdso</b>(7) (so that there is no trap
+      into the kernel), an invalid address may instead trigger a <b>SIGSEGV</b>
+      signal.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">SVr4, 4.3BSD, C89, C99, POSIX.1-2001. POSIX does not specify any
+    error conditions.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">POSIX.1 defines <i>seconds since the Epoch</i> using a formula
+    that approximates the number of seconds between a specified time and the
+    Epoch. This formula takes account of the facts that all years that are
+    evenly divisible by 4 are leap years, but years that are evenly divisible by
+    100 are not leap years unless they are also evenly divisible by 400, in
+    which case they are leap years. This value is not the same as the actual
+    number of seconds between the time and the Epoch, because of leap seconds
+    and because system clocks are not required to be synchronized to a standard
+    reference. The intention is that the interpretation of seconds since the
+    Epoch values be consistent; see POSIX.1-2008 Rationale A.4.15 for further
+    rationale.</p>
+<p class="Pp">On Linux, a call to <b>time</b>() with <i>tloc</i> specified as
+    NULL cannot fail with the error <b>EOVERFLOW</b>, even on ABIs where
+    <i>time_t</i> is a signed 32-bit integer and the clock reaches or exceeds
+    2**31 seconds (2038-01-19 03:14:08 UTC, ignoring leap seconds). (POSIX.1
+    permits, but does not require, the <b>EOVERFLOW</b> error in the case where
+    the seconds since the Epoch will not fit in <i>time_t</i>.) Instead, the
+    behavior on Linux is undefined when the system time is out of the
+    <i>time_t</i> range. Applications intended to run after 2038 should use ABIs
+    with <i>time_t</i> wider than 32 bits.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">Error returns from this system call are indistinguishable from
+    successful reports that the time is a few seconds <i>before</i> the Epoch,
+    so the C library wrapper function never sets <i>errno</i> as a result of
+    this call.</p>
+<p class="Pp">The <i>tloc</i> argument is obsolescent and should always be NULL
+    in new code. When <i>tloc</i> is NULL, the call cannot fail.</p>
+<section class="Ss">
+<h2 class="Ss" id="C_library/kernel_differences"><a class="permalink" href="#C_library/kernel_differences">C
+  library/kernel differences</a></h2>
+<p class="Pp">On some architectures, an implementation of <b>time</b>() is
+    provided in the <b>vdso</b>(7).</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>date</b>(1), <b>gettimeofday</b>(2), <b>ctime</b>(3),
+    <b>ftime</b>(3), <b>time</b>(7), <b>vdso</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

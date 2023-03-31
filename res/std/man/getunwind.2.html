@@ -1,0 +1,121 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2006 Red Hat, Inc. All Rights Reserved.
+   Written by Marcela Maslanova <mmaslano@redhat.com>
+   and Copyright 2013, Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/2795f73844e1ee847985c7729f92bc3afeddb0bc">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>getunwind(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">getunwind(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">getunwind(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getunwind - copy the unwind data to caller's buffer</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;linux/unwind.h&gt;</b>
+<b>#include &lt;sys/syscall.h&gt;</b>      /* Definition of <b>SYS_*</b> constants */
+<b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>[[deprecated]] long syscall(SYS_getunwind, void </b><i>buf</i><b>[.</b><i>buf_size</i><b>],</b>
+<b>                            size_t </b><i>buf_size</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><i>Note: this system call is obsolete.</i></p>
+<p class="Pp">The IA-64-specific <b>getunwind</b>() system call copies the
+    kernel's call frame unwind data into the buffer pointed to by <i>buf</i> and
+    returns the size of the unwind data; this data describes the gate page
+    (kernel code that is mapped into user space).</p>
+<p class="Pp">The size of the buffer <i>buf</i> is specified in <i>buf_size</i>.
+    The data is copied only if <i>buf_size</i> is greater than or equal to the
+    size of the unwind data and <i>buf</i> is not NULL; otherwise, no data is
+    copied, and the call succeeds, returning the size that would be needed to
+    store the unwind data.</p>
+<p class="Pp">The first part of the unwind data contains an unwind table. The
+    rest contains the associated unwind information, in no particular order. The
+    unwind table contains entries of the following form:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>u64 start;      (64-bit address of start of function)
+u64 end;        (64-bit address of end of function)
+u64 info;       (BUF-relative offset to unwind info)
+</pre>
+<br>
+<p class="Pp">An entry whose <i>start</i> value is zero indicates the end of the
+    table. For more information about the format, see the <i>IA-64 Software
+    Conventions and Runtime Architecture</i> manual.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>getunwind</b>() returns the size of the unwind
+    data. On error, -1 is returned and <i>errno</i> is set to indicate the
+    error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp"><b>getunwind</b>() fails with the error <b>EFAULT</b> if the
+    unwind info can't be stored in the space specified by <i>buf</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">This system call is available since Linux 2.4.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This system call is Linux-specific, and is available only on the
+    IA-64 architecture.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">This system call has been deprecated. The modern way to obtain the
+    kernel's unwind data is via the <b>vdso</b>(7).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>getauxval</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

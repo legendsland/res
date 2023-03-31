@@ -1,0 +1,269 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   This man page is Copyright (C) 1999 Andi Kleen <ak@muc.de>.
+  
+   %%%LICENSE_START(VERBATIM_ONE_PARA)
+   Permission is granted to distribute possibly modified copies
+   of this page provided the header is included verbatim,
+   and in case of nontrivial modification author and date
+   of the modification is added to the header.
+   %%%LICENSE_END
+  
+   $Id: udp.7,v 1.7 2000/01/22 01:55:05 freitag Exp $
+   --><head>
+<meta name="dc.identifier" content="res/4c42f5dcd8e719a0586d27d46f3e74ba41132e96">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>udp(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">udp(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">udp(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">udp - User Datagram Protocol for IPv4</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/socket.h&gt;</b>
+<b>#include &lt;netinet/in.h&gt;</b>
+<b>#include &lt;netinet/udp.h&gt;</b></pre>
+<pre><i>udp_socket</i><b> = socket(AF_INET, SOCK_DGRAM, 0);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">This is an implementation of the User Datagram Protocol described
+    in RFC&nbsp;768. It implements a connectionless, unreliable datagram
+    packet service. Packets may be reordered or duplicated before they arrive.
+    UDP generates and checks checksums to catch transmission errors.</p>
+<p class="Pp">When a UDP socket is created, its local and remote addresses are
+    unspecified. Datagrams can be sent immediately using <b>sendto</b>(2) or
+    <b>sendmsg</b>(2) with a valid destination address as an argument. When
+    <b>connect</b>(2) is called on the socket, the default destination address
+    is set and datagrams can now be sent using <b>send</b>(2) or <b>write</b>(2)
+    without specifying a destination address. It is still possible to send to
+    other destinations by passing an address to <b>sendto</b>(2) or
+    <b>sendmsg</b>(2). In order to receive packets, the socket can be bound to a
+    local address first by using <b>bind</b>(2). Otherwise, the socket layer
+    will automatically assign a free local port out of the range defined by
+    <i>/proc/sys/net/ipv4/ip_local_port_range</i> and bind the socket to
+    <b>INADDR_ANY</b>.</p>
+<p class="Pp">All receive operations return only one packet. When the packet is
+    smaller than the passed buffer, only that much data is returned; when it is
+    bigger, the packet is truncated and the <b>MSG_TRUNC</b> flag is set.
+    <b>MSG_WAITALL</b> is not supported.</p>
+<p class="Pp">IP options may be sent or received using the socket options
+    described in <b>ip</b>(7). They are processed by the kernel only when the
+    appropriate <i>/proc</i> parameter is enabled (but still passed to the user
+    even when it is turned off). See <b>ip</b>(7).</p>
+<p class="Pp">When the <b>MSG_DONTROUTE</b> flag is set on sending, the
+    destination address must refer to a local interface address and the packet
+    is sent only to that interface.</p>
+<p class="Pp">By default, Linux UDP does path MTU (Maximum Transmission Unit)
+    discovery. This means the kernel will keep track of the MTU to a specific
+    target IP address and return <b>EMSGSIZE</b> when a UDP packet write exceeds
+    it. When this happens, the application should decrease the packet size. Path
+    MTU discovery can be also turned off using the <b>IP_MTU_DISCOVER</b> socket
+    option or the <i>/proc/sys/net/ipv4/ip_no_pmtu_disc</i> file; see
+    <b>ip</b>(7) for details. When turned off, UDP will fragment outgoing UDP
+    packets that exceed the interface MTU. However, disabling it is not
+    recommended for performance and reliability reasons.</p>
+<section class="Ss">
+<h2 class="Ss" id="Address_format"><a class="permalink" href="#Address_format">Address
+  format</a></h2>
+<p class="Pp">UDP uses the IPv4 <i>sockaddr_in</i> address format described in
+    <b>ip</b>(7).</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Error_handling"><a class="permalink" href="#Error_handling">Error
+  handling</a></h2>
+<p class="Pp">All fatal errors will be passed to the user as an error return
+    even when the socket is not connected. This includes asynchronous errors
+    received from the network. You may get an error for an earlier packet that
+    was sent on the same socket. This behavior differs from many other BSD
+    socket implementations which don't pass any errors unless the socket is
+    connected. Linux's behavior is mandated by <b>RFC&nbsp;1122</b>.</p>
+<p class="Pp">For compatibility with legacy code, in Linux 2.0 and 2.2 it was
+    possible to set the <b>SO_BSDCOMPAT</b> <b>SOL_SOCKET</b> option to receive
+    remote errors only when the socket has been connected (except for
+    <b>EPROTO</b> and <b>EMSGSIZE</b>). Locally generated errors are always
+    passed. Support for this socket option was removed in later kernels; see
+    <b>socket</b>(7) for further information.</p>
+<p class="Pp">When the <b>IP_RECVERR</b> option is enabled, all errors are
+    stored in the socket error queue, and can be received by <b>recvmsg</b>(2)
+    with the <b>MSG_ERRQUEUE</b> flag set.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="/proc_interfaces"><a class="permalink" href="#/proc_interfaces">/proc
+  interfaces</a></h2>
+<p class="Pp">System-wide UDP parameter settings can be accessed by files in the
+    directory <i>/proc/sys/net/ipv4/</i>.</p>
+<dl class="Bl-tag">
+  <dt id="udp_mem"><a class="permalink" href="#udp_mem"><i>udp_mem</i> (since
+    Linux 2.6.25)</a></dt>
+  <dd>This is a vector of three integers governing the number of pages allowed
+      for queueing by all UDP sockets.</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="min"><a class="permalink" href="#min"><i>min</i></a></dt>
+  <dd>Below this number of pages, UDP is not bothered about its memory appetite.
+      When the amount of memory allocated by UDP exceeds this number, UDP starts
+      to moderate memory usage.</dd>
+  <dt id="pressure"><a class="permalink" href="#pressure"><i>pressure</i></a></dt>
+  <dd>This value was introduced to follow the format of <i>tcp_mem</i> (see
+      <b>tcp</b>(7)).</dd>
+  <dt id="max"><a class="permalink" href="#max"><i>max</i></a></dt>
+  <dd>Number of pages allowed for queueing by all UDP sockets.</dd>
+</dl>
+</div>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Defaults values for these three items are calculated at boot time from the
+      amount of available memory.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="udp_rmem_min"><a class="permalink" href="#udp_rmem_min"><i>udp_rmem_min</i>
+    (integer; default value: PAGE_SIZE; since Linux 2.6.25)</a></dt>
+  <dd>Minimal size, in bytes, of receive buffers used by UDP sockets in
+      moderation. Each UDP socket is able to use the size for receiving data,
+      even if total pages of UDP sockets exceed <i>udp_mem</i> pressure.</dd>
+  <dt id="udp_wmem_min"><a class="permalink" href="#udp_wmem_min"><i>udp_wmem_min</i>
+    (integer; default value: PAGE_SIZE; since Linux 2.6.25)</a></dt>
+  <dd>Minimal size, in bytes, of send buffer used by UDP sockets in moderation.
+      Each UDP socket is able to use the size for sending data, even if total
+      pages of UDP sockets exceed <i>udp_mem</i> pressure.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Socket_options"><a class="permalink" href="#Socket_options">Socket
+  options</a></h2>
+<p class="Pp">To set or get a UDP socket option, call <b>getsockopt</b>(2) to
+    read or <b>setsockopt</b>(2) to write the option with the option level
+    argument set to <b>IPPROTO_UDP</b>. Unless otherwise noted, <i>optval</i> is
+    a pointer to an <i>int</i>.</p>
+<p class="Pp">Following is a list of UDP-specific socket options. For details of
+    some other socket options that are also applicable for UDP sockets, see
+    <b>socket</b>(7).</p>
+<dl class="Bl-tag">
+  <dt id="UDP_CORK"><a class="permalink" href="#UDP_CORK"><b>UDP_CORK</b> (since
+    Linux 2.5.44)</a></dt>
+  <dd>If this option is enabled, then all data output on this socket is
+      accumulated into a single datagram that is transmitted when the option is
+      disabled. This option should not be used in code intended to be
+    portable.</dd>
+  <dt id="UDP_SEGMENT"><a class="permalink" href="#UDP_SEGMENT"><b>UDP_SEGMENT</b>
+    (since Linux 4.18)</a></dt>
+  <dd>Enables UDP segmentation offload. Segmentation offload reduces
+      <b>send</b>(2) cost by transferring multiple datagrams worth of data as a
+      single large packet through the kernel transmit path, even when that
+      exceeds MTU. As late as possible, the large packet is split by segment
+      size into a series of datagrams. This segmentation offload step is
+      deferred to hardware if supported, else performed in software. This option
+      takes a value in the range [<b>0</b>,&nbsp;<b>USHRT_MAX</b>] that sets
+      the segment size: the size of datagram payload, excluding the UDP header.
+      The segment size must be chosen such that at most 64 datagrams are sent in
+      a single call and that the datagrams after segmentation meet the same MTU
+      rules that apply to datagrams sent without this option. Segmentation
+      offload depends on checksum offload, as datagram checksums are computed
+      after segmentation. The option may also be set for individual
+      <b>sendmsg</b>(2) calls by passing it as a <b>cmsg</b>(3). A value of zero
+      disables the feature. This option should not be used in code intended to
+      be portable.</dd>
+  <dt id="UDP_GRO"><a class="permalink" href="#UDP_GRO"><b>UDP_GRO</b> (since
+    Linux 5.0)</a></dt>
+  <dd>Enables UDP receive offload. If enabled, the socket may receive multiple
+      datagrams worth of data as a single large buffer, together with a
+      <b>cmsg</b>(3) that holds the segment size. This option is the inverse of
+      segmentation offload. It reduces receive cost by handling multiple
+      datagrams worth of data as a single large packet in the kernel receive
+      path, even when that exceeds MTU. This option should not be used in code
+      intended to be portable.</dd>
+</dl>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Ioctls"><a class="permalink" href="#Ioctls">Ioctls</a></h2>
+<p class="Pp">These ioctls can be accessed using <b>ioctl</b>(2). The correct
+    syntax is:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre><b>int</b><i> value</i><b>;</b>
+<i>error</i><b> = ioctl(</b><i>udp_socket</i><b>, </b><i>ioctl_type</i><b>, &amp;</b><i>value</i><b>);</b></pre>
+</div>
+<dl class="Bl-tag">
+  <dt id="FIONREAD"><a class="permalink" href="#FIONREAD"><b>FIONREAD</b>
+    (<b>SIOCINQ</b>)</a></dt>
+  <dd>Gets a pointer to an integer as argument. Returns the size of the next
+      pending datagram in the integer in bytes, or 0 when no datagram is
+      pending. <b>Warning:</b> Using <b>FIONREAD</b>, it is impossible to
+      distinguish the case where no datagram is pending from the case where the
+      next pending datagram contains zero bytes of data. It is safer to use
+      <b>select</b>(2), <b>poll</b>(2), or <b>epoll</b>(7) to distinguish these
+      cases.</dd>
+  <dt id="TIOCOUTQ"><a class="permalink" href="#TIOCOUTQ"><b>TIOCOUTQ</b>
+    (<b>SIOCOUTQ</b>)</a></dt>
+  <dd>Returns the number of data bytes in the local send queue. Supported only
+      with Linux 2.4 and above.</dd>
+</dl>
+<p class="Pp">In addition, all ioctls documented in <b>ip</b>(7) and
+    <b>socket</b>(7) are supported.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">All errors documented for <b>socket</b>(7) or <b>ip</b>(7) may be
+    returned by a send or receive on a UDP socket.</p>
+<dl class="Bl-tag">
+  <dt id="ECONNREFUSED"><a class="permalink" href="#ECONNREFUSED"><b>ECONNREFUSED</b></a></dt>
+  <dd>No receiver was associated with the destination address. This might be
+      caused by a previous packet sent over the socket.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>IP_RECVERR</b> is a new feature in Linux 2.2.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>ip</b>(7), <b>raw</b>(7), <b>socket</b>(7),
+  <b>udplite</b>(7)</p>
+<p class="Pp">The kernel source file
+    <i>Documentation/networking/ip-sysctl.txt</i>.</p>
+<p class="Pp">RFC&nbsp;768 for the User Datagram Protocol.
+  <br>
+  RFC&nbsp;1122 for the host requirements.
+  <br>
+  RFC&nbsp;1191 for a description of path MTU discovery.</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

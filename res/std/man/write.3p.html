@@ -1,0 +1,605 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/f9ad10f08937aa8f7630235fe86cda8e3028d3c7">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>WRITE(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">WRITE(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">WRITE(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pwrite, write — write on a file</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;unistd.h&gt;</pre>
+<pre>ssize_t pwrite(int <i>fildes</i>, const void *<i>buf</i>, size_t <i>nbyte</i>,
+<br>
+    off_t <i>offset</i>);
+ssize_t write(int <i>fildes</i>, const void *<i>buf</i>, size_t <i>nbyte</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>write</i>() function shall attempt to write <i>nbyte</i>
+    bytes from the buffer pointed to by <i>buf</i> to the file associated with
+    the open file descriptor, <i>fildes</i>.</p>
+<p class="Pp">Before any action described below is taken, and if <i>nbyte</i> is
+    zero and the file is a regular file, the <i>write</i>() function may detect
+    and return errors as described below. In the absence of errors, or if error
+    detection is not performed, the <i>write</i>() function shall return zero
+    and have no other results. If <i>nbyte</i> is zero and the file is not a
+    regular file, the results are unspecified.</p>
+<p class="Pp">On a regular file or other file capable of seeking, the actual
+    writing of data shall proceed from the position in the file indicated by the
+    file offset associated with <i>fildes</i>. Before successful return from
+    <i>write</i>(), the file offset shall be incremented by the number of bytes
+    actually written. On a regular file, if the position of the last byte
+    written is greater than or equal to the length of the file, the length of
+    the file shall be set to this position plus one.</p>
+<p class="Pp">On a file not capable of seeking, writing shall always take place
+    starting at the current position. The value of a file offset associated with
+    such a device is undefined.</p>
+<p class="Pp">If the O_APPEND flag of the file status flags is set, the file
+    offset shall be set to the end of the file prior to each write and no
+    intervening file modification operation shall occur between changing the
+    file offset and the write operation.</p>
+<p class="Pp">If a <i>write</i>() requests that more bytes be written than there
+    is room for (for example, the file size limit of the process or the physical
+    end of a medium), only as many bytes as there is room for shall be written.
+    For example, suppose there is space for 20 bytes more in a file before
+    reaching a limit. A write of 512 bytes will return 20. The next write of a
+    non-zero number of bytes would give a failure return (except as noted
+    below).</p>
+<p class="Pp">If the request would cause the file size to exceed the soft file
+    size limit for the process and there is no room for any bytes to be written,
+    the request shall fail and the implementation shall generate the SIGXFSZ
+    signal for the thread.</p>
+<p class="Pp">If <i>write</i>() is interrupted by a signal before it writes any
+    data, it shall return -1 with <i>errno</i> set to <b>[EINTR]</b>.</p>
+<p class="Pp">If <i>write</i>() is interrupted by a signal after it successfully
+    writes some data, it shall return the number of bytes written.</p>
+<p class="Pp">If the value of <i>nbyte</i> is greater than {SSIZE_MAX}, the
+    result is implementation-defined.</p>
+<p class="Pp">After a <i>write</i>() to a regular file has successfully
+    returned:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>Any successful <i>read</i>() from each byte position in the file that was
+      modified by that write shall return the data specified by the
+      <i>write</i>() for that position until such byte positions are again
+      modified.</dd>
+  <dt> *</dt>
+  <dd>Any subsequent successful <i>write</i>() to the same byte position in the
+      file shall overwrite that file data.
+    <br>
+  </dd>
+</dl>
+<p class="Pp">Write requests to a pipe or FIFO shall be handled in the same way
+    as a regular file with the following exceptions:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>There is no file offset associated with a pipe, hence each write request
+      shall append to the end of the pipe.</dd>
+  <dt> *</dt>
+  <dd>Write requests of {PIPE_BUF} bytes or less shall not be interleaved with
+      data from other processes doing writes on the same pipe. Writes of greater
+      than {PIPE_BUF} bytes may have data interleaved, on arbitrary boundaries,
+      with writes by other processes, whether or not the O_NONBLOCK flag of the
+      file status flags is set.</dd>
+  <dt> *</dt>
+  <dd>If the O_NONBLOCK flag is clear, a write request may cause the thread to
+      block, but on normal completion it shall return <i>nbyte</i>.</dd>
+  <dt> *</dt>
+  <dd>If the O_NONBLOCK flag is set, <i>write</i>() requests shall be handled
+      differently, in the following ways:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>--</dt>
+  <dd>The <i>write</i>() function shall not block the thread.</dd>
+  <dt>--</dt>
+  <dd>A write request for {PIPE_BUF} or fewer bytes shall have the following
+      effect: if there is sufficient space available in the pipe, <i>write</i>()
+      shall transfer all the data and return the number of bytes requested.
+      Otherwise, <i>write</i>() shall transfer no data and return -1 with
+      <i>errno</i> set to <b>[EAGAIN]</b>.</dd>
+  <dt>--</dt>
+  <dd>A write request for more than {PIPE_BUF} bytes shall cause one of the
+      following:</dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt>--</dt>
+  <dd>When at least one byte can be written, transfer what it can and return the
+      number of bytes written. When all data previously written to the pipe is
+      read, it shall transfer at least {PIPE_BUF} bytes.</dd>
+  <dt>--</dt>
+  <dd>When no data can be written, transfer no data, and return -1 with
+      <i>errno</i> set to <b>[EAGAIN]</b>.</dd>
+</dl>
+</div>
+</div>
+<p class="Pp">When attempting to write to a file descriptor (other than a pipe
+    or FIFO) that supports non-blocking writes and cannot accept the data
+    immediately:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>If the O_NONBLOCK flag is clear, <i>write</i>() shall block the calling
+      thread until the data can be accepted.</dd>
+  <dt> *</dt>
+  <dd>If the O_NONBLOCK flag is set, <i>write</i>() shall not block the thread.
+      If some data can be written without blocking the thread, <i>write</i>()
+      shall write what it can and return the number of bytes written. Otherwise,
+      it shall return -1 and set <i>errno</i> to <b>[EAGAIN]</b>.</dd>
+</dl>
+<p class="Pp">Upon successful completion, where <i>nbyte</i> is greater than 0,
+    <i>write</i>() shall mark for update the last data modification and last
+    file status change timestamps of the file, and if the file is a regular
+    file, the S_ISUID and S_ISGID bits of the file mode may be cleared.</p>
+<p class="Pp">For regular files, no data transfer shall occur past the offset
+    maximum established in the open file description associated with
+    <i>fildes</i>.</p>
+<p class="Pp">If <i>fildes</i> refers to a socket, <i>write</i>() shall be
+    equivalent to <i>send</i>() with no flags set.</p>
+<p class="Pp">If the O_DSYNC bit has been set, write I/O operations on the file
+    descriptor shall complete as defined by synchronized I/O data integrity
+    completion.</p>
+<p class="Pp">If the O_SYNC bit has been set, write I/O operations on the file
+    descriptor shall complete as defined by synchronized I/O file integrity
+    completion.</p>
+<p class="Pp">If <i>fildes</i> refers to a shared memory object, the result of
+    the <i>write</i>() function is unspecified.</p>
+<p class="Pp">If <i>fildes</i> refers to a typed memory object, the result of
+    the <i>write</i>() function is unspecified.</p>
+<p class="Pp">If <i>fildes</i> refers to a STREAM, the operation of
+    <i>write</i>() shall be determined by the values of the minimum and maximum
+    <i>nbyte</i> range (packet size) accepted by the STREAM. These values are
+    determined by the topmost STREAM module. If <i>nbyte</i> falls within the
+    packet size range, <i>nbyte</i> bytes shall be written. If <i>nbyte</i> does
+    not fall within the range and the minimum packet size value is 0,
+    <i>write</i>() shall break the buffer into maximum packet size segments
+    prior to sending the data downstream (the last segment may contain less than
+    the maximum packet size). If <i>nbyte</i> does not fall within the range and
+    the minimum value is non-zero, <i>write</i>() shall fail with <i>errno</i>
+    set to <b>[ERANGE]</b>. Writing a zero-length buffer (<i>nbyte</i> is 0) to
+    a STREAMS device sends 0 bytes with 0 returned. However, writing a
+    zero-length buffer to a STREAMS-based pipe or FIFO sends no message and 0 is
+    returned. The process may issue I_SWROPT <i>ioctl</i>() to enable
+    zero-length messages to be sent across the pipe or FIFO.</p>
+<p class="Pp">When writing to a STREAM, data messages are created with a
+    priority band of 0. When writing to a STREAM that is not a pipe or FIFO:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>If O_NONBLOCK is clear, and the STREAM cannot accept data (the STREAM
+      write queue is full due to internal flow control conditions),
+      <i>write</i>() shall block until data can be accepted.</dd>
+  <dt> *</dt>
+  <dd>If O_NONBLOCK is set and the STREAM cannot accept data, <i>write</i>()
+      shall return -1 and set <i>errno</i> to <b>[EAGAIN]</b>.</dd>
+  <dt> *</dt>
+  <dd>If O_NONBLOCK is set and part of the buffer has been written while a
+      condition in which the STREAM cannot accept additional data occurs,
+      <i>write</i>() shall terminate and return the number of bytes
+    written.</dd>
+</dl>
+<p class="Pp">In addition, <i>write</i>() shall fail if the STREAM head has
+    processed an asynchronous error before the call. In this case, the value of
+    <i>errno</i> does not reflect the result of <i>write</i>(), but reflects the
+    prior error.</p>
+<p class="Pp">The <i>pwrite</i>() function shall be equivalent to
+    <i>write</i>(), except that it writes into a given position and does not
+    change the file offset (regardless of whether O_APPEND is set). The first
+    three arguments to <i>pwrite</i>() are the same as <i>write</i>() with the
+    addition of a fourth argument <i>offset</i> for the desired position inside
+    the file. An attempt to perform a <i>pwrite</i>() on a file that is
+    incapable of seeking shall result in an error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, these functions shall return the
+    number of bytes actually written to the file associated with <i>fildes</i>.
+    This number shall never be greater than <i>nbyte</i>. Otherwise, -1 shall be
+    returned and <i>errno</i> set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">These functions shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>The file is neither a pipe, nor a FIFO, nor a socket, the O_NONBLOCK flag
+      is set for the file descriptor, and the thread would be delayed in the
+      <i>write</i>() operation.</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The <i>fildes</i> argument is not a valid file descriptor open for
+      writing.</dd>
+  <dt id="EFBIG"><a class="permalink" href="#EFBIG"><b>EFBIG</b></a></dt>
+  <dd>An attempt was made to write a file that exceeds the
+      implementation-defined maximum file size or the file size limit of the
+      process, and there was no room for any bytes to be written.</dd>
+  <dt id="EFBIG~2"><a class="permalink" href="#EFBIG~2"><b>EFBIG</b></a></dt>
+  <dd>The file is a regular file, <i>nbyte</i> is greater than 0, and the
+      starting position is greater than or equal to the offset maximum
+      established in the open file description associated with
+    <i>fildes</i>.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>The write operation was terminated due to the receipt of a signal, and no
+      data was transferred.</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>The process is a member of a background process group attempting to write
+      to its controlling terminal, TOSTOP is set, the calling thread is not
+      blocking SIGTTOU, the process is not ignoring SIGTTOU, and the process
+      group of the process is orphaned. This error may also be returned under
+      implementation-defined conditions.</dd>
+  <dt id="ENOSPC"><a class="permalink" href="#ENOSPC"><b>ENOSPC</b></a></dt>
+  <dd>There was no free space remaining on the device containing the file.</dd>
+  <dt id="ERANGE"><a class="permalink" href="#ERANGE"><b>ERANGE</b></a></dt>
+  <dd>The transfer request size was outside the range supported by the STREAMS
+      file associated with <i>fildes</i>.</dd>
+</dl>
+<p class="Pp">The <i>pwrite</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The file is a regular file or block special file, and the <i>offset</i>
+      argument is negative. The file offset shall remain unchanged.</dd>
+  <dt id="ESPIPE"><a class="permalink" href="#ESPIPE"><b>ESPIPE</b></a></dt>
+  <dd>The file is incapable of seeking.</dd>
+</dl>
+<p class="Pp">The <i>write</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EAGAIN~2"><a class="permalink" href="#EAGAIN~2"><b>EAGAIN</b></a></dt>
+  <dd>The file is a pipe or FIFO, the O_NONBLOCK flag is set for the file
+      descriptor, and the thread would be delayed in the write operation.</dd>
+  <dt id="EAGAIN~3"><a class="permalink" href="#EAGAIN~3"><b>EAGAIN</b> or
+    <b>EWOULDBLOCK</b></a></dt>
+  <dd>
+    <br>
+    The file is a socket, the O_NONBLOCK flag is set for the file descriptor,
+      and the thread would be delayed in the write operation.</dd>
+  <dt id="ECONNRESET"><a class="permalink" href="#ECONNRESET"><b>ECONNRESET</b></a></dt>
+  <dd>A write was attempted on a socket that is not connected.</dd>
+  <dt id="EPIPE"><a class="permalink" href="#EPIPE"><b>EPIPE</b></a></dt>
+  <dd>An attempt is made to write to a pipe or FIFO that is not open for reading
+      by any process, or that only has one end open. A SIGPIPE signal shall also
+      be sent to the thread.</dd>
+  <dt id="EPIPE~2"><a class="permalink" href="#EPIPE~2"><b>EPIPE</b></a></dt>
+  <dd>A write was attempted on a socket that is shut down for writing, or is no
+      longer connected. In the latter case, if the socket is of type
+      SOCK_STREAM, a SIGPIPE signal shall also be sent to the thread.</dd>
+</dl>
+<p class="Pp">These functions may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>The STREAM or multiplexer referenced by <i>fildes</i> is linked (directly
+      or indirectly) downstream from a multiplexer.</dd>
+  <dt id="EIO~2"><a class="permalink" href="#EIO~2"><b>EIO</b></a></dt>
+  <dd>A physical I/O error has occurred.</dd>
+  <dt id="ENOBUFS"><a class="permalink" href="#ENOBUFS"><b>ENOBUFS</b></a></dt>
+  <dd>Insufficient resources were available in the system to perform the
+      operation.</dd>
+  <dt id="ENXIO"><a class="permalink" href="#ENXIO"><b>ENXIO</b></a></dt>
+  <dd>A request was made of a nonexistent device, or the request was outside the
+      capabilities of the device.</dd>
+  <dt id="ENXIO~2"><a class="permalink" href="#ENXIO~2"><b>ENXIO</b></a></dt>
+  <dd>A hangup occurred on the STREAM being written to.</dd>
+</dl>
+<p class="Pp">A write to a STREAMS file may fail if an error message has been
+    received at the STREAM head. In this case, <i>errno</i> is set to the value
+    included in the error message.
+  <br>
+</p>
+<p class="Pp">The <i>write</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>A write was attempted on a socket and the calling process does not have
+      appropriate privileges.</dd>
+  <dt id="ENETDOWN"><a class="permalink" href="#ENETDOWN"><b>ENETDOWN</b></a></dt>
+  <dd>A write was attempted on a socket and the local network interface used to
+      reach the destination is down.</dd>
+  <dt id="ENETUNREACH"><a class="permalink" href="#ENETUNREACH"><b>ENETUNREACH</b></a></dt>
+  <dd>
+    <br>
+    A write was attempted on a socket and no route to the network is
+    present.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Writing_from_a_Buffer"><a class="permalink" href="#Writing_from_a_Buffer">Writing
+  from a Buffer</a></h2>
+<p class="Pp">The following example writes data from the buffer pointed to by
+    <i>buf</i> to the file associated with the file descriptor <i>fd</i>.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;sys/types.h&gt;
+#include &lt;string.h&gt;
+...
+char buf[20];
+size_t nbytes;
+ssize_t bytes_written;
+int fd;
+...
+strcpy(buf, "This is a test\n");
+nbytes = strlen(buf);</pre>
+<pre>bytes_written = write(fd, buf, nbytes);
+...</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">See also the RATIONALE section in <i>read</i>().</p>
+<p class="Pp">An attempt to write to a pipe or FIFO has several major
+    characteristics:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd><i>Atomic/non-atomic</i>: A write is atomic if the whole amount written in
+      one operation is not interleaved with data from any other process. This is
+      useful when there are multiple writers sending data to a single reader.
+      Applications need to know how large a write request can be expected to be
+      performed atomically. This maximum is called {PIPE_BUF}. This volume of
+      POSIX.1‐2017 does not say whether write requests for more than
+      {PIPE_BUF} bytes are atomic, but requires that writes of {PIPE_BUF} or
+      fewer bytes shall be atomic.</dd>
+  <dt> *</dt>
+  <dd><i>Blocking/immediate</i>: Blocking is only possible with O_NONBLOCK
+      clear. If there is enough space for all the data requested to be written
+      immediately, the implementation should do so. Otherwise, the calling
+      thread may block; that is, pause until enough space is available for
+      writing. The effective size of a pipe or FIFO (the maximum amount that can
+      be written in one operation without blocking) may vary dynamically,
+      depending on the implementation, so it is not possible to specify a fixed
+      value for it.</dd>
+  <dt> *</dt>
+  <dd><i>Complete/partial/deferred</i>: A write request:</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>int fildes;
+size_t nbyte;
+ssize_t ret;
+char *buf;</pre>
+<pre>ret = write(fildes, buf, nbyte);</pre>
+</div>
+<p class="Pp">may return:</p>
+<dl class="Bl-tag">
+  <dt id="Complete"><a class="permalink" href="#Complete">Complete</a></dt>
+  <dd><i>ret</i>=<i>nbyte</i></dd>
+  <dt id="Partial"><a class="permalink" href="#Partial">Partial</a></dt>
+  <dd><i>ret</i>&lt;<i>nbyte</i></dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">This shall never happen if <i>nbyte</i>≤{PIPE_BUF}. If it
+    does happen (with <i>nbyte</i>&gt;{PIPE_BUF}), this volume of
+    POSIX.1‐2017 does not guarantee atomicity, even if
+    <i>ret</i>≤{PIPE_BUF}, because atomicity is guaranteed according to
+    the amount <i>requested</i>, not the amount <i>written</i>.</p>
+</div>
+<dl class="Bl-tag">
+  <dt id="Deferred:"><a class="permalink" href="#Deferred:">Deferred:</a></dt>
+  <dd><i>ret</i>=-1, <i>errno</i>=[EAGAIN]</dd>
+</dl>
+<div class="Bd-indent">
+<p class="Pp">This error indicates that a later request may succeed. It does not
+    indicate that it <i>shall</i> succeed, even if
+    <i>nbyte</i>≤{PIPE_BUF}, because if no process reads from the pipe or
+    FIFO, the write never succeeds. An application could usefully count the
+    number of times <b>[EAGAIN]</b> is caused by a particular value of
+    <i>nbyte</i>&gt;{PIPE_BUF} and perhaps do later writes with a smaller value,
+    on the assumption that the effective size of the pipe may have
+  decreased.</p>
+</div>
+<p class="Pp">Partial and deferred writes are only possible with O_NONBLOCK
+  set.</p>
+</div>
+<p class="Pp">The relations of these properties are shown in the following
+    tables:</p>
+<table class="tbl" style="border-style: solid;">
+  <tbody><tr style="border-bottom-style: solid;">
+    <td colspan="4" style="text-align: center;"><b>Write to a Pipe or FIFO with
+      O_NONBLOCK </b><i>clear</i><b></b></td>
+  </tr>
+  <tr style="border-bottom-style: solid;">
+    <td style="text-align: center; border-right-style: solid;"><b>Immediately
+      Writable:</b></td>
+    <td style="text-align: center;"><b>None</b></td>
+    <td style="text-align: center;"><b>Some</b></td>
+    <td style="text-align: center;"><i>nbyte</i></td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"><i>nbyte</i>≤{PIPE_BUF}</td>
+    <td>Atomic blocking</td>
+    <td>Atomic blocking</td>
+    <td>Atomic immediate</td>
+  </tr>
+  <tr style="border-bottom-style: solid;">
+    <td style="border-right-style: solid;"></td>
+    <td><i>nbyte</i></td>
+    <td><i>nbyte</i></td>
+    <td><i>nbyte</i></td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"><i>nbyte</i>&gt;{PIPE_BUF}</td>
+    <td>Blocking <i>nbyte</i></td>
+    <td>Blocking <i>nbyte</i></td>
+    <td>Blocking <i>nbyte</i></td>
+  </tr>
+</tbody></table>
+<p class="Pp">If the O_NONBLOCK flag is clear, a write request shall block if
+    the amount writable immediately is less than that requested. If the flag is
+    set (by <i>fcntl</i>()), a write request shall never block.</p>
+<table class="tbl" style="border-style: solid;">
+  <tbody><tr style="border-bottom-style: solid;">
+    <td colspan="4" style="text-align: center;"><b>Write to a Pipe or FIFO with
+      O_NONBLOCK </b><i>set</i><b></b></td>
+  </tr>
+  <tr style="border-bottom-style: solid;">
+    <td style="text-align: center; border-right-style: solid;"><b>Immediately
+      Writable:</b></td>
+    <td style="text-align: center;"><b>None</b></td>
+    <td style="text-align: center;"><b>Some</b></td>
+    <td style="text-align: center;"><i>nbyte</i></td>
+  </tr>
+  <tr style="border-bottom-style: solid;">
+    <td style="border-right-style: solid;"><i>nbyte</i>≤{PIPE_BUF}</td>
+    <td>-1, [EAGAIN]</td>
+    <td>-1, [EAGAIN]</td>
+    <td>Atomic <i>nbyte</i></td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"><i>nbyte</i>&gt;{PIPE_BUF}</td>
+    <td>-1, [EAGAIN]</td>
+    <td>&lt;<i>nbyte</i> or -1,</td>
+    <td>≤<i>nbyte</i> or -1,</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td></td>
+    <td>[EAGAIN]</td>
+    <td>[EAGAIN]</td>
+  </tr>
+</tbody></table>
+<p class="Pp">There is no exception regarding partial writes when O_NONBLOCK is
+    set. With the exception of writing to an empty pipe, this volume of
+    POSIX.1‐2017 does not specify exactly when a partial write is
+    performed since that would require specifying internal details of the
+    implementation. Every application should be prepared to handle partial
+    writes when O_NONBLOCK is set and the requested amount is greater than
+    {PIPE_BUF}, just as every application should be prepared to handle partial
+    writes on other kinds of file descriptors.</p>
+<p class="Pp">The intent of forcing writing at least one byte if any can be
+    written is to assure that each write makes progress if there is any room in
+    the pipe. If the pipe is empty, {PIPE_BUF} bytes must be written; if not, at
+    least some progress must have been made.</p>
+<p class="Pp">Where this volume of POSIX.1‐2017 requires -1 to be
+    returned and <i>errno</i> set to <b>[EAGAIN]</b>, most historical
+    implementations return zero (with the O_NDELAY flag set, which is the
+    historical predecessor of O_NONBLOCK, but is not itself in this volume of
+    POSIX.1‐2017). The error indications in this volume of
+    POSIX.1‐2017 were chosen so that an application can distinguish these
+    cases from end-of-file. While <i>write</i>() cannot receive an indication of
+    end-of-file, <i>read</i>() can, and the two functions have similar return
+    values. Also, some existing systems (for example, Eighth Edition) permit a
+    write of zero bytes to mean that the reader should get an end-of-file
+    indication; for those systems, a return value of zero from <i>write</i>()
+    indicates a successful write of an end-of-file indication.</p>
+<p class="Pp">Implementations are allowed, but not required, to perform error
+    checking for <i>write</i>() requests of zero bytes.</p>
+<p class="Pp">The concept of a {PIPE_MAX} limit (indicating the maximum number
+    of bytes that can be written to a pipe in a single operation) was
+    considered, but rejected, because this concept would unnecessarily limit
+    application writing.</p>
+<p class="Pp">See also the discussion of O_NONBLOCK in <i>read</i>().</p>
+<p class="Pp">Writes can be serialized with respect to other reads and writes.
+    If a <i>read</i>() of file data can be proven (by any means) to occur after
+    a <i>write</i>() of the data, it must reflect that <i>write</i>(), even if
+    the calls are made by different processes. A similar requirement applies to
+    multiple write operations to the same file position. This is needed to
+    guarantee the propagation of data from <i>write</i>() calls to subsequent
+    <i>read</i>() calls. This requirement is particularly significant for
+    networked file systems, where some caching schemes violate these
+  semantics.</p>
+<p class="Pp">Note that this is specified in terms of <i>read</i>() and
+    <i>write</i>(). The XSI extensions <i>readv</i>() and <i>writev</i>() also
+    obey these semantics. A new ``high-performance'' write analog that did not
+    follow these serialization requirements would also be permitted by this
+    wording. This volume of POSIX.1‐2017 is also silent about any effects
+    of application-level caching (such as that done by <i>stdio</i>).</p>
+<p class="Pp">This volume of POSIX.1‐2017 does not specify the value of
+    the file offset after an error is returned; there are too many cases. For
+    programming errors, such as <b>[EBADF]</b>, the concept is meaningless since
+    no file is involved. For errors that are detected immediately, such as
+    <b>[EAGAIN]</b>, clearly the pointer should not change. After an interrupt
+    or hardware error, however, an updated value would be very useful and is the
+    behavior of many implementations.</p>
+<p class="Pp">This volume of POSIX.1‐2017 does not specify the behavior
+    of concurrent writes to a regular file from multiple threads, except that
+    each write is atomic (see <i>Section 2.9.7</i>, <i>Thread Interactions with
+    Regular File Operations</i>). Applications should use some form of
+    concurrency control.</p>
+<p class="Pp">This volume of POSIX.1‐2017 intentionally does not specify
+    any <i>pwrite</i>() errors related to pipes, FIFOs, and sockets other than
+    <b>[ESPIPE]</b>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>chmod</i>()</i>, <i><i>creat</i>()</i>, <i><i>dup</i>()</i>,
+    <i><i>fcntl</i>()</i>, <i><i>getrlimit</i>()</i>, <i><i>lseek</i>()</i>,
+    <i><i>open</i>()</i>, <i><i>pipe</i>()</i>, <i><i>read</i>()</i>,
+    <i><i>ulimit</i>()</i>, <i><i>writev</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;limits.h&gt;</b></i>, <i><b>&lt;stropts.h&gt;</b></i>,
+    <i><b>&lt;sys_uio.h&gt;</b></i>, <i><b>&lt;unistd.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

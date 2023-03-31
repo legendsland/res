@@ -1,0 +1,132 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 1995, Thomas K. Dyas <tdyas@eden.rutgers.edu>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Created  1995-08-09 Thomas K. Dyas <tdyas@eden.rutgers.edu>
+   Modified 1997-01-31 by Eric S. Raymond <esr@thyrsus.com>
+   Modified 2001-03-22 by aeb
+   Modified 2003-08-04 by aeb
+   --><head>
+<meta name="dc.identifier" content="res/4801c96018cafa0e9b965943e651b01085454cee">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>ustat(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">ustat(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">ustat(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">ustat - get filesystem statistics</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;sys/types.h&gt;</b>
+<b>#include &lt;unistd.h&gt;</b>    /* libc[45] */
+<b>#include &lt;ustat.h&gt;</b>     /* glibc2 */</pre>
+<pre><b>[[deprecated]] int ustat(dev_t </b><i>dev</i><b>, struct ustat *</b><i>ubuf</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>ustat</b>() returns information about a mounted filesystem.
+    <i>dev</i> is a device number identifying a device containing a mounted
+    filesystem. <i>ubuf</i> is a pointer to a <i>ustat</i> structure that
+    contains the following members:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>daddr_t f_tfree;      /* Total free blocks */
+ino_t   f_tinode;     /* Number of free inodes */
+char    f_fname[6];   /* Filsys name */
+char    f_fpack[6];   /* Filsys pack name */
+</pre>
+<br>
+<p class="Pp">The last two fields, <i>f_fname</i> and <i>f_fpack</i>, are not
+    implemented and will always be filled with null bytes ('\0').</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, zero is returned and the <i>ustat</i> structure
+    pointed to by <i>ubuf</i> will be filled in. On error, -1 is returned, and
+    <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>ubuf</i> points outside of your accessible address space.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>dev</i> does not refer to a device containing a mounted
+    filesystem.</dd>
+  <dt id="ENOSYS"><a class="permalink" href="#ENOSYS"><b>ENOSYS</b></a></dt>
+  <dd>The mounted filesystem referenced by <i>dev</i> does not support this
+      operation, or any version of Linux before Linux 1.3.16.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">Since glibc 2.28, glibc no longer provides a wrapper for this
+    system call.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">SVr4.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp"><b>ustat</b>() is deprecated and has been provided only for
+    compatibility. All new programs should use <b>statfs</b>(2) instead.</p>
+<section class="Ss">
+<h2 class="Ss" id="HP-UX_notes"><a class="permalink" href="#HP-UX_notes">HP-UX
+  notes</a></h2>
+<p class="Pp">The HP-UX version of the <i>ustat</i> structure has an additional
+    field, <i>f_blksize</i>, that is unknown elsewhere. HP-UX warns: For some
+    filesystems, the number of free inodes does not change. Such filesystems
+    will return -1 in the field <i>f_tinode</i>. For some filesystems, inodes
+    are dynamically allocated. Such filesystems will return the current number
+    of free inodes.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>stat</b>(2), <b>statfs</b>(2)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

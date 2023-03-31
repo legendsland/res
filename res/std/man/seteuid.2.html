@@ -1,0 +1,142 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 2001 Andries Brouwer (aeb@cwi.nl)
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   [should really be seteuid.3]
+   Modified, 27 May 2004, Michael Kerrisk <mtk.manpages@gmail.com>
+       Added notes on capability requirements
+   --><head>
+<meta name="dc.identifier" content="res/c9272a67453aed697827821a410278fe18bc86e5">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>seteuid(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">seteuid(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">seteuid(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">seteuid, setegid - set effective user or group ID</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int seteuid(uid_t </b><i>euid</i><b>);</b>
+<b>int setegid(gid_t </b><i>egid</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>seteuid</b>(), <b>setegid</b>():</p>
+<pre><br>
+    _POSIX_C_SOURCE &gt;= 200112L
+<br>
+        || /* glibc &lt;= 2.19: */ _BSD_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>seteuid</b>() sets the effective user ID of the calling
+    process. Unprivileged processes may only set the effective user ID to the
+    real user ID, the effective user ID or the saved set-user-ID.</p>
+<p class="Pp">Precisely the same holds for <b>setegid</b>() with
+    "group" instead of "user".</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, zero is returned. On error, -1 is returned, and
+    <i>errno</i> is set to indicate the error.</p>
+<p class="Pp"><i>Note</i>: there are cases where <b>seteuid</b>() can fail even
+    when the caller is UID 0; it is a grave security error to omit checking for
+    a failure return from <b>seteuid</b>().</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The target user or group ID is not valid in this user namespace.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>In the case of <b>seteuid</b>(): the calling process is not privileged
+      (does not have the <b>CAP_SETUID</b> capability in its user namespace) and
+      <i>euid</i> does not match the current real user ID, current effective
+      user ID, or current saved set-user-ID.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>In the case of <b>setegid</b>(): the calling process is not privileged
+      (does not have the <b>CAP_SETGID</b> capability in its user namespace) and
+      <i>egid</i> does not match the current real group ID, current effective
+      group ID, or current saved set-group-ID.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, 4.3BSD.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Setting the effective user (group) ID to the saved set-user-ID
+    (saved set-group-ID) is possible since Linux 1.1.37 (1.1.38). On an
+    arbitrary system one should check <b>_POSIX_SAVED_IDS</b>.</p>
+<p class="Pp">Under glibc 2.0, <b>seteuid(</b><i>euid</i><b>)</b> is equivalent
+    to <b>setreuid(-1,</b><i> euid</i><b>)</b> and hence may change the saved
+    set-user-ID. Under glibc 2.1 and later, it is equivalent to
+    <b>setresuid(-1,</b><i> euid</i><b>, -1)</b> and hence does not change the
+    saved set-user-ID. Analogous remarks hold for <b>setegid</b>(), with the
+    difference that the change in implementation from <b>setregid(-1,</b><i>
+    egid</i><b>)</b> to <b>setresgid(-1,</b><i> egid</i><b>, -1)</b> occurred in
+    glibc 2.2 or 2.3 (depending on the hardware architecture).</p>
+<p class="Pp">According to POSIX.1, <b>seteuid</b>() (<b>setegid</b>()) need not
+    permit <i>euid</i> (<i>egid</i>) to be the same value as the current
+    effective user (group) ID, and some implementations do not permit this.</p>
+<section class="Ss">
+<h2 class="Ss" id="C_library/kernel_differences"><a class="permalink" href="#C_library/kernel_differences">C
+  library/kernel differences</a></h2>
+<p class="Pp">On Linux, <b>seteuid</b>() and <b>setegid</b>() are implemented as
+    library functions that call, respectively, <b>setreuid</b>(2) and
+    <b>setregid</b>(2).</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>geteuid</b>(2), <b>setresuid</b>(2), <b>setreuid</b>(2),
+    <b>setuid</b>(2), <b>capabilities</b>(7), <b>credentials</b>(7),
+    <b>user_namespaces</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

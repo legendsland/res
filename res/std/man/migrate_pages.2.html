@@ -1,0 +1,162 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright 2009 Intel Corporation
+                  Author: Andi Kleen
+   Based on the move_pages manpage which was
+   This manpage is Copyright (C) 2006 Silicon Graphics, Inc.
+                                 Christoph Lameter
+  
+   %%%LICENSE_START(VERBATIM_TWO_PARA)
+   Permission is granted to make and distribute verbatim copies of this
+   manual provided the copyright notice and this permission notice are
+   preserved on all copies.
+  
+   Permission is granted to copy and distribute modified versions of this
+   manual under the conditions for verbatim copying, provided that the
+   entire resulting derived work is distributed under the terms of a
+   permission notice identical to this one.
+   %%%LICENSE_END
+   --><head>
+<meta name="dc.identifier" content="res/333a7e78a04f7af86aa3b17da02e7f4fdc2c44f5">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>migrate_pages(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">migrate_pages(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">migrate_pages(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">migrate_pages - move all pages in a process to another set of
+    nodes</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">NUMA (Non-Uniform Memory Access) policy library (<i>libnuma</i>,
+    <i>-lnuma</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;numaif.h&gt;</b></pre>
+<pre><b>long migrate_pages(int </b><i>pid</i><b>, unsigned long </b><i>maxnode,</i>
+<b>                   const unsigned long *</b><i>old_nodes,</i>
+<b>                   const unsigned long *</b><i>new_nodes</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>migrate_pages</b>() attempts to move all pages of the process
+    <i>pid</i> that are in memory nodes <i>old_nodes</i> to the memory nodes in
+    <i>new_nodes</i>. Pages not located in any node in <i>old_nodes</i> will not
+    be migrated. As far as possible, the kernel maintains the relative topology
+    relationship inside <i>old_nodes</i> during the migration to
+    <i>new_nodes</i>.</p>
+<p class="Pp">The <i>old_nodes</i> and <i>new_nodes</i> arguments are pointers
+    to bit masks of node numbers, with up to <i>maxnode</i> bits in each mask.
+    These masks are maintained as arrays of unsigned <i>long</i> integers (in
+    the last <i>long</i> integer, the bits beyond those specified by
+    <i>maxnode</i> are ignored). The <i>maxnode</i> argument is the maximum node
+    number in the bit mask plus one (this is the same as in <b>mbind</b>(2), but
+    different from <b>select</b>(2)).</p>
+<p class="Pp">The <i>pid</i> argument is the ID of the process whose pages are
+    to be moved. To move pages in another process, the caller must be privileged
+    (<b>CAP_SYS_NICE</b>) or the real or effective user ID of the calling
+    process must match the real or saved-set user ID of the target process. If
+    <i>pid</i> is 0, then <b>migrate_pages</b>() moves pages of the calling
+    process.</p>
+<p class="Pp">Pages shared with another process will be moved only if the
+    initiating process has the <b>CAP_SYS_NICE</b> privilege.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success <b>migrate_pages</b>() returns the number of pages that
+    could not be moved (i.e., a return of zero means that all pages were
+    successfully moved). On error, it returns -1, and sets <i>errno</i> to
+    indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>Part or all of the memory range specified by
+      <i>old_nodes</i>/<i>new_nodes</i> and <i>maxnode</i> points outside your
+      accessible address space.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The value specified by <i>maxnode</i> exceeds a kernel-imposed limit. Or,
+      <i>old_nodes</i> or <i>new_nodes</i> specifies one or more node IDs that
+      are greater than the maximum supported node ID. Or, none of the node IDs
+      specified by <i>new_nodes</i> are on-line and allowed by the process's
+      current cpuset context, or none of the specified nodes contain
+    memory.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>Insufficient privilege (<b>CAP_SYS_NICE</b>) to move pages of the process
+      specified by <i>pid</i>, or insufficient privilege (<b>CAP_SYS_NICE</b>)
+      to access the specified target nodes.</dd>
+  <dt id="ESRCH"><a class="permalink" href="#ESRCH"><b>ESRCH</b></a></dt>
+  <dd>No process matching <i>pid</i> could be found.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>migrate_pages</b>() system call first appeared in Linux
+    2.6.16.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This system call is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">For information on library support, see <b>numa</b>(7).</p>
+<p class="Pp">Use <b>get_mempolicy</b>(2) with the <b>MPOL_F_MEMS_ALLOWED</b>
+    flag to obtain the set of nodes that are allowed by the calling process's
+    cpuset. Note that this information is subject to change at any time by
+    manual or automatic reconfiguration of the cpuset.</p>
+<p class="Pp">Use of <b>migrate_pages</b>() may result in pages whose location
+    (node) violates the memory policy established for the specified addresses
+    (see <b>mbind</b>(2)) and/or the specified process (see
+    <b>set_mempolicy</b>(2)). That is, memory policy does not constrain the
+    destination nodes used by <b>migrate_pages</b>().</p>
+<p class="Pp">The <i>&lt;numaif.h&gt;</i> header is not included with glibc, but
+    requires installing <i>libnuma-devel</i> or a similar package.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>get_mempolicy</b>(2), <b>mbind</b>(2), <b>set_mempolicy</b>(2),
+    <b>numa</b>(3), <b>numa_maps</b>(5), <b>cpuset</b>(7), <b>numa</b>(7),
+    <b>migratepages</b>(8), <b>numastat</b>(8)</p>
+<p class="Pp"><i>Documentation/vm/page_migration.rst</i> in the Linux kernel
+    source tree</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

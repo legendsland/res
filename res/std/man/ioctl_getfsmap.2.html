@@ -1,0 +1,328 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2017, Oracle.  All rights reserved.
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+ --><head>
+<meta name="dc.identifier" content="res/7f95ac166ce088bda5ec929454a7b1d85891716a">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>ioctl_getfsmap(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">ioctl_getfsmap(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">ioctl_getfsmap(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">ioctl_getfsmap - retrieve the physical layout of the
+  filesystem</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;linux/fsmap.h&gt;  </b>/* Definition of <b>FS_IOC_GETFSMAP</b>,
+<b>                             FM?_OF_*</b>, and <b>*FMR_OWN_*</b> constants */
+<b>#include &lt;sys/ioctl.h&gt;</b></pre>
+<pre><b>int ioctl(int </b><i>fd</i><b>, FS_IOC_GETFSMAP, struct fsmap_head * </b><i>arg</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">This <b>ioctl</b>(2) operation retrieves physical extent mappings
+    for a filesystem. This information can be used to discover which files are
+    mapped to a physical block, examine free space, or find known bad blocks,
+    among other things.</p>
+<p class="Pp">The sole argument to this operation should be a pointer to a
+    single <i>struct fsmap_head</i>:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct fsmap {
+<br>
+    __u32 fmr_device;      /* Device ID */
+<br>
+    __u32 fmr_flags;       /* Mapping flags */
+<br>
+    __u64 fmr_physical;    /* Device offset of segment */
+<br>
+    __u64 fmr_owner;       /* Owner ID */
+<br>
+    __u64 fmr_offset;      /* File offset of segment */
+<br>
+    __u64 fmr_length;      /* Length of segment */
+<br>
+    __u64 fmr_reserved[3]; /* Must be zero */
+};
+struct fsmap_head {
+<br>
+    __u32 fmh_iflags;       /* Control flags */
+<br>
+    __u32 fmh_oflags;       /* Output flags */
+<br>
+    __u32 fmh_count;        /* # of entries in array incl. input */
+<br>
+    __u32 fmh_entries;      /* # of entries filled in (output) */
+<br>
+    __u64 fmh_reserved[6];  /* Must be zero */
+<br>
+    struct fsmap fmh_keys[2];  /* Low and high keys for
+<br>
+                                  the mapping search */
+<br>
+    struct fsmap fmh_recs[];   /* Returned records */
+};
+</pre>
+<br>
+<p class="Pp">The two <i>fmh_keys</i> array elements specify the lowest and
+    highest reverse-mapping key for which the application would like physical
+    mapping information. A reverse mapping key consists of the tuple (device,
+    block, owner, offset). The owner and offset fields are part of the key
+    because some filesystems support sharing physical blocks between multiple
+    files and therefore may return multiple mappings for a given physical
+  block.</p>
+<p class="Pp">Filesystem mappings are copied into the <i>fmh_recs</i> array,
+    which immediately follows the header data.</p>
+<section class="Ss">
+<h2 class="Ss" id="Fields_of_struct_fsmap_head"><a class="permalink" href="#Fields_of_struct_fsmap_head">Fields
+  of struct fsmap_head</a></h2>
+<p class="Pp">The <i>fmh_iflags</i> field is a bit mask passed to the kernel to
+    alter the output. No flags are currently defined, so the caller must set
+    this value to zero.</p>
+<p class="Pp">The <i>fmh_oflags</i> field is a bit mask of flags set by the
+    kernel concerning the returned mappings. If <b>FMH_OF_DEV_T</b> is set, then
+    the <i>fmr_device</i> field represents a <i>dev_t</i> structure containing
+    the major and minor numbers of the block device.</p>
+<p class="Pp">The <i>fmh_count</i> field contains the number of elements in the
+    array being passed to the kernel. If this value is 0, <i>fmh_entries</i>
+    will be set to the number of records that would have been returned had the
+    array been large enough; no mapping information will be returned.</p>
+<p class="Pp">The <i>fmh_entries</i> field contains the number of elements in
+    the <i>fmh_recs</i> array that contain useful information.</p>
+<p class="Pp">The <i>fmh_reserved</i> fields must be set to zero.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Keys"><a class="permalink" href="#Keys">Keys</a></h2>
+<p class="Pp">The two key records in <i>fsmap_head.fmh_keys</i> specify the
+    lowest and highest extent records in the keyspace that the caller wants
+    returned. A filesystem that can share blocks between files likely requires
+    the tuple (<i>device</i>, <i>physical</i>, <i>owner</i>, <i>offset</i>,
+    <i>flags</i>) to uniquely index any filesystem mapping record. Classic
+    non-sharing filesystems might be able to identify any record with only
+    (<i>device</i>, <i>physical</i>, <i>flags</i>). For example, if the low key
+    is set to (8:0, 36864, 0, 0, 0), the filesystem will only return records for
+    extents starting at or above 36&nbsp;KiB on disk. If the high key is set
+    to (8:0, 1048576, 0, 0, 0), only records below 1&nbsp;MiB will be
+    returned. The format of <i>fmr_device</i> in the keys must match the format
+    of the same field in the output records, as defined below. By convention,
+    the field <i>fsmap_head.fmh_keys[0]</i> must contain the low key and
+    <i>fsmap_head.fmh_keys[1]</i> must contain the high key for the request.</p>
+<p class="Pp">For convenience, if <i>fmr_length</i> is set in the low key, it
+    will be added to <i>fmr_block</i> or <i>fmr_offset</i> as appropriate. The
+    caller can take advantage of this subtlety to set up subsequent calls by
+    copying <i>fsmap_head.fmh_recs[fsmap_head.fmh_entries - 1]</i> into the low
+    key. The function <i>fsmap_advance</i> (defined in <i>linux/fsmap.h</i>)
+    provides this functionality.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Fields_of_struct_fsmap"><a class="permalink" href="#Fields_of_struct_fsmap">Fields
+  of struct fsmap</a></h2>
+<p class="Pp">The <i>fmr_device</i> field uniquely identifies the underlying
+    storage device. If the <b>FMH_OF_DEV_T</b> flag is set in the header's
+    <i>fmh_oflags</i> field, this field contains a <i>dev_t</i> from which major
+    and minor numbers can be extracted. If the flag is not set, this field
+    contains a value that must be unique for each unique storage device.</p>
+<p class="Pp">The <i>fmr_physical</i> field contains the disk address of the
+    extent in bytes.</p>
+<p class="Pp">The <i>fmr_owner</i> field contains the owner of the extent. This
+    is an inode number unless <b>FMR_OF_SPECIAL_OWNER</b> is set in the
+    <i>fmr_flags</i> field, in which case the value is determined by the
+    filesystem. See the section below about owner values for more details.</p>
+<p class="Pp">The <i>fmr_offset</i> field contains the logical address in the
+    mapping record in bytes. This field has no meaning if the
+    <b>FMR_OF_SPECIAL_OWNER</b> or <b>FMR_OF_EXTENT_MAP</b> flags are set in
+    <i>fmr_flags</i>.</p>
+<p class="Pp">The <i>fmr_length</i> field contains the length of the extent in
+    bytes.</p>
+<p class="Pp">The <i>fmr_flags</i> field is a bit mask of extent state flags.
+    The bits are:</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="FMR_OF_PREALLOC"><a class="permalink" href="#FMR_OF_PREALLOC"><b>FMR_OF_PREALLOC</b></a></dt>
+  <dd>The extent is allocated but not yet written.</dd>
+  <dt id="FMR_OF_ATTR_FORK"><a class="permalink" href="#FMR_OF_ATTR_FORK"><b>FMR_OF_ATTR_FORK</b></a></dt>
+  <dd>This extent contains extended attribute data.</dd>
+  <dt id="FMR_OF_EXTENT_MAP"><a class="permalink" href="#FMR_OF_EXTENT_MAP"><b>FMR_OF_EXTENT_MAP</b></a></dt>
+  <dd>This extent contains extent map information for the owner.</dd>
+  <dt id="FMR_OF_SHARED"><a class="permalink" href="#FMR_OF_SHARED"><b>FMR_OF_SHARED</b></a></dt>
+  <dd>Parts of this extent may be shared.</dd>
+  <dt id="FMR_OF_SPECIAL_OWNER"><a class="permalink" href="#FMR_OF_SPECIAL_OWNER"><b>FMR_OF_SPECIAL_OWNER</b></a></dt>
+  <dd>The <i>fmr_owner</i> field contains a special value instead of an inode
+      number.</dd>
+  <dt id="FMR_OF_LAST"><a class="permalink" href="#FMR_OF_LAST"><b>FMR_OF_LAST</b></a></dt>
+  <dd>This is the last record in the data set.</dd>
+</dl>
+</div>
+<p class="Pp">The <i>fmr_reserved</i> field will be set to zero.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Owner_values"><a class="permalink" href="#Owner_values">Owner
+  values</a></h2>
+<p class="Pp">Generally, the value of the <i>fmr_owner</i> field for
+    non-metadata extents should be an inode number. However, filesystems are
+    under no obligation to report inode numbers; they may instead report
+    <b>FMR_OWN_UNKNOWN</b> if the inode number cannot easily be retrieved, if
+    the caller lacks sufficient privilege, if the filesystem does not support
+    stable inode numbers, or for any other reason. If a filesystem wishes to
+    condition the reporting of inode numbers based on process capabilities, it
+    is strongly urged that the <b>CAP_SYS_ADMIN</b> capability be used for this
+    purpose.</p>
+<dl class="Bl-tag">
+  <dt id="The"><a class="permalink" href="#The">The following special owner
+    values are generic to all filesystems:</a></dt>
+  <dd></dd>
+</dl>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="FMR_OWN_FREE"><a class="permalink" href="#FMR_OWN_FREE"><b>FMR_OWN_FREE</b></a></dt>
+  <dd>Free space.</dd>
+  <dt id="FMR_OWN_UNKNOWN"><a class="permalink" href="#FMR_OWN_UNKNOWN"><b>FMR_OWN_UNKNOWN</b></a></dt>
+  <dd>This extent is in use but its owner is not known or not easily
+    retrieved.</dd>
+  <dt id="FMR_OWN_METADATA"><a class="permalink" href="#FMR_OWN_METADATA"><b>FMR_OWN_METADATA</b></a></dt>
+  <dd>This extent is filesystem metadata.</dd>
+</dl>
+</div>
+<p class="Pp">XFS can return the following special owner values:</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="XFS_FMR_OWN_FREE"><a class="permalink" href="#XFS_FMR_OWN_FREE"><b>XFS_FMR_OWN_FREE</b></a></dt>
+  <dd>Free space.</dd>
+  <dt id="XFS_FMR_OWN_UNKNOWN"><a class="permalink" href="#XFS_FMR_OWN_UNKNOWN"><b>XFS_FMR_OWN_UNKNOWN</b></a></dt>
+  <dd>This extent is in use but its owner is not known or not easily
+    retrieved.</dd>
+  <dt id="XFS_FMR_OWN_FS"><a class="permalink" href="#XFS_FMR_OWN_FS"><b>XFS_FMR_OWN_FS</b></a></dt>
+  <dd>Static filesystem metadata which exists at a fixed address. These are the
+      AG superblock, the AGF, the AGFL, and the AGI headers.</dd>
+  <dt id="XFS_FMR_OWN_LOG"><a class="permalink" href="#XFS_FMR_OWN_LOG"><b>XFS_FMR_OWN_LOG</b></a></dt>
+  <dd>The filesystem journal.</dd>
+  <dt id="XFS_FMR_OWN_AG"><a class="permalink" href="#XFS_FMR_OWN_AG"><b>XFS_FMR_OWN_AG</b></a></dt>
+  <dd>Allocation group metadata, such as the free space btrees and the reverse
+      mapping btrees.</dd>
+  <dt id="XFS_FMR_OWN_INOBT"><a class="permalink" href="#XFS_FMR_OWN_INOBT"><b>XFS_FMR_OWN_INOBT</b></a></dt>
+  <dd>The inode and free inode btrees.</dd>
+  <dt id="XFS_FMR_OWN_INODES"><a class="permalink" href="#XFS_FMR_OWN_INODES"><b>XFS_FMR_OWN_INODES</b></a></dt>
+  <dd>Inode records.</dd>
+  <dt id="XFS_FMR_OWN_REFC"><a class="permalink" href="#XFS_FMR_OWN_REFC"><b>XFS_FMR_OWN_REFC</b></a></dt>
+  <dd>Reference count information.</dd>
+  <dt id="XFS_FMR_OWN_COW"><a class="permalink" href="#XFS_FMR_OWN_COW"><b>XFS_FMR_OWN_COW</b></a></dt>
+  <dd>This extent is being used to stage a copy-on-write.</dd>
+  <dt id="XFS_FMR_OWN_DEFECTIVE:"><a class="permalink" href="#XFS_FMR_OWN_DEFECTIVE:"><b>XFS_FMR_OWN_DEFECTIVE:</b></a></dt>
+  <dd>This extent has been marked defective either by the filesystem or the
+      underlying device.</dd>
+</dl>
+</div>
+<p class="Pp">ext4 can return the following special owner values:</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="EXT4_FMR_OWN_FREE"><a class="permalink" href="#EXT4_FMR_OWN_FREE"><b>EXT4_FMR_OWN_FREE</b></a></dt>
+  <dd>Free space.</dd>
+  <dt id="EXT4_FMR_OWN_UNKNOWN"><a class="permalink" href="#EXT4_FMR_OWN_UNKNOWN"><b>EXT4_FMR_OWN_UNKNOWN</b></a></dt>
+  <dd>This extent is in use but its owner is not known or not easily
+    retrieved.</dd>
+  <dt id="EXT4_FMR_OWN_FS"><a class="permalink" href="#EXT4_FMR_OWN_FS"><b>EXT4_FMR_OWN_FS</b></a></dt>
+  <dd>Static filesystem metadata which exists at a fixed address. This is the
+      superblock and the group descriptors.</dd>
+  <dt id="EXT4_FMR_OWN_LOG"><a class="permalink" href="#EXT4_FMR_OWN_LOG"><b>EXT4_FMR_OWN_LOG</b></a></dt>
+  <dd>The filesystem journal.</dd>
+  <dt id="EXT4_FMR_OWN_INODES"><a class="permalink" href="#EXT4_FMR_OWN_INODES"><b>EXT4_FMR_OWN_INODES</b></a></dt>
+  <dd>Inode records.</dd>
+  <dt id="EXT4_FMR_OWN_BLKBM"><a class="permalink" href="#EXT4_FMR_OWN_BLKBM"><b>EXT4_FMR_OWN_BLKBM</b></a></dt>
+  <dd>Block bit map.</dd>
+  <dt id="EXT4_FMR_OWN_INOBM"><a class="permalink" href="#EXT4_FMR_OWN_INOBM"><b>EXT4_FMR_OWN_INOBM</b></a></dt>
+  <dd>Inode bit map.</dd>
+</dl>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On error, -1 is returned, and <i>errno</i> is set to indicate the
+    error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The error placed in <i>errno</i> can be one of, but is not limited
+    to, the following:</p>
+<dl class="Bl-tag">
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd><i>fd</i> is not open for reading.</dd>
+  <dt id="EBADMSG"><a class="permalink" href="#EBADMSG"><b>EBADMSG</b></a></dt>
+  <dd>The filesystem has detected a checksum error in the metadata.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>The pointer passed in was not mapped to a valid memory address.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The array is not long enough, the keys do not point to a valid part of the
+      filesystem, the low key points to a higher point in the filesystem's
+      physical storage address space than the high key, or a nonzero value was
+      passed in one of the fields that must be zero.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient memory to process the request.</dd>
+  <dt id="EOPNOTSUPP"><a class="permalink" href="#EOPNOTSUPP"><b>EOPNOTSUPP</b></a></dt>
+  <dd>The filesystem does not support this command.</dd>
+  <dt id="EUCLEAN"><a class="permalink" href="#EUCLEAN"><b>EUCLEAN</b></a></dt>
+  <dd>The filesystem metadata is corrupt and needs repair.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">The <b>FS_IOC_GETFSMAP</b> operation first appeared in Linux
+  4.12.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This API is Linux-specific. Not all filesystems support it.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">See <i>io/fsmap.c</i> in the <i>xfsprogs</i> distribution for a
+    sample program.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>ioctl</b>(2)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

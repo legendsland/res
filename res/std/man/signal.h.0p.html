@@ -1,0 +1,832 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/562bb74e944bde898cfbf18ce012cb4303fa7ea1">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>signal.h(0P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">signal.h(0P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">signal.h(0P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">signal.h — signals</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;signal.h&gt;</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">Some of the functionality described on this reference page extends
+    the ISO&nbsp;C standard. Applications shall define the appropriate feature
+    test macro (see the System Interfaces volume of POSIX.1‐2017,
+    <i>Section 2.2</i>, <i>The Compilation Environment</i>) to enable the
+    visibility of these symbols in this header.</p>
+<p class="Pp">The <i>&lt;signal.h&gt;</i> header shall define the following
+    macros, which shall expand to constant expressions with distinct values that
+    have a type compatible with the second argument to, and the return value of,
+    the <i>signal</i>() function, and whose values shall compare unequal to the
+    address of any declarable function.</p>
+<dl class="Bl-tag">
+  <dt id="SIG_DFL"><a class="permalink" href="#SIG_DFL">SIG_DFL</a></dt>
+  <dd>Request for default signal handling.</dd>
+  <dt id="SIG_ERR"><a class="permalink" href="#SIG_ERR">SIG_ERR</a></dt>
+  <dd>Return value from <i>signal</i>() in case of error.</dd>
+  <dt id="SIG_HOLD"><a class="permalink" href="#SIG_HOLD">SIG_HOLD</a></dt>
+  <dd>Request that signal be held.</dd>
+  <dt id="SIG_IGN"><a class="permalink" href="#SIG_IGN">SIG_IGN</a></dt>
+  <dd>Request that signal be ignored.</dd>
+</dl>
+<p class="Pp">The <i>&lt;signal.h&gt;</i> header shall define the
+    <b>pthread_t</b>, <b>size_t</b>, and <b>uid_t</b> types as described in
+    <i>&lt;sys/types.h&gt;</i>.</p>
+<p class="Pp">The <i>&lt;signal.h&gt;</i> header shall define the
+    <b>timespec</b> structure as described in <i>&lt;time.h&gt;</i>.</p>
+<p class="Pp">The <i>&lt;signal.h&gt;</i> header shall define the following data
+    types:</p>
+<dl class="Bl-tag">
+  <dt id="sig_atomic_t"><a class="permalink" href="#sig_atomic_t"><b>sig_atomic_t</b></a></dt>
+  <dd>Possibly volatile-qualified integer type of an object that can be accessed
+      as an atomic entity, even in the presence of asynchronous interrupts.</dd>
+  <dt id="sigset_t"><a class="permalink" href="#sigset_t"><b>sigset_t</b></a></dt>
+  <dd>Integer or structure type of an object used to represent sets of
+    signals.</dd>
+  <dt id="pid_t"><a class="permalink" href="#pid_t"><b>pid_t</b></a></dt>
+  <dd>As described in <i>&lt;sys/types.h&gt;</i>.</dd>
+</dl>
+<p class="Pp">The <i>&lt;signal.h&gt;</i> header shall define the
+    <b>pthread_attr_t</b> type as described in <i>&lt;sys/types.h&gt;</i>.</p>
+<p class="Pp">The <i>&lt;signal.h&gt;</i> header shall define the
+    <b>sigevent</b> structure, which shall include at least the following
+    members:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>int              sigev_notify            Notification type.
+int              sigev_signo             Signal number.
+union sigval     sigev_value             Signal value.
+void           (*sigev_notify_function)(union sigval)
+<br>
+                                         Notification function.
+pthread_attr_t *sigev_notify_attributes  Notification attributes.</pre>
+</div>
+<p class="Pp">The <i>&lt;signal.h&gt;</i> header shall define the following
+    symbolic constants for the values of <i>sigev_notify</i>:</p>
+<dl class="Bl-tag">
+  <dt id="SIGEV_NONE"><a class="permalink" href="#SIGEV_NONE">SIGEV_NONE</a></dt>
+  <dd>No asynchronous notification is delivered when the event of interest
+      occurs.</dd>
+  <dt id="SIGEV_SIGNAL"><a class="permalink" href="#SIGEV_SIGNAL">SIGEV_SIGNAL</a></dt>
+  <dd>A queued signal, with an application-defined value, is generated when the
+      event of interest occurs.</dd>
+  <dt id="SIGEV_THREAD"><a class="permalink" href="#SIGEV_THREAD">SIGEV_THREAD</a></dt>
+  <dd>A notification function is called to perform notification.
+    <br>
+  </dd>
+</dl>
+<p class="Pp">The <b>sigval</b> union shall be defined as:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>int    sival_int    Integer signal value.
+void  *sival_ptr    Pointer signal value.</pre>
+</div>
+<p class="Pp">The <i>&lt;signal.h&gt;</i> header shall declare the SIGRTMIN and
+    SIGRTMAX macros, which shall expand to positive integer expressions with
+    type <b>int</b>, but which need not be constant expressions. These macros
+    specify a range of signal numbers that are reserved for application use and
+    for which the realtime signal behavior specified in this volume of
+    POSIX.1‐2017 is supported. The signal numbers in this range do not
+    overlap any of the signals specified in the following table.</p>
+<p class="Pp">The range SIGRTMIN through SIGRTMAX inclusive shall include at
+    least {RTSIG_MAX} signal numbers.</p>
+<p class="Pp">It is implementation-defined whether realtime signal behavior is
+    supported for other signals.</p>
+<p class="Pp">The <i>&lt;signal.h&gt;</i> header shall define the following
+    macros that are used to refer to the signals that occur in the system.
+    Signals defined here begin with the letters SIG followed by an uppercase
+    letter. The macros shall expand to positive integer constant expressions
+    with type <b>int</b> and distinct values. The value 0 is reserved for use as
+    the null signal (see <i>kill</i>()). Additional implementation-defined
+    signals may occur in the system.</p>
+<p class="Pp">The ISO&nbsp;C standard only requires the signal names SIGABRT,
+    SIGFPE, SIGILL, SIGINT, SIGSEGV, and SIGTERM to be defined. An
+    implementation need not generate any of these six signals, except as a
+    result of explicit use of interfaces that generate signals, such as
+    <i>raise</i>(), <i>kill</i>(), the General Terminal Interface (see
+    <i>Section 11.1.9</i>, <i>Special Characters</i>), and the <i>kill</i>
+    utility, unless otherwise stated (see, for example, the System Interfaces
+    volume of POSIX.1‐2017, <i>Section 2.8.3.3</i>, <i>Memory
+    Protection</i>).</p>
+<p class="Pp">The following signals shall be supported on all implementations
+    (default actions are explained below the table):</p>
+<table class="tbl" style="border-style: solid;">
+  <tbody><tr style="border-bottom-style: solid;">
+    <td style="text-align: center; border-right-style: solid;"><b>Signal</b></td>
+    <td style="text-align: center; border-right-style: solid;"><b>Default
+      Action</b></td>
+    <td style="text-align: center;"><b>Description</b></td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGABRT</td>
+    <td style="text-align: right; border-right-style: solid;">A</td>
+    <td>Process abort signal.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGALRM</td>
+    <td style="text-align: right; border-right-style: solid;">T</td>
+    <td>Alarm clock.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGBUS</td>
+    <td style="text-align: right; border-right-style: solid;">A</td>
+    <td>Access to an undefined portion of a memory object.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGCHLD</td>
+    <td style="text-align: right; border-right-style: solid;">I</td>
+    <td>Child process terminated, stopped,</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="text-align: right; border-right-style: solid;"></td>
+    <td>or continued.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGCONT</td>
+    <td style="text-align: right; border-right-style: solid;">C</td>
+    <td>Continue executing, if stopped.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGFPE</td>
+    <td style="text-align: right; border-right-style: solid;">A</td>
+    <td>Erroneous arithmetic operation.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGHUP</td>
+    <td style="text-align: right; border-right-style: solid;">T</td>
+    <td>Hangup.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGILL</td>
+    <td style="text-align: right; border-right-style: solid;">A</td>
+    <td>Illegal instruction.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGINT</td>
+    <td style="text-align: right; border-right-style: solid;">T</td>
+    <td>Terminal interrupt signal.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGKILL</td>
+    <td style="text-align: right; border-right-style: solid;">T</td>
+    <td>Kill (cannot be caught or ignored).</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGPIPE</td>
+    <td style="text-align: right; border-right-style: solid;">T</td>
+    <td>Write on a pipe with no one to read it.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGQUIT</td>
+    <td style="text-align: right; border-right-style: solid;">A</td>
+    <td>Terminal quit signal.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGSEGV</td>
+    <td style="text-align: right; border-right-style: solid;">A</td>
+    <td>Invalid memory reference.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGSTOP</td>
+    <td style="text-align: right; border-right-style: solid;">S</td>
+    <td>Stop executing (cannot be caught or ignored).</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGTERM</td>
+    <td style="text-align: right; border-right-style: solid;">T</td>
+    <td>Termination signal.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGTSTP</td>
+    <td style="text-align: right; border-right-style: solid;">S</td>
+    <td>Terminal stop signal.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGTTIN</td>
+    <td style="text-align: right; border-right-style: solid;">S</td>
+    <td>Background process attempting read.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGTTOU</td>
+    <td style="text-align: right; border-right-style: solid;">S</td>
+    <td>Background process attempting write.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGUSR1</td>
+    <td style="text-align: right; border-right-style: solid;">T</td>
+    <td>User-defined signal 1.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGUSR2</td>
+    <td style="text-align: right; border-right-style: solid;">T</td>
+    <td>User-defined signal 2.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGPOLL</td>
+    <td style="text-align: right; border-right-style: solid;">T</td>
+    <td>Pollable event.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGPROF</td>
+    <td style="text-align: right; border-right-style: solid;">T</td>
+    <td>Profiling timer expired.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGSYS</td>
+    <td style="text-align: right; border-right-style: solid;">A</td>
+    <td>Bad system call.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGTRAP</td>
+    <td style="text-align: right; border-right-style: solid;">A</td>
+    <td>Trace/breakpoint trap.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGURG</td>
+    <td style="text-align: right; border-right-style: solid;">I</td>
+    <td>High bandwidth data is available at a socket.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGVTALRM</td>
+    <td style="text-align: right; border-right-style: solid;">T</td>
+    <td>Virtual timer expired.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGXCPU</td>
+    <td style="text-align: right; border-right-style: solid;">A</td>
+    <td>CPU time limit exceeded.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGXFSZ</td>
+    <td style="text-align: right; border-right-style: solid;">A</td>
+    <td>File size limit exceeded.</td>
+  </tr>
+</tbody></table>
+<br>
+<p class="Pp">The default actions are as follows:</p>
+<dl class="Bl-tag">
+  <dt id="T"><a class="permalink" href="#T">T</a></dt>
+  <dd>Abnormal termination of the process.</dd>
+  <dt id="A"><a class="permalink" href="#A">A</a></dt>
+  <dd>Abnormal termination of the process with additional actions.</dd>
+  <dt id="I"><a class="permalink" href="#I">I</a></dt>
+  <dd>Ignore the signal.</dd>
+  <dt id="S"><a class="permalink" href="#S">S</a></dt>
+  <dd>Stop the process.</dd>
+  <dt id="C"><a class="permalink" href="#C">C</a></dt>
+  <dd>Continue the process, if it is stopped; otherwise, ignore the signal.</dd>
+</dl>
+<p class="Pp">The effects on the process in each case are described in the
+    System Interfaces volume of POSIX.1‐2017, <i>Section 2.4.3</i>,
+    <i>Signal Actions</i>.</p>
+<p class="Pp">The <i>&lt;signal.h&gt;</i> header shall declare the
+    <b>sigaction</b> structure, which shall include at least the following
+    members:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>void   (*sa_handler)(int)  Pointer to a signal-catching function
+<br>
+                           or one of the SIG_IGN or SIG_DFL.
+sigset_t sa_mask           Set of signals to be blocked during execution
+<br>
+                           of the signal handling function.
+int      sa_flags          Special flags.
+void   (*sa_sigaction)(int, siginfo_t *, void *)
+<br>
+                           Pointer to a signal-catching function.</pre>
+</div>
+<p class="Pp">The storage occupied by <i>sa_handler</i> and <i>sa_sigaction</i>
+    may overlap, and a conforming application shall not use both
+  simultaneously.</p>
+<p class="Pp">The <i>&lt;signal.h&gt;</i> header shall define the following
+    macros which shall expand to integer constant expressions that need not be
+    usable in <b>#if</b> preprocessing directives:</p>
+<dl class="Bl-tag">
+  <dt id="SIG_BLOCK"><a class="permalink" href="#SIG_BLOCK">SIG_BLOCK</a></dt>
+  <dd>The resulting set is the union of the current set and the signal set
+      pointed to by the argument <i>set</i>.</dd>
+  <dt id="SIG_UNBLOCK"><a class="permalink" href="#SIG_UNBLOCK">SIG_UNBLOCK</a></dt>
+  <dd>The resulting set is the intersection of the current set and the
+      complement of the signal set pointed to by the argument <i>set</i>.</dd>
+  <dt id="SIG_SETMASK"><a class="permalink" href="#SIG_SETMASK">SIG_SETMASK</a></dt>
+  <dd>The resulting set is the signal set pointed to by the argument
+    <i>set</i>.</dd>
+</dl>
+<p class="Pp">The <i>&lt;signal.h&gt;</i> header shall also define the following
+    symbolic constants:</p>
+<dl class="Bl-tag">
+  <dt id="SA_NOCLDSTOP"><a class="permalink" href="#SA_NOCLDSTOP">SA_NOCLDSTOP</a></dt>
+  <dd>Do not generate SIGCHLD when children stop
+    <br>
+    or stopped children continue.</dd>
+  <dt id="SA_ONSTACK"><a class="permalink" href="#SA_ONSTACK">SA_ONSTACK</a></dt>
+  <dd>Causes signal delivery to occur on an alternate stack.</dd>
+  <dt id="SA_RESETHAND"><a class="permalink" href="#SA_RESETHAND">SA_RESETHAND</a></dt>
+  <dd>Causes signal dispositions to be set to SIG_DFL on entry to signal
+      handlers.</dd>
+  <dt id="SA_RESTART"><a class="permalink" href="#SA_RESTART">SA_RESTART</a></dt>
+  <dd>Causes certain functions to become restartable.</dd>
+  <dt id="SA_SIGINFO"><a class="permalink" href="#SA_SIGINFO">SA_SIGINFO</a></dt>
+  <dd>Causes extra information to be passed to signal handlers at the time of
+      receipt of a signal.</dd>
+  <dt id="SA_NOCLDWAIT"><a class="permalink" href="#SA_NOCLDWAIT">SA_NOCLDWAIT</a></dt>
+  <dd>Causes implementations not to create zombie processes or status
+      information on child termination. See <i><i>sigaction</i>()</i>.</dd>
+  <dt id="SA_NODEFER"><a class="permalink" href="#SA_NODEFER">SA_NODEFER</a></dt>
+  <dd>Causes signal not to be automatically blocked on entry to signal
+    handler.</dd>
+  <dt id="SS_ONSTACK"><a class="permalink" href="#SS_ONSTACK">SS_ONSTACK</a></dt>
+  <dd>Process is executing on an alternate signal stack.</dd>
+  <dt id="SS_DISABLE"><a class="permalink" href="#SS_DISABLE">SS_DISABLE</a></dt>
+  <dd>Alternate signal stack is disabled.</dd>
+  <dt id="MINSIGSTKSZ"><a class="permalink" href="#MINSIGSTKSZ">MINSIGSTKSZ</a></dt>
+  <dd>Minimum stack size for a signal handler.</dd>
+  <dt id="SIGSTKSZ"><a class="permalink" href="#SIGSTKSZ">SIGSTKSZ</a></dt>
+  <dd>Default size in bytes for the alternate signal stack.</dd>
+</dl>
+<p class="Pp">The <i>&lt;signal.h&gt;</i> header shall define the
+    <b>mcontext_t</b> type through <b>typedef</b>.</p>
+<p class="Pp">The <i>&lt;signal.h&gt;</i> header shall define the
+    <b>ucontext_t</b> type as a structure that shall include at least the
+    following members:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>ucontext_t *uc_link     Pointer to the context that is resumed
+<br>
+                        when this context returns.
+sigset_t    uc_sigmask  The set of signals that are blocked when this
+<br>
+                        context is active.
+stack_t     uc_stack    The stack used by this context.
+mcontext_t  uc_mcontext A machine-specific representation of the saved
+<br>
+                        context.</pre>
+</div>
+<p class="Pp">The <i>&lt;signal.h&gt;</i> header shall define the <b>stack_t</b>
+    type as a structure, which shall include at least the following members:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>void     *ss_sp       Stack base or pointer.
+size_t    ss_size     Stack size.
+int       ss_flags    Flags.</pre>
+</div>
+<p class="Pp">The <i>&lt;signal.h&gt;</i> header shall define the
+    <b>siginfo_t</b> type as a structure, which shall include at least the
+    following members:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>int           si_signo  Signal number.
+int           si_code   Signal code.
+int           si_errno  If non-zero, an <i>errno</i> value associated with
+<br>
+                        this signal, as described in <b>&lt;errno.h&gt;</b>.
+pid_t         si_pid    Sending process ID.
+uid_t         si_uid    Real user ID of sending process.
+void         *si_addr   Address of faulting instruction.
+int           si_status Exit value or signal.
+long          si_band   Band event for SIGPOLL.
+union sigval  si_value  Signal value.</pre>
+</div>
+<p class="Pp">The <i>&lt;signal.h&gt;</i> header shall define the symbolic
+    constants in the <b>Code</b> column of the following table for use as values
+    of <i>si_code</i> that are signal-specific or non-signal-specific reasons
+    why the signal was generated.</p>
+<table class="tbl" style="border-style: solid;">
+  <tbody><tr style="border-bottom-style: solid;">
+    <td style="text-align: center; border-right-style: solid;"><b>Signal</b></td>
+    <td style="text-align: center; border-right-style: solid;"><b>Code</b></td>
+    <td style="text-align: center;"><b>Reason</b></td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGILL</td>
+    <td style="border-right-style: solid;">ILL_ILLOPC</td>
+    <td>Illegal opcode.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">ILL_ILLOPN</td>
+    <td>Illegal operand.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">ILL_ILLADR</td>
+    <td>Illegal addressing mode.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">ILL_ILLTRP</td>
+    <td>Illegal trap.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">ILL_PRVOPC</td>
+    <td>Privileged opcode.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">ILL_PRVREG</td>
+    <td>Privileged register.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">ILL_COPROC</td>
+    <td>Coprocessor error.</td>
+  </tr>
+  <tr style="border-bottom-style: solid;">
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">ILL_BADSTK</td>
+    <td>Internal stack error.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGFPE</td>
+    <td style="border-right-style: solid;">FPE_INTDIV</td>
+    <td>Integer divide by zero.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">FPE_INTOVF</td>
+    <td>Integer overflow.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">FPE_FLTDIV</td>
+    <td>Floating-point divide by zero.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">FPE_FLTOVF</td>
+    <td>Floating-point overflow.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">FPE_FLTUND</td>
+    <td>Floating-point underflow.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">FPE_FLTRES</td>
+    <td>Floating-point inexact result.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">FPE_FLTINV</td>
+    <td>Invalid floating-point operation.</td>
+  </tr>
+  <tr style="border-bottom-style: solid;">
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">FPE_FLTSUB</td>
+    <td>Subscript out of range.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGSEGV</td>
+    <td style="border-right-style: solid;">SEGV_MAPERR</td>
+    <td>Address not mapped to object.</td>
+  </tr>
+  <tr style="border-bottom-style: solid;">
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">SEGV_ACCERR</td>
+    <td>Invalid permissions for mapped object.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGBUS</td>
+    <td style="border-right-style: solid;">BUS_ADRALN</td>
+    <td>Invalid address alignment.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">BUS_ADRERR</td>
+    <td>Nonexistent physical address.</td>
+  </tr>
+  <tr style="border-bottom-style: solid;">
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">BUS_OBJERR</td>
+    <td>Object-specific hardware error.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGTRAP</td>
+    <td style="border-right-style: solid;">TRAP_BRKPT</td>
+    <td>Process breakpoint.</td>
+  </tr>
+  <tr style="border-bottom-style: solid;">
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">TRAP_TRACE</td>
+    <td>Process trace trap.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGCHLD</td>
+    <td style="border-right-style: solid;">CLD_EXITED</td>
+    <td>Child has exited.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">CLD_KILLED</td>
+    <td>Child has terminated abnormally and did not create a <b>core</b>
+      file.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">CLD_DUMPED</td>
+    <td>Child has terminated abnormally and created a <b>core</b> file.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">CLD_TRAPPED</td>
+    <td>Traced child has trapped.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">CLD_STOPPED</td>
+    <td>Child has stopped.</td>
+  </tr>
+  <tr style="border-bottom-style: solid;">
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">CLD_CONTINUED</td>
+    <td>Stopped child has continued.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGPOLL</td>
+    <td style="border-right-style: solid;">POLL_IN</td>
+    <td>Data input available.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">POLL_OUT</td>
+    <td>Output buffers available.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">POLL_MSG</td>
+    <td>Input message available.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">POLL_ERR</td>
+    <td>I/O error.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">POLL_PRI</td>
+    <td>High priority input available.</td>
+  </tr>
+  <tr style="border-bottom-style: solid;">
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">POLL_HUP</td>
+    <td>Device disconnected.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">Any</td>
+    <td style="border-right-style: solid;">SI_USER</td>
+    <td>Signal sent by <i>kill</i>().</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">SI_QUEUE</td>
+    <td>Signal sent by <i>sigqueue</i>().</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">SI_TIMER</td>
+    <td>Signal generated by expiration of a timer set by
+      <i>timer_settime</i>().</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">SI_ASYNCIO</td>
+    <td>Signal generated by completion of an asynchronous I/O</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;"></td>
+    <td>request.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;">SI_MESGQ</td>
+    <td>Signal generated by arrival of a message on an empty message</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;"></td>
+    <td>queue.</td>
+  </tr>
+</tbody></table>
+<p class="Pp">Implementations may support additional <i>si_code</i> values not
+    included in this list, may generate values included in this list under
+    circumstances other than those described in this list, and may contain
+    extensions or limitations that prevent some values from being generated.
+    Implementations do not generate a different value from the ones described in
+    this list for circumstances described in this list.
+  <br>
+</p>
+<p class="Pp">In addition, the following signal-specific information shall be
+    available:</p>
+<table class="tbl" style="border-style: solid;">
+  <tbody><tr style="border-bottom-style: solid;">
+    <td style="text-align: center; border-right-style: solid;"><b>Signal</b></td>
+    <td style="text-align: center; border-right-style: solid;"><b>Member</b></td>
+    <td style="text-align: center;"><b>Value</b></td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGILL</td>
+    <td style="border-right-style: solid;"><b>void *
+      </b><i>si_addr</i><b></b></td>
+    <td>Address of faulting instruction.</td>
+  </tr>
+  <tr style="border-bottom-style: solid;">
+    <td style="border-right-style: solid;">SIGFPE</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGSEGV</td>
+    <td style="border-right-style: solid;"><b>void *
+      </b><i>si_addr</i><b></b></td>
+    <td>Address of faulting memory reference.</td>
+  </tr>
+  <tr style="border-bottom-style: solid;">
+    <td style="border-right-style: solid;">SIGBUS</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGCHLD</td>
+    <td style="border-right-style: solid;"><b>pid_t
+      </b><i>si_pid</i><b></b></td>
+    <td>Child process ID.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;"><b>int
+      </b><i>si_status</i><b></b></td>
+    <td>If si_code is equal to CLD_EXITED, then si_status holds the exit value
+      of the process; otherwise, it is equal to the signal that caused the
+      process to change state. The exit value in si_status shall be equal to the
+      full exit value (that is, the value passed to <i>_exit</i>(),
+      <i>_Exit</i>(), or <i>exit</i>(), or returned from <i>main</i>()); it
+      shall not be limited to the least significant eight bits of the
+      value.</td>
+  </tr>
+  <tr style="border-bottom-style: solid;">
+    <td style="border-right-style: solid;"></td>
+    <td style="border-right-style: solid;"><b>uid_t
+      </b><i>si_uid</i><b></b></td>
+    <td>Real user ID of the process that sent the signal.</td>
+  </tr>
+  <tr>
+    <td style="border-right-style: solid;">SIGPOLL</td>
+    <td style="border-right-style: solid;"><b>long
+      </b><i>si_band</i><b></b></td>
+    <td>Band event for POLL_IN, POLL_OUT, or POLL_MSG.</td>
+  </tr>
+</tbody></table>
+<p class="Pp">For some implementations, the value of <i>si_addr</i> may be
+    inaccurate.</p>
+<p class="Pp">The following shall be declared as functions and may also be
+    defined as macros. Function prototypes shall be provided.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>int    kill(pid_t, int);
+int    killpg(pid_t, int);
+void   psiginfo(const siginfo_t *, const char *);
+void   psignal(int, const char *);
+int    pthread_kill(pthread_t, int);
+int    pthread_sigmask(int, const sigset_t *restrict,
+<br>
+           sigset_t *restrict);
+int    raise(int);
+int    sigaction(int, const struct sigaction *restrict,
+<br>
+           struct sigaction *restrict);
+int    sigaddset(sigset_t *, int);
+int    sigaltstack(const stack_t *restrict, stack_t *restrict);
+int    sigdelset(sigset_t *, int);
+int    sigemptyset(sigset_t *);
+int    sigfillset(sigset_t *);
+int    sighold(int);
+int    sigignore(int);
+int    siginterrupt(int, int);
+int    sigismember(const sigset_t *, int);
+void (*signal(int, void (*)(int)))(int);
+int    sigpause(int);
+int    sigpending(sigset_t *);
+int    sigprocmask(int, const sigset_t *restrict, sigset_t *restrict);
+int    sigqueue(pid_t, int, union sigval);
+int    sigrelse(int);
+void (*sigset(int, void (*)(int)))(int);
+int    sigsuspend(const sigset_t *);
+int    sigtimedwait(const sigset_t *restrict, siginfo_t *restrict,
+<br>
+           const struct timespec *restrict);
+int    sigwait(const sigset_t *restrict, int *restrict);
+int    sigwaitinfo(const sigset_t *restrict, siginfo_t *restrict);</pre>
+</div>
+<p class="Pp">Inclusion of the <i>&lt;signal.h&gt;</i> header may make visible
+    all symbols from the <i>&lt;time.h&gt;</i> header.</p>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">On systems not supporting the XSI option, the <i>si_pid</i> and
+    <i>si_uid</i> members of <b>siginfo_t</b> are only required to be valid when
+    <i>si_code</i> is SI_USER or SI_QUEUE. On XSI-conforming systems, they are
+    also valid for all <i>si_code</i> values less than or equal to 0; however,
+    it is unspecified whether SI_USER and SI_QUEUE have values less than or
+    equal to zero, and therefore XSI applications should check whether
+    <i>si_code</i> has the value SI_USER or SI_QUEUE or is less than or equal to
+    0 to tell whether <i>si_pid</i> and <i>si_uid</i> are valid.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">The SIGPOLL and SIGPROF signals may be removed in a future
+    version.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><b>&lt;errno.h&gt;</b></i>, <i><b>&lt;stropts.h&gt;</b></i>,
+    <i><b>&lt;sys_types.h&gt;</b></i>, <i><b>&lt;time.h&gt;</b></i></p>
+<p class="Pp">The System Interfaces volume of POSIX.1‐2017, <i>Section
+    2.2</i>, <i>The Compilation Environment</i>, <i><i>alarm</i>()</i>,
+    <i><i>ioctl</i>()</i>, <i><i>kill</i>()</i>, <i><i>killpg</i>()</i>,
+    <i><i>psiginfo</i>()</i>, <i><i>pthread_kill</i>()</i>,
+    <i><i>pthread_sigmask</i>()</i>, <i><i>raise</i>()</i>,
+    <i><i>sigaction</i>()</i>, <i><i>sigaddset</i>()</i>,
+    <i><i>sigaltstack</i>()</i>, <i><i>sigdelset</i>()</i>,
+    <i><i>sigemptyset</i>()</i>, <i><i>sigfillset</i>()</i>,
+    <i><i>sighold</i>()</i>, <i><i>siginterrupt</i>()</i>,
+    <i><i>sigismember</i>()</i>, <i><i>signal</i>()</i>,
+    <i><i>sigpending</i>()</i>, <i><i>sigqueue</i>()</i>,
+    <i><i>sigsuspend</i>()</i>, <i><i>sigtimedwait</i>()</i>,
+    <i><i>sigwait</i>()</i>, <i><i>timer_create</i>()</i>, <i><i>wait</i>()</i>,
+    <i><i>waitid</i>()</i></p>
+<p class="Pp">The Shell and Utilities volume of POSIX.1‐2017,
+    <i><i>kill</i></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

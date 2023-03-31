@@ -1,0 +1,303 @@
+<!DOCTYPE html><html><head>
+<meta name="dc.identifier" content="res/88bc1a173b11c7898a4adbb01be8f712c1358b83">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>getutent(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">getutent(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">getutent(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getutent, getutid, getutline, pututline, setutent, endutent,
+    utmpname - access utmp file entries</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;utmp.h&gt;</b></pre>
+<pre><b>struct utmp *getutent(void);</b>
+<b>struct utmp *getutid(const struct utmp *</b><i>ut</i><b>);</b>
+<b>struct utmp *getutline(const struct utmp *</b><i>ut</i><b>);</b></pre>
+<pre><b>struct utmp *pututline(const struct utmp *</b><i>ut</i><b>);</b></pre>
+<pre><b>void setutent(void);</b>
+<b>void endutent(void);</b></pre>
+<pre><b>int utmpname(const char *</b><i>file</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">New applications should use the POSIX.1-specified
+    "utmpx" versions of these functions; see STANDARDS.</p>
+<p class="Pp"><b>utmpname</b>() sets the name of the utmp-format file for the
+    other utmp functions to access. If <b>utmpname</b>() is not used to set the
+    filename before the other functions are used, they assume <b>_PATH_UTMP</b>,
+    as defined in <i>&lt;paths.h&gt;</i>.</p>
+<p class="Pp"><b>setutent</b>() rewinds the file pointer to the beginning of the
+    utmp file. It is generally a good idea to call it before any of the other
+    functions.</p>
+<p class="Pp"><b>endutent</b>() closes the utmp file. It should be called when
+    the user code is done accessing the file with the other functions.</p>
+<p class="Pp"><b>getutent</b>() reads a line from the current file position in
+    the utmp file. It returns a pointer to a structure containing the fields of
+    the line. The definition of this structure is shown in <b>utmp</b>(5).</p>
+<p class="Pp"><b>getutid</b>() searches forward from the current file position
+    in the utmp file based upon <i>ut</i>. If <i>ut-&gt;ut_type</i> is one of
+    <b>RUN_LVL</b>, <b>BOOT_TIME</b>, <b>NEW_TIME</b>, or <b>OLD_TIME</b>,
+    <b>getutid</b>() will find the first entry whose <i>ut_type</i> field
+    matches <i>ut-&gt;ut_type</i>. If <i>ut-&gt;ut_type</i> is one of
+    <b>INIT_PROCESS</b>, <b>LOGIN_PROCESS</b>, <b>USER_PROCESS</b>, or
+    <b>DEAD_PROCESS</b>, <b>getutid</b>() will find the first entry whose
+    <i>ut_id</i> field matches <i>ut-&gt;ut_id</i>.</p>
+<p class="Pp"><b>getutline</b>() searches forward from the current file position
+    in the utmp file. It scans entries whose <i>ut_type</i> is
+    <b>USER_PROCESS</b> or <b>LOGIN_PROCESS</b> and returns the first one whose
+    <i>ut_line</i> field matches <i>ut-&gt;ut_line</i>.</p>
+<p class="Pp"><b>pututline</b>() writes the <i>utmp</i> structure <i>ut</i> into
+    the utmp file. It uses <b>getutid</b>() to search for the proper place in
+    the file to insert the new entry. If it cannot find an appropriate slot for
+    <i>ut</i>, <b>pututline</b>() will append the new entry to the end of the
+    file.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp"><b>getutent</b>(), <b>getutid</b>(), and <b>getutline</b>() return
+    a pointer to a <i>struct utmp</i> on success, and NULL on failure (which
+    includes the "record not found" case). This <i>struct utmp</i> is
+    allocated in static storage, and may be overwritten by subsequent calls.</p>
+<p class="Pp">On success <b>pututline</b>() returns <i>ut</i>; on failure, it
+    returns NULL.</p>
+<p class="Pp"><b>utmpname</b>() returns 0 if the new name was successfully
+    stored, or -1 on failure.</p>
+<p class="Pp">On failure, these functions <i>errno</i> set to indicate the
+    error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Out of memory.</dd>
+  <dt id="ESRCH"><a class="permalink" href="#ESRCH"><b>ESRCH</b></a></dt>
+  <dd>Record not found.</dd>
+</dl>
+<p class="Pp"><b>setutent</b>(), <b>pututline</b>(), and the <b>getut*</b>()
+    functions can also fail for the reasons described in <b>open</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FILES"><a class="permalink" href="#FILES">FILES</a></h1>
+<dl class="Bl-tag">
+  <dt><i>/var/run/utmp</i></dt>
+  <dd>database of currently logged-in users</dd>
+  <dt><i>/var/log/wtmp</i></dt>
+  <dd>database of past user logins</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>getutent ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe init race:utent race:utentbuf sig:ALRM timer</td>
+  </tr>
+  <tr>
+    <td>getutid (), getutline ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe init race:utent sig:ALRM timer</td>
+  </tr>
+  <tr>
+    <td>pututline ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race:utent sig:ALRM timer</td>
+  </tr>
+  <tr>
+    <td>setutent (), endutent (), utmpname ()</td>
+    <td>Thread safety</td>
+    <td>MT-Unsafe race:utent</td>
+  </tr>
+</tbody></table>
+<p class="Pp">In the above table, <i>utent</i> in <i>race:utent</i> signifies
+    that if any of the functions <b>setutent</b>(), <b>getutent</b>(),
+    <b>getutid</b>(), <b>getutline</b>(), <b>pututline</b>(), <b>utmpname</b>(),
+    or <b>endutent</b>() are used in parallel in different threads of a program,
+    then data races could occur.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">XPG2, SVr4.</p>
+<p class="Pp">In XPG2 and SVID 2 the function <b>pututline</b>() is documented
+    to return void, and that is what it does on many systems (AIX, HP-UX). HP-UX
+    introduces a new function <b>_pututline</b>() with the prototype given above
+    for <b>pututline</b>().</p>
+<p class="Pp">All these functions are obsolete now on non-Linux systems.
+    POSIX.1-2001 and POSIX.1-2008, following SUSv1, does not have any of these
+    functions, but instead uses</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre><b>#include &lt;utmpx.h&gt;</b></pre>
+<pre><b>struct utmpx *getutxent(void);</b>
+<b>struct utmpx *getutxid(const struct utmpx *);</b>
+<b>struct utmpx *getutxline(const struct utmpx *);</b>
+<b>struct utmpx *pututxline(const struct utmpx *);</b>
+<b>void setutxent(void);</b>
+<b>void endutxent(void);</b>
+</pre>
+</div>
+<p class="Pp">These functions are provided by glibc, and perform the same task
+    as their equivalents without the "x", but use <i>struct utmpx</i>,
+    defined on Linux to be the same as <i>struct utmp</i>. For completeness,
+    glibc also provides <b>utmpxname</b>(), although this function is not
+    specified by POSIX.1.</p>
+<p class="Pp">On some other systems, the <i>utmpx</i> structure is a superset of
+    the <i>utmp</i> structure, with additional fields, and larger versions of
+    the existing fields, and parallel files are maintained, often
+    <i>/var/*/utmpx</i> and <i>/var/*/wtmpx</i>.</p>
+<p class="Pp">Linux glibc on the other hand does not use a parallel <i>utmpx</i>
+    file since its <i>utmp</i> structure is already large enough. The
+    "x" functions listed above are just aliases for their counterparts
+    without the "x" (e.g., <b>getutxent</b>() is an alias for
+    <b>getutent</b>()).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="glibc_notes"><a class="permalink" href="#glibc_notes">glibc
+  notes</a></h2>
+<p class="Pp">The above functions are not thread-safe. glibc adds reentrant
+    versions</p>
+<p class="Pp"></p>
+<pre><b>#include &lt;utmp.h&gt;</b></pre>
+<pre><b>int getutent_r(struct utmp *</b><i>ubuf</i><b>, struct utmp **</b><i>ubufp</i><b>);</b>
+<b>int getutid_r(struct utmp *</b><i>ut</i><b>,</b>
+<b>              struct utmp *</b><i>ubuf</i><b>, struct utmp **</b><i>ubufp</i><b>);</b>
+<b>int getutline_r(struct utmp *</b><i>ut</i><b>,</b>
+<b>                struct utmp *</b><i>ubuf</i><b>, struct utmp **</b><i>ubufp</i><b>);</b></pre>
+<p class="Pp">Feature Test Macro Requirements for glibc (see
+    <b>feature_test_macros</b>(7)):</p>
+<p class="Pp"><b>getutent_r</b>(), <b>getutid_r</b>(), <b>getutline_r</b>():</p>
+<pre><br>
+    _GNU_SOURCE
+<br>
+        || /* Since glibc 2.19: */ _DEFAULT_SOURCE
+<br>
+        || /* glibc &lt;= 2.19: */    _SVID_SOURCE || _BSD_SOURCE</pre>
+<p class="Pp">These functions are GNU extensions, analogs of the functions of
+    the same name without the _r suffix. The <i>ubuf</i> argument gives these
+    functions a place to store their result. On success, they return 0, and a
+    pointer to the result is written in <i>*ubufp</i>. On error, these functions
+    return -1. There are no utmpx equivalents of the above functions. (POSIX.1
+    does not specify such functions.)</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The following example adds and removes a utmp record, assuming it
+    is run from within a pseudo terminal. For usage in a real application, you
+    should check the return values of <b>getpwuid</b>(3) and
+  <b>ttyname</b>(3).</p>
+<p class="Pp"></p>
+<pre>#include &lt;pwd.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;time.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;utmp.h&gt;
+int
+main(void)
+{
+<br>
+    struct utmp entry;
+<br>
+    system("echo before adding entry:;who");
+<br>
+    entry.ut_type = USER_PROCESS;
+<br>
+    entry.ut_pid = getpid();
+<br>
+    strcpy(entry.ut_line, ttyname(STDIN_FILENO) + strlen("/dev/"));
+<br>
+    /* only correct for ptys named /dev/tty[pqr][0-9a-z] */
+<br>
+    strcpy(entry.ut_id, ttyname(STDIN_FILENO) + strlen("/dev/tty"));
+<br>
+    time(&amp;entry.ut_time);
+<br>
+    strcpy(entry.ut_user, getpwuid(getuid())-&gt;pw_name);
+<br>
+    memset(entry.ut_host, 0, UT_HOSTSIZE);
+<br>
+    entry.ut_addr = 0;
+<br>
+    setutent();
+<br>
+    pututline(&amp;entry);
+<br>
+    system("echo after adding entry:;who");
+<br>
+    entry.ut_type = DEAD_PROCESS;
+<br>
+    memset(entry.ut_line, 0, UT_LINESIZE);
+<br>
+    entry.ut_time = 0;
+<br>
+    memset(entry.ut_user, 0, UT_NAMESIZE);
+<br>
+    setutent();
+<br>
+    pututline(&amp;entry);
+<br>
+    system("echo after removing entry:;who");
+<br>
+    endutent();
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>getutmp</b>(3), <b>utmp</b>(5)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

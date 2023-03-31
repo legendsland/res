@@ -1,0 +1,192 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/2c3dab87e22184ef83c73750f0d10cde3118f95d">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>SIGALTSTACK(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">SIGALTSTACK(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">SIGALTSTACK(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">sigaltstack — set and get signal alternate stack
+  context</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;signal.h&gt;</pre>
+<pre>int sigaltstack(const stack_t *restrict <i>ss</i>, stack_t *restrict <i>oss</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>sigaltstack</i>() function allows a process to define and
+    examine the state of an alternate stack for signal handlers for the current
+    thread. Signals that have been explicitly declared to execute on the
+    alternate stack shall be delivered on the alternate stack.</p>
+<p class="Pp">If <i>ss</i> is not a null pointer, it points to a <b>stack_t</b>
+    structure that specifies the alternate signal stack that shall take effect
+    upon return from <i>sigaltstack</i>(). The <i>ss_flags</i> member specifies
+    the new stack state. If it is set to SS_DISABLE, the stack is disabled and
+    <i>ss_sp</i> and <i>ss_size</i> are ignored. Otherwise, the stack shall be
+    enabled, and the <i>ss_sp</i> and <i>ss_size</i> members specify the new
+    address and size of the stack.</p>
+<p class="Pp">The range of addresses starting at <i>ss_sp</i> up to but not
+    including <i>ss_sp</i>+<i>ss_size</i> is available to the implementation for
+    use as the stack. This function makes no assumptions regarding which end is
+    the stack base and in which direction the stack grows as items are
+  pushed.</p>
+<p class="Pp">If <i>oss</i> is not a null pointer, upon successful completion it
+    shall point to a <b>stack_t</b> structure that specifies the alternate
+    signal stack that was in effect prior to the call to <i>sigaltstack</i>().
+    The <i>ss_sp</i> and <i>ss_size</i> members specify the address and size of
+    that stack. The <i>ss_flags</i> member specifies the stack's state, and may
+    contain one of the following values:</p>
+<dl class="Bl-tag">
+  <dt id="SS_ONSTACK"><a class="permalink" href="#SS_ONSTACK">SS_ONSTACK</a></dt>
+  <dd>The process is currently executing on the alternate signal stack. Attempts
+      to modify the alternate signal stack while the process is executing on it
+      fail. This flag shall not be modified by processes.</dd>
+  <dt id="SS_DISABLE"><a class="permalink" href="#SS_DISABLE">SS_DISABLE</a></dt>
+  <dd>The alternate signal stack is currently disabled.</dd>
+</dl>
+<p class="Pp">The value SIGSTKSZ is a system default specifying the number of
+    bytes that would be used to cover the usual case when manually allocating an
+    alternate stack area. The value MINSIGSTKSZ is defined to be the minimum
+    stack size for a signal handler. In computing an alternate stack size, a
+    program should add that amount to its stack requirements to allow for the
+    system implementation overhead. The constants SS_ONSTACK, SS_DISABLE,
+    SIGSTKSZ, and MINSIGSTKSZ are defined in <i>&lt;signal.h&gt;</i>.</p>
+<p class="Pp">After a successful call to one of the <i>exec</i> functions, there
+    are no alternate signal stacks in the new process image.</p>
+<p class="Pp">In some implementations, a signal (whether or not indicated to
+    execute on the alternate stack) shall always execute on the alternate stack
+    if it is delivered while another signal is being caught using the alternate
+    stack.</p>
+<p class="Pp">Use of this function by library threads that are not bound to
+    kernel-scheduled entities results in undefined behavior.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>sigaltstack</i>() shall return 0;
+    otherwise, it shall return -1 and set <i>errno</i> to indicate the
+  error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>sigaltstack</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The <i>ss</i> argument is not a null pointer, and the <i>ss_flags</i>
+      member pointed to by <i>ss</i> contains flags other than SS_DISABLE.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>The size of the alternate stack area is less than MINSIGSTKSZ.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>An attempt was made to modify an active stack.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Allocating_Memory_for_an_Alternate_Stack"><a class="permalink" href="#Allocating_Memory_for_an_Alternate_Stack">Allocating
+  Memory for an Alternate Stack</a></h2>
+<p class="Pp">The following example illustrates a method for allocating memory
+    for an alternate stack.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;signal.h&gt;
+...
+if ((sigstk.ss_sp = malloc(SIGSTKSZ)) == NULL)
+<br>
+    /* Error return. */
+sigstk.ss_size = SIGSTKSZ;
+sigstk.ss_flags = 0;
+if (sigaltstack(&amp;sigstk,(stack_t *)0) &lt; 0)
+<br>
+    perror("sigaltstack");</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">On some implementations, stack space is automatically extended as
+    needed. On those implementations, automatic extension is typically not
+    available for an alternate stack. If the stack overflows, the behavior is
+    undefined.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i>Section 2.4</i>, <i>Signal Concepts</i>, <i><i>exec</i></i>,
+    <i><i>sigaction</i>()</i>, <i><i>sigsetjmp</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;signal.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

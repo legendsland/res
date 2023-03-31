@@ -1,0 +1,356 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/f5f691609933609bf537a9bd5572fb40a5fac6d0">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>RENAME(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">RENAME(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">RENAME(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">rename, renameat — rename file</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;stdio.h&gt;</pre>
+<pre>int rename(const char *<i>old</i>, const char *<i>new</i>);</pre>
+<pre>#include &lt;fcntl.h&gt;</pre>
+<pre>int renameat(int <i>oldfd</i>, const char *<i>old</i>, int <i>newfd</i>,
+<br>
+    const char *<i>new</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">For <i>rename</i>(): The functionality described on this reference
+    page is aligned with the ISO&nbsp;C standard. Any conflict between the
+    requirements described here and the ISO&nbsp;C standard is unintentional.
+    This volume of POSIX.1‐2017 defers to the ISO&nbsp;C standard.</p>
+<p class="Pp">The <i>rename</i>() function shall change the name of a file. The
+    <i>old</i> argument points to the pathname of the file to be renamed. The
+    <i>new</i> argument points to the new pathname of the file. If the
+    <i>new</i> argument does not resolve to an existing directory entry for a
+    file of type directory and the <i>new</i> argument contains at least one
+    non-&lt;slash&gt; character and ends with one or more trailing &lt;slash&gt;
+    characters after all symbolic links have been processed, <i>rename</i>()
+    shall fail.</p>
+<p class="Pp">If either the <i>old</i> or <i>new</i> argument names a symbolic
+    link, <i>rename</i>() shall operate on the symbolic link itself, and shall
+    not resolve the last component of the argument. If the <i>old</i> argument
+    and the <i>new</i> argument resolve to either the same existing directory
+    entry or different directory entries for the same existing file,
+    <i>rename</i>() shall return successfully and perform no other action.</p>
+<p class="Pp">If the <i>old</i> argument points to the pathname of a file that
+    is not a directory, the <i>new</i> argument shall not point to the pathname
+    of a directory. If the link named by the <i>new</i> argument exists, it
+    shall be removed and <i>old</i> renamed to <i>new</i>. In this case, a link
+    named <i>new</i> shall remain visible to other threads throughout the
+    renaming operation and refer either to the file referred to by <i>new</i> or
+    <i>old</i> before the operation began. Write access permission is required
+    for both the directory containing <i>old</i> and the directory containing
+    <i>new</i>.</p>
+<p class="Pp">If the <i>old</i> argument points to the pathname of a directory,
+    the <i>new</i> argument shall not point to the pathname of a file that is
+    not a directory. If the directory named by the <i>new</i> argument exists,
+    it shall be removed and <i>old</i> renamed to <i>new</i>. In this case, a
+    link named <i>new</i> shall exist throughout the renaming operation and
+    shall refer either to the directory referred to by <i>new</i> or <i>old</i>
+    before the operation began. If <i>new</i> names an existing directory, it
+    shall be required to be an empty directory.</p>
+<p class="Pp">If either <i>pathname</i> argument refers to a path whose final
+    component is either dot or dot-dot, <i>rename</i>() shall fail.</p>
+<p class="Pp">If the <i>old</i> argument points to a pathname of a symbolic
+    link, the symbolic link shall be renamed. If the <i>new</i> argument points
+    to a pathname of a symbolic link, the symbolic link shall be removed.</p>
+<p class="Pp">The <i>old</i> pathname shall not name an ancestor directory of
+    the <i>new</i> pathname. Write access permission is required for the
+    directory containing <i>old</i> and the directory containing <i>new</i>. If
+    the <i>old</i> argument points to the pathname of a directory, write access
+    permission may be required for the directory named by <i>old</i>, and, if it
+    exists, the directory named by <i>new</i>.</p>
+<p class="Pp">If the link named by the <i>new</i> argument exists and the file's
+    link count becomes 0 when it is removed and no process has the file open,
+    the space occupied by the file shall be freed and the file shall no longer
+    be accessible. If one or more processes have the file open when the last
+    link is removed, the link shall be removed before <i>rename</i>() returns,
+    but the removal of the file contents shall be postponed until all references
+    to the file are closed.</p>
+<p class="Pp">Upon successful completion, <i>rename</i>() shall mark for update
+    the last data modification and last file status change timestamps of the
+    parent directory of each file.</p>
+<p class="Pp">If the <i>rename</i>() function fails for any reason other than
+    <b>[EIO]</b>, any file named by <i>new</i> shall be unaffected.</p>
+<p class="Pp">The <i>renameat</i>() function shall be equivalent to the
+    <i>rename</i>() function except in the case where either <i>old</i> or
+    <i>new</i> specifies a relative path. If <i>old</i> is a relative path, the
+    file to be renamed is located relative to the directory associated with the
+    file descriptor <i>oldfd</i> instead of the current working directory. If
+    <i>new</i> is a relative path, the same happens only relative to the
+    directory associated with <i>newfd</i>. If the access mode of the open file
+    description associated with the file descriptor is not O_SEARCH, the
+    function shall check whether directory searches are permitted using the
+    current permissions of the directory underlying the file descriptor. If the
+    access mode is O_SEARCH, the function shall not perform the check.</p>
+<p class="Pp">If <i>renameat</i>() is passed the special value AT_FDCWD in the
+    <i>oldfd</i> or <i>newfd</i> parameter, the current working directory shall
+    be used in the determination of the file for the respective <i>path</i>
+    parameter.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, the <i>rename</i>() function shall
+    return 0. Otherwise, it shall return -1, <i>errno</i> shall be set to
+    indicate the error, and neither the file named by <i>old</i> nor the file
+    named by <i>new</i> shall be changed or created.</p>
+<p class="Pp">Upon successful completion, the <i>renameat</i>() function shall
+    return 0. Otherwise, it shall return -1 and set <i>errno</i> to indicate the
+    error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>rename</i>() and <i>renameat</i>() functions shall fail
+  if:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>A component of either path prefix denies search permission; or one of the
+      directories containing <i>old</i> or <i>new</i> denies write permissions;
+      or, write permission is required and is denied for a directory pointed to
+      by the <i>old</i> or <i>new</i> arguments.</dd>
+  <dt id="EBUSY"><a class="permalink" href="#EBUSY"><b>EBUSY</b></a></dt>
+  <dd>The directory named by <i>old</i> or <i>new</i> is currently in use by the
+      system or another process, and the implementation considers this an
+    error.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt>[EEXIST]&nbsp;or&nbsp;[ENOTEMPTY]</dt>
+  <dd>
+    <br>
+    The link named by <i>new</i> is a directory that is not an empty
+    directory.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The <i>old</i> pathname names an ancestor directory of the <i>new</i>
+      pathname, or either pathname argument contains a final component that is
+      dot or dot-dot.</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>A physical I/O error has occurred.</dd>
+  <dt id="EISDIR"><a class="permalink" href="#EISDIR"><b>EISDIR</b></a></dt>
+  <dd>The <i>new</i> argument points to a directory and the <i>old</i> argument
+      points to a file that is not a directory.</dd>
+  <dt id="ELOOP"><a class="permalink" href="#ELOOP"><b>ELOOP</b></a></dt>
+  <dd>A loop exists in symbolic links encountered during resolution of the
+      <i>path</i> argument.</dd>
+  <dt id="EMLINK"><a class="permalink" href="#EMLINK"><b>EMLINK</b></a></dt>
+  <dd>The file named by <i>old</i> is a directory, and the link count of the
+      parent directory of <i>new</i> would exceed {LINK_MAX}.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of a component of a pathname is longer than {NAME_MAX}.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>The link named by <i>old</i> does not name an existing file, a component
+      of the path prefix of <i>new</i> does not exist, or either <i>old</i> or
+      <i>new</i> points to an empty string.</dd>
+  <dt id="ENOSPC"><a class="permalink" href="#ENOSPC"><b>ENOSPC</b></a></dt>
+  <dd>The directory that would contain <i>new</i> cannot be extended.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>A component of either path prefix names an existing file that is neither a
+      directory nor a symbolic link to a directory; or the <i>old</i> argument
+      names a directory and the <i>new</i> argument names a non-directory file;
+      or the <i>old</i> argument contains at least one non-&lt;slash&gt;
+      character and ends with one or more trailing &lt;slash&gt; characters and
+      the last pathname component names an existing file that is neither a
+      directory nor a symbolic link to a directory; or the <i>old</i> argument
+      names an existing non-directory file and the <i>new</i> argument names a
+      nonexistent file, contains at least one non-&lt;slash&gt; character, and
+      ends with one or more trailing &lt;slash&gt; characters; or the <i>new</i>
+      argument names an existing non-directory file, contains at least one
+      non-&lt;slash&gt; character, and ends with one or more trailing
+      &lt;slash&gt; characters.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b> or
+    <b>EACCES</b></a></dt>
+  <dd>
+    <br>
+    The S_ISVTX flag is set on the directory containing the file referred to by
+      <i>old</i> and the process does not satisfy the criteria specified in the
+      Base Definitions volume of POSIX.1‐2017, <i>Section 4.3</i>,
+      <i>Directory Protection</i> with respect to <i>old</i>; or <i>new</i>
+      refers to an existing file, the S_ISVTX flag is set on the directory
+      containing this file, and the process does not satisfy the criteria
+      specified in the Base Definitions volume of POSIX.1‐2017,
+      <i>Section 4.3</i>, <i>Directory Protection</i> with respect to this
+    file.</dd>
+  <dt id="EROFS"><a class="permalink" href="#EROFS"><b>EROFS</b></a></dt>
+  <dd>The requested operation requires writing in a directory on a read-only
+      file system.</dd>
+  <dt id="EXDEV"><a class="permalink" href="#EXDEV"><b>EXDEV</b></a></dt>
+  <dd>The links named by <i>new</i> and <i>old</i> are on different file systems
+      and the implementation does not support links between file systems.</dd>
+</dl>
+<p class="Pp">In addition, the <i>renameat</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES~2"><a class="permalink" href="#EACCES~2"><b>EACCES</b></a></dt>
+  <dd>The access mode of the open file description associated with <i>oldfd</i>
+      or <i>newfd</i> is not O_SEARCH and the permissions of the directory
+      underlying <i>oldfd</i> or <i>newfd</i>, respectively, do not permit
+      directory searches.</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>The <i>old</i> argument does not specify an absolute path and the
+      <i>oldfd</i> argument is neither AT_FDCWD nor a valid file descriptor open
+      for reading or searching, or the <i>new</i> argument does not specify an
+      absolute path and the <i>newfd</i> argument is neither AT_FDCWD nor a
+      valid file descriptor open for reading or searching.</dd>
+  <dt id="ENOTDIR~2"><a class="permalink" href="#ENOTDIR~2"><b>ENOTDIR</b></a></dt>
+  <dd>The <i>old</i> or <i>new</i> argument is not an absolute path and
+      <i>oldfd</i> or <i>newfd</i>, respectively, is a file descriptor
+      associated with a non-directory file.</dd>
+</dl>
+<p class="Pp">The <i>rename</i>() and <i>renameat</i>() functions may fail
+  if:</p>
+<dl class="Bl-tag">
+  <dt id="EBUSY~2"><a class="permalink" href="#EBUSY~2"><b>EBUSY</b></a></dt>
+  <dd>The file named by the <i>old</i> or <i>new</i> arguments is a named
+      STREAM.</dd>
+  <dt id="ELOOP~2"><a class="permalink" href="#ELOOP~2"><b>ELOOP</b></a></dt>
+  <dd>More than {SYMLOOP_MAX} symbolic links were encountered during resolution
+      of the <i>path</i> argument.</dd>
+  <dt id="ENAMETOOLONG~2"><a class="permalink" href="#ENAMETOOLONG~2"><b>ENAMETOOLONG</b></a></dt>
+  <dd>
+    <br>
+    The length of a pathname exceeds {PATH_MAX}, or pathname resolution of a
+      symbolic link produced an intermediate result with a length that exceeds
+      {PATH_MAX}.</dd>
+  <dt id="ETXTBSY"><a class="permalink" href="#ETXTBSY"><b>ETXTBSY</b></a></dt>
+  <dd>The file named by <i>new</i> exists and is the last directory entry to a
+      pure procedure (shared text) file that is being executed.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="Renaming_a_File"><a class="permalink" href="#Renaming_a_File">Renaming
+  a File</a></h2>
+<p class="Pp">The following example shows how to rename a file named
+    <b>/home/cnd/mod1</b> to <b>/home/cnd/mod2</b>.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;stdio.h&gt;</pre>
+<pre>int status;
+...
+status = rename("/home/cnd/mod1", "/home/cnd/mod2");</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">Some implementations mark for update the last file status change
+    timestamp of renamed files and some do not. Applications which make use of
+    the last file status change timestamp may behave differently with respect to
+    renamed files unless they are designed to allow for either behavior.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">This <i>rename</i>() function is equivalent for regular files to
+    that defined by the ISO&nbsp;C standard. Its inclusion here expands that
+    definition to include actions on directories and specifies behavior when the
+    <i>new</i> parameter names a file that already exists. That specification
+    requires that the action of the function be atomic.</p>
+<p class="Pp">One of the reasons for introducing this function was to have a
+    means of renaming directories while permitting implementations to prohibit
+    the use of <i>link</i>() and <i>unlink</i>() with directories, thus
+    constraining links to directories to those made by <i>mkdir</i>().</p>
+<p class="Pp">The specification that if <i>old</i> and <i>new</i> refer to the
+    same file is intended to guarantee that:</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>rename("x", "x");</pre>
+</div>
+<p class="Pp">does not remove the file.</p>
+<p class="Pp">Renaming dot or dot-dot is prohibited in order to prevent cyclical
+    file system paths.</p>
+<p class="Pp">See also the descriptions of <b>[ENOTEMPTY]</b> and
+    <b>[ENAMETOOLONG]</b> in <i>rmdir</i>() and <b>[EBUSY]</b> in
+    <i>unlink</i>(). For a discussion of <b>[EXDEV]</b>, see <i>link</i>().</p>
+<p class="Pp">The purpose of the <i>renameat</i>() function is to rename files
+    in directories other than the current working directory without exposure to
+    race conditions. Any part of the path of a file could be changed in parallel
+    to a call to <i>rename</i>(), resulting in unspecified behavior. By opening
+    file descriptors for the source and target directories and using the
+    <i>renameat</i>() function it can be guaranteed that that renamed file is
+    located correctly and the resulting file is in the desired directory.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>link</i>()</i>, <i><i>rmdir</i>()</i>,
+    <i><i>symlink</i>()</i>, <i><i>unlink</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Section
+    4.3</i>, <i>Directory Protection</i>, <i><b>&lt;fcntl.h&gt;</b></i>,
+    <i><b>&lt;stdio.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

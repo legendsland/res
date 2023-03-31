@@ -1,0 +1,151 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 2017, Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/825bc2a004d4e4d652d3f871b70704d77a556099">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>pthread_spin_init(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">pthread_spin_init(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">pthread_spin_init(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">pthread_spin_init, pthread_spin_destroy - initialize or destroy a
+    spin lock</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">POSIX threads library (<i>libpthread</i>, <i>-lpthread</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;pthread.h&gt;</b></pre>
+<pre><b>int pthread_spin_init(pthread_spinlock_t *</b><i>lock</i><b>, int </b><i>pshared</i><b>);</b>
+<b>int pthread_spin_destroy(pthread_spinlock_t *</b><i>lock</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>pthread_spin_init</b>(), <b>pthread_spin_destroy</b>():</p>
+<pre><br>
+    _POSIX_C_SOURCE &gt;= 200112L</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><i>General note</i>: Most programs should use mutexes instead of
+    spin locks. Spin locks are primarily useful in conjunction with real-time
+    scheduling policies. See NOTES.</p>
+<p class="Pp">The <b>pthread_spin_init</b>() function allocates any resources
+    required for the use of the spin lock referred to by <i>lock</i> and
+    initializes the lock to be in the unlocked state. The <i>pshared</i>
+    argument must have one of the following values:</p>
+<dl class="Bl-tag">
+  <dt id="PTHREAD_PROCESS_PRIVATE"><a class="permalink" href="#PTHREAD_PROCESS_PRIVATE"><b>PTHREAD_PROCESS_PRIVATE</b></a></dt>
+  <dd>The spin lock is to be operated on only by threads in the same process as
+      the thread that calls <b>pthread_spin_init</b>(). (Attempting to share the
+      spin lock between processes results in undefined behavior.)</dd>
+  <dt id="PTHREAD_PROCESS_SHARED"><a class="permalink" href="#PTHREAD_PROCESS_SHARED"><b>PTHREAD_PROCESS_SHARED</b></a></dt>
+  <dd>The spin lock may be operated on by any thread in any process that has
+      access to the memory containing the lock (i.e., the lock may be in a
+      shared memory object that is shared among multiple processes).</dd>
+</dl>
+<p class="Pp">Calling <b>pthread_spin_init</b>() on a spin lock that has already
+    been initialized results in undefined behavior.</p>
+<p class="Pp">The <b>pthread_spin_destroy</b>() function destroys a previously
+    initialized spin lock, freeing any resources that were allocated for that
+    lock. Destroying a spin lock that has not been previously been initialized
+    or destroying a spin lock while another thread holds the lock results in
+    undefined behavior.</p>
+<p class="Pp">Once a spin lock has been destroyed, performing any operation on
+    the lock other than once more initializing it with
+    <b>pthread_spin_init</b>() results in undefined behavior.</p>
+<p class="Pp">The result of performing operations such as
+    <b>pthread_spin_lock</b>(3), <b>pthread_spin_unlock</b>(3), and
+    <b>pthread_spin_destroy</b>() on <i>copies</i> of the object referred to by
+    <i>lock</i> is undefined.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, there functions return zero. On failure, they return
+    an error number. In the event that <b>pthread_spin_init</b>() fails, the
+    lock is not initialized.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp"><b>pthread_spin_init</b>() may fail with the following errors:</p>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>The system has insufficient resources to initialize a new spin lock.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient memory to initialize the spin lock.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">These functions were added in glibc 2.2.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001.</p>
+<p class="Pp">Support for process-shared spin locks is a POSIX option. The
+    option is supported in the glibc implementation.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Spin locks should be employed in conjunction with real-time
+    scheduling policies (<b>SCHED_FIFO</b>, or possibly <b>SCHED_RR</b>). Use of
+    spin locks with nondeterministic scheduling policies such as
+    <b>SCHED_OTHER</b> probably indicates a design mistake. The problem is that
+    if a thread operating under such a policy is scheduled off the CPU while it
+    holds a spin lock, then other threads will waste time spinning on the lock
+    until the lock holder is once more rescheduled and releases the lock.</p>
+<p class="Pp">If threads create a deadlock situation while employing spin locks,
+    those threads will spin forever consuming CPU time.</p>
+<p class="Pp">User-space spin locks are <i>not</i> applicable as a general
+    locking solution. They are, by definition, prone to priority inversion and
+    unbounded spin times. A programmer using spin locks must be exceptionally
+    careful not only in the code, but also in terms of system configuration,
+    thread placement, and priority assignment.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>pthread_mutex_init</b>(3), <b>pthread_mutex_lock</b>(3),
+    <b>pthread_spin_lock</b>(3), <b>pthread_spin_unlock</b>(3),
+    <b>pthreads</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (C) 1996 Andries Brouwer (aeb@cwi.nl)
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Written 11 April 1996 by Andries Brouwer <aeb@cwi.nl>
+   960412: Added comments from Stephen Tweedie
+   Modified Tue Oct 22 22:28:41 1996 by Eric S. Raymond <esr@thyrsus.com>
+   Modified Mon Jan  5 20:31:04 1998 by aeb.
+   --><head>
+<meta name="dc.identifier" content="res/ed16835e8b40d7fbb2ef6905b729463acc041401">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>sysctl(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">sysctl(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">sysctl(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">sysctl - read/write system parameters</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;unistd.h&gt;</b>
+<b>#include &lt;linux/sysctl.h&gt;</b></pre>
+<pre><b>[[deprecated]] int _sysctl(struct __sysctl_args *</b><i>args</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>This system call no longer exists on current kernels!</b> See
+    NOTES.</p>
+<p class="Pp">The <b>_sysctl</b>() call reads and/or writes kernel parameters.
+    For example, the hostname, or the maximum number of open files. The argument
+    has the form</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct __sysctl_args {
+<br>
+    int    *name;    /* integer vector describing variable */
+<br>
+    int     nlen;    /* length of this vector */
+<br>
+    void   *oldval;  /* 0 or address where to store old value */
+<br>
+    size_t *oldlenp; /* available room for old value,
+<br>
+                        overwritten by actual size of old value */
+<br>
+    void   *newval;  /* 0 or address of new value */
+<br>
+    size_t  newlen;  /* size of new value */
+};
+</pre>
+<br>
+<p class="Pp">This call does a search in a tree structure, possibly resembling a
+    directory tree under <i>/proc/sys</i>, and if the requested item is found
+    calls some appropriate routine to read or modify the value.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <b>_sysctl</b>() returns 0. Otherwise,
+    a value of -1 is returned and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b>,
+    <b>EPERM</b></a></dt>
+  <dd>No search permission for one of the encountered "directories",
+      or no read permission where <i>oldval</i> was nonzero, or no write
+      permission where <i>newval</i> was nonzero.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd>The invocation asked for the previous value by setting <i>oldval</i>
+      non-NULL, but allowed zero room in <i>oldlenp</i>.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd><i>name</i> was not found.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp">This system call first appeared in Linux 1.3.57. It was removed in
+    Linux 5.5; glibc support was removed in glibc 2.32.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">This call is Linux-specific, and should not be used in programs
+    intended to be portable. It originated in 4.4BSD. Only Linux has the
+    <i>/proc/sys</i> mirror, and the object naming schemes differ between Linux
+    and 4.4BSD, but the declaration of the <b>sysctl</b>() function is the same
+    in both.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Use of this system call was long discouraged: since Linux 2.6.24,
+    uses of this system call result in warnings in the kernel log, and in Linux
+    5.5, the system call was finally removed. Use the <i>/proc/sys</i> interface
+    instead.</p>
+<p class="Pp">Note that on older kernels where this system call still exists, it
+    is available only if the kernel was configured with the
+    <b>CONFIG_SYSCTL_SYSCALL</b> option. Furthermore, glibc does not provide a
+    wrapper for this system call, necessitating the use of
+  <b>syscall</b>(2).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">The object names vary between kernel versions, making this system
+    call worthless for applications.</p>
+<p class="Pp">Not all available objects are properly documented.</p>
+<p class="Pp">It is not yet possible to change operating system by writing to
+    <i>/proc/sys/kernel/ostype</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<pre>#define _GNU_SOURCE
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;sys/syscall.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;linux/sysctl.h&gt;
+#define ARRAY_SIZE(arr)  (sizeof(arr) / sizeof((arr)[0]))
+int _sysctl(struct __sysctl_args *args);
+#define OSNAMESZ 100
+int
+main(void)
+{
+<br>
+    int                   name[] = { CTL_KERN, KERN_OSTYPE };
+<br>
+    char                  osname[OSNAMESZ];
+<br>
+    size_t                osnamelth;
+<br>
+    struct __sysctl_args  args;
+<br>
+    memset(&amp;args, 0, sizeof(args));
+<br>
+    args.name = name;
+<br>
+    args.nlen = ARRAY_SIZE(name);
+<br>
+    args.oldval = osname;
+<br>
+    args.oldlenp = &amp;osnamelth;
+<br>
+    osnamelth = sizeof(osname);
+<br>
+    if (syscall(SYS__sysctl, &amp;args) == -1) {
+<br>
+        perror("_sysctl");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    printf("This machine is running %*s\n", (int) osnamelth, osname);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>proc</b>(5)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

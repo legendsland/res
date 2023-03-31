@@ -1,0 +1,247 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   Copyright (c) 1993 Michael Haardt (michael@moria.de),
+     Fri Apr  2 11:32:09 MET DST 1993
+   and Andries Brouwer (aeb@cwi.nl), Fri Feb 14 21:47:50 1997.
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+  
+   Modified Sun Jul 25 10:45:30 1993 by Rik Faith (faith@cs.unc.edu)
+   Modified Sun Jul 21 21:25:26 1996 by Andries Brouwer (aeb@cwi.nl)
+   Modified Mon Oct 21 17:47:19 1996 by Eric S. Raymond (esr@thyrsus.com)
+   Modified Wed Aug 27 20:28:58 1997 by Nicol\[u00E1]s Lichtmaier (nick@debian.org)
+   Modified Mon Sep 21 00:00:26 1998 by Andries Brouwer (aeb@cwi.nl)
+   Modified Wed Jan 24 06:37:24 2001 by Eric S. Raymond (esr@thyrsus.com)
+   Modified Thu Dec 13 23:53:27 2001 by Martin Schulze <joey@infodrom.org>
+   --><head>
+<meta name="dc.identifier" content="res/b67b64d3d1f0de85c5532a27f733687eb2d7be55">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>environ(7)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">environ(7)</td>
+    <td class="head-vol">Miscellaneous Information Manual</td>
+    <td class="head-rtitle">environ(7)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">environ - user environment</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>extern char **</b><i>environ</i><b>;</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The variable <i>environ</i> points to an array of pointers to
+    strings called the "environment". The last pointer in this array
+    has the value NULL. This array of strings is made available to the process
+    by the <b>execve</b>(2) call when a new program is started. When a child
+    process is created via <b>fork</b>(2), it inherits a <i>copy</i> of its
+    parent's environment.</p>
+<p class="Pp">By convention, the strings in <i>environ</i> have the form
+    "<i>name</i><b>=</b><i>value</i>". The name is case-sensitive and
+    may not contain the character "<b>=</b>". The value can be
+    anything that can be represented as a string. The name and the value may not
+    contain an embedded null byte ('\0'), since this is assumed to terminate the
+    string.</p>
+<p class="Pp">Environment variables may be placed in the shell's environment by
+    the <i>export</i> command in <b>sh</b>(1), or by the <i>setenv</i> command
+    if you use <b>csh</b>(1).</p>
+<p class="Pp">The initial environment of the shell is populated in various ways,
+    such as definitions from <i>/etc/environment</i> that are processed by
+    <b>pam_env</b>(8) for all users at login time (on systems that employ
+    <b>pam</b>(8)). In addition, various shell initialization scripts, such as
+    the system-wide <i>/etc/profile</i> script and per-user initializations
+    script may include commands that add variables to the shell's environment;
+    see the manual page of your preferred shell for details.</p>
+<p class="Pp">Bourne-style shells support the syntax</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>NAME=value command
+</pre>
+<br>
+<p class="Pp">to create an environment variable definition only in the scope of
+    the process that executes <i>command</i>. Multiple variable definitions,
+    separated by white space, may precede <i>command</i>.</p>
+<p class="Pp">Arguments may also be placed in the environment at the point of an
+    <b>exec</b>(3). A C program can manipulate its environment using the
+    functions <b>getenv</b>(3), <b>putenv</b>(3), <b>setenv</b>(3), and
+    <b>unsetenv</b>(3).</p>
+<p class="Pp">What follows is a list of environment variables typically seen on
+    a system. This list is incomplete and includes only common variables seen by
+    average users in their day-to-day routine. Environment variables specific to
+    a particular program or library function are documented in the ENVIRONMENT
+    section of the appropriate manual page.</p>
+<dl class="Bl-tag">
+  <dt id="USER"><a class="permalink" href="#USER"><b>USER</b></a></dt>
+  <dd>The name of the logged-in user (used by some BSD-derived programs). Set at
+      login time, see section NOTES below.</dd>
+  <dt id="LOGNAME"><a class="permalink" href="#LOGNAME"><b>LOGNAME</b></a></dt>
+  <dd>The name of the logged-in user (used by some System-V derived programs).
+      Set at login time, see section NOTES below.</dd>
+  <dt id="HOME"><a class="permalink" href="#HOME"><b>HOME</b></a></dt>
+  <dd>A user's login directory. Set at login time, see section NOTES below.</dd>
+  <dt id="LANG"><a class="permalink" href="#LANG"><b>LANG</b></a></dt>
+  <dd>The name of a locale to use for locale categories when not overridden by
+      <b>LC_ALL</b> or more specific environment variables such as
+      <b>LC_COLLATE</b>, <b>LC_CTYPE</b>, <b>LC_MESSAGES</b>,
+      <b>LC_MONETARY</b>, <b>LC_NUMERIC</b>, and <b>LC_TIME</b> (see
+      <b>locale</b>(7) for further details of the <b>LC_*</b> environment
+      variables).</dd>
+  <dt id="PATH"><a class="permalink" href="#PATH"><b>PATH</b></a></dt>
+  <dd>The sequence of directory prefixes that <b>sh</b>(1) and many other
+      programs employ when searching for an executable file that is specified as
+      a simple filename (i.a., a pathname that contains no slashes). The
+      prefixes are separated by colons (<b>:</b>). The list of prefixes is
+      searched from beginning to end, by checking the pathname formed by
+      concatenating a prefix, a slash, and the filename, until a file with
+      execute permission is found.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>As a legacy feature, a zero-length prefix (specified as two adjacent
+      colons, or an initial or terminating colon) is interpreted to mean the
+      current working directory. However, use of this feature is deprecated, and
+      POSIX notes that a conforming application shall use an explicit pathname
+      (e.g., <i>.</i>) to specify the current working directory.</dd>
+  <dt></dt>
+  <dd>Analogously to <b>PATH</b>, one has <b>CDPATH</b> used by some shells to
+      find the target of a change directory command, <b>MANPATH</b> used by
+      <b>man</b>(1) to find manual pages, and so on.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="PWD"><a class="permalink" href="#PWD"><b>PWD</b></a></dt>
+  <dd>Absolute path to the current working directory; required to be partially
+      canonical (no <i>.</i> or <i>..</i> components).</dd>
+  <dt id="SHELL"><a class="permalink" href="#SHELL"><b>SHELL</b></a></dt>
+  <dd>The absolute pathname of the user's login shell. Set at login time, see
+      section NOTES below.</dd>
+  <dt id="TERM"><a class="permalink" href="#TERM"><b>TERM</b></a></dt>
+  <dd>The terminal type for which output is to be prepared.</dd>
+  <dt id="PAGER"><a class="permalink" href="#PAGER"><b>PAGER</b></a></dt>
+  <dd>The user's preferred utility to display text files. Any string acceptable
+      as a command-string operand to the <i>sh&nbsp;-c</i> command shall be
+      valid. If <b>PAGER</b> is null or is not set, then applications that
+      launch a pager will default to a program such as <b>less</b>(1) or
+      <b>more</b>(1).</dd>
+  <dt id="EDITOR"><a class="permalink" href="#EDITOR"><b>EDITOR</b>/<b>VISUAL</b></a></dt>
+  <dd>The user's preferred utility to edit text files. Any string acceptable as
+      a command_string operand to the <i>sh&nbsp;-c</i> command shall be
+      valid.</dd>
+</dl>
+<p class="Pp">Note that the behavior of many programs and library routines is
+    influenced by the presence or value of certain environment variables.
+    Examples include the following:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>The variables <b>LANG</b>, <b>LANGUAGE</b>, <b>NLSPATH</b>,
+      <b>LOCPATH</b>, <b>LC_ALL</b>, <b>LC_MESSAGES</b>, and so on influence
+      locale handling; see <b>catopen</b>(3), <b>gettext</b>(3), and
+      <b>locale</b>(7).</dd>
+  <dt>•</dt>
+  <dd><b>TMPDIR</b> influences the path prefix of names created by
+      <b>tempnam</b>(3) and other routines, and the temporary directory used by
+      <b>sort</b>(1) and other programs.</dd>
+  <dt>•</dt>
+  <dd><b>LD_LIBRARY_PATH</b>, <b>LD_PRELOAD</b>, and other <b>LD_*</b> variables
+      influence the behavior of the dynamic loader/linker. See also
+      <b>ld.so</b>(8).</dd>
+  <dt>•</dt>
+  <dd><b>POSIXLY_CORRECT</b> makes certain programs and library routines follow
+      the prescriptions of POSIX.</dd>
+  <dt>•</dt>
+  <dd>The behavior of <b>malloc</b>(3) is influenced by <b>MALLOC_*</b>
+      variables.</dd>
+  <dt>•</dt>
+  <dd>The variable <b>HOSTALIASES</b> gives the name of a file containing
+      aliases to be used with <b>gethostbyname</b>(3).</dd>
+  <dt>•</dt>
+  <dd><b>TZ</b> and <b>TZDIR</b> give timezone information used by
+      <b>tzset</b>(3) and through that by functions like <b>ctime</b>(3),
+      <b>localtime</b>(3), <b>mktime</b>(3), <b>strftime</b>(3). See also
+      <b>tzselect</b>(8).</dd>
+  <dt>•</dt>
+  <dd><b>TERMCAP</b> gives information on how to address a given terminal (or
+      gives the name of a file containing such information).</dd>
+  <dt>•</dt>
+  <dd><b>COLUMNS</b> and <b>LINES</b> tell applications about the window size,
+      possibly overriding the actual size.</dd>
+  <dt>•</dt>
+  <dd><b>PRINTER</b> or <b>LPDEST</b> may specify the desired printer to use.
+      See <b>lpr</b>(1).</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">Historically and by standard, <i>environ</i> must be declared in
+    the user program. However, as a (nonstandard) programmer convenience,
+    <i>environ</i> is declared in the header file <i>&lt;unistd.h&gt;</i> if the
+    <b>_GNU_SOURCE</b> feature test macro is defined (see
+    <b>feature_test_macros</b>(7)).</p>
+<p class="Pp">The <b>prctl</b>(2) <b>PR_SET_MM_ENV_START</b> and
+    <b>PR_SET_MM_ENV_END</b> operations can be used to control the location of
+    the process's environment.</p>
+<p class="Pp">The <b>HOME</b>, <b>LOGNAME</b>, <b>SHELL</b>, and <b>USER</b>
+    variables are set when the user is changed via a session management
+    interface, typically by a program such as <b>login</b>(1) from a user
+    database (such as <b>passwd</b>(5)). (Switching to the root user using
+    <b>su</b>(1) may result in a mixed environment where <b>LOGNAME</b> and
+    <b>USER</b> are retained from old user; see the <b>su</b>(1) manual
+  page.)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">Clearly there is a security risk here. Many a system command has
+    been tricked into mischief by a user who specified unusual values for
+    <b>IFS</b> or <b>LD_LIBRARY_PATH</b>.</p>
+<p class="Pp">There is also the risk of name space pollution. Programs like
+    <i>make</i> and <i>autoconf</i> allow overriding of default utility names
+    from the environment with similarly named variables in all caps. Thus one
+    uses <b>CC</b> to select the desired C compiler (and similarly <b>MAKE</b>,
+    <b>AR</b>, <b>AS</b>, <b>FC</b>, <b>LD</b>, <b>LEX</b>, <b>RM</b>,
+    <b>YACC</b>, etc.). However, in some traditional uses such an environment
+    variable gives options for the program instead of a pathname. Thus, one has
+    <b>MORE</b> and <b>LESS</b>. Such usage is considered mistaken, and to be
+    avoided in new programs.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>bash</b>(1), <b>csh</b>(1), <b>env</b>(1), <b>login</b>(1),
+    <b>printenv</b>(1), <b>sh</b>(1), <b>su</b>(1), <b>tcsh</b>(1),
+    <b>execve</b>(2), <b>clearenv</b>(3), <b>exec</b>(3), <b>getenv</b>(3),
+    <b>putenv</b>(3), <b>setenv</b>(3), <b>unsetenv</b>(3), <b>locale</b>(7),
+    <b>ld.so</b>(8), <b>pam_env</b>(8)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

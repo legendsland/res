@@ -1,0 +1,545 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 2017 David Howells <dhowells@redhat.com>
+  
+   Derived from the stat.2 manual page:
+     Copyright (c) 1992 Drew Eckhardt (drew@cs.colorado.edu), March 28, 1992
+     Parts Copyright (c) 1995 Nicolai Langfeldt (janl@ifi.uio.no), 1/1/95
+     and Copyright (c) 2006, 2007, 2014 Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+   --><head>
+<meta name="dc.identifier" content="res/3beebfec94c4fee70b906fe44d95ce11537ae2ba">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>statx(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">statx(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">statx(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">statx - get file status (extended)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#define _GNU_SOURCE          </b>/* See feature_test_macros(7) */
+<b>#include &lt;fcntl.h&gt;           </b>/* Definition of <b>AT_*</b> constants */
+<b>#include &lt;sys/stat.h&gt;</b></pre>
+<pre><b>int statx(int </b><i>dirfd</i><b>, const char *restrict </b><i>pathname</i><b>, int </b><i>flags</i><b>,</b>
+<b>          unsigned int </b><i>mask</i><b>, struct statx *restrict </b><i>statxbuf</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">This function returns information about a file, storing it in the
+    buffer pointed to by <i>statxbuf</i>. The returned buffer is a structure of
+    the following type:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct statx {
+<br>
+    __u32 stx_mask;        /* Mask of bits indicating
+<br>
+                              filled fields */
+<br>
+    __u32 stx_blksize;     /* Block size for filesystem I/O */
+<br>
+    __u64 stx_attributes;  /* Extra file attribute indicators */
+<br>
+    __u32 stx_nlink;       /* Number of hard links */
+<br>
+    __u32 stx_uid;         /* User ID of owner */
+<br>
+    __u32 stx_gid;         /* Group ID of owner */
+<br>
+    __u16 stx_mode;        /* File type and mode */
+<br>
+    __u64 stx_ino;         /* Inode number */
+<br>
+    __u64 stx_size;        /* Total size in bytes */
+<br>
+    __u64 stx_blocks;      /* Number of 512B blocks allocated */
+<br>
+    __u64 stx_attributes_mask;
+<br>
+                           /* Mask to show what's supported
+<br>
+                              in stx_attributes */
+<br>
+    /* The following fields are file timestamps */
+<br>
+    struct statx_timestamp stx_atime;  /* Last access */
+<br>
+    struct statx_timestamp stx_btime;  /* Creation */
+<br>
+    struct statx_timestamp stx_ctime;  /* Last status change */
+<br>
+    struct statx_timestamp stx_mtime;  /* Last modification */
+<br>
+    /* If this file represents a device, then the next two
+<br>
+       fields contain the ID of the device */
+<br>
+    __u32 stx_rdev_major;  /* Major ID */
+<br>
+    __u32 stx_rdev_minor;  /* Minor ID */
+<br>
+    /* The next two fields contain the ID of the device
+<br>
+       containing the filesystem where the file resides */
+<br>
+    __u32 stx_dev_major;   /* Major ID */
+<br>
+    __u32 stx_dev_minor;   /* Minor ID */
+<br>
+    __u64 stx_mnt_id;      /* Mount ID */
+<br>
+    /* Direct I/O alignment restrictions */
+<br>
+    __u32 stx_dio_mem_align;
+<br>
+    __u32 stx_dio_offset_align;
+};
+</pre>
+<br>
+<p class="Pp">The file timestamps are structures of the following type:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>struct statx_timestamp {
+<br>
+    __s64 tv_sec;    /* Seconds since the Epoch (UNIX time) */
+<br>
+    __u32 tv_nsec;   /* Nanoseconds since tv_sec */
+};
+</pre>
+<br>
+<p class="Pp">(Note that reserved space and padding is omitted.)</p>
+<section class="Ss">
+<h2 class="Ss" id="Invoking_"><a class="permalink" href="#Invoking_">Invoking
+  <b>statx</b>():</a></h2>
+<p class="Pp">To access a file's status, no permissions are required on the file
+    itself, but in the case of <b>statx</b>() with a pathname, execute (search)
+    permission is required on all of the directories in <i>pathname</i> that
+    lead to the file.</p>
+<p class="Pp"><b>statx</b>() uses <i>pathname</i>, <i>dirfd</i>, and
+    <i>flags</i> to identify the target file in one of the following ways:</p>
+<dl class="Bl-tag">
+  <dt id="An"><a class="permalink" href="#An">An absolute pathname</a></dt>
+  <dd>If <i>pathname</i> begins with a slash, then it is an absolute pathname
+      that identifies the target file. In this case, <i>dirfd</i> is
+    ignored.</dd>
+  <dt id="A"><a class="permalink" href="#A">A relative pathname</a></dt>
+  <dd>If <i>pathname</i> is a string that begins with a character other than a
+      slash and <i>dirfd</i> is <b>AT_FDCWD</b>, then <i>pathname</i> is a
+      relative pathname that is interpreted relative to the process's current
+      working directory.</dd>
+  <dt id="A~2"><a class="permalink" href="#A~2">A directory-relative
+    pathname</a></dt>
+  <dd>If <i>pathname</i> is a string that begins with a character other than a
+      slash and <i>dirfd</i> is a file descriptor that refers to a directory,
+      then <i>pathname</i> is a relative pathname that is interpreted relative
+      to the directory referred to by <i>dirfd</i>. (See <b>openat</b>(2) for an
+      explanation of why this is useful.)</dd>
+  <dt id="By"><a class="permalink" href="#By">By file descriptor</a></dt>
+  <dd>If <i>pathname</i> is an empty string and the <b>AT_EMPTY_PATH</b> flag is
+      specified in <i>flags</i> (see below), then the target file is the one
+      referred to by the file descriptor <i>dirfd</i>.</dd>
+</dl>
+<p class="Pp"><i>flags</i> can be used to influence a pathname-based lookup. A
+    value for <i>flags</i> is constructed by ORing together zero or more of the
+    following constants:</p>
+<dl class="Bl-tag">
+  <dt id="AT_EMPTY_PATH"><a class="permalink" href="#AT_EMPTY_PATH"><b>AT_EMPTY_PATH</b></a></dt>
+  <dd>If <i>pathname</i> is an empty string, operate on the file referred to by
+      <i>dirfd</i> (which may have been obtained using the <b>open</b>(2)
+      <b>O_PATH</b> flag). In this case, <i>dirfd</i> can refer to any type of
+      file, not just a directory.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>If <i>dirfd</i> is <b>AT_FDCWD</b>, the call operates on the current
+      working directory.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="AT_NO_AUTOMOUNT"><a class="permalink" href="#AT_NO_AUTOMOUNT"><b>AT_NO_AUTOMOUNT</b></a></dt>
+  <dd>Don't automount the terminal ("basename") component of
+      <i>pathname</i> if it is a directory that is an automount point. This
+      allows the caller to gather attributes of an automount point (rather than
+      the location it would mount). This flag has no effect if the mount point
+      has already been mounted over.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The <b>AT_NO_AUTOMOUNT</b> flag can be used in tools that scan directories
+      to prevent mass-automounting of a directory of automount points.</dd>
+  <dt></dt>
+  <dd>All of <b>stat</b>(2), <b>lstat</b>(2), and <b>fstatat</b>(2) act as
+      though <b>AT_NO_AUTOMOUNT</b> was set.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="AT_SYMLINK_NOFOLLOW"><a class="permalink" href="#AT_SYMLINK_NOFOLLOW"><b>AT_SYMLINK_NOFOLLOW</b></a></dt>
+  <dd>If <i>pathname</i> is a symbolic link, do not dereference it: instead
+      return information about the link itself, like <b>lstat</b>(2).</dd>
+</dl>
+<p class="Pp"><i>flags</i> can also be used to control what sort of
+    synchronization the kernel will do when querying a file on a remote
+    filesystem. This is done by ORing in one of the following values:</p>
+<dl class="Bl-tag">
+  <dt id="AT_STATX_SYNC_AS_STAT"><a class="permalink" href="#AT_STATX_SYNC_AS_STAT"><b>AT_STATX_SYNC_AS_STAT</b></a></dt>
+  <dd>Do whatever <b>stat</b>(2) does. This is the default and is very much
+      filesystem-specific.</dd>
+  <dt id="AT_STATX_FORCE_SYNC"><a class="permalink" href="#AT_STATX_FORCE_SYNC"><b>AT_STATX_FORCE_SYNC</b></a></dt>
+  <dd>Force the attributes to be synchronized with the server. This may require
+      that a network filesystem perform a data writeback to get the timestamps
+      correct.</dd>
+  <dt id="AT_STATX_DONT_SYNC"><a class="permalink" href="#AT_STATX_DONT_SYNC"><b>AT_STATX_DONT_SYNC</b></a></dt>
+  <dd>Don't synchronize anything, but rather just take whatever the system has
+      cached if possible. This may mean that the information returned is
+      approximate, but, on a network filesystem, it may not involve a round trip
+      to the server - even if no lease is held.</dd>
+</dl>
+<p class="Pp">The <i>mask</i> argument to <b>statx</b>() is used to tell the
+    kernel which fields the caller is interested in. <i>mask</i> is an ORed
+    combination of the following constants:</p>
+<p class="Pp">
+  <br>
+</p>
+<table class="tbl">
+  <tbody><tr>
+    <td><b>STATX_TYPE</b></td>
+    <td>Want stx_mode &amp; S_IFMT</td>
+  </tr>
+  <tr>
+    <td><b>STATX_MODE</b></td>
+    <td>Want stx_mode &amp; ~S_IFMT</td>
+  </tr>
+  <tr>
+    <td><b>STATX_NLINK</b></td>
+    <td>Want stx_nlink</td>
+  </tr>
+  <tr>
+    <td><b>STATX_UID</b></td>
+    <td>Want stx_uid</td>
+  </tr>
+  <tr>
+    <td><b>STATX_GID</b></td>
+    <td>Want stx_gid</td>
+  </tr>
+  <tr>
+    <td><b>STATX_ATIME</b></td>
+    <td>Want stx_atime</td>
+  </tr>
+  <tr>
+    <td><b>STATX_MTIME</b></td>
+    <td>Want stx_mtime</td>
+  </tr>
+  <tr>
+    <td><b>STATX_CTIME</b></td>
+    <td>Want stx_ctime</td>
+  </tr>
+  <tr>
+    <td><b>STATX_INO</b></td>
+    <td>Want stx_ino</td>
+  </tr>
+  <tr>
+    <td><b>STATX_SIZE</b></td>
+    <td>Want stx_size</td>
+  </tr>
+  <tr>
+    <td><b>STATX_BLOCKS</b></td>
+    <td>Want stx_blocks</td>
+  </tr>
+  <tr>
+    <td><b>STATX_BASIC_STATS</b></td>
+    <td>[All of the above]</td>
+  </tr>
+  <tr>
+    <td><b>STATX_BTIME</b></td>
+    <td>Want stx_btime</td>
+  </tr>
+  <tr>
+    <td><b>STATX_ALL</b></td>
+    <td>The same as STATX_BASIC_STATS | STATX_BTIME.</td>
+  </tr>
+  <tr>
+    <td><b></b></td>
+    <td>It is deprecated and should not be used.</td>
+  </tr>
+  <tr>
+    <td><b>STATX_MNT_ID</b></td>
+    <td>Want stx_mnt_id (since Linux 5.8)</td>
+  </tr>
+  <tr>
+    <td><b>STATX_DIOALIGN</b></td>
+    <td>Want stx_dio_mem_align and stx_dio_offset_align</td>
+  </tr>
+  <tr>
+    <td><b></b></td>
+    <td>(since Linux 6.1; support varies by filesystem)</td>
+  </tr>
+</tbody></table>
+<br>
+<p class="Pp">Note that, in general, the kernel does <i>not</i> reject values in
+    <i>mask</i> other than the above. (For an exception, see <b>EINVAL</b> in
+    errors.) Instead, it simply informs the caller which values are supported by
+    this kernel and filesystem via the <i>statx.stx_mask</i> field. Therefore,
+    <i>do not</i> simply set <i>mask</i> to <b>UINT_MAX</b> (all bits set), as
+    one or more bits may, in the future, be used to specify an extension to the
+    buffer.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="The_returned_information"><a class="permalink" href="#The_returned_information">The
+  returned information</a></h2>
+<p class="Pp">The status information for the target file is returned in the
+    <i>statx</i> structure pointed to by <i>statxbuf</i>. Included in this is
+    <i>stx_mask</i> which indicates what other information has been returned.
+    <i>stx_mask</i> has the same format as the <i>mask</i> argument and bits are
+    set in it to indicate which fields have been filled in.</p>
+<p class="Pp">It should be noted that the kernel may return fields that weren't
+    requested and may fail to return fields that were requested, depending on
+    what the backing filesystem supports. (Fields that are given values despite
+    being unrequested can just be ignored.) In either case, <i>stx_mask</i> will
+    not be equal <i>mask</i>.</p>
+<p class="Pp">If a filesystem does not support a field or if it has an
+    unrepresentable value (for instance, a file with an exotic type), then the
+    mask bit corresponding to that field will be cleared in <i>stx_mask</i> even
+    if the user asked for it and a dummy value will be filled in for
+    compatibility purposes if one is available (e.g., a dummy UID and GID may be
+    specified to mount under some circumstances).</p>
+<p class="Pp">A filesystem may also fill in fields that the caller didn't ask
+    for if it has values for them available and the information is available at
+    no extra cost. If this happens, the corresponding bits will be set in
+    <i>stx_mask</i>.</p>
+<p class="Pp"><i>Note</i>: for performance and simplicity reasons, different
+    fields in the <i>statx</i> structure may contain state information from
+    different moments during the execution of the system call. For example, if
+    <i>stx_mode</i> or <i>stx_uid</i> is changed by another process by calling
+    <b>chmod</b>(2) or <b>chown</b>(2), <b>stat</b>() might return the old
+    <i>stx_mode</i> together with the new <i>stx_uid</i>, or the old
+    <i>stx_uid</i> together with the new <i>stx_mode</i>.</p>
+<p class="Pp">Apart from <i>stx_mask</i> (which is described above), the fields
+    in the <i>statx</i> structure are:</p>
+<dl class="Bl-tag">
+  <dt id="stx_blksize"><a class="permalink" href="#stx_blksize"><i>stx_blksize</i></a></dt>
+  <dd>The "preferred" block size for efficient filesystem I/O.
+      (Writing to a file in smaller chunks may cause an inefficient
+      read-modify-rewrite.)</dd>
+  <dt id="stx_attributes"><a class="permalink" href="#stx_attributes"><i>stx_attributes</i></a></dt>
+  <dd>Further status information about the file (see below for more
+      information).</dd>
+  <dt id="stx_nlink"><a class="permalink" href="#stx_nlink"><i>stx_nlink</i></a></dt>
+  <dd>The number of hard links on a file.</dd>
+  <dt id="stx_uid"><a class="permalink" href="#stx_uid"><i>stx_uid</i></a></dt>
+  <dd>This field contains the user ID of the owner of the file.</dd>
+  <dt id="stx_gid"><a class="permalink" href="#stx_gid"><i>stx_gid</i></a></dt>
+  <dd>This field contains the ID of the group owner of the file.</dd>
+  <dt id="stx_mode"><a class="permalink" href="#stx_mode"><i>stx_mode</i></a></dt>
+  <dd>The file type and mode. See <b>inode</b>(7) for details.</dd>
+  <dt id="stx_ino"><a class="permalink" href="#stx_ino"><i>stx_ino</i></a></dt>
+  <dd>The inode number of the file.</dd>
+  <dt id="stx_size"><a class="permalink" href="#stx_size"><i>stx_size</i></a></dt>
+  <dd>The size of the file (if it is a regular file or a symbolic link) in
+      bytes. The size of a symbolic link is the length of the pathname it
+      contains, without a terminating null byte.</dd>
+  <dt id="stx_blocks"><a class="permalink" href="#stx_blocks"><i>stx_blocks</i></a></dt>
+  <dd>The number of blocks allocated to the file on the medium, in 512-byte
+      units. (This may be smaller than <i>stx_size</i>/512 when the file has
+      holes.)</dd>
+  <dt id="stx_attributes_mask"><a class="permalink" href="#stx_attributes_mask"><i>stx_attributes_mask</i></a></dt>
+  <dd>A mask indicating which bits in <i>stx_attributes</i> are supported by the
+      VFS and the filesystem.</dd>
+  <dt id="stx_atime"><a class="permalink" href="#stx_atime"><i>stx_atime</i></a></dt>
+  <dd>The file's last access timestamp.</dd>
+  <dt id="stx_btime"><a class="permalink" href="#stx_btime"><i>stx_btime</i></a></dt>
+  <dd>The file's creation timestamp.</dd>
+  <dt id="stx_ctime"><a class="permalink" href="#stx_ctime"><i>stx_ctime</i></a></dt>
+  <dd>The file's last status change timestamp.</dd>
+  <dt id="stx_mtime"><a class="permalink" href="#stx_mtime"><i>stx_mtime</i></a></dt>
+  <dd>The file's last modification timestamp.</dd>
+  <dt id="stx_dev_major"><a class="permalink" href="#stx_dev_major"><i>stx_dev_major</i>
+    and <i>stx_dev_minor</i></a></dt>
+  <dd>The device on which this file (inode) resides.</dd>
+  <dt id="stx_rdev_major"><a class="permalink" href="#stx_rdev_major"><i>stx_rdev_major</i>
+    and <i>stx_rdev_minor</i></a></dt>
+  <dd>The device that this file (inode) represents if the file is of block or
+      character device type.</dd>
+  <dt id="stx_mnt_id"><a class="permalink" href="#stx_mnt_id"><i>stx_mnt_id</i></a></dt>
+  <dd>The mount ID of the mount containing the file. This is the same number
+      reported by <b>name_to_handle_at</b>(2) and corresponds to the number in
+      the first field in one of the records in <i>/proc/self/mountinfo</i>.</dd>
+  <dt id="stx_dio_mem_align"><a class="permalink" href="#stx_dio_mem_align"><i>stx_dio_mem_align</i></a></dt>
+  <dd>The alignment (in bytes) required for user memory buffers for direct I/O
+      (<b>O_DIRECT</b>) on this file, or 0 if direct I/O is not supported on
+      this file.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd><b>STATX_DIOALIGN</b> (<i>stx_dio_mem_align</i> and
+      <i>stx_dio_offset_align</i>) is supported on block devices since Linux
+      6.1. The support on regular files varies by filesystem; it is supported by
+      ext4, f2fs, and xfs since Linux 6.1.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="stx_dio_offset_align"><a class="permalink" href="#stx_dio_offset_align"><i>stx_dio_offset_align</i></a></dt>
+  <dd>The alignment (in bytes) required for file offsets and I/O segment lengths
+      for direct I/O (<b>O_DIRECT</b>) on this file, or 0 if direct I/O is not
+      supported on this file. This will only be nonzero if
+      <i>stx_dio_mem_align</i> is nonzero, and vice versa.</dd>
+</dl>
+<p class="Pp">For further information on the above fields, see
+  <b>inode</b>(7).</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="File_attributes"><a class="permalink" href="#File_attributes">File
+  attributes</a></h2>
+<p class="Pp">The <i>stx_attributes</i> field contains a set of ORed flags that
+    indicate additional attributes of the file. Note that any attribute that is
+    not indicated as supported by <i>stx_attributes_mask</i> has no usable value
+    here. The bits in <i>stx_attributes_mask</i> correspond bit-by-bit to
+    <i>stx_attributes</i>.</p>
+<p class="Pp">The flags are as follows:</p>
+<dl class="Bl-tag">
+  <dt id="STATX_ATTR_COMPRESSED"><a class="permalink" href="#STATX_ATTR_COMPRESSED"><b>STATX_ATTR_COMPRESSED</b></a></dt>
+  <dd>The file is compressed by the filesystem and may take extra resources to
+      access.</dd>
+  <dt id="STATX_ATTR_IMMUTABLE"><a class="permalink" href="#STATX_ATTR_IMMUTABLE"><b>STATX_ATTR_IMMUTABLE</b></a></dt>
+  <dd>The file cannot be modified: it cannot be deleted or renamed, no hard
+      links can be created to this file and no data can be written to it. See
+      <b>chattr</b>(1).</dd>
+  <dt id="STATX_ATTR_APPEND"><a class="permalink" href="#STATX_ATTR_APPEND"><b>STATX_ATTR_APPEND</b></a></dt>
+  <dd>The file can only be opened in append mode for writing. Random access
+      writing is not permitted. See <b>chattr</b>(1).</dd>
+  <dt id="STATX_ATTR_NODUMP"><a class="permalink" href="#STATX_ATTR_NODUMP"><b>STATX_ATTR_NODUMP</b></a></dt>
+  <dd>File is not a candidate for backup when a backup program such as
+      <b>dump</b>(8) is run. See <b>chattr</b>(1).</dd>
+  <dt id="STATX_ATTR_ENCRYPTED"><a class="permalink" href="#STATX_ATTR_ENCRYPTED"><b>STATX_ATTR_ENCRYPTED</b></a></dt>
+  <dd>A key is required for the file to be encrypted by the filesystem.</dd>
+  <dt id="STATX_ATTR_VERITY"><a class="permalink" href="#STATX_ATTR_VERITY"><b>STATX_ATTR_VERITY</b>
+    (since Linux 5.5)</a></dt>
+  <dd>The file has fs-verity enabled. It cannot be written to, and all reads
+      from it will be verified against a cryptographic hash that covers the
+      entire file (e.g., via a Merkle tree).</dd>
+  <dt id="STATX_ATTR_DAX"><a class="permalink" href="#STATX_ATTR_DAX"><b>STATX_ATTR_DAX</b>
+    (since Linux 5.8)</a></dt>
+  <dd>The file is in the DAX (cpu direct access) state. DAX state attempts to
+      minimize software cache effects for both I/O and memory mappings of this
+      file. It requires a file system which has been configured to support
+    DAX.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>DAX generally assumes all accesses are via CPU load / store instructions
+      which can minimize overhead for small accesses, but may adversely affect
+      CPU utilization for large transfers.</dd>
+  <dt></dt>
+  <dd>File I/O is done directly to/from user-space buffers and memory mapped I/O
+      may be performed with direct memory mappings that bypass the kernel page
+      cache.</dd>
+  <dt></dt>
+  <dd>While the DAX property tends to result in data being transferred
+      synchronously, it does not give the same guarantees as the <b>O_SYNC</b>
+      flag (see <b>open</b>(2)), where data and the necessary metadata are
+      transferred together.</dd>
+  <dt></dt>
+  <dd>A DAX file may support being mapped with the <b>MAP_SYNC</b> flag, which
+      enables a program to use CPU cache flush instructions to persist CPU store
+      operations without an explicit <b>fsync</b>(2). See <b>mmap</b>(2) for
+      more information.</dd>
+</dl>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, zero is returned. On error, -1 is returned, and
+    <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>Search permission is denied for one of the directories in the path prefix
+      of <i>pathname</i>. (See also <b>path_resolution</b>(7).)</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd><i>pathname</i> is relative but <i>dirfd</i> is neither <b>AT_FDCWD</b>
+      nor a valid file descriptor.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>pathname</i> or <i>statxbuf</i> is NULL or points to a location outside
+      the process's accessible address space.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>Invalid flag specified in <i>flags</i>.</dd>
+  <dt id="EINVAL~2"><a class="permalink" href="#EINVAL~2"><b>EINVAL</b></a></dt>
+  <dd>Reserved flag specified in <i>mask</i>. (Currently, there is one such
+      flag, designated by the constant <b>STATX__RESERVED</b>, with the value
+      0x80000000U.)</dd>
+  <dt id="ELOOP"><a class="permalink" href="#ELOOP"><b>ELOOP</b></a></dt>
+  <dd>Too many symbolic links encountered while traversing the pathname.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd><i>pathname</i> is too long.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>A component of <i>pathname</i> does not exist, or <i>pathname</i> is an
+      empty string and <b>AT_EMPTY_PATH</b> was not specified in
+    <i>flags</i>.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Out of memory (i.e., kernel memory).</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>A component of the path prefix of <i>pathname</i> is not a directory or
+      <i>pathname</i> is relative and <i>dirfd</i> is a file descriptor
+      referring to a file other than a directory.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>statx</b>() was added in Linux 4.11; library support was added
+    in glibc 2.28.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>statx</b>() is Linux-specific.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>ls</b>(1), <b>stat</b>(1), <b>access</b>(2), <b>chmod</b>(2),
+    <b>chown</b>(2), <b>name_to_handle_at</b>(2), <b>readlink</b>(2),
+    <b>stat</b>(2), <b>utime</b>(2), <b>proc</b>(5), <b>capabilities</b>(7),
+    <b>inode</b>(7), <b>symlink</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

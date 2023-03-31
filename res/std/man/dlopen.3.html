@@ -1,0 +1,466 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright 1995 Yggdrasil Computing, Incorporated.
+   written by Adam J. Richter (adam@yggdrasil.com),
+   with typesetting help from Daniel Quinlan (quinlan@yggdrasil.com).
+   and Copyright 2003, 2015 Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+  
+   Modified by David A. Wheeler <dwheeler@dwheeler.com> 2000-11-28.
+   Applied patch by Terran Melconian, aeb, 2001-12-14.
+   Modified by Hacksaw <hacksaw@hacksaw.org> 2003-03-13.
+   Modified by Matt Domsch, 2003-04-09: _init and _fini obsolete
+   Modified by Michael Kerrisk <mtk.manpages@gmail.com> 2003-05-16.
+   Modified by Walter Harms: dladdr, dlvsym
+   Modified by Petr Baudis <pasky@suse.cz>, 2008-12-04: dladdr caveat
+   --><head>
+<meta name="dc.identifier" content="res/f0910d97d674a58f06de446fce5c49fa4132ff98">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>dlopen(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">dlopen(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">dlopen(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">dlclose, dlopen, dlmopen - open and close a shared object</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Dynamic linking library (<i>libdl</i>, <i>-ldl</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;dlfcn.h&gt;</b></pre>
+<pre><b>void *dlopen(const char *</b><i>filename</i><b>, int </b><i>flags</i><b>);</b>
+<b>int dlclose(void *</b><i>handle</i><b>);</b></pre>
+<pre><b>#define _GNU_SOURCE</b>
+<br>
+<b>#include &lt;dlfcn.h&gt;</b></pre>
+<pre><b>void *dlmopen(Lmid_t </b><i>lmid</i><b>, const char *</b><i>filename</i><b>, int </b><i>flags</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="dlopen()"><a class="permalink" href="#dlopen()">dlopen()</a></h2>
+<p class="Pp">The function <b>dlopen</b>() loads the dynamic shared object
+    (shared library) file named by the null-terminated string <i>filename</i>
+    and returns an opaque "handle" for the loaded object. This handle
+    is employed with other functions in the dlopen API, such as <b>dlsym</b>(3),
+    <b>dladdr</b>(3), <b>dlinfo</b>(3), and <b>dlclose</b>().</p>
+<p class="Pp">If <i>filename</i> is NULL, then the returned handle is for the
+    main program. If <i>filename</i> contains a slash ("/"), then it
+    is interpreted as a (relative or absolute) pathname. Otherwise, the dynamic
+    linker searches for the object as follows (see <b>ld.so</b>(8) for further
+    details):</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>(ELF only) If the calling object (i.e., the shared library or executable
+      from which <b>dlopen</b>() is called) contains a DT_RPATH tag, and does
+      not contain a DT_RUNPATH tag, then the directories listed in the DT_RPATH
+      tag are searched.</dd>
+  <dt>•</dt>
+  <dd>If, at the time that the program was started, the environment variable
+      <b>LD_LIBRARY_PATH</b> was defined to contain a colon-separated list of
+      directories, then these are searched. (As a security measure, this
+      variable is ignored for set-user-ID and set-group-ID programs.)</dd>
+  <dt>•</dt>
+  <dd>(ELF only) If the calling object contains a DT_RUNPATH tag, then the
+      directories listed in that tag are searched.</dd>
+  <dt>•</dt>
+  <dd>The cache file <i>/etc/ld.so.cache</i> (maintained by <b>ldconfig</b>(8))
+      is checked to see whether it contains an entry for <i>filename</i>.</dd>
+  <dt>•</dt>
+  <dd>The directories <i>/lib</i> and <i>/usr/lib</i> are searched (in that
+      order).</dd>
+</dl>
+<p class="Pp">If the object specified by <i>filename</i> has dependencies on
+    other shared objects, then these are also automatically loaded by the
+    dynamic linker using the same rules. (This process may occur recursively, if
+    those objects in turn have dependencies, and so on.)</p>
+<p class="Pp">One of the following two values must be included in
+  <i>flags</i>:</p>
+<dl class="Bl-tag">
+  <dt id="RTLD_LAZY"><a class="permalink" href="#RTLD_LAZY"><b>RTLD_LAZY</b></a></dt>
+  <dd>Perform lazy binding. Resolve symbols only as the code that references
+      them is executed. If the symbol is never referenced, then it is never
+      resolved. (Lazy binding is performed only for function references;
+      references to variables are always immediately bound when the shared
+      object is loaded.) Since glibc 2.1.1, this flag is overridden by the
+      effect of the <b>LD_BIND_NOW</b> environment variable.</dd>
+  <dt id="RTLD_NOW"><a class="permalink" href="#RTLD_NOW"><b>RTLD_NOW</b></a></dt>
+  <dd>If this value is specified, or the environment variable <b>LD_BIND_NOW</b>
+      is set to a nonempty string, all undefined symbols in the shared object
+      are resolved before <b>dlopen</b>() returns. If this cannot be done, an
+      error is returned.</dd>
+</dl>
+<p class="Pp">Zero or more of the following values may also be ORed in
+    <i>flags</i>:</p>
+<dl class="Bl-tag">
+  <dt id="RTLD_GLOBAL"><a class="permalink" href="#RTLD_GLOBAL"><b>RTLD_GLOBAL</b></a></dt>
+  <dd>The symbols defined by this shared object will be made available for
+      symbol resolution of subsequently loaded shared objects.</dd>
+  <dt id="RTLD_LOCAL"><a class="permalink" href="#RTLD_LOCAL"><b>RTLD_LOCAL</b></a></dt>
+  <dd>This is the converse of <b>RTLD_GLOBAL</b>, and the default if neither
+      flag is specified. Symbols defined in this shared object are not made
+      available to resolve references in subsequently loaded shared
+    objects.</dd>
+  <dt id="RTLD_NODELETE"><a class="permalink" href="#RTLD_NODELETE"><b>RTLD_NODELETE</b>
+    (since glibc 2.2)</a></dt>
+  <dd>Do not unload the shared object during <b>dlclose</b>(). Consequently, the
+      object's static and global variables are not reinitialized if the object
+      is reloaded with <b>dlopen</b>() at a later time.</dd>
+  <dt id="RTLD_NOLOAD"><a class="permalink" href="#RTLD_NOLOAD"><b>RTLD_NOLOAD</b>
+    (since glibc 2.2)</a></dt>
+  <dd>Don't load the shared object. This can be used to test if the object is
+      already resident (<b>dlopen</b>() returns NULL if it is not, or the
+      object's handle if it is resident). This flag can also be used to promote
+      the flags on a shared object that is already loaded. For example, a shared
+      object that was previously loaded with <b>RTLD_LOCAL</b> can be reopened
+      with <b>RTLD_NOLOAD&nbsp;|&nbsp;RTLD_GLOBAL</b>.</dd>
+  <dt id="RTLD_DEEPBIND"><a class="permalink" href="#RTLD_DEEPBIND"><b>RTLD_DEEPBIND</b>
+    (since glibc 2.3.4)</a></dt>
+  <dd>Place the lookup scope of the symbols in this shared object ahead of the
+      global scope. This means that a self-contained object will use its own
+      symbols in preference to global symbols with the same name contained in
+      objects that have already been loaded.</dd>
+</dl>
+<p class="Pp">If <i>filename</i> is NULL, then the returned handle is for the
+    main program. When given to <b>dlsym</b>(3), this handle causes a search for
+    a symbol in the main program, followed by all shared objects loaded at
+    program startup, and then all shared objects loaded by <b>dlopen</b>() with
+    the flag <b>RTLD_GLOBAL</b>.</p>
+<p class="Pp">Symbol references in the shared object are resolved using (in
+    order): symbols in the link map of objects loaded for the main program and
+    its dependencies; symbols in shared objects (and their dependencies) that
+    were previously opened with <b>dlopen</b>() using the <b>RTLD_GLOBAL</b>
+    flag; and definitions in the shared object itself (and any dependencies that
+    were loaded for that object).</p>
+<p class="Pp">Any global symbols in the executable that were placed into its
+    dynamic symbol table by <b>ld</b>(1) can also be used to resolve references
+    in a dynamically loaded shared object. Symbols may be placed in the dynamic
+    symbol table either because the executable was linked with the flag
+    "-rdynamic" (or, synonymously, "--export-dynamic"),
+    which causes all of the executable's global symbols to be placed in the
+    dynamic symbol table, or because <b>ld</b>(1) noted a dependency on a symbol
+    in another object during static linking.</p>
+<p class="Pp">If the same shared object is opened again with <b>dlopen</b>(),
+    the same object handle is returned. The dynamic linker maintains reference
+    counts for object handles, so a dynamically loaded shared object is not
+    deallocated until <b>dlclose</b>() has been called on it as many times as
+    <b>dlopen</b>() has succeeded on it. Constructors (see below) are called
+    only when the object is actually loaded into memory (i.e., when the
+    reference count increases to 1).</p>
+<p class="Pp">A subsequent <b>dlopen</b>() call that loads the same shared
+    object with <b>RTLD_NOW</b> may force symbol resolution for a shared object
+    earlier loaded with <b>RTLD_LAZY</b>. Similarly, an object that was
+    previously opened with <b>RTLD_LOCAL</b> can be promoted to
+    <b>RTLD_GLOBAL</b> in a subsequent <b>dlopen</b>().</p>
+<p class="Pp">If <b>dlopen</b>() fails for any reason, it returns NULL.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="dlmopen()"><a class="permalink" href="#dlmopen()">dlmopen()</a></h2>
+<p class="Pp">This function performs the same task as <b>dlopen</b>()—the
+    <i>filename</i> and <i>flags</i> arguments, as well as the return value, are
+    the same, except for the differences noted below.</p>
+<p class="Pp">The <b>dlmopen</b>() function differs from <b>dlopen</b>()
+    primarily in that it accepts an additional argument, <i>lmid</i>, that
+    specifies the link-map list (also referred to as a <i>namespace</i>) in
+    which the shared object should be loaded. (By comparison, <b>dlopen</b>()
+    adds the dynamically loaded shared object to the same namespace as the
+    shared object from which the <b>dlopen</b>() call is made.) The
+    <i>Lmid_t</i> type is an opaque handle that refers to a namespace.</p>
+<p class="Pp">The <i>lmid</i> argument is either the ID of an existing namespace
+    (which can be obtained using the <b>dlinfo</b>(3) <b>RTLD_DI_LMID</b>
+    request) or one of the following special values:</p>
+<dl class="Bl-tag">
+  <dt id="LM_ID_BASE"><a class="permalink" href="#LM_ID_BASE"><b>LM_ID_BASE</b></a></dt>
+  <dd>Load the shared object in the initial namespace (i.e., the application's
+      namespace).</dd>
+  <dt id="LM_ID_NEWLM"><a class="permalink" href="#LM_ID_NEWLM"><b>LM_ID_NEWLM</b></a></dt>
+  <dd>Create a new namespace and load the shared object in that namespace. The
+      object must have been correctly linked to reference all of the other
+      shared objects that it requires, since the new namespace is initially
+      empty.</dd>
+</dl>
+<p class="Pp">If <i>filename</i> is NULL, then the only permitted value for
+    <i>lmid</i> is <b>LM_ID_BASE</b>.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="dlclose()"><a class="permalink" href="#dlclose()">dlclose()</a></h2>
+<p class="Pp">The function <b>dlclose</b>() decrements the reference count on
+    the dynamically loaded shared object referred to by <i>handle</i>.</p>
+<p class="Pp">If the object's reference count drops to zero and no symbols in
+    this object are required by other objects, then the object is unloaded after
+    first calling any destructors defined for the object. (Symbols in this
+    object might be required in another object because this object was opened
+    with the <b>RTLD_GLOBAL</b> flag and one of its symbols satisfied a
+    relocation in another object.)</p>
+<p class="Pp">All shared objects that were automatically loaded when
+    <b>dlopen</b>() was invoked on the object referred to by <i>handle</i> are
+    recursively closed in the same manner.</p>
+<p class="Pp">A successful return from <b>dlclose</b>() does not guarantee that
+    the symbols associated with <i>handle</i> are removed from the caller's
+    address space. In addition to references resulting from explicit
+    <b>dlopen</b>() calls, a shared object may have been implicitly loaded (and
+    reference counted) because of dependencies in other shared objects. Only
+    when all references have been released can the shared object be removed from
+    the address space.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>dlopen</b>() and <b>dlmopen</b>() return a non-NULL
+    handle for the loaded object. On error (file could not be found, was not
+    readable, had the wrong format, or caused errors during loading), these
+    functions return NULL.</p>
+<p class="Pp">On success, <b>dlclose</b>() returns 0; on error, it returns a
+    nonzero value.</p>
+<p class="Pp">Errors from these functions can be diagnosed using
+    <b>dlerror</b>(3).</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>dlopen (), dlmopen (), dlclose ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>dlopen</b>() and <b>dlclose</b>() are present in glibc 2.0 and
+    later. <b>dlmopen</b>() first appeared in glibc 2.3.4.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001 describes <b>dlclose</b>() and <b>dlopen</b>(). The
+    <b>dlmopen</b>() function is a GNU extension.</p>
+<p class="Pp">The <b>RTLD_NOLOAD</b>, <b>RTLD_NODELETE</b>, and
+    <b>RTLD_DEEPBIND</b> flags are GNU extensions; the first two of these flags
+    are also present on Solaris.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<section class="Ss">
+<h2 class="Ss" id="dlmopen()_and_namespaces"><a class="permalink" href="#dlmopen()_and_namespaces">dlmopen()
+  and namespaces</a></h2>
+<p class="Pp">A link-map list defines an isolated namespace for the resolution
+    of symbols by the dynamic linker. Within a namespace, dependent shared
+    objects are implicitly loaded according to the usual rules, and symbol
+    references are likewise resolved according to the usual rules, but such
+    resolution is confined to the definitions provided by the objects that have
+    been (explicitly and implicitly) loaded into the namespace.</p>
+<p class="Pp">The <b>dlmopen</b>() function permits object-load
+    isolation—the ability to load a shared object in a new namespace
+    without exposing the rest of the application to the symbols made available
+    by the new object. Note that the use of the <b>RTLD_LOCAL</b> flag is not
+    sufficient for this purpose, since it prevents a shared object's symbols
+    from being available to <i>any</i> other shared object. In some cases, we
+    may want to make the symbols provided by a dynamically loaded shared object
+    available to (a subset of) other shared objects without exposing those
+    symbols to the entire application. This can be achieved by using a separate
+    namespace and the <b>RTLD_GLOBAL</b> flag.</p>
+<p class="Pp">The <b>dlmopen</b>() function also can be used to provide better
+    isolation than the <b>RTLD_LOCAL</b> flag. In particular, shared objects
+    loaded with <b>RTLD_LOCAL</b> may be promoted to <b>RTLD_GLOBAL</b> if they
+    are dependencies of another shared object loaded with <b>RTLD_GLOBAL</b>.
+    Thus, <b>RTLD_LOCAL</b> is insufficient to isolate a loaded shared object
+    except in the (uncommon) case where one has explicit control over all shared
+    object dependencies.</p>
+<p class="Pp">Possible uses of <b>dlmopen</b>() are plugins where the author of
+    the plugin-loading framework can't trust the plugin authors and does not
+    wish any undefined symbols from the plugin framework to be resolved to
+    plugin symbols. Another use is to load the same object more than once.
+    Without the use of <b>dlmopen</b>(), this would require the creation of
+    distinct copies of the shared object file. Using <b>dlmopen</b>(), this can
+    be achieved by loading the same shared object file into different
+    namespaces.</p>
+<p class="Pp">The glibc implementation supports a maximum of 16 namespaces.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Initialization_and_finalization_functions"><a class="permalink" href="#Initialization_and_finalization_functions">Initialization
+  and finalization functions</a></h2>
+<p class="Pp">Shared objects may export functions using the
+    <b>__attribute__((constructor))</b> and <b>__attribute__((destructor))</b>
+    function attributes. Constructor functions are executed before
+    <b>dlopen</b>() returns, and destructor functions are executed before
+    <b>dlclose</b>() returns. A shared object may export multiple constructors
+    and destructors, and priorities can be associated with each function to
+    determine the order in which they are executed. See the <b>gcc</b> info
+    pages (under "Function attributes") for further information.</p>
+<p class="Pp">An older method of (partially) achieving the same result is via
+    the use of two special symbols recognized by the linker: <b>_init</b> and
+    <b>_fini</b>. If a dynamically loaded shared object exports a routine named
+    <b>_init</b>(), then that code is executed after loading a shared object,
+    before <b>dlopen</b>() returns. If the shared object exports a routine named
+    <b>_fini</b>(), then that routine is called just before the object is
+    unloaded. In this case, one must avoid linking against the system startup
+    files, which contain default versions of these files; this can be done by
+    using the <b>gcc</b>(1) <i>-nostartfiles</i> command-line option.</p>
+<p class="Pp">Use of <b>_init</b> and <b>_fini</b> is now deprecated in favor of
+    the aforementioned constructors and destructors, which among other
+    advantages, permit multiple initialization and finalization functions to be
+    defined.</p>
+<p class="Pp">Since glibc 2.2.3, <b>atexit</b>(3) can be used to register an
+    exit handler that is automatically called when a shared object is
+  unloaded.</p>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="History"><a class="permalink" href="#History">History</a></h2>
+<p class="Pp">These functions are part of the dlopen API, derived from
+  SunOS.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="BUGS"><a class="permalink" href="#BUGS">BUGS</a></h1>
+<p class="Pp">As at glibc 2.24, specifying the <b>RTLD_GLOBAL</b> flag when
+    calling <b>dlmopen</b>() generates an error. Furthermore, specifying
+    <b>RTLD_GLOBAL</b> when calling <b>dlopen</b>() results in a program crash
+    (<b>SIGSEGV</b>) if the call is made from any object loaded in a namespace
+    other than the initial namespace.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below loads the (glibc) math library, looks up the
+    address of the <b>cos</b>(3) function, and prints the cosine of 2.0. The
+    following is an example of building and running the program:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ <b>cc dlopen_demo.c -ldl</b>
+$ <b>./a.out</b>
+-0.416147
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#include &lt;dlfcn.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;gnu/lib-names.h&gt;  /* Defines LIBM_SO (which will be a
+<br>
+                               string such as "libm.so.6") */
+int
+main(void)
+{
+<br>
+    void *handle;
+<br>
+    double (*cosine)(double);
+<br>
+    char *error;
+<br>
+    handle = dlopen(LIBM_SO, RTLD_LAZY);
+<br>
+    if (!handle) {
+<br>
+        fprintf(stderr, "%s\n", dlerror());
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    dlerror();    /* Clear any existing error */
+<br>
+    cosine = (double (*)(double)) dlsym(handle, "cos");
+<br>
+    /* According to the ISO C standard, casting between function
+<br>
+       pointers and 'void *', as done above, produces undefined results.
+<br>
+       POSIX.1-2001 and POSIX.1-2008 accepted this state of affairs and
+<br>
+       proposed the following workaround:
+<br>
+           *(void **) (&amp;cosine) = dlsym(handle, "cos");
+<br>
+       This (clumsy) cast conforms with the ISO C standard and will
+<br>
+       avoid any compiler warnings.
+<br>
+       The 2013 Technical Corrigendum 1 to POSIX.1-2008 improved matters
+<br>
+       by requiring that conforming implementations support casting
+<br>
+       'void *' to a function pointer.  Nevertheless, some compilers
+<br>
+       (e.g., gcc with the '-pedantic' option) may complain about the
+<br>
+       cast used in this program. */
+<br>
+    error = dlerror();
+<br>
+    if (error != NULL) {
+<br>
+        fprintf(stderr, "%s\n", error);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    printf("%f\n", (*cosine)(2.0));
+<br>
+    dlclose(handle);
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>ld</b>(1), <b>ldd</b>(1), <b>pldd</b>(1),
+    <b>dl_iterate_phdr</b>(3), <b>dladdr</b>(3), <b>dlerror</b>(3),
+    <b>dlinfo</b>(3), <b>dlsym</b>(3), <b>rtld-audit</b>(7), <b>ld.so</b>(8),
+    <b>ldconfig</b>(8)</p>
+<p class="Pp">gcc info pages, ld info pages</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

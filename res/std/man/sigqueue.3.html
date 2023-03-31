@@ -1,0 +1,178 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) 2002 Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   added note on self-signaling, aeb, 2002-06-07
+   added note on CAP_KILL, mtk, 2004-06-16
+   --><head>
+<meta name="dc.identifier" content="res/e3627e8292a38508302c431a8307320d846d04bc">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>sigqueue(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">sigqueue(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">sigqueue(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">sigqueue - queue a signal and data to a process</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;signal.h&gt;</b></pre>
+<pre><b>int sigqueue(pid_t </b><i>pid</i><b>, int </b><i>sig</i><b>, const union sigval </b><i>value</i><b>);</b></pre>
+<p class="Pp"></p>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>sigqueue</b>():</p>
+<pre><br>
+    _POSIX_C_SOURCE &gt;= 199309L</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>sigqueue</b>() sends the signal specified in <i>sig</i> to the
+    process whose PID is given in <i>pid</i>. The permissions required to send a
+    signal are the same as for <b>kill</b>(2). As with <b>kill</b>(2), the null
+    signal (0) can be used to check if a process with a given PID exists.</p>
+<p class="Pp">The <i>value</i> argument is used to specify an accompanying item
+    of data (either an integer or a pointer value) to be sent with the signal,
+    and has the following type:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>union sigval {
+<br>
+    int   sival_int;
+<br>
+    void *sival_ptr;
+};
+</pre>
+<br>
+<p class="Pp">If the receiving process has installed a handler for this signal
+    using the <b>SA_SIGINFO</b> flag to <b>sigaction</b>(2), then it can obtain
+    this data via the <i>si_value</i> field of the <i>siginfo_t</i> structure
+    passed as the second argument to the handler. Furthermore, the
+    <i>si_code</i> field of that structure will be set to <b>SI_QUEUE</b>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, <b>sigqueue</b>() returns 0, indicating that the
+    signal was successfully queued to the receiving process. Otherwise, -1 is
+    returned and <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EAGAIN"><a class="permalink" href="#EAGAIN"><b>EAGAIN</b></a></dt>
+  <dd>The limit of signals which may be queued has been reached. (See
+      <b>signal</b>(7) for further information.)</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd><i>sig</i> was invalid.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The process does not have permission to send the signal to the receiving
+      process. For the required permissions, see <b>kill</b>(2).</dd>
+  <dt id="ESRCH"><a class="permalink" href="#ESRCH"><b>ESRCH</b></a></dt>
+  <dd>No process has a PID matching <i>pid</i>.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>sigqueue ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>sigqueue</b>() and the underlying <b>rt_sigqueueinfo</b>(2)
+    system call first appeared in Linux 2.2.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">If this function results in the sending of a signal to the process
+    that invoked it, and that signal was not blocked by the calling thread, and
+    no other threads were willing to handle this signal (either by having it
+    unblocked, or by waiting for it using <b>sigwait</b>(3)), then at least some
+    signal must be delivered to this thread before this function returns.</p>
+<section class="Ss">
+<h2 class="Ss" id="C_library/kernel_differences"><a class="permalink" href="#C_library/kernel_differences">C
+  library/kernel differences</a></h2>
+<p class="Pp">On Linux, <b>sigqueue</b>() is implemented using the
+    <b>rt_sigqueueinfo</b>(2) system call. The system call differs in its third
+    argument, which is the <i>siginfo_t</i> structure that will be supplied to
+    the receiving process's signal handler or returned by the receiving
+    process's <b>sigtimedwait</b>(2) call. Inside the glibc <b>sigqueue</b>()
+    wrapper, this argument, <i>uinfo</i>, is initialized as follows:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>uinfo.si_signo = sig;      /* Argument supplied to sigqueue() */
+uinfo.si_code = SI_QUEUE;
+uinfo.si_pid = getpid();   /* Process ID of sender */
+uinfo.si_uid = getuid();   /* Real UID of sender */
+uinfo.si_value = val;      /* Argument supplied to sigqueue() */
+</pre>
+<br>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>kill</b>(2), <b>rt_sigqueueinfo</b>(2), <b>sigaction</b>(2),
+    <b>signal</b>(2), <b>pthread_sigqueue</b>(3), <b>sigwait</b>(3),
+    <b>signal</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

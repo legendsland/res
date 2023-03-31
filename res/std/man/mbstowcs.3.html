@@ -1,0 +1,292 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   t
+   Copyright (c) Bruno Haible <haible@clisp.cons.org>
+   and Copyright 2014 Michael Kerrisk <mtk.manpages@gmail.com>
+  
+   SPDX-License-Identifier: GPL-2.0-or-later
+  
+   References consulted:
+     GNU glibc-2 source code and manual
+     Dinkumware C library reference http://www.dinkumware.com/
+     OpenGroup's Single UNIX specification http://www.UNIX-systems.org/online.html
+     ISO/IEC 9899:1999
+   --><head>
+<meta name="dc.identifier" content="res/5d5cc702271b1c95bc28cc015162d8cd1d0f05b2">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>mbstowcs(3)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">mbstowcs(3)</td>
+    <td class="head-vol">Library Functions Manual</td>
+    <td class="head-rtitle">mbstowcs(3)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">mbstowcs - convert a multibyte string to a wide-character
+  string</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;stdlib.h&gt;</b></pre>
+<pre><b>size_t mbstowcs(wchar_t </b><i>dest</i><b>[restrict .</b><i>n</i><b>], const char *restrict </b><i>src</i><b>,</b>
+<b>                size_t </b><i>n</i><b>);</b></pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">If <i>dest</i> is not NULL, the <b>mbstowcs</b>() function
+    converts the multibyte string <i>src</i> to a wide-character string starting
+    at <i>dest</i>. At most <i>n</i> wide characters are written to <i>dest</i>.
+    The sequence of characters in the string <i>src</i> shall begin in the
+    initial shift state. The conversion can stop for three reasons:</p>
+<dl class="Bl-tag">
+  <dt>•</dt>
+  <dd>An invalid multibyte sequence has been encountered. In this case,
+      <i>(size_t)&nbsp;-1</i> is returned.</dd>
+  <dt>•</dt>
+  <dd><i>n</i> non-L'\0' wide characters have been stored at <i>dest</i>. In
+      this case, the number of wide characters written to <i>dest</i> is
+      returned, but the shift state at this point is lost.</dd>
+  <dt>•</dt>
+  <dd>The multibyte string has been completely converted, including the
+      terminating null character ('\0'). In this case, the number of wide
+      characters written to <i>dest</i>, excluding the terminating null wide
+      character, is returned.</dd>
+</dl>
+<p class="Pp">The programmer must ensure that there is room for at least
+    <i>n</i> wide characters at <i>dest</i>.</p>
+<p class="Pp">If <i>dest</i> is NULL, <i>n</i> is ignored, and the conversion
+    proceeds as above, except that the converted wide characters are not written
+    out to memory, and that no length limit exists.</p>
+<p class="Pp">In order to avoid the case 2 above, the programmer should make
+    sure <i>n</i> is greater than or equal to <i>mbstowcs(NULL,src,0)+1</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <b>mbstowcs</b>() function returns the number of wide
+    characters that make up the converted part of the wide-character string, not
+    including the terminating null wide character. If an invalid multibyte
+    sequence was encountered, <i>(size_t)&nbsp;-1</i> is returned.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ATTRIBUTES"><a class="permalink" href="#ATTRIBUTES">ATTRIBUTES</a></h1>
+<p class="Pp">For an explanation of the terms used in this section, see
+    <b>attributes</b>(7).</p>
+<table class="tbl" border="1" style="border-style: solid;">
+  <tbody><tr>
+    <td><b>Interface</b></td>
+    <td><b>Attribute</b></td>
+    <td><b>Value</b></td>
+  </tr>
+  <tr>
+    <td>mbstowcs ()</td>
+    <td>Thread safety</td>
+    <td>MT-Safe</td>
+  </tr>
+</tbody></table>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp">POSIX.1-2001, POSIX.1-2008, C99.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The behavior of <b>mbstowcs</b>() depends on the <b>LC_CTYPE</b>
+    category of the current locale.</p>
+<p class="Pp">The function <b>mbsrtowcs</b>(3) provides a better interface to
+    the same functionality.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">The program below illustrates the use of <b>mbstowcs</b>(), as
+    well as some of the wide character classification functions. An example run
+    is the following:</p>
+<p class="Pp">
+  <br>
+</p>
+<pre>$ ./t_mbstowcs de_DE.UTF-8 Grüße!
+Length of source string (excluding terminator):
+<br>
+    8 bytes
+<br>
+    6 multibyte characters
+Wide character string is: Grüße! (6 characters)
+<br>
+    G alpha upper
+<br>
+    r alpha lower
+<br>
+    ü alpha lower
+<br>
+    ß alpha lower
+<br>
+    e alpha lower
+<br>
+    ! !alpha
+</pre>
+<br>
+<section class="Ss">
+<h2 class="Ss" id="Program_source"><a class="permalink" href="#Program_source">Program
+  source</a></h2>
+<p class="Pp"></p>
+<pre>#include &lt;locale.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;wchar.h&gt;
+#include &lt;wctype.h&gt;
+int
+main(int argc, char *argv[])
+{
+<br>
+    size_t mbslen;      /* Number of multibyte characters in source */
+<br>
+    wchar_t *wcs;       /* Pointer to converted wide character string */
+<br>
+    if (argc &lt; 3) {
+<br>
+        fprintf(stderr, "Usage: %s &lt;locale&gt; &lt;string&gt;\n", argv[0]);
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    /* Apply the specified locale. */
+<br>
+    if (setlocale(LC_ALL, argv[1]) == NULL) {
+<br>
+        perror("setlocale");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    /* Calculate the length required to hold argv[2] converted to
+<br>
+       a wide character string. */
+<br>
+    mbslen = mbstowcs(NULL, argv[2], 0);
+<br>
+    if (mbslen == (size_t) -1) {
+<br>
+        perror("mbstowcs");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    /* Describe the source string to the user. */
+<br>
+    printf("Length of source string (excluding terminator):\n");
+<br>
+    printf("    %zu bytes\n", strlen(argv[2]));
+<br>
+    printf("    %zu multibyte characters\n\n", mbslen);
+<br>
+    /* Allocate wide character string of the desired size.  Add 1
+<br>
+       to allow for terminating null wide character (L'\0'). */
+<br>
+    wcs = calloc(mbslen + 1, sizeof(*wcs));
+<br>
+    if (wcs == NULL) {
+<br>
+        perror("calloc");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    /* Convert the multibyte character string in argv[2] to a
+<br>
+       wide character string. */
+<br>
+    if (mbstowcs(wcs, argv[2], mbslen + 1) == (size_t) -1) {
+<br>
+        perror("mbstowcs");
+<br>
+        exit(EXIT_FAILURE);
+<br>
+    }
+<br>
+    printf("Wide character string is: %ls (%zu characters)\n",
+<br>
+           wcs, mbslen);
+<br>
+    /* Now do some inspection of the classes of the characters in
+<br>
+       the wide character string. */
+<br>
+    for (wchar_t *wp = wcs; *wp != 0; wp++) {
+<br>
+        printf("    %lc ", (wint_t) *wp);
+<br>
+        if (!iswalpha(*wp))
+<br>
+            printf("!");
+<br>
+        printf("alpha ");
+<br>
+        if (iswalpha(*wp)) {
+<br>
+            if (iswupper(*wp))
+<br>
+                printf("upper ");
+<br>
+            if (iswlower(*wp))
+<br>
+                printf("lower ");
+<br>
+        }
+<br>
+        putchar('\n');
+<br>
+    }
+<br>
+    exit(EXIT_SUCCESS);
+}
+</pre>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>mblen</b>(3), <b>mbsrtowcs</b>(3), <b>mbtowc</b>(3),
+    <b>wcstombs</b>(3), <b>wctomb</b>(3)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

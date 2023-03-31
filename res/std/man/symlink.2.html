@@ -1,0 +1,215 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   This manpage is Copyright (C) 1992 Drew Eckhardt;
+               and Copyright (C) 1993 Michael Haardt, Ian Jackson.
+  		and Copyright (C) 2006, 2014 Michael Kerrisk
+  
+   SPDX-License-Identifier: Linux-man-pages-copyleft
+  
+   Modified 1993-07-24 by Rik Faith
+   Modified 1996-04-26 by Nick Duffek <nsd@bbc.com>
+   Modified 1996-11-06 by Eric S. Raymond <esr@thyrsus.com>
+   Modified 1997-01-31 by Eric S. Raymond <esr@thyrsus.com>
+   Modified 2004-06-23 by Michael Kerrisk <mtk.manpages@gmail.com>
+   --><head>
+<meta name="dc.identifier" content="res/d01e24c6a9d69ea8834290d830d92ae35fb04d2c">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>symlink(2)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">symlink(2)</td>
+    <td class="head-vol">System Calls Manual</td>
+    <td class="head-rtitle">symlink(2)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">symlink, symlinkat - make a new name for a file</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="LIBRARY"><a class="permalink" href="#LIBRARY">LIBRARY</a></h1>
+<p class="Pp">Standard C library (<i>libc</i>, <i>-lc</i>)</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre><b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int symlink(const char *</b><i>target</i><b>, const char *</b><i>linkpath</i><b>);</b></pre>
+<pre><b>#include &lt;fcntl.h&gt;           </b>/* Definition of <b>AT_*</b> constants */
+<b>#include &lt;unistd.h&gt;</b></pre>
+<pre><b>int symlinkat(const char *</b><i>target</i><b>, int </b><i>newdirfd</i><b>, const char *</b><i>linkpath</i><b>);</b></pre>
+<pre></pre>
+<div class="Bd-indent">Feature Test Macro Requirements for glibc (see
+  <b>feature_test_macros</b>(7)):</div>
+<p class="Pp"><b>symlink</b>():</p>
+<pre><br>
+    _XOPEN_SOURCE &gt;= 500 || _POSIX_C_SOURCE &gt;= 200112L
+<br>
+        || /* glibc &lt;= 2.19: */ _BSD_SOURCE</pre>
+<p class="Pp"><b>symlinkat</b>():</p>
+<pre><br>
+    Since glibc 2.10:
+<br>
+        _POSIX_C_SOURCE &gt;= 200809L
+<br>
+    Before glibc 2.10:
+<br>
+        _ATFILE_SOURCE</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>symlink</b>() creates a symbolic link named <i>linkpath</i>
+    which contains the string <i>target</i>.</p>
+<p class="Pp">Symbolic links are interpreted at run time as if the contents of
+    the link had been substituted into the path being followed to find a file or
+    directory.</p>
+<p class="Pp">Symbolic links may contain <i>..</i> path components, which (if
+    used at the start of the link) refer to the parent directories of that in
+    which the link resides.</p>
+<p class="Pp">A symbolic link (also known as a soft link) may point to an
+    existing file or to a nonexistent one; the latter case is known as a
+    dangling link.</p>
+<p class="Pp">The permissions of a symbolic link are irrelevant; the ownership
+    is ignored when following the link (except when the
+    <i>protected_symlinks</i> feature is enabled, as explained in
+    <b>proc</b>(5)), but is checked when removal or renaming of the link is
+    requested and the link is in a directory with the sticky bit
+    (<b>S_ISVTX</b>) set.</p>
+<p class="Pp">If <i>linkpath</i> exists, it will <i>not</i> be overwritten.</p>
+<section class="Ss">
+<h2 class="Ss" id="symlinkat()"><a class="permalink" href="#symlinkat()">symlinkat()</a></h2>
+<p class="Pp">The <b>symlinkat</b>() system call operates in exactly the same
+    way as <b>symlink</b>(), except for the differences described here.</p>
+<p class="Pp">If the pathname given in <i>linkpath</i> is relative, then it is
+    interpreted relative to the directory referred to by the file descriptor
+    <i>newdirfd</i> (rather than relative to the current working directory of
+    the calling process, as is done by <b>symlink</b>() for a relative
+    pathname).</p>
+<p class="Pp">If <i>linkpath</i> is relative and <i>newdirfd</i> is the special
+    value <b>AT_FDCWD</b>, then <i>linkpath</i> is interpreted relative to the
+    current working directory of the calling process (like
+  <b>symlink</b>()).</p>
+<p class="Pp">If <i>linkpath</i> is absolute, then <i>newdirfd</i> is
+  ignored.</p>
+<p class="Pp">See <b>openat</b>(2) for an explanation of the need for
+    <b>symlinkat</b>().</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">On success, zero is returned. On error, -1 is returned, and
+    <i>errno</i> is set to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>Write access to the directory containing <i>linkpath</i> is denied, or one
+      of the directories in the path prefix of <i>linkpath</i> did not allow
+      search permission. (See also <b>path_resolution</b>(7).)</dd>
+  <dt id="EBADF"><a class="permalink" href="#EBADF"><b>EBADF</b></a></dt>
+  <dd>(<b>symlinkat</b>()) <i>linkpath</i> is relative but <i>newdirfd</i> is
+      neither <b>AT_FDCWD</b> nor a valid file descriptor.</dd>
+  <dt id="EDQUOT"><a class="permalink" href="#EDQUOT"><b>EDQUOT</b></a></dt>
+  <dd>The user's quota of resources on the filesystem has been exhausted. The
+      resources could be inodes or disk blocks, depending on the filesystem
+      implementation.</dd>
+  <dt id="EEXIST"><a class="permalink" href="#EEXIST"><b>EEXIST</b></a></dt>
+  <dd><i>linkpath</i> already exists.</dd>
+  <dt id="EFAULT"><a class="permalink" href="#EFAULT"><b>EFAULT</b></a></dt>
+  <dd><i>target</i> or <i>linkpath</i> points outside your accessible address
+      space.</dd>
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>An I/O error occurred.</dd>
+  <dt id="ELOOP"><a class="permalink" href="#ELOOP"><b>ELOOP</b></a></dt>
+  <dd>Too many symbolic links were encountered in resolving
+    <i>linkpath</i>.</dd>
+  <dt id="ENAMETOOLONG"><a class="permalink" href="#ENAMETOOLONG"><b>ENAMETOOLONG</b></a></dt>
+  <dd><i>target</i> or <i>linkpath</i> was too long.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>A directory component in <i>linkpath</i> does not exist or is a dangling
+      symbolic link, or <i>target</i> or <i>linkpath</i> is an empty
+    string.</dd>
+  <dt id="ENOENT~2"><a class="permalink" href="#ENOENT~2"><b>ENOENT</b></a></dt>
+  <dd>(<b>symlinkat</b>()) <i>linkpath</i> is a relative pathname and
+      <i>newdirfd</i> refers to a directory that has been deleted.</dd>
+  <dt id="ENOMEM"><a class="permalink" href="#ENOMEM"><b>ENOMEM</b></a></dt>
+  <dd>Insufficient kernel memory was available.</dd>
+  <dt id="ENOSPC"><a class="permalink" href="#ENOSPC"><b>ENOSPC</b></a></dt>
+  <dd>The device containing the file has no room for the new directory
+    entry.</dd>
+  <dt id="ENOTDIR"><a class="permalink" href="#ENOTDIR"><b>ENOTDIR</b></a></dt>
+  <dd>A component used as a directory in <i>linkpath</i> is not, in fact, a
+      directory.</dd>
+  <dt id="ENOTDIR~2"><a class="permalink" href="#ENOTDIR~2"><b>ENOTDIR</b></a></dt>
+  <dd>(<b>symlinkat</b>()) <i>linkpath</i> is relative and <i>newdirfd</i> is a
+      file descriptor referring to a file other than a directory.</dd>
+  <dt id="EPERM"><a class="permalink" href="#EPERM"><b>EPERM</b></a></dt>
+  <dd>The filesystem containing <i>linkpath</i> does not support the creation of
+      symbolic links.</dd>
+  <dt id="EROFS"><a class="permalink" href="#EROFS"><b>EROFS</b></a></dt>
+  <dd><i>linkpath</i> is on a read-only filesystem.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSIONS"><a class="permalink" href="#VERSIONS">VERSIONS</a></h1>
+<p class="Pp"><b>symlinkat</b>() was added in Linux 2.6.16; library support was
+    added in glibc 2.4.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="STANDARDS"><a class="permalink" href="#STANDARDS">STANDARDS</a></h1>
+<p class="Pp"><b>symlink</b>(): SVr4, 4.3BSD, POSIX.1-2001, POSIX.1-2008.</p>
+<p class="Pp"><b>symlinkat</b>(): POSIX.1-2008.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">No checking of <i>target</i> is done.</p>
+<p class="Pp">Deleting the name referred to by a symbolic link will actually
+    delete the file (unless it also has other hard links). If this behavior is
+    not desired, use <b>link</b>(2).</p>
+<section class="Ss">
+<h2 class="Ss" id="glibc_notes"><a class="permalink" href="#glibc_notes">glibc
+  notes</a></h2>
+<p class="Pp">On older kernels where <b>symlinkat</b>() is unavailable, the
+    glibc wrapper function falls back to the use of <b>symlink</b>(). When
+    <i>linkpath</i> is a relative pathname, glibc constructs a pathname based on
+    the symbolic link in <i>/proc/self/fd</i> that corresponds to the
+    <i>newdirfd</i> argument.</p>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>ln</b>(1), <b>namei</b>(1), <b>lchown</b>(2), <b>link</b>(2),
+    <b>lstat</b>(2), <b>open</b>(2), <b>readlink</b>(2), <b>rename</b>(2),
+    <b>unlink</b>(2), <b>path_resolution</b>(7), <b>symlink</b>(7)</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">(date)</td>
+    <td class="foot-os">Linux man-pages (unreleased)</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

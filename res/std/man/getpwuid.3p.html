@@ -1,0 +1,287 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/473c93f427d2460b2fd8ef118cc8715d64e46c86">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>GETPWUID(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">GETPWUID(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">GETPWUID(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">getpwuid, getpwuid_r — search user database for a user
+  ID</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;pwd.h&gt;</pre>
+<pre>struct passwd *getpwuid(uid_t <i>uid</i>);
+int getpwuid_r(uid_t <i>uid</i>, struct passwd *<i>pwd</i>, char *<i>buffer</i>,
+<br>
+    size_t <i>bufsize</i>, struct passwd **<i>result</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>getpwuid</i>() function shall search the user database for
+    an entry with a matching <i>uid</i>.</p>
+<p class="Pp">The <i>getpwuid</i>() function need not be thread-safe.</p>
+<p class="Pp">Applications wishing to check for error situations should set
+    <i>errno</i> to 0 before calling <i>getpwuid</i>(). If <i>getpwuid</i>()
+    returns a null pointer and <i>errno</i> is set to non-zero, an error
+    occurred.</p>
+<p class="Pp">The <i>getpwuid_r</i>() function shall update the <b>passwd</b>
+    structure pointed to by <i>pwd</i> and store a pointer to that structure at
+    the location pointed to by <i>result</i>. The structure shall contain an
+    entry from the user database with a matching <i>uid</i>. Storage referenced
+    by the structure is allocated from the memory provided with the
+    <i>buffer</i> parameter, which is <i>bufsize</i> bytes in size. A call to
+    <i>sysconf</i>(_SC_GETPW_R_SIZE_MAX) returns either -1 without changing
+    <i>errno</i> or an initial value suggested for the size of this buffer. A
+    null pointer shall be returned at the location pointed to by <i>result</i>
+    on error or if the requested entry is not found.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">The <i>getpwuid</i>() function shall return a pointer to a
+    <b>struct passwd</b> with the structure as defined in <i>&lt;pwd.h&gt;</i>
+    with a matching entry if found. A null pointer shall be returned if the
+    requested entry is not found, or an error occurs. If the requested entry was
+    not found, <i>errno</i> shall not be changed. On error, <i>errno</i> shall
+    be set to indicate the error.</p>
+<p class="Pp">The application shall not modify the structure to which the return
+    value points, nor any storage areas pointed to by pointers within the
+    structure. The returned pointer, and pointers within the structure, might be
+    invalidated or the structure or the storage areas might be overwritten by a
+    subsequent call to <i>getpwent</i>(), <i>getpwnam</i>(), or
+    <i>getpwuid</i>(). The returned pointer, and pointers within the structure,
+    might also be invalidated if the calling thread is terminated.</p>
+<p class="Pp">If successful, the <i>getpwuid_r</i>() function shall return zero;
+    otherwise, an error number shall be returned to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">These functions may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EIO"><a class="permalink" href="#EIO"><b>EIO</b></a></dt>
+  <dd>An I/O error has occurred.</dd>
+  <dt id="EINTR"><a class="permalink" href="#EINTR"><b>EINTR</b></a></dt>
+  <dd>A signal was caught during <i>getpwuid</i>().</dd>
+  <dt id="EMFILE"><a class="permalink" href="#EMFILE"><b>EMFILE</b></a></dt>
+  <dd>All file descriptors available to the process are currently open.</dd>
+  <dt id="ENFILE"><a class="permalink" href="#ENFILE"><b>ENFILE</b></a></dt>
+  <dd>The maximum allowable number of files is currently open in the
+    system.</dd>
+</dl>
+<p class="Pp">The <i>getpwuid_r</i>() function may fail if:</p>
+<dl class="Bl-tag">
+  <dt id="ERANGE"><a class="permalink" href="#ERANGE"><b>ERANGE</b></a></dt>
+  <dd>Insufficient storage was supplied via <i>buffer</i> and <i>bufsize</i> to
+      contain the data to be referenced by the resulting <b>passwd</b>
+      structure.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">Note that <i>sysconf</i>(_SC_GETPW_R_SIZE_MAX) may return -1 if
+    there is no hard limit on the size of the buffer needed to store all the
+    groups returned. This example shows how an application can allocate a buffer
+    of sufficient size to work with <i>getpwuid_r</i>().</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>long int initlen = sysconf(_SC_GETPW_R_SIZE_MAX);
+size_t len;
+if (initlen == -1)
+<br>
+    /* Default initial length. */
+<br>
+    len = 1024;
+else
+<br>
+    len = (size_t) initlen;
+struct passwd result;
+struct passwd *resultp;
+char *buffer = malloc(len);
+if (buffer == NULL)
+<br>
+    ...handle error...
+int e;
+while ((e = getpwuid_r(42, &amp;result, buffer, len, &amp;resultp)) == ERANGE)
+<br>
+    {
+<br>
+    size_t newlen = 2 * len;
+<br>
+    if (newlen &lt; len)
+<br>
+        ...handle error...
+<br>
+    len = newlen;
+<br>
+    char *newbuffer = realloc(buffer, len);
+<br>
+    if (newbuffer == NULL)
+<br>
+        ...handle error...
+<br>
+    buffer = newbuffer;
+<br>
+    }
+if (e != 0)
+<br>
+    ...handle error...
+free (buffer);</pre>
+</div>
+<section class="Ss">
+<h2 class="Ss" id="Getting_an_Entry_for_the_Root_User"><a class="permalink" href="#Getting_an_Entry_for_the_Root_User">Getting
+  an Entry for the Root User</a></h2>
+<p class="Pp">The following example gets the user database entry for the user
+    with user ID 0 (root).</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;sys/types.h&gt;
+#include &lt;pwd.h&gt;
+...
+uid_t id = 0;
+struct passwd *pwd;</pre>
+<pre>pwd = getpwuid(id);</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Finding_the_Name_for_the_Effective_User_ID"><a class="permalink" href="#Finding_the_Name_for_the_Effective_User_ID">Finding
+  the Name for the Effective User ID</a></h2>
+<p class="Pp">The following example defines <i>pws</i> as a pointer to a
+    structure of type <b>passwd</b>, which is used to store the structure
+    pointer returned by the call to the <i>getpwuid</i>() function. The
+    <i>geteuid</i>() function shall return the effective user ID of the calling
+    process; this is used as the search criteria for the <i>getpwuid</i>()
+    function. The call to <i>getpwuid</i>() shall return a pointer to the
+    structure containing that user ID value.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;unistd.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;pwd.h&gt;
+...
+struct passwd *pws;
+pws = getpwuid(geteuid());</pre>
+</div>
+</section>
+<section class="Ss">
+<h2 class="Ss" id="Finding_an_Entry_in_the_User_Database"><a class="permalink" href="#Finding_an_Entry_in_the_User_Database">Finding
+  an Entry in the User Database</a></h2>
+<p class="Pp">The following example uses <i>getpwuid</i>() to search the user
+    database for a user ID that was previously stored in a <b>stat</b>
+    structure, then prints out the user name if it is found. If the user is not
+    found, the program prints the numeric value of the user ID for the
+  entry.</p>
+<p class="Pp"></p>
+<div class="Bd-indent">
+<pre>#include &lt;sys/types.h&gt;
+#include &lt;pwd.h&gt;
+#include &lt;stdio.h&gt;
+...
+struct stat statbuf;
+struct passwd *pwd;
+...
+if ((pwd = getpwuid(statbuf.st_uid)) != NULL)
+<br>
+    printf(" %-8.8s", pwd-&gt;pw_name);
+else
+<br>
+    printf(" %-8d", statbuf.st_uid);</pre>
+</div>
+</section>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">Three names associated with the current process can be determined:
+    <i>getpwuid</i>(<i>geteuid</i>()) returns the name associated with the
+    effective user ID of the process; <i>getlogin</i>() returns the name
+    associated with the current login activity; and
+    <i>getpwuid</i>(<i>getuid</i>()) returns the name associated with the real
+    user ID of the process.</p>
+<p class="Pp">The <i>getpwuid_r</i>() function is thread-safe and returns values
+    in a user-supplied buffer instead of possibly using a static data area that
+    may be overwritten by each call.</p>
+<p class="Pp">Portable applications should take into account that it is usual
+    for an implementation to return -1 from <i>sysconf</i>() indicating that
+    there is no maximum for _SC_GETPW_R_SIZE_MAX.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i><i>getpwnam</i>()</i>, <i><i>geteuid</i>()</i>,
+    <i><i>getuid</i>()</i>, <i><i>getlogin</i>()</i>,
+  <i><i>sysconf</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017,
+    <i><b>&lt;pwd.h&gt;</b></i>, <i><b>&lt;sys_types.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>

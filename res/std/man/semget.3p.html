@@ -1,0 +1,193 @@
+<!DOCTYPE html><html><!-- This is an automatically generated file.  Do not edit.
+   et
+ --><head>
+<meta name="dc.identifier" content="res/3eb7b80bf8c5aa758aa73f7f4872f0caf659a6f4">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table.head, table.foot { width: 100%; }
+    td.head-rtitle, td.foot-os { text-align: right; }
+    td.head-vol { text-align: center; }
+    .Nd, .Bf, .Op { display: inline; }
+    .Pa, .Ad { font-style: italic; }
+    .Ms { font-weight: bold; }
+    .Bl-diag > dt { font-weight: bold; }
+    code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd { font-weight: bold;
+      font-family: inherit; }
+  </style>
+  <title>SEMGET(3P)</title>
+<link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+</head>
+<body>
+<div id="book-container">
+<table class="head">
+  <tbody><tr>
+    <td class="head-ltitle">SEMGET(3P)</td>
+    <td class="head-vol">POSIX Programmer's Manual</td>
+    <td class="head-rtitle">SEMGET(3P)</td>
+  </tr>
+</tbody></table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="PROLOG"><a class="permalink" href="#PROLOG">PROLOG</a></h1>
+<p class="Pp">This manual page is part of the POSIX Programmer's Manual. The
+    Linux implementation of this interface may differ (consult the corresponding
+    Linux manual page for details of Linux behavior), or the interface may not
+    be implemented on Linux.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">semget — get set of XSI semaphores</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<pre>#include &lt;sys/sem.h&gt;</pre>
+<pre>int semget(key_t <i>key</i>, int <i>nsems</i>, int <i>semflg</i>);</pre>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp">The <i>semget</i>() function operates on XSI semaphores (see the
+    Base Definitions volume of POSIX.1‐2017, <i>Section 4.17</i>,
+    <i>Semaphore</i>). It is unspecified whether this function interoperates
+    with the realtime interprocess communication facilities defined in
+    <i>Section 2.8</i>, <i>Realtime</i>.</p>
+<p class="Pp">The <i>semget</i>() function shall return the semaphore identifier
+    associated with <i>key</i>.</p>
+<p class="Pp">A semaphore identifier with its associated <b>semid_ds</b> data
+    structure and its associated set of <i>nsems</i> semaphores (see
+    <i>&lt;sys/sem.h&gt;</i>) is created for <i>key</i> if one of the following
+    is true:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>The argument <i>key</i> is equal to IPC_PRIVATE.</dd>
+  <dt> *</dt>
+  <dd>The argument <i>key</i> does not already have a semaphore identifier
+      associated with it and (<i>semflg</i> &amp;IPC_CREAT) is non-zero.</dd>
+</dl>
+<p class="Pp">Upon creation, the <b>semid_ds</b> data structure associated with
+    the new semaphore identifier is initialized as follows:</p>
+<dl class="Bl-tag">
+  <dt> *</dt>
+  <dd>In the operation permissions structure <i>sem_perm.cuid</i>,
+      <i>sem_perm.uid</i>, <i>sem_perm.cgid</i>, and <i>sem_perm.gid</i> shall
+      be set to the effective user ID and effective group ID, respectively, of
+      the calling process.</dd>
+  <dt> *</dt>
+  <dd>The low-order 9 bits of <i>sem_perm.mode</i> shall be set to the low-order
+      9 bits of <i>semflg</i>.</dd>
+  <dt> *</dt>
+  <dd>The variable <i>sem_nsems</i> shall be set to the value of
+    <i>nsems</i>.</dd>
+  <dt> *</dt>
+  <dd>The variable <i>sem_otime</i> shall be set to 0 and <i>sem_ctime</i> shall
+      be set to the current time, as described in <i>Section 2.7.1</i>, <i>IPC
+      General Description</i>.</dd>
+  <dt> *</dt>
+  <dd>The data structure associated with each semaphore in the set need not be
+      initialized. The <i>semctl</i>() function with the command SETVAL or
+      SETALL can be used to initialize each semaphore.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RETURN_VALUE"><a class="permalink" href="#RETURN_VALUE">RETURN
+  VALUE</a></h1>
+<p class="Pp">Upon successful completion, <i>semget</i>() shall return a
+    non-negative integer, namely a semaphore identifier; otherwise, it shall
+    return -1 and set <i>errno</i> to indicate the error.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="ERRORS"><a class="permalink" href="#ERRORS">ERRORS</a></h1>
+<p class="Pp">The <i>semget</i>() function shall fail if:</p>
+<dl class="Bl-tag">
+  <dt id="EACCES"><a class="permalink" href="#EACCES"><b>EACCES</b></a></dt>
+  <dd>A semaphore identifier exists for <i>key</i>, but operation permission as
+      specified by the low-order 9 bits of <i>semflg</i> would not be granted;
+      see <i>Section 2.7</i>, <i>XSI Interprocess Communication</i>.</dd>
+  <dt id="EEXIST"><a class="permalink" href="#EEXIST"><b>EEXIST</b></a></dt>
+  <dd>A semaphore identifier exists for the argument <i>key</i> but
+      ((<i>semflg</i> &amp;IPC_CREAT) &amp;&amp;(<i>semflg</i> &amp;IPC_EXCL))
+      is non-zero.</dd>
+  <dt id="EINVAL"><a class="permalink" href="#EINVAL"><b>EINVAL</b></a></dt>
+  <dd>The value of <i>nsems</i> is either less than or equal to 0 or greater
+      than the system-imposed limit, or a semaphore identifier exists for the
+      argument <i>key</i>, but the number of semaphores in the set associated
+      with it is less than <i>nsems</i> and <i>nsems</i> is not equal to 0.</dd>
+  <dt id="ENOENT"><a class="permalink" href="#ENOENT"><b>ENOENT</b></a></dt>
+  <dd>A semaphore identifier does not exist for the argument <i>key</i> and
+      (<i>semflg</i> &amp;IPC_CREAT) is equal to 0.</dd>
+  <dt id="ENOSPC"><a class="permalink" href="#ENOSPC"><b>ENOSPC</b></a></dt>
+  <dd>A semaphore identifier is to be created but the system-imposed limit on
+      the maximum number of allowed semaphores system-wide would be
+    exceeded.</dd>
+</dl>
+<p class="Pp"><i>The following sections are informative.</i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">Refer to <i><i>semop</i>()</i>.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="APPLICATION_USAGE"><a class="permalink" href="#APPLICATION_USAGE">APPLICATION
+  USAGE</a></h1>
+<p class="Pp">The POSIX Realtime Extension defines alternative interfaces for
+    interprocess communication. Application developers who need to use IPC
+    should design their applications so that modules using the IPC routines
+    described in <i>Section 2.7</i>, <i>XSI Interprocess Communication</i> can
+    be easily modified to use the alternative interfaces.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="RATIONALE"><a class="permalink" href="#RATIONALE">RATIONALE</a></h1>
+<p class="Pp">None.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="FUTURE_DIRECTIONS"><a class="permalink" href="#FUTURE_DIRECTIONS">FUTURE
+  DIRECTIONS</a></h1>
+<p class="Pp">A future version may require that the value of the <i>semval</i>,
+    <i>sempid</i>, <i>semncnt</i>, and <i>semzcnt</i> members of all semaphores
+    in a semaphore set be initialized to zero when a call to <i>semget</i>()
+    creates a semaphore set. Many semaphore implementations already do this and
+    it greatly simplifies what an application must do to initialize a semaphore
+    set.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><i>Section 2.7</i>, <i>XSI Interprocess Communication</i>,
+    <i>Section 2.8</i>, <i>Realtime</i>, <i><i>ftok</i>()</i>,
+    <i><i>semctl</i>()</i>, <i><i>semop</i>()</i>, <i><i>sem_close</i>()</i>,
+    <i><i>sem_destroy</i>()</i>, <i><i>sem_getvalue</i>()</i>,
+    <i><i>sem_init</i>()</i>, <i><i>sem_open</i>()</i>,
+    <i><i>sem_post</i>()</i>, <i><i>sem_trywait</i>()</i>,
+    <i><i>sem_unlink</i>()</i></p>
+<p class="Pp">The Base Definitions volume of POSIX.1‐2017, <i>Section
+    4.17</i>, <i>Semaphore</i>, <i><b>&lt;sys_sem.h&gt;</b></i></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="COPYRIGHT"><a class="permalink" href="#COPYRIGHT">COPYRIGHT</a></h1>
+<p class="Pp">Portions of this text are reprinted and reproduced in electronic
+    form from IEEE Std 1003.1-2017, Standard for Information Technology --
+    Portable Operating System Interface (POSIX), The Open Group Base
+    Specifications Issue 7, 2018 Edition, Copyright (C) 2018 by the Institute of
+    Electrical and Electronics Engineers, Inc and The Open Group. In the event
+    of any discrepancy between this version and the original IEEE and The Open
+    Group Standard, the original IEEE and The Open Group Standard is the referee
+    document. The original Standard can be obtained online at
+    http://www.opengroup.org/unix/online.html .</p>
+<p class="Pp">Any typographical or formatting errors that appear in this page
+    are most likely to have been introduced during the conversion of the source
+    files to man page format. To report such errors, see
+    https://www.kernel.org/doc/man-pages/reporting_bugs.html .</p>
+</section>
+</div>
+<table class="foot">
+  <tbody><tr>
+    <td class="foot-date">2017</td>
+    <td class="foot-os">IEEE/The Open Group</td>
+  </tr>
+</tbody></table>
+</div>
+
+
+<script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+</body></html>
