@@ -32,6 +32,10 @@ export async function startServer() {
         httpAdminRoot:"/red",
         httpNodeRoot: "/red/api",
         userDir: keys.redDirs.base,
+        editorTheme: {
+            projects: { enabled: true, mode: 'manual' },
+            palette: { editable: true },
+        },
     };
 
     RED.init(server, settings);
