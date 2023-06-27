@@ -1,29 +1,25 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import { useState } from 'react';
+import { createRoot } from 'react-dom/client';
 import * as $ from 'jquery';
-import Box from '@mui/material/Box';
 import List from '@mui/material/List';
-import ListSubheader from '@mui/material/ListSubheader';
-import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import Button from '@mui/material/Button';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import Collapse from '@mui/material/Collapse';
 
 import Link from '@mui/material/Link';
 import {Toc} from './book';
-import {addTextSelectHandle} from './context-menu';
 import {Cli} from './cli';
 import {Shortcuts} from './shortcuts';
 import {CommandShortcut} from './command';
 import {StatusBar} from './statusbar';
 import {ColorPicker} from './color-picker';
 import {BrowserDb} from './db';
-import {Ann, Tooltip} from './annotation';
+import {Ann} from './annotation';
 import {addGoogScript} from '../google-analytics';
+import {PDFViewer2} from './pdf';
+
 
 const pagemap = require('pagemap');
 
@@ -49,10 +45,28 @@ const Category = (props: any) => {
 
     const category: {name: string, data: FilePath[]} = props.category;
     const categoeyLabel = `${category.name} (${category.data.length})`;
-    const [open, setOpen] = React.useState(true);
+    const [open, setOpen] = useState(true);
 
     const handleClick = () => {
       setOpen(!open);
+    };
+
+    const handleOpen = (url: string) => {
+        if (url.endsWith('.pdf')) {
+            const parts = url.split('/');
+            const name = parts[parts.length-1];
+            let child = window.open("about:blank","myChild");
+            child.document.write(`<html>
+    <head><title>${name}</title>
+    <link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
+    </head>
+    <body>
+    <div id="pdf-container" pdf="${url}"></div>
+    </body>
+    <script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
+   </html>`);
+            child.document.close();
+        }
     };
 
     return (
@@ -73,7 +87,13 @@ const Category = (props: any) => {
                             return (
                                     <ListItemButton key={url} sx={{ pl: 4 }}>
                                         {/* <ListItemText primary={p.base} /> */}
-                                        <Link href={url} target="_blank" rel="noopener">{p.base} {p.stars>=5?`⭐(${p.note})`:p.note?`📝(${p.note})`:''}</Link>
+                                        <Link
+                                            href={url}
+                                            target="_blank"
+                                            rel="noopener"
+                                            onClick={() => handleOpen(url)}
+                                        >{p.base} {p.stars>=5?`⭐(${p.note})`:p.note?`📝(${p.note})`:''}
+                                        </Link>
                                     </ListItemButton>
                             )
                         })
@@ -141,14 +161,16 @@ const App = (props: any) => {
         //@ts-ignore
         const config: Config = window.res_config;
 
-        ReactDOM.render(<App config={config.data}/>,
-            document.querySelector(`#${config.containerId}`));
+        createRoot(document.querySelector(`#${config.containerId}`))
+            .render(<App config={config.data}/>);
+        // ReactDOM.render(<App config={config.data}/>,
+        //     document.querySelector(`#${config.containerId}`));
     }
 
     // readings
     // all scripts should be creating on-the-fly
     // do not modify html file directly, the only exception is dc.identifier
-    else {
+    else if (window.location.href.endsWith('.html')) {
         // add right-click menu options
         $body
             .prepend('<div id="context-menu-container"></div>')
@@ -183,6 +205,17 @@ const App = (props: any) => {
         shortcuts.listen();
 
         // load google script
+    }
+
+    else if (window.document.title.endsWith('.pdf')) {
+        const $pdf = $('#pdf-container');
+        const url = $pdf.attr('pdf');
+        console.log(url);
+        createRoot($pdf[0])
+            .render(
+                <PDFViewer2
+                    url={url}
+                />);
     }
 
     addGoogScript($body);

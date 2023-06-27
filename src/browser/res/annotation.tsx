@@ -1,12 +1,11 @@
 import * as $ from 'jquery';
 import pDebounce from 'p-debounce';
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import {Fragment, useCallback, useEffect, useState} from 'react';
+import {Fragment, useReducer, useEffect, useState} from 'react';
 import {Db, Note} from '../../common/db';
 import {post} from '../server/request';
 import Mark = require('mark.js');
 import {MarkOptions} from 'mark.js';
+import {createRoot} from 'react-dom/client';
 
 type ViewEvent = {
     name: string,
@@ -89,7 +88,8 @@ export class Tooltip {
             $('body').append(`<div id="${this.containerId}"></div>`);
         }
 
-        ReactDOM.render(<TooltipView tooltip={this}/>, $(`#${this.containerId}`)[0]);
+        createRoot($(`#${this.containerId}`)[0])
+            .render(<TooltipView tooltip={this}/>);
     }
 
     show(x: number, y: number, ann: Note) {
@@ -447,7 +447,7 @@ export const AnnotationView  = (props: any) => {
 export const AnnotationsView = (props: any) => {
 
     const ann: Ann = props.ann;
-    const [force, forceUpdate] = React.useReducer(x => x + 1, 0);
+    const [force, forceUpdate] = useReducer(x => x + 1, 0);
 
     useEffect(() => {
         ann.on((event: ViewEvent) => {
@@ -554,7 +554,7 @@ export class Ann {
         });
 
         this.notes.sort(this.compareNote.bind(this));
-        ReactDOM.render(<AnnotationsView ann={this}/>, this.$container[0]);
+        createRoot(this.$container[0]).render(<AnnotationsView ann={this}/>);
         Promise.all(promises);
     }
 

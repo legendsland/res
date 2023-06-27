@@ -3,10 +3,9 @@
  */
 
 import * as $ from 'jquery';
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import {Fragment, useEffect, useState} from 'react';
+import {Fragment, useEffect, useState, useReducer} from 'react';
 import {color2Str, invertedColor2Str} from './types';
+import {createRoot} from 'react-dom/client';
 
 export const StatusBarView = (props: any) => {
 
@@ -26,7 +25,7 @@ export const StatusBarView = (props: any) => {
         ]
     }
 
-    const [force, forceUpdate] = React.useReducer(x => x + 1, 0);
+    const [force, forceUpdate] = useReducer(x => x + 1, 0);
     const [stat, setStat] = useState(initialState);
 
     const handlePalette = (color_: number[][]) => {
@@ -143,8 +142,7 @@ export class StatusBar {
             $('body').append(`<div id="${this.id}-container">`);
         }
 
-        ReactDOM.render(<StatusBarView sb={this} />,
-            document.getElementById(this.id + '-container'));
+        createRoot(document.getElementById(this.id + '-container')).render(<StatusBarView sb={this} />);
 
         this.$elem_ = $(`${this.id}`);
     }

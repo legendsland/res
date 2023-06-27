@@ -1,6 +1,4 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-
+import {createRoot} from 'react-dom/client';
 
 const App = () => {
     return (
@@ -16,6 +14,6 @@ export class Neo4j {
     }
 
     create() {
-        ReactDOM.render(<App/>, document.querySelector(`#${this.containerId}`));
+        createRoot(document.querySelector(`#${this.containerId}`)).render(<App/>);
     }
 }

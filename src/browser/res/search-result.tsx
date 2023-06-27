@@ -3,14 +3,13 @@
  */
 
 import * as $ from 'jquery';
-import * as React from 'react';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
-import * as ReactDOM from 'react-dom';
-import {useEffect, useState} from 'react';
-import {Box, Collapse, Divider, ListItemText, Paper, Typography} from '@mui/material';
+import {useState} from 'react';
+import {Box, Collapse, ListItemText, Paper} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import {unmountComponentAtNode} from 'react-dom';
+import {createRoot} from 'react-dom/client';
 
 const pagemap = require('pagemap');
 
@@ -113,12 +112,12 @@ export class SearchResultManager {
         const $container = $(`#${CONTAINER_ID}`);
         $container.remove(); // remove first
         $('body').append(`<div id="${CONTAINER_ID}"></div>`);
-        ReactDOM.render(<SearchResultView
+        createRoot($(`#${CONTAINER_ID}`)[0]).render(<SearchResultView
             input={input}
             results={results}
             mgr={this}
             spend={spend}
-        />, $(`#${CONTAINER_ID}`)[0]);
+        />);
     }
 
     close() {

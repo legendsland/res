@@ -1,5 +1,3 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
@@ -15,6 +13,7 @@ import {Button, IconButton, TextField} from '@mui/material';
 import {API} from '@editorjs/editorjs';
 import {RunTune} from './block-tunes/run';
 import {Graph} from './block/graph';
+import {createRoot} from 'react-dom/client';
 const { v4: uuidv4 } = require('uuid');
 
 const EditorJS = require('@editorjs/editorjs');
@@ -272,8 +271,7 @@ export class NotebookView {
             }
         });
 
-        ReactDOM.render(<App app={this}/>,
-            document.getElementById(this.id));
+        createRoot(document.getElementById(this.id)).render(<App app={this}/>);
     }
 //
     fetchNotes() {

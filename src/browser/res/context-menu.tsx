@@ -3,18 +3,17 @@
  */
 
 import * as $ from 'jquery';
-import * as React from 'react';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import * as ReactDOM from 'react-dom';
 import {useEffect, useState} from 'react';
 import {post} from '../server/request';
+import {createRoot} from 'react-dom/client';
 
 
 const ContextMenu = () => {
 
     const [selectedText, setSelectedText] = useState('');
-    const [contextMenu, setContextMenu] = React.useState<{
+    const [contextMenu, setContextMenu] = useState<{
         mouseX: number;
         mouseY: number;
     } | null>(null);
@@ -81,5 +80,5 @@ const ContextMenu = () => {
 
 export function addTextSelectHandle(containerId: string) {
 
-    ReactDOM.render(<ContextMenu/>, document.querySelector(`#${containerId}`));
+    createRoot(document.querySelector(`#${containerId}`)).render(<ContextMenu/>);
 }

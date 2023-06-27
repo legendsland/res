@@ -2,9 +2,8 @@
  * Generate a graph from text (code)
  */
 
-import * as React from "react";
-import * as ReactDOM from 'react-dom';
 import {post} from '../../server/request';
+import {createRoot} from 'react-dom/client';
 
 const App = (props: any) => {
 
@@ -66,7 +65,7 @@ export class RunTune {
     render() {
         const wrapper = document.createElement('div');
 
-        ReactDOM.render(<App tune={this}/>, wrapper);
+        createRoot(wrapper).render(<App tune={this}/>);
         return wrapper;
     }
 }

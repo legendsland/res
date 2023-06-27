@@ -1,9 +1,8 @@
 import * as $ from 'jquery';
-import * as ReactDOM from 'react-dom';
-import * as React from 'react';
 import Select, {SelectChangeEvent} from '@mui/material/Select';
 import {FormControl, InputLabel, MenuItem} from '@mui/material';
 import {useState} from 'react';
+import {createRoot} from 'react-dom/client';
 
 const queryUrls = new Map<string, string>([
     ['douban', 'https://www.douban.com/search?cat=1001'],
@@ -60,7 +59,6 @@ export class QuerySearch {
         });
 
         changeEngineScript('douban');
-        ReactDOM.render(<App/>,
-            document.getElementById(this.elementId));
+        createRoot(document.getElementById(this.elementId)).render(<App/>);
     }
 }

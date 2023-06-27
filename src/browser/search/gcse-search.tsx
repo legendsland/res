@@ -1,9 +1,8 @@
 import * as $ from 'jquery';
-import * as ReactDOM from 'react-dom';
-import * as React from 'react';
 import Select, {SelectChangeEvent} from '@mui/material/Select';
 import {FormControl, InputLabel, MenuItem} from '@mui/material';
 import {useState} from 'react';
+import {createRoot} from 'react-dom/client';
 
 enum SearchEngines {
     google = 'a47d2a20d46db4877',
@@ -52,7 +51,6 @@ export class GcseSearch {
         private readonly elementId: string
     ) {
         changeEngineScript(SearchEngines.google);
-        ReactDOM.render(<App/>,
-            document.getElementById(this.elementId));
+        createRoot(document.getElementById(this.elementId)).render(<App/>);
     }
 }

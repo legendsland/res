@@ -7,11 +7,10 @@
  */
 
 import * as $ from 'jquery';
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
 import {ShortcutHandler} from './shortcuts';
 import {Cli} from './cli';
+import {createRoot} from 'react-dom/client';
 
 const ID = 'res-cmd-input';
 
@@ -134,9 +133,10 @@ export class CommandShortcut implements ShortcutHandler {
 
             $('body').append(`<div id=${ID}></div>`);
 
-            ReactDOM.render(<CommandInput
-                parser={this.parser}
-            ></CommandInput>, $(`#${ID}`)[0]);
+            createRoot($(`#${ID}`)[0])
+                .render(<CommandInput
+                    parser={this.parser}
+                ></CommandInput>);
 
             this.$elem = $(`#${ID}`);
             this.hide();

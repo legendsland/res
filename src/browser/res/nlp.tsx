@@ -1,9 +1,8 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import * as $ from 'jquery';
 import { post } from '../server/request';
+import {createRoot} from 'react-dom/client';
 
 // import Verbs from 'compromise/types';
 // import Document from 'compromise/types';
@@ -83,7 +82,7 @@ export class Nlp {
     }
 
     create() {
-        ReactDOM.render(<App/>, document.querySelector(`#${this.containerId}`));
+        createRoot(document.querySelector(`#${this.containerId}`)).render(<App/>);
     }
 }
 

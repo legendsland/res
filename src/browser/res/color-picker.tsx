@@ -3,9 +3,6 @@
  */
 
 import * as $ from 'jquery';
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import {useEffect, useState} from 'react';
 import {StatusBar} from './statusbar';
 import {color2Str} from './types';
 

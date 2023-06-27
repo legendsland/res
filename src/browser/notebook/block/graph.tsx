@@ -1,8 +1,7 @@
-import * as React from "react";
-import * as ReactDOM from 'react-dom';
 import * as  cytoscape from 'cytoscape';
 import {useEffect} from 'react';
 import '../static/style.css';
+import {createRoot} from 'react-dom/client';
 
 const App = (props: any) => {
 
@@ -83,7 +82,7 @@ export class Graph {
 
     render() {
         const wrapper = document.createElement('div');
-        ReactDOM.render(<App tune={this}/>, wrapper);
+        createRoot(wrapper).render(<App tune={this}/>);
         return wrapper;
     }
 

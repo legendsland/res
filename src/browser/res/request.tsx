@@ -1,6 +1,3 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-
 import {
     Autocomplete,
     Box,
@@ -9,6 +6,8 @@ import {
     FormControl,
 } from '@mui/material';
 import {post} from '../server/request';
+import {createRoot} from 'react-dom/client';
+import {useState, useEffect} from 'react';
 
 interface Req {
     name: string,
@@ -16,8 +15,8 @@ interface Req {
 
 const App = () => {
 
-    const [name, setName] = React.useState('');
-    const [options, setOptions] = React.useState([]);
+    const [name, setName] = useState('');
+    const [options, setOptions] = useState([]);
 
     const onChange = (event:any, value: any) => {
         console.log(value);//s
@@ -37,7 +36,7 @@ const App = () => {
         });
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
 
         post('/res', {
             method: 'reqlist',
@@ -93,6 +92,6 @@ export class Request {
     }
 
     create() {
-        ReactDOM.render(<App/>, document.querySelector(`#${this.containerId}`));
+        createRoot(document.querySelector(`#${this.containerId}`)).render(<App/>);
     }
 }
