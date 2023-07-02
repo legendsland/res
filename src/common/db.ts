@@ -11,8 +11,8 @@ export type Note = {
         path: string,
     }
     pos: {
-       top: number,
-       left: number,
+        top: number,
+        left: number,
     }
     note: string,
     tags: string[]

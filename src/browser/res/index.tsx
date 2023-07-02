@@ -18,7 +18,8 @@ import {ColorPicker} from './color-picker';
 import {BrowserDb} from './db';
 import {Ann} from './annotation';
 import {addGoogScript} from '../google-analytics';
-import {PDFViewer2} from './pdf';
+import {PDFViewer} from './pdf';
+import * as React from 'react';
 
 
 const pagemap = require('pagemap');
@@ -51,21 +52,11 @@ const Category = (props: any) => {
       setOpen(!open);
     };
 
-    const handleOpen = (url: string) => {
+    const handleOpen = (e: any, url: string) => {
         if (url.endsWith('.pdf')) {
-            const parts = url.split('/');
-            const name = parts[parts.length-1];
-            let child = window.open("about:blank","myChild");
-            child.document.write(`<html>
-    <head><title>${name}</title>
-    <link id="res-style" rel="stylesheet" href="/res/dist/res/style.css" type="text/css">
-    </head>
-    <body>
-    <div id="pdf-container" pdf="${url}"></div>
-    </body>
-    <script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
-   </html>`);
-            child.document.close();
+            window.open(`/res/pdf.html?pdf=${url}`,"_blank");
+            e.preventDefault();
+            e.stopPropagation();
         }
     };
 
@@ -91,7 +82,7 @@ const Category = (props: any) => {
                                             href={url}
                                             target="_blank"
                                             rel="noopener"
-                                            onClick={() => handleOpen(url)}
+                                            onClick={(e) => handleOpen(e, url)}
                                         >{p.base} {p.stars>=5?`⭐(${p.note})`:p.note?`📝(${p.note})`:''}
                                         </Link>
                                     </ListItemButton>
@@ -155,67 +146,78 @@ const App = (props: any) => {
 
     const $body = $('body');
 
-    // table of content, res/ index page
-    //@ts-ignore
-    if (window.res_config !== undefined) {
-        //@ts-ignore
-        const config: Config = window.res_config;
-
-        createRoot(document.querySelector(`#${config.containerId}`))
-            .render(<App config={config.data}/>);
-        // ReactDOM.render(<App config={config.data}/>,
-        //     document.querySelector(`#${config.containerId}`));
-    }
-
-    // readings
-    // all scripts should be creating on-the-fly
-    // do not modify html file directly, the only exception is dc.identifier
-    else if (window.location.href.endsWith('.html')) {
-        // add right-click menu options
-        $body
-            .prepend('<div id="context-menu-container"></div>')
-            .prepend('<canvas id="res-pagemap"></canvas>')
-        ;
-        // addTextSelectHandle('context-menu-container');
-
-        // update minimap
-        pagemap($('#res-pagemap')[0], {
-            styles: {
-                '.book-search-matched': 'rgba(255,0,0,1)',
-            },
-        });
-
-        // add toc
-        const toc = new Toc();
-        try {
-            toc.generate();
-        } catch (e) {
-            // stack overflow
-        }
-
-        // add status bar
-        const sb = new StatusBar('res-statusbar');
-        const cp = new ColorPicker('book-container', sb);
-
-        const ann = new Ann(db);
-
-        //register keypress listener
-        const shortcuts = new Shortcuts();
-        shortcuts.add(new CommandShortcut(cli));
-        shortcuts.listen();
-
-        // load google script
-    }
-
-    else if (window.document.title.endsWith('.pdf')) {
+    if (window.location.href.endsWith('.pdf')) {
         const $pdf = $('#pdf-container');
-        const url = $pdf.attr('pdf');
+        const idx = window.location.href.indexOf('pdf=');
+        const url = window.location.href.substring(idx+4);
         console.log(url);
+
+        //check title
+        const parts = window.location.href.split('/');
+        const name = parts[parts.length-1];
+        window.document.title = decodeURI(name);
+
+        setTimeout(() => {
+            new Ann('pdf-container', db);
+        }, 3000);
+
         createRoot($pdf[0])
             .render(
-                <PDFViewer2
+                <PDFViewer
                     url={url}
                 />);
+    }
+
+    else {
+        // table of content, res/ index page
+        //@ts-ignore
+        if (window.res_config !== undefined) {
+            //@ts-ignore
+            const config: Config = window.res_config;
+
+            createRoot(document.querySelector(`#${config.containerId}`))
+                .render(<App config={config.data}/>);
+        }
+
+            // readings
+            // all scripts should be creating on-the-fly
+        // do not modify html file directly, the only exception is dc.identifier
+        else if (window.location.href.endsWith('.html')) {
+            // add right-click menu options
+            $body
+                .prepend('<div id="context-menu-container"></div>')
+                .prepend('<canvas id="res-pagemap"></canvas>')
+            ;
+            // addTextSelectHandle('context-menu-container');
+
+            // update minimap
+            pagemap($('#res-pagemap')[0], {
+                styles: {
+                    '.book-search-matched': 'rgba(255,0,0,1)',
+                },
+            });
+
+            // add toc
+            const toc = new Toc();
+            try {
+                toc.generate();
+            } catch (e) {
+                // stack overflow
+            }
+
+            // add status bar
+            const sb = new StatusBar('res-statusbar');
+            const cp = new ColorPicker('book-container', sb);
+
+            const ann = new Ann('book-container', db);
+
+            //register keypress listener
+            const shortcuts = new Shortcuts();
+            shortcuts.add(new CommandShortcut(cli));
+            shortcuts.listen();
+
+            // load google script
+        }
     }
 
     addGoogScript($body);

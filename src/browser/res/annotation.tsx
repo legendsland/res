@@ -122,7 +122,6 @@ export const AnnotationView  = (props: any) => {
     const note: Note = props.note;
     const id: string = note.id;
     const islocal: boolean = props.islocal;
-    const url = new URL(window.location.href);
 
     const annotatedElem = $(note.selector.path)[0];
     if (annotatedElem === undefined) {
@@ -184,7 +183,7 @@ export const AnnotationView  = (props: any) => {
                         || newNote?.pos?.left !== minLeft) {
                         console.log('update ' + id + ': ' + newNote.pos.top + ' ' + newNote.pos.left + ' **');
                         newNote.pos = {top: minTop, left: minLeft};
-                        ann.updateAnn(url, newNote).then(() => {
+                        ann.updateAnn(newNote).then(() => {
                             Object.assign(note, newNote);
                         })
                     }
@@ -207,7 +206,7 @@ export const AnnotationView  = (props: any) => {
 
     const handleFinishEdit = () => {
         note.note = content;
-        ann.updateAnn(url, note);
+        ann.updateAnn(note);
         $(`#res-ann-${id} .res-ann-note-editor`).hide();
         $(`#res-ann-${id} .res-ann-note-container`).show();
     }
@@ -223,7 +222,7 @@ export const AnnotationView  = (props: any) => {
 
     const handleNewTagBlur = (e: any) => {
         if (newTag !== '') {
-            ann.addTag(url, note.id, newTag);
+            ann.addTag(note.id, newTag);
         }
     }
 
@@ -243,7 +242,7 @@ export const AnnotationView  = (props: any) => {
     }
 
     const handleDel = (e: any) => {
-        ann.delAnnotation(url, note.id)
+        ann.delAnnotation(note.id)
             .then(/* no need due to this bad interface, it will remove all () => unmark()*/);
     }
 
@@ -265,7 +264,7 @@ export const AnnotationView  = (props: any) => {
     }
 
     const handleDelTag = (idx: number) => {
-        ann.delTag(url, note.id, idx)
+        ann.delTag(note.id, idx)
     }
 
     useEffect(() => {
@@ -331,8 +330,12 @@ export const AnnotationView  = (props: any) => {
             >
                 {/* rendering node */}
                 {
-                    content?.split('\n').map(para => {return (
-                        <p>{para}</p>
+                    content?.split('\n').map((para, index) => {return (
+                        <p
+                            key={`res-ann-${id}-${index}`}
+                        >
+                            {para}
+                        </p>
                     )})
                 }
             </div>
@@ -492,6 +495,7 @@ export const AnnotationsView = (props: any) => {
                 // ann?.notes
                     .map((note) => { return (
                         <AnnotationView
+                            key={note.id}
                             ann={ann}
                             note={note}
                             islocal={ann.isLocal}
@@ -512,16 +516,17 @@ export class Ann {
 
     marks: Map<string, Mark> = new Map<string, Mark>();
     constructor(
+        private readonly containerId: string,
         private db_: Db
     ) {
         const url = new URL(window.location.href);
-        this.path = url.pathname;
+        this.path = url.pathname + url.search;
         this.isLocal = url.hostname === 'localhost';
         this.notes = [];
 
         const $ann = $('#res-ann-container');
         if ($ann.length === 0) {
-            $('body').append('<div id="res-ann-container"></div>');
+            $('body').append(`<div id="res-ann-container" class="res-ann-container-${this.containerId}"></div>`);
         }
 
         this.tooltip = new Tooltip(this, 'res-ann-tooltip-container');
@@ -547,7 +552,7 @@ export class Ann {
 
             if (needsUpdate) {
                 promises.push(
-                    this.updateAnn(url, newNote)
+                    this.updateAnn(newNote)
                         .catch(() => console.log('failed update notes'))
                 )
             }
@@ -588,12 +593,12 @@ export class Ann {
     }
 
     private textSelect() {
-        $('#book-container')
+        $(`#${this.containerId}`)
             .on('mouseup', (e) => {
-                    // console.log('mouseup');
+                    console.log('mouseup');
                     const selection = document.getSelection();
                     const text = selection.toString();
-                    // console.log(text);
+                    console.log(text);
                     if (text === '') {
                         this.hideTooltip();
                     } else {
@@ -666,8 +671,8 @@ export class Ann {
         let path = '';
         while (elem !== null)
         {
-            if (elem.id === 'book-container') {
-                path = '#book-container' + path;
+            if (elem.id === this.containerId) {
+                path = `#${this.containerId} ${path}`;
                 break;
             }
 
@@ -679,7 +684,7 @@ export class Ann {
         }
         console.log(`get path: ${path}`);
 
-        if (path.startsWith('#book-container')) {
+        if (path.startsWith(`#${this.containerId}`)) {
             return path;
         } else {
             return undefined;
@@ -696,8 +701,8 @@ export class Ann {
         });
     }
 
-    async delAnnotation(url: URL, id: string): Promise<any> {
-        return this.request('resAnnDel', url.pathname, id)
+    async delAnnotation(id: string): Promise<any> {
+        return this.request('resAnnDel', this.path, id)
             .then(() => {
                 const idx = this.notes.findIndex(n => n.id === id);
                 if (idx !== -1) {
@@ -709,8 +714,8 @@ export class Ann {
             });
     }
 
-    async delTag(url: URL, id: string, idx: number): Promise<any> {
-        return this.request('resAnnDelTag', url.pathname, id, idx)
+    async delTag(id: string, idx: number): Promise<any> {
+        return this.request('resAnnDelTag', this.path, id, idx)
             .then(() => {
                 const nodeIdx = this.notes.findIndex(n => n.id === id);
                 if (nodeIdx !== -1) {
@@ -722,8 +727,8 @@ export class Ann {
             });
     }
 
-    async addTag(url: URL, id: string, tag: string): Promise<any> {
-        return this.request('resAnnAddTag', url.pathname, id, tag)
+    async addTag(id: string, tag: string): Promise<any> {
+        return this.request('resAnnAddTag', this.path, id, tag)
             .then(() => {
                 const idx = this.notes.findIndex(n => n.id === id);
                 if (idx !== -1) {
@@ -735,8 +740,8 @@ export class Ann {
             });
     }
 
-    async updateAnn(url: URL, n: Note): Promise<any> {
-        return this.request('resAnnUpdate', url.pathname, JSON.stringify(n))
+    async updateAnn(n: Note): Promise<any> {
+        return this.request('resAnnUpdate', this.path, JSON.stringify(n))
             .then(() => {
                 this.callbacks.forEach((callback) => callback({
                     name: 'invalidation'

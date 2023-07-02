@@ -28,7 +28,7 @@ export const PDFViewer = ({
                 canvas.height = viewport.height;
 
                 // Append the canvas to the PDF container element
-                const pdfContainer = document.getElementById('pdf-container');
+                const pdfContainer = document.getElementById('book-container');
                 pdfContainer.appendChild(canvas);
 
                 // Render the page on the canvas
