@@ -6,12 +6,14 @@ export class NodeDb extends Db {
 
     override async load() {
 
+        console.log(`load db ${this.dbPath}`);
         //@ts-ignore
         await import(this.dbPath, {
             assert: {
                 type: 'json'
             }
         }).then(d => this.db_ = d);
+        console.log(`load done`);
 
         const ann = this.db_.annotation;
         ann.records.forEach(record => {

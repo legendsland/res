@@ -5,9 +5,11 @@ import * as path from 'path';
 
 import {Record} from '../../common/db';
 import {NodeDb} from '../server/res';
+import {ROOT} from '../common/util';
 
-const root = path.join(__dirname, '../../../../');
-const dbPath = path.join(root, 'src/common/db.json');
+// const root = path.join(__dirname, '../../../../');
+// console.log('__dirname:', __dirname, 'root:', root);
+const dbPath = path.join(ROOT, 'src/common/db.json');
 
 module.exports = (async () => {
 

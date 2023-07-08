@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as util from 'util';
 import * as cheerio from "cheerio";
-export const RED = require("node-red");
+// export const RED = require("node-red");
 import * as http from 'http';
 import {removeStopwords} from 'stopword';
 import {Neo4jClient, testConnection} from './neo4j/client';
@@ -12,7 +12,6 @@ import {words} from './nlp';
 import {ProgramRunner} from './program';
 import {NodeDb} from './res';
 import {Note} from '../../common/db';
-import {keys} from '../../../.keys';
 
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -28,20 +27,6 @@ export async function startServer() {
     const root = path.join(__dirname, '../../../../../');
     const port = 34701;
 
-    const settings = {
-        httpAdminRoot:"/red",
-        httpNodeRoot: "/red/api",
-        userDir: keys.redDirs.base,
-        editorTheme: {
-            projects: { enabled: true, mode: 'manual' },
-            palette: { editable: true },
-        },
-    };
-
-    RED.init(server, settings);
-    app.use(settings.httpAdminRoot,RED.httpAdmin);
-    app.use(settings.httpNodeRoot,RED.httpNode);
-
     app.use(cors());
     app.use(express.static(root));
     app.use(bodyParser.json());
@@ -50,13 +35,14 @@ export async function startServer() {
     }));
 
     let neo4jRunning = false;
-    const neo4jClient = new Neo4jClient();
-    const programRunner = new ProgramRunner();
+    // const neo4jClient = new Neo4jClient();
+    //
+    // connection neo4j
+    // await neo4jClient.check();
+
+    // const programRunner = new ProgramRunner();
     const db = new NodeDb(`${root}/res/src/common/db.json`);
     await db.load();
-
-    // connection neo4j
-    await neo4jClient.check();
 
     app.get('/res', (req, res) => {
         res.sendFile('index.html', {root: `${root}`});
@@ -108,46 +94,46 @@ export async function startServer() {
             }
         },
 
-        nlpNgrams: {
-            fn: async () => {
-                const text = await cleanText(path.join(root, '/res/res/thinking/A Rulebook for Arguments.18.html'));
-                const ngrams = nlp(text).ngrams({
-                    size: 1
-                });
-
-                return ngrams;
-            }
-        },
-
-        nlpSentence: {
-            fn: async (sent: string) => {
-                return neo4jClient.addSent(words(sent));
-            }
-        },
-
-        notes: {
-            fn: async () => {
-                return neo4jClient.getNodeByLabel('EditorJSNote');
-            }
-        },
-
-        saveNote: {
-            fn: async (note: any) => {
-                return neo4jClient.saveNode(note);
-            }
-        },
-
-        deleteNote: {
-            fn: async (id: string) => {
-                return neo4jClient.deleteNode(id);
-            }
-        },
-
-        runGraph: {
-            fn: async (program: string) => {
-                return programRunner.run(program);
-            }
-        },
+        // nlpNgrams: {
+        //     fn: async () => {
+        //         const text = await cleanText(path.join(root, '/res/res/thinking/A Rulebook for Arguments.18.html'));
+        //         const ngrams = nlp(text).ngrams({
+        //             size: 1
+        //         });
+        //
+        //         return ngrams;
+        //     }
+        // },
+        //
+        // nlpSentence: {
+        //     fn: async (sent: string) => {
+        //         return neo4jClient.addSent(words(sent));
+        //     }
+        // },
+        //
+        // notes: {
+        //     fn: async () => {
+        //         return neo4jClient.getNodeByLabel('EditorJSNote');
+        //     }
+        // },
+        //
+        // saveNote: {
+        //     fn: async (note: any) => {
+        //         return neo4jClient.saveNode(note);
+        //     }
+        // },
+        //
+        // deleteNote: {
+        //     fn: async (id: string) => {
+        //         return neo4jClient.deleteNode(id);
+        //     }
+        // },
+        //
+        // runGraph: {
+        //     fn: async (program: string) => {
+        //         return programRunner.run(program);
+        //     }
+        // },
 
         resAnnUpdate: {
             fn: async (url: string, note: string) => {
@@ -220,10 +206,8 @@ export async function startServer() {
         }
     });
 
-    RED.start().then(() => {
-        server.listen(port, () => {
-            console.log(`Example app listening on port ${port}`)
-        });
+    app.listen(port, () => {
+        console.log(`Example app listening on port ${port}`)
     });
 }
 
