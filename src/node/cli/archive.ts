@@ -119,7 +119,7 @@ export class Archive {
                 this.generateIndex(fullpath, urls);
             } else if (fullpath.endsWith('.html') && !fullpath.endsWith('index.html')) {
                 const rel = fullpath.substring(WS_ROOT.length);
-                urls.set(rel, fullpath.substring(this.root.length)); //TODO:
+                urls.set(rel, fullpath.substring(this.root.length)); //TODO:  leading '/'
             }
         });
     }

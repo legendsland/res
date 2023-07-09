@@ -84,7 +84,7 @@ export class Toc {
         const $prebuilt = $('#res-toc-prebuilt');
 
         if ($prebuilt.length === 0) {
-
+            console.log('no prebuilt');
             const toc: TocContent = {
                 entries: []
             };
@@ -173,8 +173,10 @@ export class Toc {
         }
 
         else {
+            console.log('has prebuilt');
             const sel = $prebuilt.attr('sel');
             if (sel !== undefined && sel !== '') {
+                console.log('sel', sel);
                 const wrap = $prebuilt.attr('wrap');
                 if (wrap !== undefined) {
                     tocHtml = `<${wrap}>${$(sel).html()}</${wrap}>`;

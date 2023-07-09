@@ -145,8 +145,10 @@ const App = (props: any) => {
     const cli = new Cli();
 
     const $body = $('body');
+    const url = new URL(window.location.href);
+    const pathname = url.pathname;
 
-    if (window.location.href.endsWith('.pdf')) {
+    if (pathname.endsWith('.pdf')) {
         const $pdf = $('#pdf-container');
         const idx = window.location.href.indexOf('pdf=');
         const url = window.location.href.substring(idx+4);
@@ -182,7 +184,7 @@ const App = (props: any) => {
             // readings
             // all scripts should be creating on-the-fly
         // do not modify html file directly, the only exception is dc.identifier
-        else if (window.location.href.endsWith('.html')) {
+        else if (pathname.endsWith('.html')) {
             // add right-click menu options
             $body
                 .prepend('<div id="context-menu-container"></div>')
@@ -217,6 +219,8 @@ const App = (props: any) => {
             shortcuts.listen();
 
             // load google script
+        } else {
+            console.log(`cannot handle ${url.toString()}`);
         }
     }
 
