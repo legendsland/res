@@ -148,7 +148,7 @@ const App = (props: any) => {
     const url = new URL(window.location.href);
     const pathname = url.pathname;
 
-    if (pathname.endsWith('.pdf')) {
+    if (url.search.startsWith('?pdf=')) {
         const $pdf = $('#pdf-container');
         const idx = window.location.href.indexOf('pdf=');
         const url = window.location.href.substring(idx+4);
