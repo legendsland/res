@@ -18,7 +18,7 @@ import {ColorPicker} from './color-picker';
 import {BrowserDb} from './db';
 import {Ann} from './annotation';
 import {addGoogScript} from '../google-analytics';
-import {PDFViewer} from './pdf';
+import {PDFView} from './pdf';
 import * as React from 'react';
 
 
@@ -134,6 +134,10 @@ const App = (props: any) => {
     );
 }
 
+const onload = (db: BrowserDb) => {
+    new Ann('pdf-container', db);
+}
+
 (async () => {
 
     // append css
@@ -148,6 +152,10 @@ const App = (props: any) => {
     const url = new URL(window.location.href);
     const pathname = url.pathname;
 
+    window.addEventListener('scroll', () => {
+        console.log(document.documentElement.scrollTop, document.body.scrollTop)
+    });
+
     if (url.search.startsWith('?pdf=')) {
         const $pdf = $('#pdf-container');
         const idx = window.location.href.indexOf('pdf=');
@@ -159,14 +167,11 @@ const App = (props: any) => {
         const name = parts[parts.length-1];
         window.document.title = decodeURI(name);
 
-        setTimeout(() => {
-            new Ann('pdf-container', db);
-        }, 3000);
-
         createRoot($pdf[0])
             .render(
-                <PDFViewer
+                <PDFView
                     url={url}
+                    onload={() => onload(db)}
                 />);
     }
 

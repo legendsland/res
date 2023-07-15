@@ -1,7 +1,16 @@
 
 import {useState} from 'react';
 // Core viewer
-import { Worker, Viewer, Button, Position, Tooltip, PrimaryButton  } from '@react-pdf-viewer/core';
+import {
+    Worker,
+    Viewer,
+    Button,
+    Position,
+    Tooltip,
+    PrimaryButton,
+    DocumentLoadEvent,
+    PageChangeEvent
+} from '@react-pdf-viewer/core';
 
 // Plugins
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
@@ -14,7 +23,8 @@ import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 const workerSrc = require('pdfjs-dist/build/pdf.worker.entry');
 
 export type PDFViewerProperties = {
-    url: string
+    url: string,
+    onload: () => void
 }
 
 const renderHighlightTarget = (props: RenderHighlightTargetProps) => (
@@ -116,8 +126,9 @@ const renderHighlights = (props: RenderHighlightsProps) => (
     </div>
 );
 
-export const PDFViewer = ({
-    url
+export const PDFView = ({
+    url,
+    onload
 }: PDFViewerProperties) => {
 
 // Create new plugin instance
@@ -129,14 +140,20 @@ export const PDFViewer = ({
         trigger: Trigger.None,
     });
 
-    const onDocumentLoad = () => {
+    const onDocumentLoad = (ev: DocumentLoadEvent) => {
+        console.log(`onDocumentLoad ${ev.doc.numPages}, ${ev.file.name}`);
+        onload();
+    }
 
+    const onPageChange = (ev: PageChangeEvent) => {
+        console.log(`onPageChange ${ev.currentPage}`);
     }
 
     return <Worker workerUrl={workerSrc}>
         <Viewer
             fileUrl={url}
             onDocumentLoad={onDocumentLoad}
+            onPageChange={onPageChange}
             plugins={[
                 // Register plugins
                 defaultLayoutPluginInstance,
@@ -146,3 +163,10 @@ export const PDFViewer = ({
     </Worker>
 }
 
+export class PDFViewer {
+
+
+    render() {
+
+    }
+}
