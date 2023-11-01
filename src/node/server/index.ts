@@ -1,26 +1,28 @@
+/********************************************************************************
+ * Copyright (C) 2023 Zhangyi
+ ********************************************************************************/
 
-import * as express from "express";
+import express from 'express';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as util from 'util';
-import * as cheerio from "cheerio";
+import * as cheerio from 'cheerio';
 // export const RED = require("node-red");
 import * as http from 'http';
-import {removeStopwords} from 'stopword';
-import {Neo4jClient, testConnection} from './neo4j/client';
-import {words} from './nlp';
-import {ProgramRunner} from './program';
-import {NodeDb} from './res';
-import {Note} from '../../common/db';
+import { removeStopwords } from 'stopword';
+import { Neo4jClient, testConnection } from './neo4j/client';
+import { words } from './nlp';
+import { ProgramRunner } from './program';
+import { NodeDb } from './res';
+import { Note } from '../../common/db';
 
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
 const nlp = require('compromise');
-nlp.extend(require('compromise-ngrams')) //done!
+nlp.extend(require('compromise-ngrams')); // done!
 
 export async function startServer() {
-
     const app = express();
     const server = http.createServer(app);
 
@@ -31,10 +33,10 @@ export async function startServer() {
     app.use(express.static(root));
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({
-        extended: false
+        extended: false,
     }));
 
-    let neo4jRunning = false;
+    const neo4jRunning = false;
     // const neo4jClient = new Neo4jClient();
     //
     // connection neo4j
@@ -45,45 +47,41 @@ export async function startServer() {
     await db.load();
 
     app.get('/res', (req, res) => {
-        res.sendFile('index.html', {root: `${root}`});
+        res.sendFile('index.html', { root: `${root}` });
     });
 
     app.get('/notebook', (req, res) => {
-        res.sendFile('/res/dist/notebook/index.html', {root: `${root}`});//
+        res.sendFile('/res/dist/notebook/index.html', { root: `${root}` });//
     });
 
     // google programmablesearchengine
     app.get('/search', (req, res) => {
-        res.sendFile('/res/dist/search/index.html', {root: `${root}`});//
+        res.sendFile('/res/dist/search/index.html', { root: `${root}` });//
     });
 
     app.get('/search/gcse-a47d2a20d46db4877.html', (req, res) => {
-        res.sendFile('/res/dist/search/gcse-a47d2a20d46db4877.html', {root: `${root}`});//
+        res.sendFile('/res/dist/search/gcse-a47d2a20d46db4877.html', { root: `${root}` });//
     });
 
     app.get('/search/gcse-97c555b677d12465f.html', (req, res) => {
-        res.sendFile('/res/dist/search/gcse-97c555b677d12465f.html', {root: `${root}`});//
+        res.sendFile('/res/dist/search/gcse-97c555b677d12465f.html', { root: `${root}` });//
     });
 
     app.get('/search/gcse-a4690bf98adbc4c10.html', (req, res) => {
-        res.sendFile('/res/dist/search/gcse-a4690bf98adbc4c10.html', {root: `${root}`});//
+        res.sendFile('/res/dist/search/gcse-a4690bf98adbc4c10.html', { root: `${root}` });//
     });
 
     const routes = {
         reqlist: {
-            fn: () => {
-                return Object.getOwnPropertyNames(routes)
-                    .filter(prop => prop !== 'reqlist')
-                    .map(prop => {
-                        return {name: prop};
-                    });
-            }
+            fn: () => Object.getOwnPropertyNames(routes)
+                .filter((prop) => prop !== 'reqlist')
+                .map((prop) => ({ name: prop })),
         },
 
         neo4jHello: {
             fn: async () => {
-                const result =  await testConnection();
-                return result !== undefined? 'connected' : 'cannot connect';
+                const result = await testConnection();
+                return result !== undefined ? 'connected' : 'cannot connect';
             },
         },
 
@@ -91,7 +89,7 @@ export async function startServer() {
             fn: async () => {
                 const text = await cleanText(path.join(root, '/res/res/thinking/A Rulebook for Arguments.18.html'));
                 return getVerbs(text);
-            }
+            },
         },
 
         // nlpNgrams: {
@@ -140,7 +138,7 @@ export async function startServer() {
                 db.updateAnn(url, JSON.parse(note));
                 db.save();
                 return Promise.resolve();
-            }
+            },
         },
 
         resAnnAdd: {
@@ -148,7 +146,7 @@ export async function startServer() {
                 db.addAnnotation(url, note);
                 db.save();
                 return Promise.resolve();
-            }
+            },
         },
 
         resAnnAddTag: {
@@ -156,7 +154,7 @@ export async function startServer() {
                 db.updateAnnotationTag(url, id, tag);
                 db.save();
                 return Promise.resolve();
-            }
+            },
         },
 
         resAnnDelTag: {
@@ -164,7 +162,7 @@ export async function startServer() {
                 db.delAnnotationTag(url, id, idx);
                 db.save();
                 return Promise.resolve();
-            }
+            },
         },
 
         resAnnDel: {
@@ -172,27 +170,26 @@ export async function startServer() {
                 db.delAnnotation(url, id);
                 db.save();
                 return Promise.resolve();
-            }
+            },
         },
 
         resAnnSave: {
             fn: async () => {
                 db.save();
                 return Promise.resolve();
-            }
-        }
-    }
+            },
+        },
+    };
 
-    app.post('/res', async(req, res, next) => {
-        const body = req.body;
-        const method = body.method;
+    app.post('/res', async (req, res, next) => {
+        const { body } = req;
+        const { method } = body;
 
-        //@ts-ignore
+        // @ts-ignore
         const target = routes[method];
         console.log(`request: ${method}, params: ${JSON.stringify(body.params)}`);
 
         if (target !== undefined) {
-
             if (!neo4jRunning && method.startsWith('neo4j')) {
                 res.send('neo4j is not running');
                 return;
@@ -200,25 +197,22 @@ export async function startServer() {
 
             const result = await target.fn(...body.params);
             res.send(result);
-
         } else {
             next('error');
         }
     });
 
     app.listen(port, () => {
-        console.log(`Example app listening on port ${port}`)
+        console.log(`Example app listening on port ${port}`);
     });
 }
 
 async function cleanText(path: string): Promise<string> {
-
     const readFile = util.promisify(fs.readFile);
 
     return new Promise((resolve, reject) => {
         readFile(path).then((data) => {
             const $ = cheerio.load(data.toString());
-
 
             const text: string = $('#OEBPS\\/prf\\.xhtml').text() as string;
 
@@ -226,19 +220,17 @@ async function cleanText(path: string): Promise<string> {
 
             const result = removeStopwords(text.replace(/\n/g, ' ').split(' ')).join(' ');
             // const result = removeStopwords(text.replace(/\n/g, ' ').split(' '))
-                // .map((word) => PorterStemmer.stem(word))
-                // .reduce((prev, curr) => `${prev} ${curr}`);
+            // .map((word) => PorterStemmer.stem(word))
+            // .reduce((prev, curr) => `${prev} ${curr}`);
 
             // do the clean
 
             console.log(result);
             resolve(result);
-
         }).catch((error) => {
             reject();
-        })
+        });
     });
-
 }
 
 function getVerbs(text: string) {

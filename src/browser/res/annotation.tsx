@@ -1,11 +1,17 @@
+/********************************************************************************
+ * Copyright (C) 2023 Zhangyi
+ ********************************************************************************/
+
 import * as $ from 'jquery';
 import pDebounce from 'p-debounce';
-import {Fragment, useReducer, useEffect, useState} from 'react';
-import {Db, Note} from '../../common/db';
-import {post} from '../server/request';
+import React, {
+    Fragment, useReducer, useEffect, useState,
+} from 'react';
+import { MarkOptions } from 'mark.js';
 import Mark = require('mark.js');
-import {MarkOptions} from 'mark.js';
-import {createRoot} from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
+import { post } from '../server/request';
+import { Db, Note } from '../../common/db';
 
 type ViewEvent = {
     name: string,
@@ -13,13 +19,12 @@ type ViewEvent = {
 }
 
 const TooltipView = (props: any) => {
-    const tooltip: Tooltip = props.tooltip;
+    const { tooltip } = props;
 
-    const [pos, setPos] = useState({x:0, y:0});
+    const [pos, setPos] = useState({ x: 0, y: 0 });
     const [display, setDisplay] = useState('none');
 
     useEffect(() => {
-
         tooltip.on((event: any) => {
             if (event.name === 'show') {
                 handleShow(event.data.x, event.data.y);
@@ -33,55 +38,64 @@ const TooltipView = (props: any) => {
     const handleShow = (x: number, y: number) => {
         const x_ = x + document.documentElement.scrollLeft;
         const y_ = y + document.documentElement.scrollTop;
-        setPos({x: x_, y: y_});
+        console.log('select pos', x, document.documentElement.scrollLeft, y, document.documentElement.scrollTop);
+        setPos({ x: x_, y: y_ });
         setDisplay('block');
-    }
+    };
 
     const handleHide = () => {
         setDisplay('none');
-    }
+    };
 
     const handleClick = (e: any) => {
         tooltip.newAnnotation();
         handleHide();
     };
 
-    return <div
-        className='res-ann-tooltip'
-        style={{
-            position: 'absolute',
-            top: 0,
-            left: pos.x,
-        }}
-    >
+    useEffect(() => {
+        console.log('render TooltipView', pos);
+    });
+
+    return (
         <div
+            className="res-ann-tooltip"
             style={{
-                position: 'relative',
-                display: display,
-                backgroundColor: 'white',
-                top: pos.y,
-                zIndex: 999,
-                marginTop: 0,
-                paddingTop: 0,
-            }}>
-            <ul>
-                <li
-                    onClick={handleClick}
-                >
-                    <i className="fa fa-solid fa-plus"/>
-                </li>
-            </ul>
+                position: 'absolute',
+                top: 0,
+                left: pos.x,
+            }}
+        >
+            <div
+                style={{
+                    position: 'relative',
+                    display,
+                    backgroundColor: 'white',
+                    top: pos.y,
+                    zIndex: 999,
+                    marginTop: 0,
+                    paddingTop: 0,
+                }}
+            >
+                <ul>
+                    <li
+                        onClick={handleClick}
+                    >
+                        <i className="fa fa-solid fa-plus" />
+                    </li>
+                </ul>
+            </div>
         </div>
-    </div>
-}
+    );
+};
 
 export class Tooltip {
     private callback: (event: any) => void;
+
     public newAnn_: Note;
 
     constructor(
         readonly ann: Ann,
-        readonly containerId: string
+        readonly containerId: string,
     ) {
         const elem = $(`#${this.containerId}`);
         if (elem.length === 0) {
@@ -89,14 +103,14 @@ export class Tooltip {
         }
 
         createRoot($(`#${this.containerId}`)[0])
-            .render(<TooltipView tooltip={this}/>);
+            .render(<TooltipView tooltip={this} />);
     }
 
     show(x: number, y: number, ann: Note) {
         this.newAnn_ = ann;
         this.callback?.({
             name: 'show',
-            data: {x: x, y: y},
+            data: { x, y },
         });
     }
 
@@ -116,21 +130,30 @@ export class Tooltip {
     }
 }
 
-export const AnnotationView  = (props: any) => {
+type AnnotationViewProps = {
+    ann: Ann,
+    note: Note,
+    islocal: boolean
+}
 
-    const ann: Ann = props.ann;
-    const note: Note = props.note;
-    const id: string = note.id;
-    const islocal: boolean = props.islocal;
+export const AnnotationView = ({
+    ann,
+    note,
+    islocal,
+}: AnnotationViewProps) => {
+    const { id } = note;
+    const [content, setContent] = useState(note.note);
+    const [newTag, setNewTag] = useState('');
+    const [del, setDel] = useState('hidden');
 
     const annotatedElem = $(note.selector.path)[0];
     if (annotatedElem === undefined) {
         console.log(`invalid selector ${note.selector.path}`);
-        return <></>
+        return <></>;
     }
 
-    const top = annotatedElem.getBoundingClientRect().top + document.documentElement.scrollTop;
-    const zIndex = Math.floor(document.body.offsetHeight) - Math.floor(top);
+    // const top = annotatedElem.getBoundingClientRect().top + document.documentElement.scrollTop;
+    // const zIndex = Math.floor(document.body.offsetHeight) - Math.floor(top);
 
     const mark = () => {
         console.log(`mark: {${id}: ${note?.pos.top}, ${note?.pos.left}}`);
@@ -142,7 +165,6 @@ export const AnnotationView  = (props: any) => {
 
         // console.log(`mark ${id}`);
         const mk = ann.mark(id, note.selector.path);
-
 
         let minTop = Number.MAX_SAFE_INTEGER;
         let minLeft = Number.MAX_SAFE_INTEGER;
@@ -157,9 +179,8 @@ export const AnnotationView  = (props: any) => {
             // accuracy: 'exactly',
 
             // it has bugs, may not be called
-            each: (elem) => {
-
-                let {top, left} = $(elem).offset();
+            each: (elem: Element) => {
+                let { top, left } = $(elem).offset();
                 top = Math.floor(top);
                 left = Math.floor(left);
                 minTop = Math.min(minTop, top);
@@ -178,73 +199,69 @@ export const AnnotationView  = (props: any) => {
                 // workaround: previous saved start, end is incorrect
                 // update pos
                 if (islocal) {
-                    const newNote = Object.assign({}, note);
+                    const newNote = { ...note };
                     if (newNote?.pos?.top !== minTop
                         || newNote?.pos?.left !== minLeft) {
-                        console.log('update ' + id + ': ' + newNote.pos.top + ' ' + newNote.pos.left + ' **');
-                        newNote.pos = {top: minTop, left: minLeft};
+                        console.log(`update ${id}: ${newNote.pos.top} ${newNote.pos.left} **`);
+                        newNote.pos = { top: minTop, left: minLeft };
                         ann.updateAnn(newNote).then(() => {
                             Object.assign(note, newNote);
-                        })
+                        });
                     }
                 }
             },
 
             noMatch(term: string) {
                 console.log(`noMatch: ${term}`);
-            }
+            },
         });
-    }
-
-    const [content, setContent] = useState(note.note);
-    const [newTag, setNewTag] = useState('');
-    const [del, setDel] = useState('hidden');
+    };
 
     const handleChange = (e: any) => {
         setContent(e.target.value);
-    }
+    };
 
     const handleFinishEdit = () => {
         note.note = content;
         ann.updateAnn(note);
         $(`#res-ann-${id} .res-ann-note-editor`).hide();
         $(`#res-ann-${id} .res-ann-note-container`).show();
-    }
+    };
 
     const handleEdit = () => {
         $(`#res-ann-${id} .res-ann-note-container`).hide();
         $(`#res-ann-${id} .res-ann-note-editor`).show();
-    }
+    };
 
     const handleChangeNewTag = (e: any) => {
         setNewTag(e.target.value.trim());
-    }
+    };
 
     const handleNewTagBlur = (e: any) => {
         if (newTag !== '') {
             ann.addTag(note.id, newTag);
         }
-    }
+    };
 
     const handleClick = (e: any) => {
         // move to annotated text
         annotatedElem.scrollIntoView({
             block: 'center',
         });
-    }
+    };
 
     const handleMouseEnter = (e: any) => {
         setDel('visible');
-    }
+    };
 
     const handleMouseLeave = (e: any) => {
         setDel('hidden');
-    }
+    };
 
     const handleDel = (e: any) => {
         ann.delAnnotation(note.id)
-            .then(/* no need due to this bad interface, it will remove all () => unmark()*/);
-    }
+            .then(/* no need due to this bad interface, it will remove all () => unmark() */);
+    };
 
     const blinkBorder = (index: string) => {
         if (index === id) {
@@ -257,15 +274,15 @@ export const AnnotationView  = (props: any) => {
                 $elem.css('outline', 'none');
             }, 500);
         }
-    }
+    };
 
     const handleClickTag = () => {
 
-    }
+    };
 
     const handleDelTag = (idx: number) => {
-        ann.delTag(note.id, idx)
-    }
+        ann.delTag(note.id, idx);
+    };
 
     useEffect(() => {
         ann.on((event: ViewEvent) => {
@@ -273,184 +290,197 @@ export const AnnotationView  = (props: any) => {
                 blinkBorder(event.data.index);
             }
         });
+    }, []);
 
-    }, [])
+    useEffect(() => {
+        mark();
+    });
 
-    return <div
-        className='res-ann-a-container'
-        style={{
-            display: 'flex',
-            flexDirection: 'column',
-            backgroundColor: 'white',
-            margin: '10px',
-            fontSize: '12px',
-        }}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-    >
+    return (
         <div
-            id={`res-ann-${id}`}
-            className='res-ann'
+            className="res-ann-a-container"
             style={{
-                width: '100%',
-                // marginRight: '5px',
-                border: 'hidden',
-                paddingLeft: '5px',
-                paddingRight: '5px',
+                display: 'flex',
+                flexDirection: 'column',
+                backgroundColor: 'white',
+                margin: '10px',
+                fontSize: '12px',
             }}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
         >
-            {mark()}
-            {/*annotated text*/}
-            <blockquote
-                style={{
-                    color: 'darkgray',
-                    // fontStyle: 'italic',
-                    // paddingLeft: '2px',
-                    // paddingRight: '12px',
-                    paddingTop: '6px',
-                    paddingBottom: '2px',
-                    marginTop: 0,
-                    marginBottom: 0,
-                    // display: '-webkit-box',
-                    // overflow: 'hidden',
-                    // textOverflow: 'ellipsis',
-                    // WebkitBoxOrient: 'vertical',
-                    // WebkitLineClamp: 2,
-                    textIndent: 0,
-                    lineHeight: '15px',
-                }}
-                onClick={handleClick}
-            >
-                {note.selected}
-            </blockquote>
-
-            {/*editor*/}
             <div
-                className={'res-ann-note-container'}
-            >
-                {/* rendering node */}
-                {
-                    content?.split('\n').map((para, index) => {return (
-                        <p
-                            key={`res-ann-${id}-${index}`}
-                        >
-                            {para}
-                        </p>
-                    )})
-                }
-            </div>
-            {islocal &&
-            <textarea
-                className={'res-ann-note-editor'}
+                id={`res-ann-${id}`}
+                className="res-ann"
                 style={{
-                    display: 'none',
-                    width: '97%',
-                    // height: '100px',
-                    minHeight: '100px',
-                    maxHeight: '300px',
-                    resize: 'vertical',
-                    border: 0,
-                    textAlign: 'left',
-                    marginBottom: '-10px',
-                    margin: 0
-                }}
-                value={content}
-                onChange={handleChange}
-                onBlur={handleFinishEdit}
-            >
-            </textarea>
-            }
-            {/*tags*/}
-            <div
-                style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    margin: 0,
+                    width: '100%',
+                    // marginRight: '5px',
+                    border: 'hidden',
+                    paddingLeft: '5px',
+                    paddingRight: '5px',
                 }}
             >
-                {islocal &&
-                <span>
-                    <i
-                        className="fa fa-solid fa-edit"
-                        onClick={() => handleEdit()}
-                    />
-                </span>
-                }
-                <div
-                    className={'res-ann-tags'}
+                {/* {mark()} */}
+                {/* annotated text */}
+                <blockquote
                     style={{
-                        display: 'flex',
-                        margin: 0,
+                        color: 'darkgray',
+                        // fontStyle: 'italic',
+                        // paddingLeft: '2px',
+                        // paddingRight: '12px',
+                        paddingTop: '6px',
+                        paddingBottom: '2px',
+                        marginTop: 0,
+                        marginBottom: 0,
+                        // display: '-webkit-box',
+                        // overflow: 'hidden',
+                        // textOverflow: 'ellipsis',
+                        // WebkitBoxOrient: 'vertical',
+                        // WebkitLineClamp: 2,
+                        textIndent: 0,
+                        lineHeight: '15px',
                     }}
+                    onClick={handleClick}
                 >
+                    {note.selected}
+                </blockquote>
+
+                {/* editor */}
+                <div
+                    className="res-ann-note-container"
+                >
+                    {/* rendering node */}
                     {
-                        note.tags.map((tag, idx) => {return (
-                            <div
-                                className={'res-ann-a-tag'}
-                                style={{
-                                    fontSize: 'smaller',
-                                }}
+                        content?.split('\n').map((para, index) => (
+                            <p
+                                key={`res-ann-${id}-${index}`}
                             >
-                                <a
-                                    className={'res-ann-tag'}
-                                    onClick={handleClickTag}
-                                    style={{
-                                        color: 'darkgray',
-                                    }}
-                                >
-                                    <span>
-                                    {tag}
-                                    </span>
-                                </a>
-                                {islocal &&
-                                    <i className="fa fa-solid fa-xmark"
-                                       onClick={() => handleDelTag(idx)}
-                                    />
-                                }
-                            </div>
-                        )})
+                                {para}
+                            </p>
+                        ))
                     }
                 </div>
-                {islocal &&
-                <Fragment>
-                <input
-                    style={{
-                        fontSize: '12px',
-                        border: 0,
-                        textAlign: 'left',
-                        paddingLeft: '10px',
-                        width: '100%',
-                        margin: 0,
-                    }}
-                    value={newTag}
-                    onChange={handleChangeNewTag}
-                    onBlur={handleNewTagBlur}
-                    placeholder={''}
-                >
-                </input>
+                {islocal
+                && (
+                    <textarea
+                        className="res-ann-note-editor"
+                        style={{
+                            display: 'none',
+                            width: '97%',
+                            // height: '100px',
+                            minHeight: '100px',
+                            maxHeight: '300px',
+                            resize: 'vertical',
+                            border: 0,
+                            textAlign: 'left',
+                            marginBottom: '-10px',
+                            margin: 0,
+                        }}
+                        value={content}
+                        onChange={handleChange}
+                        onBlur={handleFinishEdit}
+                    />
+                )}
+                {/* tags */}
                 <div
                     style={{
-                        //@ts-ignore
-                        visibility: del,
-                        fontSize: '14px',
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        margin: 0,
                     }}
                 >
-                    <i className="fa fa-solid fa-xmark"
-                       onClick={handleDel}
-                    />
+                    {islocal
+                    && (
+                        <span>
+                            <i
+                                className="fa fa-solid fa-edit"
+                                onClick={() => handleEdit()}
+                            />
+                        </span>
+                    )}
+                    <div
+                        className="res-ann-tags"
+                        style={{
+                            display: 'flex',
+                            margin: 0,
+                        }}
+                    >
+                        {
+                            note.tags.map((tag, idx) => (
+                                <div
+                                    className="res-ann-a-tag"
+                                    style={{
+                                        fontSize: 'smaller',
+                                    }}
+                                >
+                                    <a
+                                        className="res-ann-tag"
+                                        onClick={handleClickTag}
+                                        style={{
+                                            color: 'darkgray',
+                                        }}
+                                    >
+                                        <span>
+                                            {tag}
+                                        </span>
+                                    </a>
+                                    {islocal
+                                        && (
+                                            <i
+                                                className="fa fa-solid fa-xmark"
+                                                onClick={() => handleDelTag(idx)}
+                                            />
+                                        )}
+                                </div>
+                            ))
+                        }
+                    </div>
+                    {islocal
+                    && (
+                        <>
+                            <input
+                                style={{
+                                    fontSize: '12px',
+                                    border: 0,
+                                    textAlign: 'left',
+                                    paddingLeft: '10px',
+                                    width: '100%',
+                                    margin: 0,
+                                }}
+                                value={newTag}
+                                onChange={handleChangeNewTag}
+                                onBlur={handleNewTagBlur}
+                                placeholder=""
+                            />
+                            <div
+                                style={{
+                                // @ts-ignore
+                                    visibility: del,
+                                    fontSize: '14px',
+                                }}
+                            >
+                                <i
+                                    className="fa fa-solid fa-xmark"
+                                    onClick={handleDel}
+                                />
+                            </div>
+                        </>
+                    )}
                 </div>
-                </Fragment>
-                }
             </div>
         </div>
-    </div>
+    );
+};
+
+type AnnotationsViewProps = {
+    ann: Ann
 }
 
-export const AnnotationsView = (props: any) => {
-
-    const ann: Ann = props.ann;
-    const [force, forceUpdate] = useReducer(x => x + 1, 0);
+export const AnnotationsView = ({
+    ann,
+}: AnnotationsViewProps) => {
+    const [force, forceUpdate] = useReducer((x) => x + 1, 0);
 
     useEffect(() => {
         ann.on((event: ViewEvent) => {
@@ -464,60 +494,73 @@ export const AnnotationsView = (props: any) => {
 
         // hide
         $('#res-ann-all').hide();
-    }, [])
+    }, []);
+
+    useEffect(() => {
+        ann.unmark();
+    });
 
     const handleClick = () => {
         toggle();
-    }
+    };
 
     const toggle = (show?: boolean) => {
-        if(show) {
+        if (show) {
             $('#res-ann-all').show();
         } else {
             $('#res-ann-all').toggle();
         }
-    }
+    };
 
-    return <Fragment
-        key={force}
-    >
-        <button
-            onClick={handleClick}
+    return (
+        <Fragment
+            key={force}
         >
-            Notes ({ann.notes.length})
-        </button>
-        <div
-            id={'res-ann-all'}
-        >
-            {ann.unmark()}
-            {
-                ann?.notes.sort((a, b) => ann.compareNote(a, b))
-                // ann?.notes
-                    .map((note) => { return (
-                        <AnnotationView
-                            key={note.id}
-                            ann={ann}
-                            note={note}
-                            islocal={ann.isLocal}
-                        />
-                )})
-            }
-        </div>
-    </Fragment>;
-}
+            <button
+                type="button"
+                onClick={handleClick}
+            >
+                Notes ({ann.notes.length})
+            </button>
+            <div
+                id="res-ann-all"
+            >
+                {/* {ann.unmark()} */}
+                {
+                    ann?.notes.sort((a, b) => ann.compareNote(a, b))
+                    // ann?.notes
+                        .map((note) => (
+                            <AnnotationView
+                                key={note.id}
+                                ann={ann}
+                                note={note}
+                                islocal={ann.isLocal}
+                            />
+                        ))
+                }
+            </div>
+        </Fragment>
+    );
+};
 
 export class Ann {
     public notes: Note[];
+
     private callbacks: ((event: any) => void)[] = [];
+
     private path: string;
+
     private $container: JQuery;
+
     public isLocal: boolean;
+
     private tooltip: Tooltip;
 
     marks: Map<string, Mark> = new Map<string, Mark>();
+
     constructor(
         private readonly containerId: string,
-        private db_: Db
+        private db_: Db,
     ) {
         const url = new URL(window.location.href);
         this.path = url.pathname + url.search;
@@ -534,14 +577,13 @@ export class Ann {
         this.$container = $('#res-ann-container');
         this.isLocal && this.textSelect();
 
-        let promises: Promise<any>[] = [];
+        const promises: Promise<any>[] = [];
         // render annotations to page
-        this.db_.annotation().get(this.path)?.map(n => {
-            const newNote = Object.assign({}, n);
+        this.db_.annotation().get(this.path)?.map((n) => {
+            const newNote = { ...n };
 
             // for old db version
             let needsUpdate = false;
-
 
             if (newNote.tags === undefined) {
                 needsUpdate = true;
@@ -553,13 +595,13 @@ export class Ann {
             if (needsUpdate) {
                 promises.push(
                     this.updateAnn(newNote)
-                        .catch(() => console.log('failed update notes'))
-                )
+                        .catch(() => console.log('failed update notes')),
+                );
             }
         });
 
         this.notes.sort(this.compareNote.bind(this));
-        createRoot(this.$container[0]).render(<AnnotationsView ann={this}/>);
+        createRoot(this.$container[0]).render(<AnnotationsView ann={this} />);
         Promise.all(promises);
     }
 
@@ -569,13 +611,13 @@ export class Ann {
 
     show(index: string) {
         this.callbacks.forEach((callback) => callback({
-            name: 'show'
+            name: 'show',
         }));
         this.callbacks.forEach((callback) => callback({
             name: 'blink',
             data: {
-                index: index
-            }
+                index,
+            },
         }));
     }
 
@@ -589,64 +631,64 @@ export class Ann {
     }
 
     unmark(options?: MarkOptions) {
-        this.marks.forEach(mk => mk.unmark(options));
+        this.marks.forEach((mk) => mk.unmark(options));
     }
 
     private textSelect() {
         $(`#${this.containerId}`)
             .on('mouseup', (e) => {
-                    console.log('mouseup');
-                    const selection = document.getSelection();
-                    const text = selection.toString();
-                    console.log(text);
-                    if (text === '') {
-                        this.hideTooltip();
-                    } else {
-                        // console.log(`selected: ${text}`);
+                console.log('mouseup');
+                const selection = document.getSelection();
+                const text = selection.toString();
+                console.log(text);
+                if (text === '') {
+                    this.hideTooltip();
+                } else {
+                    // console.log(`selected: ${text}`);
 
-                        // let ranges = [];
-                        // for(let i = 0; i < selection.rangeCount; i++) {
-                        //     ranges[i] = selection.getRangeAt(i);
-                        //     console.log(ranges[i])
-                        //     const rect1 = ranges[i].getBoundingClientRect();
-                        //     console.log(rect1)
-                        //     const rect2 = ranges[i].getClientRects();
-                        //     console.log(rect2)
-                        // }
+                    // let ranges = [];
+                    // for(let i = 0; i < selection.rangeCount; i++) {
+                    //     ranges[i] = selection.getRangeAt(i);
+                    //     console.log(ranges[i])
+                    //     const rect1 = ranges[i].getBoundingClientRect();
+                    //     console.log(rect1)
+                    //     const rect2 = ranges[i].getClientRects();
+                    //     console.log(rect2)
+                    // }
 
-                        const range = selection.getRangeAt(0);
-                        // const rect = range.getBoundingClientRect();
-                        // const start = range.startOffset;  // offset of text node
-                        // const end = range.endOffset;  // offset of text node
+                    const range = selection.getRangeAt(0);
+                    // const rect = range.getBoundingClientRect();
+                    // const start = range.startOffset;  // offset of text node
+                    // const end = range.endOffset;  // offset of text node
 
-                        const path = this.getPath(range.startContainer.parentElement);
-                        // const offsetTop = $(range.startContainer.parentElement).offset().top;
-                        // const offsetLeft = $(range.startContainer.parentElement).offset().left;
-                        // console.log(`offsetTop: ${offsetTop}`);
-                        if (path !== undefined) {
-                            this.showTooltip({
-                                    id: '' + Date.now(),
-                                    selected: text,
-                                    selector: {
-                                        path: path,
-                                        // start: start,
-                                        // end: end
-                                    },
-                                    note: '',
-                                    tags: [],
-                                    pos: {top: 0, left: 0}
+                    const path = this.getPath(range.startContainer.parentElement);
+                    // const offsetTop = $(range.startContainer.parentElement).offset().top;
+                    // const offsetLeft = $(range.startContainer.parentElement).offset().left;
+                    // console.log(`offsetTop: ${offsetTop}`);
+                    if (path !== undefined) {
+                        this.showTooltip(
+                            {
+                                id: `${Date.now()}`,
+                                selected: text,
+                                selector: {
+                                    path,
+                                // start: start,
+                                // end: end
                                 },
-                                e.clientX,
-                                e.clientY);
-                        }
+                                note: '',
+                                tags: [],
+                                pos: { top: 0, left: 0 },
+                            },
+                            e.clientX,
+                            e.clientY,
+                        );
                     }
-            })
-        ;
+                }
+            });
     }
 
     compareNote(a: Note, b: Note): number {
-        if (a.pos === undefined || b.pos === undefined)
-            return 0;
+        if (a.pos === undefined || b.pos === undefined) { return 0; }
         const result = this.compareNumbers_([
             [a.pos.top, b.pos.top],
             [a.pos.left, b.pos.left],
@@ -657,28 +699,24 @@ export class Ann {
     }
 
     compareNumbers_(nums: [number, number][]): number {
-        if (nums.length === 0)
-            return 0;
-        else {
-            const pair = nums.shift();
-            return pair[0]>pair[1]? 1:
-                pair[0]===pair[1]? this.compareNumbers_(nums): -1;
-        }
+        if (nums.length === 0) return 0;
+
+        const pair = nums.shift();
+        return pair[0] > pair[1] ? 1
+            : pair[0] === pair[1] ? this.compareNumbers_(nums) : -1;
     }
 
     private getPath(elem: HTMLElement) {
-
         let path = '';
-        while (elem !== null)
-        {
+        while (elem !== null) {
             if (elem.id === this.containerId) {
                 path = `#${this.containerId} ${path}`;
                 break;
             }
 
-            let id = $(elem.parentNode).children(elem.tagName).index(elem);
-            let nth = ':eq(' + id + ')';
-            path = ' > ' + elem.tagName.toLowerCase() + nth + path;
+            const id = $(elem.parentNode).children(elem.tagName).index(elem);
+            const nth = `:eq(${id})`;
+            path = ` > ${elem.tagName.toLowerCase()}${nth}${path}`;
 
             elem = elem.parentElement;
         }
@@ -686,9 +724,8 @@ export class Ann {
 
         if (path.startsWith(`#${this.containerId}`)) {
             return path;
-        } else {
-            return undefined;
         }
+        return undefined;
     }
 
     newAnnotation(note: Note) {
@@ -696,19 +733,19 @@ export class Ann {
             .then(() => {
                 this.notes.push(note);
                 this.callbacks.forEach((callback) => callback({
-                    name: 'invalidation'
+                    name: 'invalidation',
                 }));
-        });
+            });
     }
 
     async delAnnotation(id: string): Promise<any> {
         return this.request('resAnnDel', this.path, id)
             .then(() => {
-                const idx = this.notes.findIndex(n => n.id === id);
+                const idx = this.notes.findIndex((n) => n.id === id);
                 if (idx !== -1) {
                     this.notes.splice(idx, 1);
                     this.callbacks.forEach((callback) => callback({
-                        name: 'invalidation'
+                        name: 'invalidation',
                     }));
                 }
             });
@@ -717,11 +754,11 @@ export class Ann {
     async delTag(id: string, idx: number): Promise<any> {
         return this.request('resAnnDelTag', this.path, id, idx)
             .then(() => {
-                const nodeIdx = this.notes.findIndex(n => n.id === id);
+                const nodeIdx = this.notes.findIndex((n) => n.id === id);
                 if (nodeIdx !== -1) {
                     this.notes[nodeIdx].tags.splice(idx, 1);
                     this.callbacks.forEach((callback) => callback({
-                        name: 'invalidation'
+                        name: 'invalidation',
                     }));
                 }
             });
@@ -730,11 +767,11 @@ export class Ann {
     async addTag(id: string, tag: string): Promise<any> {
         return this.request('resAnnAddTag', this.path, id, tag)
             .then(() => {
-                const idx = this.notes.findIndex(n => n.id === id);
+                const idx = this.notes.findIndex((n) => n.id === id);
                 if (idx !== -1) {
                     this.notes[idx].tags.push(tag);
                     this.callbacks.forEach((callback) => callback({
-                        name: 'invalidation'
+                        name: 'invalidation',
                     }));
                 }
             });
@@ -744,7 +781,7 @@ export class Ann {
         return this.request('resAnnUpdate', this.path, JSON.stringify(n))
             .then(() => {
                 this.callbacks.forEach((callback) => callback({
-                    name: 'invalidation'
+                    name: 'invalidation',
                 }));
             });
     }
@@ -759,6 +796,7 @@ export class Ann {
     }
 
     debounced = (func: any, ...args: any) => pDebounce(func, 2000).bind(this)(...args);
+
     debouncedRequest = pDebounce(this.request, 2000).bind(this);
 
     request(method: string, ...params: any[]): Promise<any> {
@@ -768,22 +806,20 @@ export class Ann {
 
             // real request
             const req = post('/res', {
-                    method: method,
-                    params: params
+                method,
+                params,
             });
             return Promise.race([timeout, req]);
-        } else {
-            return Promise.reject();
         }
+        return Promise.reject();
     }
 
     private timeoutAfter(seconds: number): Promise<any> {
-        //@ts-ignore
+        // @ts-ignore
         return new Promise((resolve, reject) => {
             setTimeout(() => {
-                reject({status: -2, reason: 'request timeout'});
+                reject({ status: -2, reason: 'request timeout' });
             }, seconds * 1000);
         });
     }
 }
-

@@ -1,5 +1,7 @@
+/********************************************************************************
+ * Copyright (C) 2023 Zhangyi
+ ********************************************************************************/
 
-// assert {type: 'json'};
 export type Database = {
     annotation: Annotation
 }
@@ -36,10 +38,11 @@ export type IndexedAnnotation = Map<string, Note[]>;
 
 export abstract class Db {
     protected db_: Database;
+
     protected anns: IndexedAnnotation = new Map<string, Note[]>();
 
     constructor(
-        readonly dbPath: string
+        readonly dbPath: string,
     ) {
     }
 
@@ -47,21 +50,21 @@ export abstract class Db {
 
     getAnn(url: string): Note[] {
         const notes = this.anns.get(url);
-        return notes===undefined? [] : notes;
+        return notes === undefined ? [] : notes;
     }
 
     updateAnn(url: string, note: Note) {
         const notes = this.anns.get(url);
-        const idx = notes?.findIndex(n => n.id === note.id);
-        if (idx!==-1) {
+        const idx = notes?.findIndex((n) => n.id === note.id);
+        if (idx !== -1) {
             notes[idx] = note;
         }
     }
 
     updateAnnotationTag(url: string, id: string, tag: string) {
         const notes = this.anns.get(url);
-        const n = notes?.find(n => n.id === id);
-        if (n!==undefined) {
+        const n = notes?.find((n) => n.id === id);
+        if (n !== undefined) {
             if (n.tags === undefined) {
                 n.tags = [];
             }
@@ -71,8 +74,8 @@ export abstract class Db {
 
     delAnnotationTag(url: string, id: string, idx: number) {
         const notes = this.anns.get(url);
-        const n = notes?.find(n => n.id === id);
-        if (n!==undefined) {
+        const n = notes?.find((n) => n.id === id);
+        if (n !== undefined) {
             if (n.tags !== undefined) {
                 n.tags.splice(idx, 1);
             }
@@ -91,7 +94,7 @@ export abstract class Db {
     delAnnotation(url: string, id: string) {
         const notes = this.anns.get(url);
         if (notes !== undefined) {
-            const idx = notes.findIndex(n => n.id ===id);
+            const idx = notes.findIndex((n) => n.id === id);
             if (idx !== -1) {
                 notes.splice(idx, 1);
             }
@@ -99,10 +102,10 @@ export abstract class Db {
     }
 
     toString() {
-        this.db_.annotation.records = Array.from(this.anns).map(([url, notes]) => { return {
-            url: url,
-            notes: notes
-        }});
+        this.db_.annotation.records = Array.from(this.anns).map(([url, notes]) => ({
+            url,
+            notes,
+        }));
         return JSON.stringify(this.db_, undefined, 2);
     }
 
@@ -114,5 +117,3 @@ export abstract class Db {
         return this.db_;
     }
 }
-
-
