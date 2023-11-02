@@ -1,9 +1,8 @@
-/**
- * Decratorm of book
- */
+/********************************************************************************
+ * Copyright (C) 2023 Zhangyi
+ ********************************************************************************/
 
-import * as $ from 'jquery';
-
+import $ from 'jquery';
 
 interface TocEntry {
     id: string;
@@ -15,14 +14,14 @@ interface TocContent {
     entries: TocEntry[];
 }
 
-
 class LinkNode {
     children: LinkNode[];
+
     level: number;
 
     constructor(
         readonly id: string,
-        readonly text: string
+        readonly text: string,
     ) {
         this.children = [];
         this.level = 0;
@@ -30,7 +29,7 @@ class LinkNode {
 
     isElemAncestor(id: string) {
         const ids = $(document.getElementById(id)).parents('[id]').map(function () {
-            return this.id
+            return this.id;
         })
             .get();
 
@@ -42,7 +41,6 @@ class LinkNode {
 }
 
 class LinkTree {
-
     private root: LinkNode = new LinkNode('', 'root');
 
     add(id: string, text: string) {
@@ -52,7 +50,7 @@ class LinkTree {
 
     // search by layer
     parent(start: LinkNode, id: string): LinkNode {
-        for(let i=0; i<start.children.length; ++i) {
+        for (let i = 0; i < start.children.length; ++i) {
             if (start.children[i].isElemAncestor(id)) {
                 return this.parent(start.children[i], id);
             }
@@ -64,9 +62,9 @@ class LinkTree {
     private depthFirst_(parent: LinkNode, nodes: LinkNode[], level: number) {
         parent.level = level;
         nodes.push(parent);
-        parent.children.forEach(child => {
-            this.depthFirst_(child, nodes, level+1);
-        })
+        parent.children.forEach((child) => {
+            this.depthFirst_(child, nodes, level + 1);
+        });
     }
 
     depthFirst(): LinkNode[] {
@@ -77,32 +75,29 @@ class LinkTree {
 }
 
 export class Toc {
-
     generate() {
-
         let tocHtml = '';
         const $prebuilt = $('#res-toc-prebuilt');
 
         if ($prebuilt.length === 0) {
             console.log('no prebuilt');
             const toc: TocContent = {
-                entries: []
+                entries: [],
             };
 
             // remove duplicated
             let preText = '';
-            const ignored = this.ignore();  // notes, refs
+            const ignored = this.ignore(); // notes, refs
             $('[id]').each((index: number, element: HTMLElement) => {
                 const id = $(element).prop('id');
-                const tag = $(element).prop("tagName").toLowerCase();
+                const tag = $(element).prop('tagName').toLowerCase();
                 // console.log(id + ':' + tag);
 
                 // get first text node child of max font size
                 const $text = $(element).find('*').contents()
                     .filter(function () {
                         return this.nodeType === 3
-                            && $(this).text().trim() !== ''
-                            ;
+                            && $(this).text().trim() !== '';
                     })
                     .first();
 
@@ -114,14 +109,13 @@ export class Toc {
                     && text !== ''
                     && text !== preText
                     && text.match(ignored) === null) {
-
-                    const fspx = $text.parent().css('font-size')
+                    const fspx = $text.parent().css('font-size');
                     const fs = fspx.substring(0, fspx.length - 'px'.length);
 
                     toc.entries.push({
-                        id: id,
+                        id,
                         fs: Number.parseInt(fs),
-                        text: text,
+                        text,
                     });
                     preText = text;
                 }
@@ -138,12 +132,11 @@ export class Toc {
                         && text2 !== text
                         && text2 !== preText
                         && text2.match(ignored) === null) {
-
-                        const fspx = $(element).css('font-size')
+                        const fspx = $(element).css('font-size');
                         const fs = fspx.substring(0, fspx.length - 'px'.length);
 
                         toc.entries.push({
-                            id: id,
+                            id,
                             fs: Number.parseInt(fs),
                             text: text2,
                         });
@@ -154,25 +147,21 @@ export class Toc {
 
             // console.log(toc.entries);
             const fonts = new Set<number>();
-            toc.entries.forEach(entry => {
+            toc.entries.forEach((entry) => {
                 fonts.add(entry.fs);
             });
 
             const fontsArray = Array.from(fonts);
-            toc.entries.forEach(entry => {
+            toc.entries.forEach((entry) => {
                 entry.fs = fontsArray.indexOf(entry.fs);
             });
 
             if (toc.entries.length > 0) {
-                tocHtml = toc.entries.map((entry) =>
-                    `<li class="res-toc-fs-${entry.fs}"><a href="#${entry.id}">${entry.text}</a></li>`
-                ).reduce((prev, curr) => `${prev}\n${curr}`);
+                tocHtml = toc.entries.map((entry) => `<li class="res-toc-fs-${entry.fs}"><a href="#${entry.id}">${entry.text}</a></li>`).reduce((prev, curr) => `${prev}\n${curr}`);
 
                 tocHtml = `<ul>\n${tocHtml}\n</ul>`;
             }
-        }
-
-        else {
+        } else {
             console.log('has prebuilt');
             const sel = $prebuilt.attr('sel');
             if (sel !== undefined && sel !== '') {
@@ -202,18 +191,19 @@ export class Toc {
             $(this).removeClass('transparent');
         }).on('mouseleave', function () {
             $(this).addClass('transparent');
-        }).on('click', function (event) {
+        }).on('click', (event) => {
             event.stopPropagation();
-        }).hide();
+        })
+            .hide();
 
-        $(window).on('click', function () {
+        $(window).on('click', () => {
             $('#res-toc-content').hide();
         });
     }
 
     private toggle(id: string) {
-        const $elem = $('#' + id);
-        const hidden = $elem.is(":hidden");
+        const $elem = $(`#${id}`);
+        const hidden = $elem.is(':hidden');
         if (hidden) {
             $elem.removeClass('transparent');
             $elem.show();
@@ -224,7 +214,6 @@ export class Toc {
     }
 
     private ignore() {
-        return /(\[(\d+|\*+)\])|(\((\d+|\*+)\))|(〔(\d+|\*+)〕)/g
+        return /(\[(\d+|\*+)\])|(\((\d+|\*+)\))|(〔(\d+|\*+)〕)/g;
     }
 }
-

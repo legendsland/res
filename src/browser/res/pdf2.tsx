@@ -1,7 +1,12 @@
-import * as pdfjs from 'pdfjs-dist';
-import {useEffect} from 'react';
+/********************************************************************************
+ * Copyright (C) 2023 Zhangyi
+ ********************************************************************************/
 
-const workerSrc =  require('pdfjs-dist/build/pdf.worker.entry');
+import * as pdfjs from 'pdfjs-dist';
+import { useEffect } from 'react';
+
+const workerSrc = require('pdfjs-dist/build/pdf.worker.entry');
+
 pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
 
 export type PDFViewerProperties = {
@@ -9,17 +14,16 @@ export type PDFViewerProperties = {
 }
 
 export const PDFViewer = ({
-    url
+    url,
 }: PDFViewerProperties) => {
-
     useEffect(() => {
         console.log(`open ${url}`);
-        pdfjs.getDocument(url).promise.then(function (pdf) {
+        pdfjs.getDocument(url).promise.then((pdf) => {
             // Get the first page of the PDF
-            pdf.getPage(1).then(function (page) {
+            pdf.getPage(1).then((page) => {
                 // Set the scale for rendering the page
                 const scale = 1.5;
-                const viewport = page.getViewport({ scale: scale });
+                const viewport = page.getViewport({ scale });
 
                 // Prepare the canvas element
                 const canvas = document.createElement('canvas');
@@ -34,12 +38,12 @@ export const PDFViewer = ({
                 // Render the page on the canvas
                 const renderContext = {
                     canvasContext: context,
-                    viewport: viewport,
+                    viewport,
                 };
                 page.render(renderContext);
             });
         });
     });
 
-    return <></>
-}
+    return <></>;
+};

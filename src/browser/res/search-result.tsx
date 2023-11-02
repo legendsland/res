@@ -1,15 +1,17 @@
-/**
- * Display text search result
- */
+/********************************************************************************
+ * Copyright (C) 2023 Zhangyi
+ ********************************************************************************/
 
-import * as $ from 'jquery';
+import $ from 'jquery';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
-import {useState} from 'react';
-import {Box, Collapse, ListItemText, Paper} from '@mui/material';
+import { useState } from 'react';
+import {
+    Box, Collapse, ListItemText, Paper,
+} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import {unmountComponentAtNode} from 'react-dom';
-import {createRoot} from 'react-dom/client';
+import { unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 const pagemap = require('pagemap');
 
@@ -22,11 +24,18 @@ export interface SearchResult {
 const CONTAINER_ID = 'book-search-results';
 const CLOSE_ID = 'book-search-results-close-icon';
 
-const SearchResultView = (props: any) => {
-    const input = props.input;
-    const results: SearchResult[] = props.results;
-    const mgr = props.mgr;
-
+type SearchResultViewProps = {
+    input: string,
+    results: SearchResult[],
+    mgr: SearchResultManager,
+    spend: number,
+}
+const SearchResultView = ({
+    input,
+    results,
+    mgr,
+    spend,
+}: SearchResultViewProps) => {
     const initExpandedArray: boolean[] = [];
     results.forEach(() => {
         initExpandedArray.push(true);
@@ -55,9 +64,8 @@ const SearchResultView = (props: any) => {
             <CloseIcon
                 id={CLOSE_ID}
                 onClick={handleClose}
-            >
-            </CloseIcon>
-            <div><span>{input}</span><span>&nbsp;</span>Results: {results.length} in {props.spend}ms</div>
+            />
+            <div><span>{input}</span><span>&nbsp;</span>Results: {results.length} in {spend}ms</div>
             <List
                 sx={{
                     textAlign: 'left',
@@ -72,13 +80,12 @@ const SearchResultView = (props: any) => {
                                 key={index}
                                 // onClick={() => handleExpand(index)}
                             >
-                                {/*{expandedArray[index]? <ExpandLessOutlined /> : <ExpandMoreOutlined />}*/}
-                                {'['}{index+1}{']'}<span>&nbsp;</span>
+                                {/* {expandedArray[index]? <ExpandLessOutlined /> : <ExpandMoreOutlined />} */}
+                                {'['}{index + 1}{']'}<span>&nbsp;</span>
                                 <ListItemText
-                                    primaryTypographyProps={{fontSize: '12px'}}
+                                    primaryTypographyProps={{ fontSize: '12px' }}
                                     primary={result.title}
-                                >
-                                </ListItemText>
+                                />
                             </ListItem>
                             <Collapse
                                 key={index}
@@ -87,7 +94,7 @@ const SearchResultView = (props: any) => {
                                 <Box
                                     onClick={() => handleGoto(index)}
                                     sx={{
-                                        fontSize: 10
+                                        fontSize: 10,
                                     }}
                                 >
                                     {result.text}
@@ -99,12 +106,11 @@ const SearchResultView = (props: any) => {
             </List>
         </Paper>
     );
-}
+};
 
 export class SearchResultManager {
-
     constructor(
-        readonly dispose?: ()=>void
+        readonly dispose?: ()=>void,
     ) {
     }
 

@@ -1,19 +1,21 @@
-import {Db} from '../../common/db';
+/********************************************************************************
+ * Copyright (C) 2023 Zhangyi
+ ********************************************************************************/
+
+import { Db } from '../../common/db';
 
 export class BrowserDb extends Db {
-
     override async load() {
-        //@ts-ignore
+        // @ts-ignore
         await import('../../common/db.json', {
             assert: {
-                type: 'json'
-            }
-        }).then(d => this.db_ = d);
+                type: 'json',
+            },
+        }).then((d) => this.db_ = d);
 
         const ann = this.db_.annotation;
-        ann.records.forEach(record => {
+        ann.records.forEach((record) => {
             this.anns.set(record.url, record.notes);
         });
     }
-
 }

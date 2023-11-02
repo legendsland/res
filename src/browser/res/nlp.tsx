@@ -1,8 +1,11 @@
+/********************************************************************************
+ * Copyright (C) 2023 Zhangyi
+ ********************************************************************************/
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import * as $ from 'jquery';
+import $ from 'jquery';
+import { createRoot } from 'react-dom/client';
 import { post } from '../server/request';
-import {createRoot} from 'react-dom/client';
 
 // import Verbs from 'compromise/types';
 // import Document from 'compromise/types';
@@ -23,66 +26,59 @@ const nlp = require('compromise');
  */
 
 const App = () => {
-
     // do it in browser, or on the server
 
     const onClickServer = (request: string) => {
-
         post('/res', {
             method: request,
-            params: []
+            params: [],
         }).then((data) => {
             console.log(data);
         });
-    }
+    };
 
     const onClickClient = (request: string) => {
-        let doc = nlp($('body').text());
+        const doc = nlp($('body').text());
 
         let result = '';
         if (request === 'verbs') {
             result = doc.verbs().out('array');
-        }
-
-        else if (request === 'ngrams') {
-            result = doc.ngrams({size:1});
+        } else if (request === 'ngrams') {
+            result = doc.ngrams({ size: 1 });
         }
 
         console.log(result);
-    }
+    };
 
     return (
         <Box>
             <Button
-                onClick={() => {onClickServer('nlpVerbs');}}
+                onClick={() => { onClickServer('nlpVerbs'); }}
             >
                 S-verbs
             </Button>
 
             <Button
-                onClick={() => {onClickServer('nlpNgrams');}}
+                onClick={() => { onClickServer('nlpNgrams'); }}
             >
                 S-ngram
             </Button>
 
-
             <Button
-                onClick={() => {onClickClient('nlpVerbs');}}
+                onClick={() => { onClickClient('nlpVerbs'); }}
             >
                 C-verbs
             </Button>
         </Box>
     );
-}
+};
 
 export class Nlp {
-
     constructor(private containerId: string) {
 
     }
 
     create() {
-        createRoot(document.querySelector(`#${this.containerId}`)).render(<App/>);
+        createRoot(document.querySelector(`#${this.containerId}`)).render(<App />);
     }
 }
-

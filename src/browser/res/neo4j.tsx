@@ -1,19 +1,19 @@
-import {createRoot} from 'react-dom/client';
+/********************************************************************************
+ * Copyright (C) 2023 Zhangyi
+ ********************************************************************************/
 
-const App = () => {
-    return (
-        <div></div>
-    );
-}
+import { createRoot } from 'react-dom/client';
 
+const App = () => (
+    <div />
+);
 
 export class Neo4j {
-
     constructor(private containerId: string) {
 
     }
 
     create() {
-        createRoot(document.querySelector(`#${this.containerId}`)).render(<App/>);
+        createRoot(document.querySelector(`#${this.containerId}`)).render(<App />);
     }
 }

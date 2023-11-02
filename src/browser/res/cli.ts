@@ -1,8 +1,9 @@
-/**
- * running from browser console
- */
-import * as $ from 'jquery';
-import {SearchResult, SearchResultManager} from './search-result';
+/********************************************************************************
+ * Copyright (C) 2023 Zhangyi
+ ********************************************************************************/
+
+import $ from 'jquery';
+import { SearchResult, SearchResultManager } from './search-result';
 
 interface MatchedText {
     original: string,
@@ -12,9 +13,10 @@ interface MatchedText {
 }
 
 export class Cli {
-
     private readonly fullText: string;
+
     private readonly $container: JQuery;
+
     private readonly height: number;
 
     private readonly texts = new Map<JQuery, MatchedText>();
@@ -28,11 +30,10 @@ export class Cli {
                     matchedText.hasMatch = false;
                 }
             });
-        }
+        },
     );
 
-    constructor(
-    ) {
+    constructor() {
         this.height = $(document).height();
         this.$container = $('#book-container');
         this.fullText = this.$container.text();
@@ -44,8 +45,7 @@ export class Cli {
                 .contents()
                 .filter(function () {
                     return this.nodeType === 3
-                        && $(this).text().trim() !== ''
-                        ;
+                        && $(this).text().trim() !== '';
                 })
                 .parent()
                 .each((idx, elem: HTMLElement) => {
@@ -54,10 +54,10 @@ export class Cli {
                     this.texts.set($elem, {
                         original: $elem.text(),
                         originalHtml: $elem.html(),
-                        top: top,
-                        hasMatch: false
+                        top,
+                        hasMatch: false,
                     });
-                })
+                });
         } catch (e) {
             // stack overflow
         }
@@ -66,12 +66,12 @@ export class Cli {
     f(str: string) {
         this.c();
 
-        const re = new RegExp(str,"g");
+        const re = new RegExp(str, 'g');
         const searchResults: SearchResult[] = [];
 
         const start = Date.now();
         this.texts.forEach((text, $elem) => {
-            const original = text.original;
+            const { original } = text;
             const len = original.length;
 
             const spannedTexts: string[] = [];
@@ -79,22 +79,22 @@ export class Cli {
 
             let lastMatchedEnd = 0;
             let highlightText = '';
-            Array.from(original.matchAll(re)).forEach(match => {
+            Array.from(original.matchAll(re)).forEach((match) => {
                 text.hasMatch = true;
                 const matchedLen = match[0].length;
 
                 const matchedEnd = match.index + matchedLen;
 
-                const start = Math.max(0, match.index-5);
+                const start = Math.max(0, match.index - 5);
                 const end = Math.min(len, matchedEnd + 5);
 
-                const start2 = Math.max(0, match.index-40);
+                const start2 = Math.max(0, match.index - 40);
                 const end2 = Math.min(len, matchedEnd + 40);
 
                 searchResults.push({
                     title: original.substring(start, end),
                     text: original.substring(start2, end2),
-                    pos: text.top
+                    pos: text.top,
                 });
 
                 // bug: other html are gone ...
@@ -143,14 +143,13 @@ export class Cli {
             const duration = 1000 * (distance / speed);
             console.log(`distance: ${distance}px, speed: ${speed}px/s, duration: ${duration}ms`);
             $('html, body').animate({
-                scrollTop: this.height
+                scrollTop: this.height,
             }, {
-                duration: duration,
+                duration,
                 easing: 'linear',
                 progress(animation: JQuery.Animation<HTMLElement>, progress: number, remainingMs: number) {
-                }
+                },
             });
         }
     }
 }
-

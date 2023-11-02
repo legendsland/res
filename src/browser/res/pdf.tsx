@@ -1,5 +1,8 @@
+/********************************************************************************
+ * Copyright (C) 2023 Zhangyi
+ ********************************************************************************/
 
-import {useState} from 'react';
+import { useState } from 'react';
 // Core viewer
 import {
     Worker,
@@ -9,12 +12,19 @@ import {
     Tooltip,
     PrimaryButton,
     DocumentLoadEvent,
-    PageChangeEvent
+    PageChangeEvent,
 } from '@react-pdf-viewer/core';
 
 // Plugins
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
-import { highlightPlugin, Trigger, HighlightArea, RenderHighlightTargetProps, RenderHighlightsProps, RenderHighlightContentProps, MessageIcon } from '@react-pdf-viewer/highlight';
+import {
+    highlightPlugin,
+    Trigger,
+    RenderHighlightTargetProps,
+    RenderHighlightsProps,
+    RenderHighlightContentProps,
+    MessageIcon,
+} from '@react-pdf-viewer/highlight';
 
 // Import styles
 import '@react-pdf-viewer/core/lib/styles/index.css';
@@ -40,11 +50,11 @@ const renderHighlightTarget = (props: RenderHighlightTargetProps) => (
     >
         <Tooltip
             position={Position.TopCenter}
-            target={
+            target={(
                 <Button onClick={props.toggle}>
                     <MessageIcon />
                 </Button>
-            }
+            )}
             content={() => <div style={{ width: '100px' }}>Add a note</div>}
             offset={{ left: 10, top: 30 }}
         />
@@ -96,13 +106,13 @@ const renderHighlightContent = (props: RenderHighlightContentProps) => {
 };
 
 const areas: any[] = [
-        {
-            pageIndex: 0,
-            height: 1.55401,
-            width: 28.1674,
-            left: 27.5399,
-            top: 15.0772,
-        }
+    {
+        pageIndex: 0,
+        height: 1.55401,
+        width: 28.1674,
+        left: 27.5399,
+        top: 15.0772,
+    },
 ];
 
 const renderHighlights = (props: RenderHighlightsProps) => (
@@ -113,14 +123,12 @@ const renderHighlights = (props: RenderHighlightsProps) => (
                 <div
                     key={idx}
                     className="highlight-area"
-                    style={Object.assign(
-                        {},
-                        {
-                            background: 'yellow',
-                            opacity: 0.3,
-                        },
-                        props.getCssProperties(area, props.rotation)
-                    )}
+                    style={({
+
+                        background: 'yellow',
+                        opacity: 0.3,
+                        ...props.getCssProperties(area, props.rotation),
+                    })}
                 />
             ))}
     </div>
@@ -128,9 +136,8 @@ const renderHighlights = (props: RenderHighlightsProps) => (
 
 export const PDFView = ({
     url,
-    onload
+    onload,
 }: PDFViewerProperties) => {
-
 // Create new plugin instance
     const defaultLayoutPluginInstance = defaultLayoutPlugin();
     const highlightPluginInstance = highlightPlugin({
@@ -143,29 +150,29 @@ export const PDFView = ({
     const onDocumentLoad = (ev: DocumentLoadEvent) => {
         console.log(`onDocumentLoad ${ev.doc.numPages}, ${ev.file.name}`);
         onload();
-    }
+    };
 
     const onPageChange = (ev: PageChangeEvent) => {
         console.log(`onPageChange ${ev.currentPage}`);
-    }
+    };
 
-    return <Worker workerUrl={workerSrc}>
-        <Viewer
-            fileUrl={url}
-            onDocumentLoad={onDocumentLoad}
-            onPageChange={onPageChange}
-            plugins={[
+    return (
+        <Worker workerUrl={workerSrc}>
+            <Viewer
+                fileUrl={url}
+                onDocumentLoad={onDocumentLoad}
+                onPageChange={onPageChange}
+                plugins={[
                 // Register plugins
-                defaultLayoutPluginInstance,
-                highlightPluginInstance
-            ]}
-        />
-    </Worker>
-}
+                    defaultLayoutPluginInstance,
+                    highlightPluginInstance,
+                ]}
+            />
+        </Worker>
+    );
+};
 
 export class PDFViewer {
-
-
     render() {
 
     }

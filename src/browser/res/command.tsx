@@ -1,22 +1,17 @@
-/**
- * Supports shortcut key input
- * This should be the main interface, not clicks and ugly widgets.
- *
- * The idea of course is from the classic editor vi: minimal key strokes to achieve more.
- * To reproduce the 'feeling' of using real editor vi: quick, responsive, smooth and no bullshit.
- */
+/********************************************************************************
+ * Copyright (C) 2023 Zhangyi
+ ********************************************************************************/
 
-import * as $ from 'jquery';
-import {useState} from 'react';
-import {ShortcutHandler} from './shortcuts';
-import {Cli} from './cli';
-import {createRoot} from 'react-dom/client';
+import $ from 'jquery';
+import { useState } from 'react';
+import { createRoot } from 'react-dom/client';
+import { ShortcutHandler } from './shortcuts';
+import { Cli } from './cli';
 
 const ID = 'res-cmd-input';
 
 export const CommandInput = (props: any) => {
-
-    const parser: CommandParser = props.parser;
+    const { parser } = props;
 
     const [input, setInput] = useState('');
     const [history, setHistory] = useState([]);
@@ -28,12 +23,12 @@ export const CommandInput = (props: any) => {
             newHistory.push(input);
             setHistory(newHistory);
         }
-    }
+    };
 
     const clear = () => {
         setInput('');
         setBackIndex(0);
-    }
+    };
 
     const up = () => {
         if (history.length > 0) {
@@ -41,7 +36,7 @@ export const CommandInput = (props: any) => {
             setBackIndex(newIndex);
             setInput(history[newIndex]);
         }
-    }
+    };
 
     const down = () => {
         if (backIndex > 0) {
@@ -49,65 +44,63 @@ export const CommandInput = (props: any) => {
             setBackIndex(newIndex);
             setInput(history[newIndex]);
         }
-    }
+    };
 
     const exec = () => {
         parser.exec(input);
-    }
+    };
 
     const handleKeyDown = (event: any) => {
-        const key = event.key
+        const { key } = event;
         console.log(`${input} <- ${key}`);
 
         switch (key) {
-            case 'Escape':
-                // save and clear
-                addHistory();
-                clear();
-                break;
-            case 'Enter':
-                // execute the command
-                exec();
-                addHistory();
-                clear();
-                break;
-            case 'ArrowUp':
-                up();
-                break;
-            case 'ArrowDown':
-                down();
-                break;
-            default:
-                break;
+        case 'Escape':
+            // save and clear
+            addHistory();
+            clear();
+            break;
+        case 'Enter':
+            // execute the command
+            exec();
+            addHistory();
+            clear();
+            break;
+        case 'ArrowUp':
+            up();
+            break;
+        case 'ArrowDown':
+            down();
+            break;
+        default:
+            break;
         }
 
         return true;
-    }
+    };
 
     const handleChange = (event: any) => {
         const newValue = event.target.value;
         setInput(newValue);
-    }
+    };
 
-    return <div>
-        <input
-            type="text"
-            onKeyDown={handleKeyDown}
-            onChange={handleChange}
-            value={input}
-        >
-
-        </input>
-    </div>
-    ;
-}
+    return (
+        <div>
+            <input
+                type="text"
+                onKeyDown={handleKeyDown}
+                onChange={handleChange}
+                value={input}
+            />
+        </div>
+    );
+};
 
 export class CommandParser {
-
     private cli: Cli;
 
     constructor(
-        cli: Cli
+        cli: Cli,
     ) {
         this.cli = cli;
     }
@@ -121,22 +114,22 @@ export class CommandParser {
 
 export class CommandShortcut implements ShortcutHandler {
     private readonly $elem: JQuery;
+
     private parser: CommandParser;
 
     constructor(
-        cli: Cli
+        cli: Cli,
     ) {
         this.parser = new CommandParser(cli);
 
         // create instance if not exists
-        if($(`#${ID}`).length === 0) {
-
+        if ($(`#${ID}`).length === 0) {
             $('body').append(`<div id=${ID}></div>`);
 
             createRoot($(`#${ID}`)[0])
                 .render(<CommandInput
                     parser={this.parser}
-                ></CommandInput>);
+                />);
 
             this.$elem = $(`#${ID}`);
             this.hide();
@@ -148,27 +141,27 @@ export class CommandShortcut implements ShortcutHandler {
             'Escape',
             ':',
             '/',
-        ]
+        ];
     }
 
     handle(key: string): boolean {
         console.log(key);
         switch (key) {
-            case ':':
-            case '/':
-                // if (this.isFocused()) {
-                //     return true;
-                // } else {
-                //     this.show();
-                //     return false;
-                // }
-                this.show();
-                return true;
-            case 'Escape':
-                this.hide();
-                return true;
-            default:
-                return true;
+        case ':':
+        case '/':
+            // if (this.isFocused()) {
+            //     return true;
+            // } else {
+            //     this.show();
+            //     return false;
+            // }
+            this.show();
+            return true;
+        case 'Escape':
+            this.hide();
+            return true;
+        default:
+            return true;
         }
     }
 
@@ -193,4 +186,4 @@ export class CommandShortcut implements ShortcutHandler {
         $('input', this.$elem).trigger('blur');
     }
 }
-////
+/// /

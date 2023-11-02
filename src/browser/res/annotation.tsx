@@ -2,7 +2,7 @@
  * Copyright (C) 2023 Zhangyi
  ********************************************************************************/
 
-import * as $ from 'jquery';
+import $ from 'jquery';
 import pDebounce from 'p-debounce';
 import React, {
     Fragment, useReducer, useEffect, useState,

@@ -1,3 +1,7 @@
+/********************************************************************************
+ * Copyright (C) 2023 Zhangyi
+ ********************************************************************************/
+
 import {
     Autocomplete,
     Box,
@@ -5,21 +9,20 @@ import {
     TextField,
     FormControl,
 } from '@mui/material';
-import {post} from '../server/request';
-import {createRoot} from 'react-dom/client';
-import {useState, useEffect} from 'react';
+import { createRoot } from 'react-dom/client';
+import { useState, useEffect } from 'react';
+import { post } from '../server/request';
 
 interface Req {
     name: string,
 }
 
 const App = () => {
-
     const [name, setName] = useState('');
     const [options, setOptions] = useState([]);
 
     const onChange = (event:any, value: any) => {
-        console.log(value);//s
+        console.log(value);// s
         if (value !== undefined && value !== null) {
             setName(value.name);
         }
@@ -29,48 +32,42 @@ const App = () => {
         post('/res', {
             method: name,
             params: [],
-        }).then(data => {
+        }).then((data) => {
             // console.log(data);
-        }).catch(error => {
+        }).catch((error) => {
             console.log(error);
         });
     };
 
     useEffect(() => {
-
         post('/res', {
             method: 'reqlist',
             params: [],
-        }).then(data => {
+        }).then((data) => {
             console.log(data);
-            setOptions((data as Req[]).map((item: Req) => {
-                return {...item, label: item.name};
-            }));
+            setOptions((data as Req[]).map((item: Req) => ({ ...item, label: item.name })));
         });
-
     }, []);
 
     return (
 
-        <FormControl
-        >
+        <FormControl>
             {/* @ts-ignore */}
             <Autocomplete
                 onChange={onChange}
                 options={options as Req[]}
                 getOptionLabel={(option: Req) => option.name}
-                renderInput={(params) =>
+                renderInput={(params) => (
                     <TextField
                         {...params}
-                        type='text'
+                        type="text"
                         label="Requests"
                     />
-                }
+                )}
                 sx={{
-                    width: 500
+                    width: 500,
                 }}
-            >
-            </Autocomplete>
+            />
 
             <Button
                 onClick={submit}
@@ -80,18 +77,15 @@ const App = () => {
 
         </FormControl>
 
-
-    )
-
-}
+    );
+};
 
 export class Request {
-
     constructor(private containerId: string) {
 
     }
 
     create() {
-        createRoot(document.querySelector(`#${this.containerId}`)).render(<App/>);
+        createRoot(document.querySelector(`#${this.containerId}`)).render(<App />);
     }
 }
