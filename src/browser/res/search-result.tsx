@@ -13,8 +13,6 @@ import CloseIcon from '@mui/icons-material/Close';
 import { unmountComponentAtNode } from 'react-dom';
 import { createRoot } from 'react-dom/client';
 
-const pagemap = require('pagemap');
-
 export interface SearchResult {
     title: string,
     text: string;

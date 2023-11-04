@@ -18,6 +18,9 @@ type ViewEvent = {
     data: any
 }
 
+/**
+ * Popup when text is selected.
+ */
 const TooltipView = (props: any) => {
     const { tooltip } = props;
 
@@ -136,7 +139,10 @@ type AnnotationViewProps = {
     islocal: boolean
 }
 
-export const AnnotationView = ({
+/**
+ * Annotation boxes you can view, edit and delete comments.
+ */
+const AnnotationView = ({
     ann,
     note,
     islocal,
@@ -477,7 +483,7 @@ type AnnotationsViewProps = {
     ann: Ann
 }
 
-export const AnnotationsView = ({
+const AnnotationsView = ({
     ann,
 }: AnnotationsViewProps) => {
     const [force, forceUpdate] = useReducer((x) => x + 1, 0);
@@ -575,7 +581,12 @@ export class Ann {
         this.tooltip = new Tooltip(this, 'res-ann-tooltip-container');
 
         this.$container = $('#res-ann-container');
-        this.isLocal && this.textSelect();
+
+        // listen text select event if the server is local hosted
+        // remote is hosted on github.
+        if (this.isLocal) {
+            this.textSelect();
+        }
 
         const promises: Promise<any>[] = [];
         // render annotations to page
@@ -818,7 +829,7 @@ export class Ann {
         // @ts-ignore
         return new Promise((resolve, reject) => {
             setTimeout(() => {
-                reject({ status: -2, reason: 'request timeout' });
+                reject(new Error('request timeout'));
             }, seconds * 1000);
         });
     }
