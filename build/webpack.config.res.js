@@ -1,4 +1,6 @@
-// Generated using webpack-cli https://github.com/webpack/webpack-cli
+/********************************************************************************
+ * Copyright (C) 2023 Zhangyi
+ ********************************************************************************/
 
 const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
@@ -11,7 +13,7 @@ const staticDestPath = path.resolve(__dirname, '../dist/res');
 
 const config = {
     entry: './src/browser/res/index.tsx',
-    devtool: "source-map",
+    devtool: 'source-map',
     output: {
         path: path.resolve(__dirname, '../dist/res'),
     },
@@ -22,21 +24,22 @@ const config = {
                 use: [{
                     loader: 'ts-loader',
                     options: {
-                        configFile: "tsconfig.webpack.json",
+                        configFile: 'tsconfig.browser.json',
                         compilerOptions: {
-                            'sourceMap': true,
+                            sourceMap: true,
                         },
-                    }},
-                    "source-map-loader"
+                    },
+                },
+                'source-map-loader',
                 ],
                 exclude: [
                     '/node_modules/',
-                    '/src/node'
+                    '/src/node',
                 ],
             },
             {
                 test: /\.css$/i,
-                use: [stylesHandler,'css-loader'],
+                use: [stylesHandler, 'css-loader'],
             },
             {
                 test: /\.(eot|svg|ttf|woff|woff2|png|jpg|gif)$/i,
@@ -55,15 +58,15 @@ const config = {
             patterns: [
                 {
                     context: `${staticSrcPath}`,
-                    from: `**/*`,
-                    to: `${staticDestPath}`
+                    from: '**/*',
+                    to: `${staticDestPath}`,
                 },
             ],
         }),
     ],
     watchOptions: {
         ignored: './src/common/db.json',
-    }
+    },
 };
 
 module.exports = () => {

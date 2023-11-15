@@ -11,7 +11,9 @@ export class BrowserDb extends Db {
             assert: {
                 type: 'json',
             },
-        }).then((d) => this.db_ = d);
+        }).then((d) => {
+            this.db_ = d.default;
+        });
 
         const ann = this.db_.annotation;
         ann.records.forEach((record) => {

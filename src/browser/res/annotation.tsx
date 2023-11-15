@@ -5,7 +5,7 @@
 import $ from 'jquery';
 import pDebounce from 'p-debounce';
 import React, {
-    Fragment, useReducer, useEffect, useState,
+    Fragment, useReducer, useEffect, useState, ChangeEvent,
 } from 'react';
 import { MarkOptions } from 'mark.js';
 import Mark = require('mark.js');
@@ -18,12 +18,16 @@ type ViewEvent = {
     data: any
 }
 
+type TooltipViewProps = {
+    tooltip: Tooltip
+}
+
 /**
  * Popup when text is selected.
  */
-const TooltipView = (props: any) => {
-    const { tooltip } = props;
-
+const TooltipView = ({
+    tooltip,
+}: TooltipViewProps) => {
     const [pos, setPos] = useState({ x: 0, y: 0 });
     const [display, setDisplay] = useState('none');
 
@@ -50,7 +54,7 @@ const TooltipView = (props: any) => {
         setDisplay('none');
     };
 
-    const handleClick = (e: any) => {
+    const handleClick = () => {
         tooltip.newAnnotation();
         handleHide();
     };
@@ -91,8 +95,8 @@ const TooltipView = (props: any) => {
     );
 };
 
-export class Tooltip {
-    private callback: (event: any) => void;
+class Tooltip {
+    private callback: (event: unknown) => void;
 
     public newAnn_: Note;
 
@@ -129,6 +133,7 @@ export class Tooltip {
     }
 
     newAnnotation() {
+        console.log('new annotation', this.newAnn_);
         this.ann.newAnnotation(this.newAnn_);
     }
 }
@@ -136,7 +141,7 @@ export class Tooltip {
 type AnnotationViewProps = {
     ann: Ann,
     note: Note,
-    islocal: boolean
+    local: boolean
 }
 
 /**
@@ -145,7 +150,7 @@ type AnnotationViewProps = {
 const AnnotationView = ({
     ann,
     note,
-    islocal,
+    local,
 }: AnnotationViewProps) => {
     const { id } = note;
     const [content, setContent] = useState(note.note);
@@ -155,75 +160,21 @@ const AnnotationView = ({
     const annotatedElem = $(note.selector.path)[0];
     if (annotatedElem === undefined) {
         console.log(`invalid selector ${note.selector.path}`);
-        return <></>;
+        return;
     }
 
-    // const top = annotatedElem.getBoundingClientRect().top + document.documentElement.scrollTop;
-    // const zIndex = Math.floor(document.body.offsetHeight) - Math.floor(top);
-
-    const mark = () => {
-        console.log(`mark: {${id}: ${note?.pos.top}, ${note?.pos.left}}`);
-
-        // already marked
-        if ($(`mark.${id}`).length !== 0) {
-            return;
-        }
-
-        // console.log(`mark ${id}`);
-        const mk = ann.mark(id, note.selector.path);
-
-        let minTop = Number.MAX_SAFE_INTEGER;
-        let minLeft = Number.MAX_SAFE_INTEGER;
-
-        mk.mark(note.selected, {
-            separateWordSearch: false,
-            acrossElements: true,
-            // debug: true,
-            // exclude: [
-            //   'mark'
-            // ],
-            // accuracy: 'exactly',
-
-            // it has bugs, may not be called
-            each: (elem: Element) => {
-                let { top, left } = $(elem).offset();
-                top = Math.floor(top);
-                left = Math.floor(left);
-                minTop = Math.min(minTop, top);
-                minLeft = Math.min(minLeft, left);
-
-                $(elem).on('click', () => {
-                    ann.show(id);
-                    console.log(elem);
-                }).attr('class', id);
-
-                console.log(`min: {${minTop}, ${minLeft}}`);
-            },
-
-            done: (nums) => {
-                console.log(`total marked: ${nums}`);
-                // workaround: previous saved start, end is incorrect
-                // update pos
-                if (islocal) {
-                    const newNote = { ...note };
-                    if (newNote?.pos?.top !== minTop
-                        || newNote?.pos?.left !== minLeft) {
-                        console.log(`update ${id}: ${newNote.pos.top} ${newNote.pos.left} **`);
-                        newNote.pos = { top: minTop, left: minLeft };
-                        ann.updateAnn(newNote).then(() => {
-                            Object.assign(note, newNote);
-                        });
-                    }
-                }
-            },
-
-            noMatch(term: string) {
-                console.log(`noMatch: ${term}`);
-            },
+    useEffect(() => {
+        console.log('render AnnotationView', note.pos.top, note.selected);
+        ann.on((event: ViewEvent) => {
+            if (event.name === 'blink') {
+                blinkBorder(event.data.index);
+            }
         });
-    };
+    }, []);
 
-    const handleChange = (e: any) => {
+    // mark all notes in a document
+
+    const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
         setContent(e.target.value);
     };
 
@@ -239,32 +190,32 @@ const AnnotationView = ({
         $(`#res-ann-${id} .res-ann-note-editor`).show();
     };
 
-    const handleChangeNewTag = (e: any) => {
+    const handleChangeNewTag = (e: ChangeEvent<HTMLInputElement>) => {
         setNewTag(e.target.value.trim());
     };
 
-    const handleNewTagBlur = (e: any) => {
+    const handleNewTagBlur = () => {
         if (newTag !== '') {
             ann.addTag(note.id, newTag);
         }
     };
 
-    const handleClick = (e: any) => {
+    const handleClick = () => {
         // move to annotated text
         annotatedElem.scrollIntoView({
             block: 'center',
         });
     };
 
-    const handleMouseEnter = (e: any) => {
+    const handleMouseEnter = () => {
         setDel('visible');
     };
 
-    const handleMouseLeave = (e: any) => {
+    const handleMouseLeave = () => {
         setDel('hidden');
     };
 
-    const handleDel = (e: any) => {
+    const handleDel = () => {
         ann.delAnnotation(note.id)
             .then(/* no need due to this bad interface, it will remove all () => unmark() */);
     };
@@ -289,18 +240,6 @@ const AnnotationView = ({
     const handleDelTag = (idx: number) => {
         ann.delTag(note.id, idx);
     };
-
-    useEffect(() => {
-        ann.on((event: ViewEvent) => {
-            if (event.name === 'blink') {
-                blinkBorder(event.data.index);
-            }
-        });
-    }, []);
-
-    useEffect(() => {
-        mark();
-    });
 
     return (
         <div
@@ -357,16 +296,16 @@ const AnnotationView = ({
                 >
                     {/* rendering node */}
                     {
-                        content?.split('\n').map((para, index) => (
+                        content?.split('\n').map((para) => (
                             <p
-                                key={`res-ann-${id}-${index}`}
+                                key={`res-ann-${id}-line`}
                             >
                                 {para}
                             </p>
                         ))
                     }
                 </div>
-                {islocal
+                {local
                 && (
                     <textarea
                         className="res-ann-note-editor"
@@ -396,7 +335,7 @@ const AnnotationView = ({
                         margin: 0,
                     }}
                 >
-                    {islocal
+                    {local
                     && (
                         <span>
                             <i
@@ -431,7 +370,7 @@ const AnnotationView = ({
                                             {tag}
                                         </span>
                                     </a>
-                                    {islocal
+                                    {local
                                         && (
                                             <i
                                                 className="fa fa-solid fa-xmark"
@@ -442,7 +381,7 @@ const AnnotationView = ({
                             ))
                         }
                     </div>
-                    {islocal
+                    {local
                     && (
                         <>
                             <input
@@ -483,10 +422,88 @@ type AnnotationsViewProps = {
     ann: Ann
 }
 
+/**
+ * Right-side annotation list
+ */
 const AnnotationsView = ({
     ann,
 }: AnnotationsViewProps) => {
     const [force, forceUpdate] = useReducer((x) => x + 1, 0);
+
+    const mark = (note: Note) => {
+        console.log(`mark: {${note.id}: ${note?.pos.top}, ${note?.pos.left}}, ${note?.selected}`);
+
+        // already marked
+        if ($(`mark.${note.id}`).length !== 0) {
+            console.log('already marked');
+            return;
+        }
+
+        // console.log(`mark ${id}`);
+        const mk = ann.mark(note.id, note.selector.path);
+
+        let minTop = Number.MAX_SAFE_INTEGER;
+        let minLeft = Number.MAX_SAFE_INTEGER;
+
+        mk.mark(note.selected, {
+            separateWordSearch: false,
+            acrossElements: true,
+            // debug: true,
+            // exclude: [
+            //   'mark'
+            // ],
+            // accuracy: 'exactly',
+
+            // it has bugs, may not be called
+            each: (elem: Element) => {
+                let { top, left } = $(elem).offset();
+                top = Math.floor(top);
+                left = Math.floor(left);
+                minTop = Math.min(minTop, top);
+                minLeft = Math.min(minLeft, left);
+
+                $(elem).on('click', () => {
+                    ann.show(note.id);
+                    console.log(elem);
+                }).attr('class', note.id);
+
+                console.log(`min: {${minTop}, ${minLeft}}`);
+            },
+
+            done: (nums) => {
+                console.log(`total marked: ${nums}`);
+                // workaround: previous saved start, end is incorrect
+                // update pos
+                if (ann.local) {
+                    const newNote = { ...note };
+                    if (newNote?.pos?.top !== minTop
+                        || newNote?.pos?.left !== minLeft) {
+                        console.log(`update ${note.id}: ${newNote.pos.top} ${newNote.pos.left} **`);
+                        newNote.pos = { top: minTop, left: minLeft };
+                        ann.updateAnn(newNote).then(() => {
+                            Object.assign(note, newNote);
+                        });
+                    }
+                }
+            },
+
+            noMatch(term: string) {
+                console.log(`noMatch: ${term}`);
+            },
+        });
+    };
+
+    const isInsideViewPort = (top: number) => document.documentElement.scrollTop < top
+        && document.documentElement.scrollTop > top - document.documentElement.clientHeight;
+
+    const scrollListener = () => {
+        console.log('scroll', document.documentElement.scrollTop, document.documentElement.clientHeight);
+        ann.notes.forEach((note) => {
+            if (isInsideViewPort(note.pos.top)) {
+                mark(note);
+            }
+        });
+    };
 
     useEffect(() => {
         ann.on((event: ViewEvent) => {
@@ -498,12 +515,18 @@ const AnnotationsView = ({
             }
         });
 
+        window.addEventListener('scroll', scrollListener);
+
         // hide
         $('#res-ann-all').hide();
+
+        return () => window.removeEventListener('scroll', scrollListener);
     }, []);
 
     useEffect(() => {
-        ann.unmark();
+        // ann.unmark();
+
+        scrollListener();
     });
 
     const handleClick = () => {
@@ -540,7 +563,7 @@ const AnnotationsView = ({
                                 key={note.id}
                                 ann={ann}
                                 note={note}
-                                islocal={ann.isLocal}
+                                local={ann.local}
                             />
                         ))
                 }
@@ -552,45 +575,49 @@ const AnnotationsView = ({
 export class Ann {
     public notes: Note[];
 
-    private callbacks: ((event: any) => void)[] = [];
+    private callbacks: ((event: unknown) => void)[] = [];
 
     private path: string;
 
     private $container: JQuery;
 
-    public isLocal: boolean;
+    public local: boolean;
 
     private tooltip: Tooltip;
+
+    private readonly elem = 'res-ann-container';
+
+    private readonly elemId = '#res-ann-container';
 
     marks: Map<string, Mark> = new Map<string, Mark>();
 
     constructor(
-        private readonly containerId: string,
+        private readonly parent: string,
         private db_: Db,
     ) {
         const url = new URL(window.location.href);
         this.path = url.pathname + url.search;
-        this.isLocal = url.hostname === 'localhost';
+        this.local = url.hostname === 'localhost';
         this.notes = [];
 
-        const $ann = $('#res-ann-container');
+        const $ann = $(this.elemId);
         if ($ann.length === 0) {
-            $('body').append(`<div id="res-ann-container" class="res-ann-container-${this.containerId}"></div>`);
+            $('body').append(`<div id=${this.elem} class="${this.elem}-${this.parent}"></div>`);
         }
 
         this.tooltip = new Tooltip(this, 'res-ann-tooltip-container');
 
-        this.$container = $('#res-ann-container');
+        this.$container = $(this.elemId);
 
         // listen text select event if the server is local hosted
-        // remote is hosted on github.
-        if (this.isLocal) {
+        // remote is hosted on GitHub.
+        if (this.local) {
             this.textSelect();
         }
 
-        const promises: Promise<any>[] = [];
+        const promises: Promise<unknown>[] = [];
         // render annotations to page
-        this.db_.annotation().get(this.path)?.map((n) => {
+        this.db_.annotation().get(this.path)?.forEach((n) => {
             const newNote = { ...n };
 
             // for old db version
@@ -616,7 +643,7 @@ export class Ann {
         Promise.all(promises);
     }
 
-    on(callback: any) {
+    on(callback: (event: unknown) => void) {
         this.callbacks.push(callback);
     }
 
@@ -641,12 +668,17 @@ export class Ann {
         return mk;
     }
 
-    unmark(options?: MarkOptions) {
-        this.marks.forEach((mk) => mk.unmark(options));
+    unmark(id: string) {
+        console.log('unmark', id);
+        const mk = this.marks.get(id);
+        if (mk !== undefined) {
+            mk.unmark();
+            this.marks.delete(id);
+        }
     }
 
     private textSelect() {
-        $(`#${this.containerId}`)
+        $(`#${this.parent}`)
             .on('mouseup', (e) => {
                 console.log('mouseup');
                 const selection = document.getSelection();
@@ -655,22 +687,24 @@ export class Ann {
                 if (text === '') {
                     this.hideTooltip();
                 } else {
-                    // console.log(`selected: ${text}`);
+                    console.log(`selected: ${text}`);
 
-                    // let ranges = [];
-                    // for(let i = 0; i < selection.rangeCount; i++) {
-                    //     ranges[i] = selection.getRangeAt(i);
-                    //     console.log(ranges[i])
-                    //     const rect1 = ranges[i].getBoundingClientRect();
-                    //     console.log(rect1)
-                    //     const rect2 = ranges[i].getClientRects();
-                    //     console.log(rect2)
-                    // }
+                    const ranges = [];
+                    for (let i = 0; i < selection.rangeCount; i++) {
+                        ranges[i] = selection.getRangeAt(i);
+                        console.log(ranges[i]);
+                        const rect1 = ranges[i].getBoundingClientRect();
+                        console.log(rect1);
+                        const rect2 = ranges[i].getClientRects();
+                        console.log(rect2);
+                    }
 
                     const range = selection.getRangeAt(0);
-                    // const rect = range.getBoundingClientRect();
-                    // const start = range.startOffset;  // offset of text node
-                    // const end = range.endOffset;  // offset of text node
+                    const rect = range.getBoundingClientRect();
+                    const top = rect.top + document.documentElement.scrollTop;
+                    const left = rect.left + document.documentElement.scrollLeft;
+
+                    console.log('selected', top, left);
 
                     const path = this.getPath(range.startContainer.parentElement);
                     // const offsetTop = $(range.startContainer.parentElement).offset().top;
@@ -688,7 +722,7 @@ export class Ann {
                                 },
                                 note: '',
                                 tags: [],
-                                pos: { top: 0, left: 0 },
+                                pos: { top, left },
                             },
                             e.clientX,
                             e.clientY,
@@ -720,8 +754,8 @@ export class Ann {
     private getPath(elem: HTMLElement) {
         let path = '';
         while (elem !== null) {
-            if (elem.id === this.containerId) {
-                path = `#${this.containerId} ${path}`;
+            if (elem.id === this.parent) {
+                path = `#${this.parent} ${path}`;
                 break;
             }
 
@@ -733,7 +767,7 @@ export class Ann {
         }
         console.log(`get path: ${path}`);
 
-        if (path.startsWith(`#${this.containerId}`)) {
+        if (path.startsWith(`#${this.parent}`)) {
             return path;
         }
         return undefined;
@@ -749,12 +783,13 @@ export class Ann {
             });
     }
 
-    async delAnnotation(id: string): Promise<any> {
+    async delAnnotation(id: string): Promise<unknown> {
         return this.request('resAnnDel', this.path, id)
             .then(() => {
                 const idx = this.notes.findIndex((n) => n.id === id);
                 if (idx !== -1) {
                     this.notes.splice(idx, 1);
+                    this.unmark(id);
                     this.callbacks.forEach((callback) => callback({
                         name: 'invalidation',
                     }));
@@ -762,7 +797,7 @@ export class Ann {
             });
     }
 
-    async delTag(id: string, idx: number): Promise<any> {
+    async delTag(id: string, idx: number): Promise<unknown> {
         return this.request('resAnnDelTag', this.path, id, idx)
             .then(() => {
                 const nodeIdx = this.notes.findIndex((n) => n.id === id);
@@ -775,7 +810,7 @@ export class Ann {
             });
     }
 
-    async addTag(id: string, tag: string): Promise<any> {
+    async addTag(id: string, tag: string): Promise<unknown> {
         return this.request('resAnnAddTag', this.path, id, tag)
             .then(() => {
                 const idx = this.notes.findIndex((n) => n.id === id);
@@ -788,7 +823,7 @@ export class Ann {
             });
     }
 
-    async updateAnn(n: Note): Promise<any> {
+    async updateAnn(n: Note): Promise<unknown> {
         return this.request('resAnnUpdate', this.path, JSON.stringify(n))
             .then(() => {
                 this.callbacks.forEach((callback) => callback({
@@ -806,12 +841,15 @@ export class Ann {
         this.tooltip.show(x, y, n);
     }
 
-    debounced = (func: any, ...args: any) => pDebounce(func, 2000).bind(this)(...args);
+    debounced = (
+        func: Parameters<typeof pDebounce>[0],
+        ...args: unknown[]
+    ) => pDebounce(func, 2000).bind(this)(...args);
 
     debouncedRequest = pDebounce(this.request, 2000).bind(this);
 
-    request(method: string, ...params: any[]): Promise<any> {
-        if (this.isLocal) {
+    request(method: string, ...params: unknown[]): Promise<unknown> {
+        if (this.local) {
             // set timeout promise
             const timeout = this.timeoutAfter(10);
 
@@ -822,12 +860,12 @@ export class Ann {
             });
             return Promise.race([timeout, req]);
         }
-        return Promise.reject();
+        return Promise.reject(new Error('not local hosted'));
     }
 
-    private timeoutAfter(seconds: number): Promise<any> {
+    private timeoutAfter(seconds: number): Promise<unknown> {
         // @ts-ignore
-        return new Promise((resolve, reject) => {
+        return new Promise((_, reject) => {
             setTimeout(() => {
                 reject(new Error('request timeout'));
             }, seconds * 1000);

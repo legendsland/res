@@ -141,10 +141,6 @@ const App = ({
     );
 };
 
-const onload = (db: BrowserDb) => {
-    new Ann('pdf-container', db);
-};
-
 (async () => {
     // append css
     $('head').append('<link href="/res/dist/assets/fontawesome/css/all.css" rel="stylesheet">');
@@ -157,10 +153,6 @@ const onload = (db: BrowserDb) => {
     const $body = $('body');
     const url = new URL(window.location.href);
     const { pathname } = url;
-
-    window.addEventListener('scroll', () => {
-        console.log(document.documentElement.scrollTop, document.body.scrollTop);
-    });
 
     if (url.search.startsWith('?pdf=')) {
         const $pdf = $('#pdf-container');
@@ -177,7 +169,9 @@ const onload = (db: BrowserDb) => {
             .render(
                 <PDFView
                     url={pdfUrl}
-                    onload={() => onload(db)}
+                    onload={() => {
+                        new Ann('pdf-container', db);
+                    }}
                 />,
             );
     } else {
