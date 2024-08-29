@@ -108,6 +108,7 @@ export class Epub {
         const htmlFiles: {id: string, href: string }[] = [];
         this.$rootfile(`manifest > item[media-type="${MediaType.xhtml_xml}"]
 , manifest > item[media-type="${MediaType.html}"]`)
+            .filter((index: number, element: cheerio.TagElement) => !element.attribs.href.startsWith('http') )
             .each((index: number, element: cheerio.TagElement) => htmlFiles.push({
                 id: element.attribs.id,
                 href: path.join(this.root, rootfileDir, element.attribs.href),
@@ -121,6 +122,8 @@ export class Epub {
             if (ai === bi) return 0;
             return ai < bi ? -1 : 1;
         }).map((a) => a.href);
+
+        console.log(sortedHtmlFiles);
 
         // merge these files
         const html = this.mergeAll(head, sortedHtmlFiles);
