@@ -283,7 +283,11 @@ export class Epub {
             && !val.startsWith('https://')
         ) {
             const ext = path.parse(val).ext.substring(1);
-            const prefix = `data:image/${ext};base64,`;
+            let _ext = ext;
+            if (ext === 'svg') {
+                _ext = 'svg+xml'
+            }
+            const prefix = `data:image/${_ext};base64,`;
             const file = path.join(dir, val);
             if (fs.existsSync(file)) {
                 elem.attribs[attr] = prefix + readFileSync(file, { encoding: 'base64' });
@@ -293,7 +297,11 @@ export class Epub {
 
     private getBase64Image(imageFile: string) {
         const ext = path.parse(imageFile).ext.substring(1);
-        const prefix = `data:image/${ext};base64,`;
+        let _ext = ext;
+        if (ext === 'svg') {
+            _ext = 'svg+xml'
+        }
+        const prefix = `data:image/${_ext};base64,`;
         if (fs.existsSync(imageFile)) {
             return prefix + readFileSync(imageFile, { encoding: 'base64' });
         }
