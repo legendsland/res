@@ -431,11 +431,11 @@ const AnnotationsView = ({
     const [force, forceUpdate] = useReducer((x) => x + 1, 0);
 
     const mark = (note: Note) => {
-        console.log(`mark: {${note.id}: ${note?.pos.top}, ${note?.pos.left}}, ${note?.selected}`);
+        // console.log(`mark: {${note.id}: ${note?.pos.top}, ${note?.pos.left}}, ${note?.selected}`);
 
         // already marked
         if ($(`mark.${note.id}`).length !== 0) {
-            console.log('already marked');
+            // console.log('already marked');
             return;
         }
 
@@ -497,7 +497,7 @@ const AnnotationsView = ({
         && document.documentElement.scrollTop > top - document.documentElement.clientHeight;
 
     const scrollListener = () => {
-        console.log('scroll', document.documentElement.scrollTop, document.documentElement.clientHeight);
+        // console.log('scroll', document.documentElement.scrollTop, document.documentElement.clientHeight);
         ann.notes.forEach((note) => {
             if (isInsideViewPort(note.pos.top)) {
                 mark(note);
