@@ -18,7 +18,7 @@ import { Note } from '../../common/db';
 
 const cors = require('cors');
 const bodyParser = require('body-parser');
-
+const compression = require('compression')
 const nlp = require('compromise');
 nlp.extend(require('compromise-ngrams')); // done!
 
@@ -30,6 +30,7 @@ export async function startServer() {
     const port = 34701;
 
     app.use(cors());
+    app.use(compression());
     app.use(express.static(root));
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({
