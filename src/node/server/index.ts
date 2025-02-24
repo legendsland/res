@@ -7,12 +7,9 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as util from 'util';
 import * as cheerio from 'cheerio';
-// export const RED = require("node-red");
 import * as http from 'http';
 import { removeStopwords } from 'stopword';
 import { Neo4jClient, testConnection } from './neo4j/client';
-import { words } from './nlp';
-import { ProgramRunner } from './program';
 import { NodeDb } from './res';
 import { Note } from '../../common/db';
 
@@ -49,27 +46,6 @@ export async function startServer() {
 
     app.get('/res', (req, res) => {
         res.sendFile('index.html', { root: `${root}` });
-    });
-
-    app.get('/notebook', (req, res) => {
-        res.sendFile('/res/dist/notebook/index.html', { root: `${root}` });//
-    });
-
-    // google programmablesearchengine
-    app.get('/search', (req, res) => {
-        res.sendFile('/res/dist/search/index.html', { root: `${root}` });//
-    });
-
-    app.get('/search/gcse-a47d2a20d46db4877.html', (req, res) => {
-        res.sendFile('/res/dist/search/gcse-a47d2a20d46db4877.html', { root: `${root}` });//
-    });
-
-    app.get('/search/gcse-97c555b677d12465f.html', (req, res) => {
-        res.sendFile('/res/dist/search/gcse-97c555b677d12465f.html', { root: `${root}` });//
-    });
-
-    app.get('/search/gcse-a4690bf98adbc4c10.html', (req, res) => {
-        res.sendFile('/res/dist/search/gcse-a4690bf98adbc4c10.html', { root: `${root}` });//
     });
 
     const routes = {
