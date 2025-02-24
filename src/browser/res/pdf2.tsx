@@ -5,7 +5,10 @@
 import * as pdfjs from 'pdfjs-dist';
 import { useEffect } from 'react';
 
-const workerSrc = require('pdfjs-dist/build/pdf.worker.entry');
+const workerSrc = new URL(
+    'pdfjs-dist/build/pdf.worker.js',
+    import.meta.url,
+).toString();
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
 

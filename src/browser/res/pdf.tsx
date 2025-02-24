@@ -30,7 +30,10 @@ import {
 import '@react-pdf-viewer/core/lib/styles/index.css';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 
-const workerSrc = require('pdfjs-dist/build/pdf.worker.mjs');
+const workerSrc = new URL(
+    'pdfjs-dist/build/pdf.worker.js',
+    import.meta.url,
+).toString();
 
 export type PDFViewerProperties = {
     url: string,

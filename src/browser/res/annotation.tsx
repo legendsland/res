@@ -8,7 +8,7 @@ import React, {
     Fragment, useReducer, useEffect, useState, ChangeEvent,
 } from 'react';
 import { MarkOptions } from 'mark.js';
-import Mark = require('mark.js');
+import Mark from 'mark.js';
 import { createRoot } from 'react-dom/client';
 import { post } from '../server/request';
 import { Db, Note } from '../../common/db';
