@@ -10,8 +10,7 @@ import {
     Box, Collapse, ListItemText, Paper,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { unmountComponentAtNode } from 'react-dom';
-import { createRoot } from 'react-dom/client';
+import {createRoot, Root} from 'react-dom/client';
 
 export interface SearchResult {
     title: string,
@@ -48,8 +47,6 @@ const SearchResultView = ({
     };
 
     const handleClose = () => {
-        const $elem = $(`#${CONTAINER_ID}`);
-        unmountComponentAtNode($elem[0]);
         mgr.close();
     };
 
@@ -107,8 +104,10 @@ const SearchResultView = ({
 };
 
 export class SearchResultManager {
+    private _root: Root | undefined;
+
     constructor(
-        readonly dispose?: ()=>void,
+        readonly dispose?: () => void,
     ) {
     }
 
@@ -116,7 +115,8 @@ export class SearchResultManager {
         const $container = $(`#${CONTAINER_ID}`);
         $container.remove(); // remove first
         $('body').append(`<div id="${CONTAINER_ID}"></div>`);
-        createRoot($(`#${CONTAINER_ID}`)[0]).render(<SearchResultView
+        this._root = createRoot($(`#${CONTAINER_ID}`)[0])
+        this._root.render(<SearchResultView
             input={input}
             results={results}
             mgr={this}
@@ -125,6 +125,7 @@ export class SearchResultManager {
     }
 
     close() {
+        this._root.unmount();
         this?.dispose();
         $(`#${CONTAINER_ID}`).remove();
     }

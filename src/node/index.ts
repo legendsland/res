@@ -4,8 +4,8 @@ import {createIndex} from './cli/gen';
 import {Arguments, Argv} from 'yargs';
 import { Epub } from './cli/epub';
 import { startServer } from './server/';
-import { crawler } from './server/crawler/html/neo4j-docs';
-import { fetch } from './server/hypothes.is';
+// import { crawler } from './server/crawler/html/neo4j-docs';
+// import { fetch } from './server/hypothes.is';
 import { words } from './server/nlp';
 import {Neo4jClient} from './server/neo4j/client';
 import {merge} from './cli/merge';
@@ -71,18 +71,18 @@ const ROOT = '/home/zy/ws/res/';
             boolean: true,
             default: false
         })
-        .option('crawler', {
-            alias: 'n',
-            describe: 'Script as src link',
-            boolean: true,
-            default: false
-        })
-        .option('hypothes.is', {
-            alias: 'p',
-            describe: 'Script as src link',
-            boolean: true,
-            default: false
-        })
+        // .option('crawler', {
+        //     alias: 'n',
+        //     describe: 'Script as src link',
+        //     boolean: true,
+        //     default: false
+        // })
+        // .option('hypothes.is', {
+        //     alias: 'p',
+        //     describe: 'Script as src link',
+        //     boolean: true,
+        //     default: false
+        // })
         .option('nlp', {
             alias: 'l',
             describe: 'nlp',
@@ -142,13 +142,13 @@ const ROOT = '/home/zy/ws/res/';
         startServer();
     }
 
-    else if (argv.n) {
-        crawler();
-    }
-
-    else if (argv.p) {
-        await fetch();
-    }
+    // else if (argv.n) {
+    //     crawler();
+    // }
+    //
+    // else if (argv.p) {
+    //     await fetch();
+    // }
 
     else if (argv.l) {
         const sent = words(argv.l);
