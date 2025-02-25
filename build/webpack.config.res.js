@@ -12,6 +12,7 @@ const staticSrcPath = path.resolve(__dirname, '../src/browser/res/static');
 const staticDestPath = path.resolve(__dirname, '../dist/res');
 
 const config = {
+    target: 'web',
     entry: './src/browser/res/index.tsx',
     devtool: 'source-map',
     output: {

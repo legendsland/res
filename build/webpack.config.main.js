@@ -3,12 +3,19 @@
  ********************************************************************************/
 
 const path = require('path');
+const nodeExternals = require('webpack-node-externals');
 const CopyPlugin = require('copy-webpack-plugin');
 
 const isProduction = process.env.NODE_ENV === 'production';
 
 const config = {
     target: 'node',
+    externalsPresets: { node: true },
+    externals: [nodeExternals({
+        allowlist: [
+            /^((?!canvas).)*$/, // canvas contains native binaries
+        ],
+    })], // in order to ignore all modules in node_modules folder
     entry: './src/node/index.ts',
     devtool: 'source-map',
     output: {
