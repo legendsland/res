@@ -15,6 +15,9 @@ export type Note = {
     pos: {
         top: number,
         left: number,
+        width?: number, // pdf
+        height?: number, // pdf
+        pageIndex?: number; // pdf
     }
     note: string,
     tags: string[],

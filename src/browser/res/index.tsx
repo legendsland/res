@@ -169,9 +169,7 @@ const App = ({
             .render(
                 <PDFView
                     url={pdfUrl}
-                    onload={() => {
-                        new Ann('pdf-container', db, true);
-                    }}
+                    onload={() => new Ann('pdf-container', db, true)}
                 />,
             );
     } else {

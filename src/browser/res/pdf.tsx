@@ -2,7 +2,7 @@
  * Copyright (C) 2023 Zhangyi
  ********************************************************************************/
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 // Core viewer
 import {
     Worker,
@@ -29,6 +29,7 @@ import {
 // Import styles
 import '@react-pdf-viewer/core/lib/styles/index.css';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
+import { Ann } from './annotation';
 
 const workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.js',
@@ -37,25 +38,26 @@ const workerSrc = new URL(
 
 export type PDFViewerProperties = {
     url: string,
-    onload: () => void
+    onload: () => Ann
 }
 
 interface Note {
-    id: number;
-    content: string;
+    id: string;
+    note: string;
     highlightAreas: HighlightArea[];
-    quote: string;
+    selected: string;
 }
 
 export const PDFView = ({
     url,
     onload,
 }: PDFViewerProperties) => {
-    const [message, setMessage] = useState('');
     const [notes, setNotes] = useState<Note[]>([]);
-    let noteId = notes.length;
-    const noteEles: Map<number, HTMLElement> = new Map();
+    const noteEles: Map<string, HTMLElement> = new Map();
 
+    const ann = useRef<Ann>(null);
+
+    // select and tooltip
     const renderHighlightTarget = (props: RenderHighlightTargetProps) => (
         <div
             style={{
@@ -81,57 +83,80 @@ export const PDFView = ({
         </div>
     );
 
+    // quote and note component
     const renderHighlightContent = (props: RenderHighlightContentProps) => {
-        const addNote = () => {
-            if (message !== '') {
-                const note: Note = {
-                    id: ++noteId,
-                    content: message,
-                    highlightAreas: props.highlightAreas,
-                    quote: props.selectedText,
-                };
-                setNotes(notes.concat([note]));
-                props.cancel();
-            }
-        };
+        console.log('renderHighlightContent');
+
+        setTimeout(() => {
+            const note: Note = {
+                id: `${Date.now()}`,
+                note: '',
+                highlightAreas: props.highlightAreas,
+                selected: props.selectedText,
+            };
+            setNotes(notes.concat([note]));
+            props.cancel();
+            console.log(note);
+
+            // add to annotation
+            ann?.current.newAnnotation({
+                id: note.id,
+                selected: note.selected,
+                selector: {
+                    path: '',
+                },
+                pos: {
+                    top: note.highlightAreas[0].top,
+                    left: note.highlightAreas[0].left,
+                    width: note.highlightAreas[0].width,
+                    height: note.highlightAreas[0].height,
+                    pageIndex: note.highlightAreas[0].pageIndex,
+                },
+                note: note.note,
+                tags: [],
+                doc: 'pdf',
+            });
+        });
 
         return (
-            <div
-                style={{
-                    background: '#fff',
-                    border: '1px solid rgba(0, 0, 0, .3)',
-                    borderRadius: '2px',
-                    padding: '8px',
-                    position: 'absolute',
-                    left: `${props.selectionRegion.left}%`,
-                    top: `${props.selectionRegion.top + props.selectionRegion.height}%`,
-                    zIndex: 1,
-                }}
-            >
-                <div>
-                    <textarea
-                        rows={3}
-                        style={{
-                            border: '1px solid rgba(0, 0, 0, .3)',
-                        }}
-                        onChange={(e) => setMessage(e.target.value)}
-                    />
-                </div>
-                <div
-                    style={{
-                        display: 'flex',
-                        marginTop: '8px',
-                    }}
-                >
-                    <div style={{ marginRight: '8px' }}>
-                        <PrimaryButton onClick={addNote}>Add</PrimaryButton>
-                    </div>
-                    <Button onClick={props.cancel}>Cancel</Button>
-                </div>
-            </div>
+            <></>
+            // <div
+            //     style={{
+            //         background: '#fff',
+            //         border: '1px solid rgba(0, 0, 0, .3)',
+            //         borderRadius: '2px',
+            //         padding: '8px',
+            //         position: 'absolute',
+            //         left: `${props.selectionRegion.left}%`,
+            //         top: `${props.selectionRegion.top + props.selectionRegion.height}%`,
+            //         zIndex: 1,
+            //     }}
+            // >
+            //     <div>
+            //         <textarea
+            //             rows={3}
+            //             style={{
+            //                 border: '1px solid rgba(0, 0, 0, .3)',
+            //             }}
+            //             onChange={(e) => setMessage(e.target.value)}
+            //         />
+            //     </div>
+            //     <div
+            //         style={{
+            //             display: 'flex',
+            //             marginTop: '8px',
+            //         }}
+            //     >
+            //         <div style={{ marginRight: '8px' }}>
+            //             <PrimaryButton onClick={addNote}>Add</PrimaryButton>
+            //         </div>
+            //         <Button onClick={props.cancel}>Cancel</Button>
+            //     </div>
+            // </div>
         );
     };
 
+    // highlighted pdf text
     const renderHighlights = (props: RenderHighlightsProps) => (
         <div>
             {notes.map((note) => (
@@ -168,7 +193,20 @@ export const PDFView = ({
 
     const onDocumentLoad = (ev: DocumentLoadEvent) => {
         console.log(`onDocumentLoad ${ev.doc.numPages}, ${ev.file.name}`);
-        onload();
+        ann.current = onload();
+        const notes = ann.current.notes.map((n) => ({
+            id: n.id,
+            selected: n.selected,
+            note: n.note,
+            highlightAreas: [{
+                top: n.pos.top,
+                left: n.pos.left,
+                width: n.pos.width,
+                height: n.pos.height,
+                pageIndex: n.pos.pageIndex,
+            }],
+        }));
+        setNotes(notes);
     };
 
     const onPageChange = (ev: PageChangeEvent) => {
@@ -190,9 +228,3 @@ export const PDFView = ({
         </Worker>
     );
 };
-
-export class PDFViewer {
-    render() {
-
-    }
-}

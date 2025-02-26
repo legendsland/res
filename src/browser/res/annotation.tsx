@@ -507,8 +507,11 @@ const AnnotationsView = ({
     useEffect(() => {
         ann.on((event: ViewEvent) => {
             if (event.name === 'invalidation') {
-                console.log('invalidation');
-                forceUpdate();
+                const url = new URL(window.location.href);
+                if (!url.pathname.endsWith('pdf.html')) {
+                    console.log('invalidation');
+                    forceUpdate();
+                }
             } else if (event.name === 'show') {
                 toggle(true);
             }
