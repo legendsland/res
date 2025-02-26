@@ -18,7 +18,7 @@ export type Note = {
     }
     note: string,
     tags: string[],
-    doc: 'html' | 'pdf'
+    doc: string
 }
 
 export type Record = {

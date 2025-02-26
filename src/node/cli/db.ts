@@ -15,35 +15,37 @@ module.exports = (async () => {
     await db.load();
     const anns = db.db.annotation;
 
-    const addTags = () => {
-        anns.records.forEach((record: Record) => {
-            record.notes.forEach((n) => {
-                if (n.tags === undefined) {
-                    n.tags = [];
-                }
-            });
-        });
-        db.save();
-    };
-
-    const addPos = () => {
-        anns.records.forEach((record: Record) => {
-            record.notes.forEach((n) => {
-                if (n.pos === undefined) {
-                    n.pos = { top: 0, left: 0 };
-                }
-            });
-        });
-        db.save();
-    };
+    // const addTags = () => {
+    //     anns.records.forEach((record: Record) => {
+    //         record.notes.forEach((n) => {
+    //             if (n.tags === undefined) {
+    //                 n.tags = [];
+    //             }
+    //         });
+    //     });
+    //     db.save();
+    // };
+    //
+    // const addPos = () => {
+    //     anns.records.forEach((record: Record) => {
+    //         record.notes.forEach((n) => {
+    //             if (n.pos === undefined) {
+    //                 n.pos = { top: 0, left: 0 };
+    //             }
+    //         });
+    //     });
+    //     db.save();
+    // };
 
     const addDoc = () => {
         anns.records.forEach((record: Record) => {
             record.notes.forEach((n) => {
                 if (n.doc === undefined) {
                     if (record.url.endsWith('.pdf')) {
+                        console.log(`update pdf: ${record.url}`);
                         n.doc = 'pdf';
                     } else {
+                        console.log(`update html: ${record.url}`);
                         n.doc = 'html';
                     }
                 }
@@ -51,6 +53,8 @@ module.exports = (async () => {
         });
         db.save();
     };
+
+    addDoc();
 
     return {
         db,
