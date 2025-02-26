@@ -7,7 +7,6 @@ import pDebounce from 'p-debounce';
 import React, {
     Fragment, useReducer, useEffect, useState, ChangeEvent,
 } from 'react';
-import { MarkOptions } from 'mark.js';
 import Mark from 'mark.js';
 import { createRoot } from 'react-dom/client';
 import { post } from '../server/request';
@@ -160,7 +159,7 @@ const AnnotationView = ({
     const annotatedElem = $(note.selector.path)[0];
     if (annotatedElem === undefined) {
         console.log(`invalid selector ${note.selector.path}`);
-        return;
+        // return;
     }
 
     useEffect(() => {
@@ -594,6 +593,7 @@ export class Ann {
     constructor(
         private readonly parent: string,
         private db_: Db,
+        ro?: boolean,
     ) {
         const url = new URL(window.location.href);
         this.path = url.pathname + url.search;
@@ -611,8 +611,8 @@ export class Ann {
 
         // listen text select event if the server is local hosted
         // remote is hosted on GitHub.
-        if (this.local) {
-            this.textSelect();
+        if (!ro && this.local) {
+            this._enableTextSelect();
         }
 
         const promises: Promise<unknown>[] = [];
@@ -677,7 +677,7 @@ export class Ann {
         }
     }
 
-    private textSelect() {
+    private _enableTextSelect() {
         $(`#${this.parent}`)
             .on('mouseup', (e) => {
                 console.log('mouseup');
@@ -723,6 +723,7 @@ export class Ann {
                                 note: '',
                                 tags: [],
                                 pos: { top, left },
+                                doc: 'html',
                             },
                             e.clientX,
                             e.clientY,

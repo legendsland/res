@@ -170,7 +170,7 @@ const App = ({
                 <PDFView
                     url={pdfUrl}
                     onload={() => {
-                        new Ann('pdf-container', db);
+                        new Ann('pdf-container', db, true);
                     }}
                 />,
             );

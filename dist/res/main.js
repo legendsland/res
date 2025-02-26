@@ -87884,7 +87884,6 @@ const AnnotationView = ({ ann, note, local, }) => {
     const annotatedElem = jquery__WEBPACK_IMPORTED_MODULE_1___default()(note.selector.path)[0];
     if (annotatedElem === undefined) {
         console.log(`invalid selector ${note.selector.path}`);
-        return;
     }
     (0,react__WEBPACK_IMPORTED_MODULE_3__.useEffect)(() => {
         console.log('render AnnotationView', note.pos.top, note.selected);
@@ -88088,7 +88087,7 @@ const AnnotationsView = ({ ann, }) => {
     return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(react__WEBPACK_IMPORTED_MODULE_3__.Fragment, { children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("button", { type: "button", onClick: handleClick, children: ["Notes (", ann.notes.length, ")"] }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { id: "res-ann-all", children: ann === null || ann === void 0 ? void 0 : ann.notes.sort((a, b) => ann.compareNote(a, b)).map((note) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(AnnotationView, { ann: ann, note: note, local: ann.local }, note.id))) })] }, force));
 };
 class Ann {
-    constructor(parent, db_) {
+    constructor(parent, db_, ro) {
         var _a;
         this.parent = parent;
         this.db_ = db_;
@@ -88108,8 +88107,8 @@ class Ann {
         }
         this.tooltip = new Tooltip(this, 'res-ann-tooltip-container');
         this.$container = jquery__WEBPACK_IMPORTED_MODULE_1___default()(this.elemId);
-        if (this.local) {
-            this.textSelect();
+        if (!ro && this.local) {
+            this._enableTextSelect();
         }
         const promises = [];
         (_a = this.db_.annotation().get(this.path)) === null || _a === void 0 ? void 0 : _a.forEach((n) => {
@@ -88159,7 +88158,7 @@ class Ann {
             this.marks.delete(id);
         }
     }
-    textSelect() {
+    _enableTextSelect() {
         jquery__WEBPACK_IMPORTED_MODULE_1___default()(`#${this.parent}`)
             .on('mouseup', (e) => {
             console.log('mouseup');
@@ -88196,6 +88195,7 @@ class Ann {
                         note: '',
                         tags: [],
                         pos: { top, left },
+                        doc: 'html',
                     }, e.clientX, e.clientY);
                 }
             }
@@ -89094,50 +89094,59 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const workerSrc = new URL(/* asset import */ __webpack_require__(/*! pdfjs-dist/build/pdf.worker.js */ "./node_modules/pdfjs-dist/build/pdf.worker.js"), __webpack_require__.b).toString();
-const renderHighlightTarget = (props) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { style: {
-        background: '#eee',
-        display: 'flex',
-        position: 'absolute',
-        left: `${props.selectionRegion.left}%`,
-        top: `${props.selectionRegion.top + props.selectionRegion.height}%`,
-        transform: 'translate(0, 8px)',
-    }, children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_pdf_viewer_core__WEBPACK_IMPORTED_MODULE_2__.Tooltip, { position: _react_pdf_viewer_core__WEBPACK_IMPORTED_MODULE_2__.Position.TopCenter, target: ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_pdf_viewer_core__WEBPACK_IMPORTED_MODULE_2__.Button, { onClick: props.toggle, children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_pdf_viewer_highlight__WEBPACK_IMPORTED_MODULE_4__.MessageIcon, {}) })), content: () => (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { style: { width: '100px' }, children: "Add a note" }), offset: { left: 10, top: 30 } }) }));
-const renderHighlightContent = (props) => {
+const PDFView = ({ url, onload, }) => {
     const [message, setMessage] = (0,react__WEBPACK_IMPORTED_MODULE_1__.useState)('');
-    const addNote = () => {
-    };
-    return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", { style: {
-            background: '#fff',
-            border: '1px solid rgba(0, 0, 0, .3)',
-            borderRadius: '2px',
-            padding: '8px',
+    const [notes, setNotes] = (0,react__WEBPACK_IMPORTED_MODULE_1__.useState)([]);
+    let noteId = notes.length;
+    const noteEles = new Map();
+    const renderHighlightTarget = (props) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { style: {
+            background: '#eee',
+            display: 'flex',
             position: 'absolute',
             left: `${props.selectionRegion.left}%`,
             top: `${props.selectionRegion.top + props.selectionRegion.height}%`,
+            transform: 'translate(0, 8px)',
             zIndex: 1,
-        }, children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("textarea", { rows: 3, style: {
-                        border: '1px solid rgba(0, 0, 0, .3)',
-                    }, onChange: (e) => setMessage(e.target.value) }) }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", { style: {
-                    display: 'flex',
-                    marginTop: '8px',
-                }, children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { style: { marginRight: '8px' }, children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_pdf_viewer_core__WEBPACK_IMPORTED_MODULE_2__.PrimaryButton, { onClick: addNote, children: "Add" }) }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_pdf_viewer_core__WEBPACK_IMPORTED_MODULE_2__.Button, { onClick: props.cancel, children: "Cancel" })] })] }));
-};
-const areas = [
-    {
-        pageIndex: 0,
-        height: 1.55401,
-        width: 28.1674,
-        left: 27.5399,
-        top: 15.0772,
-    },
-];
-const renderHighlights = (props) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { children: areas
-        .filter((area) => area.pageIndex === props.pageIndex)
-        .map((area, idx) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { className: "highlight-area", style: (Object.assign({ background: 'yellow', opacity: 0.3 }, props.getCssProperties(area, props.rotation))) }, idx))) }));
-const PDFView = ({ url, onload, }) => {
+        }, children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_pdf_viewer_core__WEBPACK_IMPORTED_MODULE_2__.Tooltip, { position: _react_pdf_viewer_core__WEBPACK_IMPORTED_MODULE_2__.Position.TopCenter, target: ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_pdf_viewer_core__WEBPACK_IMPORTED_MODULE_2__.Button, { onClick: props.toggle, children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_pdf_viewer_highlight__WEBPACK_IMPORTED_MODULE_4__.MessageIcon, {}) })), content: () => (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { style: { width: '100px' }, children: "Add a note" }), offset: { left: 0, top: -8 } }) }));
+    const renderHighlightContent = (props) => {
+        const addNote = () => {
+            if (message !== '') {
+                const note = {
+                    id: ++noteId,
+                    content: message,
+                    highlightAreas: props.highlightAreas,
+                    quote: props.selectedText,
+                };
+                setNotes(notes.concat([note]));
+                props.cancel();
+            }
+        };
+        return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", { style: {
+                background: '#fff',
+                border: '1px solid rgba(0, 0, 0, .3)',
+                borderRadius: '2px',
+                padding: '8px',
+                position: 'absolute',
+                left: `${props.selectionRegion.left}%`,
+                top: `${props.selectionRegion.top + props.selectionRegion.height}%`,
+                zIndex: 1,
+            }, children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("textarea", { rows: 3, style: {
+                            border: '1px solid rgba(0, 0, 0, .3)',
+                        }, onChange: (e) => setMessage(e.target.value) }) }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", { style: {
+                        display: 'flex',
+                        marginTop: '8px',
+                    }, children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { style: { marginRight: '8px' }, children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_pdf_viewer_core__WEBPACK_IMPORTED_MODULE_2__.PrimaryButton, { onClick: addNote, children: "Add" }) }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_pdf_viewer_core__WEBPACK_IMPORTED_MODULE_2__.Button, { onClick: props.cancel, children: "Cancel" })] })] }));
+    };
+    const renderHighlights = (props) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { children: notes.map((note) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { children: note.highlightAreas
+                .filter((area) => area.pageIndex === props.pageIndex)
+                .map((area, idx) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { style: (Object.assign({ background: 'yellow', opacity: 0.4 }, props.getCssProperties(area, props.rotation))), onClick: () => console.log(note), ref: (ref) => {
+                    noteEles.set(note.id, ref);
+                } }, idx))) }, note.id))) }));
     const defaultLayoutPluginInstance = (0,_react_pdf_viewer_default_layout__WEBPACK_IMPORTED_MODULE_3__.defaultLayoutPlugin)();
     const highlightPluginInstance = (0,_react_pdf_viewer_highlight__WEBPACK_IMPORTED_MODULE_4__.highlightPlugin)({
-        trigger: _react_pdf_viewer_highlight__WEBPACK_IMPORTED_MODULE_4__.Trigger.None,
+        renderHighlightTarget,
+        renderHighlightContent,
+        renderHighlights,
     });
     const onDocumentLoad = (ev) => {
         console.log(`onDocumentLoad ${ev.doc.numPages}, ${ev.file.name}`);
@@ -90080,7 +90089,7 @@ const App = ({ config, }) => {
         window.document.title = decodeURI(name);
         (0,react_dom_client__WEBPACK_IMPORTED_MODULE_2__.createRoot)($pdf[0])
             .render((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_pdf__WEBPACK_IMPORTED_MODULE_13__.PDFView, { url: pdfUrl, onload: () => {
-                new _annotation__WEBPACK_IMPORTED_MODULE_11__.Ann('pdf-container', db);
+                new _annotation__WEBPACK_IMPORTED_MODULE_11__.Ann('pdf-container', db, true);
             } }));
     }
     else {
