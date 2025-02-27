@@ -7,7 +7,7 @@
  */
 
 import * as path from 'path';
-import cheerio from 'cheerio';
+import * as cheerio from 'cheerio';
 import * as css from 'css';
 import * as fs from 'fs';
 import { lstatSync, readFileSync, writeFileSync } from 'fs';
@@ -108,7 +108,7 @@ export class Epub {
         const htmlFiles: {id: string, href: string }[] = [];
         this.$rootfile(`manifest > item[media-type="${MediaType.xhtml_xml}"]
 , manifest > item[media-type="${MediaType.html}"]`)
-            .filter((index: number, element: cheerio.TagElement) => !element.attribs.href.startsWith('http') )
+            .filter((index: number, element: cheerio.TagElement) => !element.attribs.href.startsWith('http'))
             .each((index: number, element: cheerio.TagElement) => htmlFiles.push({
                 id: element.attribs.id,
                 href: path.join(this.root, rootfileDir, element.attribs.href),
@@ -285,7 +285,7 @@ export class Epub {
             const ext = path.parse(val).ext.substring(1);
             let _ext = ext;
             if (ext === 'svg') {
-                _ext = 'svg+xml'
+                _ext = 'svg+xml';
             }
             const prefix = `data:image/${_ext};base64,`;
             const file = path.join(dir, val);
@@ -299,7 +299,7 @@ export class Epub {
         const ext = path.parse(imageFile).ext.substring(1);
         let _ext = ext;
         if (ext === 'svg') {
-            _ext = 'svg+xml'
+            _ext = 'svg+xml';
         }
         const prefix = `data:image/${_ext};base64,`;
         if (fs.existsSync(imageFile)) {

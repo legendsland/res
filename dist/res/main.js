@@ -7917,8 +7917,13 @@ function createThemeNoVars(options = {}, ...args) {
     shape: shapeInput,
     ...other
   } = options;
-  if (options.vars) {
-    throw new Error( true ? 'MUI: `vars` is a private field used for CSS variables support.\n' + 'Please use another name.' : 0);
+  if (options.vars &&
+  // The error should throw only for the root theme creation because user is not allowed to use a custom node `vars`.
+  // `generateThemeVars` is the closest identifier for checking that the `options` is a result of `createTheme` with CSS variables so that user can create new theme for nested ThemeProvider.
+  options.generateThemeVars === undefined) {
+    throw new Error( true ? 'MUI: `vars` is a private field used for CSS variables support.\n' +
+    // #host-reference
+    'Please use another name or follow the [docs](https://mui.com/material-ui/customization/css-theme-variables/usage/) to enable the feature.' : 0);
   }
   const palette = (0,_createPalette_js__WEBPACK_IMPORTED_MODULE_0__["default"])(paletteInput);
   const systemTheme = (0,_mui_system_createTheme__WEBPACK_IMPORTED_MODULE_1__["default"])(options);
@@ -9625,7 +9630,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _StyledEngineProvider_index_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./StyledEngineProvider/index.js */ "./node_modules/@mui/styled-engine/StyledEngineProvider/StyledEngineProvider.js");
 /* harmony import */ var _GlobalStyles_index_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./GlobalStyles/index.js */ "./node_modules/@mui/styled-engine/GlobalStyles/GlobalStyles.js");
 /**
- * @mui/styled-engine v6.4.3
+ * @mui/styled-engine v6.4.6
  *
  * @license MIT
  * This source code is licensed under the MIT license found in the
