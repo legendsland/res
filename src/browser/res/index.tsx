@@ -24,6 +24,7 @@ import { BrowserDb } from './db';
 import { Ann } from './annotation';
 import { addGoogleScript } from '../google-analytics';
 import { PDFView } from './pdf';
+import { PDFAnn } from './pdf-annotation';
 
 // check running in http server or opened in browser as local file.
 function env(): string {
@@ -169,7 +170,7 @@ const App = ({
             .render(
                 <PDFView
                     url={pdfUrl}
-                    onload={() => new Ann('pdf-container', db, true)}
+                    onload={() => new PDFAnn('pdf-container', db, true)}
                 />,
             );
     } else {

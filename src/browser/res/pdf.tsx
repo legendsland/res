@@ -2,17 +2,19 @@
  * Copyright (C) 2023 Zhangyi
  ********************************************************************************/
 
-import { useEffect, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 // Core viewer
 import {
+    createStore,
+    Plugin,
     Worker,
     Viewer,
     Button,
     Position,
     Tooltip,
-    PrimaryButton,
     DocumentLoadEvent,
     PageChangeEvent,
+    PluginFunctions,
 } from '@react-pdf-viewer/core';
 
 // Plugins
@@ -29,7 +31,8 @@ import {
 // Import styles
 import '@react-pdf-viewer/core/lib/styles/index.css';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
-import { Ann } from './annotation';
+import { PDFAnn } from './pdf-annotation';
+import { Note } from '../../common/db';
 
 const workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.js',
@@ -38,24 +41,51 @@ const workerSrc = new URL(
 
 export type PDFViewerProperties = {
     url: string,
-    onload: () => Ann
+    onload: () => PDFAnn
 }
 
-interface Note {
+interface PDFNote {
     id: string;
     note: string;
     highlightAreas: HighlightArea[];
     selected: string;
 }
 
+interface StoreProps {
+    jumpToPage?(pageIndex: number): void;
+}
+
+interface JumpToPagePlugin extends Plugin {
+    jumpToPage(pageIndex: number): void;
+}
+
+const jumpToPagePlugin = (): JumpToPagePlugin => {
+    const store = useMemo(() => createStore<StoreProps>(), []);
+
+    return {
+        install: (pluginFunctions: PluginFunctions) => {
+            store.update('jumpToPage', pluginFunctions.jumpToPage);
+        },
+        jumpToPage: (pageIndex: number) => {
+            const fn = store.get('jumpToPage');
+            if (fn) {
+                fn(pageIndex);
+            }
+        },
+    };
+};
+
 export const PDFView = ({
     url,
     onload,
 }: PDFViewerProperties) => {
-    const [notes, setNotes] = useState<Note[]>([]);
+    const jumpToPagePluginInstance = jumpToPagePlugin();
+    const { jumpToPage } = jumpToPagePluginInstance;
+
+    const [notes, setNotes] = useState<PDFNote[]>([]);
     const noteEles: Map<string, HTMLElement> = new Map();
 
-    const ann = useRef<Ann>(null);
+    const ann = useRef<PDFAnn>(null);
 
     // select and tooltip
     const renderHighlightTarget = (props: RenderHighlightTargetProps) => (
@@ -88,7 +118,7 @@ export const PDFView = ({
         console.log('renderHighlightContent');
 
         setTimeout(() => {
-            const note: Note = {
+            const note: PDFNote = {
                 id: `${Date.now()}`,
                 note: '',
                 highlightAreas: props.highlightAreas,
@@ -157,31 +187,36 @@ export const PDFView = ({
     };
 
     // highlighted pdf text
-    const renderHighlights = (props: RenderHighlightsProps) => (
-        <div>
-            {notes.map((note) => (
-                <div key={note.id}>
-                    {note.highlightAreas
-                        .filter((area) => area.pageIndex === props.pageIndex)
-                        .map((area, idx) => (
-                            <div
-                                key={idx}
-                                style={({
+    const renderHighlights = (props: RenderHighlightsProps) => {
+        console.log('renderHighlights');
+        return (
+            <div>
+                {notes.map((note) => (
+                    <div key={note.id}>
+                        {note.highlightAreas
+                            .filter((area) => area.pageIndex === props.pageIndex)
+                            .map((area, idx) => (
+                                <div
+                                    key={note.id}
+                                    id={`res-pdf-highlight-${note.id}`}
+                                    style={({
 
-                                    background: 'yellow',
-                                    opacity: 0.4,
-                                    ...props.getCssProperties(area, props.rotation),
-                                })}
-                                onClick={() => console.log(note)}
-                                ref={(ref): void => {
-                                    noteEles.set(note.id, ref as HTMLElement);
-                                }}
-                            />
-                        ))}
-                </div>
-            ))}
-        </div>
-    );
+                                        background: 'yellow',
+                                        opacity: 0.4,
+                                        zIndex: 10,
+                                        ...props.getCssProperties(area, props.rotation),
+                                    })}
+                                    onClick={() => ann.current.show(note.id)}
+                                    ref={(ref): void => {
+                                        noteEles.set(note.id, ref as HTMLElement);
+                                    }}
+                                />
+                            ))}
+                    </div>
+                ))}
+            </div>
+        );
+    };
 
     // Create new plugin instance
     const defaultLayoutPluginInstance = defaultLayoutPlugin();
@@ -193,7 +228,9 @@ export const PDFView = ({
 
     const onDocumentLoad = (ev: DocumentLoadEvent) => {
         console.log(`onDocumentLoad ${ev.doc.numPages}, ${ev.file.name}`);
-        ann.current = onload();
+        const ann_ = onload();
+        ann_.on(onNotesEvent);
+        ann.current = ann_;
         const notes = ann.current.notes.map((n) => ({
             id: n.id,
             selected: n.selected,
@@ -207,6 +244,29 @@ export const PDFView = ({
             }],
         }));
         setNotes(notes);
+    };
+
+    const onNotesEvent = (event: { name: string, data: any }) => {
+        console.log(`onNotesEvent, ${event.name}`);
+        if (event.name === 'invalidation') {
+            const notes = ann.current.notes.map((n) => ({
+                id: n.id,
+                selected: n.selected,
+                note: n.note,
+                highlightAreas: [{
+                    top: n.pos.top,
+                    left: n.pos.left,
+                    width: n.pos.width,
+                    height: n.pos.height,
+                    pageIndex: n.pos.pageIndex,
+                }],
+            }));
+            setNotes(notes);
+        } else if (event.name === 'jump') {
+            const note: Note = event.data;
+            console.log(`jump to ${note?.pos?.pageIndex}`);
+            jumpToPage(note?.pos?.pageIndex);
+        }
     };
 
     const onPageChange = (ev: PageChangeEvent) => {
@@ -223,6 +283,7 @@ export const PDFView = ({
                 // Register plugins
                     defaultLayoutPluginInstance,
                     highlightPluginInstance,
+                    jumpToPagePluginInstance,
                 ]}
             />
         </Worker>

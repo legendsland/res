@@ -87888,7 +87888,7 @@ const AnnotationView = ({ ann, note, local, }) => {
     const [del, setDel] = (0,react__WEBPACK_IMPORTED_MODULE_3__.useState)('hidden');
     const annotatedElem = jquery__WEBPACK_IMPORTED_MODULE_1___default()(note.selector.path)[0];
     if (annotatedElem === undefined) {
-        console.log(`invalid selector ${note.selector.path}`);
+        console.log(`invalid selector path ${note.selector.path}`);
     }
     (0,react__WEBPACK_IMPORTED_MODULE_3__.useEffect)(() => {
         console.log('render AnnotationView', note.pos.top, note.selected);
@@ -88079,7 +88079,10 @@ const AnnotationsView = ({ ann, }) => {
         return () => window.removeEventListener('scroll', scrollListener);
     }, []);
     (0,react__WEBPACK_IMPORTED_MODULE_3__.useEffect)(() => {
-        scrollListener();
+        const url = new URL(window.location.href);
+        if (!url.pathname.endsWith('pdf.html')) {
+            scrollListener();
+        }
     });
     const handleClick = () => {
         toggle();
@@ -89074,6 +89077,354 @@ class BrowserDb extends _common_db__WEBPACK_IMPORTED_MODULE_0__.Db {
 
 /***/ }),
 
+/***/ "./src/browser/res/pdf-annotation.tsx":
+/*!********************************************!*\
+  !*** ./src/browser/res/pdf-annotation.tsx ***!
+  \********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   PDFAnn: () => (/* binding */ PDFAnn)
+/* harmony export */ });
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+/* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
+/* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(jquery__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var p_debounce__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! p-debounce */ "./node_modules/p-debounce/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var react_dom_client__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react-dom/client */ "./node_modules/react-dom/client.js");
+/* harmony import */ var _server_request__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../server/request */ "./src/browser/server/request.ts");
+var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+
+
+
+
+
+
+const AnnotationView = ({ ann, note, local, }) => {
+    const { id } = note;
+    const [content, setContent] = (0,react__WEBPACK_IMPORTED_MODULE_3__.useState)(note.note);
+    const [newTag, setNewTag] = (0,react__WEBPACK_IMPORTED_MODULE_3__.useState)('');
+    const [del, setDel] = (0,react__WEBPACK_IMPORTED_MODULE_3__.useState)('hidden');
+    const annotatedElem = jquery__WEBPACK_IMPORTED_MODULE_1___default()(`#res-pdf-highlight-${note.id}`)[0];
+    if (annotatedElem === undefined) {
+        console.log(`invalid selector path #res-pdf-highlight-${note.id}`);
+    }
+    (0,react__WEBPACK_IMPORTED_MODULE_3__.useEffect)(() => {
+        console.log('render AnnotationView', note.pos.top, note.selected);
+        ann.on((event) => {
+            if (event.name === 'blink') {
+                blinkBorder(event.data.index);
+            }
+        });
+    }, []);
+    const handleChange = (e) => {
+        setContent(e.target.value);
+    };
+    const handleFinishEdit = () => {
+        note.note = content;
+        ann.updateAnn(note);
+        jquery__WEBPACK_IMPORTED_MODULE_1___default()(`#res-ann-${id} .res-ann-note-editor`).hide();
+        jquery__WEBPACK_IMPORTED_MODULE_1___default()(`#res-ann-${id} .res-ann-note-container`).show();
+    };
+    const handleEdit = () => {
+        jquery__WEBPACK_IMPORTED_MODULE_1___default()(`#res-ann-${id} .res-ann-note-container`).hide();
+        jquery__WEBPACK_IMPORTED_MODULE_1___default()(`#res-ann-${id} .res-ann-note-editor`).show();
+    };
+    const handleChangeNewTag = (e) => {
+        setNewTag(e.target.value.trim());
+    };
+    const handleNewTagBlur = () => {
+        if (newTag !== '') {
+            ann.addTag(note.id, newTag);
+        }
+    };
+    const handleClick = () => {
+        ann.jump(note);
+    };
+    const handleMouseEnter = () => {
+        setDel('visible');
+    };
+    const handleMouseLeave = () => {
+        setDel('hidden');
+    };
+    const handleDel = () => {
+        ann.delAnnotation(note.id)
+            .then();
+    };
+    const blinkBorder = (index) => {
+        if (index === id) {
+            const $elem = jquery__WEBPACK_IMPORTED_MODULE_1___default()(`#res-ann-${id}`).parent();
+            $elem[0].scrollIntoView({
+                block: 'center',
+            });
+            $elem.css('outline', '2px red solid');
+            setTimeout(() => {
+                $elem.css('outline', 'none');
+            }, 500);
+        }
+    };
+    const handleClickTag = () => {
+    };
+    const handleDelTag = (idx) => {
+        ann.delTag(note.id, idx);
+    };
+    return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { className: "res-ann-a-container", style: {
+            display: 'flex',
+            flexDirection: 'column',
+            backgroundColor: 'white',
+            margin: '10px',
+            fontSize: '12px',
+        }, onMouseEnter: handleMouseEnter, onMouseLeave: handleMouseLeave, children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", { id: `res-ann-${id}`, className: "res-ann", style: {
+                width: '100%',
+                border: 'hidden',
+                paddingLeft: '5px',
+                paddingRight: '5px',
+            }, children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("blockquote", { style: {
+                        color: 'darkgray',
+                        paddingTop: '6px',
+                        paddingBottom: '2px',
+                        marginTop: 0,
+                        marginBottom: 0,
+                        textIndent: 0,
+                        lineHeight: '15px',
+                    }, onClick: handleClick, children: note.selected }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { className: "res-ann-note-container", children: content === null || content === void 0 ? void 0 : content.split('\n').map((para) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("p", { children: para }, `res-ann-${id}-line`))) }), local
+                    && ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("textarea", { className: "res-ann-note-editor", style: {
+                            display: 'none',
+                            width: '97%',
+                            minHeight: '100px',
+                            maxHeight: '300px',
+                            resize: 'vertical',
+                            border: 0,
+                            textAlign: 'left',
+                            marginBottom: '-10px',
+                            margin: 0,
+                        }, value: content, onChange: handleChange, onBlur: handleFinishEdit })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", { style: {
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        margin: 0,
+                    }, children: [local
+                            && ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", { children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("i", { className: "fa fa-solid fa-edit", onClick: () => handleEdit() }) })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { className: "res-ann-tags", style: {
+                                display: 'flex',
+                                margin: 0,
+                            }, children: note.tags.map((tag, idx) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", { className: "res-ann-a-tag", style: {
+                                    fontSize: 'smaller',
+                                }, children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("a", { className: "res-ann-tag", onClick: handleClickTag, style: {
+                                            color: 'darkgray',
+                                        }, children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", { children: tag }) }), local
+                                        && ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("i", { className: "fa fa-solid fa-xmark", onClick: () => handleDelTag(idx) }))] }))) }), local
+                            && ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.Fragment, { children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("input", { style: {
+                                            fontSize: '12px',
+                                            border: 0,
+                                            textAlign: 'left',
+                                            paddingLeft: '10px',
+                                            width: '100%',
+                                            margin: 0,
+                                        }, value: newTag, onChange: handleChangeNewTag, onBlur: handleNewTagBlur, placeholder: "\uF02C" }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { style: {
+                                            visibility: del,
+                                            fontSize: '14px',
+                                        }, children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("i", { className: "fa fa-solid fa-xmark", onClick: handleDel }) })] }))] })] }) }));
+};
+const AnnotationsView = ({ ann, }) => {
+    const [force, forceUpdate] = (0,react__WEBPACK_IMPORTED_MODULE_3__.useReducer)((x) => x + 1, 0);
+    const isInsideViewPort = (top) => document.documentElement.scrollTop < top
+        && document.documentElement.scrollTop > top - document.documentElement.clientHeight;
+    const scrollListener = () => {
+        ann.notes.forEach((note) => {
+            if (isInsideViewPort(note.pos.top)) {
+            }
+        });
+    };
+    (0,react__WEBPACK_IMPORTED_MODULE_3__.useEffect)(() => {
+        ann.on((event) => {
+            if (event.name === 'invalidation') {
+                console.log('invalidation');
+                forceUpdate();
+            }
+            else if (event.name === 'show') {
+                toggle(true);
+            }
+        });
+        window.addEventListener('scroll', scrollListener);
+        jquery__WEBPACK_IMPORTED_MODULE_1___default()('#res-ann-all').hide();
+        return () => window.removeEventListener('scroll', scrollListener);
+    }, []);
+    (0,react__WEBPACK_IMPORTED_MODULE_3__.useEffect)(() => {
+        const url = new URL(window.location.href);
+        if (!url.pathname.endsWith('pdf.html')) {
+            scrollListener();
+        }
+    });
+    const handleClick = () => {
+        toggle();
+    };
+    const toggle = (show) => {
+        if (show) {
+            jquery__WEBPACK_IMPORTED_MODULE_1___default()('#res-ann-all').show();
+        }
+        else {
+            jquery__WEBPACK_IMPORTED_MODULE_1___default()('#res-ann-all').toggle();
+        }
+    };
+    return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(react__WEBPACK_IMPORTED_MODULE_3__.Fragment, { children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("button", { type: "button", onClick: handleClick, children: ["Notes (", ann.notes.length, ")"] }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { id: "res-ann-all", children: ann === null || ann === void 0 ? void 0 : ann.notes.sort((a, b) => ann.compareNote(a, b)).map((note) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(AnnotationView, { ann: ann, note: note, local: ann.local }, note.id))) })] }, force));
+};
+class PDFAnn {
+    constructor(parent, db_, ro) {
+        this.parent = parent;
+        this.db_ = db_;
+        this.callbacks = [];
+        this.elem = 'res-ann-container';
+        this.elemId = '#res-ann-container';
+        this.debounced = (func, ...args) => (0,p_debounce__WEBPACK_IMPORTED_MODULE_2__["default"])(func, 2000).bind(this)(...args);
+        this.debouncedRequest = (0,p_debounce__WEBPACK_IMPORTED_MODULE_2__["default"])(this.request, 2000).bind(this);
+        const url = new URL(window.location.href);
+        this.path = url.pathname + url.search;
+        this.local = url.hostname === 'localhost';
+        this.notes = [];
+        const $ann = jquery__WEBPACK_IMPORTED_MODULE_1___default()(this.elemId);
+        if ($ann.length === 0) {
+            jquery__WEBPACK_IMPORTED_MODULE_1___default()('body').append(`<div id=${this.elem} class="${this.elem}-${this.parent}"></div>`);
+        }
+        this.$container = jquery__WEBPACK_IMPORTED_MODULE_1___default()(this.elemId);
+        if (!ro && this.local) {
+        }
+        this.notes = this.db_.annotation().get(this.path) || [];
+        this.notes.sort(this.compareNote.bind(this));
+        (0,react_dom_client__WEBPACK_IMPORTED_MODULE_4__.createRoot)(this.$container[0]).render((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(AnnotationsView, { ann: this }));
+    }
+    on(callback) {
+        this.callbacks.push(callback);
+    }
+    show(index) {
+        this.callbacks.forEach((callback) => callback({
+            name: 'show',
+        }));
+        this.callbacks.forEach((callback) => callback({
+            name: 'blink',
+            data: {
+                index,
+            },
+        }));
+    }
+    compareNote(a, b) {
+        if (a.pos === undefined || b.pos === undefined) {
+            return 0;
+        }
+        const result = this.compareNumbers_([
+            [a.pos.pageIndex, b.pos.pageIndex],
+            [a.pos.top, b.pos.top],
+            [a.pos.left, b.pos.left],
+        ]);
+        return result;
+    }
+    compareNumbers_(nums) {
+        if (nums.length === 0)
+            return 0;
+        const pair = nums.shift();
+        return pair[0] > pair[1] ? 1
+            : pair[0] === pair[1] ? this.compareNumbers_(nums) : -1;
+    }
+    newAnnotation(note) {
+        return this.request('resAnnAdd', this.path, note)
+            .then(() => {
+            this.notes.push(note);
+            this.callbacks.forEach((callback) => callback({
+                name: 'invalidation',
+            }));
+        });
+    }
+    delAnnotation(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request('resAnnDel', this.path, id)
+                .then(() => {
+                const idx = this.notes.findIndex((n) => n.id === id);
+                if (idx !== -1) {
+                    this.notes.splice(idx, 1);
+                    this.callbacks.forEach((callback) => callback({
+                        name: 'invalidation',
+                    }));
+                }
+            });
+        });
+    }
+    delTag(id, idx) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request('resAnnDelTag', this.path, id, idx)
+                .then(() => {
+                const nodeIdx = this.notes.findIndex((n) => n.id === id);
+                if (nodeIdx !== -1) {
+                    this.notes[nodeIdx].tags.splice(idx, 1);
+                    this.callbacks.forEach((callback) => callback({
+                        name: 'invalidation',
+                    }));
+                }
+            });
+        });
+    }
+    addTag(id, tag) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request('resAnnAddTag', this.path, id, tag)
+                .then(() => {
+                const idx = this.notes.findIndex((n) => n.id === id);
+                if (idx !== -1) {
+                    this.notes[idx].tags.push(tag);
+                    this.callbacks.forEach((callback) => callback({
+                        name: 'invalidation',
+                    }));
+                }
+            });
+        });
+    }
+    updateAnn(n) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.request('resAnnUpdate', this.path, JSON.stringify(n))
+                .then(() => {
+                this.callbacks.forEach((callback) => callback({
+                    name: 'invalidation',
+                }));
+            });
+        });
+    }
+    jump(n) {
+        this.callbacks.forEach((callback) => callback({
+            name: 'jump',
+            data: n,
+        }));
+    }
+    request(method, ...params) {
+        if (this.local) {
+            const timeout = this.timeoutAfter(10);
+            const req = (0,_server_request__WEBPACK_IMPORTED_MODULE_5__.post)('/res', {
+                method,
+                params,
+            });
+            return Promise.race([timeout, req]);
+        }
+        return Promise.reject(new Error('not local hosted'));
+    }
+    timeoutAfter(seconds) {
+        return new Promise((_, reject) => {
+            setTimeout(() => {
+                reject(new Error('request timeout'));
+            }, seconds * 1000);
+        });
+    }
+}
+
+
+/***/ }),
+
 /***/ "./src/browser/res/pdf.tsx":
 /*!*********************************!*\
   !*** ./src/browser/res/pdf.tsx ***!
@@ -89101,7 +89452,23 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const workerSrc = new URL(/* asset import */ __webpack_require__(/*! pdfjs-dist/build/pdf.worker.js */ "./node_modules/pdfjs-dist/build/pdf.worker.js"), __webpack_require__.b).toString();
+const jumpToPagePlugin = () => {
+    const store = (0,react__WEBPACK_IMPORTED_MODULE_1__.useMemo)(() => (0,_react_pdf_viewer_core__WEBPACK_IMPORTED_MODULE_2__.createStore)(), []);
+    return {
+        install: (pluginFunctions) => {
+            store.update('jumpToPage', pluginFunctions.jumpToPage);
+        },
+        jumpToPage: (pageIndex) => {
+            const fn = store.get('jumpToPage');
+            if (fn) {
+                fn(pageIndex);
+            }
+        },
+    };
+};
 const PDFView = ({ url, onload, }) => {
+    const jumpToPagePluginInstance = jumpToPagePlugin();
+    const { jumpToPage } = jumpToPagePluginInstance;
     const [notes, setNotes] = (0,react__WEBPACK_IMPORTED_MODULE_1__.useState)([]);
     const noteEles = new Map();
     const ann = (0,react__WEBPACK_IMPORTED_MODULE_1__.useRef)(null);
@@ -89146,11 +89513,14 @@ const PDFView = ({ url, onload, }) => {
         });
         return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.Fragment, {}));
     };
-    const renderHighlights = (props) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { children: notes.map((note) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { children: note.highlightAreas
-                .filter((area) => area.pageIndex === props.pageIndex)
-                .map((area, idx) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { style: (Object.assign({ background: 'yellow', opacity: 0.4 }, props.getCssProperties(area, props.rotation))), onClick: () => console.log(note), ref: (ref) => {
-                    noteEles.set(note.id, ref);
-                } }, idx))) }, note.id))) }));
+    const renderHighlights = (props) => {
+        console.log('renderHighlights');
+        return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { children: notes.map((note) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { children: note.highlightAreas
+                    .filter((area) => area.pageIndex === props.pageIndex)
+                    .map((area, idx) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { id: `res-pdf-highlight-${note.id}`, style: (Object.assign({ background: 'yellow', opacity: 0.4, zIndex: 10 }, props.getCssProperties(area, props.rotation))), onClick: () => ann.current.show(note.id), ref: (ref) => {
+                        noteEles.set(note.id, ref);
+                    } }, note.id))) }, note.id))) }));
+    };
     const defaultLayoutPluginInstance = (0,_react_pdf_viewer_default_layout__WEBPACK_IMPORTED_MODULE_3__.defaultLayoutPlugin)();
     const highlightPluginInstance = (0,_react_pdf_viewer_highlight__WEBPACK_IMPORTED_MODULE_4__.highlightPlugin)({
         renderHighlightTarget,
@@ -89159,7 +89529,9 @@ const PDFView = ({ url, onload, }) => {
     });
     const onDocumentLoad = (ev) => {
         console.log(`onDocumentLoad ${ev.doc.numPages}, ${ev.file.name}`);
-        ann.current = onload();
+        const ann_ = onload();
+        ann_.on(onNotesEvent);
+        ann.current = ann_;
         const notes = ann.current.notes.map((n) => ({
             id: n.id,
             selected: n.selected,
@@ -89174,12 +89546,37 @@ const PDFView = ({ url, onload, }) => {
         }));
         setNotes(notes);
     };
+    const onNotesEvent = (event) => {
+        var _a, _b;
+        console.log(`onNotesEvent, ${event.name}`);
+        if (event.name === 'invalidation') {
+            const notes = ann.current.notes.map((n) => ({
+                id: n.id,
+                selected: n.selected,
+                note: n.note,
+                highlightAreas: [{
+                        top: n.pos.top,
+                        left: n.pos.left,
+                        width: n.pos.width,
+                        height: n.pos.height,
+                        pageIndex: n.pos.pageIndex,
+                    }],
+            }));
+            setNotes(notes);
+        }
+        else if (event.name === 'jump') {
+            const note = event.data;
+            console.log(`jump to ${(_a = note === null || note === void 0 ? void 0 : note.pos) === null || _a === void 0 ? void 0 : _a.pageIndex}`);
+            jumpToPage((_b = note === null || note === void 0 ? void 0 : note.pos) === null || _b === void 0 ? void 0 : _b.pageIndex);
+        }
+    };
     const onPageChange = (ev) => {
         console.log(`onPageChange ${ev.currentPage}`);
     };
     return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_pdf_viewer_core__WEBPACK_IMPORTED_MODULE_2__.Worker, { workerUrl: workerSrc, children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_pdf_viewer_core__WEBPACK_IMPORTED_MODULE_2__.Viewer, { fileUrl: url, onDocumentLoad: onDocumentLoad, onPageChange: onPageChange, plugins: [
                 defaultLayoutPluginInstance,
                 highlightPluginInstance,
+                jumpToPagePluginInstance,
             ] }) }));
 };
 
@@ -89990,13 +90387,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react_dom_client__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react-dom/client */ "./node_modules/react-dom/client.js");
 /* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
 /* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(jquery__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _mui_material_List__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @mui/material/List */ "./node_modules/@mui/material/List/List.js");
-/* harmony import */ var _mui_material_ListItemButton__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @mui/material/ListItemButton */ "./node_modules/@mui/material/ListItemButton/ListItemButton.js");
-/* harmony import */ var _mui_material_ListItemText__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @mui/material/ListItemText */ "./node_modules/@mui/material/ListItemText/ListItemText.js");
-/* harmony import */ var _mui_icons_material_ExpandLess__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @mui/icons-material/ExpandLess */ "./node_modules/@mui/icons-material/esm/ExpandLess.js");
-/* harmony import */ var _mui_icons_material_ExpandMore__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @mui/icons-material/ExpandMore */ "./node_modules/@mui/icons-material/esm/ExpandMore.js");
-/* harmony import */ var _mui_material_Collapse__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @mui/material/Collapse */ "./node_modules/@mui/material/Collapse/Collapse.js");
-/* harmony import */ var _mui_material_Link__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! @mui/material/Link */ "./node_modules/@mui/material/Link/Link.js");
+/* harmony import */ var _mui_material_List__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @mui/material/List */ "./node_modules/@mui/material/List/List.js");
+/* harmony import */ var _mui_material_ListItemButton__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @mui/material/ListItemButton */ "./node_modules/@mui/material/ListItemButton/ListItemButton.js");
+/* harmony import */ var _mui_material_ListItemText__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @mui/material/ListItemText */ "./node_modules/@mui/material/ListItemText/ListItemText.js");
+/* harmony import */ var _mui_icons_material_ExpandLess__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @mui/icons-material/ExpandLess */ "./node_modules/@mui/icons-material/esm/ExpandLess.js");
+/* harmony import */ var _mui_icons_material_ExpandMore__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @mui/icons-material/ExpandMore */ "./node_modules/@mui/icons-material/esm/ExpandMore.js");
+/* harmony import */ var _mui_material_Collapse__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! @mui/material/Collapse */ "./node_modules/@mui/material/Collapse/Collapse.js");
+/* harmony import */ var _mui_material_Link__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! @mui/material/Link */ "./node_modules/@mui/material/Link/Link.js");
 /* harmony import */ var _book__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./book */ "./src/browser/res/book.ts");
 /* harmony import */ var _cli__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./cli */ "./src/browser/res/cli.ts");
 /* harmony import */ var _shortcuts__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./shortcuts */ "./src/browser/res/shortcuts.ts");
@@ -90007,6 +90404,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _annotation__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./annotation */ "./src/browser/res/annotation.tsx");
 /* harmony import */ var _google_analytics__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../google-analytics */ "./src/browser/google-analytics.ts");
 /* harmony import */ var _pdf__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./pdf */ "./src/browser/res/pdf.tsx");
+/* harmony import */ var _pdf_annotation__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./pdf-annotation */ "./src/browser/res/pdf-annotation.tsx");
 var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -90016,6 +90414,7 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+
 
 
 
@@ -90060,11 +90459,11 @@ const Category = ({ category, }) => {
             e.stopPropagation();
         }
     };
-    return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_mui_material_List__WEBPACK_IMPORTED_MODULE_14__["default"], { children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_mui_material_ListItemButton__WEBPACK_IMPORTED_MODULE_15__["default"], { onClick: handleClick, children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_material_ListItemText__WEBPACK_IMPORTED_MODULE_16__["default"], { primary: categoeyLabel }), open ? (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_icons_material_ExpandLess__WEBPACK_IMPORTED_MODULE_17__["default"], {}) : (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_icons_material_ExpandMore__WEBPACK_IMPORTED_MODULE_18__["default"], {})] }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_material_Collapse__WEBPACK_IMPORTED_MODULE_19__["default"], { in: open, timeout: "auto", unmountOnExit: true, children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_material_List__WEBPACK_IMPORTED_MODULE_14__["default"], { component: "div", disablePadding: true, children: category.data
+    return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_mui_material_List__WEBPACK_IMPORTED_MODULE_15__["default"], { children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_mui_material_ListItemButton__WEBPACK_IMPORTED_MODULE_16__["default"], { onClick: handleClick, children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_material_ListItemText__WEBPACK_IMPORTED_MODULE_17__["default"], { primary: categoeyLabel }), open ? (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_icons_material_ExpandLess__WEBPACK_IMPORTED_MODULE_18__["default"], {}) : (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_icons_material_ExpandMore__WEBPACK_IMPORTED_MODULE_19__["default"], {})] }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_material_Collapse__WEBPACK_IMPORTED_MODULE_20__["default"], { in: open, timeout: "auto", unmountOnExit: true, children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_material_List__WEBPACK_IMPORTED_MODULE_15__["default"], { component: "div", disablePadding: true, children: category.data
                         .sort((a, b) => a.base.localeCompare(b.base))
                         .map((p) => {
                         const url = `${p.dir}/${p.base}`;
-                        return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_material_ListItemButton__WEBPACK_IMPORTED_MODULE_15__["default"], { sx: { pl: 4 }, children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_mui_material_Link__WEBPACK_IMPORTED_MODULE_20__["default"], { href: url, target: "_blank", rel: "noopener", onClick: (e) => handleOpen(e, url), children: [p.base, " ", p.stars >= 5 ? `⭐(${p.note})` : p.note ? `📝(${p.note})` : ''] }) }, url));
+                        return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_material_ListItemButton__WEBPACK_IMPORTED_MODULE_16__["default"], { sx: { pl: 4 }, children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_mui_material_Link__WEBPACK_IMPORTED_MODULE_21__["default"], { href: url, target: "_blank", rel: "noopener", onClick: (e) => handleOpen(e, url), children: [p.base, " ", p.stars >= 5 ? `⭐(${p.note})` : p.note ? `📝(${p.note})` : ''] }) }, url));
                     }) }) })] }));
 };
 const App = ({ config, }) => {
@@ -90085,7 +90484,7 @@ const App = ({ config, }) => {
             });
         }
     });
-    return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_material_List__WEBPACK_IMPORTED_MODULE_14__["default"], { children: Array.from(grouped)
+    return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_material_List__WEBPACK_IMPORTED_MODULE_15__["default"], { children: Array.from(grouped)
             .sort(([name1], [name2]) => name1.localeCompare(name2))
             .map(([name, category]) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Category, { category: { name, data: category } }))) }));
 };
@@ -90106,7 +90505,7 @@ const App = ({ config, }) => {
         const name = parts[parts.length - 1];
         window.document.title = decodeURI(name);
         (0,react_dom_client__WEBPACK_IMPORTED_MODULE_2__.createRoot)($pdf[0])
-            .render((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_pdf__WEBPACK_IMPORTED_MODULE_13__.PDFView, { url: pdfUrl, onload: () => new _annotation__WEBPACK_IMPORTED_MODULE_11__.Ann('pdf-container', db, true) }));
+            .render((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_pdf__WEBPACK_IMPORTED_MODULE_13__.PDFView, { url: pdfUrl, onload: () => new _pdf_annotation__WEBPACK_IMPORTED_MODULE_14__.PDFAnn('pdf-container', db, true) }));
     }
     else {
         if (window.res_config !== undefined) {
