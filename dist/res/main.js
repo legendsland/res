@@ -89573,7 +89573,10 @@ const PDFView = ({ url, onload, }) => {
     const onPageChange = (ev) => {
         console.log(`onPageChange ${ev.currentPage}`);
     };
-    return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_pdf_viewer_core__WEBPACK_IMPORTED_MODULE_2__.Worker, { workerUrl: workerSrc, children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_pdf_viewer_core__WEBPACK_IMPORTED_MODULE_2__.Viewer, { fileUrl: url, onDocumentLoad: onDocumentLoad, onPageChange: onPageChange, plugins: [
+    return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_pdf_viewer_core__WEBPACK_IMPORTED_MODULE_2__.Worker, { workerUrl: workerSrc, children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_pdf_viewer_core__WEBPACK_IMPORTED_MODULE_2__.Viewer, { characterMap: {
+                isCompressed: true,
+                url: 'dist/assets/cmaps/',
+            }, fileUrl: url, onDocumentLoad: onDocumentLoad, onPageChange: onPageChange, plugins: [
                 defaultLayoutPluginInstance,
                 highlightPluginInstance,
                 jumpToPagePluginInstance,

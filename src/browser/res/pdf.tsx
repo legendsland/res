@@ -276,6 +276,10 @@ export const PDFView = ({
     return (
         <Worker workerUrl={workerSrc}>
             <Viewer
+                characterMap={{
+                    isCompressed: true,
+                    url: 'dist/assets/cmaps/',
+                }}
                 fileUrl={url}
                 onDocumentLoad={onDocumentLoad}
                 onPageChange={onPageChange}
