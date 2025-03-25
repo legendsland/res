@@ -163,7 +163,7 @@ const AnnotationView = ({
     }
 
     useEffect(() => {
-        console.log('render AnnotationView', note.pos.top, note.selected);
+        console.log('render AnnotationView', note.pos[0].top, note.selected);
         ann.on((event: ViewEvent) => {
             if (event.name === 'blink') {
                 blinkBorder(event.data.index);
@@ -475,10 +475,10 @@ const AnnotationsView = ({
                 // update pos
                 if (ann.local) {
                     const newNote = { ...note };
-                    if (newNote?.pos?.top !== minTop
-                        || newNote?.pos?.left !== minLeft) {
-                        console.log(`update ${note.id}: ${newNote.pos.top} ${newNote.pos.left} **`);
-                        newNote.pos = { top: minTop, left: minLeft };
+                    if (newNote?.pos[0]?.top !== minTop
+                        || newNote?.pos[0]?.left !== minLeft) {
+                        console.log(`update ${note.id}: ${newNote.pos[0].top} ${newNote.pos[0].left} **`);
+                        newNote.pos = [{ top: minTop, left: minLeft }];
                         ann.updateAnn(newNote).then(() => {
                             Object.assign(note, newNote);
                         });
@@ -498,7 +498,7 @@ const AnnotationsView = ({
     const scrollListener = () => {
         // console.log('scroll', document.documentElement.scrollTop, document.documentElement.clientHeight);
         ann.notes.forEach((note) => {
-            if (isInsideViewPort(note.pos.top)) {
+            if (isInsideViewPort(note.pos[0].top)) {
                 mark(note);
             }
         });
@@ -727,7 +727,7 @@ export class Ann {
                                 },
                                 note: '',
                                 tags: [],
-                                pos: { top, left },
+                                pos: [{ top, left }],
                                 doc: 'html',
                             },
                             e.clientX,
@@ -741,8 +741,8 @@ export class Ann {
     compareNote(a: Note, b: Note): number {
         if (a.pos === undefined || b.pos === undefined) { return 0; }
         const result = this.compareNumbers_([
-            [a.pos.top, b.pos.top],
-            [a.pos.left, b.pos.left],
+            [a.pos[0].top, b.pos[0].top],
+            [a.pos[0].left, b.pos[0].left],
         ]);
 
         // console.log(`{${a.pos.top}, ${b.pos.top}}, {${a.pos.left}, ${b.pos.left}}: ${result}`);

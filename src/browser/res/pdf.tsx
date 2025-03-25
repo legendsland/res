@@ -135,13 +135,13 @@ export const PDFView = ({
                 selector: {
                     path: '',
                 },
-                pos: {
-                    top: note.highlightAreas[0].top,
-                    left: note.highlightAreas[0].left,
-                    width: note.highlightAreas[0].width,
-                    height: note.highlightAreas[0].height,
-                    pageIndex: note.highlightAreas[0].pageIndex,
-                },
+                pos: note.highlightAreas.map((a) => ({
+                    top: a.top,
+                    left: a.left,
+                    width: a.width,
+                    height: a.height,
+                    pageIndex: a.pageIndex,
+                })),
                 note: note.note,
                 tags: [],
                 doc: 'pdf',
@@ -235,13 +235,15 @@ export const PDFView = ({
             id: n.id,
             selected: n.selected,
             note: n.note,
-            highlightAreas: [{
-                top: n.pos.top,
-                left: n.pos.left,
-                width: n.pos.width,
-                height: n.pos.height,
-                pageIndex: n.pos.pageIndex,
-            }],
+            highlightAreas: n.pos.map((p) => (
+                {
+                    top: p.top,
+                    left: p.left,
+                    width: p.width,
+                    height: p.height,
+                    pageIndex: p.pageIndex,
+                }
+            )),
         }));
         setNotes(notes);
     };
@@ -253,19 +255,21 @@ export const PDFView = ({
                 id: n.id,
                 selected: n.selected,
                 note: n.note,
-                highlightAreas: [{
-                    top: n.pos.top,
-                    left: n.pos.left,
-                    width: n.pos.width,
-                    height: n.pos.height,
-                    pageIndex: n.pos.pageIndex,
-                }],
+                highlightAreas: n.pos.map((p) => (
+                    {
+                        top: p.top,
+                        left: p.left,
+                        width: p.width,
+                        height: p.height,
+                        pageIndex: p.pageIndex,
+                    }
+                )),
             }));
             setNotes(notes);
         } else if (event.name === 'jump') {
             const note: Note = event.data;
-            console.log(`jump to ${note?.pos?.pageIndex}`);
-            jumpToPage(note?.pos?.pageIndex);
+            console.log(`jump to ${note?.pos[0]?.pageIndex}`);
+            jumpToPage(note?.pos[0]?.pageIndex);
         }
     };
 

@@ -54,7 +54,19 @@ module.exports = (async () => {
         db.save();
     };
 
-    addDoc();
+    const updatePos = () => {
+        anns.records.forEach((record: Record) => {
+            record.notes.forEach((n) => {
+                if (typeof n.pos === 'object') {
+                    // @ts-ignore
+                    n.pos = [n.pos];
+                }
+            });
+        });
+        db.save();
+    };
+
+    updatePos();
 
     return {
         db,

@@ -6,19 +6,21 @@ export type Database = {
     annotation: Annotation
 }
 
+export type NotePos = {
+    top: number,
+    left: number,
+    width?: number, // pdf
+    height?: number, // pdf
+    pageIndex?: number; // pdf
+}
+
 export type Note = {
     id: string | undefined,
     selected: string,
     selector: {
         path: string,
     }
-    pos: {
-        top: number,
-        left: number,
-        width?: number, // pdf
-        height?: number, // pdf
-        pageIndex?: number; // pdf
-    }
+    pos: NotePos[],
     note: string,
     tags: string[],
     doc: string

@@ -87891,7 +87891,7 @@ const AnnotationView = ({ ann, note, local, }) => {
         console.log(`invalid selector path ${note.selector.path}`);
     }
     (0,react__WEBPACK_IMPORTED_MODULE_3__.useEffect)(() => {
-        console.log('render AnnotationView', note.pos.top, note.selected);
+        console.log('render AnnotationView', note.pos[0].top, note.selected);
         ann.on((event) => {
             if (event.name === 'blink') {
                 blinkBorder(event.data.index);
@@ -88037,10 +88037,10 @@ const AnnotationsView = ({ ann, }) => {
                 console.log(`total marked: ${nums}`);
                 if (ann.local) {
                     const newNote = Object.assign({}, note);
-                    if (((_a = newNote === null || newNote === void 0 ? void 0 : newNote.pos) === null || _a === void 0 ? void 0 : _a.top) !== minTop
-                        || ((_b = newNote === null || newNote === void 0 ? void 0 : newNote.pos) === null || _b === void 0 ? void 0 : _b.left) !== minLeft) {
-                        console.log(`update ${note.id}: ${newNote.pos.top} ${newNote.pos.left} **`);
-                        newNote.pos = { top: minTop, left: minLeft };
+                    if (((_a = newNote === null || newNote === void 0 ? void 0 : newNote.pos[0]) === null || _a === void 0 ? void 0 : _a.top) !== minTop
+                        || ((_b = newNote === null || newNote === void 0 ? void 0 : newNote.pos[0]) === null || _b === void 0 ? void 0 : _b.left) !== minLeft) {
+                        console.log(`update ${note.id}: ${newNote.pos[0].top} ${newNote.pos[0].left} **`);
+                        newNote.pos = [{ top: minTop, left: minLeft }];
                         ann.updateAnn(newNote).then(() => {
                             Object.assign(note, newNote);
                         });
@@ -88056,7 +88056,7 @@ const AnnotationsView = ({ ann, }) => {
         && document.documentElement.scrollTop > top - document.documentElement.clientHeight;
     const scrollListener = () => {
         ann.notes.forEach((note) => {
-            if (isInsideViewPort(note.pos.top)) {
+            if (isInsideViewPort(note.pos[0].top)) {
                 mark(note);
             }
         });
@@ -88205,7 +88205,7 @@ class Ann {
                         },
                         note: '',
                         tags: [],
-                        pos: { top, left },
+                        pos: [{ top, left }],
                         doc: 'html',
                     }, e.clientX, e.clientY);
                 }
@@ -88217,8 +88217,8 @@ class Ann {
             return 0;
         }
         const result = this.compareNumbers_([
-            [a.pos.top, b.pos.top],
-            [a.pos.left, b.pos.left],
+            [a.pos[0].top, b.pos[0].top],
+            [a.pos[0].left, b.pos[0].left],
         ]);
         return result;
     }
@@ -89121,7 +89121,7 @@ const AnnotationView = ({ ann, note, local, }) => {
         console.log(`invalid selector path #res-pdf-highlight-${note.id}`);
     }
     (0,react__WEBPACK_IMPORTED_MODULE_3__.useEffect)(() => {
-        console.log('render AnnotationView', note.pos.top, note.selected);
+        console.log('render AnnotationView', note.pos[0].top, note.selected);
         ann.on((event) => {
             if (event.name === 'blink') {
                 blinkBorder(event.data.index);
@@ -89242,7 +89242,7 @@ const AnnotationsView = ({ ann, }) => {
         && document.documentElement.scrollTop > top - document.documentElement.clientHeight;
     const scrollListener = () => {
         ann.notes.forEach((note) => {
-            if (isInsideViewPort(note.pos.top)) {
+            if (isInsideViewPort(note.pos[0].top)) {
             }
         });
     };
@@ -89322,9 +89322,9 @@ class PDFAnn {
             return 0;
         }
         const result = this.compareNumbers_([
-            [a.pos.pageIndex, b.pos.pageIndex],
-            [a.pos.top, b.pos.top],
-            [a.pos.left, b.pos.left],
+            [a.pos[0].pageIndex, b.pos[0].pageIndex],
+            [a.pos[0].top, b.pos[0].top],
+            [a.pos[0].left, b.pos[0].left],
         ]);
         return result;
     }
@@ -89499,13 +89499,13 @@ const PDFView = ({ url, onload, }) => {
                 selector: {
                     path: '',
                 },
-                pos: {
-                    top: note.highlightAreas[0].top,
-                    left: note.highlightAreas[0].left,
-                    width: note.highlightAreas[0].width,
-                    height: note.highlightAreas[0].height,
-                    pageIndex: note.highlightAreas[0].pageIndex,
-                },
+                pos: note.highlightAreas.map((a) => ({
+                    top: a.top,
+                    left: a.left,
+                    width: a.width,
+                    height: a.height,
+                    pageIndex: a.pageIndex,
+                })),
                 note: note.note,
                 tags: [],
                 doc: 'pdf',
@@ -89536,13 +89536,13 @@ const PDFView = ({ url, onload, }) => {
             id: n.id,
             selected: n.selected,
             note: n.note,
-            highlightAreas: [{
-                    top: n.pos.top,
-                    left: n.pos.left,
-                    width: n.pos.width,
-                    height: n.pos.height,
-                    pageIndex: n.pos.pageIndex,
-                }],
+            highlightAreas: n.pos.map((p) => ({
+                top: p.top,
+                left: p.left,
+                width: p.width,
+                height: p.height,
+                pageIndex: p.pageIndex,
+            })),
         }));
         setNotes(notes);
     };
@@ -89554,20 +89554,20 @@ const PDFView = ({ url, onload, }) => {
                 id: n.id,
                 selected: n.selected,
                 note: n.note,
-                highlightAreas: [{
-                        top: n.pos.top,
-                        left: n.pos.left,
-                        width: n.pos.width,
-                        height: n.pos.height,
-                        pageIndex: n.pos.pageIndex,
-                    }],
+                highlightAreas: n.pos.map((p) => ({
+                    top: p.top,
+                    left: p.left,
+                    width: p.width,
+                    height: p.height,
+                    pageIndex: p.pageIndex,
+                })),
             }));
             setNotes(notes);
         }
         else if (event.name === 'jump') {
             const note = event.data;
-            console.log(`jump to ${(_a = note === null || note === void 0 ? void 0 : note.pos) === null || _a === void 0 ? void 0 : _a.pageIndex}`);
-            jumpToPage((_b = note === null || note === void 0 ? void 0 : note.pos) === null || _b === void 0 ? void 0 : _b.pageIndex);
+            console.log(`jump to ${(_a = note === null || note === void 0 ? void 0 : note.pos[0]) === null || _a === void 0 ? void 0 : _a.pageIndex}`);
+            jumpToPage((_b = note === null || note === void 0 ? void 0 : note.pos[0]) === null || _b === void 0 ? void 0 : _b.pageIndex);
         }
     };
     const onPageChange = (ev) => {

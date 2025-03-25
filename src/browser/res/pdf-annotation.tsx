@@ -42,7 +42,7 @@ const AnnotationView = ({
     }
 
     useEffect(() => {
-        console.log('render AnnotationView', note.pos.top, note.selected);
+        console.log('render AnnotationView', note.pos[0].top, note.selected);
         ann.on((event: ViewEvent) => {
             if (event.name === 'blink') {
                 blinkBorder(event.data.index);
@@ -315,7 +315,7 @@ const AnnotationsView = ({
     const scrollListener = () => {
         // console.log('scroll', document.documentElement.scrollTop, document.documentElement.clientHeight);
         ann.notes.forEach((note) => {
-            if (isInsideViewPort(note.pos.top)) {
+            if (isInsideViewPort(note.pos[0].top)) {
                 // mark(note);
             }
         });
@@ -453,9 +453,9 @@ export class PDFAnn {
     compareNote(a: Note, b: Note): number {
         if (a.pos === undefined || b.pos === undefined) { return 0; }
         const result = this.compareNumbers_([
-            [a.pos.pageIndex, b.pos.pageIndex],
-            [a.pos.top, b.pos.top],
-            [a.pos.left, b.pos.left],
+            [a.pos[0].pageIndex, b.pos[0].pageIndex],
+            [a.pos[0].top, b.pos[0].top],
+            [a.pos[0].left, b.pos[0].left],
         ]);
 
         // console.log(`{${a.pos.top}, ${b.pos.top}}, {${a.pos.left}, ${b.pos.left}}: ${result}`);
