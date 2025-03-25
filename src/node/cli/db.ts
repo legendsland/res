@@ -66,7 +66,7 @@ module.exports = (async () => {
         db.save();
     };
 
-    updatePos();
+    // updatePos();
 
     return {
         db,

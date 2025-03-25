@@ -1,41 +1,41 @@
-import {fromIgnoreFile} from './ignorefile';
-import {Db} from '../../common/db';
-import {ParsedPath} from 'path';
+import { ParsedPath } from 'path';
 import * as path from 'path';
+import { fromIgnoreFile } from './ignorefile';
+import { NodeDb } from '../server/res';
 
 const fs = require('fs');
 
 export async function createIndex() {
-  const list = fromIgnoreFile();
+    const list = fromIgnoreFile();
 
-  const config = {
-    containerId: 'container',
-    data: list
-  };
+    const config = {
+        containerId: 'container',
+        data: list,
+    };
 
-  const db_ = await require('./db');
-  const db: Db = db_.db;
+    const db_: {db: NodeDb} = await require('./db');
+    const { db } = db_;
 
-  list.forEach((l: ParsedPath & {stars: number, note: number}) => {
-    const url = encodeURI(path.join('/res/', l.dir, l.base));
-    const notes = db.getAnn(url);
-    let maxStars = 0;
-    notes.forEach(n => {
-      let stars = 0;
-      for(let i=0; i<n.note.length; ++i) {
-        if (n.note[i] === '⭐') {
-          ++stars;
-        }
-      }
-      maxStars = Math.max(maxStars, stars);
+    list.forEach((l: ParsedPath & {stars: number, note: number}) => {
+        const url = encodeURI(path.join('/res/', l.dir, l.base));
+        const notes = db.getAnn(url);
+        let maxStars = 0;
+        notes.forEach((n) => {
+            let stars = 0;
+            for (let i = 0; i < n.note.length; ++i) {
+                if (n.note[i] === '⭐') {
+                    ++stars;
+                }
+            }
+            maxStars = Math.max(maxStars, stars);
+        });
+        l.note = notes.length;
+        l.stars = maxStars;
     });
-    l.note = notes.length;
-    l.stars = maxStars;
-  })
 
-  const config_json = JSON.stringify(config);
+    const config_json = JSON.stringify(config);
 
-  const html = `
+    const html = `
 <!DOCTYPE html>
 <html>
     <head>
@@ -51,7 +51,6 @@ export async function createIndex() {
 </html>
 `;
 
-  console.log('index.html created');
-  fs.writeFileSync('index.html', html);
+    console.log('index.html created');
+    fs.writeFileSync('index.html', html);
 }
-

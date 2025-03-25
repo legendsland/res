@@ -1,22 +1,23 @@
 import * as yargs from 'yargs';
-import {add, checkDci, checkFiles, del, decorate} from './cli/dci';
-import {createIndex} from './cli/gen';
-import {Arguments, Argv} from 'yargs';
+import { Arguments, Argv } from 'yargs';
+import * as path from 'path';
+import {
+    add, checkDci, checkFiles, del, decorate,
+} from './cli/dci';
+import { createIndex } from './cli/gen';
 import { Epub } from './cli/epub';
-import { startServer } from './server/';
+import { startServer } from './server';
 // import { crawler } from './server/crawler/html/neo4j-docs';
 // import { fetch } from './server/hypothes.is';
 import { words } from './server/nlp';
-import {Neo4jClient} from './server/neo4j/client';
-import {merge} from './cli/merge';
-import {rm} from './cli/pre-code';
-import * as path from 'path';
-import {Archive} from './cli/archive'
+import { Neo4jClient } from './server/neo4j/client';
+import { merge } from './cli/merge';
+import { rm } from './cli/pre-code';
+import { Archive } from './cli/archive';
 
 const ROOT = '/home/zy/ws/res/';
 
-(async () =>{
-
+(async () => {
     const args: Argv = yargs
         .usage('Usage: $0 [-a <filename>]')
         .option('index', {
@@ -69,7 +70,7 @@ const ROOT = '/home/zy/ws/res/';
             alias: 'e',
             describe: 'Embed script code into html',
             boolean: true,
-            default: false
+            default: false,
         })
         // .option('crawler', {
         //     alias: 'n',
@@ -92,53 +93,42 @@ const ROOT = '/home/zy/ws/res/';
             describe: 'delete ch pre',
             type: 'string',
         })
-        .command('frame [dir]', 'merge multiple html files into single one as iframes',
-        (yargs: any) => {
-            yargs.positional('dir', {
-                type: 'string'
-            })
-        }, (({dir}) => {
-                let p = undefined;
-                if (typeof dir === 'string') {
-                    p = path.join(ROOT, dir);
-                }
-                new Archive(p);
-            }))
-    ;
-
-    const argv: any = args.argv;
+        .command(
+            'frame [dir]',
+            'merge multiple html files into single one as iframes',
+            (yargs: any) => {
+                yargs.positional('dir', {
+                    type: 'string',
+                });
+            }, (
+                ({ dir }) => {
+                    let p;
+                    if (typeof dir === 'string') {
+                        p = path.join(ROOT, dir);
+                    }
+                    new Archive(p);
+                }),
+        );
+    const { argv } = args as any;
     console.log(argv);
-
 
     if (argv.i) {
         await createIndex();
-    }
-
-    else if (argv.t !== undefined) {
+    } else if (argv.t !== undefined) {
         checkDci(argv.t);
         await checkFiles();
-    }
-
-    else if (argv.a !== undefined) {
+    } else if (argv.a !== undefined) {
         await add(argv.a);
         await createIndex();
-    }
-
-    else if (argv.u !== undefined) {
+    } else if (argv.u !== undefined) {
         decorate(argv.u, argv.e, argv.o || argv.u);
-    }
-
-    else if (argv.d !== undefined) {
+    } else if (argv.d !== undefined) {
         await del(argv.d);
         await createIndex();
-    }
-
-    else if (argv.c !== undefined) {
+    } else if (argv.c !== undefined) {
         const epub = new Epub(argv.c, argv.o);
         await epub.convert();
-    }
-
-    else if (argv.s !== undefined) {
+    } else if (argv.s !== undefined) {
         startServer();
     }
 
@@ -159,14 +149,9 @@ const ROOT = '/home/zy/ws/res/';
         console.log(result);
 
         await client.dispose();
-    }
-
-    else if (argv.m) {
+    } else if (argv.m) {
         await merge(argv.m[0], argv.m[1]);
-    }
-
-    else if (argv.pre) {
+    } else if (argv.pre) {
         rm(argv.pre);
     }
 })();
-
