@@ -90462,11 +90462,22 @@ const Category = ({ category, }) => {
             e.stopPropagation();
         }
     };
+    const showReview = (id, _event) => {
+        const tooltip = jquery__WEBPACK_IMPORTED_MODULE_3___default()(`#${id}`);
+        tooltip.show();
+    };
+    const hideReview = (id) => {
+        const tooltip = jquery__WEBPACK_IMPORTED_MODULE_3___default()(`#${id}`);
+        tooltip.hide();
+    };
     return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_mui_material_List__WEBPACK_IMPORTED_MODULE_15__["default"], { children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_mui_material_ListItemButton__WEBPACK_IMPORTED_MODULE_16__["default"], { onClick: handleClick, children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_material_ListItemText__WEBPACK_IMPORTED_MODULE_17__["default"], { primary: categoeyLabel }), open ? (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_icons_material_ExpandLess__WEBPACK_IMPORTED_MODULE_18__["default"], {}) : (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_icons_material_ExpandMore__WEBPACK_IMPORTED_MODULE_19__["default"], {})] }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_material_Collapse__WEBPACK_IMPORTED_MODULE_20__["default"], { in: open, timeout: "auto", unmountOnExit: true, children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_material_List__WEBPACK_IMPORTED_MODULE_15__["default"], { component: "div", disablePadding: true, children: category.data
                         .sort((a, b) => a.base.localeCompare(b.base))
-                        .map((p) => {
+                        .map((p, idx) => {
+                        var _a;
                         const url = `${p.dir}/${p.base}`;
-                        return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_material_ListItemButton__WEBPACK_IMPORTED_MODULE_16__["default"], { sx: { pl: 4 }, children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_mui_material_Link__WEBPACK_IMPORTED_MODULE_21__["default"], { href: url, target: "_blank", rel: "noopener", onClick: (e) => handleOpen(e, url), children: [p.base, " ", p.stars >= 5 ? `⭐(${p.note})` : p.note ? `📝(${p.note})` : ''] }) }, url));
+                        const id = `res-index-tooltip-${category.name}-`;
+                        return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_mui_material_ListItemButton__WEBPACK_IMPORTED_MODULE_16__["default"], { sx: { pl: 4 }, children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_material_Link__WEBPACK_IMPORTED_MODULE_21__["default"], { href: url, target: "_blank", rel: "noopener", onClick: (e) => handleOpen(e, url), onMouseEnter: (event) => showReview(id + idx, event), onMouseLeave: () => hideReview(id + idx), children: p.base }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", { className: "res-index-stat", children: p.stars >= 5 ? `⭐(${p.note})`
+                                        : p.review ? `📝(${p.note})` : p.note ? `(${p.note})` : '' }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { id: id + idx, className: "res-index-tooltip", children: (_a = p.review) === null || _a === void 0 ? void 0 : _a.split('\n').map((line, idx) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("p", { children: line }, idx))) })] }, url));
                     }) }) })] }));
 };
 const App = ({ config, }) => {
@@ -90476,20 +90487,28 @@ const App = ({ config, }) => {
         const category = parts[1];
         const files = grouped.get(category);
         const file = [{
-                dir: item.dir, base: item.base, stars: item.stars, note: item.note,
+                dir: item.dir,
+                base: item.base,
+                stars: item.stars,
+                note: item.note,
+                review: item.review,
             }];
         if (files === undefined) {
             grouped.set(category, file);
         }
         else {
             files.push({
-                dir: item.dir, base: item.base, stars: item.stars, note: item.note,
+                dir: item.dir,
+                base: item.base,
+                stars: item.stars,
+                note: item.note,
+                review: item.review,
             });
         }
     });
     return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_material_List__WEBPACK_IMPORTED_MODULE_15__["default"], { children: Array.from(grouped)
             .sort(([name1], [name2]) => name1.localeCompare(name2))
-            .map(([name, category]) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Category, { category: { name, data: category } }))) }));
+            .map(([name, category]) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Category, { category: { name, data: category } }, name))) }));
 };
 (() => __awaiter(void 0, void 0, void 0, function* () {
     jquery__WEBPACK_IMPORTED_MODULE_3___default()('head').append('<link href="/res/dist/assets/fontawesome/css/all.css" rel="stylesheet">');

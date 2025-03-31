@@ -37,7 +37,13 @@ function env(): string {
     return 'unknown';
 }
 
-type FilePath = { dir: string, base: string, stars: number, note: number };
+type FilePath = {
+    dir: string,
+    base: string,
+    stars: number,
+    note: number,
+    review: string
+};
 interface Config {
     containerId: string,
     data: FilePath[]
@@ -67,6 +73,17 @@ const Category = ({
         }
     };
 
+    const showReview = (id: string, _event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+        const tooltip = $(`#${id}`);
+        // console.log(event.pageX, event.pageY);
+        tooltip.show();
+    };
+
+    const hideReview = (id: string) => {
+        const tooltip = $(`#${id}`);
+        tooltip.hide();
+    };
+
     return (
         <List>
             <ListItemButton onClick={handleClick}>
@@ -78,8 +95,9 @@ const Category = ({
                     {
                         category.data
                             .sort((a, b) => a.base.localeCompare(b.base))
-                            .map((p) => {
+                            .map((p, idx) => {
                                 const url = `${p.dir}/${p.base}`;
+                                const id = `res-index-tooltip-${category.name}-`;
                                 return (
                                     <ListItemButton key={url} sx={{ pl: 4 }}>
                                         {/* <ListItemText primary={p.base} /> */}
@@ -88,8 +106,23 @@ const Category = ({
                                             target="_blank"
                                             rel="noopener"
                                             onClick={(e) => handleOpen(e, url)}
-                                        >{p.base} {p.stars >= 5 ? `⭐(${p.note})` : p.note ? `📝(${p.note})` : ''}
+                                            onMouseEnter={(event) => showReview(id + idx, event)}
+                                            onMouseLeave={() => hideReview(id + idx)}
+                                        >
+                                            {p.base}
                                         </Link>
+                                        <span className="res-index-stat">
+                                            {p.stars >= 5 ? `⭐(${p.note})`
+                                                : p.review ? `📝(${p.note})` : p.note ? `(${p.note})` : ''}
+                                        </span>
+                                        <div id={id + idx} className="res-index-tooltip">
+                                            {p.review?.split('\n').map((line, idx) => (
+                                                <p
+                                                    key={idx}
+                                                >{line}
+                                                </p>
+                                            ))}
+                                        </div>
                                     </ListItemButton>
                                 );
                             })
@@ -116,13 +149,21 @@ const App = ({
 
         const files = grouped.get(category);
         const file = [{
-            dir: item.dir, base: item.base, stars: item.stars, note: item.note,
+            dir: item.dir,
+            base: item.base,
+            stars: item.stars,
+            note: item.note,
+            review: item.review,
         }];
         if (files === undefined) {
             grouped.set(category, file);
         } else {
             files.push({
-                dir: item.dir, base: item.base, stars: item.stars, note: item.note,
+                dir: item.dir,
+                base: item.base,
+                stars: item.stars,
+                note: item.note,
+                review: item.review,
             });
         }
     });
@@ -134,6 +175,7 @@ const App = ({
                     .sort(([name1], [name2]) => name1.localeCompare(name2))
                     .map(([name, category]) => (
                         <Category
+                            key={name}
                             category={{ name, data: category }}
                         />
                     ))

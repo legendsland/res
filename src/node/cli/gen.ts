@@ -17,8 +17,9 @@ export async function createIndex() {
     const db_: { db: NodeDb } = await require('./db');
     const { db } = db_;
 
-    list.forEach((l: ParsedPath & { stars: number, note: number }) => {
+    list.forEach((l: ParsedPath & { stars: number, note: number, review: string }) => {
         let notes: Note[] = [];
+        let review = '';
         if (l.base?.endsWith('.html')) {
             const htmlUrl = encodeURI(path.join('/res/', l.dir, l.base));
             notes = db.getAnn(htmlUrl);
@@ -30,17 +31,22 @@ export async function createIndex() {
         let maxStars = 0;
         notes.forEach((n) => {
             let stars = 0;
-            for (let i = 0; i < n.note.length; ++i) {
-                if (n.note[i] === '⭐') {
-                    // debug
-                    // console.log(l.base);
-                    ++stars;
+            if (n.tags?.includes('#R')) {
+                // console.log(`add review ${n.note}`);
+                review = n.note;
+                for (let i = 0; i < n.note.length; ++i) {
+                    if (n.note[i] === '⭐') {
+                        // debug
+                        // console.log(l.base);
+                        ++stars;
+                    }
                 }
             }
             maxStars = Math.max(maxStars, stars);
         });
         l.note = notes.length;
         l.stars = maxStars;
+        l.review = review;
     });
 
     const config_json = JSON.stringify(config);
