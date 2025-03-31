@@ -89650,10 +89650,11 @@ class SearchResultManager {
         this.dispose = dispose;
     }
     show(input, results, spend) {
-        const $container = jquery__WEBPACK_IMPORTED_MODULE_1___default()(`#${CONTAINER_ID}`);
+        let $container = jquery__WEBPACK_IMPORTED_MODULE_1___default()(`#${CONTAINER_ID}`);
         $container.remove();
         jquery__WEBPACK_IMPORTED_MODULE_1___default()('body').append(`<div id="${CONTAINER_ID}"></div>`);
-        this._root = (0,react_dom_client__WEBPACK_IMPORTED_MODULE_3__.createRoot)(jquery__WEBPACK_IMPORTED_MODULE_1___default()(`#${CONTAINER_ID}`)[0]);
+        $container = jquery__WEBPACK_IMPORTED_MODULE_1___default()(`#${CONTAINER_ID}`);
+        this._root = (0,react_dom_client__WEBPACK_IMPORTED_MODULE_3__.createRoot)($container[0]);
         this._root.render((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(SearchResultView, { input: input, results: results, mgr: this, spend: spend }));
     }
     close() {

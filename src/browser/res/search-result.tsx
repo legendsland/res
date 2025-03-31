@@ -10,7 +10,7 @@ import {
     Box, Collapse, ListItemText, Paper,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import {createRoot, Root} from 'react-dom/client';
+import { createRoot, Root } from 'react-dom/client';
 
 export interface SearchResult {
     title: string,
@@ -112,10 +112,11 @@ export class SearchResultManager {
     }
 
     show(input: string, results: SearchResult[], spend: number) {
-        const $container = $(`#${CONTAINER_ID}`);
+        let $container = $(`#${CONTAINER_ID}`);
         $container.remove(); // remove first
         $('body').append(`<div id="${CONTAINER_ID}"></div>`);
-        this._root = createRoot($(`#${CONTAINER_ID}`)[0])
+        $container = $(`#${CONTAINER_ID}`);
+        this._root = createRoot($container[0]);
         this._root.render(<SearchResultView
             input={input}
             results={results}
