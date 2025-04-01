@@ -90478,7 +90478,11 @@ const Category = ({ category, }) => {
                         const url = `${p.dir}/${p.base}`;
                         const id = `res-index-tooltip-${category.name}-`;
                         return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_mui_material_ListItemButton__WEBPACK_IMPORTED_MODULE_16__["default"], { sx: { pl: 4 }, children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_material_Link__WEBPACK_IMPORTED_MODULE_21__["default"], { href: url, target: "_blank", rel: "noopener", onClick: (e) => handleOpen(e, url), onMouseEnter: (event) => showReview(id + idx, event), onMouseLeave: () => hideReview(id + idx), children: p.base }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", { className: "res-index-stat", children: p.stars >= 5 ? `⭐(${p.note})`
-                                        : p.review ? `📝(${p.note})` : p.note ? `(${p.note})` : '' }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { id: id + idx, className: "res-index-tooltip", children: (_a = p.review) === null || _a === void 0 ? void 0 : _a.split('\n').map((line, idx) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("p", { children: line }, idx))) })] }, url));
+                                        : p.review ? `📝(${p.note})` : p.note ? `(${p.note})` : '' }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", { className: "res-index-progress-container", children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", { className: "res-index-progress-percent", title: `${(p.percent * 100).toFixed(1)}%`, style: {
+                                                width: p.percent * 100,
+                                            } }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", { className: "res-index-progress-quality", title: `${(p.quality * 100).toFixed(1)}%`, style: {
+                                                width: p.quality * 100,
+                                            } })] }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { id: id + idx, className: "res-index-tooltip", children: (_a = p.review) === null || _a === void 0 ? void 0 : _a.split('\n').map((line, idx) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("p", { children: line }, idx))) })] }, url));
                     }) }) })] }));
 };
 const App = ({ config, }) => {
@@ -90493,6 +90497,8 @@ const App = ({ config, }) => {
                 stars: item.stars,
                 note: item.note,
                 review: item.review,
+                percent: item.percent,
+                quality: item.quality,
             }];
         if (files === undefined) {
             grouped.set(category, file);
@@ -90504,6 +90510,8 @@ const App = ({ config, }) => {
                 stars: item.stars,
                 note: item.note,
                 review: item.review,
+                percent: item.percent,
+                quality: item.quality,
             });
         }
     });

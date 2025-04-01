@@ -42,7 +42,9 @@ type FilePath = {
     base: string,
     stars: number,
     note: number,
-    review: string
+    review: string,
+    percent: number,
+    quality: number,
 };
 interface Config {
     containerId: string,
@@ -115,6 +117,24 @@ const Category = ({
                                             {p.stars >= 5 ? `⭐(${p.note})`
                                                 : p.review ? `📝(${p.note})` : p.note ? `(${p.note})` : ''}
                                         </span>
+                                        <div
+                                            className="res-index-progress-container"
+                                        >
+                                            <span
+                                                className="res-index-progress-percent"
+                                                title={`${(p.percent * 100).toFixed(1)}%`}
+                                                style={{
+                                                    width: p.percent * 100,
+                                                }}
+                                            />
+                                            <span
+                                                className="res-index-progress-quality"
+                                                title={`${(p.quality * 100).toFixed(1)}%`}
+                                                style={{
+                                                    width: p.quality * 100,
+                                                }}
+                                            />
+                                        </div>
                                         <div id={id + idx} className="res-index-tooltip">
                                             {p.review?.split('\n').map((line, idx) => (
                                                 <p
@@ -154,6 +174,8 @@ const App = ({
             stars: item.stars,
             note: item.note,
             review: item.review,
+            percent: item.percent,
+            quality: item.quality,
         }];
         if (files === undefined) {
             grouped.set(category, file);
@@ -164,6 +186,8 @@ const App = ({
                 stars: item.stars,
                 note: item.note,
                 review: item.review,
+                percent: item.percent,
+                quality: item.quality,
             });
         }
     });

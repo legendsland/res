@@ -6,6 +6,61 @@ import { Note } from '../../common/db';
 
 const fs = require('fs');
 
+const AverageNoteMargin = 1600;
+
+type NoteState = {
+    top: number,
+    tags: number,
+    isNode: boolean,
+    hasComment: boolean,
+}
+
+// only for html
+function progress(length: number, notes: NoteState[]) {
+    if (length === Number.POSITIVE_INFINITY
+        || length < 0
+        || notes.length === 0) {
+        return {
+            percent: 0,
+            quality: 0,
+        };
+    }
+
+    // notes.forEach((n) => console.log(n.top));
+
+    // filter invalid
+    const _notes = notes.filter((note) => note.top < Number.MAX_SAFE_INTEGER);
+    let tops = _notes.map((n) => n.top);
+
+    // normalization
+    const max = tops.reduce((a, b) => Math.max(a, b), -Infinity);
+    const min = tops.reduce((a, b) => Math.min(a, b), Infinity);
+    tops = tops.map((top) => (top - min) / (max - min));
+
+    // const expect = tops.reduce((acc, cur) => acc + cur) / _notes.length;
+    const start = 0;
+    const distanceToStart = tops.reduce((prev, curr) => prev + Math.abs(curr - start), 0) / _notes.length;
+
+    const end = 1;
+    const distanceToEnd = tops.reduce((prev, curr) => prev + Math.abs(curr - end), 0) / _notes.length;
+
+    // const done = 0.5 * (1 - distanceToStart) + 0.5 * (1 - distanceToEnd);
+    const done = 1 - distanceToEnd;
+
+    const quality = _notes.reduce((prev, curr) => prev + (curr.tags > 0 ? 0 : -0.1)
+            + (curr.isNode ? 0 : -0.2)
+            + (curr.hasComment ? 0 : -0.1), _notes.length) / _notes.length;
+
+    const shouldHaveNotes = Math.round(length / AverageNoteMargin);
+    const percent = _notes.length / shouldHaveNotes;
+
+    console.log(`notes: ${_notes.length}, percent: ${percent} (${shouldHaveNotes}/${length}), quality: ${quality}, done: ${done}`);
+    return {
+        percent: 0.5 * percent + 0.5 * done, // weighted
+        quality,
+    };
+}
+
 export async function createIndex() {
     const list = fromIgnoreFile();
 
@@ -17,7 +72,13 @@ export async function createIndex() {
     const db_: { db: NodeDb } = await require('./db');
     const { db } = db_;
 
-    list.forEach((l: ParsedPath & { stars: number, note: number, review: string }) => {
+    list.forEach((l: ParsedPath & {
+        stars: number,
+        note: number,
+        review: string,
+        percent: number,
+        quality: number,
+    }) => {
         let notes: Note[] = [];
         let review = '';
         if (l.base?.endsWith('.html')) {
@@ -29,10 +90,29 @@ export async function createIndex() {
             notes = db.getAnn(pdfUrl);
         }
         let maxStars = 0;
+        let start = 0;
+        let end = Number.POSITIVE_INFINITY;
+        const noteStats: NoteState[] = [];
         notes.forEach((n) => {
+            const noteStat: NoteState = {
+                top: 0,
+                tags: 0,
+                isNode: false,
+                hasComment: false,
+            };
+            noteStat.top = n.pos[0]?.top || 0;
+            noteStat.tags = n.tags?.length || 0;
+
             let stars = 0;
+            if (n.note !== undefined && n.note.length > 0) {
+                noteStat.hasComment = true;
+            }
+            if (n.tags?.includes('#N')) {
+                noteStat.isNode = true;
+            }
             if (n.tags?.includes('#R')) {
                 // console.log(`add review ${n.note}`);
+                start = n.pos[0].top;
                 review = n.note;
                 for (let i = 0; i < n.note.length; ++i) {
                     if (n.note[i] === '⭐') {
@@ -42,11 +122,18 @@ export async function createIndex() {
                     }
                 }
             }
+            if (n.tags?.includes('#F')) {
+                end = n.pos[0].top;
+            }
             maxStars = Math.max(maxStars, stars);
+            noteStats.push(noteStat);
         });
         l.note = notes.length;
         l.stars = maxStars;
         l.review = review;
+        const { percent, quality } = progress(end - start, noteStats);
+        l.percent = percent;
+        l.quality = quality;
     });
 
     const config_json = JSON.stringify(config);
