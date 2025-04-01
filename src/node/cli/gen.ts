@@ -16,13 +16,13 @@ type NoteState = {
 }
 
 // only for html
-function progress(length: number, notes: NoteState[]) {
+function calcReadingProgress(length: number, notes: NoteState[]) {
     if (length === Number.POSITIVE_INFINITY
         || length < 0
         || notes.length === 0) {
         return {
-            percent: 0,
-            quality: 0,
+            progress: 0,
+            understand: 0,
         };
     }
 
@@ -47,17 +47,19 @@ function progress(length: number, notes: NoteState[]) {
     // const done = 0.5 * (1 - distanceToStart) + 0.5 * (1 - distanceToEnd);
     const done = 1 - distanceToEnd;
 
-    const quality = _notes.reduce((prev, curr) => prev + (curr.tags > 0 ? 0 : -0.1)
+    const averageQuality = _notes.reduce((prev, curr) => prev + (curr.tags > 0 ? 0 : -0.1)
             + (curr.isNode ? 0 : -0.2)
             + (curr.hasComment ? 0 : -0.1), _notes.length) / _notes.length;
 
     const shouldHaveNotes = Math.round(length / AverageNoteMargin);
     const percent = _notes.length / shouldHaveNotes;
 
-    console.log(`notes: ${_notes.length}, percent: ${percent} (${shouldHaveNotes}/${length}), quality: ${quality}, done: ${done}`);
+    console.log(`notes: ${_notes.length}, percent: ${percent} (${shouldHaveNotes}/${length}), quality: ${averageQuality}, done: ${done}`);
+
+    const progress = 0.5 * percent + 0.5 * done; // weighted
     return {
-        percent: 0.5 * percent + 0.5 * done, // weighted
-        quality,
+        progress,
+        understand: averageQuality * progress,
     };
 }
 
@@ -76,8 +78,8 @@ export async function createIndex() {
         stars: number,
         note: number,
         review: string,
-        percent: number,
-        quality: number,
+        progress: number,
+        understand: number,
     }) => {
         let notes: Note[] = [];
         let review = '';
@@ -131,9 +133,9 @@ export async function createIndex() {
         l.note = notes.length;
         l.stars = maxStars;
         l.review = review;
-        const { percent, quality } = progress(end - start, noteStats);
-        l.percent = percent;
-        l.quality = quality;
+        const { progress, understand } = calcReadingProgress(end - start, noteStats);
+        l.progress = progress;
+        l.understand = understand;
     });
 
     const config_json = JSON.stringify(config);
