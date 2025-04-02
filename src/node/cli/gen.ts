@@ -6,7 +6,7 @@ import { Note } from '../../common/db';
 
 const fs = require('fs');
 
-const AverageNoteMargin = 1600;
+const expectedAverageNoteDistance = 1600;
 
 type NoteState = {
     top: number,
@@ -16,7 +16,7 @@ type NoteState = {
 }
 
 // only for html
-function calcReadingProgress(length: number, notes: NoteState[]) {
+function calcReadingProgress(file: string, length: number, notes: NoteState[]) {
     if (length === Number.POSITIVE_INFINITY
         || length < 0
         || notes.length === 0) {
@@ -35,31 +35,42 @@ function calcReadingProgress(length: number, notes: NoteState[]) {
     // normalization
     const max = tops.reduce((a, b) => Math.max(a, b), -Infinity);
     const min = tops.reduce((a, b) => Math.min(a, b), Infinity);
-    tops = tops.map((top) => (top - min) / (max - min));
+
+    tops = tops.map((top) => (top - min) / (max - min))
+        .sort((a, b) => a - b);
 
     // const expect = tops.reduce((acc, cur) => acc + cur) / _notes.length;
     const start = 0;
-    const distanceToStart = tops.reduce((prev, curr) => prev + Math.abs(curr - start), 0) / _notes.length;
+    const averageDistanceToStart = tops.reduce((prev, curr) => prev + Math.abs(curr - start), 0) / _notes.length;
 
     const end = 1;
-    const distanceToEnd = tops.reduce((prev, curr) => prev + Math.abs(curr - end), 0) / _notes.length;
+    const averageDistanceToEnd = tops.reduce((prev, curr) => prev + Math.abs(curr - end), 0) / _notes.length;
 
     // const done = 0.5 * (1 - distanceToStart) + 0.5 * (1 - distanceToEnd);
-    const done = 1 - distanceToEnd;
 
-    const averageQuality = _notes.reduce((prev, curr) => prev + (curr.tags > 0 ? 0 : -0.1)
+    // calculate evenness between notes
+    const averageNoteDistance = tops.reduce((prev, curr) => {
+        prev.push(curr - prev[prev.length - 1]);
+        return prev;
+    }, [0])
+        .reduce((prev, curr) => prev + curr, 0) * ((max - min) / _notes.length);
+
+    const density = expectedAverageNoteDistance / averageNoteDistance;
+
+    const averageNoteQuality = _notes.reduce((prev, curr) => prev + (curr.tags > 0 ? 0 : -0.1)
             + (curr.isNode ? 0 : -0.2)
             + (curr.hasComment ? 0 : -0.1), _notes.length) / _notes.length;
 
-    const shouldHaveNotes = Math.round(length / AverageNoteMargin);
-    const percent = _notes.length / shouldHaveNotes;
+    const shouldHaveNotes = Math.round(length / expectedAverageNoteDistance);
+    const percentNotes = _notes.length / shouldHaveNotes;
 
-    console.log(`notes: ${_notes.length}, percent: ${percent} (${shouldHaveNotes}/${length}), quality: ${averageQuality}, done: ${done}`);
+    console.log(`notes: ${_notes.length}, percent: ${percentNotes} (${_notes.length}/${shouldHaveNotes}/${length}), quality: ${averageNoteQuality} [${file}]`);
 
-    const progress = 0.5 * percent + 0.5 * done; // weighted
+    // const progress = 0.5 * percentNotes + 0.5 * density; // weighted
+    const progress = percentNotes;
     return {
         progress,
-        understand: averageQuality * progress,
+        understand: averageNoteQuality * progress,
     };
 }
 
@@ -92,7 +103,7 @@ export async function createIndex() {
             notes = db.getAnn(pdfUrl);
         }
         let maxStars = 0;
-        let start = 0;
+        let start = Number.NEGATIVE_INFINITY;
         let end = Number.POSITIVE_INFINITY;
         const noteStats: NoteState[] = [];
         notes.forEach((n) => {
@@ -133,7 +144,7 @@ export async function createIndex() {
         l.note = notes.length;
         l.stars = maxStars;
         l.review = review;
-        const { progress, understand } = calcReadingProgress(end - start, noteStats);
+        const { progress, understand } = calcReadingProgress(l.base, end - start, noteStats);
         l.progress = progress;
         l.understand = understand;
     });
