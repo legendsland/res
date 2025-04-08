@@ -45,6 +45,7 @@ type FilePath = {
     review: string,
     progress: number,
     understand: number,
+    reading: boolean,
 };
 interface Config {
     containerId: string,
@@ -103,6 +104,9 @@ const Category = ({
                                 return (
                                     <ListItemButton key={url} sx={{ pl: 4 }}>
                                         {/* <ListItemText primary={p.base} /> */}
+                                        <span className="res-index-status">
+                                            {p.reading ? '!' : ''}
+                                        </span>
                                         <Link
                                             href={url}
                                             target="_blank"
@@ -176,6 +180,7 @@ const App = ({
             review: item.review,
             progress: item.progress,
             understand: item.understand,
+            reading: item.reading,
         }];
         if (files === undefined) {
             grouped.set(category, file);
@@ -188,6 +193,7 @@ const App = ({
                 review: item.review,
                 progress: item.progress,
                 understand: item.understand,
+                reading: item.reading,
             });
         }
     });

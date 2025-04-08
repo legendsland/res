@@ -90477,7 +90477,7 @@ const Category = ({ category, }) => {
                         var _a;
                         const url = `${p.dir}/${p.base}`;
                         const id = `res-index-tooltip-${category.name}-`;
-                        return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_mui_material_ListItemButton__WEBPACK_IMPORTED_MODULE_16__["default"], { sx: { pl: 4 }, children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_material_Link__WEBPACK_IMPORTED_MODULE_21__["default"], { href: url, target: "_blank", rel: "noopener", onClick: (e) => handleOpen(e, url), onMouseEnter: (event) => showReview(id + idx, event), onMouseLeave: () => hideReview(id + idx), children: p.base }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", { className: "res-index-stat", children: p.stars >= 5 ? `⭐(${p.note})`
+                        return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_mui_material_ListItemButton__WEBPACK_IMPORTED_MODULE_16__["default"], { sx: { pl: 4 }, children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", { className: "res-index-status", children: p.reading ? '!' : '' }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_material_Link__WEBPACK_IMPORTED_MODULE_21__["default"], { href: url, target: "_blank", rel: "noopener", onClick: (e) => handleOpen(e, url), onMouseEnter: (event) => showReview(id + idx, event), onMouseLeave: () => hideReview(id + idx), children: p.base }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", { className: "res-index-stat", children: p.stars >= 5 ? `⭐(${p.note})`
                                         : p.review ? `📝(${p.note})` : p.note ? `(${p.note})` : '' }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", { className: "res-index-progress-container", children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", { className: "res-index-progress-progress", title: `progress: ${(p.progress * 100).toFixed(1)}%`, style: {
                                                 width: p.progress * 100,
                                             } }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", { className: "res-index-progress-understand", title: `understand: ${(p.understand * 100).toFixed(1)}%`, style: {
@@ -90499,6 +90499,7 @@ const App = ({ config, }) => {
                 review: item.review,
                 progress: item.progress,
                 understand: item.understand,
+                reading: item.reading,
             }];
         if (files === undefined) {
             grouped.set(category, file);
@@ -90512,6 +90513,7 @@ const App = ({ config, }) => {
                 review: item.review,
                 progress: item.progress,
                 understand: item.understand,
+                reading: item.reading,
             });
         }
     });

@@ -91,6 +91,7 @@ export async function createIndex() {
         review: string,
         progress: number,
         understand: number,
+        reading: boolean
     }) => {
         let notes: Note[] = [];
         let review = '';
@@ -106,6 +107,7 @@ export async function createIndex() {
         let start = Number.NEGATIVE_INFINITY;
         let end = Number.POSITIVE_INFINITY;
         const noteStats: NoteState[] = [];
+        let reading = false;
         notes.forEach((n) => {
             const noteStat: NoteState = {
                 top: 0,
@@ -120,9 +122,11 @@ export async function createIndex() {
             if (n.note !== undefined && n.note.length > 0) {
                 noteStat.hasComment = true;
             }
+            // nodes in graph
             if (n.tags?.includes('#N')) {
                 noteStat.isNode = true;
             }
+            // review
             if (n.tags?.includes('#R')) {
                 // console.log(`add review ${n.note}`);
                 start = n.pos[0].top;
@@ -135,6 +139,11 @@ export async function createIndex() {
                     }
                 }
             }
+            // current reading
+            if (n.tags?.includes('#!')) {
+                reading = true;
+            }
+            // final point
             if (n.tags?.includes('#F')) {
                 end = n.pos[0].top;
             }
@@ -147,6 +156,7 @@ export async function createIndex() {
         const { progress, understand } = calcReadingProgress(l.base, end - start, noteStats);
         l.progress = progress;
         l.understand = understand;
+        l.reading = reading;
     });
 
     const config_json = JSON.stringify(config);
