@@ -64,7 +64,7 @@ function calcReadingProgress(file: string, length: number, notes: NoteState[]) {
     const shouldHaveNotes = Math.round(length / expectedAverageNoteDistance);
     const percentNotes = _notes.length / shouldHaveNotes;
 
-    console.log(`notes: ${_notes.length}, percent: ${percentNotes} (${_notes.length}/${shouldHaveNotes}/${length}), quality: ${averageNoteQuality} [${file}]`);
+    // console.log(`notes: ${_notes.length}, percent: ${percentNotes} (${_notes.length}/${shouldHaveNotes}/${length}), quality: ${averageNoteQuality} [${file}]`);
 
     // const progress = 0.5 * percentNotes + 0.5 * density; // weighted
     const progress = percentNotes;
