@@ -7,18 +7,19 @@ import { Note } from '../../common/db';
 const fs = require('fs');
 
 const expectedAverageNoteDistance = 1600;
+const expectedAverageNotePage = 1;
 
 type NoteState = {
-    top: number,
+    pos: number,
     tags: number,
     isNode: boolean,
     hasComment: boolean,
 }
 
-// only for html
-function calcReadingProgress(file: string, length: number, notes: NoteState[]) {
-    if (length === Number.POSITIVE_INFINITY
-        || length < 0
+function calcReadingProgressPdf(file: string, pages: number, notes: NoteState[]) {
+    // console.log(`pdf: ${pages}`);
+    if (pages === Number.POSITIVE_INFINITY
+        || pages < 0
         || notes.length === 0) {
         return {
             progress: 0,
@@ -29,8 +30,41 @@ function calcReadingProgress(file: string, length: number, notes: NoteState[]) {
     // notes.forEach((n) => console.log(n.top));
 
     // filter invalid
-    const _notes = notes.filter((note) => note.top < Number.MAX_SAFE_INTEGER);
-    let tops = _notes.map((n) => n.top);
+    const _notes = notes.filter((note) => note.pos < Number.MAX_SAFE_INTEGER);
+
+    const shouldHaveNotes = Math.round(pages / expectedAverageNotePage);
+    const percentNotes = _notes.length / shouldHaveNotes;
+
+    const averageNoteQuality = _notes.reduce((prev, curr) => prev + (curr.tags > 0 ? 0 : -0.1)
+        + (curr.isNode ? 0 : -0.2)
+        + (curr.hasComment ? 0 : -0.1), _notes.length) / _notes.length;
+
+    console.log(`notes: ${_notes.length}, percent: ${percentNotes} (${_notes.length}/${shouldHaveNotes}/${pages}), quality: ${averageNoteQuality} [${file}]`);
+
+    // const progress = 0.5 * percentNotes + 0.5 * density; // weighted
+    const progress = percentNotes;
+    return {
+        progress,
+        understand: averageNoteQuality * progress,
+    };
+}
+
+// only for html
+function calcReadingProgress(file: string, pages: number, notes: NoteState[]) {
+    if (pages === Number.POSITIVE_INFINITY
+        || pages < 0
+        || notes.length === 0) {
+        return {
+            progress: 0,
+            understand: 0,
+        };
+    }
+
+    // notes.forEach((n) => console.log(n.top));
+
+    // filter invalid
+    const _notes = notes.filter((note) => note.pos < Number.MAX_SAFE_INTEGER);
+    let tops = _notes.map((n) => n.pos);
 
     // normalization
     const max = tops.reduce((a, b) => Math.max(a, b), -Infinity);
@@ -61,10 +95,10 @@ function calcReadingProgress(file: string, length: number, notes: NoteState[]) {
             + (curr.isNode ? 0 : -0.2)
             + (curr.hasComment ? 0 : -0.1), _notes.length) / _notes.length;
 
-    const shouldHaveNotes = Math.round(length / expectedAverageNoteDistance);
+    const shouldHaveNotes = Math.round(pages / expectedAverageNoteDistance);
     const percentNotes = _notes.length / shouldHaveNotes;
 
-    // console.log(`notes: ${_notes.length}, percent: ${percentNotes} (${_notes.length}/${shouldHaveNotes}/${length}), quality: ${averageNoteQuality} [${file}]`);
+    console.log(`notes: ${_notes.length}, percent: ${percentNotes} (${_notes.length}/${shouldHaveNotes}/${pages}), quality: ${averageNoteQuality} [${file}]`);
 
     // const progress = 0.5 * percentNotes + 0.5 * density; // weighted
     const progress = percentNotes;
@@ -95,6 +129,7 @@ export async function createIndex() {
     }) => {
         let notes: Note[] = [];
         let review = '';
+        let isPDF = false;
         if (l.base?.endsWith('.html')) {
             const htmlUrl = encodeURI(path.join('/res/', l.dir, l.base));
             notes = db.getAnn(htmlUrl);
@@ -102,20 +137,23 @@ export async function createIndex() {
         if (l.base?.endsWith('.pdf')) {
             const pdfUrl = encodeURI(path.join(`/res/pdf.html?pdf=${l.dir}`, l.base));
             notes = db.getAnn(pdfUrl);
+            isPDF = true;
         }
         let maxStars = 0;
         let start = Number.NEGATIVE_INFINITY;
         let end = Number.POSITIVE_INFINITY;
+        const startPage = Number.NEGATIVE_INFINITY;
+        const endPage = Number.POSITIVE_INFINITY;
         const noteStats: NoteState[] = [];
         let reading = false;
         notes.forEach((n) => {
             const noteStat: NoteState = {
-                top: 0,
+                pos: 0,
                 tags: 0,
                 isNode: false,
                 hasComment: false,
             };
-            noteStat.top = n.pos[0]?.top || 0;
+            noteStat.pos = isPDF ? n.pos[0].pageIndex : n.pos[0]?.top || 0;
             noteStat.tags = n.tags?.length || 0;
 
             let stars = 0;
@@ -129,7 +167,7 @@ export async function createIndex() {
             // review
             if (n.tags?.includes('#R')) {
                 // console.log(`add review ${n.note}`);
-                start = n.pos[0].top;
+                start = isPDF ? n.pos[0].pageIndex : n.pos[0].top;
                 review = n.note;
                 for (let i = 0; i < n.note.length; ++i) {
                     if (n.note[i] === '⭐') {
@@ -145,7 +183,7 @@ export async function createIndex() {
             }
             // final point
             if (n.tags?.includes('#F')) {
-                end = n.pos[0].top;
+                end = isPDF ? n.pos[0].pageIndex : n.pos[0].top;
             }
             maxStars = Math.max(maxStars, stars);
             noteStats.push(noteStat);
@@ -153,7 +191,8 @@ export async function createIndex() {
         l.note = notes.length;
         l.stars = maxStars;
         l.review = review;
-        const { progress, understand } = calcReadingProgress(l.base, end - start, noteStats);
+        const { progress, understand } = isPDF ? calcReadingProgressPdf(l.base, end - start, noteStats)
+            : calcReadingProgress(l.base, end - start, noteStats);
         l.progress = progress;
         l.understand = understand;
         l.reading = reading;
