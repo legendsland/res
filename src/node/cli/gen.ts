@@ -39,7 +39,7 @@ function calcReadingProgressPdf(file: string, pages: number, notes: NoteState[])
         + (curr.isNode ? 0 : -0.2)
         + (curr.hasComment ? 0 : -0.1), _notes.length) / _notes.length;
 
-    console.log(`notes: ${_notes.length}, percent: ${percentNotes} (${_notes.length}/${shouldHaveNotes}/${pages}), quality: ${averageNoteQuality} [${file}]`);
+    // console.log(`notes: ${_notes.length}, percent: ${percentNotes} (${_notes.length}/${shouldHaveNotes}/${pages}), quality: ${averageNoteQuality} [${file}]`);
 
     // const progress = 0.5 * percentNotes + 0.5 * density; // weighted
     const progress = percentNotes;
@@ -98,7 +98,7 @@ function calcReadingProgress(file: string, pages: number, notes: NoteState[]) {
     const shouldHaveNotes = Math.round(pages / expectedAverageNoteDistance);
     const percentNotes = _notes.length / shouldHaveNotes;
 
-    console.log(`notes: ${_notes.length}, percent: ${percentNotes} (${_notes.length}/${shouldHaveNotes}/${pages}), quality: ${averageNoteQuality} [${file}]`);
+    // console.log(`notes: ${_notes.length}, percent: ${percentNotes} (${_notes.length}/${shouldHaveNotes}/${pages}), quality: ${averageNoteQuality} [${file}]`);
 
     // const progress = 0.5 * percentNotes + 0.5 * density; // weighted
     const progress = percentNotes;
