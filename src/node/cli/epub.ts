@@ -9,8 +9,16 @@
 import * as path from 'path';
 import * as cheerio from 'cheerio';
 import * as css from 'css';
-import * as fs from 'fs';
-import { lstatSync, readFileSync, writeFileSync } from 'fs';
+// import * as fs from 'fs';
+import {
+    lstatSync,
+    readFileSync as _readFileSync,
+    writeFileSync,
+    existsSync as _existsSync,
+    rmSync,
+    mkdirSync,
+    cpSync as _cpSync,
+} from 'fs';
 import extract from 'extract-zip';
 
 const PATH_CONTAINER = 'META-INF/container.xml';
@@ -25,6 +33,25 @@ const enum MediaType {
 
 interface htmlHead {
     title: string
+}
+
+function readFileSync(file: string, option?: any) {
+    const decoded = decodeURIComponent(file);
+    // console.log(`read: ${decoded}`);
+    return _readFileSync(decoded, option);
+}
+
+function existsSync(file: string) {
+    const decoded = decodeURIComponent(file);
+    // console.log(`exists: ${file}  ->  ${decoded}`);
+    return _existsSync(decoded);
+}
+
+function cpSync(file: string, dest: string, option?: any) {
+    const decodedSrc = decodeURIComponent(file);
+    const decodedDest = decodeURIComponent(dest);
+    // console.log(`copy: ${file}  ->  ${decoded}`);
+    return _cpSync(decodedSrc, decodedDest, option);
 }
 
 export class Epub {
@@ -123,7 +150,7 @@ export class Epub {
             return ai < bi ? -1 : 1;
         }).map((a) => a.href);
 
-        console.log(sortedHtmlFiles);
+        console.log(sortedHtmlFiles.map((file) => decodeURIComponent(file)));
 
         // merge these files
         const html = this.mergeAll(head, sortedHtmlFiles);
@@ -132,7 +159,7 @@ export class Epub {
 
         // delete tmp
         if (this.extractDir !== undefined) {
-            fs.rmSync(this.extractDir, { recursive: true, force: true });
+            rmSync(this.extractDir, { recursive: true, force: true });
         }
     }
 
@@ -233,11 +260,13 @@ export class Epub {
                 if (src !== undefined) {
                     const jsFile = path.join(dir, src);
                     console.log(jsFile);
-                    if (fs.existsSync(jsFile)) {
+                    if (existsSync(jsFile)) {
                         $(element).empty();
                         $(element).removeAttr('src');
                         const js = readFileSync(jsFile, { encoding: 'utf-8' }).toString();
                         $(element).text(js);
+                    } else {
+                        console.warn(`${jsFile} ${decodeURIComponent(jsFile)} not exists`);
                     }
                 }
             }
@@ -289,8 +318,10 @@ export class Epub {
             }
             const prefix = `data:image/${_ext};base64,`;
             const file = path.join(dir, val);
-            if (fs.existsSync(file)) {
+            if (existsSync(file)) {
                 elem.attribs[attr] = prefix + readFileSync(file, { encoding: 'base64' });
+            } else {
+                console.warn(`${file} ${decodeURIComponent(file)} not exists`);
             }
         }
     }
@@ -302,9 +333,11 @@ export class Epub {
             _ext = 'svg+xml';
         }
         const prefix = `data:image/${_ext};base64,`;
-        if (fs.existsSync(imageFile)) {
+        if (existsSync(imageFile)) {
             return prefix + readFileSync(imageFile, { encoding: 'base64' });
         }
+        console.warn(`${imageFile} ${decodeURIComponent(imageFile)} not exists`);
+
         return undefined;
     }
 
@@ -313,9 +346,11 @@ export class Epub {
 
         f1.styles.forEach((elem: cheerio.TagElement, href: string) => {
             const file = path.join(this.root, href);
-            if (fs.existsSync(file)) {
+            if (existsSync(file)) {
                 const cssContent = readFileSync(file, { encoding: 'utf8' }).toString();
                 html.styles.add(this.updateCss(cssContent, file));
+            } else {
+                console.warn(`${file} ${decodeURIComponent(file)} not exists`);
             }
         });
 
@@ -330,11 +365,19 @@ export class Epub {
         console.log(file);
         const style = css.parse(cssContent);
         style.stylesheet.rules.forEach((rule) => {
+            // console.log(`rule: ${rule.type}`);
+            if (rule.type === 'import') {
+                console.log(`import ${rule.import}`);
+            }
             // if (rule.type === 'font-face') {
             // @ts-ignore
             rule?.declarations?.filter((decl) => decl.property === 'src'
-                    || decl.property === 'background-image').forEach((decl: any) => {
+                    || decl.property === 'background-image'
+                    || decl.property === 'background').forEach((decl: any) => {
                 const { value } = decl;
+
+                // console.log(value);
+
                 let start = -1;
                 let end = 0;
 
@@ -368,17 +411,17 @@ export class Epub {
                 if (end > 0) {
                     const fontPath = value.substring(start, end);
                     const fontName = path.parse(fontPath).base;
-                    // console.log('font: ', fontPath);
+                    // console.log('style: ', fontPath);
                     // check exists such font
                     const fontSrcPath = path.join(path.dirname(file), fontPath);
                     const fontDestPath = path.join(this.srcRoot, 'dist/assets/fonts/', fontName);
 
                     // copy font files
                     if (rule.type === 'font-face' && decl.property === 'src') {
-                        fs.mkdirSync(path.dirname(fontDestPath), { recursive: true });
-                        if (!fs.existsSync(fontDestPath) && fs.existsSync(fontSrcPath)) {
+                        mkdirSync(path.dirname(fontDestPath), { recursive: true });
+                        if (!existsSync(fontDestPath) && existsSync(fontSrcPath)) {
                             console.log('copy font: ', fontPath);
-                            fs.cpSync(fontSrcPath, fontDestPath, { recursive: true });
+                            cpSync(fontSrcPath, fontDestPath, { recursive: true });
                         }
 
                         const fullPath = `/res/dist/assets/fonts/${fontName}`;
@@ -388,7 +431,8 @@ export class Epub {
                     }
 
                     // embed images
-                    else if (decl.property === 'background-image') {
+                    else if (decl.property === 'background-image'
+                        || decl.property === 'background') {
                         const data = this.getBase64Image(fontSrcPath);
                         if (data !== undefined) {
                             const newValue = value.substring(0, start)
