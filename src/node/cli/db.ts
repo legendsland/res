@@ -66,7 +66,24 @@ module.exports = (async () => {
         db.save();
     };
 
-    // updatePos();
+    const statTags = () => {
+        const tags  = new Map<string, number>();
+        anns.records.forEach((record: Record) => {
+            record.notes.forEach((n) => {
+                n.tags?.forEach((tag) => {
+                    const count = tags.get(tag) || 0;
+                    tags.set(tag, count+1);
+                })
+            });
+        });
+        Array.from(tags.keys())
+            .sort((a, b) => a.localeCompare(b))
+            .forEach((key) => {
+                console.log(`${key}: ${tags.get(key)}`)
+            })
+    };
+
+    statTags();
 
     return {
         db,
