@@ -25,6 +25,8 @@ import { Ann } from './annotation';
 import { addGoogleScript } from '../google-analytics';
 import { PDFView } from './pdf';
 import { PDFAnn } from './pdf-annotation';
+import { KnowledgeGraphViewContainer } from './graph';
+import { prodContainer } from '../container';
 
 // check running in http server or opened in browser as local file.
 function env(): string {
@@ -215,6 +217,9 @@ const App = ({
 };
 
 (async () => {
+    // load modules
+    const { container } = prodContainer();
+
     // append css
     $('head').append('<link href="/res/dist/assets/fontawesome/css/all.css" rel="stylesheet">');
 
@@ -287,6 +292,10 @@ const App = ({
             console.log(`cannot handle ${url.toString()}`);
         }
     }
+
+    // add kg
+    const kg = container.get<KnowledgeGraphViewContainer>(KnowledgeGraphViewContainer);
+    kg.render();
 
     addGoogleScript($body.get()[0]);
 
