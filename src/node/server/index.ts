@@ -9,13 +9,12 @@ import * as util from 'util';
 import * as cheerio from 'cheerio';
 import * as http from 'http';
 import { removeStopwords } from 'stopword';
-import { Neo4jClient, testConnection } from './neo4j/client';
 import { NodeDb } from './res';
 import { Note } from '../../common/db';
 
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const compression = require('compression')
+const compression = require('compression');
 const nlp = require('compromise');
 nlp.extend(require('compromise-ngrams')); // done!
 
@@ -55,60 +54,12 @@ export async function startServer() {
                 .map((prop) => ({ name: prop })),
         },
 
-        neo4jHello: {
-            fn: async () => {
-                const result = await testConnection();
-                return result !== undefined ? 'connected' : 'cannot connect';
-            },
-        },
-
         nlpVerbs: {
             fn: async () => {
                 const text = await cleanText(path.join(root, '/res/res/thinking/A Rulebook for Arguments.18.html'));
                 return getVerbs(text);
             },
         },
-
-        // nlpNgrams: {
-        //     fn: async () => {
-        //         const text = await cleanText(path.join(root, '/res/res/thinking/A Rulebook for Arguments.18.html'));
-        //         const ngrams = nlp(text).ngrams({
-        //             size: 1
-        //         });
-        //
-        //         return ngrams;
-        //     }
-        // },
-        //
-        // nlpSentence: {
-        //     fn: async (sent: string) => {
-        //         return neo4jClient.addSent(words(sent));
-        //     }
-        // },
-        //
-        // notes: {
-        //     fn: async () => {
-        //         return neo4jClient.getNodeByLabel('EditorJSNote');
-        //     }
-        // },
-        //
-        // saveNote: {
-        //     fn: async (note: any) => {
-        //         return neo4jClient.saveNode(note);
-        //     }
-        // },
-        //
-        // deleteNote: {
-        //     fn: async (id: string) => {
-        //         return neo4jClient.deleteNode(id);
-        //     }
-        // },
-        //
-        // runGraph: {
-        //     fn: async (program: string) => {
-        //         return programRunner.run(program);
-        //     }
-        // },
 
         resAnnUpdate: {
             fn: async (url: string, note: string) => {

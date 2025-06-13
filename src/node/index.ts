@@ -1,5 +1,5 @@
 import * as yargs from 'yargs';
-import { Arguments, Argv } from 'yargs';
+import { Argv } from 'yargs';
 import * as path from 'path';
 import {
     add, checkDci, checkFiles, del, decorate,
@@ -9,8 +9,6 @@ import { Epub } from './cli/epub';
 import { startServer } from './server';
 // import { crawler } from './server/crawler/html/neo4j-docs';
 // import { fetch } from './server/hypothes.is';
-import { words } from './server/nlp';
-import { Neo4jClient } from './server/neo4j/client';
 import { merge } from './cli/merge';
 import { rm } from './cli/pre-code';
 import { Archive } from './cli/archive';
@@ -130,25 +128,6 @@ const ROOT = '/home/zy/ws/res/';
         await epub.convert();
     } else if (argv.s !== undefined) {
         startServer();
-    }
-
-    // else if (argv.n) {
-    //     crawler();
-    // }
-    //
-    // else if (argv.p) {
-    //     await fetch();
-    // }
-
-    else if (argv.l) {
-        const sent = words(argv.l);
-
-        const client = new Neo4jClient();
-        const result = await client.addSent(sent);
-
-        console.log(result);
-
-        await client.dispose();
     } else if (argv.m) {
         await merge(argv.m[0], argv.m[1]);
     } else if (argv.pre) {
