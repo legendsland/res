@@ -1,8 +1,11 @@
 const fs = require('fs');
 const { JSDOM } = require('jsdom');
 
+const input = process.argv[2];
+const output = `${input}.wrap.html`;
+
 // Read the HTML file
-const inputHTML = fs.readFileSync('/home/zy/ws/res/res/ssci/input.html', 'utf8');
+const inputHTML = fs.readFileSync(input, 'utf8');
 
 // Parse with JSDOM
 const dom = new JSDOM(inputHTML);
@@ -19,6 +22,6 @@ $('div').filter(function () {
 });
 
 // Save the modified HTML
-fs.writeFileSync('/home/zy/ws/res/res/ssci/output.html', dom.serialize());
+fs.writeFileSync(output, dom.serialize());
 
-console.log('Updated HTML saved to output.html');
+console.log(`Updated HTML saved to ${output}`);
