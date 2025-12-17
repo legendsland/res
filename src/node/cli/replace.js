@@ -15,11 +15,14 @@ global.document = document;
 const $ = jQuery = require('jquery')(dom.window);
 
 // Select all divs and wrap text content with <span>
-$('div').filter(function () {
-    return $(this).contents().length === 1 && this.childNodes[0].nodeType === 3;
-}).each(function () {
-    $(this).html(`<p>${$(this).text().trim()}</p>`);
-});
+// $('div').filter(function () {
+//     return $(this).contents().length === 1 && this.childNodes[0].nodeType === 3;
+// }).each(function () {
+//     $(this).html(`<p>${$(this).text().trim()}</p>`);
+// });
+
+// use jquery to wrap all text nodes in <div> with <p>, but not the text nodes in <span>
+$('div').wrapInner('<p></p>');
 
 // Save the modified HTML
 fs.writeFileSync(output, dom.serialize());
