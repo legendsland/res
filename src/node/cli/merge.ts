@@ -86,7 +86,7 @@ export function merge(from: string, to: string) {
                     }
                 });
 
-                $to(toElems[i]).after(`<${tag} ${attrs}>${newHtml}</${tag}>`);
+                $to(toElems[i]).after(`\n<${tag} ${attrs}>${newHtml}</${tag}>`);
             }
         } else {
             console.log(p);

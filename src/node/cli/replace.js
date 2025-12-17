@@ -22,7 +22,19 @@ const $ = jQuery = require('jquery')(dom.window);
 // });
 
 // use jquery to wrap all text nodes in <div> with <p>, but not the text nodes in <span>
-$('div').wrapInner('<p></p>');
+// $('div').wrapInner('<p></p>');
+
+// $('table').wrap('<code class="language-python"></code>');
+
+$('p').each(function () {
+    const $current = $(this);
+    const $next = $current.next();
+
+    if ($next.length && $current.prop('outerHTML') === $next.prop('outerHTML')) {
+        $next.remove();
+    }
+});
+
 
 // Save the modified HTML
 fs.writeFileSync(output, dom.serialize());
