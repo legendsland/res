@@ -3,12 +3,7 @@
  ********************************************************************************/
 
 import express from 'express';
-import * as path from 'path';
-import * as fs from 'fs';
-import * as util from 'util';
-import * as cheerio from 'cheerio';
 import * as http from 'http';
-import { removeStopwords } from 'stopword';
 import { NodeDb } from './res';
 import { Note } from '../../common/db';
 
@@ -17,27 +12,27 @@ import bodyParser from 'body-parser';
 
 export async function startServer() {
     const app = express();
-    const server = http.createServer(app);
+    http.createServer(app);
 
     // const root = path.join(import.meta.dirname, '../../../../../');
-    const root = '/home/zy/ws/res';
+
+    // TODO: hard-coded
+    const root = '/home/zy/ws';
+
+    console.log(`import.meta.dirname: ${import.meta.dirname}`);
+    console.log(`root: ${root}`);
     const port = 34701;
 
     app.use(cors());
     app.use(express.static(root));
     app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded({
-        extended: false,
-    }));
+    app.use(
+        bodyParser.urlencoded({
+            extended: false,
+        }),
+    );
 
-    const neo4jRunning = false;
-    // const neo4jClient = new Neo4jClient();
-    //
-    // connection neo4j
-    // await neo4jClient.check();
-
-    // const programRunner = new ProgramRunner();
-    const db = new NodeDb(`${root}/src/common/db.json`);
+    const db = new NodeDb(`${root}/res/src/common/db.json`);
     await db.load();
 
     app.get('/res', (req, res) => {
@@ -45,19 +40,6 @@ export async function startServer() {
     });
 
     const routes = {
-        reqlist: {
-            fn: () => Object.getOwnPropertyNames(routes)
-                .filter((prop) => prop !== 'reqlist')
-                .map((prop) => ({ name: prop })),
-        },
-
-        nlpVerbs: {
-            fn: async () => {
-                const text = await cleanText(path.join(root, '/res/res/thinking/A Rulebook for Arguments.18.html'));
-                return getVerbs(text);
-            },
-        },
-
         resAnnUpdate: {
             fn: async (url: string, note: string) => {
                 db.updateAnn(url, JSON.parse(note));
@@ -115,11 +97,6 @@ export async function startServer() {
         console.log(`request: ${method}, params: ${JSON.stringify(body.params)}`);
 
         if (target !== undefined) {
-            if (!neo4jRunning && method.startsWith('neo4j')) {
-                res.send('neo4j is not running');
-                return;
-            }
-
             const result = await target.fn(...body.params);
             res.send(result);
         } else {
@@ -130,34 +107,4 @@ export async function startServer() {
     app.listen(port, () => {
         console.log(`Example app listening on port ${port}`);
     });
-}
-
-async function cleanText(path: string): Promise<string> {
-    const readFile = util.promisify(fs.readFile);
-
-    return new Promise((resolve, reject) => {
-        readFile(path).then((data) => {
-            const $ = cheerio.load(data.toString());
-
-            const text: string = $('#OEBPS\\/prf\\.xhtml').text() as string;
-
-            // const text = 'a b c d it man asked for for it it it man man';
-
-            const result = removeStopwords(text.replace(/\n/g, ' ').split(' ')).join(' ');
-            // const result = removeStopwords(text.replace(/\n/g, ' ').split(' '))
-            // .map((word) => PorterStemmer.stem(word))
-            // .reduce((prev, curr) => `${prev} ${curr}`);
-
-            // do the clean
-
-            console.log(result);
-            resolve(result);
-        }).catch((error) => {
-            reject();
-        });
-    });
-}
-
-function getVerbs(text: string) {
-    return '';
 }

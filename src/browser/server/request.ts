@@ -10,10 +10,12 @@ export async function post(url: string, data: any) {
             type: 'POST',
             data: JSON.stringify(data),
             contentType: 'application/json',
-        }).then((data) => {
-            resolve(data);
-        }).catch((error) => {
-            reject(error);
-        });
+        })
+            .then((d) => {
+                resolve(d);
+            })
+            .catch((error) => {
+                reject(error);
+            });
     });
 }

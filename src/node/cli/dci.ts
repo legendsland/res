@@ -1,5 +1,5 @@
-import {appendIgnore, delIgnore, fromIgnoreFile} from './ignorefile';
-import {listFiles as gitListFiles, remove as gitRemove, add as gitAdd} from 'isomorphic-git';
+import { appendIgnore, delIgnore, fromIgnoreFile } from './ignorefile';
+import { listFiles as gitListFiles, remove as gitRemove, add as gitAdd } from 'isomorphic-git';
 
 import fs from 'fs';
 import path from 'path';
@@ -16,11 +16,11 @@ export function checkDci(files: string[]) {
     // if no files are specified, check files in .gitignore
     if (files.length === 0) {
         htmlFiles = fromIgnoreFile()
-            .filter(path => path.base.endsWith('html'))
-            .map(path => path.dir + '/' + path.base);
+            .filter((p) => p.base.endsWith('html'))
+            .map((p) => p.dir + '/' + p.base);
     }
 
-    htmlFiles.forEach(filename => {
+    htmlFiles.forEach((filename) => {
         const html = fs.readFileSync(filename);
         const idx = html.indexOf(DCI);
         if (idx === -1) {
@@ -32,22 +32,22 @@ export function checkDci(files: string[]) {
 }
 
 export async function checkFiles() {
-    const added = fromIgnoreFile().map(path => path.dir + '/' + path.base).sort();
+    const added = fromIgnoreFile()
+        .map((p) => p.dir + '/' + p.base)
+        .sort();
     const files = await gitListFiles({
         fs: fs,
         dir: '.',
     });
 
-    const ignoreDirs = [
-        'res/images'
-    ];
+    const ignoreDirs = ['res/images'];
 
     const fromIgnore = JSON.stringify(added);
     const fromGit = JSON.stringify(
-        files.filter((file) =>
-            file.startsWith('res/')
-            && ignoreDirs.filter((dir) => file.startsWith(dir)).length === 0
-        ).sort());
+        files
+            .filter((file) => file.startsWith('res/') && ignoreDirs.filter((dir) => file.startsWith(dir)).length === 0)
+            .sort(),
+    );
     if (fromIgnore !== fromGit) {
         console.log('!! not consistent');
         console.log('ignore: ' + fromIgnore);
@@ -67,14 +67,14 @@ export async function decorate(file: string, embedded: boolean, output: string) 
     const ext = filePath.ext;
 
     // add dci automatically if it is a html file and dci doesn't exist
-    if ( ext === Ext.html ) {
+    if (ext === Ext.html) {
         const html = fs.readFileSync(file);
 
         const $ = cheerio.load(html);
 
         const $dci = $('meta[name="dc.identifier"]');
         if ($dci.length === 0) {
-            const sha1sum = crypto.createHash('sha1')
+            const sha1sum = crypto.createHash('sha1');
             const hex = sha1sum.update(html).digest('hex');
             console.log('create dci: res/' + hex);
             $('head').prepend(`\n<meta name="dc.identifier" content="res/${hex}">\n`);
@@ -84,12 +84,12 @@ export async function decorate(file: string, embedded: boolean, output: string) 
 
         // add ore replace inlined css and javascript
         const $style = $(`#${STYLE_ELEM_ID}`);
-        if ( $style.length !== 0 ) {
+        if ($style.length !== 0) {
             $style.remove();
         }
-//<meta name="dc.identifier" content="res/6287b00253a4b52566edbef59f7ba7c1050ed0a7">
+        // <meta name="dc.identifier" content="res/6287b00253a4b52566edbef59f7ba7c1050ed0a7">
         const $script = $(`#${SCRIPT_ELEM_ID}`);
-        if ( $script.length !== 0 ) {
+        if ($script.length !== 0) {
             $script.remove();
         }
 
@@ -101,16 +101,18 @@ export async function decorate(file: string, embedded: boolean, output: string) 
             $('body').append(`<script id="${SCRIPT_ELEM_ID}" type="text/javascript">${scriptContent}</script>\n`);
         } else {
             // link, easy for updating
-            $('head').append(`<link id="${STYLE_ELEM_ID}" rel="stylesheet" href="/res/dist/res/style.css" type="text/css"/>\n`);
+            $('head').append(
+                `<link id="${STYLE_ELEM_ID}" rel="stylesheet" href="/res/dist/res/style.css" type="text/css"/>\n`,
+            );
 
-            $('body').append(`<script id="${SCRIPT_ELEM_ID}" src="/res/dist/res/main.js" type="text/javascript"></script>\n`);
-
+            $('body').append(
+                `<script id="${SCRIPT_ELEM_ID}" src="/res/dist/res/main.js" type="text/javascript"></script>\n`,
+            );
         }
 
         // copy if not the same file
         fs.writeFileSync(output, $.html());
-
-    } else if ( ext === Ext.pdf ) {
+    } else if (ext === Ext.pdf) {
         // do nothing....
     }
 }
@@ -125,7 +127,7 @@ export async function add(file: string) {
     gitAdd({
         fs: fs,
         dir: '.',
-        filepath: file
+        filepath: file,
     }).then(() => {
         console.log(`${file} added to git`);
     });
@@ -142,13 +144,13 @@ export async function del(file: string) {
         dir: '.',
     });
 
-    const list = files.filter(f => f === file);
+    const list = files.filter((f) => f === file);
     if (list.length === 1) {
         // remove from git
         gitRemove({
             fs: fs,
             dir: '.',
-            filepath: list[0]
+            filepath: list[0],
         }).then(() => {
             console.log(`${file} removed from git`);
         });

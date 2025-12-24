@@ -91318,9 +91318,11 @@ async function post(url, data) {
             type: 'POST',
             data: JSON.stringify(data),
             contentType: 'application/json',
-        }).then((data) => {
-            resolve(data);
-        }).catch((error) => {
+        })
+            .then((d) => {
+            resolve(d);
+        })
+            .catch((error) => {
             reject(error);
         });
     });

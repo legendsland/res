@@ -21,6 +21,7 @@ import {
     cpSync as _cpSync,
 } from 'fs';
 import extract from 'extract-zip';
+import { ROOT } from '../common/util';
 
 const PATH_CONTAINER = 'META-INF/container.xml';
 const TAG_ROOTFILE = 'rootfile';
@@ -79,7 +80,7 @@ export class Epub {
         this.isEpub = false;
         this.inputFile = path.resolve(input);
         this.output = output;
-        this.srcRoot = path.join(__dirname, '../../../../');
+        this.srcRoot = ROOT;
     }
 
     async convert() {
