@@ -12,21 +12,18 @@ import { removeStopwords } from 'stopword';
 import { NodeDb } from './res';
 import { Note } from '../../common/db';
 
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const compression = require('compression');
-const nlp = require('compromise');
-nlp.extend(require('compromise-ngrams')); // done!
+import cors from 'cors';
+import bodyParser from 'body-parser';
 
 export async function startServer() {
     const app = express();
     const server = http.createServer(app);
 
-    const root = path.join(__dirname, '../../../../../');
+    // const root = path.join(import.meta.dirname, '../../../../../');
+    const root = '/home/zy/ws/res';
     const port = 34701;
 
     app.use(cors());
-    app.use(compression());
     app.use(express.static(root));
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({
@@ -40,7 +37,7 @@ export async function startServer() {
     // await neo4jClient.check();
 
     // const programRunner = new ProgramRunner();
-    const db = new NodeDb(`${root}/res/src/common/db.json`);
+    const db = new NodeDb(`${root}/src/common/db.json`);
     await db.load();
 
     app.get('/res', (req, res) => {
@@ -162,5 +159,5 @@ async function cleanText(path: string): Promise<string> {
 }
 
 function getVerbs(text: string) {
-    return nlp(text).verbs().out('array');
+    return '';
 }

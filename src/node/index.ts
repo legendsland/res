@@ -1,6 +1,7 @@
-import * as yargs from 'yargs';
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
 import { Argv } from 'yargs';
-import * as path from 'path';
+import path from 'path';
 import { add, checkDci, checkFiles, del, decorate } from './cli/dci';
 import { createIndex } from './cli/gen';
 import { Epub } from './cli/epub';
@@ -11,7 +12,7 @@ import { Archive } from './cli/archive';
 const ROOT = '/home/zy/ws/res/';
 
 (async () => {
-    const args: Argv = yargs
+    const args: Argv = yargs(hideBin(process.argv))
         .usage('Usage: $0 [-a <filename>]')
         .option('index', {
             alias: 'i',

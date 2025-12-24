@@ -1,6 +1,8 @@
 /********************************************************************************
  * Copyright (C) 2023 Harman
  ********************************************************************************/
+
+import 'reflect-metadata';
 import '@testing-library/dom';
 import failOnConsole from 'jest-fail-on-console';
 import process from 'process';

@@ -89081,9 +89081,7 @@ __webpack_require__.r(__webpack_exports__);
 
 const prodContainer = () => {
     const c = new inversify__WEBPACK_IMPORTED_MODULE_1__.Container();
-    const allModules = [
-        _res_modules__WEBPACK_IMPORTED_MODULE_2__.kgModules,
-    ];
+    const allModules = [_res_modules__WEBPACK_IMPORTED_MODULE_2__.kgModules];
     c.load(...allModules);
     return {
         container: c,
@@ -89150,15 +89148,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var mark_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(mark_js__WEBPACK_IMPORTED_MODULE_4__);
 /* harmony import */ var react_dom_client__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react-dom/client */ "./node_modules/react-dom/client.js");
 /* harmony import */ var _server_request__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../server/request */ "./src/browser/server/request.ts");
-var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 
 
 
@@ -89212,6 +89201,10 @@ const TooltipView = ({ tooltip, }) => {
             }, children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("ul", { children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("li", { onClick: handleClick, children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("i", { className: "fa fa-solid fa-plus" }) }) }) }) }));
 };
 class Tooltip {
+    ann;
+    containerId;
+    callback;
+    newAnn_;
     constructor(ann, containerId) {
         this.ann = ann;
         this.containerId = containerId;
@@ -89223,17 +89216,15 @@ class Tooltip {
             .render((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(TooltipView, { tooltip: this }));
     }
     show(x, y, ann) {
-        var _a;
         this.newAnn_ = ann;
-        (_a = this.callback) === null || _a === void 0 ? void 0 : _a.call(this, {
+        this.callback?.({
             name: 'show',
             data: { x, y },
         });
     }
     hide() {
-        var _a;
         this.newAnn_ = undefined;
-        (_a = this.callback) === null || _a === void 0 ? void 0 : _a.call(this, {
+        this.callback?.({
             name: 'hide',
         });
     }
@@ -89334,7 +89325,7 @@ const AnnotationView = ({ ann, note, local, }) => {
                         marginBottom: 0,
                         textIndent: 0,
                         lineHeight: '15px',
-                    }, onClick: handleClick, children: note.selected }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { className: "res-ann-note-container", children: content === null || content === void 0 ? void 0 : content.split('\n').map((para) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("p", { children: para }, `res-ann-${id}-line`))) }), local
+                    }, onClick: handleClick, children: note.selected }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { className: "res-ann-note-container", children: content?.split('\n').map((para) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("p", { children: para }, `res-ann-${id}-line`))) }), local
                     && ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("textarea", { className: "res-ann-note-editor", style: {
                             display: 'none',
                             width: '97%',
@@ -89397,12 +89388,11 @@ const AnnotationsView = ({ ann, }) => {
                 console.log(`min: {${minTop}, ${minLeft}}`);
             },
             done: (nums) => {
-                var _a, _b;
                 console.log(`total marked: ${nums}`);
                 if (ann.local) {
-                    const newNote = Object.assign({}, note);
-                    if (((_a = newNote === null || newNote === void 0 ? void 0 : newNote.pos[0]) === null || _a === void 0 ? void 0 : _a.top) !== minTop
-                        || ((_b = newNote === null || newNote === void 0 ? void 0 : newNote.pos[0]) === null || _b === void 0 ? void 0 : _b.left) !== minLeft) {
+                    const newNote = { ...note };
+                    if (newNote?.pos[0]?.top !== minTop
+                        || newNote?.pos[0]?.left !== minLeft) {
                         console.log(`update ${note.id}: ${newNote.pos[0].top} ${newNote.pos[0].left} **`);
                         newNote.pos = [{ top: minTop, left: minLeft }];
                         ann.updateAnn(newNote).then(() => {
@@ -89459,19 +89449,24 @@ const AnnotationsView = ({ ann, }) => {
             jquery__WEBPACK_IMPORTED_MODULE_1___default()('#res-ann-all').toggle();
         }
     };
-    return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(react__WEBPACK_IMPORTED_MODULE_3__.Fragment, { children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("button", { type: "button", onClick: handleClick, children: ["Notes (", ann.notes.length, ")"] }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { id: "res-ann-all", children: ann === null || ann === void 0 ? void 0 : ann.notes.sort((a, b) => ann.compareNote(a, b)).map((note) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(AnnotationView, { ann: ann, note: note, local: ann.local }, note.id))) })] }, force));
+    return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(react__WEBPACK_IMPORTED_MODULE_3__.Fragment, { children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("button", { type: "button", onClick: handleClick, children: ["Notes (", ann.notes.length, ")"] }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { id: "res-ann-all", children: ann?.notes.sort((a, b) => ann.compareNote(a, b))
+                    .map((note) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(AnnotationView, { ann: ann, note: note, local: ann.local }, note.id))) })] }, force));
 };
 class Ann {
+    parent;
+    db_;
+    notes;
+    callbacks = [];
+    path;
+    $container;
+    local;
+    tooltip;
+    elem = 'res-ann-container';
+    elemId = '#res-ann-container';
+    marks = new Map();
     constructor(parent, db_, ro) {
-        var _a;
         this.parent = parent;
         this.db_ = db_;
-        this.callbacks = [];
-        this.elem = 'res-ann-container';
-        this.elemId = '#res-ann-container';
-        this.marks = new Map();
-        this.debounced = (func, ...args) => (0,p_debounce__WEBPACK_IMPORTED_MODULE_2__["default"])(func, 2000).bind(this)(...args);
-        this.debouncedRequest = (0,p_debounce__WEBPACK_IMPORTED_MODULE_2__["default"])(this.request, 2000).bind(this);
         const url = new URL(window.location.href);
         this.path = url.pathname + url.search;
         this.local = url.hostname === 'localhost';
@@ -89486,8 +89481,8 @@ class Ann {
             this._enableTextSelect();
         }
         const promises = [];
-        (_a = this.db_.annotation().get(this.path)) === null || _a === void 0 ? void 0 : _a.forEach((n) => {
-            const newNote = Object.assign({}, n);
+        this.db_.annotation().get(this.path)?.forEach((n) => {
+            const newNote = { ...n };
             let needsUpdate = false;
             if (newNote.tags === undefined) {
                 needsUpdate = true;
@@ -89620,57 +89615,49 @@ class Ann {
             }));
         });
     }
-    delAnnotation(id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.request('resAnnDel', this.path, id)
-                .then(() => {
-                const idx = this.notes.findIndex((n) => n.id === id);
-                if (idx !== -1) {
-                    this.notes.splice(idx, 1);
-                    this.unmark(id);
-                    this.callbacks.forEach((callback) => callback({
-                        name: 'invalidation',
-                    }));
-                }
-            });
-        });
-    }
-    delTag(id, idx) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.request('resAnnDelTag', this.path, id, idx)
-                .then(() => {
-                const nodeIdx = this.notes.findIndex((n) => n.id === id);
-                if (nodeIdx !== -1) {
-                    this.notes[nodeIdx].tags.splice(idx, 1);
-                    this.callbacks.forEach((callback) => callback({
-                        name: 'invalidation',
-                    }));
-                }
-            });
-        });
-    }
-    addTag(id, tag) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.request('resAnnAddTag', this.path, id, tag)
-                .then(() => {
-                const idx = this.notes.findIndex((n) => n.id === id);
-                if (idx !== -1) {
-                    this.notes[idx].tags.push(tag);
-                    this.callbacks.forEach((callback) => callback({
-                        name: 'invalidation',
-                    }));
-                }
-            });
-        });
-    }
-    updateAnn(n) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.request('resAnnUpdate', this.path, JSON.stringify(n))
-                .then(() => {
+    async delAnnotation(id) {
+        return this.request('resAnnDel', this.path, id)
+            .then(() => {
+            const idx = this.notes.findIndex((n) => n.id === id);
+            if (idx !== -1) {
+                this.notes.splice(idx, 1);
+                this.unmark(id);
                 this.callbacks.forEach((callback) => callback({
                     name: 'invalidation',
                 }));
-            });
+            }
+        });
+    }
+    async delTag(id, idx) {
+        return this.request('resAnnDelTag', this.path, id, idx)
+            .then(() => {
+            const nodeIdx = this.notes.findIndex((n) => n.id === id);
+            if (nodeIdx !== -1) {
+                this.notes[nodeIdx].tags.splice(idx, 1);
+                this.callbacks.forEach((callback) => callback({
+                    name: 'invalidation',
+                }));
+            }
+        });
+    }
+    async addTag(id, tag) {
+        return this.request('resAnnAddTag', this.path, id, tag)
+            .then(() => {
+            const idx = this.notes.findIndex((n) => n.id === id);
+            if (idx !== -1) {
+                this.notes[idx].tags.push(tag);
+                this.callbacks.forEach((callback) => callback({
+                    name: 'invalidation',
+                }));
+            }
+        });
+    }
+    async updateAnn(n) {
+        return this.request('resAnnUpdate', this.path, JSON.stringify(n))
+            .then(() => {
+            this.callbacks.forEach((callback) => callback({
+                name: 'invalidation',
+            }));
         });
     }
     hideTooltip() {
@@ -89679,6 +89666,8 @@ class Ann {
     showTooltip(n, x, y) {
         this.tooltip.show(x, y, n);
     }
+    debounced = (func, ...args) => (0,p_debounce__WEBPACK_IMPORTED_MODULE_2__["default"])(func, 2000).bind(this)(...args);
+    debouncedRequest = (0,p_debounce__WEBPACK_IMPORTED_MODULE_2__["default"])(this.request, 2000).bind(this);
     request(method, ...params) {
         if (this.local) {
             const timeout = this.timeoutAfter(10);
@@ -89717,6 +89706,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(jquery__WEBPACK_IMPORTED_MODULE_0__);
 
 class LinkNode {
+    id;
+    text;
+    children;
+    level;
     constructor(id, text) {
         this.id = id;
         this.text = text;
@@ -89732,9 +89725,7 @@ class LinkNode {
     }
 }
 class LinkTree {
-    constructor() {
-        this.root = new LinkNode('', 'root');
-    }
+    root = new LinkNode('', 'root');
     add(id, text) {
         const p = this.parent(this.root, id);
         p.children.push(new LinkNode(id, text));
@@ -89901,16 +89892,19 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class Cli {
-    constructor() {
-        this.texts = new Map();
-        this.searchResultMgr = new _search_result__WEBPACK_IMPORTED_MODULE_1__.SearchResultManager(() => {
-            this.texts.forEach((matchedText, $elem) => {
-                if (matchedText.hasMatch) {
-                    $elem.html(matchedText.originalHtml);
-                    matchedText.hasMatch = false;
-                }
-            });
+    fullText;
+    $container;
+    height;
+    texts = new Map();
+    searchResultMgr = new _search_result__WEBPACK_IMPORTED_MODULE_1__.SearchResultManager(() => {
+        this.texts.forEach((matchedText, $elem) => {
+            if (matchedText.hasMatch) {
+                $elem.html(matchedText.originalHtml);
+                matchedText.hasMatch = false;
+            }
         });
+    });
+    constructor() {
         this.height = jquery__WEBPACK_IMPORTED_MODULE_0___default()(document).height();
         this.$container = jquery__WEBPACK_IMPORTED_MODULE_0___default()('#book-container');
         this.fullText = this.$container.text();
@@ -90030,11 +90024,13 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class ColorPicker {
+    areaId;
+    sb_;
+    ctrlKey = false;
+    palettes = new Map();
     constructor(areaId, sb_) {
         this.areaId = areaId;
         this.sb_ = sb_;
-        this.ctrlKey = false;
-        this.palettes = new Map();
         jquery__WEBPACK_IMPORTED_MODULE_0___default()(document).on('keydown', (e) => {
             this.ctrlKey = e.ctrlKey;
         }).on('keyup', (e) => {
@@ -90107,7 +90103,6 @@ class ColorPicker {
             ctx.drawImage(image, 0, 0);
             jquery__WEBPACK_IMPORTED_MODULE_0___default()(canvas)
                 .on('mouseenter', (e) => {
-                var _a;
                 const id = jquery__WEBPACK_IMPORTED_MODULE_0___default()(e.target).attr('id');
                 let palette = this.palettes.get(id);
                 if (palette === undefined) {
@@ -90116,17 +90111,16 @@ class ColorPicker {
                         .map((c) => [c.r, c.g, c.b, 255]);
                     this.palettes.set(id, palette);
                 }
-                (_a = this.sb_) === null || _a === void 0 ? void 0 : _a.update({
+                this.sb_?.update({
                     palette,
                 });
             })
                 .on('mousemove', (e) => {
-                var _a;
                 const bb = canvas.getBoundingClientRect();
                 const x = Math.floor((e.clientX - bb.left) / bb.width * canvas.width);
                 const y = Math.floor((e.clientY - bb.top) / bb.height * canvas.height);
                 const px = ctx.getImageData(x, y, 1, 1).data;
-                (_a = this.sb_) === null || _a === void 0 ? void 0 : _a.update({
+                this.sb_?.update({
                     color: [px[0], px[1], px[2], px[3]],
                 });
             })
@@ -90340,6 +90334,7 @@ const CommandInput = (props) => {
     return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("input", { type: "text", onKeyDown: handleKeyDown, onChange: handleChange, value: input }) }));
 };
 class CommandParser {
+    cli;
     constructor(cli) {
         this.cli = cli;
     }
@@ -90350,6 +90345,8 @@ class CommandParser {
     }
 }
 class CommandShortcut {
+    $elem;
+    parser;
     constructor(cli) {
         this.parser = new CommandParser(cli);
         if (jquery__WEBPACK_IMPORTED_MODULE_1___default()(`#${ID}`).length === 0) {
@@ -90414,26 +90411,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   BrowserDb: () => (/* binding */ BrowserDb)
 /* harmony export */ });
 /* harmony import */ var _common_db__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../common/db */ "./src/common/db.ts");
-var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 
 class BrowserDb extends _common_db__WEBPACK_IMPORTED_MODULE_0__.Db {
-    load() {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield __webpack_require__.e(/*! import() */ "src_common_db_json").then(__webpack_require__.t.bind(__webpack_require__, /*! ../../common/db.json */ "./src/common/db.json", 19)).then((d) => {
-                this.db_ = d.default;
-            });
-            const ann = this.db_.annotation;
-            ann.records.forEach((record) => {
-                this.anns.set(record.url, record.notes);
-            });
+    async load() {
+        await __webpack_require__.e(/*! import() */ "src_common_db_json").then(__webpack_require__.t.bind(__webpack_require__, /*! ../../common/db.json */ "./src/common/db.json", 19)).then((d) => {
+            this.db_ = d.default;
+        });
+        const ann = this.db_.annotation;
+        ann.records.forEach((record) => {
+            this.anns.set(record.url, record.notes);
         });
     }
 }
@@ -90450,6 +90436,7 @@ class BrowserDb extends _common_db__WEBPACK_IMPORTED_MODULE_0__.Db {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   KnowledgeGraphView: () => (/* binding */ KnowledgeGraphView),
 /* harmony export */   KnowledgeGraphViewContainer: () => (/* binding */ KnowledgeGraphViewContainer)
 /* harmony export */ });
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
@@ -90461,10 +90448,9 @@ __webpack_require__.r(__webpack_exports__);
 
 const KnowledgeGraphView = () => (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { children: "aaa" });
 class KnowledgeGraphViewContainer {
-    constructor() {
-        this._elemId = 'res-kg-container';
-        this._elemSelector = '#res-kg-container';
-    }
+    _elemId = 'res-kg-container';
+    _elemSelector = '#res-kg-container';
+    _root;
     render() {
         if (jquery__WEBPACK_IMPORTED_MODULE_1___default()(this._elemSelector).length === 0) {
             jquery__WEBPACK_IMPORTED_MODULE_1___default()('body').append(`<div id="${this._elemId}"></div>`);
@@ -90527,15 +90513,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_3__);
 /* harmony import */ var react_dom_client__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react-dom/client */ "./node_modules/react-dom/client.js");
 /* harmony import */ var _server_request__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../server/request */ "./src/browser/server/request.ts");
-var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 
 
 
@@ -90629,7 +90606,7 @@ const AnnotationView = ({ ann, note, local, }) => {
                         marginBottom: 0,
                         textIndent: 0,
                         lineHeight: '15px',
-                    }, onClick: handleClick, children: note.selected }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { className: "res-ann-note-container", children: content === null || content === void 0 ? void 0 : content.split('\n').map((para) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("p", { children: para }, `res-ann-${id}-line`))) }), local
+                    }, onClick: handleClick, children: note.selected }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { className: "res-ann-note-container", children: content?.split('\n').map((para) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("p", { children: para }, `res-ann-${id}-line`))) }), local
                     && ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("textarea", { className: "res-ann-note-editor", style: {
                             display: 'none',
                             width: '97%',
@@ -90708,17 +90685,22 @@ const AnnotationsView = ({ ann, }) => {
             jquery__WEBPACK_IMPORTED_MODULE_1___default()('#res-ann-all').toggle();
         }
     };
-    return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(react__WEBPACK_IMPORTED_MODULE_3__.Fragment, { children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("button", { type: "button", onClick: handleClick, children: ["Notes (", ann.notes.length, ")"] }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { id: "res-ann-all", children: ann === null || ann === void 0 ? void 0 : ann.notes.sort((a, b) => ann.compareNote(a, b)).map((note) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(AnnotationView, { ann: ann, note: note, local: ann.local }, note.id))) })] }, force));
+    return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(react__WEBPACK_IMPORTED_MODULE_3__.Fragment, { children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("button", { type: "button", onClick: handleClick, children: ["Notes (", ann.notes.length, ")"] }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { id: "res-ann-all", children: ann?.notes.sort((a, b) => ann.compareNote(a, b))
+                    .map((note) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(AnnotationView, { ann: ann, note: note, local: ann.local }, note.id))) })] }, force));
 };
 class PDFAnn {
+    parent;
+    db_;
+    notes;
+    callbacks = [];
+    path;
+    $container;
+    local;
+    elem = 'res-ann-container';
+    elemId = '#res-ann-container';
     constructor(parent, db_, ro) {
         this.parent = parent;
         this.db_ = db_;
-        this.callbacks = [];
-        this.elem = 'res-ann-container';
-        this.elemId = '#res-ann-container';
-        this.debounced = (func, ...args) => (0,p_debounce__WEBPACK_IMPORTED_MODULE_2__["default"])(func, 2000).bind(this)(...args);
-        this.debouncedRequest = (0,p_debounce__WEBPACK_IMPORTED_MODULE_2__["default"])(this.request, 2000).bind(this);
         const url = new URL(window.location.href);
         this.path = url.pathname + url.search;
         this.local = url.hostname === 'localhost';
@@ -90775,56 +90757,48 @@ class PDFAnn {
             }));
         });
     }
-    delAnnotation(id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.request('resAnnDel', this.path, id)
-                .then(() => {
-                const idx = this.notes.findIndex((n) => n.id === id);
-                if (idx !== -1) {
-                    this.notes.splice(idx, 1);
-                    this.callbacks.forEach((callback) => callback({
-                        name: 'invalidation',
-                    }));
-                }
-            });
-        });
-    }
-    delTag(id, idx) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.request('resAnnDelTag', this.path, id, idx)
-                .then(() => {
-                const nodeIdx = this.notes.findIndex((n) => n.id === id);
-                if (nodeIdx !== -1) {
-                    this.notes[nodeIdx].tags.splice(idx, 1);
-                    this.callbacks.forEach((callback) => callback({
-                        name: 'invalidation',
-                    }));
-                }
-            });
-        });
-    }
-    addTag(id, tag) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.request('resAnnAddTag', this.path, id, tag)
-                .then(() => {
-                const idx = this.notes.findIndex((n) => n.id === id);
-                if (idx !== -1) {
-                    this.notes[idx].tags.push(tag);
-                    this.callbacks.forEach((callback) => callback({
-                        name: 'invalidation',
-                    }));
-                }
-            });
-        });
-    }
-    updateAnn(n) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.request('resAnnUpdate', this.path, JSON.stringify(n))
-                .then(() => {
+    async delAnnotation(id) {
+        return this.request('resAnnDel', this.path, id)
+            .then(() => {
+            const idx = this.notes.findIndex((n) => n.id === id);
+            if (idx !== -1) {
+                this.notes.splice(idx, 1);
                 this.callbacks.forEach((callback) => callback({
                     name: 'invalidation',
                 }));
-            });
+            }
+        });
+    }
+    async delTag(id, idx) {
+        return this.request('resAnnDelTag', this.path, id, idx)
+            .then(() => {
+            const nodeIdx = this.notes.findIndex((n) => n.id === id);
+            if (nodeIdx !== -1) {
+                this.notes[nodeIdx].tags.splice(idx, 1);
+                this.callbacks.forEach((callback) => callback({
+                    name: 'invalidation',
+                }));
+            }
+        });
+    }
+    async addTag(id, tag) {
+        return this.request('resAnnAddTag', this.path, id, tag)
+            .then(() => {
+            const idx = this.notes.findIndex((n) => n.id === id);
+            if (idx !== -1) {
+                this.notes[idx].tags.push(tag);
+                this.callbacks.forEach((callback) => callback({
+                    name: 'invalidation',
+                }));
+            }
+        });
+    }
+    async updateAnn(n) {
+        return this.request('resAnnUpdate', this.path, JSON.stringify(n))
+            .then(() => {
+            this.callbacks.forEach((callback) => callback({
+                name: 'invalidation',
+            }));
         });
     }
     jump(n) {
@@ -90833,6 +90807,8 @@ class PDFAnn {
             data: n,
         }));
     }
+    debounced = (func, ...args) => (0,p_debounce__WEBPACK_IMPORTED_MODULE_2__["default"])(func, 2000).bind(this)(...args);
+    debouncedRequest = (0,p_debounce__WEBPACK_IMPORTED_MODULE_2__["default"])(this.request, 2000).bind(this);
     request(method, ...params) {
         if (this.local) {
             const timeout = this.timeoutAfter(10);
@@ -90924,7 +90900,7 @@ const PDFView = ({ url, onload, }) => {
             setNotes(notes.concat([note]));
             props.cancel();
             console.log(note);
-            ann === null || ann === void 0 ? void 0 : ann.current.newAnnotation({
+            ann?.current.newAnnotation({
                 id: note.id,
                 selected: note.selected,
                 selector: {
@@ -90948,7 +90924,12 @@ const PDFView = ({ url, onload, }) => {
         console.log('renderHighlights');
         return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { children: notes.map((note) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { children: note.highlightAreas
                     .filter((area) => area.pageIndex === props.pageIndex)
-                    .map((area, idx) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { id: `res-pdf-highlight-${note.id}`, style: (Object.assign({ background: 'yellow', opacity: 0.4, zIndex: 10 }, props.getCssProperties(area, props.rotation))), onClick: () => ann.current.show(note.id), ref: (ref) => {
+                    .map((area, idx) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { id: `res-pdf-highlight-${note.id}`, style: ({
+                        background: 'yellow',
+                        opacity: 0.4,
+                        zIndex: 10,
+                        ...props.getCssProperties(area, props.rotation),
+                    }), onClick: () => ann.current.show(note.id), ref: (ref) => {
                         noteEles.set(note.id, ref);
                     } }, note.id))) }, note.id))) }));
     };
@@ -90978,7 +90959,6 @@ const PDFView = ({ url, onload, }) => {
         setNotes(notes);
     };
     const onNotesEvent = (event) => {
-        var _a, _b;
         console.log(`onNotesEvent, ${event.name}`);
         if (event.name === 'invalidation') {
             const notes = ann.current.notes.map((n) => ({
@@ -90997,8 +90977,8 @@ const PDFView = ({ url, onload, }) => {
         }
         else if (event.name === 'jump') {
             const note = event.data;
-            console.log(`jump to ${(_a = note === null || note === void 0 ? void 0 : note.pos[0]) === null || _a === void 0 ? void 0 : _a.pageIndex}`);
-            jumpToPage((_b = note === null || note === void 0 ? void 0 : note.pos[0]) === null || _b === void 0 ? void 0 : _b.pageIndex);
+            console.log(`jump to ${note?.pos[0]?.pageIndex}`);
+            jumpToPage(note?.pos[0]?.pageIndex);
         }
     };
     const onPageChange = (ev) => {
@@ -91077,6 +91057,8 @@ const SearchResultView = ({ input, results, mgr, spend, }) => {
                                 }, children: result.text }) }, index)] }))) })] }));
 };
 class SearchResultManager {
+    dispose;
+    _root;
     constructor(dispose) {
         this.dispose = dispose;
     }
@@ -91090,7 +91072,7 @@ class SearchResultManager {
     }
     close() {
         this._root.unmount();
-        this === null || this === void 0 ? void 0 : this.dispose();
+        this?.dispose();
         jquery__WEBPACK_IMPORTED_MODULE_1___default()(`#${CONTAINER_ID}`).remove();
     }
 }
@@ -91113,8 +91095,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(jquery__WEBPACK_IMPORTED_MODULE_0__);
 
 class Shortcuts {
+    $body;
+    handlers = new Map();
     constructor() {
-        this.handlers = new Map();
         this.$body = jquery__WEBPACK_IMPORTED_MODULE_0___default()('body');
     }
     add(handler) {
@@ -91188,7 +91171,7 @@ const StatusBarView = (props) => {
     const [force, _forceUpdate] = (0,react__WEBPACK_IMPORTED_MODULE_2__.useReducer)((x) => x + 1, 0);
     const [stat, setStat] = (0,react__WEBPACK_IMPORTED_MODULE_2__.useState)(initialState);
     const handlePalette = (color_) => {
-        const s = Object.assign({}, stat);
+        const s = { ...stat };
         for (let i = 0; i < Math.min(initialState.palette.length, color_.length); ++i) {
             s.palette[i].bg = (0,_types__WEBPACK_IMPORTED_MODULE_4__.color2Str)(color_[i]);
             s.palette[i].fg = (0,_types__WEBPACK_IMPORTED_MODULE_4__.invertedColor2Str)(color_[i], true);
@@ -91196,14 +91179,14 @@ const StatusBarView = (props) => {
         setStat(s);
     };
     const handleColor = (color_) => {
-        const s = Object.assign({}, stat);
+        const s = { ...stat };
         s.colors[1].bg = (0,_types__WEBPACK_IMPORTED_MODULE_4__.color2Str)(color_);
         s.colors[1].fg = (0,_types__WEBPACK_IMPORTED_MODULE_4__.invertedColor2Str)(color_, true);
         setStat(s);
     };
     const handlePickColor = () => {
         const color_ = stat.colors[1];
-        const s = Object.assign({}, stat);
+        const s = { ...stat };
         s.colors[0].fg = color_.fg;
         s.colors[0].bg = color_.bg;
         setStat(s);
@@ -91240,12 +91223,14 @@ const StatusBarView = (props) => {
                 }, children: c.bg }, `colors-${idx}`)))] }, force));
 };
 class StatusBar {
+    id;
+    $elem_;
+    listeners_ = new Set();
+    stat = {
+        color: [255, 255, 255, 1],
+    };
     constructor(id) {
         this.id = id;
-        this.listeners_ = new Set();
-        this.stat = {
-            color: [255, 255, 255, 1],
-        };
         this.$elem_ = jquery__WEBPACK_IMPORTED_MODULE_1___default()(`${this.id}`);
         if (this.$elem_.length === 0) {
             jquery__WEBPACK_IMPORTED_MODULE_1___default()('body').append(`<div id="${this.id}-container">`);
@@ -91325,29 +91310,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
 /* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(jquery__WEBPACK_IMPORTED_MODULE_0__);
-var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 
-function post(url, data) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return new Promise((resolve, reject) => {
-            jquery__WEBPACK_IMPORTED_MODULE_0___default().ajax({
-                url,
-                type: 'POST',
-                data: JSON.stringify(data),
-                contentType: 'application/json',
-            }).then((data) => {
-                resolve(data);
-            }).catch((error) => {
-                reject(error);
-            });
+async function post(url, data) {
+    return new Promise((resolve, reject) => {
+        jquery__WEBPACK_IMPORTED_MODULE_0___default().ajax({
+            url,
+            type: 'POST',
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+        }).then((data) => {
+            resolve(data);
+        }).catch((error) => {
+            reject(error);
         });
     });
 }
@@ -91367,9 +91341,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   Db: () => (/* binding */ Db)
 /* harmony export */ });
 class Db {
+    dbPath;
+    db_;
+    anns = new Map();
     constructor(dbPath) {
         this.dbPath = dbPath;
-        this.anns = new Map();
     }
     getAnn(url) {
         const notes = this.anns.get(url);
@@ -91377,14 +91353,14 @@ class Db {
     }
     updateAnn(url, note) {
         const notes = this.anns.get(url);
-        const idx = notes === null || notes === void 0 ? void 0 : notes.findIndex((n) => n.id === note.id);
+        const idx = notes?.findIndex((n) => n.id === note.id);
         if (idx !== -1) {
             notes[idx] = note;
         }
     }
     updateAnnotationTag(url, id, tag) {
         const notes = this.anns.get(url);
-        const n = notes === null || notes === void 0 ? void 0 : notes.find((n) => n.id === id);
+        const n = notes?.find((n) => n.id === id);
         if (n !== undefined) {
             if (n.tags === undefined) {
                 n.tags = [];
@@ -91394,7 +91370,7 @@ class Db {
     }
     delAnnotationTag(url, id, idx) {
         const notes = this.anns.get(url);
-        const n = notes === null || notes === void 0 ? void 0 : notes.find((n) => n.id === id);
+        const n = notes?.find((n) => n.id === id);
         if (n !== undefined) {
             if (n.tags !== undefined) {
                 n.tags.splice(idx, 1);
@@ -91842,15 +91818,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _pdf_annotation__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./pdf-annotation */ "./src/browser/res/pdf-annotation.tsx");
 /* harmony import */ var _graph__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./graph */ "./src/browser/res/graph.tsx");
 /* harmony import */ var _container__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ../container */ "./src/browser/container.ts");
-var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 
 
 
@@ -91909,7 +91876,6 @@ const Category = ({ category, }) => {
     return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_mui_material_List__WEBPACK_IMPORTED_MODULE_17__["default"], { children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_mui_material_ListItemButton__WEBPACK_IMPORTED_MODULE_18__["default"], { onClick: handleClick, children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_material_ListItemText__WEBPACK_IMPORTED_MODULE_19__["default"], { primary: categoeyLabel }), open ? (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_icons_material_ExpandLess__WEBPACK_IMPORTED_MODULE_20__["default"], {}) : (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_icons_material_ExpandMore__WEBPACK_IMPORTED_MODULE_21__["default"], {})] }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_material_Collapse__WEBPACK_IMPORTED_MODULE_22__["default"], { in: open, timeout: "auto", unmountOnExit: true, children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_material_List__WEBPACK_IMPORTED_MODULE_17__["default"], { component: "div", disablePadding: true, children: category.data
                         .sort((a, b) => a.base.localeCompare(b.base))
                         .map((p, idx) => {
-                        var _a;
                         const url = `${p.dir}/${p.base}`;
                         const id = `res-index-tooltip-${category.name}-`;
                         return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_mui_material_ListItemButton__WEBPACK_IMPORTED_MODULE_18__["default"], { sx: { pl: 4 }, children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", { className: "res-index-status", children: p.reading ? '!' : '' }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_material_Link__WEBPACK_IMPORTED_MODULE_23__["default"], { href: url, target: "_blank", rel: "noopener", onClick: (e) => handleOpen(e, url), onMouseEnter: (event) => showReview(id + idx, event), onMouseLeave: () => hideReview(id + idx), children: p.base }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", { className: "res-index-stat", children: p.stars >= 5 ? `⭐(${p.note})`
@@ -91917,7 +91883,7 @@ const Category = ({ category, }) => {
                                                 width: p.progress * 100,
                                             } }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", { className: "res-index-progress-understand", title: `understand: ${(p.understand * 100).toFixed(1)}%`, style: {
                                                 width: p.understand * 100,
-                                            } })] }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { id: id + idx, className: "res-index-tooltip", children: (_a = p.review) === null || _a === void 0 ? void 0 : _a.split('\n').map((line, idx) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("p", { children: line }, idx))) })] }, url));
+                                            } })] }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { id: id + idx, className: "res-index-tooltip", children: p.review?.split('\n').map((line, idx) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("p", { children: line }, idx))) })] }, url));
                     }) }) })] }));
 };
 const App = ({ config, }) => {
@@ -91956,11 +91922,11 @@ const App = ({ config, }) => {
             .sort(([name1], [name2]) => name1.localeCompare(name2))
             .map(([name, category]) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Category, { category: { name, data: category } }, name))) }));
 };
-(() => __awaiter(void 0, void 0, void 0, function* () {
+(async () => {
     const { container } = (0,_container__WEBPACK_IMPORTED_MODULE_16__.prodContainer)();
     jquery__WEBPACK_IMPORTED_MODULE_3___default()('head').append('<link href="/res/dist/assets/fontawesome/css/all.css" rel="stylesheet">');
     const db = new _db__WEBPACK_IMPORTED_MODULE_10__.BrowserDb('../../common/db.json');
-    yield db.load();
+    await db.load();
     const cli = new _cli__WEBPACK_IMPORTED_MODULE_5__.Cli();
     const $body = jquery__WEBPACK_IMPORTED_MODULE_3___default()('body');
     const url = new URL(window.location.href);
@@ -92005,7 +91971,7 @@ const App = ({ config, }) => {
     kg.render();
     (0,_google_analytics__WEBPACK_IMPORTED_MODULE_12__.addGoogleScript)($body.get()[0]);
     __webpack_require__.g.x = cli;
-}))();
+})();
 
 })();
 

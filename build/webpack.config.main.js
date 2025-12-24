@@ -11,7 +11,10 @@ const isProduction = process.env.NODE_ENV === 'production';
 const config = {
     target: 'node',
     externalsPresets: { node: true },
-    externals: [nodeExternals({
+    externals: [
+        'utf-8-validate',
+        'bufferutil',
+        nodeExternals({
         allowlist: [
             /^((?!canvas).)*$/, // canvas contains native binaries
         ],

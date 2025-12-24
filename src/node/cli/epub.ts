@@ -7,6 +7,7 @@
  */
 
 import * as path from 'path';
+import { injectable } from 'inversify';
 import * as cheerio from 'cheerio';
 import * as css from 'css';
 // import * as fs from 'fs';
@@ -54,6 +55,7 @@ function cpSync(file: string, dest: string, option?: any) {
     return _cpSync(decodedSrc, decodedDest, option);
 }
 
+@injectable()
 export class Epub {
     private $container: cheerio.Root;
 

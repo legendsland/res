@@ -2,30 +2,22 @@
  * Copyright (C) 2023 Zhangyi
  ********************************************************************************/
 
-import type { JestConfigWithTsJest } from 'ts-jest';
+import { createDefaultEsmPreset } from 'ts-jest';
 
-const config: JestConfigWithTsJest = {
+const defaultEsmPreset = createDefaultEsmPreset({
+    tsconfig: 'tsconfig.browser.json', // You can specify a custom spec config here
+});
 
-    // The glob patterns Jest uses to detect test files
-    testMatch: [
-        '<rootDir>/out/src/browser/**/*.test.js',
-    ],
+export default {
+    ...defaultEsmPreset,
 
-    // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
-    testPathIgnorePatterns: [
-        '/node_modules/',
-    ],
+    // // The glob patterns Jest uses to detect test files
+    testMatch: ['<rootDir>/src/browser/**/*.test.ts', '<rootDir>/src/browser/**/*.test.tsx'],
 
-    moduleNameMapper: {
-        // A css mock just to make jest work
-        '\\.css$': '<rootDir>/src/browser/test/jest-css.js',
-    },
-    preset: 'ts-jest/presets/js-with-ts',
-    transformIgnorePatterns: [
-        'node_modules/(?!(vscode-ws-jsonrpc)/).+\\.js$',
-    ],
-    testEnvironment: 'jest-environment-jsdom',
-    setupFilesAfterEnv: ['<rootDir>/out/test/jest-setup.js'],
+    // // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
+    // testPathIgnorePatterns: ['/node_modules/',],
+
+    // preset: 'ts-jest/presets/js-with-ts',
+    // transformIgnorePatterns: ['node_modules/(?!(vscode-ws-jsonrpc)/).+\\.js$'],
+    setupFilesAfterEnv: ['<rootDir>/test/jest-setup.ts'],
 };
-
-export default config;

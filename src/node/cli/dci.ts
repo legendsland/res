@@ -1,9 +1,9 @@
 import {appendIgnore, delIgnore, fromIgnoreFile} from './ignorefile';
 import {listFiles as gitListFiles, remove as gitRemove, add as gitAdd} from 'isomorphic-git';
 
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto')
+import fs from 'fs';
+import path from 'path';
+import crypto from 'crypto';
 import * as cheerio from 'cheerio';
 
 const DCI = '<meta name="dc.identifier" content="res/';

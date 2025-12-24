@@ -5,6 +5,7 @@ import { NodeDb } from '../server/res';
 import { Note } from '../../common/db';
 
 import fs from 'fs';
+import { updateDb } from './db';
 
 const expectedAverageNoteDistance = 1600;
 const expectedAverageNotePage = 1;
@@ -120,7 +121,7 @@ export async function createIndex() {
         data: list,
     };
 
-    const db_: { db: NodeDb } = await require('./db');
+    const db_: { db: NodeDb } = await updateDb();
     const { db } = db_;
 
     list.forEach(
