@@ -6,7 +6,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as jsdom from 'jsdom';
 
-//TODO: you cannot apply js on iframes ....
+// TODO: you cannot apply js on iframes ....
 // problem is styles from different htmls would conflict.
 // cannot use global res.js
 
@@ -24,7 +24,7 @@ const template = `
 <script id="res-script" src="/res/dist/res/main.js" type="text/javascript"></script>
 </body>
 </html>
-`
+`;
 
 const indexTemplate = `
 <!DOCTYPE html>
@@ -39,20 +39,16 @@ const indexTemplate = `
 </div>
 </body>
 </html>
-`
+`;
 
 const WS_ROOT = '/home/zy/ws';
 
 export class Archive {
-
     private root: string;
     private $index;
     private indexFile: string;
 
-    constructor(
-        private inputFile?: string,
-    ) {
-
+    constructor(private inputFile?: string) {
         if (inputFile === undefined) {
             this.root = path.join(WS_ROOT, 'res/res/wa');
         } else {
@@ -68,8 +64,7 @@ export class Archive {
                     const prefix = path.join(WS_ROOT, 'res/res/');
                     const d = path.parse(inputFile).dir;
                     this.root = path.join(WS_ROOT, 'res/res/', d.substring(prefix.length));
-                }
-                else {
+                } else {
                     console.log(`unsupported: ${inputFile}`);
                     return;
                 }
@@ -80,10 +75,10 @@ export class Archive {
         this.indexFile = path.join(this.root, 'index.html');
 
         // if (!fs.existsSync(this.indexFile)) {
-            fs.writeFileSync(this.indexFile, indexTemplate, {encoding: 'utf8'});
+        fs.writeFileSync(this.indexFile, indexTemplate, { encoding: 'utf8' });
         // }
 
-        const content = fs.readFileSync(this.indexFile, {encoding: 'utf8'});
+        const content = fs.readFileSync(this.indexFile, { encoding: 'utf8' });
         const index = new jsdom.JSDOM(content);
         this.$index = require('jquery')(index.window);
 
@@ -99,34 +94,35 @@ export class Archive {
         const urls = new Map<string, string>();
         this.generateIndex(this.root, urls);
 
-        Array.from(urls).sort(([url1, name1], [url2, name2]) =>
-         name1.localeCompare(name2, undefined, {sensitivity: 'accent'})).map(([url, name]) => {
-            this.$index('#res-wa-index ul').append(`
+        Array.from(urls)
+            .sort(([url1, name1], [url2, name2]) => name1.localeCompare(name2, undefined, { sensitivity: 'accent' }))
+            .map(([url, name]) => {
+                this.$index('#res-wa-index ul').append(`
 <li><a href="${url}" target="_blank">${name}</a></li>
-`)
-        })
+`);
+            });
 
         // update index.html
-        fs.writeFileSync(this.indexFile, this.$index('html')[0].outerHTML, {encoding: 'utf8'});
+        fs.writeFileSync(this.indexFile, this.$index('html')[0].outerHTML, { encoding: 'utf8' });
     }
 
     private generateIndex(root: string, urls: Map<string, string>) {
         const files = fs.readdirSync(root);
-        files.forEach(file => {
+        files.forEach((file) => {
             const fullpath = path.resolve(root, file);
             // console.log(fullpath);
-            if ( fs.lstatSync(fullpath).isDirectory() ) {
+            if (fs.lstatSync(fullpath).isDirectory()) {
                 this.generateIndex(fullpath, urls);
             } else if (fullpath.endsWith('.html') && !fullpath.endsWith('index.html')) {
                 const rel = fullpath.substring(WS_ROOT.length);
-                urls.set(rel, fullpath.substring(this.root.length)); //TODO:  leading '/'
+                urls.set(rel, fullpath.substring(this.root.length)); // TODO:  leading '/'
             }
         });
     }
 
     private update(inputFile: string) {
         console.log(`update: ${inputFile}`);
-        const content = fs.readFileSync(inputFile, {encoding: 'utf8'});
+        const content = fs.readFileSync(inputFile, { encoding: 'utf8' });
         const target = new jsdom.JSDOM(content);
         const $ = require('jquery')(target.window);
 
@@ -137,10 +133,9 @@ export class Archive {
             $out('html').prepend($('head'));
             $out('#book-container').append($('body').html());
 
-            fs.writeFileSync(inputFile, '<!DOCTYPE html>\n' + $out('html')[0].outerHTML, {encoding: 'utf8'});
+            fs.writeFileSync(inputFile, '<!DOCTYPE html>\n' + $out('html')[0].outerHTML, { encoding: 'utf8' });
         } else {
             console.log(inputFile + ': already updated');
         }
     }
 }
-

@@ -8,32 +8,29 @@ import * as fs from 'fs';
 import * as jsdom from 'jsdom';
 
 function getPath($: any, elem: HTMLElement) {
-
-    let path = '';
-    while (elem !== null)
-    {
+    let p = '';
+    while (elem !== null) {
         if (elem.tagName.toLowerCase() === 'body') {
-            path = 'body' + path;
+            p = 'body' + p;
             break;
         }
 
-        let id = $(elem.parentNode).children(elem.tagName).index(elem);
-        let nth = ':eq(' + id + ')';
-        path = ' > ' + elem.tagName.toLowerCase() + nth + path;
+        const id = $(elem.parentNode).children(elem.tagName).index(elem);
+        const nth = ':eq(' + id + ')';
+        p = ' > ' + elem.tagName.toLowerCase() + nth + p;
 
         elem = elem.parentElement;
     }
-    if (path.startsWith('body')) {
-        return path;
+    if (p.startsWith('body')) {
+        return p;
     } else {
         return undefined;
     }
 }
 
 export function merge(from: string, to: string) {
-
     // shoe not be nested
-    const selector = 'h1,h2,h3,h4,p,li,dt,dd,pre,blockquote';  //pre blockquote
+    const selector = 'h1,h2,h3,h4,p,li,dt,dd,pre,blockquote'; // pre blockquote
 
     const fromFile = path.resolve(from);
     const toFile = path.resolve(to);
@@ -54,12 +51,12 @@ export function merge(from: string, to: string) {
 
     const paths: string[] = [];
 
-    for(let i=0; i<fromElems.length; ++i) {
+    for (let i = 0; i < fromElems.length; ++i) {
         const $f = $from(fromElems[i]);
 
         const p = getPath($from, $f[0]);
         // console.log(p);
-        const parents = paths.filter(p_ => p.includes(p_));
+        const parents = paths.filter((p_) => p.includes(p_));
         // find p has parent in paths
         if (parents.length === 0) {
             paths.push(p);
@@ -81,7 +78,7 @@ export function merge(from: string, to: string) {
                 // get attributes
                 let attrs = '';
                 $from.each($f[0].attributes, function () {
-                    if(this.specified) {
+                    if (this.specified) {
                         attrs += `${this.name}=\"${this.value}\" `;
                     }
                 });

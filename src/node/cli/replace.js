@@ -12,7 +12,7 @@ const dom = new JSDOM(inputHTML);
 const { document } = dom.window;
 
 global.document = document;
-const $ = jQuery = require('jquery')(dom.window);
+const $ = (jQuery = require('jquery')(dom.window));
 
 // Select all divs and wrap text content with <span>
 // $('div').filter(function () {
@@ -34,7 +34,6 @@ const $ = jQuery = require('jquery')(dom.window);
 //         $next.remove();
 //     }
 // });
-
 
 $('img').remove();
 

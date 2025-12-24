@@ -44,8 +44,7 @@ export function delIgnore(filePath: ParsedPath) {
 
 export function appendIgnore(filePath: ParsedPath) {
     const added = fromIgnoreFile();
-    const found = added.filter((path) => filePath.dir === path.dir
-        && filePath.base === path.base).length > 0;
+    const found = added.filter((p) => filePath.dir === p.dir && filePath.base === p.base).length > 0;
 
     if (!found) {
         let lines = '';

@@ -6,7 +6,6 @@ import { createIndex } from './cli/gen';
 import { Epub } from './cli/epub';
 import { startServer } from './server';
 import { merge } from './cli/merge';
-import { rm } from './cli/pre-code';
 import { Archive } from './cli/archive';
 
 const ROOT = '/home/zy/ws/res/';
@@ -66,27 +65,6 @@ const ROOT = '/home/zy/ws/res/';
             boolean: true,
             default: false,
         })
-        // .option('crawler', {
-        //     alias: 'n',
-        //     describe: 'Script as src link',
-        //     boolean: true,
-        //     default: false
-        // })
-        // .option('hypothes.is', {
-        //     alias: 'p',
-        //     describe: 'Script as src link',
-        //     boolean: true,
-        //     default: false
-        // })
-        .option('nlp', {
-            alias: 'l',
-            describe: 'nlp',
-            type: 'string',
-        })
-        .option('pre', {
-            describe: 'delete ch pre',
-            type: 'string',
-        })
         .command(
             'frame [dir]',
             'merge multiple html files into single one as iframes',
@@ -126,7 +104,5 @@ const ROOT = '/home/zy/ws/res/';
         startServer();
     } else if (argv.m) {
         await merge(argv.m[0], argv.m[1]);
-    } else if (argv.pre) {
-        rm(argv.pre);
     }
 })();
