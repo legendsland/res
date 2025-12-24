@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import { createRoot, Root } from 'react-dom/client';
 
-const KnowledgeGraphView = () => <div>aaa</div>;
+export const KnowledgeGraphView = () => <div>aaa</div>;
 
 export class KnowledgeGraphViewContainer {
     private readonly _elemId = 'res-kg-container';
