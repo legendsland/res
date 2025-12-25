@@ -6,6 +6,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import * as jsdom from 'jsdom';
+import jquery from 'jquery';
 
 function getPath($: any, elem: HTMLElement) {
     let p = '';
@@ -42,11 +43,11 @@ export function merge(from: string, to: string) {
     const contentTo = fs.readFileSync(toFile).toString();
 
     const domFrom = new jsdom.JSDOM(contentFrom);
-    const $from = require('jquery')(domFrom.window);
+    const $from = jquery(domFrom.window) as any;
     const fromElems = $from(selector);
 
     const domTo = new jsdom.JSDOM(contentTo);
-    const $to = require('jquery')(domTo.window);
+    const $to = jquery(domTo.window) as any;
     const toElems = $to(selector);
 
     const paths: string[] = [];
