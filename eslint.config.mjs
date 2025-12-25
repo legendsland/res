@@ -8,8 +8,6 @@ import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 import importPlugin from 'eslint-plugin-import';
-import airbnb from 'eslint-config-airbnb';
-import { fixupConfigRules } from '@eslint/compat';
 
 export default defineConfig(
     eslint.configs.recommended,
