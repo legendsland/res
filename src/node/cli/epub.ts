@@ -6,11 +6,10 @@
  * Load, parse epub file and convert it to html.
  */
 
-import * as path from 'path';
+import path from 'path';
 import { injectable } from 'inversify';
-import * as cheerio from 'cheerio';
-import * as css from 'css';
-// import * as fs from 'fs';
+import cheerio from 'cheerio';
+import css from 'css';
 import {
     lstatSync,
     readFileSync as _readFileSync,
@@ -25,8 +24,6 @@ import { ROOT } from '../common/util';
 
 const PATH_CONTAINER = 'META-INF/container.xml';
 const TAG_ROOTFILE = 'rootfile';
-const TAG_DC_TITLE_ESC = 'dc\\:title';
-const TAG_DC_IDENTIFIER_ESC = 'dc\\:identifier';
 
 const enum MediaType {
     xhtml_xml = 'application/xhtml+xml',
@@ -34,7 +31,7 @@ const enum MediaType {
 }
 
 interface htmlHead {
-    title: string
+    title: string;
 }
 
 function readFileSync(file: string, option?: any) {
@@ -99,7 +96,9 @@ export class Epub {
             this.extractDir = '/tmp/res-epub';
             await extract(this.inputFile, { dir: this.extractDir });
             this.root = this.extractDir;
-            this.outputFile = this.output ? this.output : `${this.inputFile.substring(0, this.inputFile.length - 5)}.html`;
+            this.outputFile = this.output
+                ? this.output
+                : `${this.inputFile.substring(0, this.inputFile.length - 5)}.html`;
             this.isEpub = true;
         } else {
             /// /
@@ -107,21 +106,15 @@ export class Epub {
             process.exit(-1);
         }
 
-        this.$container = cheerio.load(
-            readFileSync(this.fullname(PATH_CONTAINER), { encoding: 'utf8' }),
-            {
-                xmlMode: true,
-            },
-        );
+        this.$container = cheerio.load(readFileSync(this.fullname(PATH_CONTAINER), { encoding: 'utf8' }), {
+            xmlMode: true,
+        });
 
         const rootfilePath = this.$container(TAG_ROOTFILE).attr('full-path');
 
-        this.$rootfile = cheerio.load(
-            readFileSync(this.fullname(rootfilePath), { encoding: 'utf8' }),
-            {
-                xmlMode: true,
-            },
-        );
+        this.$rootfile = cheerio.load(readFileSync(this.fullname(rootfilePath), { encoding: 'utf8' }), {
+            xmlMode: true,
+        });
 
         // use filename as title
         const head: htmlHead = {
@@ -135,23 +128,29 @@ export class Epub {
         });
 
         const rootfileDir = path.parse(rootfilePath).dir;
-        const htmlFiles: {id: string, href: string }[] = [];
-        this.$rootfile(`manifest > item[media-type="${MediaType.xhtml_xml}"]
-, manifest > item[media-type="${MediaType.html}"]`)
+        const htmlFiles: { id: string; href: string }[] = [];
+        this.$rootfile(
+            `manifest > item[media-type="${MediaType.xhtml_xml}"]
+, manifest > item[media-type="${MediaType.html}"]`,
+        )
             .filter((index: number, element: cheerio.TagElement) => !element.attribs.href.startsWith('http'))
-            .each((index: number, element: cheerio.TagElement) => htmlFiles.push({
-                id: element.attribs.id,
-                href: path.join(this.root, rootfileDir, element.attribs.href),
-            }));
+            .each((index: number, element: cheerio.TagElement) =>
+                htmlFiles.push({
+                    id: element.attribs.id,
+                    href: path.join(this.root, rootfileDir, element.attribs.href),
+                }),
+            );
 
-        const sortedHtmlFiles = htmlFiles.sort((a, b) => {
-            const ai = itemrefs.indexOf(a.id);
-            const bi = itemrefs.indexOf(b.id);
-            if (ai === -1) return -1;
-            if (bi === -1) return 1;
-            if (ai === bi) return 0;
-            return ai < bi ? -1 : 1;
-        }).map((a) => a.href);
+        const sortedHtmlFiles = htmlFiles
+            .sort((a, b) => {
+                const ai = itemrefs.indexOf(a.id);
+                const bi = itemrefs.indexOf(b.id);
+                if (ai === -1) return -1;
+                if (bi === -1) return 1;
+                if (ai === bi) return 0;
+                return ai < bi ? -1 : 1;
+            })
+            .map((a) => a.href);
 
         console.log(sortedHtmlFiles.map((file) => decodeURIComponent(file)));
 
@@ -168,13 +167,10 @@ export class Epub {
 
     private parse(filename: string, single?: boolean) {
         const { dir } = path.parse(filename);
-        const $ = cheerio.load(
-            readFileSync(filename, { encoding: 'utf8' }),
-            {
-                xmlMode: true,
-                decodeEntities: false,
-            },
-        );
+        const $ = cheerio.load(readFileSync(filename, { encoding: 'utf8' }), {
+            xmlMode: true,
+            decodeEntities: false,
+        });
 
         // workaround: <a id='xxx'/>contents
         // is parsed incorrect to
@@ -237,43 +233,45 @@ export class Epub {
         // embed css
         const styles = new Map<string, cheerio.TagElement>();
         let inlineStyles = '';
-        $('style, link[type="text/css"], link[rel="stylesheet"], script').each((index: number, element: cheerio.TagElement) => {
-            const tag = $(element).prop('tagName').toLowerCase();
+        $('style, link[type="text/css"], link[rel="stylesheet"], script').each(
+            (index: number, element: cheerio.TagElement) => {
+                const tag = $(element).prop('tagName').toLowerCase();
 
-            // external style file
-            if (tag === 'link') {
-                const type = $(element).attr('type');
-                if (type === 'text/css') {
-                    const url = path.relative(this.root, path.join(dir, element.attribs.href));
-                    styles.set(url, element);
-                }
-            }
-
-            // inlined styles
-            else if (tag === 'style') {
-                // replace font path
-                const cssContent = $(element).text();
-                inlineStyles += this.updateCss(cssContent, filename);
-                inlineStyles += '\n';
-            }
-
-            // javascript
-            else if (tag === 'script') {
-                const { src } = element.attribs;
-                if (src !== undefined) {
-                    const jsFile = path.join(dir, src);
-                    console.log(jsFile);
-                    if (existsSync(jsFile)) {
-                        $(element).empty();
-                        $(element).removeAttr('src');
-                        const js = readFileSync(jsFile, { encoding: 'utf-8' }).toString();
-                        $(element).text(js);
-                    } else {
-                        console.warn(`${jsFile} ${decodeURIComponent(jsFile)} not exists`);
+                // external style file
+                if (tag === 'link') {
+                    const type = $(element).attr('type');
+                    if (type === 'text/css') {
+                        const url = path.relative(this.root, path.join(dir, element.attribs.href));
+                        styles.set(url, element);
                     }
                 }
-            }
-        });
+
+                // inlined styles
+                else if (tag === 'style') {
+                    // replace font path
+                    const cssContent = $(element).text();
+                    inlineStyles += this.updateCss(cssContent, filename);
+                    inlineStyles += '\n';
+                }
+
+                // javascript
+                else if (tag === 'script') {
+                    const { src } = element.attribs;
+                    if (src !== undefined) {
+                        const jsFile = path.join(dir, src);
+                        console.log(jsFile);
+                        if (existsSync(jsFile)) {
+                            $(element).empty();
+                            $(element).removeAttr('src');
+                            const js = readFileSync(jsFile, { encoding: 'utf-8' }).toString();
+                            $(element).text(js);
+                        } else {
+                            console.warn(`${jsFile} ${decodeURIComponent(jsFile)} not exists`);
+                        }
+                    }
+                }
+            },
+        );
 
         let attrs = '';
         for (const [key, value] of Object.entries($('body').attr())) {
@@ -289,7 +287,9 @@ export class Epub {
 
         // not working
         // $('.res-tmp-span').remove();
-        const bookContent = $('body').html().replace(/<span class="res-tmp-span" style="display: none;">&nbsp;<\/span>/g, '');
+        const bookContent = $('body')
+            .html()
+            .replace(/<span class="res-tmp-span" style="display: none;">&nbsp;<\/span>/g, '');
 
         let head: string | undefined;
         if (single) {
@@ -309,10 +309,11 @@ export class Epub {
         const val = elem.attribs[attr];
         // console.log(attr + ': ' + val);
         // TODO: fetch images from remote
-        if (val !== undefined
-            && !val.startsWith('data:image/')
-            && !val.startsWith('http://')
-            && !val.startsWith('https://')
+        if (
+            val !== undefined &&
+            !val.startsWith('data:image/') &&
+            !val.startsWith('http://') &&
+            !val.startsWith('https://')
         ) {
             const ext = path.parse(val).ext.substring(1);
             let _ext = ext;
@@ -374,77 +375,79 @@ export class Epub {
             }
             // if (rule.type === 'font-face') {
             // @ts-ignore
-            rule?.declarations?.filter((decl) => decl.property === 'src'
-                    || decl.property === 'background-image'
-                    || decl.property === 'background').forEach((decl: any) => {
-                const { value } = decl;
+            rule?.declarations
+                ?.filter(
+                    (decl: any) =>
+                        decl.property === 'src' ||
+                        decl.property === 'background-image' ||
+                        decl.property === 'background',
+                )
+                .forEach((decl: any) => {
+                    const { value } = decl;
 
-                // console.log(value);
+                    // console.log(value);
 
-                let start = -1;
-                let end = 0;
+                    let start = -1;
+                    let end = 0;
 
-                // TODO: url may be not at the beginning
-                if (value.startsWith('url("')) {
-                    start = 5;
-                    for (let i = start; i < value.length; ++i) {
-                        if (value[i] === '"') {
-                            end = i;
-                            break;
+                    // TODO: url may be not at the beginning
+                    if (value.startsWith('url("')) {
+                        start = 5;
+                        for (let i = start; i < value.length; ++i) {
+                            if (value[i] === '"') {
+                                end = i;
+                                break;
+                            }
+                        }
+                    } else if (value.startsWith("url('")) {
+                        start = 5;
+                        for (let i = start; i < value.length; ++i) {
+                            if (value[i] === "'") {
+                                end = i;
+                                break;
+                            }
+                        }
+                    } else if (value.startsWith('url(')) {
+                        start = 4;
+                        for (let i = start; i < value.length; ++i) {
+                            if (value[i] === ')') {
+                                end = i;
+                                break;
+                            }
                         }
                     }
-                } else if (value.startsWith('url(\'')) {
-                    start = 5;
-                    for (let i = start; i < value.length; ++i) {
-                        if (value[i] === '\'') {
-                            end = i;
-                            break;
-                        }
-                    }
-                } else if (value.startsWith('url(')) {
-                    start = 4;
-                    for (let i = start; i < value.length; ++i) {
-                        if (value[i] === ')') {
-                            end = i;
-                            break;
-                        }
-                    }
-                }
 
-                if (end > 0) {
-                    const fontPath = value.substring(start, end);
-                    const fontName = path.parse(fontPath).base;
-                    // console.log('style: ', fontPath);
-                    // check exists such font
-                    const fontSrcPath = path.join(path.dirname(file), fontPath);
-                    const fontDestPath = path.join(this.srcRoot, 'dist/assets/fonts/', fontName);
+                    if (end > 0) {
+                        const fontPath = value.substring(start, end);
+                        const fontName = path.parse(fontPath).base;
+                        // console.log('style: ', fontPath);
+                        // check exists such font
+                        const fontSrcPath = path.join(path.dirname(file), fontPath);
+                        const fontDestPath = path.join(this.srcRoot, 'dist/assets/fonts/', fontName);
 
-                    // copy font files
-                    if (rule.type === 'font-face' && decl.property === 'src') {
-                        mkdirSync(path.dirname(fontDestPath), { recursive: true });
-                        if (!existsSync(fontDestPath) && existsSync(fontSrcPath)) {
-                            console.log('copy font: ', fontPath);
-                            cpSync(fontSrcPath, fontDestPath, { recursive: true });
-                        }
+                        // copy font files
+                        if (rule.type === 'font-face' && decl.property === 'src') {
+                            mkdirSync(path.dirname(fontDestPath), { recursive: true });
+                            if (!existsSync(fontDestPath) && existsSync(fontSrcPath)) {
+                                console.log('copy font: ', fontPath);
+                                cpSync(fontSrcPath, fontDestPath, { recursive: true });
+                            }
 
-                        const fullPath = `/res/dist/assets/fonts/${fontName}`;
-                        const newValue = value.substring(0, start)
-                                + fullPath + value.substring(end);
-                        decl.value = newValue;
-                    }
-
-                    // embed images
-                    else if (decl.property === 'background-image'
-                        || decl.property === 'background') {
-                        const data = this.getBase64Image(fontSrcPath);
-                        if (data !== undefined) {
-                            const newValue = value.substring(0, start)
-                                    + data + value.substring(end);
+                            const fullPath = `/res/dist/assets/fonts/${fontName}`;
+                            const newValue = value.substring(0, start) + fullPath + value.substring(end);
                             decl.value = newValue;
                         }
+
+                        // embed images
+                        else if (decl.property === 'background-image' || decl.property === 'background') {
+                            const data = this.getBase64Image(fontSrcPath);
+                            if (data !== undefined) {
+                                const newValue = value.substring(0, start) + data + value.substring(end);
+                                decl.value = newValue;
+                            }
+                        }
                     }
-                }
-            });
+                });
             // }
         });
 
@@ -476,8 +479,8 @@ export class Epub {
             this.merge(files[0], html, true);
             headStr = html.head;
         } else {
-            for (let i = 0; i < files.length; ++i) {
-                this.merge(files[i], html);
+            for (const file of files) {
+                this.merge(file, html);
             }
         }
 
