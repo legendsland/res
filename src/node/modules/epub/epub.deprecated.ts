@@ -7,8 +7,7 @@
  */
 
 import path from 'path';
-import { injectable } from 'inversify';
-import cheerio from 'cheerio';
+import * as cheerio from 'cheerio';
 import css from 'css';
 import {
     lstatSync,
@@ -20,7 +19,7 @@ import {
     cpSync as _cpSync,
 } from 'fs';
 import extract from 'extract-zip';
-import { ROOT } from '../common/util';
+import { ROOT } from '../../common/util';
 
 const PATH_CONTAINER = 'META-INF/container.xml';
 const TAG_ROOTFILE = 'rootfile';
@@ -53,7 +52,6 @@ function cpSync(file: string, dest: string, option?: any) {
     return _cpSync(decodedSrc, decodedDest, option);
 }
 
-@injectable()
 export class Epub {
     private $container: cheerio.Root;
 

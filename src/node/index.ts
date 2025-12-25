@@ -4,7 +4,7 @@ import { Argv } from 'yargs';
 import path from 'path';
 import { add, checkDci, checkFiles, del, decorate } from './cli/dci';
 import { createIndex } from './cli/gen';
-import { Epub } from './cli/epub';
+import { Epub } from './modules/epub/epub.deprecated';
 import { startServer } from './server';
 import { merge } from './cli/merge';
 import { Archive } from './cli/archive';

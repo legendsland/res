@@ -1,4 +1,4 @@
 export interface EpubArgs {
-    file: string;
+    convert: string;
     output?: string;
 }

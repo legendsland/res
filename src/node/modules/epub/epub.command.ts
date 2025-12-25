@@ -2,27 +2,31 @@ import { injectable } from 'inversify';
 import type { Argv } from 'yargs';
 import type { Command } from '../../core/interfaces/command.interface.js';
 import type { EpubArgs } from './epub.dto.js';
+import { Epub } from './epub.deprecated.js';
 
 @injectable()
 export class EpubCommand implements Command<EpubArgs, void> {
     public readonly name = 'epub';
-    public readonly description = 'Processes a specific ebook file';
+    public readonly description = 'Process a epub file';
 
     public configure(yargs: Argv): Argv<EpubArgs> {
         return yargs
-            .option('file', {
-                alias: 'f',
+            .option('convert', {
+                alias: 'c',
+                describe: 'Input epub file path',
                 type: 'string',
-                demandOption: true,
-                describe: 'Path to the epub file',
+                nargs: 1,
             })
             .option('output', {
+                alias: 'o',
+                describe: 'Output html file path',
                 type: 'string',
-                describe: 'Path to the output file',
-            }) as Argv<EpubArgs>;
+            });
     }
 
     public async execute(args: EpubArgs): Promise<void> {
-        console.log(`Processing: ${args.file} (Force: ${args.output})`);
+        console.log(`Processing: ${args.convert} (output: ${args.output})`);
+        const epub = new Epub(args.convert, args.output);
+        return epub.convert();
     }
 }
