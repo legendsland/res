@@ -12,9 +12,14 @@ export default {
     ...defaultEsmPreset,
 
     // // The glob patterns Jest uses to detect test files
-    testMatch: ['<rootDir>/src/node/**/*.test.ts'],
+    testMatch: ['<rootDir>/src/node/**/*.spec.ts'],
 
-    // // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
+    moduleNameMapper: {
+        // This regex captures the file path and strips the .js extension
+        '^(\\.{1,2}/.*)\\.js$': '$1',
+    },
+
+    // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
     // testPathIgnorePatterns: ['/node_modules/',],
 
     // preset: 'ts-jest/presets/js-with-ts',

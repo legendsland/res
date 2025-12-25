@@ -140,7 +140,6 @@ export default defineConfig(
                     },
                 },
             ],
-            '@typescript-eslint/no-require-imports': 'warn',
         },
         settings: {
             'import/resolver': {
