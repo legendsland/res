@@ -57,8 +57,10 @@ export class Toc {
 
                 // pass 3: simplification
                 $('.res-toc-dynamic-item-container > a', $toc).each(function () {
+                    const rk = parseInt($(this).parent().attr('data-res-toc-rank') || '1');
+                    const spaces = '&nbsp;'.repeat((rk - 1) * 4);
                     const text = $(this).text().trim();
-                    $(this).html(text);
+                    $(this).html(`${spaces}${text}`);
                 });
 
                 tocHtml = $toc[0].outerHTML;
