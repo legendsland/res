@@ -35,19 +35,12 @@ export class Toc {
                             $(this).attr('id', 'res-toc-dynamic-item-' + index);
                         }
 
-                        cloned
-                            .find('*')
-                            .addBack()
-                            .contents()
-                            .filter(function () {
-                                return (
-                                    this.nodeType === 3 && this.nodeValue !== null && this.nodeValue.trim().length > 0
-                                );
-                            })
-                            .first()
-                            .wrap(`<a href="#${this.id}"></a>`);
+                        // NOTE: <a> cannot be nested
+                        cloned.find('a').each(function () {
+                            $(this).replaceWith($(this).text());
+                        });
 
-                        return cloned[0].outerHTML;
+                        return `<li><div class="res-toc-dynamic-item-container"><a href="#${this.id}">${cloned[0].outerHTML}</a></div></li>`;
                     })
                     .get()
                     .join('\n');
@@ -58,11 +51,14 @@ export class Toc {
                 selectors.forEach((selector, rk) => {
                     rank = rk + 1;
                     $(selector, $toc).each(function () {
-                        // console.log(rank, index);
-                        $(this).wrap(
-                            `<li><div class="res-toc-dynamic-item-container" data-res-toc-rank="${rank}"></div></li>`,
-                        );
+                        $(this).parent().parent().attr('data-res-toc-rank', rank);
                     });
+                });
+
+                // pass 3: simplification
+                $('.res-toc-dynamic-item-container > a', $toc).each(function () {
+                    const text = $(this).text().trim();
+                    $(this).html(text);
                 });
 
                 tocHtml = $toc[0].outerHTML;

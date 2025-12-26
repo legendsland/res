@@ -52,6 +52,9 @@ function cpSync(file: string, dest: string, option?: any) {
     return _cpSync(decodedSrc, decodedDest, option);
 }
 
+/**
+ * @deprecated
+ */
 export class Epub {
     private $container: cheerio.Root;
 
