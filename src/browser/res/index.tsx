@@ -14,7 +14,7 @@ import Collapse from '@mui/material/Collapse';
 
 import Link from '@mui/material/Link';
 import * as React from 'react';
-import { Toc } from './book';
+import { Toc } from './toc';
 import { Cli } from './cli';
 import { Shortcuts } from './shortcuts';
 import { CommandShortcut } from './command';
@@ -33,36 +33,35 @@ function env(): string {
     const { href } = document.location;
     if (href.startsWith('file')) {
         return 'file';
-    } if (href.startsWith('http')) {
+    }
+    if (href.startsWith('http')) {
         return 'http';
     }
     return 'unknown';
 }
 
-type FilePath = {
-    dir: string,
-    base: string,
-    stars: number,
-    note: number,
-    review: string,
-    progress: number,
-    understand: number,
-    reading: boolean,
-};
+interface FilePath {
+    dir: string;
+    base: string;
+    stars: number;
+    note: number;
+    review: string;
+    progress: number;
+    understand: number;
+    reading: boolean;
+}
 interface Config {
-    containerId: string,
-    data: FilePath[]
+    containerId: string;
+    data: FilePath[];
 }
 
-type CategoryProps = {
+interface CategoryProps {
     category: {
-        name: string,
-        data: FilePath[],
-    }
+        name: string;
+        data: FilePath[];
+    };
 }
-const Category = ({
-    category,
-}: CategoryProps) => {
+const Category = ({ category }: CategoryProps) => {
     const categoeyLabel = `${category.name} (${category.data.length})`;
     const [open, setOpen] = useState(true);
 
@@ -97,76 +96,67 @@ const Category = ({
             </ListItemButton>
             <Collapse in={open} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding>
-                    {
-                        category.data
-                            .sort((a, b) => a.base.localeCompare(b.base))
-                            .map((p, idx) => {
-                                const url = `${p.dir}/${p.base}`;
-                                const id = `res-index-tooltip-${category.name}-`;
-                                return (
-                                    <ListItemButton key={url} sx={{ pl: 4 }}>
-                                        {/* <ListItemText primary={p.base} /> */}
-                                        <span className="res-index-status">
-                                            {p.reading ? '!' : ''}
-                                        </span>
-                                        <Link
-                                            href={url}
-                                            target="_blank"
-                                            rel="noopener"
-                                            onClick={(e) => handleOpen(e, url)}
-                                            onMouseEnter={(event) => showReview(id + idx, event)}
-                                            onMouseLeave={() => hideReview(id + idx)}
-                                        >
-                                            {p.base}
-                                        </Link>
-                                        <span className="res-index-stat">
-                                            {p.stars >= 5 ? `⭐(${p.note})`
-                                                : p.review ? `📝(${p.note})` : p.note ? `(${p.note})` : ''}
-                                        </span>
-                                        <div
-                                            className="res-index-progress-container"
-                                        >
-                                            <span
-                                                className="res-index-progress-progress"
-                                                title={`progress: ${(p.progress * 100).toFixed(1)}%`}
-                                                style={{
-                                                    width: p.progress * 100,
-                                                }}
-                                            />
-                                            <span
-                                                className="res-index-progress-understand"
-                                                title={`understand: ${(p.understand * 100).toFixed(1)}%`}
-                                                style={{
-                                                    width: p.understand * 100,
-                                                }}
-                                            />
-                                        </div>
-                                        <div id={id + idx} className="res-index-tooltip">
-                                            {p.review?.split('\n').map((line, idx) => (
-                                                <p
-                                                    key={idx}
-                                                >{line}
-                                                </p>
-                                            ))}
-                                        </div>
-                                    </ListItemButton>
-                                );
-                            })
-                    }
+                    {category.data
+                        .sort((a, b) => a.base.localeCompare(b.base))
+                        .map((p, idx) => {
+                            const url = `${p.dir}/${p.base}`;
+                            const id = `res-index-tooltip-${category.name}-`;
+                            return (
+                                <ListItemButton key={url} sx={{ pl: 4 }}>
+                                    {/* <ListItemText primary={p.base} /> */}
+                                    <span className="res-index-status">{p.reading ? '!' : ''}</span>
+                                    <Link
+                                        href={url}
+                                        target="_blank"
+                                        rel="noopener"
+                                        onClick={(e) => handleOpen(e, url)}
+                                        onMouseEnter={(event) => showReview(id + idx, event)}
+                                        onMouseLeave={() => hideReview(id + idx)}
+                                    >
+                                        {p.base}
+                                    </Link>
+                                    <span className="res-index-stat">
+                                        {p.stars >= 5
+                                            ? `⭐(${p.note})`
+                                            : p.review
+                                              ? `📝(${p.note})`
+                                              : p.note
+                                                ? `(${p.note})`
+                                                : ''}
+                                    </span>
+                                    <div className="res-index-progress-container">
+                                        <span
+                                            className="res-index-progress-progress"
+                                            title={`progress: ${(p.progress * 100).toFixed(1)}%`}
+                                            style={{
+                                                width: p.progress * 100,
+                                            }}
+                                        />
+                                        <span
+                                            className="res-index-progress-understand"
+                                            title={`understand: ${(p.understand * 100).toFixed(1)}%`}
+                                            style={{
+                                                width: p.understand * 100,
+                                            }}
+                                        />
+                                    </div>
+                                    <div id={id + idx} className="res-index-tooltip">
+                                        {p.review?.split('\n').map((line, idx) => <p key={idx}>{line}</p>)}
+                                    </div>
+                                </ListItemButton>
+                            );
+                        })}
                 </List>
             </Collapse>
-
         </List>
     );
 };
 
-type AppProps = {
-    config: FilePath[],
+interface AppProps {
+    config: FilePath[];
 }
-const App = ({
-    config,
-}: AppProps) => {
-    const grouped: Map<string, FilePath[]> = new Map();
+const App = ({ config }: AppProps) => {
+    const grouped = new Map<string, FilePath[]>();
 
     config.forEach((item) => {
         // item: res/aaa/bbb/....
@@ -174,16 +164,18 @@ const App = ({
         const category = parts[1];
 
         const files = grouped.get(category);
-        const file = [{
-            dir: item.dir,
-            base: item.base,
-            stars: item.stars,
-            note: item.note,
-            review: item.review,
-            progress: item.progress,
-            understand: item.understand,
-            reading: item.reading,
-        }];
+        const file = [
+            {
+                dir: item.dir,
+                base: item.base,
+                stars: item.stars,
+                note: item.note,
+                review: item.review,
+                progress: item.progress,
+                understand: item.understand,
+                reading: item.reading,
+            },
+        ];
         if (files === undefined) {
             grouped.set(category, file);
         } else {
@@ -202,21 +194,19 @@ const App = ({
 
     return (
         <List>
-            {
-                Array.from(grouped)
-                    .sort(([name1], [name2]) => name1.localeCompare(name2))
-                    .map(([name, category]) => (
-                        <Category
-                            key={name}
-                            category={{ name, data: category }}
-                        />
-                    ))
-            }
+            {Array.from(grouped)
+                .sort(([name1], [name2]) => name1.localeCompare(name2))
+                .map(([name, category]) => (
+                    <Category key={name} category={{ name, data: category }} />
+                ))}
         </List>
     );
 };
 
 (async () => {
+    // @ts-ignore
+    global.$ = $;
+
     // load modules
     const { container } = prodContainer();
 
@@ -243,13 +233,7 @@ const App = ({
         const name = parts[parts.length - 1];
         window.document.title = decodeURI(name);
 
-        createRoot($pdf[0])
-            .render(
-                <PDFView
-                    url={pdfUrl}
-                    onload={() => new PDFAnn('pdf-container', db, true)}
-                />,
-            );
+        createRoot($pdf[0]).render(<PDFView url={pdfUrl} onload={() => new PDFAnn('pdf-container', db, true)} />);
     } else {
         // table of content, res/ index page
         // @ts-ignore
@@ -257,8 +241,7 @@ const App = ({
             // @ts-ignore
             const config: Config = window.res_config;
 
-            createRoot(document.querySelector(`#${config.containerId}`))
-                .render(<App config={config.data} />);
+            createRoot(document.querySelector(`#${config.containerId}`)).render(<App config={config.data} />);
         }
 
         // readings
