@@ -89691,190 +89691,6 @@ class Ann {
 
 /***/ }),
 
-/***/ "./src/browser/res/book.ts":
-/*!*********************************!*\
-  !*** ./src/browser/res/book.ts ***!
-  \*********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   Toc: () => (/* binding */ Toc)
-/* harmony export */ });
-/* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
-/* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(jquery__WEBPACK_IMPORTED_MODULE_0__);
-
-class LinkNode {
-    id;
-    text;
-    children;
-    level;
-    constructor(id, text) {
-        this.id = id;
-        this.text = text;
-        this.children = [];
-        this.level = 0;
-    }
-    isElemAncestor(id) {
-        const ids = jquery__WEBPACK_IMPORTED_MODULE_0___default()(document.getElementById(id)).parents('[id]').map(function () {
-            return this.id;
-        })
-            .get();
-        return ids.includes(this.id);
-    }
-}
-class LinkTree {
-    root = new LinkNode('', 'root');
-    add(id, text) {
-        const p = this.parent(this.root, id);
-        p.children.push(new LinkNode(id, text));
-    }
-    parent(start, id) {
-        for (let i = 0; i < start.children.length; ++i) {
-            if (start.children[i].isElemAncestor(id)) {
-                return this.parent(start.children[i], id);
-            }
-        }
-        return start;
-    }
-    depthFirst_(parent, nodes, level) {
-        parent.level = level;
-        nodes.push(parent);
-        parent.children.forEach((child) => {
-            this.depthFirst_(child, nodes, level + 1);
-        });
-    }
-    depthFirst() {
-        const nodes = [];
-        this.depthFirst_(this.root, nodes, 0);
-        return nodes;
-    }
-}
-class Toc {
-    generate() {
-        let tocHtml = '';
-        const $prebuilt = jquery__WEBPACK_IMPORTED_MODULE_0___default()('#res-toc-prebuilt');
-        if ($prebuilt.length === 0) {
-            console.log('no prebuilt');
-            const toc = {
-                entries: [],
-            };
-            let preText = '';
-            const ignored = this.ignore();
-            jquery__WEBPACK_IMPORTED_MODULE_0___default()('[id]').each((index, element) => {
-                const id = jquery__WEBPACK_IMPORTED_MODULE_0___default()(element).prop('id');
-                const tag = jquery__WEBPACK_IMPORTED_MODULE_0___default()(element).prop('tagName').toLowerCase();
-                const $text = jquery__WEBPACK_IMPORTED_MODULE_0___default()(element).find('*').contents()
-                    .filter(function () {
-                    return this.nodeType === 3
-                        && jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).text().trim() !== '';
-                })
-                    .first();
-                const text = $text.text();
-                if (text.length < 64
-                    && text !== ''
-                    && text !== preText
-                    && text.match(ignored) === null) {
-                    const fspx = $text.parent().css('font-size');
-                    const fs = fspx.substring(0, fspx.length - 'px'.length);
-                    toc.entries.push({
-                        id,
-                        fs: Number.parseInt(fs),
-                        text,
-                    });
-                    preText = text;
-                }
-                if (tag === 'h1'
-                    || tag === 'h2'
-                    || tag === 'h3'
-                    || tag === 'h4') {
-                    const text2 = jquery__WEBPACK_IMPORTED_MODULE_0___default()(element).text().trim();
-                    if (text2.length < 64
-                        && text2 !== ''
-                        && text2 !== text
-                        && text2 !== preText
-                        && text2.match(ignored) === null) {
-                        const fspx = jquery__WEBPACK_IMPORTED_MODULE_0___default()(element).css('font-size');
-                        const fs = fspx.substring(0, fspx.length - 'px'.length);
-                        toc.entries.push({
-                            id,
-                            fs: Number.parseInt(fs),
-                            text: text2,
-                        });
-                        preText = text2;
-                    }
-                }
-            });
-            const fonts = new Set();
-            toc.entries.forEach((entry) => {
-                fonts.add(entry.fs);
-            });
-            const fontsArray = Array.from(fonts);
-            toc.entries.forEach((entry) => {
-                entry.fs = fontsArray.indexOf(entry.fs);
-            });
-            if (toc.entries.length > 0) {
-                tocHtml = toc.entries.map((entry) => `<li class="res-toc-fs-${entry.fs}"><a href="#${entry.id}">${entry.text}</a></li>`).reduce((prev, curr) => `${prev}\n${curr}`);
-                tocHtml = `<ul>\n${tocHtml}\n</ul>`;
-            }
-        }
-        else {
-            console.log('has prebuilt');
-            const sel = $prebuilt.attr('sel');
-            if (sel !== undefined && sel !== '') {
-                console.log('sel', sel);
-                const wrap = $prebuilt.attr('wrap');
-                if (wrap !== undefined) {
-                    tocHtml = `<${wrap}>${jquery__WEBPACK_IMPORTED_MODULE_0___default()(sel).html()}</${wrap}>`;
-                }
-                else {
-                    tocHtml = jquery__WEBPACK_IMPORTED_MODULE_0___default()(sel).html();
-                }
-            }
-        }
-        jquery__WEBPACK_IMPORTED_MODULE_0___default()('body').prepend(`
-<div id="res-toc-container">
-    <button id="res-toc-control">TOC</button>
-    <div id="res-toc-content">${tocHtml}</div>
-</div>
-`);
-        jquery__WEBPACK_IMPORTED_MODULE_0___default()('#res-toc-control').on('click', (event) => {
-            this.toggle('res-toc-content');
-            event.stopPropagation();
-        });
-        jquery__WEBPACK_IMPORTED_MODULE_0___default()('#res-toc-content').on('mouseenter', function () {
-            jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).removeClass('transparent');
-        }).on('mouseleave', function () {
-            jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).addClass('transparent');
-        }).on('click', (event) => {
-            event.stopPropagation();
-        })
-            .hide();
-        jquery__WEBPACK_IMPORTED_MODULE_0___default()(window).on('click', () => {
-            jquery__WEBPACK_IMPORTED_MODULE_0___default()('#res-toc-content').hide();
-        });
-    }
-    toggle(id) {
-        const $elem = jquery__WEBPACK_IMPORTED_MODULE_0___default()(`#${id}`);
-        const hidden = $elem.is(':hidden');
-        if (hidden) {
-            $elem.removeClass('transparent');
-            $elem.show();
-        }
-        else {
-            $elem.addClass('transparent');
-            $elem.hide();
-        }
-    }
-    ignore() {
-        return /(\[(\d+|\*+)\])|(\((\d+|\*+)\))|(〔(\d+|\*+)〕)/g;
-    }
-}
-
-
-/***/ }),
-
 /***/ "./src/browser/res/cli.ts":
 /*!********************************!*\
   !*** ./src/browser/res/cli.ts ***!
@@ -91254,6 +91070,181 @@ class StatusBar {
 
 /***/ }),
 
+/***/ "./src/browser/res/toc.ts":
+/*!********************************!*\
+  !*** ./src/browser/res/toc.ts ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Toc: () => (/* binding */ Toc)
+/* harmony export */ });
+/* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
+/* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(jquery__WEBPACK_IMPORTED_MODULE_0__);
+
+class Toc {
+    generate() {
+        let tocHtml = '';
+        const $dynamic = jquery__WEBPACK_IMPORTED_MODULE_0___default()('#res-toc-dynamic');
+        const $prebuilt = jquery__WEBPACK_IMPORTED_MODULE_0___default()('#res-toc-prebuilt');
+        if ($dynamic.length !== 0) {
+            console.log('has dynamic');
+            const sel = $dynamic.attr('sel');
+            console.log(`sel: ${sel}`);
+            if (sel !== undefined && sel !== '') {
+                const selectors = new Function(`return ${sel}`)();
+                const toc = jquery__WEBPACK_IMPORTED_MODULE_0___default()(selectors.join(','))
+                    .map(function (index) {
+                    const cloned = jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).clone();
+                    if (!jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).attr('id')) {
+                        jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).attr('id', 'res-toc-dynamic-item-' + index);
+                    }
+                    cloned.find('a').each(function () {
+                        jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).replaceWith(jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).text());
+                    });
+                    return `<li><div class="res-toc-dynamic-item-container"><a href="#${this.id}">${cloned[0].outerHTML}</a></div></li>`;
+                })
+                    .get()
+                    .join('\n');
+                const $toc = jquery__WEBPACK_IMPORTED_MODULE_0___default()(`<ul>${toc}</ul>`);
+                let rank = 0;
+                selectors.forEach((selector, rk) => {
+                    rank = rk + 1;
+                    jquery__WEBPACK_IMPORTED_MODULE_0___default()(selector, $toc).each(function () {
+                        jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).parent().parent().attr('data-res-toc-rank', rank);
+                    });
+                });
+                jquery__WEBPACK_IMPORTED_MODULE_0___default()('.res-toc-dynamic-item-container > a', $toc).each(function () {
+                    const rk = parseInt(jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).parent().attr('data-res-toc-rank') || '1');
+                    const spaces = '&nbsp;'.repeat(rk * 4);
+                    const text = jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).text().trim();
+                    jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).html(`${spaces}${text}`);
+                });
+                tocHtml = $toc[0].outerHTML;
+            }
+        }
+        else if ($prebuilt.length !== 0) {
+            console.log('has prebuilt');
+            const sel = $prebuilt.attr('sel');
+            if (sel !== undefined && sel !== '') {
+                console.log('sel', sel);
+                const wrap = $prebuilt.attr('wrap');
+                if (wrap !== undefined) {
+                    tocHtml = `<${wrap}>${jquery__WEBPACK_IMPORTED_MODULE_0___default()(sel).html()}</${wrap}>`;
+                }
+                else {
+                    tocHtml = jquery__WEBPACK_IMPORTED_MODULE_0___default()(sel).html();
+                }
+            }
+        }
+        else {
+            console.log('no prebuilt');
+            const toc = {
+                entries: [],
+            };
+            let preText = '';
+            const ignored = this.ignore();
+            jquery__WEBPACK_IMPORTED_MODULE_0___default()('[id]').each((index, element) => {
+                const id = jquery__WEBPACK_IMPORTED_MODULE_0___default()(element).prop('id');
+                const tag = jquery__WEBPACK_IMPORTED_MODULE_0___default()(element).prop('tagName').toLowerCase();
+                const $text = jquery__WEBPACK_IMPORTED_MODULE_0___default()(element)
+                    .find('*')
+                    .contents()
+                    .filter(function () {
+                    return this.nodeType === 3 && jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).text().trim() !== '';
+                })
+                    .first();
+                const text = $text.text();
+                if (text.length < 64 && text !== '' && text !== preText && text.match(ignored) === null) {
+                    const fspx = $text.parent().css('font-size');
+                    const fs = fspx.substring(0, fspx.length - 'px'.length);
+                    toc.entries.push({
+                        id,
+                        fs: Number.parseInt(fs),
+                        text,
+                    });
+                    preText = text;
+                }
+                if (tag === 'h1' || tag === 'h2' || tag === 'h3' || tag === 'h4') {
+                    const text2 = jquery__WEBPACK_IMPORTED_MODULE_0___default()(element).text().trim();
+                    if (text2.length < 64 &&
+                        text2 !== '' &&
+                        text2 !== text &&
+                        text2 !== preText &&
+                        text2.match(ignored) === null) {
+                        const fspx = jquery__WEBPACK_IMPORTED_MODULE_0___default()(element).css('font-size');
+                        const fs = fspx.substring(0, fspx.length - 'px'.length);
+                        toc.entries.push({
+                            id,
+                            fs: Number.parseInt(fs),
+                            text: text2,
+                        });
+                        preText = text2;
+                    }
+                }
+            });
+            const fonts = new Set();
+            toc.entries.forEach((entry) => {
+                fonts.add(entry.fs);
+            });
+            const fontsArray = Array.from(fonts);
+            toc.entries.forEach((entry) => {
+                entry.fs = fontsArray.indexOf(entry.fs);
+            });
+            if (toc.entries.length > 0) {
+                tocHtml = toc.entries
+                    .map((entry) => `<li class="res-toc-fs-${entry.fs}"><a href="#${entry.id}">${entry.text}</a></li>`)
+                    .reduce((prev, curr) => `${prev}\n${curr}`);
+                tocHtml = `<ul>\n${tocHtml}\n</ul>`;
+            }
+        }
+        jquery__WEBPACK_IMPORTED_MODULE_0___default()('body').prepend(`
+<div id="res-toc-container">
+    <button id="res-toc-control">TOC</button>
+    <div id="res-toc-content">${tocHtml}</div>
+</div>
+`);
+        jquery__WEBPACK_IMPORTED_MODULE_0___default()('#res-toc-control').on('click', (event) => {
+            this.toggle('res-toc-content');
+            event.stopPropagation();
+        });
+        jquery__WEBPACK_IMPORTED_MODULE_0___default()('#res-toc-content')
+            .on('mouseenter', function () {
+            jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).removeClass('transparent');
+        })
+            .on('mouseleave', function () {
+            jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).addClass('transparent');
+        })
+            .on('click', (event) => {
+            event.stopPropagation();
+        })
+            .hide();
+        jquery__WEBPACK_IMPORTED_MODULE_0___default()(window).on('click', () => {
+            jquery__WEBPACK_IMPORTED_MODULE_0___default()('#res-toc-content').hide();
+        });
+    }
+    toggle(id) {
+        const $elem = jquery__WEBPACK_IMPORTED_MODULE_0___default()(`#${id}`);
+        const hidden = $elem.is(':hidden');
+        if (hidden) {
+            $elem.removeClass('transparent');
+            $elem.show();
+        }
+        else {
+            $elem.addClass('transparent');
+            $elem.hide();
+        }
+    }
+    ignore() {
+        return /(\[(\d+|\*+)\])|(\((\d+|\*+)\))|(〔(\d+|\*+)〕)/g;
+    }
+}
+
+
+/***/ }),
+
 /***/ "./src/browser/res/types.ts":
 /*!**********************************!*\
   !*** ./src/browser/res/types.ts ***!
@@ -91807,7 +91798,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _mui_icons_material_ExpandMore__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! @mui/icons-material/ExpandMore */ "./node_modules/@mui/icons-material/esm/ExpandMore.js");
 /* harmony import */ var _mui_material_Collapse__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! @mui/material/Collapse */ "./node_modules/@mui/material/Collapse/Collapse.js");
 /* harmony import */ var _mui_material_Link__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! @mui/material/Link */ "./node_modules/@mui/material/Link/Link.js");
-/* harmony import */ var _book__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./book */ "./src/browser/res/book.ts");
+/* harmony import */ var _toc__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./toc */ "./src/browser/res/toc.ts");
 /* harmony import */ var _cli__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./cli */ "./src/browser/res/cli.ts");
 /* harmony import */ var _shortcuts__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./shortcuts */ "./src/browser/res/shortcuts.ts");
 /* harmony import */ var _command__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./command */ "./src/browser/res/command.tsx");
@@ -91854,7 +91845,7 @@ function env() {
     }
     return 'unknown';
 }
-const Category = ({ category, }) => {
+const Category = ({ category }) => {
     const categoeyLabel = `${category.name} (${category.data.length})`;
     const [open, setOpen] = (0,react__WEBPACK_IMPORTED_MODULE_1__.useState)(true);
     const handleClick = () => {
@@ -91880,21 +91871,27 @@ const Category = ({ category, }) => {
                         .map((p, idx) => {
                         const url = `${p.dir}/${p.base}`;
                         const id = `res-index-tooltip-${category.name}-`;
-                        return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_mui_material_ListItemButton__WEBPACK_IMPORTED_MODULE_18__["default"], { sx: { pl: 4 }, children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", { className: "res-index-status", children: p.reading ? '!' : '' }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_material_Link__WEBPACK_IMPORTED_MODULE_23__["default"], { href: url, target: "_blank", rel: "noopener", onClick: (e) => handleOpen(e, url), onMouseEnter: (event) => showReview(id + idx, event), onMouseLeave: () => hideReview(id + idx), children: p.base }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", { className: "res-index-stat", children: p.stars >= 5 ? `⭐(${p.note})`
-                                        : p.review ? `📝(${p.note})` : p.note ? `(${p.note})` : '' }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", { className: "res-index-progress-container", children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", { className: "res-index-progress-progress", title: `progress: ${(p.progress * 100).toFixed(1)}%`, style: {
+                        return ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_mui_material_ListItemButton__WEBPACK_IMPORTED_MODULE_18__["default"], { sx: { pl: 4 }, children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", { className: "res-index-status", children: p.reading ? '!' : '' }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_mui_material_Link__WEBPACK_IMPORTED_MODULE_23__["default"], { href: url, target: "_blank", rel: "noopener", onClick: (e) => handleOpen(e, url), onMouseEnter: (event) => showReview(id + idx, event), onMouseLeave: () => hideReview(id + idx), children: p.base }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", { className: "res-index-stat", children: p.stars >= 5
+                                        ? `⭐(${p.note})`
+                                        : p.review
+                                            ? `📝(${p.note})`
+                                            : p.note
+                                                ? `(${p.note})`
+                                                : '' }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", { className: "res-index-progress-container", children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", { className: "res-index-progress-progress", title: `progress: ${(p.progress * 100).toFixed(1)}%`, style: {
                                                 width: p.progress * 100,
                                             } }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", { className: "res-index-progress-understand", title: `understand: ${(p.understand * 100).toFixed(1)}%`, style: {
                                                 width: p.understand * 100,
-                                            } })] }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { id: id + idx, className: "res-index-tooltip", children: p.review?.split('\n').map((line, idx) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("p", { children: line }, idx))) })] }, url));
+                                            } })] }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", { id: id + idx, className: "res-index-tooltip", children: p.review?.split('\n').map((line, idx) => (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("p", { children: line }, idx)) })] }, url));
                     }) }) })] }));
 };
-const App = ({ config, }) => {
+const App = ({ config }) => {
     const grouped = new Map();
     config.forEach((item) => {
         const parts = item.dir.split('/');
         const category = parts[1];
         const files = grouped.get(category);
-        const file = [{
+        const file = [
+            {
                 dir: item.dir,
                 base: item.base,
                 stars: item.stars,
@@ -91903,7 +91900,8 @@ const App = ({ config, }) => {
                 progress: item.progress,
                 understand: item.understand,
                 reading: item.reading,
-            }];
+            },
+        ];
         if (files === undefined) {
             grouped.set(category, file);
         }
@@ -91925,6 +91923,7 @@ const App = ({ config, }) => {
             .map(([name, category]) => ((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Category, { category: { name, data: category } }, name))) }));
 };
 (async () => {
+    __webpack_require__.g.$ = (jquery__WEBPACK_IMPORTED_MODULE_3___default());
     const { container } = (0,_container__WEBPACK_IMPORTED_MODULE_16__.prodContainer)();
     jquery__WEBPACK_IMPORTED_MODULE_3___default()('head').append('<link href="/res/dist/assets/fontawesome/css/all.css" rel="stylesheet">');
     const db = new _db__WEBPACK_IMPORTED_MODULE_10__.BrowserDb('../../common/db.json');
@@ -91941,18 +91940,16 @@ const App = ({ config, }) => {
         const parts = window.location.href.split('/');
         const name = parts[parts.length - 1];
         window.document.title = decodeURI(name);
-        (0,react_dom_client__WEBPACK_IMPORTED_MODULE_2__.createRoot)($pdf[0])
-            .render((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_pdf__WEBPACK_IMPORTED_MODULE_13__.PDFView, { url: pdfUrl, onload: () => new _pdf_annotation__WEBPACK_IMPORTED_MODULE_14__.PDFAnn('pdf-container', db, true) }));
+        (0,react_dom_client__WEBPACK_IMPORTED_MODULE_2__.createRoot)($pdf[0]).render((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_pdf__WEBPACK_IMPORTED_MODULE_13__.PDFView, { url: pdfUrl, onload: () => new _pdf_annotation__WEBPACK_IMPORTED_MODULE_14__.PDFAnn('pdf-container', db, true) }));
     }
     else {
         if (window.res_config !== undefined) {
             const config = window.res_config;
-            (0,react_dom_client__WEBPACK_IMPORTED_MODULE_2__.createRoot)(document.querySelector(`#${config.containerId}`))
-                .render((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(App, { config: config.data }));
+            (0,react_dom_client__WEBPACK_IMPORTED_MODULE_2__.createRoot)(document.querySelector(`#${config.containerId}`)).render((0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(App, { config: config.data }));
         }
         else if (pathname.endsWith('.html')) {
             $body.prepend('<div id="context-menu-container"></div>');
-            const toc = new _book__WEBPACK_IMPORTED_MODULE_4__.Toc();
+            const toc = new _toc__WEBPACK_IMPORTED_MODULE_4__.Toc();
             try {
                 toc.generate();
             }
