@@ -77,13 +77,14 @@ export function merge(from: string, to: string) {
                 const tag = $f.prop('tagName').toLowerCase();
 
                 // get attributes
-                let attrs = '';
+                let attrs = 'lang="en"';
                 $from.each($f[0].attributes, function () {
                     if (this.specified) {
-                        attrs += `${this.name}=\"${this.value}\" `;
+                        attrs += ` ${this.name}=\"${this.value}\"`;
                     }
                 });
 
+                $to(toElems[i]).attr('lang', 'zh-CN');
                 $to(toElems[i]).after(`\n<${tag} ${attrs}>${newHtml}</${tag}>`);
             }
         } else {

@@ -37,10 +37,12 @@ const $ = (jQuery = require('jquery')(dom.window));
 //     }
 // });
 
-$('.bold').each(function () {
-    $(this).replaceWith($(this).text());
+$('p[class^="programlisting"]').replaceWith(function () {
+    return $('<code/>', {
+        class: this.className, // Copies all existing classes (e.g., "programlisting-js")
+        html: $(this).html(), // Preserves inner text and tags
+    });
 });
-$('span.calibre9').wrap('<p></p>');
 
 // Save the modified HTML
 fs.writeFileSync(output, dom.serialize());
