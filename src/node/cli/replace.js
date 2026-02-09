@@ -37,12 +37,15 @@ const $ = (jQuery = require('jquery')(dom.window));
 //     }
 // });
 
-$('p[class^="programlisting"]').replaceWith(function () {
-    return $('<code/>', {
-        class: this.className, // Copies all existing classes (e.g., "programlisting-js")
-        html: $(this).html(), // Preserves inner text and tags
-    });
-});
+// $('p[class="IMG---Figure"]').replaceWith(function () {
+//     return $('<code/>', {
+//         class: this.className, // Copies all existing classes (e.g., "programlisting-js")
+//         html: $(this).html(), // Preserves inner text and tags
+//     });
+// });
+
+$('math').wrap('<code></code>');
+$('.source-code').wrap('<code></code>');
 
 // Save the modified HTML
 fs.writeFileSync(output, dom.serialize());
