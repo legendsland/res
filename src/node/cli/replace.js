@@ -44,8 +44,9 @@ const $ = (jQuery = require('jquery')(dom.window));
 //     });
 // });
 
-$('math').wrap('<code></code>');
-$('.source-code').wrap('<code></code>');
+$('table.table-container').remove();
+$('.packt_tip').remove();
+$('.packt_tip-one').remove();
 
 // Save the modified HTML
 fs.writeFileSync(output, dom.serialize());
