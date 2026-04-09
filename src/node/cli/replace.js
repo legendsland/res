@@ -26,27 +26,9 @@ const $ = (jQuery = require('jquery')(dom.window));
 // use jquery to wrap all text nodes in <div> with <p>, but not the text nodes in <span>
 // $('div').wrapInner('<p></p>');
 
-// $('table').wrap('<code class="language-python"></code>');
+$('math').wrap('<code></code>');
 
-// $('p').each(function () {
-//     const $current = $(this);
-//     const $next = $current.next();
 
-//     if ($next.length && $current.prop('outerHTML') === $next.prop('outerHTML')) {
-//         $next.remove();
-//     }
-// });
-
-// $('p[class="IMG---Figure"]').replaceWith(function () {
-//     return $('<code/>', {
-//         class: this.className, // Copies all existing classes (e.g., "programlisting-js")
-//         html: $(this).html(), // Preserves inner text and tags
-//     });
-// });
-
-$('table.table-container').remove();
-$('.packt_tip').remove();
-$('.packt_tip-one').remove();
 
 // Save the modified HTML
 fs.writeFileSync(output, dom.serialize());
