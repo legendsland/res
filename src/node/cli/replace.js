@@ -26,7 +26,7 @@ const $ = (jQuery = require('jquery')(dom.window));
 // use jquery to wrap all text nodes in <div> with <p>, but not the text nodes in <span>
 // $('div').wrapInner('<p></p>');
 
-$('math').wrap('<code></code>');
+$('div.p').wrapInner('<p></p>');
 
 
 
