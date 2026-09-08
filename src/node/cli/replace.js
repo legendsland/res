@@ -26,7 +26,18 @@ const $ = (jQuery = require('jquery')(dom.window));
 // use jquery to wrap all text nodes in <div> with <p>, but not the text nodes in <span>
 // $('div').wrapInner('<p></p>');
 
-$('span.calibre4').wrap('<p></p>');
+$('code').not('pre code').each(function() {
+    const $code = $(this);
+    
+    // Create span preserving existing classes and attributes
+    const $span = $('<span></span>')
+        .html($code.html())
+        .addClass('code')
+        .addClass('notranslate')
+        .addClass($code.attr('class') || '');
+    
+    $code.replaceWith($span);
+});
 
 
 // Save the modified HTML
