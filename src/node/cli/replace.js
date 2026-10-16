@@ -24,7 +24,7 @@ const $ = (jQuery = require('jquery')(dom.window));
 //     });
 
 // use jquery to wrap all text nodes in <div> with <p>, but not the text nodes in <span>
-// $('div').wrapInner('<p></p>');
+$('div.ProgramCode').wrapInner('<code></code>');
 
 // $('code').not('pre code').each(function() {
 //     const $code = $(this);
