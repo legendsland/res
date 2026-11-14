@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>Lisp 的根源 · The Roots of Lisp</title><style>html{background:white;color:#111;font-family:Arial,"Microsoft YaHei",sans-serif;line-height:1.65}body{max-width:960px;margin:0 auto;padding:28px 20px 70px}h1,h2{line-height:1.3;margin:1.8em 0 .35em}h1[lang=en],h2[lang=en]{margin-top:0}p{margin:.65em 0;overflow-wrap:anywhere}p[lang=en]{color:#111;margin-top:.15em;margin-bottom:1.1em}ol{padding-left:1.8em}li{margin:.8em 0}li p{margin:.15em 0}li p[lang=en]{margin-bottom:.6em}code,pre{font-family:Consolas,"Liberation Mono",monospace}code{font-size:.94em}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px;line-height:1.55;margin:1em 0;background:white;border:0;padding:0}.kw{color:#7543a0;font-weight:600}.string{color:#226b35}.comment{color:#59605c}math{font-size:1.05em}@media(max-width:600px){body{padding:18px 12px}pre{font-size:14px}}</style></head><body>
+<h1 lang="zh-CN">Lisp 的根源</h1>
+<h1 lang="en">The Roots of Lisp</h1>
+<p lang="zh-CN">保罗·格雷厄姆</p>
+<p lang="en">paul graham</p>
+<p lang="zh-CN">草稿，2002 年 1 月 18 日。</p>
+<p lang="en">Draft, January 18, 2002.</p>
+<p lang="zh-CN">1960 年，John McCarthy 发表了一篇非凡的论文。他为编程所做的事，有点像欧几里得为几何学所做的事。¹ 他展示了如何仅凭少数几个简单运算符和一种表示函数的记法，构建出一整门编程语言。他把这门语言称为 Lisp，即“List Processing”（表处理），因为他的一个核心思想，就是用一种称为列表的简单数据结构，同时表示代码和数据。</p>
+<p lang="en">In 1960, John McCarthy published a remarkable paper in which he did for programming something like what Euclid did for geometry.<sup><a href="#fn-1">1</a></sup> He showed how, given a handful of simple operators and a notation for functions, you can build a whole programming language. He called this language Lisp, for “List Processing,” because one of his key ideas was to use a simple data structure called a list for both code and data.</p>
+<p lang="zh-CN">理解 McCarthy 的发现很有价值，不仅因为它是计算机历史上的里程碑，也因为它为我们这个时代编程的发展方向提供了一个模型。在我看来，迄今真正简洁、一致的编程模型有两个：C 模型和 Lisp 模型。它们就像两处高地，中间则是泥泞的低地。随着计算机能力增强，新开发的语言一直在稳步向 Lisp 模型靠近。过去 20 年里，设计新编程语言的一种流行配方，就是以 C 的计算模型为基础，再逐项加入取自 Lisp 模型的部分，例如运行时类型机制和垃圾回收。</p>
+<p lang="en">It's worth understanding what McCarthy discovered, not just as a landmark in the history of computers, but as a model for what programming is tending to become in our own time. It seems to me that there have been two really clean, consistent models of programming so far: the C model and the Lisp model. These two seem points of high ground, with swampy lowlands between them. As computers have grown more powerful, the new languages being developed have been moving steadily toward the Lisp model. A popular recipe for new programming languages in the past 20 years has been to take the C model of computing and add to it, piecemeal, parts taken from the Lisp model, like runtime typing and garbage collection.</p>
+<p lang="zh-CN">本文将尝试用尽可能简单的语言，解释 McCarthy 的发现。目的不只是了解某人在四十年前得到的一个有趣理论结果，而是展示语言正在走向何方。Lisp 的不同寻常之处，事实上也是它的决定性特征，是它可以用自身来编写。为了理解 McCarthy 这句话的含义，我们将重走他的探索之路，把他的数学记法翻译成可运行的 Common Lisp 代码。</p>
+<p lang="en">In this article I'm going to try to explain in the simplest possible terms what McCarthy discovered. The point is not just to learn about an interesting theoretical result someone figured out forty years ago, but to show where languages are heading. The unusual thing about Lisp, in fact, the defining quality of Lisp, is that it can be written in itself. To understand what McCarthy meant by this, we're going to retrace his steps, with his mathematical notation translated into running Common Lisp code.</p>
+<h2 lang="zh-CN">1 七个原始运算符</h2>
+<h2 lang="en">1 Seven Primitive Operators</h2>
+<p lang="zh-CN">首先定义表达式。表达式要么是原子，即一个字母序列，例如 <code>foo</code>；要么是由零个或多个表达式组成的列表，表达式之间以空白分隔，并用圆括号括起来。下面是一些表达式：</p>
+<p lang="en">To start with, we define an expression. An expression is either an atom, which is a sequence of letters (e.g. foo), or a list of zero or more expressions, separated by whitespace and enclosed by parentheses. Here are some expressions:</p>
+<pre><code class="language-common-lisp">foo
+()
+(foo)
+(foo bar)
+(a b (c) d)</code></pre>
+<p lang="zh-CN">最后一个表达式是一个包含四个元素的列表，其中第三个元素本身又是一个只包含一个元素的列表。</p>
+<p lang="en">The last expression is a list of four elements, the third of which is itself a list of one element.</p>
+<p lang="zh-CN">在算术中，表达式 1 + 1 的值是 2。有效的 Lisp 表达式也有值。如果表达式 e 产生一个值 v，我们就说 e 返回 v。 接下来，我们要定义有哪些表达式，以及每种表达式返回什么值。如果表达式是一个列表，我们把第一个元素称为运算符，其余元素称为参数。我们将定义七个原始运算符，这里的“原始”是指类似公理的基础地位：<code>quote</code>、<code>atom</code>、<code>eq</code>、<code>car</code>、<code>cdr</code>、<code>cons</code> 和 <code>cond</code>。</p>
+<p lang="en">In arithmetic the expression 1 + 1 has the value 2. Valid Lisp expressions also have values. If an expression e yields a value v we say that e returns v. Our next step is to define what kinds of expressions there can be, and what value each kind returns. If an expression is a list, we call the first element the operator and the remaining elements the arguments. We are going to define seven primitive (in the sense of axioms) operators: quote, atom, eq, car, cdr, cons, and cond.</p>
+
+
+<ol>
+<li>
+<p lang="zh-CN"><code>(quote x)</code> 返回 x。为便于阅读，我们把 <code>(quote x)</code> 简写为 <code>'x</code>。</p>
+<p lang="en">(quote x) returns x. For readability we will abbreviate (quote x) as 'x.</p>
+<pre><code class="language-common-lisp">&gt; (<span class="kw">quote</span> a)
+a
+&gt; 'a
+a
+&gt; (<span class="kw">quote</span> (a b c))
+(a b c)</code></pre>
+</li>
+<li>
+<p lang="zh-CN">如果 x 的值是原子或空表，<code>(atom x)</code> 返回原子 <code>t</code>；否则返回 <code>()</code>。在 Lisp 中，我们习惯用原子 <code>t</code> 表示真，用空表表示假。</p>
+<p lang="en">(atom x) returns the atom t if the value of x is an atom or the empty list. Otherwise it returns (). In Lisp we conventionally use the atom t to represent truth, and the empty list to represent falsity.</p>
+<pre><code class="language-common-lisp">&gt; (atom 'a)
+t
+&gt; (atom '(a b c))
+()
+&gt; (atom '())
+t</code></pre>
+<p lang="zh-CN">现在有了一个会对参数求值的运算符，就可以说明 <code>quote</code> 的用途了。给列表加上引用，就能保护它不被求值。作为参数传给 <code>atom</code> 这类运算符时，没有引用的列表会被当作代码：</p>
+<p lang="en">Now that we have an operator whose argument is evaluated we can show what quote is for. By quoting a list we protect it from evaluation. An unquoted list given as an argument to an operator like atom is treated as code:</p>
+<pre><code class="language-common-lisp">&gt; (atom (atom 'a))
+t</code></pre>
+<p lang="zh-CN">而被引用的列表只会被当作列表，在这里是一个包含两个元素的列表：</p>
+<p lang="en">whereas a quoted list is treated as mere list, in this case a list of two elements:</p>
+<pre><code class="language-common-lisp">&gt; (atom '(atom 'a))
+()</code></pre>
+<p lang="zh-CN">这与英语中引号的用法相对应。Cambridge 是马萨诸塞州的一个城镇，约有 90,000 名居民；“Cambridge”则是一个由九个字母组成的单词。</p>
+<p lang="en">This corresponds to the way we use quotes in English. Cambridge is a town in Massachusetts that contains about 90,000 people. "Cambridge" is a word that contains nine letters.</p>
+<p lang="zh-CN">引用可能显得有些陌生，因为其他语言很少有类似的东西。它与 Lisp 最鲜明的特征之一紧密相连：代码和数据由相同的数据结构构成，而 <code>quote</code> 运算符就是区分二者的方式。</p>
+<p lang="en">Quote may seem a bit of a foreign concept, because few other languages have anything like it. It's closely tied to one of the most distinctive features of Lisp: code and data are made out of the same data structures, and the quote operator is the way we distinguish between them.</p>
+</li>
+<li>
+<p lang="zh-CN">如果 x 和 y 的值是同一个原子，或者二者都是空表，<code>(eq x y)</code> 返回 <code>t</code>；否则返回 <code>()</code>。</p>
+<p lang="en">(eq x y) returns t if the values of x and y are the same atom or both the empty list, and () otherwise.</p>
+<pre><code class="language-common-lisp">&gt; (eq 'a 'a)
+t
+&gt; (eq 'a 'b)
+()
+&gt; (eq '() '())
+t</code></pre>
+</li>
+<li>
+<p lang="zh-CN"><code>(car x)</code> 要求 x 的值是一个列表，并返回它的第一个元素。</p>
+<p lang="en">(car x) expects the value of x to be a list and returns its first element.</p>
+<pre><code class="language-common-lisp">&gt; (car '(a b c))
+a</code></pre>
+</li>
+<li>
+<p lang="zh-CN"><code>(cdr x)</code> 要求 x 的值是一个列表，并返回除第一个元素之外的其余部分。</p>
+<p lang="en">(cdr x) expects the value of x to be a list and returns everything after the first element.</p>
+<pre><code class="language-common-lisp">&gt; (cdr '(a b c))
+(b c)</code></pre>
+</li>
+<li>
+<p lang="zh-CN"><code>(cons x y)</code> 要求 y 的值是一个列表，并返回一个新列表：第一个元素是 x 的值，后面接着 y 的值中的各个元素。</p>
+<p lang="en">(cons x y) expects the value of y to be a list and returns a list containing the value of x followed by the elements of the value of y.</p>
+<pre><code class="language-common-lisp">&gt; (cons 'a '(b c))
+(a b c)
+&gt; (cons 'a (cons 'b (cons 'c '())))
+(a b c)
+&gt; (car (cons 'a '(b c)))
+a
+&gt; (cdr (cons 'a '(b c)))
+(b c)</code></pre>
+</li>
+<li>
+<p lang="zh-CN"><code>(cond (<math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mn>1</mn></msub></math> <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>e</mi><mn>1</mn></msub></math>) … (<math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mi>n</mi></msub></math> <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>e</mi><mi>n</mi></msub></math>))</code> 按如下方式求值：依次对各个 p 表达式求值，直到某个表达式返回 <code>t</code>。找到后，就返回相应 e 表达式的值，作为整个 <code>cond</code> 表达式的值。</p>
+<p lang="en">(cond (<math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mn>1</mn></msub></math> <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>e</mi><mn>1</mn></msub></math>) … (<math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mi>n</mi></msub></math> <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>e</mi><mi>n</mi></msub></math>)) is evaluated as follows. The p expressions are evaluated in order until one returns t. When one is found, the value of the corresponding e expression is returned as the value of the whole cond expression.</p>
+<pre><code class="language-common-lisp">&gt; (<span class="kw">cond</span> ((eq 'a 'b) 'first)
+        ((atom 'a) 'second))
+second</code></pre>
+</li>
+</ol>
+<p lang="zh-CN">七个原始运算符中，有五个在对以它们开头的表达式求值时，总是先对参数求值。² 我们把这种类型的运算符称为函数。</p>
+<p lang="en">In five of our seven primitive operators, the arguments are always evaluated when an expression beginning with that operator is evaluated.<sup><a href="#fn-2">2</a></sup> We will call an operator of that type a function.</p>
+<h2 lang="zh-CN">2 表示函数</h2>
+<h2 lang="en">2 Denoting Functions</h2>
+<p lang="zh-CN">接下来定义一种描述函数的记法。函数表示为 <code>(lambda (<math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mn>1</mn></msub></math> … <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mi>n</mi></msub></math>) e)</code>，其中 <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mn>1</mn></msub></math> … <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mi>n</mi></msub></math> 是原子，称为形参，e 是一个表达式。第一个元素是这种表达式的表达式：</p>
+<p lang="en">Next we define a notation for describing functions. A function is expressed as (lambda (<math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mn>1</mn></msub></math> … <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mi>n</mi></msub></math>) e), where <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mn>1</mn></msub></math> … <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mi>n</mi></msub></math> are atoms (called parameters) and e is an expression. An expression whose first element is such an expression</p>
+<pre><code class="language-common-lisp">((<span class="kw">lambda</span> (p₁ … pₙ) e) a₁ … aₙ)</code></pre>
+<p lang="zh-CN">称为函数调用，其值按如下方式计算：先对每个表达式 <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>a</mi><mi>i</mi></msub></math> 求值，然后对 e 求值。在 e 的求值过程中，每个形参 <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mi>i</mi></msub></math> 的值，都是最近一次函数调用中相应实参 <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>a</mi><mi>i</mi></msub></math> 的值。</p>
+<p lang="en">is called a function call and its value is computed as follows. Each expression <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>a</mi><mi>i</mi></msub></math> is evaluated. Then e is evaluated. During the evaluation of e, the value of any occurrence of one of the <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mi>i</mi></msub></math> is the value of the corresponding <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>a</mi><mi>i</mi></msub></math> in the most recent function call.</p>
+<pre><code class="language-common-lisp">&gt; ((<span class="kw">lambda</span> (x) (cons x '(b))) 'a)
+(a b)
+&gt; ((<span class="kw">lambda</span> (x y) (cons x (cdr y)))
+   'z
+   '(a b c))
+(z b c)</code></pre>
+<p lang="zh-CN">如果一个表达式的第一个元素是原子 f，而且 f 不是原始运算符：</p>
+<p lang="en">If an expression has as its first element an atom f that is not one of the primitive operators</p>
+<pre><code class="language-common-lisp">(f a₁ … aₙ)</code></pre>
+<p lang="zh-CN">并且 f 的值是函数 <code>(lambda (<math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mn>1</mn></msub></math> … <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mi>n</mi></msub></math>) e)</code>，那么这个表达式的值就等于下面表达式的值：</p>
+<p lang="en">and the value of f is a function (lambda (<math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mn>1</mn></msub></math> … <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mi>n</mi></msub></math>) e) then the value of the expression is the value of</p>
+<pre><code class="language-common-lisp">((<span class="kw">lambda</span> (p₁ … pₙ) e) a₁ … aₙ)</code></pre>
+<p lang="zh-CN">换句话说，形参不仅可以在表达式中用作参数，也可以用作运算符：</p>
+<p lang="en">In other words, parameters can be used as operators in expressions as well as arguments:</p>
+<pre><code class="language-common-lisp">&gt; ((<span class="kw">lambda</span> (f) (f '(b c)))
+   '(<span class="kw">lambda</span> (x) (cons 'a x)))
+(a b c)</code></pre>
+<p lang="zh-CN">还有另一种函数记法，它使函数能够引用自身，从而让我们方便地定义递归函数。³ 这种记法：</p>
+<p lang="en">There is another notation for functions that enables the function to refer to itself, thereby giving us a convenient way to define recursive functions.³ The notation</p>
+<pre><code class="language-common-lisp">(<span class="kw">label</span> f (<span class="kw">lambda</span> (p₁ … pₙ) e))</code></pre>
+<p lang="zh-CN">表示一个行为与 <code>(lambda (<math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mn>1</mn></msub></math> … <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mi>n</mi></msub></math>) e)</code> 相同的函数，但多了一项性质：e 中出现的 f 会求值得到整个 <code>label</code> 表达式，就好像 f 也是函数的一个形参。</p>
+<p lang="en">denotes a function that behaves like (lambda (<math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mn>1</mn></msub></math> … <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mi>n</mi></msub></math>) e), with the additional property that an occurrence of f within e will evaluate to the label expression, as if f were a parameter of the function.</p>
+<p lang="zh-CN">假设要定义一个函数 <code>(subst x y z)</code>，它接收表达式 x、原子 y 和列表 z，返回一个类似 z 的列表，但把 z 中所有出现的 y，无论嵌套多深，都替换为 x。</p>
+<p lang="en">Suppose we want to define a function (subst x y z), which takes an expression x, an atom y, and a list z, and returns a list like z but with each instance of y (at any depth of nesting) in z replaced by x.</p>
+<pre><code class="language-common-lisp">&gt; (subst 'm 'b '(a b (a b c) d))
+(a m (a m c) d)</code></pre>
+<p lang="zh-CN">这个函数可以表示为：</p>
+<p lang="en">We can denote this function as</p>
+<pre><code class="language-common-lisp">(<span class="kw">label</span> subst (<span class="kw">lambda</span> (x y z)
+               (<span class="kw">cond</span> ((atom z)
+                      (<span class="kw">cond</span> ((eq z y) x)
+                            ('t z)))
+                     ('t (cons (subst x y (car z))
+                               (subst x y (cdr z)))))))</code></pre>
+<p lang="zh-CN">我们把 <code>f = (label f (lambda (<math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mn>1</mn></msub></math> … <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mi>n</mi></msub></math>) e))</code> 简写为：</p>
+<p lang="en">We will abbreviate f = (label f (lambda (<math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mn>1</mn></msub></math> … <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mi>n</mi></msub></math>) e)) as</p>
+<pre><code class="language-common-lisp">(<span class="kw">defun</span> f (p₁ … pₙ) e)</code></pre>
+<p lang="zh-CN">因此：</p>
+<p lang="en">so</p>
+<pre><code class="language-common-lisp">(<span class="kw">defun</span> subst (x y z)
+  (<span class="kw">cond</span> ((atom z)
+         (<span class="kw">cond</span> ((eq z y) x)
+               ('t z)))
+        ('t (cons (subst x y (car z))
+                  (subst x y (cdr z)))))))</code></pre>
+<p lang="zh-CN">顺便说一下，这里也展示了如何在 <code>cond</code> 表达式中设置默认子句。第一个元素是 <code>'t</code> 的子句总会成功。因此：</p>
+<p lang="en">Incidentally, we see here how to get a default clause in a cond expression. A clause whose first element is 't will always succeed. So</p>
+<pre><code class="language-common-lisp">(<span class="kw">cond</span> (x y) ('t z))</code></pre>
+<p lang="zh-CN">等价于我们在一种有专门语法的语言中可能写出的：</p>
+<p lang="en">is equivalent to what we might write in a language with syntax as</p>
+<pre><code class="language-common-lisp">if x then y else z</code></pre>
+<h2 lang="zh-CN">3 一些函数</h2>
+<h2 lang="en">3 Some Functions</h2>
+<p lang="zh-CN">现在有了表达函数的方法，就可以用七个原始运算符定义一些新函数。首先，为常见模式引入一些缩写会很方便。我们用 <code><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>c</mi><mi>x</mi></msub></math>r</code> 表示 <code>car</code> 和 <code>cdr</code> 的相应复合，其中 x 是由 a 或 d 组成的序列。例如，<code>(cadr e)</code> 是 <code>(car (cdr e))</code> 的缩写，返回 e 的第二个元素。</p>
+<p lang="en">Now that we have a way of expressing functions, we define some new ones in terms of our seven primitive operators. First it will be convenient to introduce some abbreviations for common patterns. We will use <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>c</mi><mi>x</mi></msub></math>r, where x is a sequence of as or ds, as an abbreviation for the corresponding composition of car and cdr. So for example (cadr e) is an abbreviation for (car (cdr e)), which returns the second element of e.</p>
+<pre><code class="language-common-lisp">&gt; (cadr '((a b) (c d) e))
+(c d)
+&gt; (caddr '((a b) (c d) e))
+e
+&gt; (cdar '((a b) (c d) e))
+(b)</code></pre>
+<p lang="zh-CN">此外，我们用 <code>(list <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>e</mi><mn>1</mn></msub></math> … <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>e</mi><mi>n</mi></msub></math>)</code> 表示 <code>(cons <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>e</mi><mn>1</mn></msub></math> … (cons <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>e</mi><mi>n</mi></msub></math> '()) …)</code>。</p>
+<p lang="en">Also, we will use (list <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>e</mi><mn>1</mn></msub></math> … <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>e</mi><mi>n</mi></msub></math>) for (cons <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>e</mi><mn>1</mn></msub></math> … (cons <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>e</mi><mi>n</mi></msub></math> '()) …).</p>
+<pre><code class="language-common-lisp">&gt; (cons 'a (cons 'b (cons 'c '())))
+(a b c)
+&gt; (list 'a 'b 'c)
+(a b c)</code></pre>
+<p lang="zh-CN">现在来定义一些新函数。我在这些函数名末尾加了一个句点，以区分原始函数和用原始函数定义的函数，同时避免与 Common Lisp 中已有的函数重名。</p>
+<p lang="en">Now we define some new functions. I'five changed the names of these functions by adding periods at the end. This distinguishes primitive functions from those defined in terms of them, and also avoids clashes with existing Common Lisp functions.</p>
+<ol>
+<li>
+<p lang="zh-CN"><code>(null. x)</code> 检查参数是否为空表。</p>
+<p lang="en">(null. x) tests whether its argument is the empty list.</p>
+<pre><code class="language-common-lisp">(<span class="kw">defun</span> null. (x)
+  (eq x '()))
+
+&gt; (null. 'a)
+()
+&gt; (null. '())
+t</code></pre>
+</li>
+<li>
+<p lang="zh-CN">如果两个参数都返回 <code>t</code>，<code>(and. x y)</code> 就返回 <code>t</code>，否则返回 <code>()</code>。</p>
+<p lang="en">(and. x y) returns t if both its arguments do and () otherwise.</p>
+<pre><code class="language-common-lisp">(<span class="kw">defun</span> and. (x y)
+  (<span class="kw">cond</span> (x (<span class="kw">cond</span> (y 't) ('t '())))
+        ('t '())))
+
+&gt; (and. (atom 'a) (eq 'a 'a))
+t
+&gt; (and. (atom 'a) (eq 'a 'b))
+()</code></pre>
+</li>
+<li>
+<p lang="zh-CN">如果参数返回 <code>()</code>，<code>(not. x)</code> 就返回 <code>t</code>；如果参数返回 <code>t</code>，它就返回 <code>()</code>。</p>
+<p lang="en">(not. x) returns t if its argument returns (), and () if its argument returns t.</p>
+<pre><code class="language-common-lisp">(<span class="kw">defun</span> not. (x)
+  (<span class="kw">cond</span> (x '())
+        ('t 't)))
+
+&gt; (not (eq 'a 'a))
+()
+&gt; (not (eq 'a 'b))
+t</code></pre>
+</li>
+<li>
+<p lang="zh-CN"><code>(append. x y)</code> 接收两个列表，并返回它们连接后的列表。</p>
+<p lang="en">(append. x y) takes two lists and returns their concatenation.</p>
+<pre><code class="language-common-lisp">(<span class="kw">defun</span> append. (x y)
+  (<span class="kw">cond</span> ((null. x) y)
+        ('t (cons (car x) (append. (cdr x) y)))))
+
+&gt; (append. '(a b) '(c d))
+(a b c d)
+&gt; (append. '() '(c d))
+(c d)</code></pre>
+</li>
+<li>
+<p lang="zh-CN"><code>(pair. x y)</code> 接收两个长度相同的列表，并返回一个由双元素列表组成的列表。每个双元素列表依次包含来自两个输入列表的对应元素。</p>
+<p lang="en">(pair. x y) takes two lists of the same length and returns a list of two-element lists containing successive pairs of an element from each.</p>
+<pre><code class="language-common-lisp">(<span class="kw">defun</span> pair. (x y)
+  (<span class="kw">cond</span> ((and. (null. x) (null. y)) '())
+        ((and. (not. (atom x)) (not. (atom y)))
+         (cons (list (car x) (car y))
+               (pair. (cdr x) (cdr y))))))
+
+&gt; (pair. '(x y z) '(a b c))
+((x a) (y b) (z c))</code></pre>
+</li>
+<li>
+<p lang="zh-CN"><code>(assoc. x y)</code> 接收一个原子 x，以及一个具有 <code>pair.</code> 所创建形式的列表 y。它找到第一个首元素为 x 的子列表，并返回该子列表的第二个元素。</p>
+<p lang="en">(assoc. x y) takes an atom x and a list y of the form created by pair., and returns the second element of the first list in y whose first element is x.</p>
+<pre><code class="language-common-lisp">(<span class="kw">defun</span> assoc. (x y)
+  (<span class="kw">cond</span> ((eq (caar y) x) (cadar y))
+        ('t (assoc. x (cdr y)))))
+
+&gt; (assoc. 'x '((x a) (y b)))
+a
+&gt; (assoc. 'x '((x new) (x a) (y b)))
+new</code></pre>
+</li>
+</ol>
+<h2 lang="zh-CN">4 惊喜</h2>
+<h2 lang="en">4 The Surprise</h2>
+<p lang="zh-CN">到这里，我们已经能定义连接列表、把一个表达式替换为另一个表达式等函数。记法也许很优美，但那又怎样？现在惊喜来了。事实证明，我们还能写出一个充当这门语言解释器的函数：它接收任意 Lisp 表达式作为参数，并返回该表达式的值。代码如下：</p>
+<p lang="en">So we can define functions that concatenate lists, substitute one expression for another, etc. An elegant notation, perhaps, but so what? Now comes the surprise. We can also, it turns out, write a function that acts as an interpreter for our language: a function that takes as an argument any Lisp expression, and returns its value. Here it is:</p>
+<pre><code class="language-common-lisp">(<span class="kw">defun</span> eval. (e a)
+  (<span class="kw">cond</span>
+    ((atom e) (assoc. e a))
+    ((atom (car e))
+     (<span class="kw">cond</span>
+       ((eq (car e) '<span class="kw">quote</span>) (cadr e))
+       ((eq (car e) 'atom) (atom    (eval. (cadr e) a)))
+       ((eq (car e) 'eq)    (eq     (eval. (cadr e) a)
+                                    (eval. (caddr e) a)))
+       ((eq (car e) 'car)   (car    (eval. (cadr e) a)))
+       ((eq (car e) 'cdr)   (cdr    (eval. (cadr e) a)))
+       ((eq (car e) 'cons) (cons    (eval. (cadr e) a)
+                                    (eval. (caddr e) a)))
+       ((eq (car e) '<span class="kw">cond</span>) (evcon. (cdr e) a))
+       ('t (eval. (cons (assoc. (car e) a)
+                        (cdr e))
+                  a))))
+    ((eq (caar e) '<span class="kw">label</span>)
+     (eval. (cons (caddar e) (cdr e))
+            (cons (list (cadar e) (car e)) a)))
+    ((eq (caar e) '<span class="kw">lambda</span>)
+     (eval. (caddar e)
+            (append. (pair. (cadar e) (evlis. (cdr e) a))
+                     a)))))
+
+(<span class="kw">defun</span> evcon. (c a)
+  (<span class="kw">cond</span> ((eval. (caar c) a)
+         (eval. (cadar c) a))
+        ('t (evcon. (cdr c) a))))
+
+(<span class="kw">defun</span> evlis. (m a)
+  (<span class="kw">cond</span> ((null. m) '())
+        ('t (cons (eval. (car m) a)
+                  (evlis. (cdr m) a)))))</code></pre>
+<p lang="zh-CN"><code>eval.</code> 的定义比前面见过的任何定义都长。下面看看各个部分是如何工作的。</p>
+<p lang="en">The definition of eval. is longer than any of the others we'five seen before. Let's consider how each part works.</p>
+<p lang="zh-CN">这个函数接收两个参数：e 是待求值的表达式；a 是一个列表，表示各个原子作为函数调用中的形参而获得的值。这个列表称为环境，其形式与 <code>pair.</code> 创建的列表相同。我们编写 <code>pair.</code> 和 <code>assoc.</code>，正是为了构建和搜索这些列表。</p>
+<p lang="en">The function takes two arguments: e, the expression to be evaluated, and a, a list representing the values that atoms have been given by appearing as parameters in function calls. This list is called the environment, and it is of the form created by pair.. It was in order to build and search these lists that we wrote pair. and assoc..</p>
+<p lang="zh-CN"><code>eval.</code> 的主干是一个包含四个子句的 <code>cond</code> 表达式。如何对表达式求值，取决于它的类型。第一个子句处理原子。如果 e 是原子，就在环境中查找它的值：</p>
+<p lang="en">The spine of eval. is a cond expression with four clauses. How we evaluate an expression depends on what kind it is. The first clause handles atoms. If e is an atom, we look up its value in the environment:</p>
+<pre><code class="language-common-lisp">&gt; (eval. 'x '((x a) (y b)))
+a</code></pre>
+<p lang="zh-CN"><code>eval.</code> 的第二个子句又是一个 <code>cond</code>，用于处理形如 <code>(a …)</code> 的表达式，其中 a 是原子。这包括原始运算符的所有用法，每个运算符都有对应的子句。</p>
+<p lang="en">The second clause of eval. is another cond for handling expressions of the form (a …), where a is an atom. These include all the uses of the primitive operators, and there is a clause for each one.</p>
+<pre><code class="language-common-lisp">&gt; (eval. '(eq 'a 'a) '())
+t
+&gt; (eval. '(cons x '(b c))
+         '((x a) (y b)))
+(a b c)</code></pre>
+<p lang="zh-CN">除 <code>quote</code> 外，这些子句都会调用 <code>eval.</code> 来求出参数的值。</p>
+<p lang="en">All of these (except quote) call eval. to find the value of the arguments.</p>
+<p lang="zh-CN">最后两个子句更复杂一些。对 <code>cond</code> 表达式求值时，我们调用辅助函数 <code>evcon.</code>，它递归地逐个检查子句，寻找第一个元素返回 <code>t</code> 的子句。找到后，就返回该子句第二个元素的值。</p>
+<p lang="en">The last two clauses are more complicated. To evaluate a cond expression we call a subsidiary function called evcon., which works its way through the clauses recursively, looking for one in which the first element returns t. When it finds such a clause it returns the value of the second element.</p>
+<pre><code class="language-common-lisp">&gt; (eval. '(<span class="kw">cond</span> ((atom x) 'atom)
+                ('t 'list))
+         '((x '(a b))))
+list</code></pre>
+<p lang="zh-CN"><code>eval.</code> 第二个子句的最后一部分，处理对作为参数传入的函数的调用。它把原子替换为它的值，这个值应该是一个 <code>lambda</code> 或 <code>label</code> 表达式，然后对所得表达式求值。因此：</p>
+<p lang="en">The final part of the second clause of eval. handles calls to functions that have been passed as parameters. It works by replacing the atom with its value (which ought to be a lambda or label expression) and evaluating the resulting expression. So</p>
+<pre><code class="language-common-lisp">(eval. '(f '(b c))
+       '((f (<span class="kw">lambda</span> (x) (cons 'a x)))))</code></pre>
+<p lang="zh-CN">会变成：</p>
+<p lang="en">turns into</p>
+<pre><code class="language-common-lisp">(eval. '((<span class="kw">lambda</span> (x) (cons 'a x)) '(b c))
+       '((f (<span class="kw">lambda</span> (x) (cons 'a x)))))</code></pre>
+<p lang="zh-CN">它返回 <code>(a b c)</code>。</p>
+<p lang="en">which returns (a b c).</p>
+<p lang="zh-CN"><code>eval.</code> 最后两个子句处理第一个元素本身就是 <code>lambda</code> 或 <code>label</code> 表达式的函数调用。对 <code>label</code> 表达式求值时，先把由函数名和函数本身组成的列表压入环境，再用内部的 <code>lambda</code> 表达式替换 <code>label</code> 表达式，并调用 <code>eval.</code> 对所得表达式求值。也就是说：</p>
+<p lang="en">The last two clauses in eval. handle function calls in which the first element is an actual lambda or label expression. A label expression is evaluated by pushing a list of the function name and the function itself onto the environment, and then calling eval. on an expression with the inner lambda expression substituted for the label expression. That is,</p>
+<pre><code class="language-common-lisp">(eval. '((<span class="kw">label</span> firstatom (<span class="kw">lambda</span> (x)
+                            (<span class="kw">cond</span> ((atom x) x)
+                                  ('t (firstatom (car x))))))
+         y)
+       '((y ((a b) (c d)))))</code></pre>
+<p lang="zh-CN">会变成：</p>
+<p lang="en">becomes</p>
+<pre><code class="language-common-lisp">(eval. '((<span class="kw">lambda</span> (x)
+           (<span class="kw">cond</span> ((atom x) x)
+                 ('t (firstatom (car x)))))
+         y)
+       '((firstatom
+          (<span class="kw">label</span> firstatom (<span class="kw">lambda</span> (x)
+                             (<span class="kw">cond</span> ((atom x) x)
+                                   ('t (firstatom (car x)))))))
+         (y ((a b) (c d)))))</code></pre>
+<p lang="zh-CN">它最终返回 <code>a</code>。</p>
+<p lang="en">which eventually returns a.</p>
+<p lang="zh-CN">最后，对形如 <code>((lambda (<math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mn>1</mn></msub></math> … <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mi>n</mi></msub></math>) e) <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>a</mi><mn>1</mn></msub></math> … <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>a</mi><mi>n</mi></msub></math>)</code> 的表达式求值时，先调用 <code>evlis.</code>，得到各个实参 <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>a</mi><mn>1</mn></msub></math> … <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>a</mi><mi>n</mi></msub></math> 的值所组成的列表 <code>(<math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>v</mi><mn>1</mn></msub></math> … <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>v</mi><mi>n</mi></msub></math>)</code>，再把 <code>(<math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mn>1</mn></msub></math> <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>v</mi><mn>1</mn></msub></math>) … (<math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mi>n</mi></msub></math> <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>v</mi><mi>n</mi></msub></math>)</code> 加到环境前端，然后对 e 求值。因此：</p>
+<p lang="en">Finally, an expression of the form ((lambda (<math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mn>1</mn></msub></math> … <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mi>n</mi></msub></math>) e) <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>a</mi><mn>1</mn></msub></math> … <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>a</mi><mi>n</mi></msub></math>) is evaluated by first calling evlis. to get a list of values (<math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>v</mi><mn>1</mn></msub></math> … <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>v</mi><mi>n</mi></msub></math>) of the arguments <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>a</mi><mn>1</mn></msub></math> … <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>a</mi><mi>n</mi></msub></math>, and then evaluating e with (<math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mn>1</mn></msub></math> <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>v</mi><mn>1</mn></msub></math>) … (<math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>p</mi><mi>n</mi></msub></math> <math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>v</mi><mi>n</mi></msub></math>) appended to the front of the environment. So</p>
+<pre><code class="language-common-lisp">(eval. '((<span class="kw">lambda</span> (x y) (cons x (cdr y)))
+         'a
+         '(b c d))
+       '())</code></pre>
+<p lang="zh-CN">会变成：</p>
+<p lang="en">becomes</p>
+<pre><code class="language-common-lisp">(eval. '(cons x (cdr y))
+       '((x a) (y (b c d))))</code></pre>
+<p lang="zh-CN">它最终返回 <code>(a c d)</code>。</p>
+<p lang="en">which eventually returns (a c d).</p>
+<h2 lang="zh-CN">5 后续影响</h2>
+<h2 lang="en">5 Aftermath</h2>
+<p lang="zh-CN">现在已经理解 <code>eval</code> 如何工作，让我们退后一步，想想这意味着什么。我们得到的是一个极其优美的计算模型。只用 <code>quote</code>、<code>atom</code>、<code>eq</code>、<code>car</code>、<code>cdr</code>、<code>cons</code> 和 <code>cond</code>，就能定义一个真正实现了这门语言的函数 <code>eval.</code>；再利用它，就能定义任何我们想要的其他函数。</p>
+<p lang="en">Now that we understand how eval works, let's step back and consider what it means. What we have here is a remarkably elegant model of computation. Using just quote, atom, eq, car, cdr, cons, and cond, we can define a function, eval., that actually implements our language, and then using that we can define any additional function we want.</p>
+<p lang="zh-CN">当然，计算模型早已存在，其中最著名的是图灵机。但阅读图灵机程序并不怎么让人获得启发。如果想要一种描述算法的语言，你可能会希望它更抽象一些，而这正是 McCarthy 定义 Lisp 的目标之一。</p>
+<p lang="en">There were already models of computation, of course, most notably the Turing Machine. But Turing Machine programs are not very edifying to read. If you want a language for describing algorithms, you might want something more abstract, and that was one of McCarthy's aims in defining Lisp.</p>
+<p lang="zh-CN">他在 1960 年定义的语言还缺少很多东西：没有副作用，没有顺序执行，反正顺序执行也只有与副作用结合时才有用；没有实用的数字，⁴ 而且采用动态作用域。但只需增加少得令人惊讶的代码，就能弥补这些局限。Steele 和 Sussman 在一篇著名论文《解释器的艺术》中展示了如何做到这一点。⁵</p>
+<p lang="en">The language he defined in 1960 was missing a lot. It has no side-effects, no sequential execution (which is useful only with side effects anyway), no practical numbers,4 and dynamic scope. But these limitations can be remedied with surprisingly little additional code. Steele and Sussman show how to do it in a famous paper called "The Art of the Interpreter."5</p>
+<p lang="zh-CN">如果你理解 McCarthy 的 <code>eval</code>，理解的就不仅仅是语言史上的某个阶段。这些思想至今仍是 Lisp 的语义核心。因此，从某种意义上说，研究 McCarthy 的原始论文，就是在了解 Lisp 究竟是什么。与其说 Lisp 是 McCarthy 设计出来的，不如说是他发现的。它本质上并不是专门用于人工智能、快速原型开发，或其他类似层次任务的语言。它是你尝试将计算公理化时得到的东西，或者说，得到的东西之一。</p>
+<p lang="en">If you understand McCarthy's eval, you understand more than just a stage in the history of languages. These ideas are still the semantic core of Lisp today. So studying McCarthy's original paper shows us, in a sense, what Lisp really is. It's not something that McCarthy designed so much as something he discovered. It's not intrinsically a language for AI or for rapid prototyping, or any other task at that level. It's what you get (or one thing you get) when you try to axiomatize computation.</p>
+<p lang="zh-CN">随着时间推移，“中位数语言”，也就是处于中位数位置的程序员所使用的语言，一直在不断向 Lisp 靠近。因此，理解 <code>eval</code>，也就是理解一种很可能在未来很长时间内占据主导地位的计算模型。</p>
+<p lang="en">Over time, the median language, meaning the language used by the median programmer, has grown consistently closer to Lisp. So by understanding eval you're understanding what will probably be the main model of computation well into the future.</p>
+<h2 lang="zh-CN">说明</h2>
+<h2 lang="en">Notes</h2>
+<p lang="zh-CN">在把 McCarthy 的记法翻译成可运行代码时，我尽量少作改动。我曾想让代码更容易阅读，但还是希望保留原作的风味。</p>
+<p lang="en">In translating McCarthy's notation into running code I tried to change as little as possible. I was tempted to make the code easier to read, but I wanted to keep the flavor of the original.</p>
+<p lang="zh-CN">在 McCarthy 的论文中，假用 <code>f</code> 表示，而不是空表。我用 <code>()</code> 表示假，是为了让示例能在 Common Lisp 中运行。代码没有任何地方依赖“假恰好也是空表”这一点；谓词返回的结果从来不会被拿来作为 <code>cons</code> 的列表尾部。</p>
+<p lang="en">In McCarthy's paper, falsity is represented by f, not the empty list. I used () to represent falsity so that the examples would work in Common Lisp. The code nowhere depends on falsity happening also to be the empty list nothing is ever consed onto the result returned by a predicate.</p>
+<p lang="zh-CN">我略去了如何用点对构建列表，因为理解 <code>eval</code> 并不需要它。我也没有提到 <code>apply</code>，虽然 McCarthy 在 1960 年称为通用函数的其实是 <code>apply</code>，那是它的一个很早的版本，主要用途是给参数加引用；当时 <code>eval</code> 只是 <code>apply</code> 调用的一个子程序，负责完成全部实际工作。</p>
+<p lang="en">I skipped building lists out of dotted pairs, because you don't need them to understand eval. I also skipped mentioning apply, though it was apply (a very early form of it, whose main purpose was to quote arguments) that McCarthy called the universal function in 1960 eval was then just a subroutine that apply called to do all the work.</p>
+<p lang="zh-CN">我把 <code>list</code> 和各个 <code><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>c</mi><mi>x</mi></msub></math>r</code> 定义为缩写，因为 McCarthy 就是这样做的。实际上，所有 <code><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>c</mi><mi>x</mi></msub></math>r</code> 都可以定义为普通函数。<code>list</code> 也一样，只要稍微修改 <code>eval</code>，让函数可以接收任意数量的参数即可，而这很容易做到。</p>
+<p lang="en">I defined list and the cxrs as abbreviations because that's how McCarthy did it. In fact the cxrs could all have been defined as ordinary functions. So could list if we modified eval, as we easily could, to let functions take any number of arguments.</p>
+<p lang="zh-CN">McCarthy 的论文只列出了五个原始运算符。他使用了 <code>cond</code> 和 <code>quote</code>，但可能把它们看作元语言的一部分。同样，他也没有定义逻辑运算符 <code>and</code> 和 <code>not</code>，不过这不是什么大问题，因为可以把足够好用的版本定义为函数。</p>
+<p lang="en">McCarthy's paper only had five primitive operators. He used cond and quote but may have thought of them as part of his metalanguage. He likewise didn't define the logical operators and and not, but this is less of a problem because adequate versions can be defined as functions.</p>
+<p lang="zh-CN">在 <code>eval.</code> 的定义中，我们调用了 <code>pair.</code> 和 <code>assoc.</code> 等其他函数。但凡是用原始运算符定义的函数，其调用都可以替换成对 <code>eval.</code> 的调用。也就是说：</p>
+<p lang="en">In the definition of eval. we called other functions like pair. and assoc., but any call to one of the functions we defined in terms of the primitive operators could be replaced by a call to eval.. That is,</p>
+<pre><code class="language-common-lisp">(assoc. (car e) a)</code></pre>
+<p lang="zh-CN">可以写成：</p>
+<p lang="en">could have been written as</p>
+<pre><code class="language-common-lisp">(eval. '((<span class="kw">label</span> assoc.
+                (<span class="kw">lambda</span> (x y)
+                  (<span class="kw">cond</span> ((eq (caar y) x) (cadar y))
+                        ('t (assoc. x (cdr y))))))
+         (car e)
+         a)
+        (cons (list 'e e) (cons (list 'a a) a)))</code></pre>
+<p lang="zh-CN">McCarthy 的 <code>eval</code> 有一个小错误。第 16 行写的内容相当于 <code>(evlis. (cdr e) a)</code>，而不是仅仅 <code>(cdr e)</code>，导致调用具名函数时，参数被求值了两次。这表明，在论文提交时，这个版本的 <code>eval</code> 很可能还没有用 IBM 704 机器语言实现。这也说明，不实际运行程序，就很难确信任何具有一定长度的程序是正确的。</p>
+<p lang="en">There was a small bug in McCarthy's eval. Line 16 was (equivalent to) (evlis. (cdr e) a) instead of just (cdr e), which caused the arguments in a call to a named function to be evaluated twice. This suggests that this description of eval had not yet been implemented in IBM 704 machine language when the paper was submitted. It also shows how hard it is to be sure of the correctness of any length of program without trying to run it.</p>
+<p lang="zh-CN">我还在 McCarthy 的代码中遇到了另一个问题。在给出 <code>eval</code> 的定义之后，他又举了一些高阶函数的例子，也就是以其他函数作为参数的函数。他定义了 <code>maplist</code>：</p>
+<p lang="en">I encountered one other problem in McCarthy's code. After giving the definition of eval he goes on to give some examples of higher-order functions,  functions that take other functions as arguments. He defines maplist:</p>
+<pre><code class="language-common-lisp">(<span class="kw">label</span> maplist
+       (<span class="kw">lambda</span> (x f)
+         (<span class="kw">cond</span> ((null x) '())
+               ('t (cons (f x) (maplist (cdr x) f))))))</code></pre>
+<p lang="zh-CN">然后用它编写了一个进行符号求导的简单函数 <code>diff</code>。但 <code>diff</code> 传给 <code>maplist</code> 的函数把 x 用作形参，而对 x 的引用被 <code>maplist</code> 内部的形参 x 捕获了。⁶</p>
+<p lang="en">then uses it to write a simple function diff for symbolic differentiation. But diff passes maplist a function that uses x as a parameter, and the reference to it is captured by the parameter x within maplist.<sup><a href="#fn-6">6</a></sup></p>
+<p lang="zh-CN">连高阶 Lisp 函数的第一个示例，都因为动态作用域而出错，这充分说明了动态作用域的危险。McCarthy 在 1960 年可能还没有完全意识到动态作用域的影响。动态作用域在 Lisp 实现中保留了令人惊讶的漫长时间，直到 Sussman 和 Steele 于 1975 年开发出 Scheme。词法作用域并不会让 <code>eval</code> 的定义复杂多少，但可能会增加编译器的编写难度。</p>
+<p lang="en">It's an eloquent testimony to the dangers of dynamic scope that even the very first example of higher-order Lisp functions was broken because of it. It may be that McCarthy was not fully aware of the implications of dynamic scope in 1960. Dynamic scope remained in Lisp implementations for a surprisingly long time, until Sussman and Steele developed Scheme in 1975. Lexical scope does not complicate the definition of eval very much, but it may make compilers harder to write.</p>
+<h2 lang="zh-CN">脚注</h2>
+<h2 lang="en">Footnotes</h2>
+<ol class="footnotes">
+<li id="fn-1">
+<p lang="zh-CN">《符号表达式的递归函数及其机器计算，第一部分》。《ACM 通讯》，第 3 卷第 4 期，1960 年 4 月，第 184–195 页。</p>
+<p lang="en">“Recursive Functions of Symbolic Expressions and Their Computation by Machine, Part I.” Communications of the ACM 3:4, April 1960, pp. 184–195.</p>
+</li>
+<li id="fn-2">
+<p lang="zh-CN">以另外两个运算符 <code>quote</code> 和 <code>cond</code> 开头的表达式，求值方式不同。对 <code>quote</code> 表达式求值时，不对它的参数求值，而是直接把参数作为整个 <code>quote</code> 表达式的值返回。在有效的 <code>cond</code> 表达式中，只有一条 L 形路径上的子表达式会被求值。</p>
+<p lang="en">Expressions beginning with the other two operators, quote and cond, are evaluated differently. When a quote expression is evaluated, its argument is not evaluated, but is simply returned as the value of the whole quote expression. And in a valid cond expression, only an L-shaped path of subexpressions will be evaluated.</p>
+</li>
+<li id="fn-3">
+<p lang="zh-CN">从逻辑上说，我们并不需要为此定义一种新记法。利用一种称为 Y 组合子的、作用于函数的函数，就可以在现有记法中定义递归函数。McCarthy 写论文时可能还不知道 Y 组合子；无论如何，<code>label</code> 记法更容易阅读。</p>
+<p lang="en">Logically we don't need to define a new notation for this. We could define recursive functions in our existing notation using a function on functions called the Y combinator. It may be that McCarthy did not know about the Y combinator when he wrote his paper in any case, label notation is more readable.</p>
+</li>
+<li id="fn-4">
+<p lang="zh-CN">在 McCarthy 的 1960 年 Lisp 中，可以用一些方法进行算术运算，例如用一个包含 n 个原子的列表表示数字 n。</p>
+<p lang="en">It is possible to do arithmetic in McCarthy's 1960 Lisp by using e.g. a list of n atoms to represent the number n.</p>
+</li>
+<li id="fn-5">
+<p lang="zh-CN">Guy Lewis Steele, Jr. 和 Gerald Jay Sussman，《解释器的艺术，或模块化情结：第零、第一和第二部分》，麻省理工学院人工智能实验室备忘录第 453 号，1978 年 5 月。</p>
+<p lang="en">Guy Lewis Steele, Jr. and Gerald Jay Sussman, "The Art of the Interpreter, or the Modularity Complex (Parts Zero, One, and Two)," MIT AI Lab Memo 453, May 1978.</p>
+</li>
+<li id="fn-6">
+<p lang="zh-CN">今天的 Lisp 程序员在这里会用 <code>mapcar</code>，而不是 <code>maplist</code>。这个例子倒是解开了一个谜：Common Lisp 中为什么还保留 <code>maplist</code>。它是最初的映射函数，而 <code>mapcar</code> 是后来加入的。</p>
+<p lang="en">Present day Lisp programmers would use mapcar instead of maplist here. This example does clear up one mystery: why maplist is in Common Lisp at all. It was the original mapping function, and mapcar a later addition.</p>
+</li>
+</ol>
+</body></html>
